@@ -8,7 +8,7 @@ import { UniverseConfig } from "../codegen/index.sol";
 contract PlanetSystem is System, Errors {
   function initPlanet() public returns (uint32) { }
 
-  function _validatePlanetHash(uint256 planetHash) internal pure {
+  function _validatePlanetHash(uint256 planetHash) internal view {
     if (
       planetHash
         >= (21888242871839275222246405745257275088548364400416034343698204186575808495617 / UniverseConfig.getSparsity())
