@@ -23,38 +23,44 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
   const [pkCopied, setPkCopied] = useState(false);
 
   const { data: walletClient } = useWalletClient();
-  const burnerBalanceData = useBurnerBalance(burnerWalletClient);
-  const mainWalletBalanceData = useMainWalletBalance();
+  const { value: burnerBalanceValue, refetch: refetchBurnerBalance } = useBurnerBalance(burnerWalletClient);
+  const { value: mainWalletBalanceValue, refetch: refetchMainWalletBalance } = useMainWalletBalance();
 
-  // Fetch balances asynchronously
+  // Fetch balances explicitly
   const fetchBalances = async () => {
     try {
-      if (burnerBalanceData.value) {
-        setBurnerBalance(burnerBalanceData.value);
-      }
-      if (mainWalletBalanceData.value) {
-        setMainWalletBalance(mainWalletBalanceData.value);
-      }
+      await refetchBurnerBalance();
+      await refetchMainWalletBalance();
+      setBurnerBalance(burnerBalanceValue);
+      setMainWalletBalance(mainWalletBalanceValue);
     } catch (err) {
       console.error("Error fetching balances:", err);
     }
   };
 
-  // Initial balance fetch
+  // Initial and interval-based balance fetch
   useEffect(() => {
-    fetchBalances();
-  }, [burnerBalanceData, mainWalletBalanceData]);
+    fetchBalances(); // Initial fetch
+
+    const intervalId = setInterval(() => {
+      fetchBalances(); // Fetch every 2 seconds
+    }, 2000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [refetchBurnerBalance, refetchMainWalletBalance, burnerBalanceValue, mainWalletBalanceValue]);
 
   const transferToBurner = async () => {
     if (!burnerWalletClient || !walletClient) return;
     const value = parseEther((transferAmount ?? 0).toString());
     try {
-      const tx = await walletClient.sendTransaction({
+      await walletClient.sendTransaction({
         to: burnerWalletClient.account?.address,
         value,
       });
       setTxSuccessful(true);
       fetchBalances(); // Refresh balances after transaction
+      setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
     } catch (err) {
       console.error("Error sending transaction:", err);
     }
@@ -64,12 +70,13 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
     if (!burnerWalletClient || !walletClient) return;
     const value = burnerBalance; // Draining all funds
     try {
-      const tx = await burnerWalletClient.sendTransaction({
+      await burnerWalletClient.sendTransaction({
         to: walletClient.account?.address,
         value,
       });
       setTxSuccessful(true);
       fetchBalances(); // Refresh balances after transaction
+      setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
     } catch (err) {
       console.error("Error sending transaction:", err);
     }
@@ -118,10 +125,10 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
             Refresh
           </button>
         </h3>
-        {txSuccessful && <div className="text-center text-green-600">Transaction successful Sent!</div>}
+        {txSuccessful && <div className="text-center text-green-600">Transaction successful!</div>}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span>Main Wallet Balance: </span>
+            <span>Main Wallet Balance:</span>
             <span>{shortedAddress(walletClient?.account?.address as `0x${string}`)}</span>
             <span>{mainWalletBalance ? formatEther(mainWalletBalance) : "0"} ETH</span>
           </div>
@@ -136,7 +143,7 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
             </button>
             <span>{burnerBalance ? formatEther(burnerBalance) : "0"} ETH</span>
           </div>
-          {burnerBalanceData.danger && <div className="text-red-500">Warning: Low session wallet balance!</div>}
+          {burnerBalanceValue.danger && <div className="text-red-500">Warning: Low session wallet balance!</div>}
           <div className="mt-4 space-y-2">
             <input
               type="number"

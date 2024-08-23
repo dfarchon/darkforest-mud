@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { WalletClient } from "viem";
 import { useAccount, useBalance } from "wagmi";
@@ -11,11 +11,12 @@ export function useBurnerBalance(burnerClient: WalletClient) {
   const [balance, setBalance] = useState<bigint>(0n); // State to store the balance
   const [danger, setDanger] = useState(false); // State to track low balance danger
 
-  const { data: balanceData } = useBalance({
+  const { data: balanceData, refetch } = useBalance({
     address: burnerClient?.account?.address, // Use burner account address
   });
 
-  useEffect(() => {
+  // Fetch balance function with refetch capability
+  const fetchBalance = useCallback(async () => {
     if (balanceData) {
       const fetchedBalance = BigInt(balanceData.value);
       setBalance(fetchedBalance);
@@ -23,19 +24,26 @@ export function useBurnerBalance(burnerClient: WalletClient) {
     }
   }, [balanceData]);
 
-  return { value: balance, danger }; // Return balance and danger flag
+  // Call refetch to re-fetch the balance
+  const refetchBalance = useCallback(async () => {
+    await refetch();
+    fetchBalance(); // Update local state after refetch
+  }, [refetch, fetchBalance]);
+
+  return { value: balance, danger, refetch: refetchBalance }; // Return balance and danger flag with refetch function
 }
 
 export function useMainWalletBalance() {
   const { address } = useAccount(); // Get main wallet account from wagmi
   const [balance, setBalance] = useState<bigint>(0n); // State to store the balance
   const [belowRecommended, setBelowRecommended] = useState(false); // Track if balance is below recommended
-  //enabled: !!address, // Fetch balance only if the address exists
-  const { data: balanceData } = useBalance({
+
+  const { data: balanceData, refetch } = useBalance({
     address,
   });
 
-  useEffect(() => {
+  // Fetch balance function with refetch capability
+  const fetchBalance = useCallback(async () => {
     if (balanceData) {
       const fetchedBalance = BigInt(balanceData.value);
       setBalance(fetchedBalance);
@@ -43,5 +51,11 @@ export function useMainWalletBalance() {
     }
   }, [balanceData]);
 
-  return { value: balance, belowRecommended }; // Return balance and belowRecommended flag
+  // Call refetch to re-fetch the balance
+  const refetchBalance = useCallback(async () => {
+    await refetch();
+    fetchBalance(); // Update local state after refetch
+  }, [refetch, fetchBalance]);
+
+  return { value: balance, belowRecommended, refetch: refetchBalance }; // Return balance and belowRecommended flag with refetch function
 }
