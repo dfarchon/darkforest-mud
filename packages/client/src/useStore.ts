@@ -4,7 +4,7 @@ import { Config } from "wagmi";
 import { create } from "zustand";
 
 // import { HeadlessLayer } from "./layers/Headless";
-// import { LocalLayer } from "./layers/Local";
+import { LocalLayer } from "./layers/Local";
 import { NetworkLayer } from "./layers/Network";
 
 // import { ThreeJsLayer } from "./layers/Renderer/Phaser";
@@ -16,7 +16,7 @@ export type ContractType = GetContractReturnType<typeof IWorldAbi, PublicClient<
 //  loadingPageHidden: boolean;
 export type Store = {
   networkLayer: NetworkLayer | null;
-
+  localLayer: LocalLayer | null;
   wagmiConfig: Config | null;
   externalWalletClient: WalletClient | null;
   externalWorldContract: ContractType | null;
@@ -28,7 +28,7 @@ export type Store = {
 //  loadingPageHidden: false,
 export const useStore = create<Store>(() => ({
   networkLayer: null,
-
+  localLayer: null,
   wagmiConfig: null,
   externalWalletClient: null,
   externalWorldContract: null,

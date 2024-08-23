@@ -5,6 +5,7 @@ import { transportObserver } from "@latticexyz/common";
 import { MUDChain } from "@latticexyz/common/chains";
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { ClientConfig } from "viem";
 import { createConfig, fallback, http, webSocket } from "wagmi";
 import { getPublicClient, getWalletClient } from "wagmi/actions";
 
@@ -25,8 +26,15 @@ export const wagmiConfig = createConfig({
     }),
   ),
 });
-// projectId obtain from 
-export const wagmiConfig2 = getDefaultConfig({
+
+export const clientOptions = {
+  chain: networkConfig.chain,
+  transport: transportObserver(fallback([webSocket(), http()], { retryCount: 0 })),
+  pollingInterval: 250,
+} as const satisfies ClientConfig;
+
+// projectId obtain from
+export const wagmiConfig2 = await getDefaultConfig({
   appName: "DF-MUD",
   projectId: "4cb4d26de6508ef627675e916a2db64f",
   pollingInterval: 250,

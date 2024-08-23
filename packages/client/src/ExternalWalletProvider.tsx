@@ -7,7 +7,7 @@ import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import { Hex, createPublicClient, fallback, getContract, http, webSocket } from "viem";
 import { useWalletClient } from "wagmi";
 import { NetworkConfig } from "./mud/utils";
-import { useStore } from "../useStore";
+import { useStore } from "./useStore";
 
 export type Props = {
   networkConfig: NetworkConfig;

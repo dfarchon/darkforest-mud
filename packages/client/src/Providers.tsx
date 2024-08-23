@@ -10,9 +10,9 @@ import { RainbowKitProvider, darkTheme, getDefaultConfig } from "@rainbow-me/rai
 import "@rainbow-me/rainbowkit/styles.css";
 import { WagmiProvider, createConfig, fallback, http, webSocket } from "wagmi";
 
+import { ExternalWalletProvider } from "./ExternalWalletProvider";
 import { TooltipProvider } from "./components/tooltip";
 import WalletHeader from "./components/walletHeader";
-import { wagmiConfig2 } from "./mud/common";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
 import { supportedChains } from "./mud/supportedChains";
 
@@ -24,7 +24,6 @@ export type Props = {
 
 export function Providers({ children }: Props) {
   const [networkConfig, setNetworkConfig] = useState<any>(null); // Local state for storing resolved network config
-  const [wagmiConfigX, setWagmiConfigX] = useState<any>(null);
 
   useEffect(() => {
     const fetchNetworkConfig = async () => {
@@ -59,19 +58,6 @@ export function Providers({ children }: Props) {
   });
 
 
-  // const wagmiConfig = createConfig({
-  //   chains: supportedChains as [MUDChain, ...MUDChain[]],
-  //   pollingInterval: 1_000,
-
-  //   // TODO: how to properly set up a transport config for all chains supported as bridge sources?
-  //   transports: Object.fromEntries(
-  //     supportedChains.map((chain) => {
-  //       if (chain.rpcUrls.default.webSocket) return [chain.id, transportObserver(fallback([http(), webSocket()]))];
-  //       return [chain.id, transportObserver(fallback([http()]))];
-  //     }),
-  //   ),
-  // });
-
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
@@ -84,7 +70,7 @@ export function Providers({ children }: Props) {
             overlayBlur: "small",
           })}
         >
-          <MUDAccountKitProvider
+          {/* <MUDAccountKitProvider
             config={{
               chain: networkConfig.chain,
               worldAddress: networkConfig.worldAddress,
@@ -93,13 +79,15 @@ export function Providers({ children }: Props) {
                 name: "DF on MUD",
               },
             }}
-          >
+          > */}{" "}
+          <ExternalWalletProvider networkConfig={networkConfig}>
             <TooltipProvider delayDuration={300}>
               {" "}
               <WalletHeader />
               {children}
             </TooltipProvider>
-          </MUDAccountKitProvider>
+          </ExternalWalletProvider>
+          {/* </MUDAccountKitProvider> */}
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

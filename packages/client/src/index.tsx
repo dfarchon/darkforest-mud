@@ -9,9 +9,10 @@ import { useAccount } from "wagmi";
 
 import { MUDProvider } from "./MUDContext";
 import { Providers } from "./Providers";
+
 // Ensure you import this
 import "./index.css";
-import { publicClient } from "./mud/common";
+
 import { setup } from "./mud/setup";
 import { GamePage } from "./pages/GamePage";
 import { WelcomePage } from "./pages/WelcomePage";
@@ -47,12 +48,13 @@ setup().then(async (result) => {
   // Render the application with MUDProvider and Providers
   root.render(
     <React.StrictMode>
-      <Providers>
-        <BrowserRouter>
-          <ProtectedRoutes />
-        </BrowserRouter>{" "}
-      </Providers>
-      ,
+      <MUDProvider value={result}>
+        <Providers>
+          <BrowserRouter>
+            <ProtectedRoutes />
+          </BrowserRouter>{" "}
+        </Providers>{" "}
+      </MUDProvider>
     </React.StrictMode>,
   );
 
@@ -60,7 +62,7 @@ setup().then(async (result) => {
     const { mount: mountDevTools } = await import("@latticexyz/dev-tools");
     mountDevTools({
       config: mudConfig,
-      publicClient: publicClient,
+      publicClient: result.network.publicClient,
       walletClient: result.network.walletClient,
       latestBlock$: result.network.latestBlock$,
       storedBlockLogs$: result.network.storedBlockLogs$,
