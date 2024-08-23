@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { BigNumberish, ethers } from "ethers";
 import { twMerge } from "tailwind-merge";
+import { Hex } from "viem";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -30,7 +31,7 @@ export function entityToAddress(entity: string): string {
   return entity.slice(0, 2) + entity.slice(26);
 }
 
-export function hexToString(hex) {
+export function hexToString(hex: string) {
   if (hex) {
     const hexString = hex.replace(/^0x/, ""); // Remove '0x' prefix if present
     const pairs = hexString.match(/.{2}/g); // Split the string into pairs of two characters
@@ -51,7 +52,7 @@ export function stringToHex(str) {
   return "0x" + hexString;
 }
 
-export function numberToHex(value) {
+export function numberToHex(value: { toString: (arg0: number) => Hex }) {
   const hexValue = value.toString(16); // Convert the decimal value to hexadecimal
   const paddedHexValue = hexValue.padStart(64, "0"); // Pad the hexadecimal value with zeros to make it 32 bytes long
   return "0x" + paddedHexValue; // Add the "0x" prefix

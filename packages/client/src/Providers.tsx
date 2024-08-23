@@ -1,14 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { MUDAccountKitProvider } from "@latticexyz/account-kit";
 import { transportObserver } from "@latticexyz/common";
 import { MUDChain } from "@latticexyz/common/chains";
-import worlds from "@latticexyz/gas-tank/worlds.json";
 
 import { RainbowKitProvider, darkTheme, getDefaultConfig } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
-import { WagmiProvider, createConfig, fallback, http, webSocket } from "wagmi";
+import { WagmiProvider, fallback, http, webSocket } from "wagmi";
 
 import { ExternalWalletProvider } from "./ExternalWalletProvider";
 import { TooltipProvider } from "./components/tooltip";
@@ -56,7 +54,6 @@ export function Providers({ children }: Props) {
       }),
     ),
   });
-
 
   return (
     <WagmiProvider config={wagmiConfig}>
