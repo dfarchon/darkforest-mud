@@ -1,13 +1,10 @@
-import { QueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
-
 import { transportObserver } from "@latticexyz/common";
 import { MUDChain } from "@latticexyz/common/chains";
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { ClientConfig } from "viem";
 import { createConfig, fallback, http, webSocket } from "wagmi";
-import { getPublicClient, getWalletClient } from "wagmi/actions";
+import { getPublicClient } from "wagmi/actions";
 
 import { getNetworkConfig } from "./getNetworkConfig";
 import { supportedChains } from "./supportedChains";
@@ -49,5 +46,3 @@ export const wagmiConfig2 = await getDefaultConfig({
 
 // TODO: figure out how to get public client without !
 export const publicClient = getPublicClient(wagmiConfig, { chainId: networkConfig.chainId })!;
-
-//export const walletClient = getWalletClient(wagmiConfig, { chainId: networkConfig.chainId })!;
