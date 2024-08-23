@@ -1,10 +1,7 @@
 // tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export const mode = "jit";
-export const purge = [
-  "./src/**/*.{html,js,jsx,ts,tsx}", // Ensure all JS/TS files within src are included
-  "./public/index.html", // Include HTML files in public directory
-];
+
 export const content = [
   "./index.html", // Ensure HTML files are included
   "./src/**/*.{js,ts,jsx,tsx}", // Ensure all JavaScript/TypeScript files are included

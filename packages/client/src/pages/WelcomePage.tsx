@@ -19,7 +19,6 @@ export const WelcomePage: React.FC = () => {
 
   return (
     <div className="flex h-screen">
-      <WalletHeader />
       <div className="m-auto ">
         {!isConnected && (
           <>

@@ -1,4 +1,6 @@
+// index.tsx
 import { useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 
@@ -7,7 +9,9 @@ import { useAccount } from "wagmi";
 
 import { MUDProvider } from "./MUDContext";
 import { Providers } from "./Providers";
+// Ensure you import this
 import "./index.css";
+import { publicClient } from "./mud/common";
 import { setup } from "./mud/setup";
 import { GamePage } from "./pages/GamePage";
 import { WelcomePage } from "./pages/WelcomePage";
@@ -17,7 +21,6 @@ const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("React root not found");
 const root = ReactDOM.createRoot(rootElement);
 
-// Component to handle route redirection based on wallet connection status
 const ProtectedRoutes = () => {
   const { isConnected } = useAccount(); // Get wallet connection status
   const navigate = useNavigate();
@@ -43,21 +46,21 @@ const ProtectedRoutes = () => {
 setup().then(async (result) => {
   // Render the application with MUDProvider and Providers
   root.render(
-    <Providers>
-      <MUDProvider value={result}>
+    <React.StrictMode>
+      <Providers>
         <BrowserRouter>
           <ProtectedRoutes />
-        </BrowserRouter>
-      </MUDProvider>
-    </Providers>,
+        </BrowserRouter>{" "}
+      </Providers>
+      ,
+    </React.StrictMode>,
   );
 
-  // If in development mode, mount dev tools
   if (import.meta.env.DEV) {
     const { mount: mountDevTools } = await import("@latticexyz/dev-tools");
     mountDevTools({
       config: mudConfig,
-      publicClient: result.network.publicClient,
+      publicClient: publicClient,
       walletClient: result.network.walletClient,
       latestBlock$: result.network.latestBlock$,
       storedBlockLogs$: result.network.storedBlockLogs$,
