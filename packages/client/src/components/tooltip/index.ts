@@ -1,4 +1,4 @@
-export * from "./connect-btn";
+export * from "../connect-btn";
 // radix
 export * from "./tooltip";
 export * from "./toast";

@@ -1,12 +1,11 @@
 import { hexToResource, resourceToHex } from "@latticexyz/common";
-
 import { Entity } from "@latticexyz/recs";
 
 import { EthAddress } from "./identifier";
 
 export const WORLD_ADDRESS = "fixed world adress";
 // REDSTONE
-
+// todo explorer for garnet? 
 export const NETWORK_EXPLORER = "https://explorer.redstone.xyz/";
 
 export const DEFAULT_RPC = "https://rpc.garnet.redstone.xyz";

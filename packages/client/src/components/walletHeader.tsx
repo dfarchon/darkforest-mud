@@ -10,7 +10,6 @@ export const WalletHeader: React.FC = () => {
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
   const [showSessionWalletManager, setShowSessionWalletManager] = useState(false);
- 
   return (
     <div className="fixed right-4 top-4 flex flex-col items-center space-y-2">
       {isConnected ? (

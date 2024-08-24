@@ -5,9 +5,10 @@ import { createBurnerAccount } from "@latticexyz/common";
 import { createWalletClient, formatEther, parseEther } from "viem";
 import { useWalletClient } from "wagmi";
 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/tooltip";
 import { useBurnerBalance, useMainWalletBalance } from "./hooks/useBalance";
 import { clientOptions } from "./mud/common";
-import { RECOMMENDED_BALANCE, shortedAddress } from "./shared";
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE, shortedAddress } from "./shared";
 
 export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const burnerAccount = createBurnerAccount(localStorage.getItem("mud:burnerWallet") as `0x${string}`);
@@ -111,21 +112,28 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed right-5 top-[80px] z-50 flex items-center justify-center bg-black ">
       <div id="session-wallet-modal" className="relative w-full max-w-lg rounded-lg bg-black p-6 shadow-lg">
         <button onClick={onClose} className="absolute right-2 top-2 text-gray-500 hover:text-gray-700">
           ✕
         </button>
-        <h3 className="mb-4 flex items-center justify-between text-lg font-bold">
-          <span className="text-left">Session Wallet Manager</span>
-          <button
-            onClick={fetchBalances} // Manually refresh balances
-            className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
-          >
-            Refresh
-          </button>
+        <h3 className="mb-4 flex items-center justify-between text-lg ">
+          <span className="text-left font-bold">Session Wallet Manager</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <button
+                  onClick={fetchBalances}
+                  className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
+                >
+                  🗘
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh balance</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </h3>
-        {txSuccessful && <div className="text-center text-green-600">Transaction successful!</div>}
+
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span>Main Wallet Balance:</span>
@@ -135,38 +143,79 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
           <div className="flex items-center justify-between">
             <span>Session Wallet Balance:</span>
             <span>{shortedAddress(burnerWalletClient?.account?.address)}</span>
-            <button
-              onClick={copyPrivateKey}
-              className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
-            >
-              {pkCopied ? "Copied!" : "Copy PK"}
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <button
+                    onClick={copyPrivateKey}
+                    className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
+                  >
+                    {pkCopied ? "Copied!" : "Copy PK"}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Copy pk to clipboard</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <span>{burnerBalance ? formatEther(burnerBalance) : "0"} ETH</span>
           </div>
-          {burnerBalanceValue.danger && <div className="text-red-500">Warning: Low session wallet balance!</div>}
-          <div className="mt-4 space-y-2">
-            <input
-              type="number"
-              placeholder="Enter amount to transfer"
-              value={transferAmount ?? "0"}
-              onChange={(e) => setTransferAmount(parseFloat(e.target.value))}
-              className="w-full rounded border p-2"
-            />
-            <div className="flex items-center">
-              <button
-                onClick={transferToBurner}
-                className="w-full rounded bg-blue-500 p-2 text-white hover:bg-blue-600"
-                disabled={
-                  (transferAmount ?? 0) <= 0 || mainWalletBalance < parseEther((transferAmount ?? 0).toString())
-                }
-              >
-                Transfer to Session Wallet
-              </button>
-              <button onClick={drainBurner} className="ml-2 w-full rounded bg-red-500 p-2 text-white hover:bg-red-600">
-                Drain Session Wallet
-              </button>
-            </div>
+
+          <div className="flex flex-row items-center justify-center space-x-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <button
+                    onClick={transferToBurner}
+                    className="w-full rounded bg-blue-500 p-2 text-white hover:bg-blue-600 disabled:opacity-50"
+                    disabled={
+                      (transferAmount ?? 0) <= 0 || mainWalletBalance < parseEther((transferAmount ?? 0).toString())
+                    }
+                  >
+                    Send to
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Send input amount to burnerWallet</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <input
+                    type="number"
+                    placeholder="Enter amount to transfer"
+                    value={transferAmount ?? "0"}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (value >= 0 && value <= 1) {
+                        setTransferAmount(value);
+                      }
+                    }}
+                    min="0"
+                    max="1"
+                    step="0.001" // Allows increments of 0.01 ETH for more precise control
+                    className="rounded border p-2"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Set input amount</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <button
+                    onClick={drainBurner}
+                    className="w-full rounded bg-red-500 p-2 text-white hover:bg-red-600 disabled:opacity-50"
+                  >
+                    Drain
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Send all to mainWallet</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
+          {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
+            <div className="flex items-center justify-center text-red-500 ">Warning: Low session wallet balance!</div>
+          )}
+          {txSuccessful && <div className="text-center text-green-600">Transaction successful!</div>}
         </div>
       </div>
     </div>
