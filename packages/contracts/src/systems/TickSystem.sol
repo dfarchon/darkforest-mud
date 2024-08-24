@@ -25,13 +25,18 @@ contract TickSystem is System, Errors {
     }
 
     // it's ok to revert if current block number is smaller than the last tick block number
-    uint256 blkNumPassed = block.number - Ticker.getBlockNumber();
-    if (blkNumPassed == 0) {
+    uint256 tickCount = (block.number - ticker.blockNumber) * ticker.tickRate;
+    if (tickCount == 0) {
       return;
     }
 
     // universal updatings
-    _shrinkInnerCircle(blkNumPassed);
+    _shrinkInnerCircle(tickCount);
+
+    // update ticker
+    ticker.blockNumber = uint64(block.number);
+    ticker.tickNumber += uint96(tickCount);
+    Ticker.set(ticker);
   }
 
   function pause() public {
@@ -42,18 +47,23 @@ contract TickSystem is System, Errors {
   }
 
   function unpause() public {
-    if (!Ticker.getPaused()) {
+    TickerData memory ticker = Ticker.get();
+    if (!ticker.paused) {
       revert Errors.NotPaused();
     }
-    Ticker.setPaused(false);
+    ticker.paused = false;
+    ticker.blockNumber = uint64(block.number);
+    Ticker.set(ticker);
   }
 
-  function _shrinkInnerCircle(uint256 blkNumPassed) internal {
+  function updatePlanet(uint256 planetHash) public { }
+
+  function _shrinkInnerCircle(uint256 tickCount) internal {
     InnerCircleData memory innerCircle = InnerCircle.get();
     if (innerCircle.radius == 0) {
       return;
     }
-    uint256 shrinkage = innerCircle.speed * blkNumPassed;
+    uint256 shrinkage = innerCircle.speed * tickCount;
     InnerCircle.setRadius(shrinkage > innerCircle.radius ? 0 : uint64(innerCircle.radius - shrinkage));
   }
 }

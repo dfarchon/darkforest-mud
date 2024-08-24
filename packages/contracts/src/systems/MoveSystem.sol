@@ -6,6 +6,7 @@ import { IWorld } from "../codegen/world/IWorld.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput } from "../lib/VerificationInput.sol";
+import { Planet } from "../lib/Planet.sol";
 
 contract MoveSystem is System, Errors {
   /**
@@ -28,8 +29,12 @@ contract MoveSystem is System, Errors {
     world.df__tickOncePerBlock();
 
     _input.validate();
-    if (!IWorld(_world()).df__verifyMoveProof(_proof, _input)) {
+    if (!world.df__verifyMoveProof(_proof, _input)) {
       revert Errors.InvalidMoveProof();
     }
+
+    // new planet instances in memory
+    Planet memory fromPlanet = world.df__newPlanet(_input.fromPlanetHash);
+    Planet memory toPlanet = world.df__newPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
   }
 }

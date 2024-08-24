@@ -29,6 +29,8 @@ struct MoveInput {
   // toPlanet's position. We could use the current inner shrinking circle radius to replace toRadiusSquare.
   // Then in the circuit we check that innerCircleRadius <= toPlanet.x^2 + toPlanet.y^2, while we
   // check innerCircleRadius >= curInnerCircleRadius in the contract.
+  // But this value is highly related to the determination of a planet's type. Then the best way is
+  // to move this determination into the circuit.
   uint256 toRadiusSquare;
 }
 
