@@ -35,47 +35,26 @@ struct Planet {
 
 library PlanetLib {
   function readFromStore(Planet memory planet) internal view {
+    _validateHash(planet);
+
+    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
+    if (data.planetType == PlanetType.UNKNOWN) {
+      _initPlanet(planet);
+    } else {
+      _loadLatestData(planet, data);
+    }
+
+    _loadMetadata(planet);
+
+    _doublePropeties(planet);
+  }
+
+  function _validateHash(Planet memory planet) internal view {
     if (
       planet.planetHash
         >= (21888242871839275222246405745257275088548364400416034343698204186575808495617 / UniverseConfig.getSparsity())
     ) {
       revert Errors.InvalidPlanetHash();
-    }
-
-    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
-    bool newPlanet;
-    if (data.planetType == PlanetType.UNKNOWN) {
-      newPlanet = true;
-      _initPlanet(planet);
-    } else {
-      // read metadata
-      planet.perlin = data.perlin;
-      planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
-      planet.lastUpdateTick = data.lastUpdateTick;
-      planet.level = data.level;
-      planet.planetType = data.planetType;
-      planet.spaceType = data.spaceType;
-      planet.population = data.population;
-      planet.silver = data.silver;
-    }
-
-    // read latest data
-    PlanetMetadataData memory metadata = PlanetMetadata.get(planet.spaceType, planet.planetType, uint8(planet.level));
-    planet.range = metadata.range;
-    planet.speed = metadata.speed;
-    planet.defense = metadata.defense;
-    planet.populationCap = metadata.populationCap;
-    planet.populationGrowth = metadata.populationGrowth;
-    planet.silverCap = metadata.silverCap;
-    planet.silverGrowth = metadata.silverGrowth;
-
-    _doublePropeties(planet);
-
-    if (newPlanet) {
-      PlanetInitialValueData memory initialValues =
-        PlanetInitialValue.get(planet.spaceType, planet.planetType, uint8(planet.level));
-      planet.population = initialValues.population;
-      planet.silver = initialValues.silver;
     }
   }
 
@@ -84,6 +63,7 @@ library PlanetLib {
     _initZone(planet);
     _initLevel(planet);
     _initPlanetType(planet);
+    _initPopulationAndSilver(planet);
     planet.lastUpdateTick = Ticker.getTickNumber();
   }
 
@@ -170,6 +150,35 @@ library PlanetLib {
         ++i;
       }
     }
+  }
+
+  function _initPopulationAndSilver(Planet memory planet) internal view {
+    PlanetInitialValueData memory initialValues =
+        PlanetInitialValue.get(planet.spaceType, planet.planetType, uint8(planet.level));
+    planet.population = initialValues.population;
+    planet.silver = initialValues.silver;
+  }
+
+  function _loadLatestData(Planet memory planet, PlanetData memory data) internal view {
+    planet.perlin = data.perlin;
+    planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
+    planet.lastUpdateTick = data.lastUpdateTick;
+    planet.level = data.level;
+    planet.planetType = data.planetType;
+    planet.spaceType = data.spaceType;
+    planet.population = data.population;
+    planet.silver = data.silver;
+  }
+
+  function _loadMetadata(Planet memory planet) internal view {
+    PlanetMetadataData memory metadata = PlanetMetadata.get(planet.spaceType, planet.planetType, uint8(planet.level));
+    planet.range = metadata.range;
+    planet.speed = metadata.speed;
+    planet.defense = metadata.defense;
+    planet.populationCap = metadata.populationCap;
+    planet.populationGrowth = metadata.populationGrowth;
+    planet.silverCap = metadata.silverCap;
+    planet.silverGrowth = metadata.silverGrowth;
   }
 
   function _doublePropeties(Planet memory planet) internal pure {
