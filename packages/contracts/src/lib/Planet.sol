@@ -3,16 +3,9 @@ pragma solidity >=0.8.24;
 
 import { Errors } from "../interfaces/errors.sol";
 import { PlanetType, SpaceType } from "../codegen/common.sol";
-import {
-  UniverseConfig, Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData
-} from "../codegen/index.sol";
-import {
-  SpaceTypeConfig,
-  UniverseZoneConfig,
-  PlanetLevelConfig,
-  PlanetTypeConfig,
-  SpaceTypeConfig
-} from "../codegen/index.sol";
+import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
+import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
+import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
 import { PlanetInitialValue, PlanetInitialValueData, Ticker, PlanetOwner } from "../codegen/index.sol";
 
 using PlanetLib for Planet global;
