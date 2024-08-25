@@ -26,7 +26,7 @@ contract MoveSystem is System, Errors {
     uint256 _artifact
   ) public returns (uint256) {
     IWorld world = IWorld(_world());
-    world.df__tickOncePerBlock();
+    world.df__tick();
 
     _input.validate();
     if (!world.df__verifyMoveProof(_proof, _input)) {
