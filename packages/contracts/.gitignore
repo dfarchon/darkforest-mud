@@ -6,7 +6,7 @@ artifacts/
 broadcast/
 src/codegen/
 .env
-
+deploys/
 
 
 
