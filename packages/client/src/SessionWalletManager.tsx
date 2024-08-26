@@ -136,13 +136,17 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span>Main Wallet Balance:</span>
+            <span>Main :</span>
             <span>{shortedAddress(walletClient?.account?.address as `0x${string}`)}</span>
-            <span>{mainWalletBalance ? formatEther(mainWalletBalance) : "0"} ETH</span>
+            <span>{mainWalletBalance ? Number(formatEther(mainWalletBalance)).toFixed(4) : "0"} ETH</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Session Wallet Balance:</span>
+            <span>Session :</span>
             <span>{shortedAddress(burnerWalletClient?.account?.address)}</span>
+
+            <span>{burnerBalance ? Number(formatEther(burnerBalance)).toFixed(4) : "0"} ETH</span>
+          </div>
+          <div className="items-center">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -150,15 +154,13 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
                     onClick={copyPrivateKey}
                     className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
                   >
-                    {pkCopied ? "Copied!" : "Copy PK"}
+                    {pkCopied ? "Copied!" : "Copy"}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Copy pk to clipboard</TooltipContent>
               </Tooltip>
-            </TooltipProvider>
-            <span>{burnerBalance ? formatEther(burnerBalance) : "0"} ETH</span>
+            </TooltipProvider>{" "}
           </div>
-
           <div className="flex flex-row items-center justify-center space-x-4">
             <TooltipProvider>
               <Tooltip>
@@ -212,6 +214,7 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
               </Tooltip>
             </TooltipProvider>
           </div>
+
           {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
             <div className="flex items-center justify-center text-red-500 ">Warning: Low session wallet balance!</div>
           )}
