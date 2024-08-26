@@ -59,8 +59,8 @@ library PlanetLib {
   }
 
   function _initPlanet(Planet memory planet) internal view {
-    _initSpaceType(planet);
     _initZone(planet);
+    _initSpaceType(planet);
     _initLevel(planet);
     _initPlanetType(planet);
     _initPopulationAndSilver(planet);
@@ -70,16 +70,22 @@ library PlanetLib {
   function _initSpaceType(Planet memory planet) internal view {
     uint32[] memory thresholds = SpaceTypeConfig.getPerlinThresholds();
     uint256 perlin = planet.perlin;
-    assert(thresholds.length == 3);
-    if (perlin >= thresholds[2]) {
-      planet.spaceType = SpaceType.DEAD_SPACE;
-    } else if (perlin >= thresholds[1]) {
-      planet.spaceType = SpaceType.DEEP_SPACE;
-    } else if (perlin >= thresholds[0]) {
-      planet.spaceType = SpaceType.SPACE;
-    } else {
+    uint256 length = thresholds.length;
+    // if a planet locates at the last second zone, its space type is NEBULA
+    if (planet.universeZone + 1 == UniverseZoneConfig.lengthBorders()) {
       planet.spaceType = SpaceType.NEBULA;
+      return;
     }
+    for (uint256 i; i < thresholds.length;) {
+      if (perlin < thresholds[i]) {
+        planet.spaceType = SpaceType(i + 1);
+        return;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+    planet.spaceType = SpaceType(length);
   }
 
   function _initZone(Planet memory planet) internal view {
@@ -150,6 +156,7 @@ library PlanetLib {
         ++i;
       }
     }
+    revert Errors.UnknownPlanetType();
   }
 
   function _initPopulationAndSilver(Planet memory planet) internal view {
