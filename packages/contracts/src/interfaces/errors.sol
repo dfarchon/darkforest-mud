@@ -12,4 +12,5 @@ interface Errors {
 
   // planet system
   error InvalidPlanetHash();
+  error UnknownPlanetType();
 }
