@@ -27,3 +27,9 @@ eth_rpc_url = "https://rpc.garnetchain.com"
 
 [profile.redstone]
 eth_rpc_url = "https://rpc.redstonechain.com"
+
+[fmt]
+line_length = 120
+tab_width = 2
+bracket_spacing = true
+ignore = ["lib/*"]
