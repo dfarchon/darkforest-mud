@@ -103,7 +103,7 @@ export default defineWorld({
     },
     Planet: {
       id: "bytes32",
-      lastUpdateTick: "uint96",
+      lastUpdateTick: "uint64",
       perlin: "uint8", // not sure if this suffices
       level: "uint8",
       planetType: "PlanetType",
@@ -112,9 +112,31 @@ export default defineWorld({
       silver: "uint64",
     },
     PlanetOwner: "address",
+    PendingMove: {
+      schema: {
+        to: "bytes32",
+        number: "uint8",
+        indexes: "uint8[]",
+      },
+      key: ["to"],
+    },
+    Move: {
+      schema: {
+        to: "bytes32",
+        index: "uint8",
+        from: "bytes32",
+        executor: "address",
+        departureTime: "uint64",
+        arrivalTime: "uint64",
+        population: "uint64",
+        silver: "uint64",
+        artifact: "uint256"
+      },
+      key: ["to", "index"],
+    },
     Ticker: {
       schema: {
-        tickNumber: "uint96",
+        tickNumber: "uint64",
         tickRate: "uint64", // per block
         blockNumber: "uint64",
         paused: "bool",

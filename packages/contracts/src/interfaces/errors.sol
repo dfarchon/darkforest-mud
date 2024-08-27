@@ -5,6 +5,9 @@ interface Errors {
   // move system
   error InvalidMoveProof();
   error InvalidMoveInput(uint8 index);
+  error NotPlanetOwner();
+  error NotEnoughPopulation();
+  error NotEnoughSilver();
 
   // tick system
   error Paused();

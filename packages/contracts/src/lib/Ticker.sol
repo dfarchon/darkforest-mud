@@ -21,7 +21,7 @@ library TickerLib {
 
     // update ticker
     ticker.blockNumber = uint64(block.number);
-    ticker.tickNumber += uint96(tickCount);
+    ticker.tickNumber += uint64(tickCount);
   }
 
   function pause(TickerData memory ticker) internal {
