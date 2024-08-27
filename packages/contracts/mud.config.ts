@@ -8,11 +8,13 @@ export default defineWorld({
   },
   tables: {
     // todo remove this table and corresponding increment system
-    Counter: {
+    PlayersTable: {
       schema: {
-        value: "uint32",
+        owner: "address",
+        minted: "uint256",
+        name: "string",
       },
-      key: [],
+      key: ["owner"],
     },
     TempConfigSet: {
       schema: {
@@ -74,7 +76,7 @@ export default defineWorld({
         // use 1 instead of true
         perlinMirrorY: "uint8",
       },
-      key: []
+      key: [],
     },
     PlanetMetadata: {
       schema: {
@@ -127,6 +129,6 @@ export default defineWorld({
         speed: "uint64",
       },
       key: [],
-    }
+    },
   },
 });

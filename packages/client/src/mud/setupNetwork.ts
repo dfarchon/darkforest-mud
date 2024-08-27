@@ -6,6 +6,7 @@
 import { ContractWrite, createBurnerAccount, transportObserver } from "@latticexyz/common";
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
 import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
+import { syncToZustand } from "@latticexyz/store-sync/zustand";
 
 /*
  * Import our MUD config, which includes strong types for
@@ -136,7 +137,7 @@ export async function setupNetwork() {
   const worldContract = getContract({
     address: networkConfig.worldAddress as Hex,
     abi: IWorldAbi,
-    client: { public: publicClient, wallet: burnerWalletClient },
+    client: { publicClient: publicClient, wallet: burnerWalletClient },
   });
 
   /*
@@ -146,7 +147,22 @@ export async function setupNetwork() {
    * events from the chain.
    */
 
+  const {
+    tables,
+    useStore,
+    latestBlock$: latestBlockZu$,
+    storedBlockLogs$: storedBlockLogsZu$,
+    waitForTransaction: waitForTransactionZu,
+  } = await syncToZustand({
+    config: mudConfig,
+    address: networkConfig.worldAddress as Hex,
+    publicClient,
+    startBlock: BigInt(networkConfig.initialBlockNumber),
+  });
+
   return {
+    tables,
+    useStore,
     world,
     components,
     playerEntity: encodeEntity({ address: "address" }, { address: burnerWalletClient.account.address }),
@@ -158,5 +174,8 @@ export async function setupNetwork() {
     waitForTransaction,
     worldContract,
     write$: write$.asObservable().pipe(share()),
+    latestBlockZu$,
+    storedBlockLogsZu$,
+    waitForTransactionZu,
   };
 }

@@ -1,11 +1,11 @@
 import React from "react";
 
-interface SyncClientStatusProps {
+interface SyncClientStatusRecProps {
   message: string;
   percentage: number;
 }
 
-export const SyncClientStatus: React.FC<SyncClientStatusProps> = ({ message, percentage }) => {
+export const SyncClientStatusRec: React.FC<SyncClientStatusRecProps> = ({ message, percentage }) => {
   return (
     <div className="flex flex-col items-center rounded-lg bg-gray-800 p-6 shadow-lg">
       <div className="mb-2 text-xl font-semibold">{message}</div>
@@ -33,4 +33,4 @@ export const SyncClientStatus: React.FC<SyncClientStatusProps> = ({ message, per
   );
 };
 
-export default SyncClientStatus;
+export default SyncClientStatusRec;
