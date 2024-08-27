@@ -43,11 +43,19 @@ export const GamePage: React.FC = () => {
 
   return (
     <div>
-      {playerSpawned && <div className="m-4 text-center">Player: {name}</div>}
-      <div className="flex h-screen w-screen items-center justify-center bg-gray-900 text-white">
+      {playerSpawned && (
+        <>
+          {" "}
+          <div className="fixed left-1/2 top-4 -translate-x-1/2 transform text-center">Player: {name}</div>
+          <div className="flex items-center justify-center bg-gray-900 text-white">
+            {" "}
+            <h1 className="text-4xl font-bold">HERE WILL BE MAP</h1>
+          </div>
+        </>
+      )}
+      <div className="flex items-center justify-center bg-gray-900 text-white">
         {syncProgress.step === "live" ? (
           <div className="text-center">
-            <h1 className="text-4xl font-bold">HERE WILL BE MAP</h1>
             {!playerSpawned && (
               <>
                 {" "}
