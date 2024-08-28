@@ -51,6 +51,9 @@ library MoveLib {
     uint256 present = Ticker.getTickNumber();
     move.departureTime = uint64(present);
     move.arrivalTime = uint64(present + time);
+    if (to.moveQueue.IsFull()) {
+      revert Errors.ReachMaxMoveToLimit(MAX_MOVE_QUEUE_SIZE);
+    }
     to.moveQueue.PushMove(move);
   }
 

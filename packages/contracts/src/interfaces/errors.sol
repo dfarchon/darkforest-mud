@@ -10,6 +10,7 @@ interface Errors {
   error NotPlanetOwner();
   error NotEnoughPopulation();
   error NotEnoughSilver();
+  error ReachMaxMoveToLimit(uint8 limit);
 
   // tick system
   error Paused();
