@@ -6,6 +6,11 @@ export default defineWorld({
     PlanetType: ["UNKNOWN", "PLANET", "ASTEROID_FIELD", "FOUNDRY", "SPACETIME_RIP", "QUASAR"],
     SpaceType: ["UNKNOWN", "NEBULA", "SPACE", "DEEP_SPACE", "DEAD_SPACE"],
   },
+  systems: {
+    TickSystem: {
+      openAccess: false,
+    }
+  },
   tables: {
     // todo remove this table and corresponding increment system
     Counter: {
