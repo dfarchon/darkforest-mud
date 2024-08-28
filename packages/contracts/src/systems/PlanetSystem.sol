@@ -15,11 +15,16 @@ contract PlanetSystem is System, Errors {
     planet.planetHash = planetHash;
     planet.perlin = perlin;
     planet.distSquare = distanceSquare;
-    planet.readFromStore();
+    _loading(planet);
   }
 
   function newPlanet(uint256 planetHash) public view returns (Planet memory planet) {
     planet.planetHash = planetHash;
+    _loading(planet);
+  }
+
+  function _loading(Planet memory planet) internal view {
     planet.readFromStore();
+    planet.sync();
   }
 }

@@ -5,13 +5,13 @@ import { Move, MoveData, Ticker, PendingMove, PendingMoveData } from "../codegen
 
 struct MoveQueue {
   uint256 planet;
+  uint256 head;
   uint256 number;
   uint8[] indexes;
 }
 
 using MoveQueueLib for MoveQueue global;
 
-// uint256 constant DEFAULT_INDEXES = 0x00001d1c1b1a191817161514131211100f0e0d0c0b0a09080706050403020100;
 uint8 constant MAX_MOVE_QUEUE_SIZE = 30;
 
 library MoveQueueLib {
@@ -29,8 +29,13 @@ library MoveQueueLib {
   function ReadFromStore(MoveQueue memory _q, uint256 _planet) internal view {
     _q.planet = _planet;
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(_planet));
+    _q.head = pendingMove.head;
     _q.number = pendingMove.number;
     _q.indexes = pendingMove.indexes;
+  }
+
+  function WriteIntoStore(MoveQueue memory _q) internal {
+    PendingMove.set(bytes32(_q.planet), uint8(_q.head), uint8(_q.number), _q.indexes);
   }
 
   function IsEmpty(MoveQueue memory _q) internal pure returns (bool) {
@@ -44,51 +49,33 @@ library MoveQueueLib {
   function PushMove(MoveQueue memory _q, MoveData memory _move) internal {
     assert(!_q.IsFull());
     uint8[] memory indexes = _q.indexes;
-    uint256 i = _q.number;
-    uint8 index = indexes[i];
+    uint256 i = _q.head + _q.number;
+    uint8 index = indexes[i % MAX_MOVE_QUEUE_SIZE];
     Move.set(bytes32(_q.planet), index, _move);
     while (i > 0) {
-      uint8 curIndex = indexes[i - 1];
+      uint8 curIndex = indexes[(i - 1) % MAX_MOVE_QUEUE_SIZE];
       MoveData memory move = Move.get(bytes32(_q.planet), curIndex);
       if (move.arrivalTime <= _move.arrivalTime) {
         break;
       }
-      indexes[i] = curIndex;
+      indexes[i % MAX_MOVE_QUEUE_SIZE] = curIndex;
       --i;
     }
-    indexes[i] = index;
+    indexes[i % MAX_MOVE_QUEUE_SIZE] = index;
     ++_q.number;
     _q.indexes = indexes;
   }
 
-  function PopArrivedMoves(MoveQueue memory _q) internal view returns (MoveData[] memory moves) {
+  function PopMove(MoveQueue memory _q) internal view returns (MoveData memory move) {
     if (_q.IsEmpty()) {
-      return moves;
+      return move;
     }
-    uint256 number = _q.number;
-    uint256 popNumber = number;
+    move = Move.get(bytes32(_q.planet), _q.indexes[_q.head]);
     uint256 currentTick = Ticker.getTickNumber();
-    for (uint256 i; i < number;) {
-      MoveData memory move = Move.get(bytes32(_q.planet), _q.indexes[i]);
-      if (move.arrivalTime > currentTick) {
-        popNumber = i;
-        break;
-      }
-      unchecked {
-        ++i;
-      }
-    }
-    moves = new MoveData[](popNumber);
-    for (uint256 i; i < popNumber;) {
-      moves[i] = Move.get(bytes32(_q.planet), _q.indexes[i]);
-      unchecked {
-        ++i;
-      }
-    }
-    for (uint256 i = popNumber; i < number; i++) {
-      uint8 temp = _q.indexes[i];
-      _q.indexes[i] = _q.indexes[i - popNumber];
-      _q.indexes[i - popNumber] = temp;
+    if (move.arrivalTime <= currentTick) {
+      _q.head = (_q.head + 1) % MAX_MOVE_QUEUE_SIZE;
+      --_q.number;
+      return move;
     }
   }
 }

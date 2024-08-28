@@ -115,6 +115,7 @@ export default defineWorld({
     PendingMove: {
       schema: {
         to: "bytes32",
+        head: "uint8",
         number: "uint8",
         indexes: "uint8[]",
       },
