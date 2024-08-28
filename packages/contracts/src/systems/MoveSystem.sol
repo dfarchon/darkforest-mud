@@ -33,7 +33,6 @@ contract MoveSystem is System, Errors {
     IWorld world = IWorld(_world());
     world.df__tick();
 
-    
     if (!world.df__verifyMoveProof(_proof, _input)) {
       revert Errors.InvalidMoveProof();
     }
