@@ -7,8 +7,9 @@ import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData }
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
 import { PlanetInitialValue, PlanetInitialValueData, Ticker, PlanetOwner } from "../codegen/index.sol";
+import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-import { MoveQueue } from "./Move.sol";
+import { PendingMoveLib } from "./Move.sol";
 
 using PlanetLib for Planet global;
 
@@ -33,10 +34,12 @@ struct Planet {
   uint256 populationGrowth;
   uint256 silverCap;
   uint256 silverGrowth;
-  MoveQueue moveQueue;
+  PendingMoveData moveQueue;
 }
 
 library PlanetLib {
+  using PendingMoveLib for PendingMoveData;
+
   function readFromStore(Planet memory planet) internal view {
     _validateHash(planet);
 
@@ -63,7 +66,7 @@ library PlanetLib {
     });
     PlanetTable.set(bytes32(planet.planetHash), data);
     PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
-    planet.moveQueue.WriteToStore();
+    planet.moveQueue.WriteToStore(planet.planetHash);
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
@@ -77,6 +80,14 @@ library PlanetLib {
     }
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);
+  }
+
+  function pushMove(Planet memory planet, MoveData memory move) internal {
+    planet.moveQueue.PushMove(planet.planetHash, move);
+  }
+
+  function popArrivedMove(Planet memory planet, uint256 untilTick) internal view returns (MoveData memory move) {
+    return planet.moveQueue.PopArrivedMove(planet.planetHash, untilTick);
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -94,7 +105,7 @@ library PlanetLib {
     _initLevel(planet);
     _initPlanetType(planet);
     _initPopulationAndSilver(planet);
-    planet.moveQueue.New(planet.planetHash);
+    planet.moveQueue.New();
     planet.lastUpdateTick = Ticker.getTickNumber();
   }
 

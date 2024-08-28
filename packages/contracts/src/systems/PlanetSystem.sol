@@ -30,12 +30,13 @@ contract PlanetSystem is System, Errors {
   }
 
   function _sync(Planet memory planet) internal view {
-    MoveData memory move = planet.moveQueue.PopArrivedMove();
+    uint256 untilTick = Ticker.getTickNumber();
+    MoveData memory move = planet.popArrivedMove(untilTick);
     while (uint256(move.from) != 0) {
       planet.naturalGrowth(move.arrivalTime);
       IWorld(_world()).df__arrive(move, planet);
-      move = planet.moveQueue.PopArrivedMove();
+      move = planet.popArrivedMove(untilTick);
     }
-    planet.naturalGrowth(Ticker.getTickNumber());
+    planet.naturalGrowth(untilTick);
   }
 }

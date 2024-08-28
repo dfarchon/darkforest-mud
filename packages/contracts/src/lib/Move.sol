@@ -6,18 +6,11 @@ import { Move, MoveData, Ticker, PendingMove, PendingMoveData } from "../codegen
 import { PlanetType } from "../codegen/common.sol";
 import { Planet } from "./Planet.sol";
 
-struct MoveQueue {
-  uint256 planet;
-  uint256 head;
-  uint256 number;
-  uint8[] indexes;
-}
-
-using MoveQueueLib for MoveQueue global;
-
 uint8 constant MAX_MOVE_QUEUE_SIZE = 32;
 
 library MoveLib {
+  using PendingMoveLib for PendingMoveData;
+
   function NewMove(Planet memory from, address captain) internal pure returns (MoveData memory move) {
     if (from.owner != captain) {
       revert Errors.NotPlanetOwner();
@@ -48,13 +41,17 @@ library MoveLib {
 
   function headTo(MoveData memory move, Planet memory to, uint256 distance, uint256 speed) internal {
     uint256 time = distance * 100 / speed;
-    uint256 present = Ticker.getTickNumber();
+    uint256 present = to.lastUpdateTick;
     move.departureTime = uint64(present);
     move.arrivalTime = uint64(present + time);
-    if (to.moveQueue.IsFull()) {
-      revert Errors.ReachMaxMoveToLimit(MAX_MOVE_QUEUE_SIZE);
+    // if time == 0, unload immediately
+    if (time == 0) {
+      unloadPopulation(move, to);
+      unloadSilver(move, to);
+      unloadArtifact(move, to);
+      return;
     }
-    to.moveQueue.PushMove(move);
+    to.pushMove(move);
   }
 
   function unloadPopulation(MoveData memory move, Planet memory to) internal pure {
@@ -94,9 +91,10 @@ library MoveLib {
   }
 }
 
-library MoveQueueLib {
-  function New(MoveQueue memory _q, uint256 _planet) internal pure {
-    _q.planet = _planet;
+library PendingMoveLib {
+  using PendingMoveLib for PendingMoveData;
+
+  function New(PendingMoveData memory _q) internal pure {
     _q.indexes = new uint8[](MAX_MOVE_QUEUE_SIZE);
     for (uint256 i; i < MAX_MOVE_QUEUE_SIZE;) {
       _q.indexes[i] = uint8(i);
@@ -106,35 +104,33 @@ library MoveQueueLib {
     }
   }
 
-  function ReadFromStore(MoveQueue memory _q, uint256 _planet) internal view {
-    _q.planet = _planet;
-    PendingMoveData memory pendingMove = PendingMove.get(bytes32(_planet));
-    _q.head = pendingMove.head;
-    _q.number = pendingMove.number;
-    _q.indexes = pendingMove.indexes;
+  function ReadFromStore(PendingMoveData memory _q, uint256 _planet) internal view {
+    _q = PendingMove.get(bytes32(_planet));
   }
 
-  function WriteToStore(MoveQueue memory _q) internal {
-    PendingMove.set(bytes32(_q.planet), uint8(_q.head), uint8(_q.number), _q.indexes);
+  function WriteToStore(PendingMoveData memory _q, uint256 _planet) internal {
+    PendingMove.set(bytes32(_planet), _q);
   }
 
-  function IsEmpty(MoveQueue memory _q) internal pure returns (bool) {
+  function IsEmpty(PendingMoveData memory _q) internal pure returns (bool) {
     return _q.number == 0;
   }
 
-  function IsFull(MoveQueue memory _q) internal pure returns (bool) {
+  function IsFull(PendingMoveData memory _q) internal pure returns (bool) {
     return _q.indexes.length == _q.number;
   }
 
-  function PushMove(MoveQueue memory _q, MoveData memory _move) internal {
-    assert(!_q.IsFull());
+  function PushMove(PendingMoveData memory _q, uint256 _planet, MoveData memory _move) internal {
+    if (_q.IsFull()) {
+      revert Errors.ReachMaxMoveToLimit(MAX_MOVE_QUEUE_SIZE);
+    }
     uint8[] memory indexes = _q.indexes;
     uint256 i = _q.head + _q.number;
     uint8 index = indexes[i % MAX_MOVE_QUEUE_SIZE];
-    Move.set(bytes32(_q.planet), index, _move);
+    Move.set(bytes32(_planet), index, _move);
     while (i > 0) {
       uint8 curIndex = indexes[(i - 1) % MAX_MOVE_QUEUE_SIZE];
-      MoveData memory move = Move.get(bytes32(_q.planet), curIndex);
+      MoveData memory move = Move.get(bytes32(_planet), curIndex);
       if (move.arrivalTime <= _move.arrivalTime) {
         break;
       }
@@ -146,13 +142,12 @@ library MoveQueueLib {
     _q.indexes = indexes;
   }
 
-  function PopArrivedMove(MoveQueue memory _q) internal view returns (MoveData memory move) {
+  function PopArrivedMove(PendingMoveData memory _q, uint256 _planet, uint256 until) internal view returns (MoveData memory move) {
     if (_q.IsEmpty()) {
       return move;
     }
-    move = Move.get(bytes32(_q.planet), _q.indexes[_q.head]);
-    uint256 currentTick = Ticker.getTickNumber();
-    if (move.arrivalTime <= currentTick) {
+    move = Move.get(bytes32(_planet), _q.indexes[_q.head]);
+    if (move.arrivalTime <= until) {
       _q.head = (_q.head + 1) % MAX_MOVE_QUEUE_SIZE;
       --_q.number;
       return move;
