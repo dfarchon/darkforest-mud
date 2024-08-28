@@ -1,3 +1,11 @@
 node_modules
+dist
+.DS_Store
+.idea/
 
 packages/DFARES-v0.1
+packages/classic-packages
+
+
+
+

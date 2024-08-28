@@ -1,29 +1,16 @@
-import { useComponentValue } from "@latticexyz/react";
-import { useMUD } from "./MUDContext";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { LandingPage } from "./Frontend/Pages/LandingPage";
+import { SandboxPage } from "./Frontend/Pages/SandboxPage";
 
 export const App = () => {
-  const {
-    components: { Counter },
-    systemCalls: { increment },
-  } = useMUD();
-
-  const counter = useComponentValue(Counter, singletonEntity);
-
   return (
     <>
-      <div>
-        Counter: <span>{counter?.value ?? "??"}</span>
-      </div>
-      <button
-        type="button"
-        onClick={async (event) => {
-          event.preventDefault();
-          console.log("new counter value:", await increment());
-        }}
-      >
-        Increment
-      </button>
+      <Router>
+        <Routes>
+          <Route path="/sandbox" element={<SandboxPage />} />
+          <Route path="/" element={<LandingPage />} />
+        </Routes>
+      </Router>
     </>
   );
 };
