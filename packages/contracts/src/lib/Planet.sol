@@ -7,10 +7,8 @@ import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData }
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
 import { PlanetInitialValue, PlanetInitialValueData, Ticker, PlanetOwner } from "../codegen/index.sol";
-import { MoveData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-import { UniverseLib } from "./Universe.sol";
-import { MoveQueue } from "./MoveQueue.sol";
+import { MoveQueue } from "./Move.sol";
 
 using PlanetLib for Planet global;
 
@@ -42,85 +40,43 @@ library PlanetLib {
   function readFromStore(Planet memory planet) internal view {
     _validateHash(planet);
 
-    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
-    if (data.planetType == PlanetType.UNKNOWN) {
+    if (PlanetTable.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
       _initPlanet(planet);
     } else {
-      _loadLatestData(planet, data);
+      _readLatestData(planet);
     }
 
-    _loadMetadata(planet);
+    _readMetadata(planet);
 
     _doublePropeties(planet);
   }
 
-  function sync(Planet memory planet) internal view {
-    MoveData memory arrivedMove = planet.moveQueue.PopMove();
-    while (uint256(arrivedMove.from) != 0) {
-      _naturalGrowth(planet, arrivedMove.arrivalTime);
-      planet.arrive(arrivedMove);
-      arrivedMove = planet.moveQueue.PopMove();
-    }
-    _naturalGrowth(planet, Ticker.getTickNumber());
-  }
-
-  function send(
-    Planet memory from,
-    Planet memory to,
-    uint256 distance,
-    uint256 population,
-    uint256 silver,
-    uint256 artifact
-  ) internal {
-    _validateSent(from, population, silver);
-
-    uint256 time = UniverseLib.distance(from, to, distance) * 100 / from.speed;
-    uint256 present = Ticker.getTickNumber();
-
-    MoveData memory move = MoveData({
-      from: bytes32(from.planetHash),
-      executor: from.owner,
-      departureTime: uint64(present),
-      arrivalTime: uint64(present + time),
-      population: uint64(population),
-      silver: uint64(silver),
-      artifact: artifact
+  function writeToStore(Planet memory planet) internal {
+    PlanetData memory data = PlanetData({
+      perlin: uint8(planet.perlin),
+      lastUpdateTick: uint64(planet.lastUpdateTick),
+      level: uint8(planet.level),
+      planetType: planet.planetType,
+      spaceType: planet.spaceType,
+      population: uint64(planet.population),
+      silver: uint64(planet.silver)
     });
-    from.moveQueue.PushMove(move);
-
-    from.population -= population;
-    from.silver -= silver;
+    PlanetTable.set(bytes32(planet.planetHash), data);
+    PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
+    planet.moveQueue.WriteToStore();
   }
 
-  function arrive(Planet memory planet, MoveData memory move) internal view {
-    assert(move.arrivalTime == planet.lastUpdateTick);
-    uint256 population = planet.population;
-    uint256 arrivedPopulation = move.population;
-    if (move.executor == planet.owner) {
-      population += arrivedPopulation;
-    } else {
-      uint256 defense = planet.defense;
-      if (population > (arrivedPopulation * 100) / defense) {
-        population -= (arrivedPopulation * 100) / defense;
-      } else {
-        planet.owner = move.executor;
-        population = arrivedPopulation - ((population * defense) / 100);
-        if (population == 0) {
-          population = 1;
-        }
-      }
+  function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
+    if (planet.lastUpdateTick >= untilTick) {
+      return;
     }
-    if (planet.planetType == PlanetType.QUASAR) {
-      if (population > planet.populationCap) {
-        population = planet.populationCap;
-      }
+    uint256 tickElapsed = untilTick - planet.lastUpdateTick;
+    planet.lastUpdateTick = untilTick;
+    if (planet.owner == address(0)) {
+      return;
     }
-    planet.population = population;
-
-    planet.silver += move.silver;
-    if (planet.silver > planet.silverCap) {
-      planet.silver = planet.silverCap;
-    }
+    _populationGrow(planet, tickElapsed);
+    _silverGrow(planet, tickElapsed);
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -241,7 +197,8 @@ library PlanetLib {
     planet.silver = initialValues.silver;
   }
 
-  function _loadLatestData(Planet memory planet, PlanetData memory data) internal view {
+  function _readLatestData(Planet memory planet) internal view {
+    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
     planet.perlin = data.perlin;
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
@@ -253,7 +210,7 @@ library PlanetLib {
     planet.moveQueue.ReadFromStore(planet.planetHash);
   }
 
-  function _loadMetadata(Planet memory planet) internal view {
+  function _readMetadata(Planet memory planet) internal view {
     PlanetMetadataData memory metadata = PlanetMetadata.get(planet.spaceType, planet.planetType, uint8(planet.level));
     planet.range = metadata.range;
     planet.speed = metadata.speed;
@@ -287,20 +244,7 @@ library PlanetLib {
     }
   }
 
-  function _naturalGrowth(Planet memory planet, uint256 untilTick) internal view {
-    if (planet.lastUpdateTick >= untilTick) {
-      return;
-    }
-    uint256 tickElapsed = untilTick - planet.lastUpdateTick;
-    planet.lastUpdateTick = untilTick;
-    if (planet.owner == address(0)) {
-      return;
-    }
-    _populationGrow(planet, tickElapsed);
-    _silverGrow(planet, tickElapsed);
-  }
-
-  function _populationGrow(Planet memory planet, uint256 tickElapsed) internal view {
+  function _populationGrow(Planet memory planet, uint256 tickElapsed) internal pure {
     if (planet.populationGrowth == 0) {
       return;
     }
@@ -329,7 +273,7 @@ library PlanetLib {
       ABDKMath64x64.toUInt(ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), denominator));
   }
 
-  function _silverGrow(Planet memory planet, uint256 tickElapsed) internal view {
+  function _silverGrow(Planet memory planet, uint256 tickElapsed) internal pure {
     uint256 silver = planet.silver;
     uint256 cap = planet.silverCap;
     if (planet.silverGrowth == 0 || silver >= cap) {
@@ -337,17 +281,5 @@ library PlanetLib {
     }
     silver += planet.silverGrowth * tickElapsed;
     planet.silver = silver > cap ? cap : silver;
-  }
-
-  function _validateSent(Planet memory from, uint256 population, uint256 silver) internal view {
-    if (from.owner != msg.sender) {
-      revert Errors.NotPlanetOwner();
-    }
-    if (from.population <= population) {
-      revert Errors.NotEnoughPopulation();
-    }
-    if (from.silver < silver) {
-      revert Errors.NotEnoughSilver();
-    }
   }
 }

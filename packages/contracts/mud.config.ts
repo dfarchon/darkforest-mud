@@ -126,7 +126,7 @@ export default defineWorld({
         to: "bytes32",
         index: "uint8",
         from: "bytes32",
-        executor: "address",
+        captain: "address",
         departureTime: "uint64",
         arrivalTime: "uint64",
         population: "uint64",

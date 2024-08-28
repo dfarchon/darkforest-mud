@@ -237,6 +237,7 @@ contract VerifySystem is System {
   }
 
   function verifyMoveProof(Proof memory proof, MoveInput memory input) public view returns (bool) {
+    input.validate();
     return verify(input.flatten(), proof, MoveVerifyingKey());
   }
 
