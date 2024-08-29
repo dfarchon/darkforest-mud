@@ -17,8 +17,12 @@ export const SandboxPage = () => {
       <div>
         Counter: <span>{counter?.value ?? "??"}</span>
       </div>
+
+      <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded">
+        Basic Button
+      </button>
       <button
-        type="button"
+        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-lg"
         onClick={async (event) => {
           event.preventDefault();
           console.log("new counter value:", await increment());
@@ -26,6 +30,8 @@ export const SandboxPage = () => {
       >
         Increment
       </button>
+
+      <button type="button">Increment</button>
     </>
   );
 };
