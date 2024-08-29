@@ -14,6 +14,9 @@ importers:
       '@spectrum-web-components/theme':
         specifier: ^0.47.1
         version: 0.47.1
+      auto-bind:
+        specifier: ^5.0.1
+        version: 5.0.1
       color:
         specifier: ^4.2.3
         version: 4.2.3
@@ -1477,6 +1480,10 @@ packages:
   astral-regex@2.0.0:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
+
+  auto-bind@5.0.1:
+    resolution: {integrity: sha512-ooviqdwwgfIfNmDwo94wlshcdzfO64XV0Cg6oDsDYBJfITDz1EngD2z7DkbvCWn+XIMsIqW27sEVF6qcpJrRcg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   autoprefixer@10.4.20:
     resolution: {integrity: sha512-XY25y5xSv/wEoqzDyXXME4AFfkZI0P23z6Fs3YgymDnKJkCGOnkL0iTxCa85UTqaSgfcqyf3UA6+c7wUvx/16g==}
@@ -5413,6 +5420,8 @@ snapshots:
   ast-parents@0.0.1: {}
 
   astral-regex@2.0.0: {}
+
+  auto-bind@5.0.1: {}
 
   autoprefixer@10.4.20(postcss@8.4.41):
     dependencies:
