@@ -32,10 +32,10 @@ export const keysPerTx = 400;
 export const generateKey = () => {
   const hexArray = padStart(
     bigInt(
-      ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString()
+      ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString(),
     ).toString(16),
     24,
-    "0"
+    "0",
   ).split("");
 
   return chunk(hexArray, 6)

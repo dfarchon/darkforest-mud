@@ -1,6 +1,3 @@
 {
-  "extends": "@latticexyz/common/tsconfig.base.json",
-  "compilerOptions": {
-    "strictPropertyInitialization": false
-  }
+  "extends": "@latticexyz/common/tsconfig.base.json"
 }
