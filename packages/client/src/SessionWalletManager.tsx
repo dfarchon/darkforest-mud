@@ -55,9 +55,11 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
     if (!burnerWalletClient || !walletClient) return;
     const value = parseEther((transferAmount ?? 0).toString());
     try {
+      const gasLimit = 21000; // Typical gas limit for simple ETH transfers
       await walletClient.sendTransaction({
         to: burnerWalletClient.account?.address,
         value,
+        gasLimit,
       });
       setTxSuccessful(true);
       fetchBalances(); // Refresh balances after transaction
@@ -112,12 +114,12 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
   }, [onClose]);
 
   return (
-    <div className="fixed right-5 top-[80px] z-50 flex items-center justify-center bg-black ">
+    <div className="fixed right-5 top-[80px] z-50 flex items-center justify-center bg-black">
       <div id="session-wallet-modal" className="relative w-full max-w-lg rounded-lg bg-black p-6 shadow-lg">
         <button onClick={onClose} className="absolute right-2 top-2 text-gray-500 hover:text-gray-700">
           ✕
         </button>
-        <h3 className="mb-4 flex items-center justify-between text-lg ">
+        <h3 className="mb-4 flex items-center justify-between text-lg">
           <span className="text-left font-bold">Session Wallet Manager</span>
           <TooltipProvider>
             <Tooltip>
@@ -216,7 +218,7 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
           </div>
 
           {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
-            <div className="flex items-center justify-center text-red-500 ">Warning: Low session wallet balance!</div>
+            <div className="flex items-center justify-center text-red-500">Warning: Low session wallet balance!</div>
           )}
           {txSuccessful && <div className="text-center text-green-600">Transaction successful!</div>}
         </div>

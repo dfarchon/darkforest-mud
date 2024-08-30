@@ -7,6 +7,7 @@ import { singletonEntity } from "@latticexyz/store-sync/recs";
 
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
+import { Address } from "viem";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
@@ -46,8 +47,8 @@ export function createSystemCalls(
   // };
   //increment,
 
-  const mintPlayer = async (name: string) => {
-    const tx = await worldContract.write.df__mintPlayer([name]);
+  const mintPlayer = async (name: string, linked: Address) => {
+    const tx = await worldContract.write.df__mintPlayer([name, linked]);
     await waitForTransaction(tx);
     return getComponentValue(PlayersTable, singletonEntity);
   };
