@@ -1,11 +1,11 @@
-import { MAX_PLANET_LEVEL } from "../../constants";
+import { MAX_PLANET_LEVEL } from "@df/constants";
 import {
   CanvasCoords,
   MineRendererType,
   Planet,
   RendererType,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { Renderer } from "../Renderer";

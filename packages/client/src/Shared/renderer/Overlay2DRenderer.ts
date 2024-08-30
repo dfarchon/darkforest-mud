@@ -1,4 +1,4 @@
-import { isEmojiFlagMessage } from "../gamelogic";
+import { isEmojiFlagMessage } from "@df/gamelogic";
 import {
   isAvatar,
   isHat,
@@ -8,7 +8,7 @@ import {
   numToHatType,
   numToLogoType,
   numToMemeType,
-} from "../procedural";
+} from "@df/procedural";
 import {
   Artifact,
   CanvasCoords,
@@ -19,7 +19,7 @@ import {
   PlanetRenderInfo,
   TextAlign,
   WorldCoords,
-} from "../types";
+} from "@df/types";
 import { avatarFromType } from "./Avatars";
 import { engineConsts } from "./EngineConsts";
 import { hatFromType } from "./Hats";

@@ -1,8 +1,4 @@
-import {
-  DFAnimation,
-  DFStatefulAnimation,
-  PlanetLevel,
-} from "../../Shared/types";
+import { DFAnimation, DFStatefulAnimation, PlanetLevel } from "@df/types";
 import anime from "animejs";
 
 export function sinusoidalAnimation(rps: number): DFAnimation {

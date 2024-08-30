@@ -1,4 +1,4 @@
-import { AttribProps } from "@dfares/types";
+import { AttribProps } from "@df/types";
 import { AttribArray } from "./AttribArray";
 
 /**

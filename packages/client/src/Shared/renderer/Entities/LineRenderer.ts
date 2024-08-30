@@ -6,7 +6,7 @@ import {
   RenderZIndex,
   RGBAVec,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { LINE_PROGRAM_DEFINITION } from "../Programs/LineProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";

@@ -1,7 +1,7 @@
-// import { CONTRACT_PRECISION } from '@dfares/constants';
-// import type { DarkForest } from '@dfares/contracts/typechain';
-// import { bonusFromHex } from '@dfares/hexgen';
-// import type { Planet, PlanetDefaults, PlanetLevel, PlanetType, SpaceType } from '@dfares/types';
+// import { CONTRACT_PRECISION } from '@df/constants';
+// import type { DarkForest } from '@df/contracts/typechain';
+// import { bonusFromHex } from '@df/hexgen';
+// import type { Planet, PlanetDefaults, PlanetLevel, PlanetType, SpaceType } from '@df/types';
 // import { address } from './address';
 // import { locationIdFromDecStr } from './location';
 
@@ -9,7 +9,7 @@
 
 // /**
 //  * Converts data obtained from a contract call (typed with Typechain) into a
-//  * `Planet` that can be used by the client (see @dfares/types). Note
+//  * `Planet` that can be used by the client (see @df/types). Note
 //  * that some `Planet` fields (1) store client data that the blockchain is not
 //  * aware of, such as `unconfirmedDepartures`, (2) store derived data that is
 //  * calculated later by the client, such as `silverSpent` and `bonus`, or (3)
@@ -103,7 +103,7 @@
 // /**
 //  * Converts the raw typechain result of a call which fetches a
 //  * `PlanetTypes.PlanetDefaultStats[]` array of structs, and converts it into
-//  * an object with type `PlanetDefaults` (see @dfares/types).
+//  * an object with type `PlanetDefaults` (see @df/types).
 //  *
 //  * @param rawDefaults result of a ethers.js contract call which returns a raw
 //  * `PlanetTypes.PlanetDefaultStats` struct, typed with typechain.

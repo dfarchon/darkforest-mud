@@ -5,7 +5,7 @@ import {
   RendererType,
   SpaceRendererType,
   Vec3,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { SPACE_PROGRAM_DEFINITION } from "../Programs/SpaceProgram";
 import { AttribManager } from "../WebGL/AttribManager";

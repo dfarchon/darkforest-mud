@@ -4,7 +4,7 @@ import {
   UniformProps,
   UniformType,
   Vec3,
-} from "@dfares/types";
+} from "@df/types";
 import { mat3, mat4 } from "gl-matrix";
 import { AttribManager } from "./AttribManager";
 import { ProgramUtils } from "./ProgramUtils";

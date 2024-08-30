@@ -7,22 +7,22 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/whitelist
+ * npm install --save @df/whitelist
  * ```
  * ```bash
- * yarn add @dfares/whitelist
+ * yarn add @df/whitelist
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as whitelist from 'http://cdn.skypack.dev/@dfares/whitelist'
+ * import * as whitelist from 'http://cdn.skypack.dev/@df/whitelist'
  * ```
  *
  * @packageDocumentation
  */
 
-import { mimcSponge } from "../hashing";
+import { mimcSponge } from "@df/hashing";
 import bigInt from "big-integer";
 import { ethers } from "ethers";
 // import { chunk, padStart, replace } from "lodash";

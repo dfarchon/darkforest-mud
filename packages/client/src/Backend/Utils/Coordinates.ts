@@ -1,4 +1,4 @@
-import { CanvasCoords, WorldCoords } from "../../Shared/types";
+import { CanvasCoords, WorldCoords } from "@df/types";
 
 export const coordsEqual = (a: WorldCoords, b: WorldCoords): boolean =>
   a.x === b.x && a.y === b.y;

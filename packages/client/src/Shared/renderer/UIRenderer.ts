@@ -1,5 +1,5 @@
-import { isLocatable } from "../gamelogic";
-import { isUnconfirmedMoveTx } from "../serde";
+import { isLocatable } from "@df/gamelogic";
+import { isUnconfirmedMoveTx } from "@df/serde";
 import {
   ArtifactType,
   Planet,
@@ -8,7 +8,7 @@ import {
   RGBVec,
   UIRendererType,
   WorldCoords,
-} from "../types";
+} from "@df/types";
 import { engineConsts } from "./EngineConsts";
 import { Renderer } from "./Renderer";
 import { GameGLManager } from "./WebGL/GameGLManager";

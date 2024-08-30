@@ -1,4 +1,4 @@
-import { Planet, RenderZIndex, RGBVec } from "../types";
+import { Planet, RenderZIndex, RGBVec } from "@df/types";
 
 /* generic template string which, combined with a vscode package, let us get syntax highlighting. */
 

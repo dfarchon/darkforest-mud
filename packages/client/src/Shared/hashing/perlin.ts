@@ -1,4 +1,4 @@
-import { PerlinConfig } from "../types";
+import { PerlinConfig } from "@df/types";
 import BigInt, { BigInteger } from "big-integer";
 import { Fraction, IFraction } from "./fractions/bigFraction";
 import { perlinRandHash } from "./mimc";

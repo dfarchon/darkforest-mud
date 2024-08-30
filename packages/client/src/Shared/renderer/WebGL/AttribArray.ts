@@ -1,4 +1,4 @@
-import { AttribType } from "../../types";
+import { AttribType } from "@df/types";
 import autoBind from "auto-bind";
 
 const getAttribTypeSize = (type: AttribType): number => {

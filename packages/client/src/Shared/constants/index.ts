@@ -8,16 +8,16 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/constants
+ * npm install --save @df/constants
  * ```
  * ```bash
- * yarn add @dfares/constants
+ * yarn add @df/constants
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as constants from 'http://cdn.skypack.dev/@dfares/constants'
+ * import * as constants from 'http://cdn.skypack.dev/@df/constants'
  * ```
  *
  * @packageDocumentation
@@ -31,7 +31,7 @@ import {
   GasPrices,
   LocationId,
   PlanetLevel,
-} from "../types";
+} from "@df/types";
 import bigInt, { BigInteger } from "big-integer";
 
 export const TOKEN_NAME = "ETH";

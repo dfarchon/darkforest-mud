@@ -1,5 +1,5 @@
-// import type { DarkForest } from '@dfares/contracts/typechain';
-// import type { Union, UnionId } from '@dfares/types';
+// import type { DarkForest } from '@df/contracts/typechain';
+// import type { Union, UnionId } from '@df/types';
 // import { address } from './address';
 
 // export type RawUnion = Awaited<ReturnType<DarkForest['unions']>>;
@@ -7,7 +7,7 @@
 // /**
 //  * Converts the raw typechain result of a call which fetches a
 //  * `UnionTypes.Union` struct, and converts it into an object
-//  * with type `Union` (see @dfares/types) that can be used by a client.
+//  * with type `Union` (see @df/types) that can be used by a client.
 //  *
 //  * @param rawUnion result of an ethers.js contract call which returns a raw
 //  * `UnionTypes.Union` struct, typed with typechain.

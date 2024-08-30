@@ -10,22 +10,22 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/serde
+ * npm install --save @df/serde
  * ```
  * ```bash
- * yarn add @dfares/serde
+ * yarn add @df/serde
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as serde from 'http://cdn.skypack.dev/@dfares/serde'
+ * import * as serde from 'http://cdn.skypack.dev/@df/serde'
  * ```
  *
  * @packageDocumentation
  */
 
-// TODO handle @dfares/contracts/typechain
+// TODO handle @df/contracts/typechain
 
 export * from "./address";
 // export * from "./arrival";

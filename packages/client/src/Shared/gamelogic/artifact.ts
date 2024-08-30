@@ -2,8 +2,8 @@ import {
   EMPTY_ADDRESS,
   MAX_SPACESHIP_TYPE,
   MIN_SPACESHIP_TYPE,
-} from "../constants";
-import { hashToInt } from "../serde";
+} from "@df/constants";
+import { hashToInt } from "@df/serde";
 import {
   Abstract,
   Artifact,
@@ -19,7 +19,7 @@ import {
   PlanetLevel,
   PlanetType,
   RenderedArtifact,
-} from "../types";
+} from "@df/types";
 
 export const RelicsList: ArtifactType[] = [
   ArtifactType.Wormhole,

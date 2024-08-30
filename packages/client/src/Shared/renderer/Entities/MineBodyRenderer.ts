@@ -1,4 +1,4 @@
-import { getPlanetCosmetic, hslToRgb } from "../../procedural";
+import { getPlanetCosmetic, hslToRgb } from "@df/procedural";
 import {
   CanvasCoords,
   DrawMode,
@@ -7,7 +7,7 @@ import {
   RendererType,
   RGBVec,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { MINE_PROGRAM_DEFINITION } from "../Programs/MineProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

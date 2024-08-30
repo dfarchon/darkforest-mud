@@ -29,7 +29,7 @@ import {
   UIRendererType,
   UnminedRendererType,
   VoyageRendererType,
-} from "../types";
+} from "@df/types";
 
 export function isPlanetRenderer(
   renderer: BaseRenderer,

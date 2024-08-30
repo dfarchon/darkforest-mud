@@ -5,7 +5,7 @@ import {
   Planet,
   RendererType,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { BLACKDOMAIN_PROGRAM_DEFINITION } from "../Programs/BlackDomainProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

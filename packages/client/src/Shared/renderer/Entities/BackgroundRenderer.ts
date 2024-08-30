@@ -4,7 +4,7 @@ import {
   RendererType,
   RGBVec,
   SpaceType,
-} from "../../types";
+} from "@df/types";
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { RectRenderer } from "./RectRenderer";

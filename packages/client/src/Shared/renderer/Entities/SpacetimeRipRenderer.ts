@@ -1,4 +1,4 @@
-import { getPlanetCosmetic } from "../../procedural";
+import { getPlanetCosmetic } from "@df/procedural";
 import {
   CanvasCoords,
   Planet,
@@ -6,7 +6,7 @@ import {
   SpacetimeRipRendererType,
   SpaceType,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { SPACETIMERIP_PROGRAM_DEFINITION } from "../Programs/SpacetimeRipProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

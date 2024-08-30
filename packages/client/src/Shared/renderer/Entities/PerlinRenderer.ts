@@ -5,7 +5,7 @@ import {
   Rectangle,
   RendererType,
   Vec3,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { PERLIN_PROGRAM_DEFINITION } from "../Programs/PerlinProgram";
 import { AttribManager } from "../WebGL/AttribManager";
@@ -26,7 +26,7 @@ export class PerlinRenderer
   extends GenericRenderer<typeof PERLIN_PROGRAM_DEFINITION>
   implements PerlinRendererType
 {
-  manager: GameGLManager;
+  declare manager: GameGLManager; //TODO handle declare
   config: PerlinConfig;
 
   posBuffer: number[];

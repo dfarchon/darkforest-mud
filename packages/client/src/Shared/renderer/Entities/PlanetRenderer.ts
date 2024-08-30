@@ -1,10 +1,10 @@
-import { getPlanetCosmetic } from "../../procedural";
+import { getPlanetCosmetic } from "@df/procedural";
 import {
   Planet,
   PlanetRendererType,
   RendererType,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { mat4 } from "gl-matrix";
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";

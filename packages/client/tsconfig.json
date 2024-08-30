@@ -5,7 +5,11 @@
     "target": "ESNext",
     "lib": ["ESNext", "DOM"],
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@df/*": ["./src/Shared/*"]
+    }
   },
   "include": ["src"]
 }

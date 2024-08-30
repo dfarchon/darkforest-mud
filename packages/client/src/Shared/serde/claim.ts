@@ -1,6 +1,6 @@
-// import { LOCATION_ID_UB } from '@dfares/constants';
-// import type { DarkForest } from '@dfares/contracts/typechain';
-// import type { ClaimedCoords } from '@dfares/types';
+// import { LOCATION_ID_UB } from '@df/constants';
+// import type { DarkForest } from '@df/contracts/typechain';
+// import type { ClaimedCoords } from '@df/types';
 // import bigInt from 'big-integer';
 // import { address } from './address';
 // import { locationIdFromDecStr } from './location';

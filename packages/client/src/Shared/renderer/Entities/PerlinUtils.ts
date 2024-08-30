@@ -1,5 +1,5 @@
-import { Fraction, getRandomGradientAt, rand } from "../../hashing";
-import { Abstract, PerlinConfig, Rectangle, WorldCoords } from "../../types";
+import { Fraction, getRandomGradientAt, rand } from "@df/hashing";
+import { Abstract, PerlinConfig, Rectangle, WorldCoords } from "@df/types";
 
 /* types */
 type Vector = { x: number; y: number };

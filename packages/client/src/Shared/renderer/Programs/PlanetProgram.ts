@@ -1,5 +1,5 @@
-import { isLocatable } from "../../gamelogic";
-import { AttribType, Biome, Planet, UniformType } from "../../types";
+import { isLocatable } from "@df/gamelogic";
+import { AttribType, Biome, Planet, UniformType } from "@df/types";
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 

@@ -1,4 +1,4 @@
-import { Rectangle } from "../../Shared/types";
+import { Rectangle } from "@df/types";
 import { Dispatch, SetStateAction } from "react";
 import GameUIManager from "../../Backend/GameLogic/GameUIManager";
 import GameManager from "../../Backend/GameLogic/GameManager";

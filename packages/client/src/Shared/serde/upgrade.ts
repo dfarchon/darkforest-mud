@@ -1,5 +1,5 @@
-// import type { DarkForest } from '@dfares/contracts/typechain';
-// import type { Upgrade, UpgradeBranches } from '@dfares/types';
+// import type { DarkForest } from '@df/contracts/typechain';
+// import type { Upgrade, UpgradeBranches } from '@df/types';
 
 // // Sort of duplicate of RawArtifactWithMetadata to avoid circular dependency
 // export type RawUpgrade = Awaited<ReturnType<DarkForest['getArtifactById']>>['upgrade'];
@@ -8,7 +8,7 @@
 // /**
 //  * Converts raw data received from a typechain-typed ethers.js contract call
 //  * returning a `UpgradeTypes.Upgrade` into an `Upgrade` object (see
-//  * @dfares/types)
+//  * @df/types)
 //  *
 //  * @param rawUpgrade raw data received from a typechain-typed ethers.js contract
 //  * call returning a `UpgradeTypes.Upgrade`

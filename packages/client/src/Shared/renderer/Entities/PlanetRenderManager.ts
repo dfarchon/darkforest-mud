@@ -1,11 +1,11 @@
-import { EMPTY_ADDRESS } from "../../constants";
+import { EMPTY_ADDRESS } from "@df/constants";
 import {
   formatNumber,
   getRange,
   hasOwner,
   isLocatable,
   isSpaceShip,
-} from "../../gamelogic";
+} from "@df/gamelogic";
 import {
   artifactImageTypeToNum,
   avatarTypeToNum,
@@ -16,8 +16,8 @@ import {
   isMeme,
   logoTypeToNum,
   memeTypeToNum,
-} from "../../procedural";
-import { isUnconfirmedMoveTx } from "../../serde";
+} from "@df/procedural";
+import { isUnconfirmedMoveTx } from "@df/serde";
 import {
   Artifact,
   ArtifactType,
@@ -35,7 +35,7 @@ import {
   TextAlign,
   TextAnchor,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { avatars } from "../Avatars";
 import { engineConsts } from "../EngineConsts";
 import { logos } from "../Logos";

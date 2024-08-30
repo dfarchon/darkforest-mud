@@ -1,4 +1,4 @@
-// import type { DarkForest } from "@dfares/contracts/typechain";
+// import type { DarkForest } from "@df/contracts/typechain";
 import {
   Artifact,
   ArtifactId,
@@ -7,7 +7,7 @@ import {
   ArtifactType,
   Biome,
   VoyageId,
-} from "../types";
+} from "@df/types";
 import bigInt from "big-integer";
 import type { BigNumber as EthersBN } from "ethers";
 import { address } from "./address";
@@ -80,7 +80,7 @@ export function artifactIdToDecStr(artifactId: ArtifactId): string {
 // /**
 //  * Converts the raw typechain result of a call to
 //  * `DarkForest.getArtifactPointValues` to an `ArtifactPointValues`
-//  * typescript typed object (see @dfares/types).
+//  * typescript typed object (see @df/types).
 //  */
 // export function decodeArtifactPointValues(
 //   rawPointValues: RawArtifactPointValues
@@ -102,7 +102,7 @@ export function artifactIdToDecStr(artifactId: ArtifactId): string {
 
 // /**
 //  * Converts the raw typechain result of `ArtifactTypes.ArtifactWithMetadata`
-//  * struct to an `Artifact` typescript typed object (see @dfares/types).
+//  * struct to an `Artifact` typescript typed object (see @df/types).
 //  *
 //  * @param rawArtifactWithMetadata Raw data of an `ArtifactWithMetadata` struct,
 //  * returned from a blockchain call (assumed to be typed with typechain).

@@ -1,6 +1,6 @@
-// import { CONTRACT_PRECISION } from '@dfares/constants';
-// import type { DarkForest } from '@dfares/contracts/typechain';
-// import type { Player, UnionId } from '@dfares/types';
+// import { CONTRACT_PRECISION } from '@df/constants';
+// import type { DarkForest } from '@df/contracts/typechain';
+// import type { Player, UnionId } from '@df/types';
 // import { address } from './address';
 // import { locationIdFromEthersBN } from './location';
 
@@ -9,7 +9,7 @@
 // /**
 //  * Converts the raw typechain result of a call which fetches a
 //  * `PlayerTypes.Player` struct, and converts it into an object
-//  * with type `Player` (see @dfares/types) that can be used by a client.
+//  * with type `Player` (see @df/types) that can be used by a client.
 //  *
 //  * @param rawPlayer result of an ethers.js contract call which returns a raw
 //  * `PlayerTypes.Player` struct, typed with typechain.

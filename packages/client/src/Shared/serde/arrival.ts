@@ -1,6 +1,6 @@
-// import { CONTRACT_PRECISION } from '@dfares/constants';
-// import type { DarkForest } from '@dfares/contracts/typechain';
-// import type { ArrivalType, QueuedArrival, VoyageId } from '@dfares/types';
+// import { CONTRACT_PRECISION } from '@df/constants';
+// import type { DarkForest } from '@df/contracts/typechain';
+// import type { ArrivalType, QueuedArrival, VoyageId } from '@df/types';
 // import { address } from './address';
 // import { artifactIdFromEthersBN } from './artifact';
 // import { locationIdFromDecStr } from './location';
@@ -9,7 +9,7 @@
 
 // /**
 //  * Converts the raw typechain result of `ArrivalTypes.ArrivalData` struct to
-//  * to a `QueuedArrival` typescript typed object (see @dfares/types)
+//  * to a `QueuedArrival` typescript typed object (see @df/types)
 //  *
 //  * @param rawArrival Raw data of a `ArrivalTypes.ArrivalData` struct,
 //  * returned from a blockchain call (assumed to be typed with typechain).

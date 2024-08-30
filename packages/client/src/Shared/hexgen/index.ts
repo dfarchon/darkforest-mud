@@ -9,21 +9,21 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/hexgen
+ * npm install --save @df/hexgen
  * ```
  * ```bash
- * yarn add @dfares/hexgen
+ * yarn add @df/hexgen
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as hexgen from 'http://cdn.skypack.dev/@dfares/hexgen'
+ * import * as hexgen from 'http://cdn.skypack.dev/@df/hexgen'
  * ```
  *
  * @packageDocumentation
  */
-import type { LocationId, Planet, PlanetBonus } from "../types";
+import type { LocationId, Planet, PlanetBonus } from "@df/types";
 import bigInt from "big-integer";
 
 /**

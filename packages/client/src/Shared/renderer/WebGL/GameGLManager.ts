@@ -3,7 +3,7 @@ import { WebGLManager } from "./WebGLManager";
 
 export class GameGLManager extends WebGLManager {
   renderer: Renderer;
-  gl: WebGL2RenderingContext;
+  declare gl: WebGL2RenderingContext; //TODO handle declare
 
   isHighPerf: boolean;
 

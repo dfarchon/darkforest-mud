@@ -1,5 +1,5 @@
-import { MAX_PERLIN_VALUE } from "../../hashing";
-import { AttribType, UniformType } from "../../types";
+import { MAX_PERLIN_VALUE } from "@df/hashing";
+import { AttribType, UniformType } from "@df/types";
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 

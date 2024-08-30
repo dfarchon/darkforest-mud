@@ -8,16 +8,16 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/types
+ * npm install --save @df/types
  * ```
  * ```bash
- * yarn add @dfares/types
+ * yarn add @df/types
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as types from 'http://cdn.skypack.dev/@dfares/types'
+ * import * as types from 'http://cdn.skypack.dev/@df/types'
  * ```
  *
  * @packageDocumentation

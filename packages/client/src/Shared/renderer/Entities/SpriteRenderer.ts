@@ -1,4 +1,4 @@
-import { isUnconfirmedMoveTx } from "../../serde";
+import { isUnconfirmedMoveTx } from "@df/serde";
 import {
   Artifact,
   ArtifactRarity,
@@ -10,7 +10,7 @@ import {
   RGBVec,
   SpriteRendererType,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { SPRITE_PROGRAM_DEFINITION } from "../Programs/SpriteProgram";

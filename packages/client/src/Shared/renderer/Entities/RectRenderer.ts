@@ -6,7 +6,7 @@ import {
   RenderZIndex,
   RGBVec,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { RECT_PROGRAM_DEFINITION } from "../Programs/RectProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

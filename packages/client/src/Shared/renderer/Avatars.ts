@@ -1,5 +1,5 @@
-import { PICTURE_URL } from "../constants";
-import { AvatarType } from "../types";
+import { PICTURE_URL } from "@df/constants";
+import { AvatarType } from "@df/types";
 export type Avatar = {
   legacy: boolean;
   topLayer: Array<string>;

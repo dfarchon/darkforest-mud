@@ -10,16 +10,16 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/hashing
+ * npm install --save @df/hashing
  * ```
  * ```bash
- * yarn add @dfares/hashing
+ * yarn add @df/hashing
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as hashing from 'http://cdn.skypack.dev/@dfares/hashing'
+ * import * as hashing from 'http://cdn.skypack.dev/@df/hashing'
  * ```
  *
  * @packageDocumentation

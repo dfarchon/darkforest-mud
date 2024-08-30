@@ -1,6 +1,6 @@
-// import { LOCATION_ID_UB } from "@dfares/constants";
-// import type { DarkForest } from "@dfares/contracts/typechain";
-// import { BurnedCoords } from "@dfares/types";
+// import { LOCATION_ID_UB } from "@df/constants";
+// import type { DarkForest } from "@df/contracts/typechain";
+// import { BurnedCoords } from "@df/types";
 // import bigInt from "big-integer";
 // import { address } from "./address";
 // import { locationIdFromDecStr } from "./location";
@@ -10,7 +10,7 @@
 // /**
 //  * Converts the result of a typechain-typed ethers.js contract call returning a
 //  * `RevealTypes.RevealedCoords` struct into a `RevealedCoords` object (see
-//  * @dfares/types)
+//  * @df/types)
 //  *
 //  * @param rawRevealedCoords the result of a typechain-typed ethers.js contract
 //  * call returning a RevealTypes.RevealedCoords` struct

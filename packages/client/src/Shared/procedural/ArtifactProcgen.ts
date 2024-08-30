@@ -1,4 +1,4 @@
-import { EMPTY_ADDRESS, EMPTY_LOCATION_ID } from "../constants";
+import { EMPTY_ADDRESS, EMPTY_LOCATION_ID } from "@df/constants";
 import {
   Artifact,
   ArtifactId,
@@ -6,7 +6,7 @@ import {
   ArtifactRarity,
   ArtifactType,
   Biome,
-} from "../types";
+} from "@df/types";
 
 const namesById = new Map<ArtifactId, string>();
 export const artifactName = (artifact: Artifact | undefined): string => {

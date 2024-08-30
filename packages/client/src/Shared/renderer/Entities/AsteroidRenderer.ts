@@ -7,7 +7,7 @@ import {
   Planet,
   RendererType,
   RGBVec,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { ASTEROID_PROGRAM_DEFINITION } from "../Programs/AsteroidProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

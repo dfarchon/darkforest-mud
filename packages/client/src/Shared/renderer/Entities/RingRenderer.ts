@@ -6,7 +6,7 @@ import {
   RGBVec,
   RingRendererType,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import {
   propsFromIdx,

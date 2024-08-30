@@ -1,6 +1,6 @@
-import { EMPTY_ADDRESS } from "../../constants";
-import { formatNumber, hasOwner } from "../../gamelogic";
-import { getOwnerColorVec } from "../../procedural";
+import { EMPTY_ADDRESS } from "@df/constants";
+import { formatNumber, hasOwner } from "@df/gamelogic";
+import { getOwnerColorVec } from "@df/procedural";
 import {
   ArtifactType,
   LocationId,
@@ -12,7 +12,7 @@ import {
   TextAlign,
   TextAnchor,
   VoyageRendererType,
-} from "../../types";
+} from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";

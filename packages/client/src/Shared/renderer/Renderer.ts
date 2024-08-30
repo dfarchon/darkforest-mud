@@ -56,7 +56,7 @@ import {
   VoyageRendererType,
   WorldCoords,
   WorldLocation,
-} from "../types";
+} from "@df/types";
 import autoBind from "auto-bind";
 import { AsteroidRenderer } from "./Entities/AsteroidRenderer";
 import { BackgroundRenderer } from "./Entities/BackgroundRenderer";

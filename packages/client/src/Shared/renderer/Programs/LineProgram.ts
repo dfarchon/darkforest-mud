@@ -1,4 +1,4 @@
-import { AttribType, UniformType } from "../../types";
+import { AttribType, UniformType } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { glsl } from "../EngineUtils";
 

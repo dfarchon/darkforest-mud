@@ -1,4 +1,4 @@
-import { Chunk } from "../../types";
+import { Chunk } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { MASK_PROGRAM_DEFINITION } from "../Programs/MaskProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -7,7 +7,7 @@ import { GenericRenderer } from "../WebGL/GenericRenderer";
 export class MaskRenderer extends GenericRenderer<
   typeof MASK_PROGRAM_DEFINITION
 > {
-  manager: GameGLManager;
+  declare manager: GameGLManager; //TODO handle declare
   bgCanvas: HTMLCanvasElement;
   quadBuffer: number[];
   perlinThresholds: number[];

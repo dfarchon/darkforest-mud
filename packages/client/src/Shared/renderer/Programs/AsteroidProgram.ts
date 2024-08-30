@@ -1,4 +1,4 @@
-import { AttribType, UniformType } from "../../types";
+import { AttribType, UniformType } from "@df/types";
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 

@@ -44,7 +44,7 @@ import {
   UnconfirmedUseKey,
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawSilver,
-} from "../types";
+} from "@df/types";
 
 // @todo:
 // - these `isUnconfirmedX` should be named something that matches the naming convention of the

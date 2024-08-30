@@ -5,7 +5,7 @@ import {
   RendererType,
   RGBVec,
   WorldCoords,
-} from "../../types";
+} from "@df/types";
 import autoBind from "auto-bind";
 import { EngineUtils } from "../EngineUtils";
 import {

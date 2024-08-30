@@ -1,4 +1,4 @@
-import { RGBAVec } from "../../types";
+import { RGBAVec } from "@df/types";
 import autoBind from "auto-bind";
 import { mat4 } from "gl-matrix";
 

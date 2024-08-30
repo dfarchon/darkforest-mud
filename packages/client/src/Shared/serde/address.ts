@@ -1,4 +1,4 @@
-import type { EthAddress } from "../types";
+import type { EthAddress } from "@df/types";
 import bigInt from "big-integer";
 
 /**

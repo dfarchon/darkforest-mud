@@ -1,4 +1,4 @@
-import { HatType } from "../types";
+import { HatType } from "@df/types";
 
 export type Hat = {
   legacy: boolean;

@@ -8,16 +8,16 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/events
+ * npm install --save @df/events
  * ```
  * ```bash
- * yarn add @dfares/events
+ * yarn add @df/events
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as events from 'http://cdn.skypack.dev/@dfares/events'
+ * import * as events from 'http://cdn.skypack.dev/@df/events'
  * ```
  *
  * @packageDocumentation

@@ -11,10 +11,10 @@ import {
   MIN_LOGO_TYPE,
   MIN_MEME_TYPE,
   MIN_PLANET_LEVEL,
-} from "../constants";
-import { getPlanetRank, isLocatable } from "../gamelogic";
-import { seededRandom } from "../hashing";
-import { hashToInt } from "../serde";
+} from "@df/constants";
+import { getPlanetRank, isLocatable } from "@df/gamelogic";
+import { seededRandom } from "@df/hashing";
+import { hashToInt } from "@df/serde";
 import {
   ArtifactId,
   AvatarType,

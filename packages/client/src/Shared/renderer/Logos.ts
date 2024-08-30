@@ -1,5 +1,5 @@
-import { PICTURE_URL } from "../constants";
-import { LogoType } from "../types";
+import { PICTURE_URL } from "@df/constants";
+import { LogoType } from "@df/types";
 
 export type Logo = {
   legacy: boolean;

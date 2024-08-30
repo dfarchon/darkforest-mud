@@ -1,5 +1,5 @@
-import { LOCATION_ID_UB } from "../constants";
-import type { LocationId } from "../types";
+import { LOCATION_ID_UB } from "@df/constants";
+import type { LocationId } from "@df/types";
 import bigInt, { BigInteger } from "big-integer";
 import type { BigNumber as EthersBN } from "ethers";
 
