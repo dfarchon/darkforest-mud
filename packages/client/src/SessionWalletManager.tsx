@@ -124,12 +124,12 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <button
+                <span
                   onClick={fetchBalances}
                   className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
                 >
                   🗘
-                </button>
+                </span>
               </TooltipTrigger>
               <TooltipContent>Refresh balance</TooltipContent>
             </Tooltip>
@@ -152,12 +152,12 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <button
+                  <span
                     onClick={copyPrivateKey}
                     className="flex items-center rounded-lg bg-gray-800 p-2 text-white shadow-md hover:bg-gray-600"
                   >
                     {pkCopied ? "Copied!" : "Copy"}
-                  </button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>Copy pk to clipboard</TooltipContent>
               </Tooltip>
@@ -167,7 +167,7 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <button
+                  <span
                     onClick={transferToBurner}
                     className="w-full rounded bg-blue-500 p-2 text-white hover:bg-blue-600 disabled:opacity-50"
                     disabled={
@@ -175,7 +175,7 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
                     }
                   >
                     Send to
-                  </button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>Send input amount to burnerWallet</TooltipContent>
               </Tooltip>
@@ -205,12 +205,12 @@ export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClos
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <button
+                  <span
                     onClick={drainBurner}
                     className="w-full rounded bg-red-500 p-2 text-white hover:bg-red-600 disabled:opacity-50"
                   >
                     Drain
-                  </button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>Send all to mainWallet</TooltipContent>
               </Tooltip>
