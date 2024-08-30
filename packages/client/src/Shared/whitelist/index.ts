@@ -25,47 +25,17 @@
 import { mimcSponge } from "@df/hashing";
 import bigInt from "big-integer";
 import { ethers } from "ethers";
-// import { chunk, padStart, replace } from "lodash";
-
-function chunk<T>(array: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-}
-
-function padStart(
-  str: string,
-  targetLength: number,
-  padString: string = " ",
-): string {
-  if (str.length >= targetLength) {
-    return str;
-  }
-  padString = padString.repeat(
-    Math.ceil((targetLength - str.length) / padString.length),
-  );
-  return padString.slice(0, targetLength - str.length) + str;
-}
-
-function replace(
-  str: string,
-  searchValue: string | RegExp,
-  replaceValue: string,
-): string {
-  return str.replace(searchValue, replaceValue);
-}
+import { chunk, padStart, replace } from "lodash";
 
 export const keysPerTx = 400;
 
 export const generateKey = () => {
   const hexArray = padStart(
     bigInt(
-      ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString(),
+      ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString()
     ).toString(16),
     24,
-    "0",
+    "0"
   ).split("");
 
   return chunk(hexArray, 6)
