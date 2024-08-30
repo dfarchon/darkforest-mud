@@ -9,7 +9,7 @@ contract PlayerSpawnSystem is System {
   uint32 private totalSpawned;
   uint32 private MAX_TOTAL_MINT = 50;
 
-  function mintPlayer(string memory name) public {
+  function mintPlayer(string memory name, address linked) public {
     // TODO require PLAY/PAUSE
     // TODO spawn plant init
     // payable mint require(msg.value == (MINT_COST), '"You must send a ETH value with this transaction."');
@@ -24,7 +24,7 @@ contract PlayerSpawnSystem is System {
 
     PlayersTable.setName(_msgSender(), name);
     PlayersTable.setMinted(_msgSender(), block.number);
-
+    PlayersTable.setLinked(_msgSender(), linked);
     // Update the total minted count
     totalSpawned++;
   }

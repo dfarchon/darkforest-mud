@@ -11,6 +11,7 @@ export default defineWorld({
     PlayersTable: {
       schema: {
         owner: "address",
+        linked: "address",
         minted: "uint256",
         name: "string",
       },

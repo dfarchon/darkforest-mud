@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 
+import { useAccount } from "wagmi";
+
 import { useMUD } from "../MUDContext";
 
 const SpawnPlayer = () => {
   const [name, setName] = useState("");
-
+  const linkedAccount = useAccount();
   const {
     systemCalls: { mintPlayer },
   } = useMUD();
 
   const handleMintPlayer = () => {
     if (name.length <= 8 && name.length > 0) {
-      mintPlayer(name);
+      mintPlayer(name, linkedAccount.address);
     } else {
       alert("Name must be between 1 and 8 characters.");
     }
