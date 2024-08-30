@@ -34,6 +34,6 @@
     "@spectrum-web-components/theme": "^0.47.1",
     "auto-bind": "^5.0.1",
     "color": "^4.2.3",
-    "lit": "^3.2.0"
+    "lit": "2.1.2"
   }
 }

@@ -4,7 +4,7 @@
     "types": ["vite/client"],
     "target": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "jsx": "react",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "module": "esnext",
@@ -13,7 +13,8 @@
     "paths": {
       "@df/*": ["./src/Shared/*"]
     },
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "useDefineForClassFields": false
   },
   "include": ["src"]
 }

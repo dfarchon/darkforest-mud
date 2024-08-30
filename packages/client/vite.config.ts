@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
@@ -13,5 +14,13 @@ export default defineConfig({
     target: "es2022",
     minify: true,
     sourcemap: true,
+  },
+  resolve: {
+    alias: {
+      "@df": path.resolve(__dirname, "src/Shared"),
+    },
+  },
+  css: {
+    devSourcemap: false,
   },
 });
