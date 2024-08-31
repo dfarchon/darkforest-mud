@@ -6,7 +6,7 @@ import { PlanetType, SpaceType } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
-import { PlanetInitialValue, PlanetInitialValueData, Ticker, PlanetOwner } from "../codegen/index.sol";
+import { PlanetInitialResource, PlanetInitialResourceData, Ticker, PlanetOwner } from "../codegen/index.sol";
 import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveLib } from "./Move.sol";
@@ -50,8 +50,6 @@ library PlanetLib {
     }
 
     _readMetadata(planet);
-
-    _doublePropeties(planet);
   }
 
   function writeToStore(Planet memory planet) internal {
@@ -185,7 +183,7 @@ library PlanetLib {
 
   function _initPlanetType(Planet memory planet) internal view {
     uint256 value = uint8(planet.planetHash >> 24);
-    uint8[] memory thresholds = PlanetTypeConfig.getThresholds(planet.spaceType, uint8(planet.level));
+    uint16[] memory thresholds = PlanetTypeConfig.getThresholds(planet.spaceType, uint8(planet.level));
     uint256 length = thresholds.length;
     uint256 cumulativeThreshold;
     for (uint256 i; i < length;) {
@@ -202,10 +200,10 @@ library PlanetLib {
   }
 
   function _initPopulationAndSilver(Planet memory planet) internal view {
-    PlanetInitialValueData memory initialValues =
-      PlanetInitialValue.get(planet.spaceType, planet.planetType, uint8(planet.level));
-    planet.population = initialValues.population;
-    planet.silver = initialValues.silver;
+    PlanetInitialResourceData memory initialResources =
+      PlanetInitialResource.get(planet.spaceType, planet.planetType, uint8(planet.level));
+    planet.population = initialResources.population;
+    planet.silver = initialResources.silver;
   }
 
   function _readLatestData(Planet memory planet) internal view {
@@ -230,9 +228,7 @@ library PlanetLib {
     planet.populationGrowth = metadata.populationGrowth;
     planet.silverCap = metadata.silverCap;
     planet.silverGrowth = metadata.silverGrowth;
-  }
 
-  function _doublePropeties(Planet memory planet) internal pure {
     uint256 value = planet.planetHash >> 32;
     if (uint8(value) < 16) {
       planet.populationCap *= 2;

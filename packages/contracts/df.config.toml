@@ -1,0 +1,86 @@
+[universe]
+a_sparsity = 16384
+b_radius = 150000
+
+[temp]
+a_biome_check = false
+b_skip_proof_check = true
+
+[space_type]
+a_perlin_thresholds = [14, 15, 19]
+b_planet_level_limits = [4, 5, 9, 9]
+c_planet_level_bonus = [0, 0, 0, 0]
+
+[universe_zone]
+a_borders = [56250, 75000, 93750, 112500, 131250] # from zone0 to zone4
+b_planet_level_limits = [9, 8, 7, 6, 5, 9]        # from zone0 to zone5
+c_planet_level_bonus = [1, 0, 0, 0, 0, 0]         # from zone0 to zone5
+
+[planet_level]
+thresholds = [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
+
+# the reason for putting the thresholds in a nested object instead of an explicit
+# 3-dimentional array is to avoid the toml formattor from spreading the array,
+# which makes it hard to read and maintain
+[planet_type.thresholds.1] # Nebula
+0 = [256, 0, 0, 0, 0] # planet, asteroid field, foundry, spacetime rip, quasar
+1 = [253, 2, 0, 1, 0]
+2 = [253, 2, 0, 1, 0]
+3 = [253, 2, 0, 0, 1]
+4 = [253, 2, 0, 0, 1]
+5 = [253, 2, 0, 0, 1]
+6 = [253, 2, 0, 0, 1]
+7 = [253, 2, 0, 0, 1]
+8 = [253, 2, 0, 0, 1]
+9 = [253, 2, 0, 0, 1]
+
+[planet_type.thresholds.2] # Space
+0 = [256, 0, 0, 0, 0]
+1 = [253, 2, 1, 0, 0]
+2 = [252, 2, 1, 1, 0]
+3 = [251, 2, 1, 1, 1]
+4 = [252, 2, 1, 0, 1]
+5 = [252, 2, 1, 0, 1]
+6 = [252, 2, 1, 0, 1]
+7 = [252, 2, 1, 0, 1]
+8 = [252, 2, 1, 0, 1]
+9 = [252, 2, 1, 0, 1]
+
+[planet_type.thresholds.3] # Deep Space
+0 = [256, 0, 0, 0, 0]
+1 = [250, 4, 2, 0, 0]
+2 = [250, 4, 1, 1, 0]
+3 = [248, 4, 1, 2, 1]
+4 = [248, 4, 1, 2, 1]
+5 = [248, 4, 1, 2, 1]
+6 = [248, 4, 1, 2, 1]
+7 = [248, 4, 1, 2, 1]
+8 = [248, 4, 1, 2, 1]
+9 = [248, 4, 1, 2, 1]
+
+[planet_type.thresholds.4] # Dead Space
+0 = [256, 0, 0, 0, 0]
+1 = [251, 4, 1, 0, 0]
+2 = [251, 4, 1, 0, 0]
+3 = [247, 4, 2, 2, 1]
+4 = [247, 4, 2, 2, 1]
+5 = [247, 4, 2, 2, 1]
+6 = [247, 4, 2, 2, 1]
+7 = [247, 4, 2, 2, 1]
+8 = [247, 4, 2, 2, 1]
+9 = [247, 4, 2, 2, 1]
+
+[snark]
+a_planet_hash_key = 2020
+b_biome_base_key = 4567
+c_space_type_key = 8020
+d_perlin_length_scale = 8192
+e_perlin_mirror_x = 0
+f_perlin_mirror_y = 0
+
+[ticker]
+rate = 1
+
+[inner_circle]
+a_radius = 0
+b_speed = 0

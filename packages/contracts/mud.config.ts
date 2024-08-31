@@ -9,7 +9,13 @@ export default defineWorld({
   systems: {
     TickSystem: {
       openAccess: false,
-    }
+    },
+    InitializeSystem: {
+      openAccess: false,
+    },
+    TestOnlySystem: {
+      openAccess: false,
+    },
   },
   tables: {
     // todo remove this table and corresponding increment system
@@ -64,7 +70,7 @@ export default defineWorld({
         level: "uint8",
         // length = number of planet types. ex: [253, 0, 2, 0, 1]
         // 253 PLANET, 0 ASTEROID_FIELD, 2 FOUNDRY, 0 SPACETIME_RIP, 1 QUASAR
-        thresholds: "uint8[]",
+        thresholds: "uint16[]",
       },
       key: ["spaceType", "level"],
     },
@@ -81,25 +87,28 @@ export default defineWorld({
       },
       key: []
     },
+    // we restrict the type length of speed, defense, so that all fiels fit into one slot
+    // if we need larger values, we can make the PlanetInitialResource table be the second
+    // metadata table, and benefit from the 2nd slot. 
     PlanetMetadata: {
       schema: {
         range: "uint32",
-        speed: "uint32",
-        defense: "uint32",
+        speed: "uint16",
+        defense: "uint16",
         populationCap: "uint64",
-        populationGrowth: "uint64",
+        populationGrowth: "uint32",
         silverCap: "uint64",
-        silverGrowth: "uint64",
+        silverGrowth: "uint32",
         level: "uint8",
         planetType: "PlanetType",
         spaceType: "SpaceType",
       },
       key: ["spaceType", "planetType", "level"],
     },
-    PlanetInitialValue: {
+    PlanetInitialResource: {
       schema: {
-        silver: "uint64",
         population: "uint64",
+        silver: "uint64",
         level: "uint8",
         planetType: "PlanetType",
         spaceType: "SpaceType",
