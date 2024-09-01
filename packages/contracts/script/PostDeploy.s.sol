@@ -9,7 +9,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { SpaceType } from "../src/codegen/common.sol";
-import { PlanetMetadata, PlanetMetadataData } from "../src/codegen/index.sol";
+import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData } from "../src/codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData } from "../src/codegen/index.sol";
 import { UniverseConfig, UniverseConfigData, TempConfigSet, TempConfigSetData } from "../src/codegen/index.sol";
 import { SpaceTypeConfig, SpaceTypeConfigData } from "../src/codegen/index.sol";
@@ -56,9 +56,11 @@ contract PostDeploy is Script {
       }
     }
     SnarkConfig.set(abi.decode(toml.parseRaw(".snark"), (SnarkConfigData)));
-    console.log(SnarkConfig.get().perlinLengthScale, SnarkConfig.get().perlinMirrorX);
     Ticker.set(0, uint64(toml.readUint(".ticker.rate")), 0, true);
     InnerCircle.set(abi.decode(toml.parseRaw(".inner_circle"), (InnerCircleData)));
+
+    // set test planets
+    _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
 
     vm.stopBroadcast();
   }
@@ -88,5 +90,19 @@ contract PostDeploy is Script {
     IWorld(worldAddress).df__setPlanetMetadata(
       9, PlanetMetadataData(8829, 160, 200, 800000000, 4167, 400000000, 2778), 25
     );
+  }
+
+  struct TestPlanet {
+    int64 x;
+    int64 y;
+    bytes32 planetHash;
+    address owner;
+    PlanetData data;
+  }
+
+  function _setTestPlanets(TestPlanet[] memory planets) internal {
+    for (uint256 i; i < planets.length; i++) {
+      Planet.set(planets[i].planetHash, planets[i].data);
+    }
   }
 }

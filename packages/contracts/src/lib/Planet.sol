@@ -41,9 +41,8 @@ library PlanetLib {
   using PendingMoveLib for PendingMoveData;
 
   function readFromStore(Planet memory planet) internal view {
-    _validateHash(planet);
-
     if (PlanetTable.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
+      _validateHash(planet);
       _initPlanet(planet);
     } else {
       _readLatestData(planet);
@@ -208,6 +207,9 @@ library PlanetLib {
 
   function _readLatestData(Planet memory planet) internal view {
     PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
+    if (data.planetType == PlanetType.UNKNOWN) {
+      revert Errors.InvalidPlanetHash();
+    }
     planet.perlin = data.perlin;
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
