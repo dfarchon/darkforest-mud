@@ -9,11 +9,6 @@ import { TempConfigSet } from "../codegen/index.sol";
 // todo store verification key in tables
 contract VerifySystem is System {
   function verify(uint256[] memory input, Proof memory proof, VerificationKey memory vk) internal view returns (bool) {
-    // check whether to skip proof verification
-    if (TempConfigSet.getSkipProofCheck()) {
-      return true;
-    }
-
     uint256 snark_scalar_field = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     require(input.length + 1 == vk.IC.length, "verifier-bad-input");
     // Compute the linear combination vk_x
@@ -124,6 +119,11 @@ contract VerifySystem is System {
     view
     returns (bool)
   {
+    // check whether to skip proof verification
+    if (TempConfigSet.getSkipProofCheck()) {
+      return true;
+    }
+
     Proof memory proof;
     proof.A = G1Point(a[0], a[1]);
     proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
@@ -237,6 +237,11 @@ contract VerifySystem is System {
   }
 
   function verifyMoveProof(Proof memory proof, MoveInput memory input) public view returns (bool) {
+    // check whether to skip proof verification
+    if (TempConfigSet.getSkipProofCheck()) {
+      return true;
+    }
+
     input.validate();
     return verify(input.flatten(), proof, MoveVerifyingKey());
   }
@@ -327,6 +332,11 @@ contract VerifySystem is System {
     uint256[2] memory c,
     uint256[7] memory input
   ) public view returns (bool) {
+    // check whether to skip proof verification
+    if (TempConfigSet.getSkipProofCheck()) {
+      return true;
+    }
+
     Proof memory proof;
     proof.A = G1Point(a[0], a[1]);
     proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
@@ -435,6 +445,11 @@ contract VerifySystem is System {
     view
     returns (bool)
   {
+    // check whether to skip proof verification
+    if (TempConfigSet.getSkipProofCheck()) {
+      return true;
+    }
+
     Proof memory proof;
     proof.A = G1Point(a[0], a[1]);
     proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
@@ -509,6 +524,11 @@ contract VerifySystem is System {
     uint256[2] memory c,
     uint256[2] memory input
   ) public view returns (bool) {
+    // check whether to skip proof verification
+    if (TempConfigSet.getSkipProofCheck()) {
+      return true;
+    }
+
     Proof memory proof;
     proof.A = G1Point(a[0], a[1]);
     proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);

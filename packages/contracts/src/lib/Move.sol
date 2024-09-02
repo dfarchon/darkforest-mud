@@ -5,12 +5,12 @@ import { Errors } from "../interfaces/errors.sol";
 import { Move, MoveData, Ticker, PendingMove, PendingMoveData } from "../codegen/index.sol";
 import { PlanetType } from "../codegen/common.sol";
 import { Planet } from "./Planet.sol";
+import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 
-uint8 constant MAX_MOVE_QUEUE_SIZE = 32;
+uint8 constant MAX_MOVE_QUEUE_SIZE = 30;
+uint240 constant DEFAULT_INDEXES = 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d;
 
 library MoveLib {
-  using PendingMoveLib for PendingMoveData;
-
   function NewMove(Planet memory from, address captain) internal pure returns (MoveData memory move) {
     if (from.owner != captain) {
       revert Errors.NotPlanetOwner();
@@ -19,11 +19,18 @@ library MoveLib {
     move.from = bytes32(from.planetHash);
   }
 
-  function loadPopulation(MoveData memory move, Planet memory from, uint256 population) internal pure {
+  function loadPopulation(MoveData memory move, Planet memory from, uint256 population, uint256 distance) internal pure {
     if (from.population <= population) {
       revert Errors.NotEnoughPopulation();
     }
-    move.population += uint64(population);
+    int256 constantLoss = int256(from.populationCap / 20);
+    int256 alive = ABDKMath64x64.div(
+      ABDKMath64x64.fromUInt(population), ABDKMath64x64.exp_2(ABDKMath64x64.divu(distance, from.range))
+    );
+    if (alive <= constantLoss) {
+      revert Errors.NotEnoughPopulation();
+    }
+    move.population += uint64(uint256(alive - constantLoss));
     from.population -= population;
   }
 
@@ -91,46 +98,72 @@ library MoveLib {
   }
 }
 
-library PendingMoveLib {
-  using PendingMoveLib for PendingMoveData;
+struct PendingMoveQueue {
+  uint256 planetHash;
+  uint256 head;
+  uint256 number;
+  uint256[] indexes;
+  bool shouldWrite;
+}
 
-  function New(PendingMoveData memory _q) internal pure {
-    _q.indexes = new uint8[](MAX_MOVE_QUEUE_SIZE);
-    for (uint256 i; i < MAX_MOVE_QUEUE_SIZE;) {
-      _q.indexes[i] = uint8(i);
+using PendingMoveQueueLib for PendingMoveQueue global;
+
+library PendingMoveQueueLib {
+  function ReadFromStore(PendingMoveQueue memory _q, uint256 _planet) internal view {
+    PendingMoveData memory data = PendingMove.get(bytes32(_planet));
+    _q.planetHash = _planet;
+    _q.head = data.head;
+    _q.number = data.number;
+    uint256 indexes = data.indexes;
+    if (indexes == 0) {
+      indexes = DEFAULT_INDEXES;
+    }
+    uint256[] memory indexArray = new uint256[](MAX_MOVE_QUEUE_SIZE);
+    for (uint256 i = MAX_MOVE_QUEUE_SIZE - 1; i > 0;) {
+      indexArray[i] = uint8(indexes);
       unchecked {
-        ++i;
+        --i;
+        indexes >>= 8;
       }
+    }
+    indexArray[0] = uint8(indexes);
+    _q.indexes = indexArray;
+  }
+
+  function WriteToStore(PendingMoveQueue memory _q) internal {
+    if (_q.shouldWrite) {
+      uint256 indexes;
+      for (uint256 i; i < MAX_MOVE_QUEUE_SIZE;) {
+        indexes <<= 8;
+        indexes += _q.indexes[i];
+        unchecked {
+          ++i;
+        }
+      }
+      PendingMove.set(bytes32(_q.planetHash), uint8(_q.head), uint8(_q.number), uint240(indexes));
+      return;
     }
   }
 
-  function ReadFromStore(PendingMoveData memory _q, uint256 _planet) internal view {
-    _q = PendingMove.get(bytes32(_planet));
-  }
-
-  function WriteToStore(PendingMoveData memory _q, uint256 _planet) internal {
-    PendingMove.set(bytes32(_planet), _q);
-  }
-
-  function IsEmpty(PendingMoveData memory _q) internal pure returns (bool) {
+  function IsEmpty(PendingMoveQueue memory _q) internal pure returns (bool) {
     return _q.number == 0;
   }
 
-  function IsFull(PendingMoveData memory _q) internal pure returns (bool) {
+  function IsFull(PendingMoveQueue memory _q) internal pure returns (bool) {
     return _q.indexes.length == _q.number;
   }
 
-  function PushMove(PendingMoveData memory _q, uint256 _planet, MoveData memory _move) internal {
+  function PushMove(PendingMoveQueue memory _q, MoveData memory _move) internal {
     if (_q.IsFull()) {
       revert Errors.ReachMaxMoveToLimit(MAX_MOVE_QUEUE_SIZE);
     }
-    uint8[] memory indexes = _q.indexes;
+    uint256[] memory indexes = _q.indexes;
     uint256 i = _q.head + _q.number;
-    uint8 index = indexes[i % MAX_MOVE_QUEUE_SIZE];
-    Move.set(bytes32(_planet), index, _move);
+    uint256 index = indexes[i % MAX_MOVE_QUEUE_SIZE];
+    Move.set(bytes32(_q.planetHash), uint8(index), _move);
     while (i > 0) {
-      uint8 curIndex = indexes[(i - 1) % MAX_MOVE_QUEUE_SIZE];
-      MoveData memory move = Move.get(bytes32(_planet), curIndex);
+      uint256 curIndex = indexes[(i - 1) % MAX_MOVE_QUEUE_SIZE];
+      MoveData memory move = Move.get(bytes32(_q.planetHash), uint8(curIndex));
       if (move.arrivalTime <= _move.arrivalTime) {
         break;
       }
@@ -140,16 +173,18 @@ library PendingMoveLib {
     indexes[i % MAX_MOVE_QUEUE_SIZE] = index;
     ++_q.number;
     _q.indexes = indexes;
+    _q.shouldWrite = true;
   }
 
-  function PopArrivedMove(PendingMoveData memory _q, uint256 _planet, uint256 until) internal view returns (MoveData memory move) {
+  function PopArrivedMove(PendingMoveQueue memory _q, uint256 until) internal view returns (MoveData memory move) {
     if (_q.IsEmpty()) {
       return move;
     }
-    move = Move.get(bytes32(_planet), _q.indexes[_q.head]);
+    move = Move.get(bytes32(_q.planetHash), uint8(_q.indexes[_q.head]));
     if (move.arrivalTime <= until) {
       _q.head = (_q.head + 1) % MAX_MOVE_QUEUE_SIZE;
       --_q.number;
+      _q.shouldWrite = true;
       return move;
     }
   }

@@ -9,3 +9,5 @@ src/codegen/
 
 # Ignore MUD deploy artifacts
 deploys/**/*.json
+
+.env

@@ -9,7 +9,7 @@ import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/i
 import { PlanetInitialResource, PlanetInitialResourceData, Ticker, PlanetOwner } from "../codegen/index.sol";
 import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-import { PendingMoveLib } from "./Move.sol";
+import { PendingMoveQueue } from "./Move.sol";
 
 using PlanetLib for Planet global;
 
@@ -34,12 +34,10 @@ struct Planet {
   uint256 populationGrowth;
   uint256 silverCap;
   uint256 silverGrowth;
-  PendingMoveData moveQueue;
+  PendingMoveQueue moveQueue;
 }
 
 library PlanetLib {
-  using PendingMoveLib for PendingMoveData;
-
   function readFromStore(Planet memory planet) internal view {
     if (PlanetTable.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
       _validateHash(planet);
@@ -47,6 +45,8 @@ library PlanetLib {
     } else {
       _readLatestData(planet);
     }
+
+    planet.moveQueue.ReadFromStore(planet.planetHash);
 
     _readMetadata(planet);
   }
@@ -63,7 +63,7 @@ library PlanetLib {
     });
     PlanetTable.set(bytes32(planet.planetHash), data);
     PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
-    planet.moveQueue.WriteToStore(planet.planetHash);
+    planet.moveQueue.WriteToStore();
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
@@ -80,11 +80,11 @@ library PlanetLib {
   }
 
   function pushMove(Planet memory planet, MoveData memory move) internal {
-    planet.moveQueue.PushMove(planet.planetHash, move);
+    planet.moveQueue.PushMove(move);
   }
 
   function popArrivedMove(Planet memory planet, uint256 untilTick) internal view returns (MoveData memory move) {
-    return planet.moveQueue.PopArrivedMove(planet.planetHash, untilTick);
+    return planet.moveQueue.PopArrivedMove(untilTick);
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -102,7 +102,6 @@ library PlanetLib {
     _initLevel(planet);
     _initPlanetType(planet);
     _initPopulationAndSilver(planet);
-    planet.moveQueue.New();
     planet.lastUpdateTick = Ticker.getTickNumber();
   }
 
@@ -218,7 +217,6 @@ library PlanetLib {
     planet.spaceType = data.spaceType;
     planet.population = data.population;
     planet.silver = data.silver;
-    planet.moveQueue.ReadFromStore(planet.planetHash);
   }
 
   function _readMetadata(Planet memory planet) internal view {

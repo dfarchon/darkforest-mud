@@ -131,7 +131,7 @@ export default defineWorld({
         to: "bytes32",
         head: "uint8",
         number: "uint8",
-        indexes: "uint8[]",
+        indexes: "uint240",
       },
       key: ["to"],
     },

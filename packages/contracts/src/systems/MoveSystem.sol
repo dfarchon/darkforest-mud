@@ -43,10 +43,11 @@ contract MoveSystem is System, Errors {
 
     // create a new move and load all resources
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
-    shipping.loadPopulation(fromPlanet, _population);
+    uint256 distance = UniverseLib.distance(fromPlanet, toPlanet, _input.distance);
+    shipping.loadPopulation(fromPlanet, _population, distance);
     shipping.loadSilver(fromPlanet, _silver);
     shipping.loadArtifact(fromPlanet, _artifact);
-    shipping.headTo(toPlanet, UniverseLib.distance(fromPlanet, toPlanet, _input.distance), fromPlanet.speed);
+    shipping.headTo(toPlanet, distance, fromPlanet.speed);
 
     // write back to storage
     fromPlanet.writeToStore();

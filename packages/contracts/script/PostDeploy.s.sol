@@ -32,12 +32,6 @@ contract PostDeploy is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    // ------------------ EXAMPLES ------------------
-
-    // Call increment on the world via the registered function selector
-    uint32 newValue = IWorld(worldAddress).df__increment();
-    console.log("Increment via IWorld:", newValue);
-
     // Set planet metadata
     _setPlanetMetadata(worldAddress);
 
@@ -66,6 +60,7 @@ contract PostDeploy is Script {
   }
 
   function _setPlanetMetadata(address worldAddress) internal {
+    console.log("Setting planet metadata");
     IWorld(worldAddress).df__setPlanetMetadata(
       0,
       PlanetMetadataData(99, 160, 400, 100000, 417, 0, 0), // range, speed, defense, populationCap, populationGrowth, silverCap, silverGrowth
@@ -101,6 +96,7 @@ contract PostDeploy is Script {
   }
 
   function _setTestPlanets(TestPlanet[] memory planets) internal {
+    console.log("Dropping test planets");
     for (uint256 i; i < planets.length; i++) {
       Planet.set(planets[i].planetHash, planets[i].data);
     }
