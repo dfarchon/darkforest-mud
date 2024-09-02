@@ -23,14 +23,14 @@ library MoveLib {
     if (from.population <= population) {
       revert Errors.NotEnoughPopulation();
     }
-    int256 constantLoss = int256(from.populationCap / 20);
+    int256 constantLoss = ABDKMath64x64.divu(from.populationCap, 20);
     int256 alive = ABDKMath64x64.div(
       ABDKMath64x64.fromUInt(population), ABDKMath64x64.exp_2(ABDKMath64x64.divu(distance, from.range))
     );
     if (alive <= constantLoss) {
       revert Errors.NotEnoughPopulation();
     }
-    move.population += uint64(uint256(alive - constantLoss));
+    move.population += ABDKMath64x64.toUInt(int128(alive - constantLoss));
     from.population -= population;
   }
 
@@ -180,12 +180,12 @@ library PendingMoveQueueLib {
     if (_q.IsEmpty()) {
       return move;
     }
-    move = Move.get(bytes32(_q.planetHash), uint8(_q.indexes[_q.head]));
-    if (move.arrivalTime <= until) {
+    MoveData memory firstMove = Move.get(bytes32(_q.planetHash), uint8(_q.indexes[_q.head]));
+    if (firstMove.arrivalTime <= until) {
       _q.head = (_q.head + 1) % MAX_MOVE_QUEUE_SIZE;
       --_q.number;
       _q.shouldWrite = true;
-      return move;
+      return firstMove;
     }
   }
 }
