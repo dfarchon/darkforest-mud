@@ -171,12 +171,13 @@ library PlanetLib {
     uint256 posLevel = uint256(level);
     uint256 limit = SpaceTypeConfig.getPlanetLevelLimits()[uint8(planet.spaceType)];
     if (posLevel > limit) {
-      planet.level = limit;
+      posLevel = limit;
     }
     limit = UniverseZoneConfig.getPlanetLevelLimits()[uint8(planet.universeZone)];
     if (posLevel > limit) {
-      planet.level = limit;
+      posLevel = limit;
     }
+    planet.level = posLevel;
   }
 
   function _initPlanetType(Planet memory planet) internal view {
