@@ -2,8 +2,11 @@ import { useComponentValue } from "@latticexyz/react";
 import { useMUD } from "../../MUDContext";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { hello } from "utils";
+import { getNetworkConfig } from "../../mud/getNetworkConfig";
 
 export const SandboxPage = () => {
+  const networkConfig = getNetworkConfig();
+
   const {
     components: { Counter },
     systemCalls: { increment },
@@ -14,6 +17,15 @@ export const SandboxPage = () => {
   return (
     <>
       <div> {hello(" Sandbox Page!")}</div>
+      <button
+        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+        onClick={() => {
+          console.log(networkConfig);
+        }}
+      >
+        {" "}
+        show network config{" "}
+      </button>
       <div>
         Counter: <span>{counter?.value ?? "??"}</span>
       </div>

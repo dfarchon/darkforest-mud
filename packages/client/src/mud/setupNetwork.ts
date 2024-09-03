@@ -40,7 +40,7 @@ import mudConfig from "contracts/mud.config";
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
-  const networkConfig = await getNetworkConfig();
+  const networkConfig = getNetworkConfig();
 
   /*
    * Create a viem public (read only) client

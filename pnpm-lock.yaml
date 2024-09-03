@@ -177,6 +177,9 @@ importers:
       vite:
         specifier: ^4.2.1
         version: 4.5.3(@types/node@18.19.47)
+      vite-plugin-wasm:
+        specifier: ^3.3.0
+        version: 3.3.0(vite@4.5.3(@types/node@18.19.47))
       wait-port:
         specifier: ^1.0.4
         version: 1.1.0
@@ -204,10 +207,10 @@ importers:
         version: 18.19.47
       ds-test:
         specifier: https://github.com/dapphub/ds-test.git#e282159d5170298eb2455a6c05280ab5a73a4ef0
-        version: https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0
+        version: git+https://git@github.com:dapphub/ds-test.git#e282159d5170298eb2455a6c05280ab5a73a4ef0
       forge-std:
         specifier: https://github.com/foundry-rs/forge-std.git#74cfb77e308dd188d2f58864aaf44963ae6b88b1
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/74cfb77e308dd188d2f58864aaf44963ae6b88b1
+        version: git+https://git@github.com:foundry-rs/forge-std.git#74cfb77e308dd188d2f58864aaf44963ae6b88b1
       prettier:
         specifier: 3.2.5
         version: 3.2.5
@@ -1882,8 +1885,8 @@ packages:
       sqlite3:
         optional: true
 
-  ds-test@https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0:
-    resolution: {tarball: https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0}
+  ds-test@git+https://git@github.com:dapphub/ds-test.git#e282159d5170298eb2455a6c05280ab5a73a4ef0:
+    resolution: {commit: e282159d5170298eb2455a6c05280ab5a73a4ef0, repo: git@github.com:dapphub/ds-test.git, type: git}
     version: 1.0.0
 
   eastasianwidth@0.2.0:
@@ -2079,8 +2082,8 @@ packages:
     resolution: {integrity: sha512-Ld2g8rrAyMYFXBhEqMz8ZAHBi4J4uS1i/CxGMDnjyFWddMXLVcDp051DZfu+t7+ab7Wv6SMqpWmyFIj5UbfFvg==}
     engines: {node: '>=14'}
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/74cfb77e308dd188d2f58864aaf44963ae6b88b1:
-    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/74cfb77e308dd188d2f58864aaf44963ae6b88b1}
+  forge-std@git+https://git@github.com:foundry-rs/forge-std.git#74cfb77e308dd188d2f58864aaf44963ae6b88b1:
+    resolution: {commit: 74cfb77e308dd188d2f58864aaf44963ae6b88b1, repo: git@github.com:foundry-rs/forge-std.git, type: git}
     version: 1.6.0
 
   fraction.js@4.3.7:
@@ -3261,6 +3264,11 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  vite-plugin-wasm@3.3.0:
+    resolution: {integrity: sha512-tVhz6w+W9MVsOCHzxo6SSMSswCeIw4HTrXEi6qL3IRzATl83jl09JVO1djBqPSwfjgnpVHNLYcaMbaDX5WB/pg==}
+    peerDependencies:
+      vite: ^2 || ^3 || ^4 || ^5
 
   vite@4.5.3:
     resolution: {integrity: sha512-kQL23kMeX92v3ph7IauVkXkikdDRsYMGTVl5KY2E9OY4ONLvkHf04MDTbnfo6NKxZiDLWzVpP5oTa8hQD8U3dg==}
@@ -5862,7 +5870,7 @@ snapshots:
       postgres: 3.4.4
       sql.js: 1.11.0
 
-  ds-test@https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0: {}
+  ds-test@git+https://git@github.com:dapphub/ds-test.git#e282159d5170298eb2455a6c05280ab5a73a4ef0: {}
 
   eastasianwidth@0.2.0: {}
 
@@ -6241,7 +6249,7 @@ snapshots:
       cross-spawn: 7.0.3
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/74cfb77e308dd188d2f58864aaf44963ae6b88b1: {}
+  forge-std@git+https://git@github.com:foundry-rs/forge-std.git#74cfb77e308dd188d2f58864aaf44963ae6b88b1: {}
 
   fraction.js@4.3.7: {}
 
@@ -7421,6 +7429,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
       - zod
+
+  vite-plugin-wasm@3.3.0(vite@4.5.3(@types/node@18.19.47)):
+    dependencies:
+      vite: 4.5.3(@types/node@18.19.47)
 
   vite@4.5.3(@types/node@18.19.47):
     dependencies:

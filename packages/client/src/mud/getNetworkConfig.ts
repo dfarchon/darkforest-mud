@@ -23,7 +23,7 @@ import worlds from "contracts/worlds.json";
  */
 import { supportedChains } from "./supportedChains";
 
-export async function getNetworkConfig() {
+export function getNetworkConfig() {
   const params = new URLSearchParams(window.location.search);
 
   /*
