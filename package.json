@@ -28,12 +28,5 @@
   "engines": {
     "node": "^18 || ^20",
     "pnpm": ">=9.8.0 <10.0.0"
-  },
-  "dependencies": {
-    "@spectrum-web-components/slider": "^0.47.1",
-    "@spectrum-web-components/theme": "^0.47.1",
-    "auto-bind": "^5.0.1",
-    "color": "^4.2.3",
-    "lit": "2.1.2"
   }
 }

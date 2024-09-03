@@ -7,9 +7,9 @@
   "scripts": {
     "build": "vite build",
     "dev": "wait-port localhost:8545 && vite",
+    "format": "prettier --write .",
     "preview": "vite preview",
-    "test": "tsc --noEmit",
-    "format": "prettier --write ."
+    "test": "tsc --noEmit"
   },
   "dependencies": {
     "@latticexyz/common": "2.1.1",
@@ -21,12 +21,17 @@
     "@latticexyz/utils": "2.1.1",
     "@latticexyz/world": "2.1.1",
     "@lit-labs/react": "1.0.2",
+    "@spectrum-web-components/slider": "^0.47.1",
+    "@spectrum-web-components/theme": "^0.47.1",
     "animejs": "^3.2.2",
+    "auto-bind": "^5.0.1",
     "big-integer": "^1.6.52",
+    "color": "^4.2.3",
     "contracts": "workspace:*",
     "ethers": "5.7",
     "fastq": "^1.17.1",
     "gl-matrix": "^3.4.3",
+    "lit": "2.1.2",
     "lodash": "4.17.15",
     "mnemonist": "^0.39.8",
     "react": "^18.2.0",

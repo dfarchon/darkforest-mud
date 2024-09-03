@@ -7,22 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@spectrum-web-components/slider':
-        specifier: ^0.47.1
-        version: 0.47.1
-      '@spectrum-web-components/theme':
-        specifier: ^0.47.1
-        version: 0.47.1
-      auto-bind:
-        specifier: ^5.0.1
-        version: 5.0.1
-      color:
-        specifier: ^4.2.3
-        version: 4.2.3
-      lit:
-        specifier: 2.1.2
-        version: 2.1.2
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.4.0
@@ -90,12 +74,24 @@ importers:
       '@lit-labs/react':
         specifier: 1.0.2
         version: 1.0.2
+      '@spectrum-web-components/slider':
+        specifier: ^0.47.1
+        version: 0.47.1
+      '@spectrum-web-components/theme':
+        specifier: ^0.47.1
+        version: 0.47.1
       animejs:
         specifier: ^3.2.2
         version: 3.2.2
+      auto-bind:
+        specifier: ^5.0.1
+        version: 5.0.1
       big-integer:
         specifier: ^1.6.52
         version: 1.6.52
+      color:
+        specifier: ^4.2.3
+        version: 4.2.3
       contracts:
         specifier: workspace:*
         version: link:../contracts
@@ -108,6 +104,9 @@ importers:
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
+      lit:
+        specifier: 2.1.2
+        version: 2.1.2
       lodash:
         specifier: 4.17.15
         version: 4.17.15
