@@ -36,5 +36,7 @@ contract MoveSystem is System, Errors {
     // new planet instances in memory
     Planet memory fromPlanet = world.df__newPlanet(_input.fromPlanetHash);
     Planet memory toPlanet = world.df__newPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
+
+    fromPlanet.send(toPlanet, _input.distance, _population, _silver);
   }
 }

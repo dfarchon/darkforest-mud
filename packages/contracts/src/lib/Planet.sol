@@ -7,6 +7,9 @@ import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData }
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
 import { PlanetInitialValue, PlanetInitialValueData, Ticker, PlanetOwner } from "../codegen/index.sol";
+import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
+import { UniverseLib } from "./Universe.sol";
+import { MoveQueue } from "./Move.sol";
 
 using PlanetLib for Planet global;
 
@@ -31,6 +34,7 @@ struct Planet {
   uint256 populationGrowth;
   uint256 silverCap;
   uint256 silverGrowth;
+  MoveQueue moveQueue;
 }
 
 library PlanetLib {
@@ -49,6 +53,22 @@ library PlanetLib {
     _doublePropeties(planet);
   }
 
+  function sync(Planet memory planet) internal view {
+    if (planet.owner != address(0)) {
+      _populationGrow(planet);
+      _silverGrow(planet);
+    }
+  }
+
+  function send(Planet memory from, Planet memory to, uint256 distance, uint256 population, uint256 silver)
+    internal
+    view
+  {
+    _validateSent(from, population, silver);
+
+    uint256 time = UniverseLib.distance(from, to, distance) * 100 / from.speed;
+  }
+
   function _validateHash(Planet memory planet) internal view {
     if (
       planet.planetHash
@@ -64,6 +84,7 @@ library PlanetLib {
     _initLevel(planet);
     _initPlanetType(planet);
     _initPopulationAndSilver(planet);
+    planet.moveQueue.New(planet.planetHash);
     planet.lastUpdateTick = Ticker.getTickNumber();
   }
 
@@ -161,7 +182,7 @@ library PlanetLib {
 
   function _initPopulationAndSilver(Planet memory planet) internal view {
     PlanetInitialValueData memory initialValues =
-        PlanetInitialValue.get(planet.spaceType, planet.planetType, uint8(planet.level));
+      PlanetInitialValue.get(planet.spaceType, planet.planetType, uint8(planet.level));
     planet.population = initialValues.population;
     planet.silver = initialValues.silver;
   }
@@ -175,6 +196,7 @@ library PlanetLib {
     planet.spaceType = data.spaceType;
     planet.population = data.population;
     planet.silver = data.silver;
+    planet.moveQueue.ReadFromStore(planet.planetHash);
   }
 
   function _loadMetadata(Planet memory planet) internal view {
@@ -208,6 +230,59 @@ library PlanetLib {
     value >>= 8;
     if (uint8(value) < 16) {
       planet.defense *= 2;
+    }
+  }
+
+  function _populationGrow(Planet memory planet) internal view {
+    int128 tickElapsed =
+      ABDKMath64x64.sub(ABDKMath64x64.fromUInt(Ticker.getTickNumber()), -ABDKMath64x64.fromUInt(planet.lastUpdateTick));
+    if (tickElapsed == 0 || planet.populationGrowth == 0) {
+      return;
+    }
+    int128 one = ABDKMath64x64.fromUInt(1);
+
+    int128 denominator = ABDKMath64x64.add(
+      ABDKMath64x64.mul(
+        ABDKMath64x64.exp(
+          ABDKMath64x64.div(
+            ABDKMath64x64.mul(
+              ABDKMath64x64.mul(ABDKMath64x64.fromInt(-4), ABDKMath64x64.fromUInt(planet.populationGrowth)), tickElapsed
+            ),
+            ABDKMath64x64.fromUInt(planet.populationCap)
+          )
+        ),
+        ABDKMath64x64.sub(
+          ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), ABDKMath64x64.fromUInt(planet.population)),
+          one
+        )
+      ),
+      one
+    );
+
+    planet.population =
+      ABDKMath64x64.toUInt(ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), denominator));
+  }
+
+  function _silverGrow(Planet memory planet) internal view {
+    uint256 tickElapsed = Ticker.getTickNumber() - planet.lastUpdateTick;
+    uint256 silver = planet.silver;
+    uint256 cap = planet.silverCap;
+    if (tickElapsed == 0 || planet.silverGrowth == 0 || silver >= cap) {
+      return;
+    }
+    silver += planet.silverGrowth * tickElapsed;
+    planet.silver = silver > cap ? cap : silver;
+  }
+
+  function _validateSent(Planet memory from, uint256 population, uint256 silver) internal view {
+    if (from.owner != msg.sender) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (from.population <= population) {
+      revert Errors.NotEnoughPopulation();
+    }
+    if (from.silver < silver) {
+      revert Errors.NotEnoughSilver();
     }
   }
 }

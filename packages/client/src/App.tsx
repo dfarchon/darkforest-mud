@@ -1,29 +1,57 @@
-import { useComponentValue } from "@latticexyz/react";
-import { useMUD } from "./MUDContext";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Theme } from "./Frontend/Components/Theme";
+import { HelloPage } from "./Frontend/Pages/HelloPage";
+import { SandboxPage } from "./Frontend/Pages/SandboxPage";
+import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
+import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
+import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
+import "./index.css";
+import "./Frontend/Styles/font/stylesheet.css";
+import "./Frontend/Styles/icomoon/style.css";
+import "./Frontend/Styles/preflight.css";
+import "./Frontend/Styles/Press_Start_2P/stylesheet.css";
+import "./Frontend/Styles/style.css";
+import { createGlobalStyle } from "styled-components";
+import dfstyles from "./Frontend/Styles/dfstyles";
+import { getNetworkConfig } from "./mud/getNetworkConfig";
+
+const GlobalStyle = createGlobalStyle`
+body {
+  width: 100vw;
+  min-height: 100vh;
+  background-color: ${dfstyles.colors.background};
+}
+`;
 
 export const App = () => {
-  const {
-    components: { Counter },
-    systemCalls: { increment },
-  } = useMUD();
-
-  const counter = useComponentValue(Counter, singletonEntity);
+  const networkConfig = getNetworkConfig();
+  const defaultAddress = networkConfig.worldAddress;
 
   return (
     <>
-      <div>
-        Counter: <span>{counter?.value ?? "??"}</span>
-      </div>
-      <button
-        type="button"
-        onClick={async (event) => {
-          event.preventDefault();
-          console.log("new counter value:", await increment());
-        }}
-      >
-        Increment
-      </button>
+      <GlobalStyle />
+      <Theme color="dark" scale="medium">
+        <Router>
+          <Routes>
+            <Route
+              path="/play"
+              element={
+                <Navigate to={`/play/${defaultAddress}`} replace={true} />
+              }
+            />
+            <Route path="/play/:contract" element={<GameLandingPage />} />
+            <Route path="/landing" element={<ClassicLandingPage />} />
+            <Route path="/sandbox" element={<SandboxPage />} />
+            <Route path="/" element={<HelloPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Router>
+      </Theme>
     </>
   );
 };

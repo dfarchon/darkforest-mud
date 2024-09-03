@@ -34,6 +34,7 @@ export function createSystemCalls(
   { worldContract, waitForTransaction }: SetupNetworkResult,
   { PlayersTable }: ClientComponents,
 ) {
+
   // const increment = async () => {
   //   /*
   //    * Because IncrementSystem
@@ -49,6 +50,7 @@ export function createSystemCalls(
 
   const mintPlayer = async (name: string, linked: Address) => {
     const tx = await worldContract.write.df__mintPlayer([name, linked]);
+
     await waitForTransaction(tx);
     return getComponentValue(PlayersTable, singletonEntity);
   };

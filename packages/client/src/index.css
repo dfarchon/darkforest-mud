@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* Custom global styles */
 html, body {
   height: 100%;
@@ -19,3 +20,4 @@ body {
   align-items: center;
   min-height: 100vh;
 }
+
