@@ -185,15 +185,18 @@ library PendingMoveQueueLib {
     if (_q.IsEmpty()) {
       return move;
     }
-    MoveData memory firstMove = Move.get(bytes32(_q.planetHash), uint8(_q.indexes[_q.head]));
+    uint256[] memory indexes = _q.indexes;
+    uint256 head = _q.head;
+    MoveData memory firstMove = Move.get(bytes32(_q.planetHash), uint8(indexes[head]));
     if (firstMove.arrivalTime <= until) {
       // move the index at head to the tail
-      uint256 tail = (_q.head + _q.number) % MAX_MOVE_QUEUE_SIZE;
-      uint256 temp = _q.indexes[_q.head];
-      _q.indexes[_q.head] = _q.indexes[tail];
-      _q.indexes[tail] = temp;
+      uint256 tail = (head + _q.number) % MAX_MOVE_QUEUE_SIZE;
+      uint256 temp = indexes[head];
+      indexes[head] = indexes[tail];
+      indexes[tail] = temp;
 
-      _q.head = (_q.head + 1) % MAX_MOVE_QUEUE_SIZE;
+      _q.indexes = indexes;
+      _q.head = (head + 1) % MAX_MOVE_QUEUE_SIZE;
       --_q.number;
       _q.shouldWrite = true;
       return firstMove;
