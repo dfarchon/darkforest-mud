@@ -74,7 +74,7 @@ contract MoveTest is MudTest {
     input.distance /= 2;
     planet1 = IWorld(worldAddress).df__readPlanet(1);
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 110000, 1000, 0);
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 0);
     assertEq(pendingMove.number, 2);
@@ -87,21 +87,21 @@ contract MoveTest is MudTest {
     assertEq(move2.departureTime, move1.departureTime);
     assertEq(move2.arrivalTime, move2.departureTime + (input.distance * 100) / planet1.speed);
     assertEq(move2.arrivalTime - move2.departureTime, (move1.arrivalTime - move1.departureTime) / 2);
-    assertEq(planet1.population - 100000, PlanetTable.getPopulation(bytes32(planet1.planetHash)));
+    assertEq(planet1.population - 110000, PlanetTable.getPopulation(bytes32(planet1.planetHash)));
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
 
     input.distance *= 2;
     vm.roll(_getBlockNumberAtTick(move2.arrivalTime));
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 1);
     assertEq(pendingMove.number, 2);
-    // the second move (index 1) has arrived, the third move(index 2) was newly pushed into the queue
+    // the second move (index 1) has arrived, the third move(index 1) was newly pushed into the queue
     index = _getIndexAt(pendingMove, 0);
     assertEq(index, 0);
     index = _getIndexAt(pendingMove, 1);
-    assertEq(index, 2);
+    assertEq(index, 1);
     MoveData memory move3 = Move.get(bytes32(planet2.planetHash), uint8(index));
     assertEq(_getPopulationAtTick(planet2, move2.arrivalTime) - move2.population * 100 / planet2.defense, PlanetTable.getPopulation(bytes32(planet2.planetHash)));
     assertEq(planet2.silver + move2.silver, PlanetTable.getSilver(bytes32(planet2.planetHash)));

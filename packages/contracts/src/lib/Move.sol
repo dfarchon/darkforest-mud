@@ -57,7 +57,6 @@ library MoveLib {
     } else {
       to.pushMove(move);
     }
-    
   }
 
   function arrivedAt(MoveData memory move, Planet memory planet) internal pure {
@@ -188,6 +187,12 @@ library PendingMoveQueueLib {
     }
     MoveData memory firstMove = Move.get(bytes32(_q.planetHash), uint8(_q.indexes[_q.head]));
     if (firstMove.arrivalTime <= until) {
+      // move the index at head to the tail
+      uint256 tail = (_q.head + _q.number) % MAX_MOVE_QUEUE_SIZE;
+      uint256 temp = _q.indexes[_q.head];
+      _q.indexes[_q.head] = _q.indexes[tail];
+      _q.indexes[tail] = temp;
+
       _q.head = (_q.head + 1) % MAX_MOVE_QUEUE_SIZE;
       --_q.number;
       _q.shouldWrite = true;

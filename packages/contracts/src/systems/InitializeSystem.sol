@@ -2,11 +2,14 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { PlanetMetadata, PlanetMetadataData, PlanetInitialResource, PlanetInitialResourceData } from "../codegen/index.sol";
+import { PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
+import { PlanetInitialResource, PlanetInitialResourceData } from "../codegen/index.sol";
 import { SpaceType, PlanetType } from "../codegen/common.sol";
 
 contract InitializeSystem is System {
-  function setPlanetMetadata(uint8 level, PlanetMetadataData memory metadata, uint256 initialPopulationPercentage) public {
+  function setPlanetMetadata(uint8 level, PlanetMetadataData memory metadata, uint256 initialPopulationPercentage)
+    public
+  {
     PlanetMetadataData memory md = metadata;
     // NEBULA
     _initPlanetMetadataWithSpaceType(SpaceType.NEBULA, level, md, initialPopulationPercentage);
@@ -50,13 +53,20 @@ contract InitializeSystem is System {
    * FOUNDRY: no silver, no silverGrowth
    * QUASAR: double speed, no silverGrowth, 10 times silverCap, no populationGrowth, 5 times populationCap
    */
-  function _initPlanetMetadataWithSpaceType(SpaceType spaceType, uint8 level, PlanetMetadataData memory metadata, uint256 initialPopulationPercentage) internal {
+  function _initPlanetMetadataWithSpaceType(
+    SpaceType spaceType,
+    uint8 level,
+    PlanetMetadataData memory metadata,
+    uint256 initialPopulationPercentage
+  ) internal {
     PlanetMetadataData memory md = metadata;
     md.defense /= 2;
     md.silverCap *= 2;
     PlanetMetadata.set(spaceType, PlanetType.ASTEROID_FIELD, level, md);
     uint64 population = uint64(md.populationCap * initialPopulationPercentage / 100);
-    PlanetInitialResource.set(spaceType, PlanetType.ASTEROID_FIELD, level, PlanetInitialResourceData(population, md.silverCap / 2));
+    PlanetInitialResource.set(
+      spaceType, PlanetType.ASTEROID_FIELD, level, PlanetInitialResourceData(population, md.silverCap / 2)
+    );
 
     md.silverGrowth = 0;
     PlanetMetadata.set(spaceType, PlanetType.SPACETIME_RIP, level, md);
