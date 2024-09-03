@@ -18,13 +18,6 @@ export default defineWorld({
     },
   },
   tables: {
-    // todo remove this table and corresponding increment system
-    Counter: {
-      schema: {
-        value: "uint32",
-      },
-      key: [],
-    },
     TempConfigSet: {
       schema: {
         biomeCheck: "bool",
