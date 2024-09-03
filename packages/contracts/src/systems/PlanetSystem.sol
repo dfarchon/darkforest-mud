@@ -34,7 +34,7 @@ contract PlanetSystem is System, Errors {
     MoveData memory move = planet.popArrivedMove(untilTick);
     while (uint256(move.from) != 0) {
       planet.naturalGrowth(move.arrivalTime);
-      IWorld(_world()).df__arrive(move, planet);
+      move.arrivedAt(planet);
       move = planet.popArrivedMove(untilTick);
     }
     planet.naturalGrowth(untilTick);

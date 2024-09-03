@@ -53,12 +53,18 @@ library MoveLib {
     move.arrivalTime = uint64(present + time);
     // if time == 0, unload immediately
     if (time == 0) {
-      unloadPopulation(move, to);
-      unloadSilver(move, to);
-      unloadArtifact(move, to);
-      return;
+      arrivedAt(move, to);
+    } else {
+      to.pushMove(move);
     }
-    to.pushMove(move);
+    
+  }
+
+  function arrivedAt(MoveData memory move, Planet memory planet) internal pure {
+    assert(move.arrivalTime == planet.lastUpdateTick);
+    unloadPopulation(move, planet);
+    unloadSilver(move, planet);
+    unloadArtifact(move, planet);
   }
 
   function unloadPopulation(MoveData memory move, Planet memory to) internal pure {

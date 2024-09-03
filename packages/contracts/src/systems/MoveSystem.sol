@@ -40,7 +40,6 @@ contract MoveSystem is System, Errors {
     // new planet instances in memory
     Planet memory fromPlanet = world.df__readPlanet(_input.fromPlanetHash);
     Planet memory toPlanet = world.df__readPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
-
     // create a new move and load all resources
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
     uint256 distance = UniverseLib.distance(fromPlanet, toPlanet, _input.distance);
@@ -52,17 +51,5 @@ contract MoveSystem is System, Errors {
     // write back to storage
     fromPlanet.writeToStore();
     toPlanet.writeToStore();
-  }
-
-  /**
-   * @notice A move arrives at the destination planet. Update the planet's population, silver, and artifact in memory
-   * @param shipping MoveData.
-   * @param planet Planet.
-   */
-  function arrive(MoveData memory shipping, Planet memory planet) public pure {
-    assert(shipping.arrivalTime == planet.lastUpdateTick);
-    shipping.unloadPopulation(planet);
-    shipping.unloadSilver(planet);
-    shipping.unloadArtifact(planet);
   }
 }

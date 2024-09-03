@@ -17,6 +17,7 @@ import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 contract MoveTest is MudTest {
   address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
   address user1 = address(1);
+  address user2 = address(2);
 
   function setUp() public override {
     super.setUp();
@@ -29,7 +30,7 @@ contract MoveTest is MudTest {
 
     // init 2 planets
     IWorld(worldAddress).df__createPlanet(1, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000);
-    IWorld(worldAddress).df__createPlanet(2, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000);
+    IWorld(worldAddress).df__createPlanet(2, user2, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000);
     vm.stopPrank();
   }
 
@@ -89,14 +90,45 @@ contract MoveTest is MudTest {
     assertEq(planet1.population - 100000, PlanetTable.getPopulation(bytes32(planet1.planetHash)));
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
 
+    input.distance *= 2;
     vm.roll(_getBlockNumberAtTick(move2.arrivalTime));
-    vm.prank(admin);
-    IWorld(worldAddress).df__tick();
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    pendingMove = PendingMove.get(bytes32(planet2.planetHash));
+    assertEq(pendingMove.head, 1);
+    assertEq(pendingMove.number, 2);
+    // the second move (index 1) has arrived, the third move(index 2) was newly pushed into the queue
+    index = _getIndexAt(pendingMove, 0);
+    assertEq(index, 0);
+    index = _getIndexAt(pendingMove, 1);
+    assertEq(index, 2);
+    MoveData memory move3 = Move.get(bytes32(planet2.planetHash), uint8(index));
+    assertEq(_getPopulationAtTick(planet2, move2.arrivalTime) - move2.population * 100 / planet2.defense, PlanetTable.getPopulation(bytes32(planet2.planetHash)));
+    assertEq(planet2.silver + move2.silver, PlanetTable.getSilver(bytes32(planet2.planetHash)));
 
+    vm.roll(_getBlockNumberAtTick(move1.arrivalTime));
+    planet2 = IWorld(worldAddress).df__readPlanet(2);
+    planet2.population = 1;
+    vm.startPrank(admin);
+    // set the planet2 population to 1 to let user1 captures it
+    PlanetTable.setPopulation(bytes32(planet2.planetHash), 1);
+    IWorld(worldAddress).df__tick();
+    Planet memory latestPlanet2 = IWorld(worldAddress).df__readPlanet(2);
+    assertEq(latestPlanet2.owner, user1);
+    assertEq(latestPlanet2.population, move1.population - (_getPopulationAtTick(planet2, move1.arrivalTime) * planet2.defense / 100));
+    assertEq(latestPlanet2.silver, move1.silver + planet2.silver);
+
+    vm.roll(_getBlockNumberAtTick(move3.arrivalTime));
+    planet2 = latestPlanet2;
+    IWorld(worldAddress).df__tick();
+    latestPlanet2 = IWorld(worldAddress).df__readPlanet(2);
+    assertEq(latestPlanet2.owner, user1);
+    assertEq(latestPlanet2.population, move3.population + _getPopulationAtTick(planet2, move3.arrivalTime));
+    assertEq(latestPlanet2.silver, move3.silver + planet2.silver);
   }
 
   function _getIndexAt(PendingMoveData memory pendingMove, uint8 i) internal pure returns (uint8) {
-    return uint8(pendingMove.indexes >> (8 * (29 - i)));
+    return uint8(pendingMove.indexes >> (8 * (29 - (pendingMove.head + i) % 30)));
   }
 
   function _getBlockNumberAtTick(uint256 tick) internal view returns (uint256) {
