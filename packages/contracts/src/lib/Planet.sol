@@ -114,7 +114,7 @@ library PlanetLib {
       planet.spaceType = SpaceType.NEBULA;
       return;
     }
-    for (uint256 i; i < thresholds.length;) {
+    for (uint256 i; i < length;) {
       if (perlin < thresholds[i]) {
         planet.spaceType = SpaceType(i + 1);
         return;
@@ -123,7 +123,7 @@ library PlanetLib {
         ++i;
       }
     }
-    planet.spaceType = SpaceType(length);
+    planet.spaceType = SpaceType(length + 1);
   }
 
   function _initZone(Planet memory planet) internal view {

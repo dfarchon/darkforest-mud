@@ -92,6 +92,7 @@ contract MoveTest is MudTest {
 
     input.distance *= 2;
     vm.roll(_getBlockNumberAtTick(move2.arrivalTime));
+    planet2 = IWorld(worldAddress).df__readPlanet(2);
     vm.prank(user1);
     IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
