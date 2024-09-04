@@ -1,13 +1,8 @@
-import { formatNumber } from "../../Shared/gamelogic";
-import {
-  EthAddress,
-  Planet,
-  SpaceType,
-  Upgrade,
-  UpgradeBranchName,
-} from "../../Shared/types";
 import bigInt from "big-integer";
 import { BigInteger } from "big-integer";
+
+import { formatNumber } from "../../Shared/gamelogic";
+import { EthAddress, Planet, SpaceType, Upgrade, UpgradeBranchName } from "../../Shared/types";
 import { StatIdx } from "../../_types/global/GlobalTypes";
 
 export const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -15,9 +10,7 @@ export const ONE_DAY = 24 * 60 * 60 * 1000;
 type NestedBigIntArray = (BigInteger | string | NestedBigIntArray)[];
 type NestedStringArray = (string | NestedStringArray)[];
 
-export const hexifyBigIntNestedArray = (
-  arr: NestedBigIntArray,
-): NestedStringArray => {
+export const hexifyBigIntNestedArray = (arr: NestedBigIntArray): NestedStringArray => {
   return arr.map((value) => {
     if (Array.isArray(value)) {
       return hexifyBigIntNestedArray(value);
@@ -47,11 +40,7 @@ export const getUpgradeStat = (upgrade: Upgrade, stat: StatIdx): number => {
 
 // color utils
 
-export const hslStr: (h: number, s: number, l: number) => string = (
-  h,
-  s,
-  l,
-) => {
+export const hslStr: (h: number, s: number, l: number) => string = (h, s, l) => {
   return `hsl(${h % 360},${s}%,${l}%)`;
 };
 function hashToHue(hash: string): number {
@@ -80,10 +69,7 @@ export const getRandomActionId = () => {
   return ret;
 };
 
-export const getFormatProp = (
-  planet: Planet | undefined,
-  prop: string,
-): string => {
+export const getFormatProp = (planet: Planet | undefined, prop: string): string => {
   if (!planet) return "0";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const myPlanet = planet as any;

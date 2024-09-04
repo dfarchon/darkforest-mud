@@ -1,5 +1,6 @@
-import { PlanetType, PlanetTypeNames } from "@df/types";
 import React from "react";
+
+import { PlanetType, PlanetTypeNames } from "@df/types";
 import styled, { keyframes } from "styled-components";
 
 const Wrap = styled.span`

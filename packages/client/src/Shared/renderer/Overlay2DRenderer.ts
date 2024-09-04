@@ -20,12 +20,14 @@ import {
   TextAlign,
   WorldCoords,
 } from "@df/types";
+
 import { avatarFromType } from "./Avatars";
 import { engineConsts } from "./EngineConsts";
 import { hatFromType } from "./Hats";
 import { logoFromType } from "./Logos";
 import { memeFromType } from "./Memes";
 import { Renderer } from "./Renderer";
+
 /*
    this is mostly migration code from the old renderer; it holds all of the old renderer primitives,
    but most of them have been re-implemented in GL. still useful for debugging sometimes - draws
@@ -89,11 +91,7 @@ export class Overlay2DRenderer {
     );
   }
 
-  drawArtifactAroundPlanet(
-    artifact: Artifact,
-    coords: CanvasCoords,
-    size: number,
-  ) {
+  drawArtifactAroundPlanet(artifact: Artifact, coords: CanvasCoords, size: number) {
     this.ctx.fillRect(coords.x - size / 2, coords.y - size / 2, size, size);
   }
 
@@ -234,36 +232,17 @@ export class Overlay2DRenderer {
     // ctx.arc(trueCenter.x, trueCenter.y, trueWidth / 2, 0, 2 * Math.PI);
     // ctx.clip();
 
-    ctx.drawImage(
-      image,
-      trueCenter.x - trueWidth / 2,
-      trueCenter.y - trueHeight / 2,
-      trueWidth,
-      trueHeight,
-    );
+    ctx.drawImage(image, trueCenter.x - trueWidth / 2, trueCenter.y - trueHeight / 2, trueWidth, trueHeight);
 
     ctx.globalAlpha = 1;
     ctx.restore();
   }
 
-  drawLoopWorld(
-    center: WorldCoords,
-    radius: number,
-    width: number,
-    color = "white",
-    dotted = false,
-  ) {
+  drawLoopWorld(center: WorldCoords, radius: number, width: number, color = "white", dotted = false) {
     this.drawArcWorld(center, radius, width, 100, color, dotted);
   }
 
-  drawArcWorld(
-    center: WorldCoords,
-    radius: number,
-    width: number,
-    percent: number,
-    color = "white",
-    dotted = false,
-  ) {
+  drawArcWorld(center: WorldCoords, radius: number, width: number, percent: number, color = "white", dotted = false) {
     const viewport = this.renderer.getViewport();
 
     const centerCanvasCoords = viewport.worldToCanvasCoords(center);
@@ -289,24 +268,16 @@ export class Overlay2DRenderer {
     this.ctx.setLineDash([]);
   }
 
-  drawLine(
-    startCoords: WorldCoords,
-    endCoords: WorldCoords,
-    lineWidth: number,
-    color = "white",
-    dotted = false,
-  ) {
+  drawLine(startCoords: WorldCoords, endCoords: WorldCoords, lineWidth: number, color = "white", dotted = false) {
     const viewport = this.renderer.getViewport();
 
     this.ctx.beginPath();
     // this.ctx.lineWidth = viewport.worldToCanvasDist(lineWidth);
     this.ctx.lineWidth = lineWidth;
     this.ctx.strokeStyle = color;
-    const startCanvasCoords: CanvasCoords =
-      viewport.worldToCanvasCoords(startCoords);
+    const startCanvasCoords: CanvasCoords = viewport.worldToCanvasCoords(startCoords);
     this.ctx.moveTo(startCanvasCoords.x, startCanvasCoords.y);
-    const endCanvasCoords: CanvasCoords =
-      viewport.worldToCanvasCoords(endCoords);
+    const endCanvasCoords: CanvasCoords = viewport.worldToCanvasCoords(endCoords);
     this.ctx.lineTo(endCanvasCoords.x, endCanvasCoords.y);
 
     if (dotted) this.ctx.setLineDash([15, 15]);
@@ -316,24 +287,13 @@ export class Overlay2DRenderer {
     this.ctx.setLineDash([]);
   }
 
-  drawPlanetMessages(
-    centerWorld: WorldCoords,
-    radiusWorld: number,
-    renderInfo: PlanetRenderInfo,
-    textAlpha: number,
-  ) {
+  drawPlanetMessages(centerWorld: WorldCoords, radiusWorld: number, renderInfo: PlanetRenderInfo, textAlpha: number) {
     // planets have at most one emoji
     let renderedEmoji = false;
 
     renderInfo.planet.messages?.forEach((m) => {
       if (isEmojiFlagMessage(m) && !renderedEmoji) {
-        this.drawEmojiMessage(
-          centerWorld,
-          radiusWorld,
-          renderInfo,
-          m,
-          textAlpha,
-        );
+        this.drawEmojiMessage(centerWorld, radiusWorld, renderInfo, m, textAlpha);
         renderedEmoji = true;
       }
     });
@@ -363,8 +323,7 @@ export class Overlay2DRenderer {
     }
 
     if (renderInfo.planet.emojiBobAnimation !== undefined) {
-      offsetY +=
-        renderInfo.planet.emojiBobAnimation.value() * (radiusPixels * 0.1);
+      offsetY += renderInfo.planet.emojiBobAnimation.value() * (radiusPixels * 0.1);
     }
 
     // don't want to obscure the silver text
@@ -375,20 +334,10 @@ export class Overlay2DRenderer {
     this.ctx.font = `${size}px Arial`;
     this.ctx.fillStyle = `rgba(0, 0, 0, ${textAlpha})`;
     const textSize = this.ctx.measureText(text);
-    this.ctx.fillText(
-      text,
-      pixelCoords.x - textSize.width / 2,
-      pixelCoords.y - radiusPixels * 1.3 + offsetY,
-    );
+    this.ctx.fillText(text, pixelCoords.x - textSize.width / 2, pixelCoords.y - radiusPixels * 1.3 + offsetY);
   }
 
-  drawText(
-    text: string,
-    x: number,
-    y: number,
-    color = "white",
-    align: TextAlign = TextAlign.Center,
-  ) {
+  drawText(text: string, x: number, y: number, color = "white", align: TextAlign = TextAlign.Center) {
     this.ctx.font = engineConsts.fontStyle;
     // this.ctx.textBaseline = 'middle';
     if (align === TextAlign.Center) {

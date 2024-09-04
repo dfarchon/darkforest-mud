@@ -1,6 +1,7 @@
-import { DarkForestModal, PositionChangedEvent } from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
+
+import { DarkForestModal, PositionChangedEvent } from "@df/ui";
 
 customElements.define(DarkForestModal.tagName, DarkForestModal);
 

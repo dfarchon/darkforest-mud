@@ -1,15 +1,16 @@
+import bigInt, { BigInteger } from "big-integer";
+
+import { TerminalTextStyle } from "../../Frontend/Utils/TerminalTypes";
+import { TerminalHandle } from "../../Frontend/Views/Terminal";
 import {
-  buildContractCallArgs,
   SnarkJSProofAndSignals,
   WhitelistSnarkContractCallArgs,
   WhitelistSnarkInput,
+  buildContractCallArgs,
 } from "../../Shared/snarks";
 import whitelistCircuitPath from "../../Shared/snarks/whitelist.wasm";
 import whitelistZkeyPath from "../../Shared/snarks/whitelist.zkey";
 import { EthAddress } from "../../Shared/types";
-import bigInt, { BigInteger } from "big-integer";
-import { TerminalTextStyle } from "../../Frontend/Utils/TerminalTypes";
-import { TerminalHandle } from "../../Frontend/Views/Terminal";
 
 /**
  * Helper method for generating whitelist SNARKS.
@@ -24,25 +25,15 @@ export const getWhitelistArgs = async (
 ): Promise<WhitelistSnarkContractCallArgs> => {
   try {
     const start = Date.now();
-    terminal?.current?.println(
-      "WHITELIST REGISTER: calculating witness and proof",
-      TerminalTextStyle.Sub,
-    );
+    terminal?.current?.println("WHITELIST REGISTER: calculating witness and proof", TerminalTextStyle.Sub);
     const input: WhitelistSnarkInput = {
       key: key.toString(),
       recipient: bigInt(recipient.substring(2), 16).toString(),
     };
 
-    const fullProveResponse = await window.snarkjs.groth16.fullProve(
-      input,
-      whitelistCircuitPath,
-      whitelistZkeyPath,
-    );
+    const fullProveResponse = await window.snarkjs.groth16.fullProve(input, whitelistCircuitPath, whitelistZkeyPath);
     const { proof, publicSignals }: SnarkJSProofAndSignals = fullProveResponse;
-    const ret = buildContractCallArgs(
-      proof,
-      publicSignals,
-    ) as WhitelistSnarkContractCallArgs;
+    const ret = buildContractCallArgs(proof, publicSignals) as WhitelistSnarkContractCallArgs;
     const end = Date.now();
     terminal?.current?.println(
       `WHITELIST REGISTER: calculated witness and proof in ${end - start}ms`,

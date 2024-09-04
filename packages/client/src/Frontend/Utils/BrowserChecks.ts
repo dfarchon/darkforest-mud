@@ -38,8 +38,7 @@ export const isMobileOrTablet = () => {
   return check;
 };
 
-const isSupportedBrowser = async () =>
-  isChrome() || isFirefox() || (await isBrave());
+const isSupportedBrowser = async () => isChrome() || isFirefox() || (await isBrave());
 
 type FeatureList = Partial<Record<Incompatibility, boolean>>;
 
@@ -47,8 +46,7 @@ const checkFeatures = async (): Promise<FeatureList> => {
   const incompats: FeatureList = {};
 
   try {
-    incompats[Incompatibility.UnsupportedBrowser] =
-      !(await isSupportedBrowser());
+    incompats[Incompatibility.UnsupportedBrowser] = !(await isSupportedBrowser());
     incompats[Incompatibility.NoIDB] = !supportsIDB();
     incompats[Incompatibility.MobileOrTablet] = isMobileOrTablet();
   } catch (e) {
@@ -61,14 +59,11 @@ const checkFeatures = async (): Promise<FeatureList> => {
 
 export const unsupportedFeatures = async (): Promise<Incompatibility[]> => {
   const features = await checkFeatures();
-  return Object.keys(features).filter(
-    (f) => features[f as Incompatibility],
-  ) as Incompatibility[];
+  return Object.keys(features).filter((f) => features[f as Incompatibility]) as Incompatibility[];
 };
 
 export const isFirefox = () => navigator.userAgent.indexOf("Firefox") > 0;
 
 export const isChrome = () => /Google Inc/.test(navigator.vendor);
 
-export const isBrave = async () =>
-  !!((navigator as any).brave && (await (navigator as any).brave.isBrave())); // eslint-disable-line @typescript-eslint/no-explicit-any
+export const isBrave = async () => !!((navigator as any).brave && (await (navigator as any).brave.isBrave())); // eslint-disable-line @typescript-eslint/no-explicit-any

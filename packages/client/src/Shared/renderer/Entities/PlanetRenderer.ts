@@ -1,18 +1,10 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
-  Planet,
-  PlanetRendererType,
-  RendererType,
-  WorldCoords,
-} from "@df/types";
+import { Planet, PlanetRendererType, RendererType, WorldCoords } from "@df/types";
 import { mat4 } from "gl-matrix";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
-import {
-  distortFromPlanet,
-  PLANET_PROGRAM_DEFINITION,
-  propsFromPlanet,
-} from "../Programs/PlanetProgram";
+import { PLANET_PROGRAM_DEFINITION, distortFromPlanet, propsFromPlanet } from "../Programs/PlanetProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
@@ -48,16 +40,8 @@ export class PlanetRenderer
     this.uniformSetters.time(time / 6);
   }
 
-  public queuePlanetBodyScreen(
-    planet: Planet,
-    radius: number,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-  ) {
-    const { position, rectPos, color, color2, color3, props, props2 } =
-      this.attribManagers;
+  public queuePlanetBodyScreen(planet: Planet, radius: number, x1: number, y1: number, x2: number, y2: number) {
+    const { position, rectPos, color, color2, color3, props, props2 } = this.attribManagers;
     const cosmetic = getPlanetCosmetic(planet);
 
     // auto-sorts on GPU
@@ -92,17 +76,9 @@ export class PlanetRenderer
     this.verts += 6;
   }
 
-  public queuePlanetBody(
-    planet: Planet,
-    centerW: WorldCoords,
-    radiusW: number,
-  ): void {
-    const center = this.manager.renderer
-      .getViewport()
-      .worldToCanvasCoords(centerW);
-    const radius = this.manager.renderer
-      .getViewport()
-      .worldToCanvasDist(radiusW);
+  public queuePlanetBody(planet: Planet, centerW: WorldCoords, radiusW: number): void {
+    const center = this.manager.renderer.getViewport().worldToCanvasCoords(centerW);
+    const radius = this.manager.renderer.getViewport().worldToCanvasDist(radiusW);
 
     const x1 = center.x - radius;
     const y1 = center.y - radius;

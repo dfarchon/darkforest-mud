@@ -1,4 +1,5 @@
 import type { mat3, mat4 } from "gl-matrix";
+
 import type { Artifact, RenderedArtifact } from "./artifact";
 import type { HatType } from "./hat";
 import type { LocationId } from "./identifier";
@@ -308,12 +309,7 @@ export interface AsteroidRendererType {
    * @param centerW - represents the coordinates of the planet relative to the game world.
    * @param radiusW - represents the radius of the planet relative to the size of the game world
    */
-  queueAsteroid(
-    planet: Planet,
-    centerW: CanvasCoords,
-    radiusW: number,
-    color?: RGBVec,
-  ): void;
+  queueAsteroid(planet: Planet, centerW: CanvasCoords, radiusW: number, color?: RGBVec): void;
 
   /**
    * Draws all queued Asteroids.
@@ -505,12 +501,7 @@ export interface MineBodyRendererType {
    * @param radius - Radius of the Asteroid Field relative to the game world
    * @param z - The amount of Asteroids in the Asteroid field
    */
-  queueMineScreen(
-    planet: Planet,
-    center: WorldCoords,
-    radius: number,
-    z: number,
-  ): void;
+  queueMineScreen(planet: Planet, center: WorldCoords, radius: number, z: number): void;
 
   /**
    * Draws all queued mine bodies.
@@ -635,13 +626,7 @@ export interface UnminedRendererType {
    * @param color - optional the color of the chunk
    * @param zIdx - Z axis
    */
-  queueRect(
-    { x, y }: CanvasCoords,
-    width: number,
-    height: number,
-    color?: RGBVec,
-    zIdx?: number,
-  ): void;
+  queueRect({ x, y }: CanvasCoords, width: number, height: number, color?: RGBVec, zIdx?: number): void;
 
   /**
    * Draws all undiscovered space
@@ -867,43 +852,17 @@ export interface PlanetRenderManagerType {
     disableHats?: boolean,
   ): void;
 
-  queueHat(
-    planet: Planet,
-    center: WorldCoords,
-    radius: number,
-    hatType: number,
-    hatLevel: number,
-  ): void;
+  queueHat(planet: Planet, center: WorldCoords, radius: number, hatType: number, hatLevel: number): void;
 
-  queueArtifactImage(
-    center: WorldCoords,
-    radius: number,
-    artifact?: Artifact,
-  ): void;
+  queueArtifactImage(center: WorldCoords, radius: number, artifact?: Artifact): void;
 
   // queueNewHat(center: WorldCoords, radius: number, artifact?: Artifact): void;
 
-  queueMemeImage(
-    center: WorldCoords,
-    radius: number,
-    hatType: number,
-    hatLevel: number,
-  ): void;
+  queueMemeImage(center: WorldCoords, radius: number, hatType: number, hatLevel: number): void;
 
-  queueLogoImage(
-    center: WorldCoords,
-    radius: number,
-    hatType: number,
-    hatLevel: number,
-    ifAdminSet: boolean,
-  ): void;
+  queueLogoImage(center: WorldCoords, radius: number, hatType: number, hatLevel: number, ifAdminSet: boolean): void;
 
-  queueAvatarImage(
-    center: WorldCoords,
-    radius: number,
-    hatType: number,
-    hatLevel: number,
-  ): void;
+  queueAvatarImage(center: WorldCoords, radius: number, hatType: number, hatLevel: number): void;
 
   flush(): void;
 }
@@ -922,13 +881,7 @@ export interface QuasarBodyRendererType {
    * @param z - z axis
    * @param angle - the angle the body should be titled
    */
-  queueQuasarBody(
-    planet: Planet,
-    centerW: WorldCoords,
-    radiusW: number,
-    z?: number,
-    angle?: number,
-  ): void;
+  queueQuasarBody(planet: Planet, centerW: WorldCoords, radiusW: number, z?: number, angle?: number): void;
 
   /**
    * Draw all queued Quasar Bodies

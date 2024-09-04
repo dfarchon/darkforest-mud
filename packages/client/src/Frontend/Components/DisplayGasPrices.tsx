@@ -1,5 +1,6 @@
-import { GasPrices } from "@df/types";
 import React from "react";
+
+import { GasPrices } from "@df/types";
 
 export function DisplayGasPrices({ gasPrices }: { gasPrices?: GasPrices }) {
   return (

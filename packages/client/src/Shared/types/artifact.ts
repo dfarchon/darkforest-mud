@@ -1,10 +1,5 @@
 import type { Biome } from "./game_types";
-import type {
-  ArtifactId,
-  EthAddress,
-  LocationId,
-  VoyageId,
-} from "./identifier";
+import type { ArtifactId, EthAddress, LocationId, VoyageId } from "./identifier";
 import type { TransactionCollection } from "./transaction";
 import type { Upgrade } from "./upgrade";
 import type { Abstract } from "./utility";
@@ -144,22 +139,7 @@ export type Artifact = {
 // TODO: get this out of here
 
 const godGrammar = {
-  god1: [
-    "c'",
-    "za",
-    "ry'",
-    "ab'",
-    "bak'",
-    "dt'",
-    "ek'",
-    "fah'",
-    "q'",
-    "qo",
-    "van",
-    "bow",
-    "gui",
-    "si",
-  ],
+  god1: ["c'", "za", "ry'", "ab'", "bak'", "dt'", "ek'", "fah'", "q'", "qo", "van", "bow", "gui", "si"],
   god2: [
     "thun",
     "tchalla",

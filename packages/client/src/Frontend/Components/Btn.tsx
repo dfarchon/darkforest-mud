@@ -1,16 +1,10 @@
-import {
-  DarkForestButton,
-  DarkForestShortcutButton,
-  ShortcutPressedEvent,
-} from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
 
+import { DarkForestButton, DarkForestShortcutButton, ShortcutPressedEvent } from "@df/ui";
+
 customElements.define(DarkForestButton.tagName, DarkForestButton);
-customElements.define(
-  DarkForestShortcutButton.tagName,
-  DarkForestShortcutButton,
-);
+customElements.define(DarkForestShortcutButton.tagName, DarkForestShortcutButton);
 
 export { DarkForestButton, DarkForestShortcutButton, ShortcutPressedEvent };
 

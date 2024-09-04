@@ -6,21 +6,5 @@
   "singleQuote": false,
   "jsxSingleQuote": false,
   "bracketSpacing": true,
-  "importOrder": [
-    "react",
-    "@latticexyz",
-    "@primodiumxyz",
-    "<THIRD_PARTY_MODULES>",
-    "prototypes",
-    "@/",
-    "@/components",
-    "@/utils",
-    "^[./]"
-  ],
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true,
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss"
-  ]
+  "plugins": ["prettier-plugin-tailwindcss"]
 }

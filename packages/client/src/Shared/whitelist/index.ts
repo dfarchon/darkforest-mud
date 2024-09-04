@@ -21,7 +21,6 @@
  *
  * @packageDocumentation
  */
-
 import { mimcSponge } from "@df/hashing";
 import bigInt from "big-integer";
 import { ethers } from "ethers";
@@ -31,9 +30,7 @@ export const keysPerTx = 400;
 
 export const generateKey = () => {
   const hexArray = padStart(
-    bigInt(
-      ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString(),
-    ).toString(16),
+    bigInt(ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString()).toString(16),
     24,
     "0",
   ).split("");
@@ -53,8 +50,6 @@ export const generateKeys = (count: number) => {
   return keys;
 };
 
-export const bigIntFromKey = (key: string) =>
-  bigInt(replace(key, /\-/g, ""), 16);
+export const bigIntFromKey = (key: string) => bigInt(replace(key, /\-/g, ""), 16);
 
-export const keyHash = (key: string) =>
-  mimcSponge([bigIntFromKey(key)], 1, 220, 0)[0].toString();
+export const keyHash = (key: string) => mimcSponge([bigIntFromKey(key)], 1, 220, 0)[0].toString();

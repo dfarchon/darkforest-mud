@@ -1,9 +1,4 @@
-import type {
-  ArtifactId,
-  EthAddress,
-  LocationId,
-  VoyageId,
-} from "./identifier";
+import type { ArtifactId, EthAddress, LocationId, VoyageId } from "./identifier";
 import type { Abstract } from "./utility";
 
 /**

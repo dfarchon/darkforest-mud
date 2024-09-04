@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { WalletClient } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
-import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "../shared";
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@df/constants";
 
 // You can define a threshold constant for low balance
 

@@ -1,6 +1,8 @@
-import { Biome, BiomeNames } from "@df/types";
 import React from "react";
+
+import { Biome, BiomeNames } from "@df/types";
 import styled from "styled-components";
+
 import { BiomeTextColors } from "../../Styles/Colors";
 import { burnAnim, wiggle } from "../BiomeAnims";
 

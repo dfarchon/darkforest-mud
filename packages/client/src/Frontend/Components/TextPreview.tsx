@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from "react";
+
 import styled, { css } from "styled-components";
+
 import { TextInput } from "./Input";
 
 const DEFAULT_UNFOCUSED_WIDTH = "50px";
@@ -31,12 +33,7 @@ export function TextPreview({
   if (isTextBox) {
     return (
       <InputContainer style={style} width={focusedWidth}>
-        <TextInput
-          selected={true}
-          readonly={true}
-          value={text}
-          onBlur={onBlur}
-        />
+        <TextInput selected={true} readonly={true} value={text} onBlur={onBlur} />
       </InputContainer>
     );
   }

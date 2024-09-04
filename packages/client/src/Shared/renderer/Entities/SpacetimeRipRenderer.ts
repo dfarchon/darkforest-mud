@@ -1,12 +1,6 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
-  CanvasCoords,
-  Planet,
-  RendererType,
-  SpacetimeRipRendererType,
-  SpaceType,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, Planet, RendererType, SpaceType, SpacetimeRipRendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { SPACETIMERIP_PROGRAM_DEFINITION } from "../Programs/SpacetimeRipProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -28,14 +22,8 @@ export class SpacetimeRipRenderer
     this.quad2Buffer = EngineUtils.makeQuadVec2(-1, 1, 1, -1);
   }
 
-  public queueRipScreen(
-    planet: Planet,
-    center: CanvasCoords,
-    radius: number,
-    z: number,
-  ) {
-    const { position, color, rectPos, inColor1, inColor2, inColor3 } =
-      this.attribManagers;
+  public queueRipScreen(planet: Planet, center: CanvasCoords, radius: number, z: number) {
+    const { position, color, rectPos, inColor1, inColor2, inColor3 } = this.attribManagers;
 
     const r = radius * 1.7;
 
@@ -69,12 +57,8 @@ export class SpacetimeRipRenderer
   }
 
   public queueRip(planet: Planet, centerW: WorldCoords, radiusW: number): void {
-    const center = this.manager.renderer
-      .getViewport()
-      .worldToCanvasCoords(centerW);
-    const radius = this.manager.renderer
-      .getViewport()
-      .worldToCanvasDist(radiusW);
+    const center = this.manager.renderer.getViewport().worldToCanvasCoords(centerW);
+    const radius = this.manager.renderer.getViewport().worldToCanvasDist(radiusW);
     const z = EngineUtils.getPlanetZIndex(planet);
 
     this.queueRipScreen(planet, center, radius, z);

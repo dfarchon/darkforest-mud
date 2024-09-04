@@ -11,9 +11,7 @@ function isVowel(c) {
 }
 
 function isAlphaNum(c) {
-  return (
-    (c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || (c >= "0" && c <= "9")
-  );
+  return (c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || (c >= "0" && c <= "9");
 }
 function escapeRegExp(str) {
   return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
@@ -85,8 +83,7 @@ export var baseEngModifiers = {
         return s + "es";
         break;
       case "y":
-        if (!isVowel(s.charAt(s.length - 2)))
-          return s.substring(0, s.length - 1) + "ies";
+        if (!isVowel(s.charAt(s.length - 2))) return s.substring(0, s.length - 1) + "ies";
         else return s + "s";
         break;
       default:
@@ -108,8 +105,7 @@ export var baseEngModifiers = {
         return s + "ed";
         break;
       case "y":
-        if (!isVowel(s.charAt(s.length - 2)))
-          return s.substring(0, s.length - 1) + "ied";
+        if (!isVowel(s.charAt(s.length - 2))) return s.substring(0, s.length - 1) + "ied";
         else return s + "d";
         break;
       default:

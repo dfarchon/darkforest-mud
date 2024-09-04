@@ -1,5 +1,6 @@
-import { css, html, LitElement, nothing, unsafeCSS } from "lit";
+import { LitElement, css, html, nothing, unsafeCSS } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
+
 import * as dfstyles from "./styles";
 
 export class DarkForestCheckbox extends LitElement {
@@ -90,9 +91,7 @@ export class DarkForestCheckbox extends LitElement {
         @keyup=${this._handleKeyUp}
         @keydown=${this._handleKeyDown}
         .checked=${this.checked}
-      />${this.label
-        ? html`<span class="labelContent">${this.label}</span>`
-        : nothing}
+      />${this.label ? html`<span class="labelContent">${this.label}</span>` : nothing}
     </label>`;
   }
 

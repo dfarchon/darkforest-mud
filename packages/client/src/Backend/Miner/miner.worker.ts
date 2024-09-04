@@ -3,6 +3,7 @@ import { locationIdFromBigInt } from "@df/serde";
 import { Chunk, PerlinConfig, Rectangle, WorldLocation } from "@df/types";
 import bigInt from "big-integer";
 import { BigInteger } from "big-integer";
+
 import { LOCATION_ID_UB } from "../../Frontend/Utils/constants";
 import { MinerWorkerMessage } from "../../_types/global/GlobalTypes";
 import { getPlanetLocations } from "./permutation";
@@ -88,9 +89,7 @@ const exploreChunk = (
 };
 
 ctx.addEventListener("message", (e: MessageEvent) => {
-  const exploreMessage: MinerWorkerMessage = JSON.parse(
-    e.data,
-  ) as MinerWorkerMessage;
+  const exploreMessage: MinerWorkerMessage = JSON.parse(e.data) as MinerWorkerMessage;
 
   exploreChunk(
     exploreMessage.chunkFootprint,

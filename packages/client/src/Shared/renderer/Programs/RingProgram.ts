@@ -1,4 +1,5 @@
 import { AttribType, UniformType } from "@df/types";
+
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 
@@ -141,8 +142,4 @@ export const RING_PROGRAM_DEFINITION = {
 export type RingProps = [number, number, number];
 
 // xRad, yRad, delTheta
-export const propsFromIdx = (idx: number): RingProps => [
-  1.7 + 0.7 * idx,
-  0.3 + 0.25 * idx,
-  1.2 * 0.45 ** idx,
-];
+export const propsFromIdx = (idx: number): RingProps => [1.7 + 0.7 * idx, 0.3 + 0.25 * idx, 1.2 * 0.45 ** idx];

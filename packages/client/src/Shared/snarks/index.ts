@@ -232,19 +232,13 @@ export interface SnarkJSProofAndSignals {
  * @param publicSignals the circuit's public signals (i.e. output signals and
  * public input signals)
  */
-export function buildContractCallArgs(
-  snarkProof: SnarkJSProof,
-  publicSignals: string[],
-): ContractCallArgs {
+export function buildContractCallArgs(snarkProof: SnarkJSProof, publicSignals: string[]): ContractCallArgs {
   // the object returned by genZKSnarkProof needs to be massaged into a set of parameters the verifying contract
   // will accept
   return [
     snarkProof.pi_a.slice(0, 2), // pi_a
     // genZKSnarkProof reverses values in the inner arrays of pi_b
-    [
-      snarkProof.pi_b[0].slice(0).reverse(),
-      snarkProof.pi_b[1].slice(0).reverse(),
-    ], // pi_b
+    [snarkProof.pi_b[0].slice(0).reverse(), snarkProof.pi_b[1].slice(0).reverse()], // pi_b
     snarkProof.pi_c.slice(0, 2), // pi_c
     publicSignals, // input
   ] as ContractCallArgs;
@@ -254,9 +248,7 @@ export function buildContractCallArgs(
 /**
  * @hidden
  */
-export function fakeProof(
-  publicSignals: string[] = [],
-): SnarkJSProofAndSignals {
+export function fakeProof(publicSignals: string[] = []): SnarkJSProofAndSignals {
   return {
     proof: {
       pi_a: ["0", "0", "0"],

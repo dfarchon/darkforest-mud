@@ -1,12 +1,5 @@
 import { EMPTY_ADDRESS, EMPTY_LOCATION_ID } from "@df/constants";
-import {
-  Artifact,
-  ArtifactId,
-  artifactNameFromArtifact,
-  ArtifactRarity,
-  ArtifactType,
-  Biome,
-} from "@df/types";
+import { Artifact, ArtifactId, ArtifactRarity, ArtifactType, Biome, artifactNameFromArtifact } from "@df/types";
 
 const namesById = new Map<ArtifactId, string>();
 export const artifactName = (artifact: Artifact | undefined): string => {
@@ -64,26 +57,10 @@ export const mockArtifactWithRarity = (
   planetBiome: Biome = Biome.WASTELAND,
 ): Artifact => mockArtifact(rarity, artifactType, planetBiome);
 
-export const mockCommon = mockArtifactWithRarity(
-  ArtifactRarity.Common,
-  ArtifactType.Spaceship,
-  Biome.WASTELAND,
-);
+export const mockCommon = mockArtifactWithRarity(ArtifactRarity.Common, ArtifactType.Spaceship, Biome.WASTELAND);
 
-export const mockRare = mockArtifactWithRarity(
-  ArtifactRarity.Rare,
-  ArtifactType.Spaceship,
-  Biome.WASTELAND,
-);
+export const mockRare = mockArtifactWithRarity(ArtifactRarity.Rare, ArtifactType.Spaceship, Biome.WASTELAND);
 
-export const mockEpic = mockArtifactWithRarity(
-  ArtifactRarity.Epic,
-  ArtifactType.Spaceship,
-  Biome.WASTELAND,
-);
+export const mockEpic = mockArtifactWithRarity(ArtifactRarity.Epic, ArtifactType.Spaceship, Biome.WASTELAND);
 
-export const mockLegendary = mockArtifactWithRarity(
-  ArtifactRarity.Legendary,
-  ArtifactType.Spaceship,
-  Biome.WASTELAND,
-);
+export const mockLegendary = mockArtifactWithRarity(ArtifactRarity.Legendary, ArtifactType.Spaceship, Biome.WASTELAND);

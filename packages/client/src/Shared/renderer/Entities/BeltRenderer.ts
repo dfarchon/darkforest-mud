@@ -1,18 +1,8 @@
-import {
-  BeltRendererType,
-  CanvasCoords,
-  Planet,
-  RendererType,
-  RGBVec,
-  WorldCoords,
-} from "@df/types";
+import { BeltRendererType, CanvasCoords, Planet, RGBVec, RendererType, WorldCoords } from "@df/types";
 import autoBind from "auto-bind";
+
 import { EngineUtils } from "../EngineUtils";
-import {
-  BeltProps,
-  BELT_PROGRAM_DEFINITION,
-  propsFromIdx,
-} from "../Programs/BeltProgram";
+import { BELT_PROGRAM_DEFINITION, BeltProps, propsFromIdx } from "../Programs/BeltProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
@@ -45,12 +35,8 @@ export class BeltRenderer
     props: BeltProps = [10, 1, 1, 0.05],
     angle = 0,
   ) {
-    const center = this.manager.renderer
-      .getViewport()
-      .worldToCanvasCoords(centerW);
-    const radius = this.manager.renderer
-      .getViewport()
-      .worldToCanvasDist(radiusW);
+    const center = this.manager.renderer.getViewport().worldToCanvasCoords(centerW);
+    const radius = this.manager.renderer.getViewport().worldToCanvasDist(radiusW);
 
     this.queueBelt(center, radius, color, l, z, delZ, props, angle);
   }
@@ -65,12 +51,7 @@ export class BeltRenderer
     props: BeltProps = [10, 1, 1, 0.05],
     angle = 0,
   ) {
-    const {
-      position: posA,
-      rectPos: rectPosA,
-      color: colorA,
-      props: propsA,
-    } = this.attribManagers;
+    const { position: posA, rectPos: rectPosA, color: colorA, props: propsA } = this.attribManagers;
 
     EngineUtils.makeQuadVec2Buffered(this.topRectPosBuffer, -l, l, l, 0);
     EngineUtils.makeQuadVec2Buffered(this.botRectPosBuffer, -l, 0, l, -l);

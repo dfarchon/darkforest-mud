@@ -34,12 +34,7 @@ export function getNetworkConfig() {
    *    vite dev server was started or client was built
    * 4. The default, 31337 (anvil)
    */
-  const chainId = Number(
-    params.get("chainId") ||
-      params.get("chainid") ||
-      import.meta.env.VITE_CHAIN_ID ||
-      31337,
-  );
+  const chainId = Number(params.get("chainId") || params.get("chainid") || import.meta.env.VITE_CHAIN_ID || 31337);
 
   /*
    * Find the chain (unless it isn't in the list of supported chains).
@@ -58,9 +53,7 @@ export function getNetworkConfig() {
   const world = worlds[chain.id.toString()];
   const worldAddress = params.get("worldAddress") || world?.address;
   if (!worldAddress) {
-    throw new Error(
-      `No world address found for chain ${chainId}. Did you run \`mud deploy\`?`,
-    );
+    throw new Error(`No world address found for chain ${chainId}. Did you run \`mud deploy\`?`);
   }
 
   /*
@@ -72,7 +65,7 @@ export function getNetworkConfig() {
    */
   const initialBlockNumber = params.has("initialBlockNumber")
     ? Number(params.get("initialBlockNumber"))
-    : world?.blockNumber ?? 0n;
+    : (world?.blockNumber ?? 0n);
 
   return {
     privateKey: getBurnerPrivateKey(),

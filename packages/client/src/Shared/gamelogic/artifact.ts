@@ -1,8 +1,4 @@
-import {
-  EMPTY_ADDRESS,
-  MAX_SPACESHIP_TYPE,
-  MIN_SPACESHIP_TYPE,
-} from "@df/constants";
+import { EMPTY_ADDRESS, MAX_SPACESHIP_TYPE, MIN_SPACESHIP_TYPE } from "@df/constants";
 import { hashToInt } from "@df/serde";
 import {
   Abstract,
@@ -44,11 +40,7 @@ export function isBasic(type: ArtifactType): boolean {
 }
 
 export function isSpaceShip(type: ArtifactType | undefined): boolean {
-  return (
-    type !== undefined &&
-    type >= MIN_SPACESHIP_TYPE &&
-    type <= MAX_SPACESHIP_TYPE
-  );
+  return type !== undefined && type >= MIN_SPACESHIP_TYPE && type <= MAX_SPACESHIP_TYPE;
 }
 
 export function hasStatBoost(type: ArtifactType | undefined): boolean {
@@ -94,8 +86,7 @@ export function artifactAvailableTimestamp(artifact: Artifact) {
   }
 
   const availableAtTimestampMs =
-    artifact.lastDeactivated * 1000 +
-    artifactCooldownHoursMap[artifact.artifactType] * 60 * 60 * 1000;
+    artifact.lastDeactivated * 1000 + artifactCooldownHoursMap[artifact.artifactType] * 60 * 60 * 1000;
 
   return availableAtTimestampMs;
 }
@@ -108,9 +99,7 @@ export function isActivated(artifact: Artifact | undefined) {
   return artifact.lastActivated > artifact.lastDeactivated;
 }
 
-export function getActivatedArtifact(
-  artifacts: Artifact[],
-): Artifact | undefined {
+export function getActivatedArtifact(artifacts: Artifact[]): Artifact | undefined {
   return artifacts.find(isActivated);
 }
 
@@ -124,11 +113,9 @@ export function getArtifactDebugName(a?: Artifact): string {
 
 export const biomeName = (biome: Biome): string => BiomeNames[biome];
 
-export const rarityName = (rarity: ArtifactRarity): string =>
-  ArtifactRarityNames[rarity];
+export const rarityName = (rarity: ArtifactRarity): string => ArtifactRarityNames[rarity];
 
-export const rarityNameFromArtifact = (a: Artifact): string =>
-  rarityName(a.rarity);
+export const rarityNameFromArtifact = (a: Artifact): string => rarityName(a.rarity);
 
 export function artifactBiomeName(artifact: Artifact): string {
   if (isAncient(artifact)) return "Ancient";
@@ -189,9 +176,7 @@ export function artifactFileName(
   artifact: RenderedArtifact,
   color: ArtifactFileColor,
   // used in GifRenderer.ts to generate filenames from mock artifacts
-  debugProps:
-    | { forceAncient: boolean; skipCaching: boolean }
-    | undefined = undefined,
+  debugProps: { forceAncient: boolean; skipCaching: boolean } | undefined = undefined,
 ): string {
   const { artifactType: type, rarity, planetBiome: biome, id } = artifact;
 
@@ -247,15 +232,9 @@ export function artifactFileName(
   return `${size}-${fileName}${colorStr}.${ext}`;
 }
 
-export function getActiveBlackDomain(
-  artifacts: Artifact[],
-): Artifact | undefined {
+export function getActiveBlackDomain(artifacts: Artifact[]): Artifact | undefined {
   for (const artifact of artifacts) {
-    if (
-      artifact.artifactType === ArtifactType.BlackDomain &&
-      isActivated(artifact)
-    )
-      return artifact;
+    if (artifact.artifactType === ArtifactType.BlackDomain && isActivated(artifact)) return artifact;
   }
   return undefined;
 }
@@ -265,11 +244,7 @@ export const dateMintedAt = (artifact: Artifact | undefined): string => {
   return new Date(artifact.mintedAtTimestamp * 1000).toDateString();
 };
 
-export function canActivateArtifact(
-  artifact: Artifact,
-  planet: Planet | undefined,
-  artifactsOnPlanet: Artifact[],
-) {
+export function canActivateArtifact(artifact: Artifact, planet: Planet | undefined, artifactsOnPlanet: Artifact[]) {
   if (isSpaceShip(artifact.artifactType)) {
     return (
       planet &&
@@ -295,11 +270,7 @@ export function canActivateArtifact(
   return false;
 }
 
-export function canWithdrawArtifact(
-  account: EthAddress,
-  artifact: Artifact,
-  planet?: Planet,
-) {
+export function canWithdrawArtifact(account: EthAddress, artifact: Artifact, planet?: Planet) {
   return (
     planet &&
     !planet.destroyed &&
@@ -311,11 +282,7 @@ export function canWithdrawArtifact(
   );
 }
 
-export function canDepositArtifact(
-  account: EthAddress,
-  artifact: Artifact,
-  planet?: Planet,
-) {
+export function canDepositArtifact(account: EthAddress, artifact: Artifact, planet?: Planet) {
   return (
     planet &&
     !planet.destroyed &&
@@ -334,10 +301,7 @@ export function getPlayerControlledSpaceships(
   return (artifacts || []).filter((a) => a?.controller === owner);
 }
 
-export function canOperatePinkShip(
-  artifact: Artifact,
-  planet: Planet | undefined,
-) {
+export function canOperatePinkShip(artifact: Artifact, planet: Planet | undefined) {
   if (isSpaceShip(artifact.artifactType)) {
     return planet && artifact.artifactType === ArtifactType.ShipPink;
   }

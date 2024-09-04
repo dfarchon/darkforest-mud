@@ -1,4 +1,5 @@
 import { AttribProps } from "@df/types";
+
 import { AttribArray } from "./AttribArray";
 
 /**
@@ -40,12 +41,7 @@ export class AttribManager {
    * @param props - An AttribProps object, containing the attrib name and other info.
    * @param enable - Should we call gl.enableVertexAttribArray? (default true)
    */
-  constructor(
-    gl: WebGL2RenderingContext,
-    program: WebGLProgram,
-    props: AttribProps,
-    enable = true,
-  ) {
+  constructor(gl: WebGL2RenderingContext, program: WebGLProgram, props: AttribProps, enable = true) {
     this.gl = gl;
     this.props = props;
 
@@ -86,12 +82,6 @@ export class AttribManager {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.vertexAttribPointer(loc, dim, type, normalize, 0, 0);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      this.attribArray.array,
-      gl.DYNAMIC_DRAW,
-      0,
-      n * dim,
-    );
+    gl.bufferData(gl.ARRAY_BUFFER, this.attribArray.array, gl.DYNAMIC_DRAW, 0, n * dim);
   }
 }

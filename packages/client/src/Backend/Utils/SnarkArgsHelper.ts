@@ -1,15 +1,14 @@
-import {
-  fakeHash,
-  mimcHash,
-  modPBigInt,
-  modPBigIntNative,
-  perlin,
-} from "../../Shared/hashing";
+import bigInt from "big-integer";
+import { BigInteger } from "big-integer";
+import FastQueue from "fastq";
+import { LRUMap } from "mnemonist";
+
+import { TerminalTextStyle } from "../../Frontend/Utils/TerminalTypes";
+import { TerminalHandle } from "../../Frontend/Views/Terminal";
+import { fakeHash, mimcHash, modPBigInt, modPBigIntNative, perlin } from "../../Shared/hashing";
 import {
   BiomebaseSnarkContractCallArgs,
   BiomebaseSnarkInput,
-  buildContractCallArgs,
-  fakeProof,
   InitSnarkContractCallArgs,
   InitSnarkInput,
   MoveSnarkContractCallArgs,
@@ -17,6 +16,8 @@ import {
   RevealSnarkContractCallArgs,
   RevealSnarkInput,
   SnarkJSProofAndSignals,
+  buildContractCallArgs,
+  fakeProof,
 } from "../../Shared/snarks";
 import biomebaseCircuitPath from "../../Shared/snarks/biomebase.wasm";
 import biomebaseZkeyPath from "../../Shared/snarks/biomebase.zkey";
@@ -27,12 +28,6 @@ import moveZkeyPath from "../../Shared/snarks/move.zkey";
 import revealCircuitPath from "../../Shared/snarks/reveal.wasm";
 import revealZkeyPath from "../../Shared/snarks/reveal.zkey";
 import { PerlinConfig } from "../../Shared/types";
-import bigInt from "big-integer";
-import { BigInteger } from "big-integer";
-import FastQueue from "fastq";
-import { LRUMap } from "mnemonist";
-import { TerminalTextStyle } from "../../Frontend/Utils/TerminalTypes";
-import { TerminalHandle } from "../../Frontend/Views/Terminal";
 import { HashConfig } from "../../_types/global/GlobalTypes";
 
 type ZKPTask = {
@@ -45,11 +40,7 @@ type ZKPTask = {
   onError: (e: Error) => void;
 };
 
-type SnarkInput =
-  | RevealSnarkInput
-  | InitSnarkInput
-  | MoveSnarkInput
-  | BiomebaseSnarkInput;
+type SnarkInput = RevealSnarkInput | InitSnarkInput | MoveSnarkInput | BiomebaseSnarkInput;
 
 class SnarkProverQueue {
   private taskQueue: FastQueue.queue;
@@ -60,11 +51,7 @@ class SnarkProverQueue {
     this.taskCount = 0;
   }
 
-  public doProof(
-    input: SnarkInput,
-    circuit: string,
-    zkey: string,
-  ): Promise<SnarkJSProofAndSignals> {
+  public doProof(input: SnarkInput, circuit: string, zkey: string): Promise<SnarkJSProofAndSignals> {
     const taskId = this.taskCount++;
     const task = {
       input,
@@ -84,17 +71,10 @@ class SnarkProverQueue {
     });
   }
 
-  private async execute(
-    task: ZKPTask,
-    cb: (err: Error | null, result: SnarkJSProofAndSignals | null) => void,
-  ) {
+  private async execute(task: ZKPTask, cb: (err: Error | null, result: SnarkJSProofAndSignals | null) => void) {
     try {
       console.log(`proving ${task.taskId}`);
-      const res = await window.snarkjs.groth16.fullProve(
-        task.input,
-        task.circuit,
-        task.zkey,
-      );
+      const res = await window.snarkjs.groth16.fullProve(task.input, task.circuit, task.zkey);
       console.log(`proved ${task.taskId}`);
       cb(null, res);
     } catch (e) {
@@ -129,9 +109,7 @@ class SnarkArgsHelper {
     this.terminal = terminal;
     this.snarkProverQueue = new SnarkProverQueue();
     this.hashConfig = hashConfig;
-    this.planetHashMimc = useMockHash
-      ? fakeHash(hashConfig.planetRarity)
-      : mimcHash(hashConfig.planetHashKey);
+    this.planetHashMimc = useMockHash ? fakeHash(hashConfig.planetRarity) : mimcHash(hashConfig.planetHashKey);
     this.spaceTypePerlinOpts = {
       key: hashConfig.spaceTypeKey,
       scale: hashConfig.perlinLengthScale,
@@ -146,9 +124,7 @@ class SnarkArgsHelper {
       mirrorY: hashConfig.perlinMirrorY,
       floor: true,
     };
-    this.moveSnarkCache = new LRUMap<string, MoveSnarkContractCallArgs>(
-      SnarkArgsHelper.DEFAULT_SNARK_CACHE_SIZE,
-    );
+    this.moveSnarkCache = new LRUMap<string, MoveSnarkContractCallArgs>(SnarkArgsHelper.DEFAULT_SNARK_CACHE_SIZE);
   }
 
   static create(
@@ -168,31 +144,18 @@ class SnarkArgsHelper {
     const newCache = new LRUMap<string, MoveSnarkContractCallArgs>(size);
     const oldKeys = Array.from(this.moveSnarkCache.keys());
 
-    for (
-      let i = 0;
-      i < newCache.capacity && i < this.moveSnarkCache.size;
-      i++
-    ) {
-      newCache.set(
-        oldKeys[i],
-        this.moveSnarkCache.get(oldKeys[i]) as MoveSnarkContractCallArgs,
-      );
+    for (let i = 0; i < newCache.capacity && i < this.moveSnarkCache.size; i++) {
+      newCache.set(oldKeys[i], this.moveSnarkCache.get(oldKeys[i]) as MoveSnarkContractCallArgs);
     }
 
     this.moveSnarkCache.clear();
     this.moveSnarkCache = newCache;
   }
 
-  async getRevealArgs(
-    x: number,
-    y: number,
-  ): Promise<RevealSnarkContractCallArgs> {
+  async getRevealArgs(x: number, y: number): Promise<RevealSnarkContractCallArgs> {
     try {
       const start = Date.now();
-      this.terminal.current?.println(
-        "REVEAL: calculating witness and proof",
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println("REVEAL: calculating witness and proof", TerminalTextStyle.Sub);
       const input: RevealSnarkInput = {
         x: modPBigInt(x).toString(),
         y: modPBigInt(y).toString(),
@@ -205,20 +168,10 @@ class SnarkArgsHelper {
 
       const { proof, publicSignals }: SnarkJSProofAndSignals = this.useMockHash
         ? this.fakeRevealProof(x, y)
-        : await this.snarkProverQueue.doProof(
-            input,
-            revealCircuitPath,
-            revealZkeyPath,
-          );
-      const ret = buildContractCallArgs(
-        proof,
-        publicSignals,
-      ) as RevealSnarkContractCallArgs;
+        : await this.snarkProverQueue.doProof(input, revealCircuitPath, revealZkeyPath);
+      const ret = buildContractCallArgs(proof, publicSignals) as RevealSnarkContractCallArgs;
       const end = Date.now();
-      this.terminal.current?.println(
-        `REVEAL: calculated witness and proof in ${end - start}ms`,
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println(`REVEAL: calculated witness and proof in ${end - start}ms`, TerminalTextStyle.Sub);
 
       return ret;
     } catch (e) {
@@ -226,17 +179,10 @@ class SnarkArgsHelper {
     }
   }
 
-  async getInitArgs(
-    x: number,
-    y: number,
-    r: number,
-  ): Promise<InitSnarkContractCallArgs> {
+  async getInitArgs(x: number, y: number, r: number): Promise<InitSnarkContractCallArgs> {
     try {
       const start = Date.now();
-      this.terminal.current?.println(
-        "INIT: calculating witness and proof",
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println("INIT: calculating witness and proof", TerminalTextStyle.Sub);
       const input: InitSnarkInput = {
         x: modPBigInt(x).toString(),
         y: modPBigInt(y).toString(),
@@ -251,20 +197,10 @@ class SnarkArgsHelper {
 
       const { proof, publicSignals }: SnarkJSProofAndSignals = this.useMockHash
         ? this.fakeInitProof(x, y, r)
-        : await this.snarkProverQueue.doProof(
-            input,
-            initCircuitPath,
-            initZkeyPath,
-          );
-      const ret = buildContractCallArgs(
-        proof,
-        publicSignals,
-      ) as InitSnarkContractCallArgs;
+        : await this.snarkProverQueue.doProof(input, initCircuitPath, initZkeyPath);
+      const ret = buildContractCallArgs(proof, publicSignals) as InitSnarkContractCallArgs;
       const end = Date.now();
-      this.terminal.current?.println(
-        `INIT: calculated witness and proof in ${end - start}ms`,
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println(`INIT: calculated witness and proof in ${end - start}ms`, TerminalTextStyle.Sub);
 
       return ret;
     } catch (e) {
@@ -289,10 +225,7 @@ class SnarkArgsHelper {
 
     try {
       const start = Date.now();
-      this.terminal.current?.println(
-        "MOVE: calculating witness and proof",
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println("MOVE: calculating witness and proof", TerminalTextStyle.Sub);
       const input: MoveSnarkInput = {
         x1: modPBigInt(x1).toString(),
         y1: modPBigInt(y1).toString(),
@@ -310,21 +243,11 @@ class SnarkArgsHelper {
 
       const { proof, publicSignals }: SnarkJSProofAndSignals = this.useMockHash
         ? this.fakeMoveProof(x1, y1, x2, y2, r, distMax)
-        : await this.snarkProverQueue.doProof(
-            input,
-            moveCircuitPath,
-            moveZkeyPath,
-          );
+        : await this.snarkProverQueue.doProof(input, moveCircuitPath, moveZkeyPath);
 
-      const proofArgs = buildContractCallArgs(
-        proof,
-        publicSignals,
-      ) as MoveSnarkContractCallArgs;
+      const proofArgs = buildContractCallArgs(proof, publicSignals) as MoveSnarkContractCallArgs;
       const end = Date.now();
-      this.terminal.current?.println(
-        `MOVE: calculated witness and proof in ${end - start}ms`,
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println(`MOVE: calculated witness and proof in ${end - start}ms`, TerminalTextStyle.Sub);
 
       this.moveSnarkCache.set(cacheKey, proofArgs);
       return proofArgs;
@@ -333,16 +256,10 @@ class SnarkArgsHelper {
     }
   }
 
-  async getFindArtifactArgs(
-    x: number,
-    y: number,
-  ): Promise<BiomebaseSnarkContractCallArgs> {
+  async getFindArtifactArgs(x: number, y: number): Promise<BiomebaseSnarkContractCallArgs> {
     try {
       const start = Date.now();
-      this.terminal.current?.println(
-        "ARTIFACT: calculating witness and proof",
-        TerminalTextStyle.Sub,
-      );
+      this.terminal.current?.println("ARTIFACT: calculating witness and proof", TerminalTextStyle.Sub);
       const input: BiomebaseSnarkInput = {
         x: modPBigInt(x).toString(),
         y: modPBigInt(y).toString(),
@@ -355,11 +272,7 @@ class SnarkArgsHelper {
 
       const { proof, publicSignals }: SnarkJSProofAndSignals = this.useMockHash
         ? this.fakeBiomebaseProof(x, y)
-        : await this.snarkProverQueue.doProof(
-            input,
-            biomebaseCircuitPath,
-            biomebaseZkeyPath,
-          );
+        : await this.snarkProverQueue.doProof(input, biomebaseCircuitPath, biomebaseZkeyPath);
 
       const proofArgs = buildContractCallArgs(proof, publicSignals);
       const end = Date.now();
@@ -388,9 +301,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
     ];
-    return fakeProof(
-      publicSignals.map((x) => modPBigIntNative(x).toString(10)),
-    );
+    return fakeProof(publicSignals.map((x) => modPBigIntNative(x).toString(10)));
   }
 
   private fakeInitProof(x: number, y: number, r: number) {
@@ -406,19 +317,10 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
     ];
-    return fakeProof(
-      publicSignals.map((x) => modPBigIntNative(x).toString(10)),
-    );
+    return fakeProof(publicSignals.map((x) => modPBigIntNative(x).toString(10)));
   }
 
-  private fakeMoveProof(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    r: number,
-    distMax: number,
-  ) {
+  private fakeMoveProof(x1: number, y1: number, x2: number, y2: number, r: number, distMax: number) {
     const hash1 = this.planetHashMimc(x1, y1);
     const hash2 = this.planetHashMimc(x2, y2);
     const perl2 = perlin({ x: x2, y: y2 }, this.spaceTypePerlinOpts);
@@ -434,9 +336,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
     ];
-    return fakeProof(
-      publicSignals.map((x) => modPBigIntNative(x).toString(10)),
-    );
+    return fakeProof(publicSignals.map((x) => modPBigIntNative(x).toString(10)));
   }
 
   private fakeBiomebaseProof(x: number, y: number) {
@@ -451,9 +351,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
     ];
-    return fakeProof(
-      publicSignals.map((x) => modPBigIntNative(x).toString(10)),
-    );
+    return fakeProof(publicSignals.map((x) => modPBigIntNative(x).toString(10)));
   }
 }
 

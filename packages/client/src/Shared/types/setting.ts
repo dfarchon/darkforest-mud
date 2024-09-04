@@ -1,7 +1,6 @@
 /**
  * @hidden
  */
-
 import type { Abstract } from "./utility";
 
 /**
@@ -24,8 +23,7 @@ export type Setting = Abstract<string, "Setting">;
  */
 export const Setting = {
   OptOutMetrics: "OptOutMetrics" as Setting,
-  AutoApproveNonPurchaseTransactions:
-    "AutoApproveNonPurchaseTransactions" as Setting,
+  AutoApproveNonPurchaseTransactions: "AutoApproveNonPurchaseTransactions" as Setting,
   DrawChunkBorders: "DrawChunkBorders" as Setting,
   HighPerformanceRendering: "HighPerformanceRendering" as Setting,
   MoveNotifications: "MoveNotifications" as Setting,
@@ -53,10 +51,8 @@ export const Setting = {
   ExperimentalFeatures: "ExperimentalFeatures" as Setting,
   DisableEmojiRendering: "DisableEmojiRendering" as Setting,
   DisableHatRendering: "DisableHatRendering" as Setting,
-  AutoClearConfirmedTransactionsAfterSeconds:
-    "AutoClearConfirmedTransactionsAfterSeconds" as Setting,
-  AutoClearRejectedTransactionsAfterSeconds:
-    "AutoClearRejectedTransactionsAfterSeconds" as Setting,
+  AutoClearConfirmedTransactionsAfterSeconds: "AutoClearConfirmedTransactionsAfterSeconds" as Setting,
+  AutoClearRejectedTransactionsAfterSeconds: "AutoClearRejectedTransactionsAfterSeconds" as Setting,
   RendererColorInnerNebula: "RendererColorInnerNebula" as Setting,
   RendererColorNebula: "RendererColorNebula" as Setting,
   RendererColorSpace: "RendererColorSpace" as Setting,

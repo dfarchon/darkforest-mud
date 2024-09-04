@@ -15,14 +15,15 @@ import {
 import { getPlanetRank, isLocatable } from "@df/gamelogic";
 import { seededRandom } from "@df/hashing";
 import { hashToInt } from "@df/serde";
+
 import {
   ArtifactId,
   AvatarType,
   AvatarTypeNames,
   Biome,
   EthAddress,
-  HatType,
   HSLVec,
+  HatType,
   LocationId,
   LogoType,
   LogoTypeNames,
@@ -36,13 +37,7 @@ import {
   UpgradeBranchName,
 } from "../types";
 import Noise from "./Noise";
-import {
-  blurb2grammar,
-  blurbGrammar,
-  planetNameWords,
-  planetTagAdj,
-  planetTagNoun,
-} from "./ProcgenConsts";
+import { blurb2grammar, blurbGrammar, planetNameWords, planetTagAdj, planetTagNoun } from "./ProcgenConsts";
 import tracery from "./tracery";
 import { baseEngModifiers } from "./tracery-modifiers";
 
@@ -267,12 +262,7 @@ export function avatarTypeToNum(avatarType: AvatarType): number {
 }
 
 export function artifactImageTypeToNum(artifactImageType: number): number {
-  if (
-    isMeme(artifactImageType) ||
-    isLogo(artifactImageType) ||
-    isAvatar(artifactImageType)
-  )
-    return artifactImageType;
+  if (isMeme(artifactImageType) || isLogo(artifactImageType) || isAvatar(artifactImageType)) return artifactImageType;
   return 0;
 }
 
@@ -464,21 +454,15 @@ export function getRuinsInfo(loc: LocationId): RuinsInfo {
   return myInfo as RuinsInfo;
 }
 
-export function getPlanetCosmetic(
-  planet: Planet | undefined,
-): PlanetCosmeticInfo {
+export function getPlanetCosmetic(planet: Planet | undefined): PlanetCosmeticInfo {
   if (!planet) return grayColors;
   if (cosmeticByLocId.has(planet.locationId)) {
     return cosmeticByLocId.get(planet.locationId) || grayColors;
   }
 
   // biome-defined
-  const baseColor = isLocatable(planet)
-    ? baseByBiome[planet.biome]
-    : ([0, 0, 50] as HSLVec);
-  const oceanColor = isLocatable(planet)
-    ? oceanByBiome[planet.biome]
-    : ([0, 0, 20] as HSLVec);
+  const baseColor = isLocatable(planet) ? baseByBiome[planet.biome] : ([0, 0, 50] as HSLVec);
+  const oceanColor = isLocatable(planet) ? oceanByBiome[planet.biome] : ([0, 0, 20] as HSLVec);
 
   const baseHue = hashToHue(planet.locationId);
   const seed = parseInt("0x" + planet.locationId.substring(0, 9));
@@ -493,17 +477,9 @@ export function getPlanetCosmetic(
   const secondaryColor2 = [baseColor[0], sS, sL + 10] as HSLVec;
   const secondaryColor3 = [baseColor[0], sS, sL + 20] as HSLVec;
 
-  const beachColor = [
-    baseColor[0] + 10,
-    baseColor[1] - 30,
-    Math.min(baseColor[2] + 23, 100),
-  ] as HSLVec;
+  const beachColor = [baseColor[0] + 10, baseColor[1] - 30, Math.min(baseColor[2] + 23, 100)] as HSLVec;
 
-  const asteroidHsl = (
-    isLocatable(planet) && planet.biome === Biome.WASTELAND
-      ? [0, 0, 40]
-      : baseColor
-  ) as HSLVec;
+  const asteroidHsl = (isLocatable(planet) && planet.biome === Biome.WASTELAND ? [0, 0, 40] : baseColor) as HSLVec;
 
   /* calculate spacetime rip colors */
   const spacetime1: HSLVec = [baseHue, 75, 70];

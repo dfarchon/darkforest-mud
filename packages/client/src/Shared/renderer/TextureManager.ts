@@ -1,12 +1,6 @@
 import { MAX_ARTIFACT_TYPE, MAX_BIOME, MIN_ARTIFACT_TYPE } from "@df/constants";
 import { isBasic, isRelic, isSpaceShip } from "@df/gamelogic";
-import {
-  ArtifactId,
-  ArtifactRarity,
-  ArtifactType,
-  Biome,
-  RenderedArtifact,
-} from "@df/types";
+import { ArtifactId, ArtifactRarity, ArtifactType, Biome, RenderedArtifact } from "@df/types";
 
 export const ARTIFACTS_URL = "/public/sprites/artifacts.png";
 export const ARTIFACTS_THUMBS_URL = "/public/sprites/artifactthumbs.png";
@@ -209,13 +203,10 @@ export function isShiny(rarity: ArtifactRarity) {
   return rarity >= ArtifactRarity.Epic;
 }
 
-export function spriteFromArtifact(
-  artifact: RenderedArtifact,
-): SpriteRectangle {
+export function spriteFromArtifact(artifact: RenderedArtifact): SpriteRectangle {
   const { id, artifactType: type, planetBiome: biome, rarity } = artifact;
 
-  if (artifactSpriteMap.has(id))
-    return artifactSpriteMap.get(id) || EMPTY_SPRITE;
+  if (artifactSpriteMap.has(id)) return artifactSpriteMap.get(id) || EMPTY_SPRITE;
 
   if (isSpaceShip(artifact.artifactType)) {
     const idx = {

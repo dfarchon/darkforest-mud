@@ -1,4 +1,5 @@
 import type { Contract } from "ethers";
+
 import type { ArtifactId, EthAddress, LocationId, UnionId } from "./identifier";
 import type { WorldLocation } from "./world";
 
@@ -55,14 +56,7 @@ export type ContractMethodName =
   | "disbandUnion"
   | "levelUpUnion";
 
-export type EthTxStatus =
-  | "Init"
-  | "Processing"
-  | "Prioritized"
-  | "Submit"
-  | "Confirm"
-  | "Fail"
-  | "Cancel";
+export type EthTxStatus = "Init" | "Processing" | "Prioritized" | "Submit" | "Confirm" | "Fail" | "Cancel";
 
 /**
  * The intent of this type is to represent a transaction that will occur on the blockchain in a way

@@ -15,5 +15,7 @@ import { PlanetMetadata, PlanetMetadataData } from "./tables/PlanetMetadata.sol"
 import { PlanetInitialValue, PlanetInitialValueData } from "./tables/PlanetInitialValue.sol";
 import { Planet, PlanetData } from "./tables/Planet.sol";
 import { PlanetOwner } from "./tables/PlanetOwner.sol";
+import { PendingMove, PendingMoveData } from "./tables/PendingMove.sol";
+import { Move, MoveData } from "./tables/Move.sol";
 import { Ticker, TickerData } from "./tables/Ticker.sol";
 import { InnerCircle, InnerCircleData } from "./tables/InnerCircle.sol";

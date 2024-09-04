@@ -1,6 +1,7 @@
-import { DarkForestSlider, DarkForestSliderHandle } from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
+
+import { DarkForestSlider, DarkForestSliderHandle } from "@df/ui";
 
 customElements.define(DarkForestSlider.tagName, DarkForestSlider);
 customElements.define(DarkForestSliderHandle.tagName, DarkForestSliderHandle);

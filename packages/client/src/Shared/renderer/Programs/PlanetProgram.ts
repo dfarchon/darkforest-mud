@@ -1,5 +1,6 @@
 import { isLocatable } from "@df/gamelogic";
 import { AttribType, Biome, Planet, UniformType } from "@df/types";
+
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 
@@ -410,9 +411,7 @@ export const beachFromPlanet = (p: Planet): number =>
     2, // level 9
   ][p.planetLevel];
 
-export const propsFromPlanet = (
-  p: Planet,
-): [number, number, number, number] => [
+export const propsFromPlanet = (p: Planet): [number, number, number, number] => [
   octavesFromPlanet(p),
   cloudsFromPlanet(p),
   morphFromPlanet(p),

@@ -27,13 +27,7 @@
 import { fakeHash, seededRandom } from "./fakeHash";
 import { Fraction } from "./fractions/bigFraction";
 import mimcHash, { mimcSponge, modPBigInt, modPBigIntNative } from "./mimc";
-import {
-  getRandomGradientAt,
-  IntegerVector,
-  MAX_PERLIN_VALUE,
-  perlin,
-  rand,
-} from "./perlin";
+import { IntegerVector, MAX_PERLIN_VALUE, getRandomGradientAt, perlin, rand } from "./perlin";
 
 export {
   mimcHash,

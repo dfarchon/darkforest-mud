@@ -23,9 +23,6 @@ export class GameGLManager extends WebGLManager {
       : [0.3, 0.3, 0.35, 1.0];
 
     const { gl } = this;
-    super.clear(
-      gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT,
-      color,
-    );
+    super.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT, color);
   }
 }

@@ -2,41 +2,31 @@
   "compilerOptions": {
     "types": ["vite/client"],
     "target": "ES2022",
-    "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/shared/*": ["./src/shared/*"]
-    }
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "module": "esnext",
-    "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@df/*": ["./src/Shared/*"]
+      "@df/*": ["./src/Shared/*"],
+      "@mud/*": ["./src/mud/*"],
+      "@components/*": ["./src/components/*"],
+      "@utils/*": ["./src/utils/*"]
     },
+    "useDefineForClassFields": false,
     "strictPropertyInitialization": false,
-    "useDefineForClassFields": false
+    "ignoreDeprecations": "5.0" // TODO: remove later
   },
   "include": ["src"]
 }

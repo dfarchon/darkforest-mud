@@ -1,10 +1,5 @@
-import {
-  CanvasCoords,
-  RendererType,
-  RenderZIndex,
-  RGBVec,
-  UnminedRendererType,
-} from "@df/types";
+import { CanvasCoords, RGBVec, RenderZIndex, RendererType, UnminedRendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { UNMINED_PROGRAM_DEFINITION } from "../Programs/UnminedProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -30,11 +25,7 @@ export class UnminedRenderer
     color: RGBVec = [255, 0, 0],
     zIdx: number = RenderZIndex.DEFAULT,
   ): void {
-    const {
-      position: posA,
-      rectPos: rectPosA,
-      color: colorA,
-    } = this.attribManagers;
+    const { position: posA, rectPos: rectPosA, color: colorA } = this.attribManagers;
     const { x1, y1 } = { x1: x, y1: y };
     const { x2, y2 } = { x2: x + width, y2: y + height };
 
@@ -56,9 +47,7 @@ export class UnminedRenderer
     this.uniformSetters.time(time);
 
     const viewport = this.manager.renderer.getViewport();
-    const { x: xC, y: yC } = viewport.worldToCanvasCoords(
-      viewport.centerWorldCoords,
-    );
+    const { x: xC, y: yC } = viewport.worldToCanvasCoords(viewport.centerWorldCoords);
     this.uniformSetters.viewportCenter([xC, yC, 0]);
   }
 }

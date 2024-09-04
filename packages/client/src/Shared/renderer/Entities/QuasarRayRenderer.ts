@@ -1,11 +1,6 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
-  CanvasCoords,
-  Planet,
-  QuasarRayRendererType,
-  RendererType,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, Planet, QuasarRayRendererType, RendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { QUASARRAY_PROGRAM_DEFINITION } from "../Programs/QuasarRayProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -33,14 +28,7 @@ export class QuasarRayRenderer
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   }
 
-  public queueQuasarRayScreen(
-    top = true,
-    planet: Planet,
-    center: CanvasCoords,
-    radius: number,
-    z: number,
-    angle = 0,
-  ) {
+  public queueQuasarRayScreen(top = true, planet: Planet, center: CanvasCoords, radius: number, z: number, angle = 0) {
     const { position, color, rectPos } = this.attribManagers;
 
     const facTop = 0.93 + Math.cos(angle + Math.PI) * 0.07;
@@ -75,14 +63,7 @@ export class QuasarRayRenderer
     this.verts += 6;
   }
 
-  public queueQuasarRay(
-    planet: Planet,
-    centerW: WorldCoords,
-    radiusW: number,
-    z: number,
-    top = true,
-    angle = 0,
-  ): void {
+  public queueQuasarRay(planet: Planet, centerW: WorldCoords, radiusW: number, z: number, top = true, angle = 0): void {
     const viewport = this.manager.renderer.getViewport();
     const center = viewport.worldToCanvasCoords(centerW);
     const radius = viewport.worldToCanvasDist(radiusW);

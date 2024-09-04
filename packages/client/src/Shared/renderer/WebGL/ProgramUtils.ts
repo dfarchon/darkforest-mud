@@ -1,15 +1,9 @@
 // adds line numbers to a string. useful for debugging shaders
 const withLineNums = (shader: string): string =>
-  shader
-    .split("\n")
-    .reduce((acc, curr, i) => acc + `[${i}] ` + curr + "\n", "");
+  shader.split("\n").reduce((acc, curr, i) => acc + `[${i}] ` + curr + "\n", "");
 
 export class ProgramUtils {
-  public static createShader(
-    gl: WebGL2RenderingContext,
-    type: number,
-    source: string,
-  ): WebGLShader | null {
+  public static createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
     const shader = gl.createShader(type);
     if (!shader) {
       console.error("error creating shader");

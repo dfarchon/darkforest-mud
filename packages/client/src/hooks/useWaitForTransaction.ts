@@ -5,7 +5,7 @@ import { StorageAdapterBlock } from "@latticexyz/store-sync";
 import { Observable } from "rxjs";
 import { Hex, TransactionReceipt, createPublicClient } from "viem";
 
-import { createWaitForTransaction } from "@/mud/waitForTransaction";
+import { createWaitForTransaction } from "@mud/waitForTransaction";
 
 // Adjust import as necessary
 
@@ -22,7 +22,10 @@ export function useWaitForTransaction({
   >(null);
 
   useEffect(() => {
-    const waitForTransactionFn = createWaitForTransaction({ client, storedBlockLogs$ });
+    const waitForTransactionFn = createWaitForTransaction({
+      client,
+      storedBlockLogs$,
+    });
     setWaitForTransaction(() => waitForTransactionFn);
   }, [client, storedBlockLogs$]);
 

@@ -4,28 +4,22 @@ import {
   ArtifactRarity,
   CanvasCoords,
   GameViewport,
-  RenderedArtifact,
-  RendererType,
   RGBAVec,
   RGBVec,
+  RenderedArtifact,
+  RendererType,
   SpriteRendererType,
   WorldCoords,
 } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { SPRITE_PROGRAM_DEFINITION } from "../Programs/SpriteProgram";
-import {
-  loadArtifactAtlas,
-  loadArtifactThumbAtlas,
-  spriteFromArtifact,
-  SpriteRectangle,
-} from "../TextureManager";
+import { SpriteRectangle, loadArtifactAtlas, loadArtifactThumbAtlas, spriteFromArtifact } from "../TextureManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 import { WebGLManager } from "../WebGL/WebGLManager";
-export class SpriteRenderer
-  extends GenericRenderer<typeof SPRITE_PROGRAM_DEFINITION>
-  implements SpriteRendererType
-{
+
+export class SpriteRenderer extends GenericRenderer<typeof SPRITE_PROGRAM_DEFINITION> implements SpriteRendererType {
   private posBuffer: number[];
   private texBuffer: number[];
   private rectposBuffer: number[];
@@ -218,91 +212,21 @@ export class SpriteRenderer
     const s = this.thumb ? width / 16 : width / 64;
     const iters = this.thumb ? 1 : 2;
     for (let del = s; del <= iters * s; del += s) {
-      this.queueSprite(
-        artifact,
-        { x, y: y - del },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
-      this.queueSprite(
-        artifact,
-        { x, y: y + del },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
-      this.queueSprite(
-        artifact,
-        { x: x + del, y },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
-      this.queueSprite(
-        artifact,
-        { x: x - del, y },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
+      this.queueSprite(artifact, { x, y: y - del }, width, alpha, color, undefined, theta);
+      this.queueSprite(artifact, { x, y: y + del }, width, alpha, color, undefined, theta);
+      this.queueSprite(artifact, { x: x + del, y }, width, alpha, color, undefined, theta);
+      this.queueSprite(artifact, { x: x - del, y }, width, alpha, color, undefined, theta);
     }
 
     if (iters === 2) {
-      this.queueSprite(
-        artifact,
-        { x: x - 1, y: y - 1 },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
-      this.queueSprite(
-        artifact,
-        { x: x - 1, y: y + 1 },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
-      this.queueSprite(
-        artifact,
-        { x: x + 1, y: y - 1 },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
-      this.queueSprite(
-        artifact,
-        { x: x + 1, y: y + 1 },
-        width,
-        alpha,
-        color,
-        undefined,
-        theta,
-      );
+      this.queueSprite(artifact, { x: x - 1, y: y - 1 }, width, alpha, color, undefined, theta);
+      this.queueSprite(artifact, { x: x - 1, y: y + 1 }, width, alpha, color, undefined, theta);
+      this.queueSprite(artifact, { x: x + 1, y: y - 1 }, width, alpha, color, undefined, theta);
+      this.queueSprite(artifact, { x: x + 1, y: y + 1 }, width, alpha, color, undefined, theta);
     }
   }
 
-  queueIconWorld(
-    artifact: Artifact,
-    topLeft: WorldCoords,
-    widthW: number,
-    maxWidth = 32,
-    viewport: GameViewport,
-  ) {
+  queueIconWorld(artifact: Artifact, topLeft: WorldCoords, widthW: number, maxWidth = 32, viewport: GameViewport) {
     const width = viewport.worldToCanvasDist(widthW);
     const loc = viewport.worldToCanvasCoords(topLeft);
     const dim = Math.min(maxWidth, width);

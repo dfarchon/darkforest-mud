@@ -1,12 +1,5 @@
-import {
-  CanvasCoords,
-  DrawMode,
-  LineRendererType,
-  RendererType,
-  RenderZIndex,
-  RGBAVec,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, DrawMode, LineRendererType, RGBAVec, RenderZIndex, RendererType, WorldCoords } from "@df/types";
+
 import { LINE_PROGRAM_DEFINITION } from "../Programs/LineProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
@@ -62,10 +55,7 @@ export class LineRenderer
         this.verts,
       );
 
-      colorA.setVertex(
-        [color[0], color[1], color[2], color[0], color[1], color[2]],
-        this.verts,
-      );
+      colorA.setVertex([color[0], color[1], color[2], color[0], color[1], color[2]], this.verts);
       distA.setVertex([0, dist], this.verts);
       this.verts += 2;
     }

@@ -1,11 +1,6 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
-  CanvasCoords,
-  Planet,
-  QuasarBodyRendererType,
-  RendererType,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, Planet, QuasarBodyRendererType, RendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { QUASARBODY_PROGRAM_DEFINITION } from "../Programs/QuasarBodyProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -27,13 +22,7 @@ export class QuasarBodyRenderer
     this.quad2Buffer = EngineUtils.makeQuadVec2(-1, 1, 1, -1);
   }
 
-  public queueQuasarBodyScreen(
-    planet: Planet,
-    center: CanvasCoords,
-    radius: number,
-    z: number,
-    angle = 0,
-  ) {
+  public queueQuasarBodyScreen(planet: Planet, center: CanvasCoords, radius: number, z: number, angle = 0) {
     const { position, color, rectPos } = this.attribManagers;
 
     const h = radius * (0.65 + Math.cos(angle) * 0.35);
@@ -63,19 +52,9 @@ export class QuasarBodyRenderer
     this.verts += 6;
   }
 
-  public queueQuasarBody(
-    planet: Planet,
-    centerW: WorldCoords,
-    radiusW: number,
-    z: number,
-    angle = 0,
-  ): void {
-    const center = this.manager.renderer
-      .getViewport()
-      .worldToCanvasCoords(centerW);
-    const radius = this.manager.renderer
-      .getViewport()
-      .worldToCanvasDist(radiusW);
+  public queueQuasarBody(planet: Planet, centerW: WorldCoords, radiusW: number, z: number, angle = 0): void {
+    const center = this.manager.renderer.getViewport().worldToCanvasCoords(centerW);
+    const radius = this.manager.renderer.getViewport().worldToCanvasDist(radiusW);
 
     this.queueQuasarBodyScreen(planet, center, radius, z, angle);
   }

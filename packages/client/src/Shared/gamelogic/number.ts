@@ -20,7 +20,6 @@ export const formatNumber = (num: number, smallDec = 0): string => {
 
   if (rem < 10) return `${rem.toFixed(1)}${suffixes[log000]}`;
   else if (rem < 100) return `${rem.toFixed(1)}${suffixes[log000]}`;
-  else if (log000 < suffixes.length)
-    return `${rem.toFixed(0)}${suffixes[log000]}`;
+  else if (log000 < suffixes.length) return `${rem.toFixed(0)}${suffixes[log000]}`;
   else return `${rem.toFixed(0)}E${log000 * 3}`;
 };

@@ -1,13 +1,9 @@
-import { isAncient, isLocatable } from "@df/gamelogic";
-import {
-  Artifact,
-  Biome,
-  BiomeNames,
-  LocatablePlanet,
-  Planet,
-} from "@df/types";
 import React from "react";
+
+import { isAncient, isLocatable } from "@df/gamelogic";
+import { Artifact, Biome, BiomeNames, LocatablePlanet, Planet } from "@df/types";
 import styled from "styled-components";
+
 import { BiomeTextColors } from "../../Styles/Colors";
 import { AncientLabel, AncientLabelAnim } from "../AncientLabel";
 import { icyAnim, shakeAnim } from "../BiomeAnims";
@@ -31,37 +27,19 @@ export const BiomeLabelAnim = ({ biome }: { biome: Biome }) =>
   ) : biome === Biome.WASTELAND ? (
     <WastelandLabel />
   ) : (
-    <StyledBiomeLabelAnim biome={biome}>
-      {BiomeNames[biome]}
-    </StyledBiomeLabelAnim>
+    <StyledBiomeLabelAnim biome={biome}>{BiomeNames[biome]}</StyledBiomeLabelAnim>
   );
 
-export const PlanetBiomeLabelAnim = ({
-  planet,
-}: {
-  planet: LocatablePlanet;
-}) => <BiomeLabelAnim biome={planet.biome} />;
+export const PlanetBiomeLabelAnim = ({ planet }: { planet: LocatablePlanet }) => (
+  <BiomeLabelAnim biome={planet.biome} />
+);
 
-export const OptionalPlanetBiomeLabelAnim = ({
-  planet,
-}: {
-  planet: Planet | undefined;
-}) => (
-  <>
-    {planet && isLocatable(planet) && <PlanetBiomeLabelAnim planet={planet} />}
-  </>
+export const OptionalPlanetBiomeLabelAnim = ({ planet }: { planet: Planet | undefined }) => (
+  <>{planet && isLocatable(planet) && <PlanetBiomeLabelAnim planet={planet} />}</>
 );
 
 export const ArtifactBiomeLabel = ({ artifact }: { artifact: Artifact }) =>
-  isAncient(artifact) ? (
-    <AncientLabel />
-  ) : (
-    <BiomeLabel biome={artifact.planetBiome} />
-  );
+  isAncient(artifact) ? <AncientLabel /> : <BiomeLabel biome={artifact.planetBiome} />;
 
 export const ArtifactBiomeLabelAnim = ({ artifact }: { artifact: Artifact }) =>
-  isAncient(artifact) ? (
-    <AncientLabelAnim />
-  ) : (
-    <BiomeLabelAnim biome={artifact.planetBiome} />
-  );
+  isAncient(artifact) ? <AncientLabelAnim /> : <BiomeLabelAnim biome={artifact.planetBiome} />;

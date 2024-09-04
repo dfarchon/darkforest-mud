@@ -1,16 +1,11 @@
+import React, { useEffect, useState } from "react";
+
 import { BLOCK_EXPLORER_URL } from "@df/constants";
 import { isLocatable } from "@df/gamelogic";
 import { artifactName, getPlanetName } from "@df/procedural";
-import {
-  Artifact,
-  ArtifactId,
-  Chunk,
-  Planet,
-  Transaction,
-  WorldCoords,
-} from "@df/types";
-import React, { useEffect, useState } from "react";
+import { Artifact, ArtifactId, Chunk, Planet, Transaction, WorldCoords } from "@df/types";
 import styled from "styled-components";
+
 // import Viewport from '../Game/Viewport';
 import dfstyles from "../Styles/dfstyles";
 // import { useUIManager } from '../Utils/AppHooks';
@@ -89,11 +84,7 @@ export function TxLink({ tx }: { tx: Transaction }) {
     return (
       <>
         <u>
-          <Link
-            onClick={() => window.open(`${BLOCK_EXPLORER_URL}/tx/${tx.hash}`)}
-          >
-            {tx.hash.substring(0, 7)}
-          </Link>
+          <Link onClick={() => window.open(`${BLOCK_EXPLORER_URL}/tx/${tx.hash}`)}>{tx.hash.substring(0, 7)}</Link>
         </u>
       </>
     );
@@ -148,9 +139,7 @@ export function FAQ04Link({ children }: { children: React.ReactNode }) {
   return <Link to={"https://blog.zkga.me/df-04-faq"}>{children} </Link>;
 }
 
-export const LongDash = () => (
-  <span style={{ transform: "scale(1.5, 1)", display: "inline-block" }}>-</span>
-);
+export const LongDash = () => <span style={{ transform: "scale(1.5, 1)", display: "inline-block" }}>-</span>;
 
 export const Coords = ({ coords: { x, y } }: { coords: WorldCoords }) => (
   <Sub>

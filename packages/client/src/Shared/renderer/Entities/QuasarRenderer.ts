@@ -1,9 +1,5 @@
-import {
-  Planet,
-  QuasarRendererType,
-  RendererType,
-  WorldCoords,
-} from "@df/types";
+import { Planet, QuasarRendererType, RendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";

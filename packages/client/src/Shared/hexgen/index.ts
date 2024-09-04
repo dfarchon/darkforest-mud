@@ -33,11 +33,7 @@ import bigInt from "big-integer";
  * @param startByte The first byte to include in the result.
  * @param endByte The byte _after_ the last byte to include in the result.
  */
-export function getBytesFromHex(
-  hexStr: string,
-  startByte: number,
-  endByte: number,
-) {
+export function getBytesFromHex(hexStr: string, startByte: number, endByte: number) {
   const byteString = hexStr.substring(2 * startByte, 2 * endByte);
   return bigInt(`0x${byteString}`);
 }

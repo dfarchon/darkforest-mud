@@ -70,9 +70,7 @@ export interface PlanetMessageRequest {
  * Contains the answer to the above question.
  */
 export interface PlanetMessageResponse {
-  [
-    planetId: string /* this is really a LocationId */
-  ]: PlanetMessage<unknown>[];
+  [planetId: string /* this is really a LocationId */]: PlanetMessage<unknown>[];
 }
 
 /**

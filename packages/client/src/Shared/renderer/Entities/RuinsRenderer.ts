@@ -1,13 +1,6 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
-  CanvasCoords,
-  Planet,
-  PlanetLevel,
-  RendererType,
-  RGBVec,
-  RuinsRendererType,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, Planet, PlanetLevel, RGBVec, RendererType, RuinsRendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { RUINS_PROGRAM_DEFINITION } from "../Programs/RuinsProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -29,12 +22,7 @@ export class RuinsRenderer
     this.quad2Buffer = EngineUtils.makeQuadVec2(-1, 1, 1, -1);
   }
 
-  public queueRuinsScreen(
-    planet: Planet,
-    center: CanvasCoords,
-    radius: number,
-    z: number,
-  ) {
+  public queueRuinsScreen(planet: Planet, center: CanvasCoords, radius: number, z: number) {
     const cosmetic = getPlanetCosmetic(planet);
 
     const interval = 1 / (planet.planetLevel + 1);
@@ -69,13 +57,7 @@ export class RuinsRenderer
     weights: [number, number, number, number],
     props: [number, number, number, number],
   ) {
-    const {
-      position,
-      color: colorA,
-      rectPos,
-      weights: weightsA,
-      props: propsA,
-    } = this.attribManagers;
+    const { position, color: colorA, rectPos, weights: weightsA, props: propsA } = this.attribManagers;
 
     const r = radius * 1.0;
 
@@ -98,17 +80,9 @@ export class RuinsRenderer
     this.verts += 6;
   }
 
-  public queueRuins(
-    planet: Planet,
-    centerW: WorldCoords,
-    radiusW: number,
-  ): void {
-    const center = this.manager.renderer
-      .getViewport()
-      .worldToCanvasCoords(centerW);
-    const radius = this.manager.renderer
-      .getViewport()
-      .worldToCanvasDist(radiusW);
+  public queueRuins(planet: Planet, centerW: WorldCoords, radiusW: number): void {
+    const center = this.manager.renderer.getViewport().worldToCanvasCoords(centerW);
+    const radius = this.manager.renderer.getViewport().worldToCanvasDist(radiusW);
     const z = EngineUtils.getPlanetZIndex(planet);
 
     this.queueRuinsScreen(planet, center, radius, z);

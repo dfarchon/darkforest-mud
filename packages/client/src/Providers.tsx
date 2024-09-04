@@ -26,10 +26,12 @@ export function Providers({ children }: Props) {
   useEffect(() => {
     const fetchNetworkConfig = async () => {
       try {
-        const config = await getNetworkConfig();
+        const config = getNetworkConfig();
         // Update chain.id to be equal to chainId
         config.chain.id = config.chainId;
         setNetworkConfig(config);
+        console.log("CONFIG");
+        console.log(config);
       } catch (error) {
         console.error("Error fetching network config:", error);
       }
@@ -58,7 +60,7 @@ export function Providers({ children }: Props) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
+        {/* <RainbowKitProvider
           theme={darkTheme({
             accentColor: "#999996",
             accentColorForeground: "#000",
@@ -66,26 +68,16 @@ export function Providers({ children }: Props) {
             fontStack: "system",
             overlayBlur: "small",
           })}
-        >
-          {/* <MUDAccountKitProvider
-            config={{
-              chain: networkConfig.chain,
-              worldAddress: networkConfig.worldAddress,
-              gasTankAddress: (worlds as any)[networkConfig.chainId].address,
-              appInfo: {
-                name: "DF on MUD",
-              },
-            }}
-          > */}{" "}
-          <ExternalWalletProvider networkConfig={networkConfig}>
-            <TooltipProvider delayDuration={300}>
-              {" "}
-              <WalletHeader />
-              {children}
-            </TooltipProvider>
-          </ExternalWalletProvider>
-          {/* </MUDAccountKitProvider> */}
-        </RainbowKitProvider>
+        > */}
+
+        <ExternalWalletProvider networkConfig={networkConfig}>
+          {/* <TooltipProvider delayDuration={300}> */}
+          {/* <WalletHeader /> */}
+          {children}
+          {/* </TooltipProvider> */}
+        </ExternalWalletProvider>
+
+        {/* </RainbowKitProvider> */}
       </QueryClientProvider>
     </WagmiProvider>
   );

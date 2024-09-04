@@ -1,4 +1,5 @@
 import { AttribType, UniformType } from "@df/types";
+
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 
@@ -170,9 +171,4 @@ export const BELT_PROGRAM_DEFINITION = {
 export type BeltProps = [number, number, number, number];
 
 // num, xRad, yRad,
-export const propsFromIdx = (idx: number): BeltProps => [
-  50 + 10 * idx,
-  1.7 + 0.7 * idx,
-  0.3 + 0.25 * idx,
-  0.05,
-];
+export const propsFromIdx = (idx: number): BeltProps => [50 + 10 * idx, 1.7 + 0.7 * idx, 0.3 + 0.25 * idx, 0.05];

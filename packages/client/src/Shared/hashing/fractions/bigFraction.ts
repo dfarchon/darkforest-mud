@@ -38,7 +38,6 @@
  * f.mul([-4, 3]).div(4.9);
  *
  */
-
 import { BigInteger } from "big-integer";
 
 export interface NumeratorDenominator {
@@ -145,10 +144,8 @@ const { Fraction, errorConstructor } = (function (root) {
     return errorConstructor;
   }
 
-  const DivisionByZero = (Fraction["DivisionByZero"] =
-    createError("DivisionByZero"));
-  const InvalidParameter = (Fraction["InvalidParameter"] =
-    createError("InvalidParameter"));
+  const DivisionByZero = (Fraction["DivisionByZero"] = createError("DivisionByZero"));
+  const InvalidParameter = (Fraction["InvalidParameter"] = createError("InvalidParameter"));
 
   function assign(n, s) {
     try {
@@ -300,10 +297,7 @@ const { Fraction, errorConstructor } = (function (root) {
         }
 
         // Check for repeating places
-        if (
-          (match[ndx] === "(" && match[ndx + 2] === ")") ||
-          (match[ndx] === "'" && match[ndx + 2] === "'")
-        ) {
+        if ((match[ndx] === "(" && match[ndx + 2] === ")") || (match[ndx] === "'" && match[ndx + 2] === "'")) {
           x = assign(match[ndx + 1], s);
           z = C_TEN ** BigInt(match[ndx + 1].length) - C_ONE;
           ndx += 3;
@@ -455,10 +449,7 @@ const { Fraction, errorConstructor } = (function (root) {
      **/
     add: function (a, b) {
       parse(a, b);
-      return new Fraction(
-        this["s"] * this["n"] * P["d"] + P["s"] * this["d"] * P["n"],
-        this["d"] * P["d"],
-      );
+      return new Fraction(this["s"] * this["n"] * P["d"] + P["s"] * this["d"] * P["n"], this["d"] * P["d"]);
     },
 
     /**
@@ -468,10 +459,7 @@ const { Fraction, errorConstructor } = (function (root) {
      **/
     sub: function (a, b) {
       parse(a, b);
-      return new Fraction(
-        this["s"] * this["n"] * P["d"] - P["s"] * this["d"] * P["n"],
-        this["d"] * P["d"],
-      );
+      return new Fraction(this["s"] * this["n"] * P["d"] - P["s"] * this["d"] * P["n"], this["d"] * P["d"]);
     },
 
     /**
@@ -481,10 +469,7 @@ const { Fraction, errorConstructor } = (function (root) {
      **/
     mul: function (a, b) {
       parse(a, b);
-      return new Fraction(
-        this["s"] * P["s"] * this["n"] * P["n"],
-        this["d"] * P["d"],
-      );
+      return new Fraction(this["s"] * P["s"] * this["n"] * P["n"], this["d"] * P["d"]);
     },
 
     /**
@@ -494,10 +479,7 @@ const { Fraction, errorConstructor } = (function (root) {
      **/
     div: function (a, b) {
       parse(a, b);
-      return new Fraction(
-        this["s"] * P["s"] * this["n"] * P["d"],
-        this["d"] * P["n"],
-      );
+      return new Fraction(this["s"] * P["s"] * this["n"] * P["d"], this["d"] * P["n"]);
     },
 
     /**
@@ -538,10 +520,7 @@ const { Fraction, errorConstructor } = (function (root) {
        * => b2 * a1 = a2 * b1 * q + b1 * b2 * r
        * => (b2 * a1 % a2 * b1) / (b1 * b2)
        */
-      return new Fraction(
-        (this["s"] * (P["d"] * this["n"])) % (P["n"] * this["d"]),
-        P["d"] * this["d"],
-      );
+      return new Fraction((this["s"] * (P["d"] * this["n"])) % (P["n"] * this["d"]), P["d"] * this["d"]);
     },
 
     /**
@@ -554,10 +533,7 @@ const { Fraction, errorConstructor } = (function (root) {
 
       // gcd(a / b, c / d) = gcd(a, c) / lcm(b, d)
 
-      return new Fraction(
-        gcd(P["n"], this["n"]) * gcd(P["d"], this["d"]),
-        P["d"] * this["d"],
-      );
+      return new Fraction(gcd(P["n"], this["n"]) * gcd(P["d"], this["d"]), P["d"] * this["d"]);
     },
 
     /**
@@ -573,10 +549,7 @@ const { Fraction, errorConstructor } = (function (root) {
       if (P["n"] === C_ZERO && this["n"] === C_ZERO) {
         return new Fraction();
       }
-      return new Fraction(
-        P["n"] * this["n"],
-        gcd(P["n"], this["n"]) * gcd(P["d"], this["d"]),
-      );
+      return new Fraction(P["n"] * this["n"], gcd(P["n"], this["n"]) * gcd(P["d"], this["d"]));
     },
 
     /**
@@ -595,15 +568,9 @@ const { Fraction, errorConstructor } = (function (root) {
      */
     pow: function (m) {
       if (m < 0) {
-        return new Fraction(
-          (this["s"] * this["d"]) ** BigInt(-m),
-          this["n"] ** BigInt(-m),
-        );
+        return new Fraction((this["s"] * this["d"]) ** BigInt(-m), this["n"] ** BigInt(-m));
       } else {
-        return new Fraction(
-          (this["s"] * this["n"]) ** BigInt(+m),
-          this["d"] ** BigInt(+m),
-        );
+        return new Fraction((this["s"] * this["n"]) ** BigInt(+m), this["d"] ** BigInt(+m));
       }
     },
 
@@ -637,10 +604,7 @@ const { Fraction, errorConstructor } = (function (root) {
     ceil: function (places) {
       places = 10 ** Number(places || 0);
 
-      return new Fraction(
-        Math.ceil((places * Number(this["s"] * this["n"])) / Number(this["d"])),
-        places,
-      );
+      return new Fraction(Math.ceil((places * Number(this["s"] * this["n"])) / Number(this["d"])), places);
     },
 
     /**
@@ -651,12 +615,7 @@ const { Fraction, errorConstructor } = (function (root) {
     floor: function (places) {
       places = 10 ** Number(places || 0);
 
-      return new Fraction(
-        Math.floor(
-          (places * Number(this["s"] * this["n"])) / Number(this["d"]),
-        ),
-        places,
-      );
+      return new Fraction(Math.floor((places * Number(this["s"] * this["n"])) / Number(this["d"])), places);
     },
 
     /**
@@ -667,12 +626,7 @@ const { Fraction, errorConstructor } = (function (root) {
     round: function (places) {
       places = 10 ** Number(places || 0);
 
-      return new Fraction(
-        Math.round(
-          (places * Number(this["s"] * this["n"])) / Number(this["d"]),
-        ),
-        places,
-      );
+      return new Fraction(Math.round((places * Number(this["s"] * this["n"])) / Number(this["d"])), places);
     },
 
     /**
@@ -682,9 +636,7 @@ const { Fraction, errorConstructor } = (function (root) {
      */
     divisible: function (a, b) {
       parse(a, b);
-      return !(
-        !(P["n"] * this["d"]) || (this["n"] * P["d"]) % (P["n"] * this["d"])
-      );
+      return !(!(P["n"] * this["d"]) || (this["n"] * P["d"]) % (P["n"] * this["d"]));
     },
 
     /**

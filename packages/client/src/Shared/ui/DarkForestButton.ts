@@ -1,5 +1,6 @@
-import { css, html, LitElement, unsafeCSS } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+
 import * as dfstyles from "./styles";
 
 export class DarkForestButton extends LitElement {
@@ -22,10 +23,7 @@ export class DarkForestButton extends LitElement {
         align-items: center;
         cursor: pointer;
         color: var(--df-button-color, ${unsafeCSS(dfstyles.colors.text)});
-        background-color: var(
-          --df-button-background,
-          ${unsafeCSS(dfstyles.colors.backgroundDark)}
-        );
+        background-color: var(--df-button-background, ${unsafeCSS(dfstyles.colors.backgroundDark)});
         padding: 2px 8px;
       }
 
@@ -34,10 +32,7 @@ export class DarkForestButton extends LitElement {
       .button:not(.disabled).forceActive {
         filter: brightness(80%);
         color: ${unsafeCSS(dfstyles.colors.background)};
-        background: var(
-          --df-button-hover-background,
-          ${unsafeCSS(dfstyles.colors.text)}
-        );
+        background: var(--df-button-hover-background, ${unsafeCSS(dfstyles.colors.text)});
 
         /* Set the Icon color to a darker value on hover */
         --df-icon-color: ${unsafeCSS(dfstyles.colors.background)};
@@ -64,10 +59,7 @@ export class DarkForestButton extends LitElement {
       .medium,
       .large,
       .stretch {
-        border: var(
-          --df-button-border,
-          1px solid ${unsafeCSS(dfstyles.colors.borderDark)}
-        );
+        border: var(--df-button-border, 1px solid ${unsafeCSS(dfstyles.colors.borderDark)});
       }
 
       .medium:not(.disabled):hover,
@@ -78,10 +70,7 @@ export class DarkForestButton extends LitElement {
       .large:not(.disabled).forceActive,
       .stretch:not(.disabled):hover,
       .stretch:not(.disabled).forceActive .stretch:active {
-        border: var(
-          --df-button-hover-border,
-          1px solid ${unsafeCSS(dfstyles.colors.border)}
-        );
+        border: var(--df-button-hover-border, 1px solid ${unsafeCSS(dfstyles.colors.border)});
       }
 
       .danger:not(.disabled) {

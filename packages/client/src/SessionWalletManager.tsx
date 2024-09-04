@@ -8,7 +8,8 @@ import { useWalletClient } from "wagmi";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/tooltip";
 import { useBurnerBalance, useMainWalletBalance } from "./hooks/useBalance";
 import { clientOptions } from "./mud/common";
-import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE, shortedAddress } from "./shared";
+import { shortedAddress } from "./components/utils";
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@df/constants";
 
 export const SessionWalletManager: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const burnerAccount = createBurnerAccount(localStorage.getItem("mud:burnerWallet") as `0x${string}`);

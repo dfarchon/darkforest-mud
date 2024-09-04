@@ -1,20 +1,12 @@
 import { isLocatable } from "@df/gamelogic";
 import { isUnconfirmedMoveTx } from "@df/serde";
-import {
-  ArtifactType,
-  Planet,
-  RendererType,
-  RenderZIndex,
-  RGBVec,
-  UIRendererType,
-  WorldCoords,
-} from "@df/types";
+import { ArtifactType, Planet, RGBVec, RenderZIndex, RendererType, UIRendererType, WorldCoords } from "@df/types";
+
 import { engineConsts } from "./EngineConsts";
 import { Renderer } from "./Renderer";
 import { GameGLManager } from "./WebGL/GameGLManager";
 
-const { orangeA, red, redA, white, whiteA, purpleA, blueA, pinkA, sensaichaA } =
-  engineConsts.colors;
+const { orangeA, red, redA, white, whiteA, purpleA, blueA, pinkA, sensaichaA } = engineConsts.colors;
 
 export class UIRenderer implements UIRendererType {
   renderer: Renderer;
@@ -35,16 +27,9 @@ export class UIRenderer implements UIRendererType {
   }
 
   queueMousePath() {
-    const {
-      context: uiManager,
-      lineRenderer: lR,
-      textRenderer: tR,
-      circleRenderer: cR,
-    } = this.renderer;
+    const { context: uiManager, lineRenderer: lR, textRenderer: tR, circleRenderer: cR } = this.renderer;
     const mouseDownPlanet = uiManager.getMouseDownPlanet();
-    const loc = mouseDownPlanet
-      ? uiManager.getLocationOfPlanet(mouseDownPlanet.locationId)
-      : undefined;
+    const loc = mouseDownPlanet ? uiManager.getLocationOfPlanet(mouseDownPlanet.locationId) : undefined;
 
     const to: WorldCoords | undefined = uiManager.getHoveringOverCoords();
     const from: WorldCoords | undefined = loc?.coords;
@@ -79,25 +64,15 @@ export class UIRenderer implements UIRendererType {
       } else {
         const myPlanet = uiManager.getPlanetWithCoords(from);
         if (myPlanet && isLocatable(myPlanet) && to !== from) {
-          lR.queueLineWorld(
-            from,
-            to,
-            uiManager.isAbandoning() ? orangeA : whiteA,
-            2,
-            RenderZIndex.Voyages,
-          );
+          lR.queueLineWorld(from, to, uiManager.isAbandoning() ? orangeA : whiteA, 2, RenderZIndex.Voyages);
 
           let effectiveEnergy = myPlanet.energy;
 
-          for (const unconfirmedMove of myPlanet.transactions?.getTransactions(
-            isUnconfirmedMoveTx,
-          ) ?? []) {
+          for (const unconfirmedMove of myPlanet.transactions?.getTransactions(isUnconfirmedMoveTx) ?? []) {
             effectiveEnergy -= unconfirmedMove.intent.forces;
           }
 
-          const energy =
-            (uiManager.getForcesSending(myPlanet.locationId) / 100) *
-            effectiveEnergy;
+          const energy = (uiManager.getForcesSending(myPlanet.locationId) / 100) * effectiveEnergy;
           const distance = uiManager.getDistCoords(from, to);
 
           const myAtk: number = uiManager.getEnergyArrivingForMove(
@@ -107,31 +82,19 @@ export class UIRenderer implements UIRendererType {
             energy,
           );
 
-          if (
-            !uiManager.getHoveringOverPlanet() &&
-            !uiManager.isSendingShip(myPlanet.locationId)
-          ) {
+          if (!uiManager.getHoveringOverPlanet() && !uiManager.isSendingShip(myPlanet.locationId)) {
             const color = myAtk > 0 ? whiteA : redA;
             color[3] = 255;
-            tR.queueTextWorld(
-              `Energy: ${Math.round(myAtk)}`,
-              { x: to.x, y: to.y },
-              color,
-            );
+            tR.queueTextWorld(`Energy: ${Math.round(myAtk)}`, { x: to.x, y: to.y }, color);
           }
         }
       }
     }
   }
 
-  private queueRectAtPlanet(
-    planet: Planet,
-    coords: WorldCoords,
-    color: RGBVec,
-  ) {
+  private queueRectAtPlanet(planet: Planet, coords: WorldCoords, color: RGBVec) {
     const { context: uiManager, rectRenderer } = this.renderer;
-    const sideLength =
-      2.3 * uiManager.getRadiusOfPlanetLevel(planet.planetLevel);
+    const sideLength = 2.3 * uiManager.getRadiusOfPlanetLevel(planet.planetLevel);
 
     rectRenderer.queueRectCenterWorld(coords, sideLength, sideLength, color, 2);
   }

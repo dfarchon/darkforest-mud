@@ -46,10 +46,7 @@ var tracery = (function () {
 
   // Expand the node (with the given child rule)
   //  Make children if the node has any
-  TraceryNode.prototype.expandChildren = function (
-    childRule,
-    preventRecursion,
-  ) {
+  TraceryNode.prototype.expandChildren = function (childRule, preventRecursion) {
     this.children = [];
     this.finishedText = "";
 
@@ -124,8 +121,7 @@ var tracery = (function () {
 
           // Make undo actions for all preactions (pops for each push)
           for (var i = 0; i < this.preactions.length; i++) {
-            if (this.preactions[i].type === 0)
-              this.postactions.push(this.preactions[i].createUndo());
+            if (this.preactions[i].type === 0) this.postactions.push(this.preactions[i].createUndo());
           }
 
           // Activate all the preactions
@@ -137,11 +133,7 @@ var tracery = (function () {
 
           // Expand (passing the node, this allows tracking of recursion depth)
 
-          var selectedRule = this.grammar.selectRule(
-            this.symbol,
-            this,
-            this.errors,
-          );
+          var selectedRule = this.grammar.selectRule(this.symbol, this, this.errors);
 
           this.expandChildren(selectedRule, preventRecursion);
 
@@ -357,9 +349,7 @@ var tracery = (function () {
           errors.push("Falloff distribution not yet implemented");
           break;
         default:
-          index = Math.floor(
-            Math.pow(rng(), this.falloff) * this.defaultRules.length,
-          );
+          index = Math.floor(Math.pow(rng(), this.falloff) * this.defaultRules.length);
           break;
       }
 
@@ -431,9 +421,7 @@ var tracery = (function () {
     });
 
     if (this.stack.length === 0) {
-      errors.push(
-        "The rule stack for '" + this.key + "' is empty, too many pops?",
-      );
+      errors.push("The rule stack for '" + this.key + "' is empty, too many pops?");
       return "((" + this.key + "))";
     }
 
@@ -532,8 +520,7 @@ var tracery = (function () {
   };
 
   Grammar.prototype.popRules = function (key) {
-    if (!this.symbols[key])
-      this.errors.push("Can't pop: no symbol for key " + key);
+    if (!this.symbols[key]) this.errors.push("Can't pop: no symbol for key " + key);
     this.symbols[key].popRules();
   };
 
@@ -546,8 +533,7 @@ var tracery = (function () {
 
     // Failover to alternative subgrammars
     for (var i = 0; i < this.subgrammars.length; i++) {
-      if (this.subgrammars[i].symbols[key])
-        return this.subgrammars[i].symbols[key].selectRule();
+      if (this.subgrammars[i].symbols[key]) return this.subgrammars[i].symbols[key].selectRule();
     }
 
     // No symbol?
@@ -619,8 +605,7 @@ var tracery = (function () {
         }
         var rawSubstring;
         if (lastEscapedChar !== undefined) {
-          rawSubstring =
-            escapedSubstring + "\\" + rule.substring(lastEscapedChar + 1, end);
+          rawSubstring = escapedSubstring + "\\" + rule.substring(lastEscapedChar + 1, end);
         } else {
           rawSubstring = rule.substring(start, end);
         }

@@ -45,4 +45,6 @@ export const wagmiConfig2 = await getDefaultConfig({
 });
 
 // TODO: figure out how to get public client without !
-export const publicClient = getPublicClient(wagmiConfig, { chainId: networkConfig.chainId })!;
+export const publicClient = getPublicClient(wagmiConfig, {
+  chainId: networkConfig.chainId,
+})!;

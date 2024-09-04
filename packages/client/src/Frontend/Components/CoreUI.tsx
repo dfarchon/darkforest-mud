@@ -1,6 +1,8 @@
-import colors from "color";
 import React, { ChangeEvent, useCallback } from "react";
+
+import colors from "color";
 import styled, { css } from "styled-components";
+
 import dfstyles from "../Styles/dfstyles";
 import { DFZIndex } from "../Utils/constants";
 
@@ -33,17 +35,7 @@ export const TextButton = styled.span`
 `;
 
 export const Padded = styled.div`
-  ${({
-    left,
-    top,
-    right,
-    bottom,
-  }: {
-    left?: string;
-    top?: string;
-    right?: string;
-    bottom?: string;
-  }) => css`
+  ${({ left, top, right, bottom }: { left?: string; top?: string; right?: string; bottom?: string }) => css`
     padding-left: ${left || "8px"};
     padding-top: ${top || "8px"};
     padding-right: ${right || "8px"};
@@ -109,11 +101,7 @@ export const Bottom = styled.div`
   left: 0;
 `;
 
-export const VerticalSplit = function ({
-  children,
-}: {
-  children: [React.ReactNode, React.ReactNode];
-}) {
+export const VerticalSplit = function ({ children }: { children: [React.ReactNode, React.ReactNode] }) {
   return (
     <VerticalSplitRow>
       <VerticalSplitChild>{children[0]}</VerticalSplitChild>
@@ -187,12 +175,7 @@ export function Link(
   const { to, color, openInThisTab, children } = props;
 
   return (
-    <LinkImpl
-      {...props}
-      href={to}
-      color={color}
-      target={openInThisTab ? undefined : "_blank"}
-    >
+    <LinkImpl {...props} href={to} color={color} target={openInThisTab ? undefined : "_blank"}>
       {children}
     </LinkImpl>
   );

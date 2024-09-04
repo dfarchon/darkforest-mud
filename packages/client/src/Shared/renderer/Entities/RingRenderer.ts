@@ -1,18 +1,7 @@
-import {
-  CanvasCoords,
-  GameViewport,
-  Planet,
-  RendererType,
-  RGBVec,
-  RingRendererType,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, GameViewport, Planet, RGBVec, RendererType, RingRendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
-import {
-  propsFromIdx,
-  RingProps,
-  RING_PROGRAM_DEFINITION,
-} from "../Programs/RingProgram";
+import { RING_PROGRAM_DEFINITION, RingProps, propsFromIdx } from "../Programs/RingProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
@@ -64,12 +53,7 @@ export class RingRenderer
     props: RingProps = [1, 1, 1],
     angle = 0,
   ) {
-    const {
-      position: posA,
-      rectPos: rectPosA,
-      color: colorA,
-      props: propsA,
-    } = this.attribManagers;
+    const { position: posA, rectPos: rectPosA, color: colorA, props: propsA } = this.attribManagers;
 
     EngineUtils.makeQuadVec2Buffered(this.topRectPosBuffer, -l, l, l, 0);
     EngineUtils.makeQuadVec2Buffered(this.botRectPosBuffer, -l, 0, l, -l);
@@ -112,14 +96,7 @@ export class RingRenderer
     this.verts += 6;
   }
 
-  queueRingAtIdx(
-    planet: Planet,
-    centerW: WorldCoords,
-    radiusW: number,
-    color: RGBVec,
-    beltIdx: number,
-    angle = 0,
-  ) {
+  queueRingAtIdx(planet: Planet, centerW: WorldCoords, radiusW: number, color: RGBVec, beltIdx: number, angle = 0) {
     const delZ = 0.01 * (beltIdx + 1);
 
     const props = propsFromIdx(beltIdx);

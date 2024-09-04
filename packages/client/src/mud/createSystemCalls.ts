@@ -5,9 +5,10 @@
 import { getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 
+import { Address } from "viem";
+
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
-import { Address } from "viem";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
@@ -34,7 +35,6 @@ export function createSystemCalls(
   { worldContract, waitForTransaction }: SetupNetworkResult,
   { PlayersTable }: ClientComponents,
 ) {
-
   // const increment = async () => {
   //   /*
   //    * Because IncrementSystem

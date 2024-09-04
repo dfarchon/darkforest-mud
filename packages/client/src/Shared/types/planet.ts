@@ -76,14 +76,7 @@ export const PlanetTypeNames = {
  * doubling each of five stats: (in order) [energyCap, energyGrowth, range,
  * speed, defense]
  */
-export type PlanetBonus = [
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-];
+export type PlanetBonus = [boolean, boolean, boolean, boolean, boolean, boolean];
 
 /**
  * Represents a Dark Forest planet object (planets, asteroid fields, quasars,

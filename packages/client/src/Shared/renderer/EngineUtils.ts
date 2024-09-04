@@ -1,4 +1,4 @@
-import { Planet, RenderZIndex, RGBVec } from "@df/types";
+import { Planet, RGBVec, RenderZIndex } from "@df/types";
 
 /* generic template string which, combined with a vscode package, let us get syntax highlighting. */
 
@@ -16,8 +16,7 @@ export class EngineUtils {
    * 12000 is a nicely divisible number, 2pi ensures periodicity
    * @returns the modular of the current unix time by (2 * pi  * 12000) in seconds
    */
-  public static getNow = (): number =>
-    (Date.now() / 1000) % (2 * Math.PI * 12000);
+  public static getNow = (): number => (Date.now() / 1000) % (2 * Math.PI * 12000);
 
   // prettier-ignore
   public static fillTexture(gl: WebGL2RenderingContext) {
@@ -30,12 +29,7 @@ export class EngineUtils {
     return `#${hex(r)}${hex(g)}${hex(b)}`;
   }
 
-  private static rotateIndices(
-    b: number[],
-    i: number,
-    j: number,
-    angle: number,
-  ): void {
+  private static rotateIndices(b: number[], i: number, j: number, angle: number): void {
     const [x, y] = [b[i], b[j]];
     const c = Math.cos(angle);
     const s = Math.sin(angle);
@@ -63,12 +57,7 @@ export class EngineUtils {
     EngineUtils.rotateIndices(b, 10, 11, angle);
   }
 
-  private static translateIndices(
-    b: number[],
-    i: number,
-    j: number,
-    [tx, ty]: [number, number],
-  ): void {
+  private static translateIndices(b: number[], i: number, j: number, [tx, ty]: [number, number]): void {
     b[i] += tx;
     b[j] += ty;
   }
@@ -106,13 +95,7 @@ export class EngineUtils {
   }
 
   /* makes a 3d quad */
-  public static makeQuad(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    z: number,
-  ): number[] {
+  public static makeQuad(x1: number, y1: number, x2: number, y2: number, z: number): number[] {
     // prettier-ignore
     return [
       x1, y1, z,
@@ -143,12 +126,7 @@ export class EngineUtils {
   }
 
   /* like above, but 2d */
-  public static makeQuadVec2(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-  ): number[] {
+  public static makeQuadVec2(x1: number, y1: number, x2: number, y2: number): number[] {
     // prettier-ignore
     return [
       x1, y1,
@@ -196,6 +174,5 @@ export class EngineUtils {
     b[20] = ax2; b[21] = ay2; b[22] = bx2; b[23] = by2;
   }
 
-  public static getPlanetZIndex = (planet: Planet): number =>
-    RenderZIndex.Planets + planet.planetLevel;
+  public static getPlanetZIndex = (planet: Planet): number => RenderZIndex.Planets + planet.planetLevel;
 }

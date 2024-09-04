@@ -1,5 +1,6 @@
 import { PICTURE_URL } from "@df/constants";
 import { MemeType } from "@df/types";
+
 export type Meme = {
   legacy: boolean;
   topLayer: Array<string>;

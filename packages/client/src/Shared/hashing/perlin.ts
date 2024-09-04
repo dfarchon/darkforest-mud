@@ -1,5 +1,6 @@
 import { PerlinConfig } from "@df/types";
 import BigInt, { BigInteger } from "big-integer";
+
 import { Fraction, IFraction } from "./fractions/bigFraction";
 import { perlinRandHash } from "./mimc";
 
@@ -78,13 +79,8 @@ try {
   console.error("Browser does not support BigInt.", err);
 }
 
-export const getRandomGradientAt = (
-  point: Vector,
-  scale: IFraction,
-  randFn: HashFn,
-): Vector => {
-  const val =
-    vecs[randFn(point.x.valueOf(), point.y.valueOf(), scale.valueOf())];
+export const getRandomGradientAt = (point: Vector, scale: IFraction, randFn: HashFn): Vector => {
+  const val = vecs[randFn(point.x.valueOf(), point.y.valueOf(), scale.valueOf())];
   return val;
 };
 
@@ -125,10 +121,9 @@ const perlinValue: (
   for (const corner of corners) {
     const distVec = minus(p, corner.coords);
     ret = ret.add(
-      getWeight(
-        scalarMultiply(scale.inverse(), corner.coords),
-        scalarMultiply(scale.inverse(), p),
-      ).mul(dot(scalarMultiply(scale.inverse(), distVec), corner.gradient)),
+      getWeight(scalarMultiply(scale.inverse(), corner.coords), scalarMultiply(scale.inverse(), p)).mul(
+        dot(scalarMultiply(scale.inverse(), distVec), corner.gradient),
+      ),
     );
   }
   return ret;
@@ -159,11 +154,7 @@ const realMod = (dividend: IFraction, divisor: IFraction): IFraction => {
   return temp;
 };
 
-const valueAt = (
-  p: Vector,
-  scale: IFraction,
-  randFn: (...inputs: number[]) => number,
-) => {
+const valueAt = (p: Vector, scale: IFraction, randFn: (...inputs: number[]) => number) => {
   const bottomLeftCoords = {
     x: p.x.sub(realMod(p.x, scale)),
     y: p.y.sub(realMod(p.y, scale)),
@@ -198,11 +189,7 @@ const valueAt = (
     gradient: getRandomGradientAt(topRightCoords, scale, randFn),
   };
 
-  const out = perlinValue(
-    [bottomLeftGrad, bottomRightGrad, topLeftGrad, topRightGrad],
-    scale,
-    p,
-  );
+  const out = perlinValue([bottomLeftGrad, bottomRightGrad, topLeftGrad, topRightGrad], scale, p);
 
   return out;
 };
@@ -224,13 +211,7 @@ export function perlin(coords: IntegerVector, options: PerlinConfig) {
   const pValues: IFraction[] = [];
   for (let i = 0; i < 3; i += 1) {
     // scale must be a power of two, up to 8192
-    pValues.push(
-      valueAt(
-        fractionalP,
-        new Fraction(options.scale * 2 ** i),
-        rand(options.key),
-      ),
-    );
+    pValues.push(valueAt(fractionalP, new Fraction(options.scale * 2 ** i), rand(options.key)));
   }
   ret = ret.add(pValues[0]);
   ret = ret.add(pValues[0]);

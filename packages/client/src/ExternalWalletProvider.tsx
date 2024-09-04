@@ -6,8 +6,9 @@ import { transactionQueue } from "@latticexyz/common/actions";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import { Hex, createPublicClient, fallback, getContract, http, webSocket } from "viem";
 import { useWalletClient } from "wagmi";
+
 import { NetworkConfig } from "./mud/utils";
-import { useStore } from "./useStore";
+import { useStore } from "./hooks/useStore";
 
 export type Props = {
   networkConfig: NetworkConfig;
@@ -20,7 +21,10 @@ export function ExternalWalletProvider({ networkConfig, children }: Props) {
     if (networkConfig.useBurner) return;
 
     if (!externalWalletClient) {
-      useStore.setState({ externalWalletClient: null, externalWorldContract: null });
+      useStore.setState({
+        externalWalletClient: null,
+        externalWorldContract: null,
+      });
       return;
     }
 
@@ -42,7 +46,10 @@ export function ExternalWalletProvider({ networkConfig, children }: Props) {
       },
     });
 
-    useStore.setState({ externalWalletClient: customExternalWalletClient, externalWorldContract });
+    useStore.setState({
+      externalWalletClient: customExternalWalletClient,
+      externalWorldContract,
+    });
   }, [externalWalletClient, networkConfig.chain, networkConfig.useBurner, networkConfig.worldAddress]);
 
   return children;

@@ -1,13 +1,6 @@
+import { AsteroidRendererType, CanvasCoords, DrawMode, GameViewport, Planet, RGBVec, RendererType } from "@df/types";
+
 import { getPlanetCosmetic } from "../../procedural";
-import {
-  AsteroidRendererType,
-  CanvasCoords,
-  DrawMode,
-  GameViewport,
-  Planet,
-  RendererType,
-  RGBVec,
-} from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { ASTEROID_PROGRAM_DEFINITION } from "../Programs/AsteroidProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -26,19 +19,8 @@ export class AsteroidRenderer
     this.viewport = manager.renderer.getViewport();
   }
 
-  public queueAsteroid(
-    planet: Planet,
-    centerW: CanvasCoords,
-    radiusW: number,
-    color: RGBVec,
-  ) {
-    const {
-      position: posA,
-      color: colorA,
-      radius: radiusA,
-      theta: thetaA,
-      seed: seedA,
-    } = this.attribManagers;
+  public queueAsteroid(planet: Planet, centerW: CanvasCoords, radiusW: number, color: RGBVec) {
+    const { position: posA, color: colorA, radius: radiusA, theta: thetaA, seed: seedA } = this.attribManagers;
 
     const center = this.viewport.worldToCanvasCoords(centerW);
     const radius = this.viewport.worldToCanvasDist(radiusW);

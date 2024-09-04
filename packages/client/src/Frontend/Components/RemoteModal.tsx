@@ -1,6 +1,8 @@
-import { ModalId } from "@df/types";
 import * as React from "react";
 import ReactDOM from "react-dom";
+
+import { ModalId } from "@df/types";
+
 import { ModalPane } from "../Views/ModalPane";
 
 /**
@@ -25,13 +27,7 @@ export function RemoteModal({
   width?: string;
 }>) {
   return ReactDOM.createPortal(
-    <ModalPane
-      id={id}
-      title={title}
-      visible={visible}
-      onClose={onClose}
-      width={width}
-    >
+    <ModalPane id={id} title={title} visible={visible} onClose={onClose} width={width}>
       {children}
     </ModalPane>,
     container,

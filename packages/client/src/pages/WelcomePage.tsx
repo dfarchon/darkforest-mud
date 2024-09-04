@@ -19,7 +19,7 @@ export const WelcomePage: React.FC = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="m-auto ">
+      <div className="m-auto">
         {!isConnected && (
           <>
             <h1 className="mb-6 text-2xl font-bold">Connect your wallet to play MUD version of Dark Forest</h1>

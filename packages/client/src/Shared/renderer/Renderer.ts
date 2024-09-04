@@ -30,9 +30,9 @@ import {
   PinkZoneRendererType,
   Planet,
   PlanetLevel,
-  PlanetRendererType,
   PlanetRenderInfo,
   PlanetRenderManagerType,
+  PlanetRendererType,
   Player,
   QuasarBodyRendererType,
   QuasarRayRendererType,
@@ -44,8 +44,8 @@ import {
   RuinsRendererType,
   Setting,
   SpaceRendererType,
-  SpacetimeRipRendererType,
   SpaceType,
+  SpacetimeRipRendererType,
   SpriteRendererType,
   TextRendererType,
   Transaction,
@@ -58,6 +58,7 @@ import {
   WorldLocation,
 } from "@df/types";
 import autoBind from "auto-bind";
+
 import { AsteroidRenderer } from "./Entities/AsteroidRenderer";
 import { BackgroundRenderer } from "./Entities/BackgroundRenderer";
 import { BeltRenderer } from "./Entities/BeltRenderer";
@@ -71,8 +72,8 @@ import { MineBodyRenderer } from "./Entities/MineBodyRenderer";
 import { MineRenderer } from "./Entities/MineRenderer";
 import { PerlinRenderer } from "./Entities/PerlinRenderer";
 import { PinkZoneRenderer } from "./Entities/PinkZoneRenderer";
-import { PlanetRenderer } from "./Entities/PlanetRenderer";
 import { PlanetRenderManager } from "./Entities/PlanetRenderManager";
+import { PlanetRenderer } from "./Entities/PlanetRenderer";
 import { QuasarBodyRenderer } from "./Entities/QuasarBodyRenderer";
 import { QuasarRayRenderer } from "./Entities/QuasarRayRenderer";
 import { QuasarRenderer } from "./Entities/QuasarRenderer";
@@ -323,14 +324,7 @@ export class Renderer {
     context: RendererGameContext,
     config: IRendererConfig,
   ) {
-    const canvasRenderer = new Renderer(
-      canvas,
-      glCanvas,
-      bufferCanvas,
-      viewport,
-      context,
-      config,
-    );
+    const canvasRenderer = new Renderer(canvas, glCanvas, bufferCanvas, viewport, context, config);
     Renderer.instance = canvasRenderer;
 
     return canvasRenderer;
@@ -370,37 +364,17 @@ export class Renderer {
     // get some data
     const { cachedPlanets, chunks } = this.context.getLocationsAndChunks();
 
-    const innerNebulaColor = this.context.getStringSetting(
-      Setting.RendererColorInnerNebula,
-    );
-    const nebulaColor = this.context.getStringSetting(
-      Setting.RendererColorNebula,
-    );
-    const spaceColor = this.context.getStringSetting(
-      Setting.RendererColorSpace,
-    );
-    const deepSpaceColor = this.context.getStringSetting(
-      Setting.RendererColorDeepSpace,
-    );
-    const deadSpaceColor = this.context.getStringSetting(
-      Setting.RendererColorDeadSpace,
-    );
+    const innerNebulaColor = this.context.getStringSetting(Setting.RendererColorInnerNebula);
+    const nebulaColor = this.context.getStringSetting(Setting.RendererColorNebula);
+    const spaceColor = this.context.getStringSetting(Setting.RendererColorSpace);
+    const deepSpaceColor = this.context.getStringSetting(Setting.RendererColorDeepSpace);
+    const deadSpaceColor = this.context.getStringSetting(Setting.RendererColorDeadSpace);
 
-    const isHighPerfMode = this.context.getBooleanSetting(
-      Setting.HighPerformanceRendering,
-    );
-    const disableEmojis = this.context.getBooleanSetting(
-      Setting.DisableEmojiRendering,
-    );
-    const disableHats = this.context.getBooleanSetting(
-      Setting.DisableHatRendering,
-    );
-    const drawChunkBorders = this.context.getBooleanSetting(
-      Setting.DrawChunkBorders,
-    );
-    const disableFancySpaceEffect = this.context.getBooleanSetting(
-      Setting.DisableFancySpaceEffect,
-    );
+    const isHighPerfMode = this.context.getBooleanSetting(Setting.HighPerformanceRendering);
+    const disableEmojis = this.context.getBooleanSetting(Setting.DisableEmojiRendering);
+    const disableHats = this.context.getBooleanSetting(Setting.DisableHatRendering);
+    const drawChunkBorders = this.context.getBooleanSetting(Setting.DrawChunkBorders);
+    const disableFancySpaceEffect = this.context.getBooleanSetting(Setting.DisableFancySpaceEffect);
 
     // draw the bg
     this.bgRenderer.queueChunks(
@@ -440,13 +414,7 @@ export class Renderer {
     this.linkRenderManager.queueLinks();
 
     // queue planets
-    this.planetRenderManager.queuePlanets(
-      cachedPlanets,
-      this.now,
-      isHighPerfMode,
-      disableEmojis,
-      disableHats,
-    );
+    this.planetRenderManager.queuePlanets(cachedPlanets, this.now, isHighPerfMode, disableEmojis, disableHats);
 
     // flush all - ordering matters! (they get drawn bottom-up)
 

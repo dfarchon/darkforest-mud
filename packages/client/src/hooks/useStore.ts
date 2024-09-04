@@ -4,28 +4,27 @@ import { Config } from "wagmi";
 import { create } from "zustand";
 
 // import { HeadlessLayer } from "./layers/Headless";
-import { LocalLayer } from "./layers/Local";
-import { NetworkLayer } from "./layers/Network";
-
+// import { LocalLayer } from "./layers/Local";
+// import { NetworkLayer } from "./layers/Network";
 // import { ThreeJsLayer } from "./layers/Renderer/Phaser";
 
 export type ContractType = GetContractReturnType<typeof IWorldAbi, PublicClient<Transport, Chain>, Address>;
-//  headlessLayer: HeadlessLayer | null;
+// headlessLayer: HeadlessLayer | null;
 // localLayer: LocalLayer | null;
 // threeJsLayer: ThreeJsLayer | null;
-//  loadingPageHidden: boolean;
+// loadingPageHidden: boolean;
 export type Store = {
-  networkLayer: NetworkLayer | null;
-  localLayer: LocalLayer | null;
+  // networkLayer: NetworkLayer | null;
+  // localLayer: LocalLayer | null;
   wagmiConfig: Config | null;
   externalWalletClient: WalletClient | null;
   externalWorldContract: ContractType | null;
 };
 
-//  headlessLayer: null,
+// headlessLayer: null,
 // localLayer: null,
 // threeJsLayer: null,
-//  loadingPageHidden: false,
+// loadingPageHidden: false,
 export const useStore = create<Store>(() => ({
   networkLayer: null,
   localLayer: null,

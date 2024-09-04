@@ -1,9 +1,6 @@
-import {
-  HandleController,
-  Slider,
-  SliderHandle,
-} from "@spectrum-web-components/slider";
-import { css, CSSResultArray, unsafeCSS } from "lit";
+import { HandleController, Slider, SliderHandle } from "@spectrum-web-components/slider";
+import { CSSResultArray, css, unsafeCSS } from "lit";
+
 import * as dfstyles from "./styles";
 
 export class DarkForestSlider extends Slider {
@@ -18,12 +15,8 @@ export class DarkForestSlider extends Slider {
         --spectrum-slider-m-height: var(--df-slider-height);
         --spectrum-slide-label-text-size: 14px;
         --spectrum-fieldlabel-m-text-size: 14px;
-        --spectrum-slider-m-label-text-color: ${unsafeCSS(
-          dfstyles.colors.subtext,
-        )};
-        --spectrum-fieldlabel-m-text-color: ${unsafeCSS(
-          dfstyles.colors.subtext,
-        )};
+        --spectrum-slider-m-label-text-color: ${unsafeCSS(dfstyles.colors.subtext)};
+        --spectrum-fieldlabel-m-text-color: ${unsafeCSS(dfstyles.colors.subtext)};
         width: var(--df-slider-width, 100%);
       }
 
@@ -89,9 +82,7 @@ export class DarkForestSliderHandle extends SliderHandle {
   private _handleChange(_evt: Event) {
     const controller = this.handleController as HandleController;
     const handleNamesInOrder = Object.keys(controller.values);
-    const idx = handleNamesInOrder.findIndex(
-      (name) => name === this.handleName,
-    );
+    const idx = handleNamesInOrder.findIndex((name) => name === this.handleName);
     const value = this.value;
 
     const step = this.step || 1;

@@ -5,23 +5,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 export const ConnectBtn = () => {
   return (
     <ConnectButton.Custom>
-      {({
-        account,
-        chain,
-        openAccountModal,
-        openChainModal,
-        openConnectModal,
-        authenticationStatus,
-        mounted,
-      }) => {
+      {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
         // Note: If your app doesn't use authentication, you
         // can remove all 'authenticationStatus' checks
         const ready = mounted && authenticationStatus !== "loading";
         const connected =
-          ready &&
-          account &&
-          chain &&
-          (!authenticationStatus || authenticationStatus === "authenticated");
+          ready && account && chain && (!authenticationStatus || authenticationStatus === "authenticated");
         return (
           <div
             {...(!ready && {
@@ -36,22 +25,14 @@ export const ConnectBtn = () => {
             {(() => {
               if (!connected) {
                 return (
-                  <button
-                    className="btn btn-secondary btn-sm rounded"
-                    onClick={openConnectModal}
-                    type="button"
-                  >
+                  <button className="btn btn-secondary btn-sm rounded" onClick={openConnectModal} type="button">
                     Connect Wallet
                   </button>
                 );
               }
               if (chain.unsupported) {
                 return (
-                  <button
-                    className="btn btn-error btn-sm rounded"
-                    onClick={openChainModal}
-                    type="button"
-                  >
+                  <button className="btn btn-error btn-sm rounded" onClick={openChainModal} type="button">
                     Wrong network
                   </button>
                 );
@@ -67,14 +48,10 @@ export const ConnectBtn = () => {
                       <Network width={16} height={16} />
                     </button>
                   </div>
-                  <button
-                    onClick={openAccountModal}
-                    className="btn btn-sm relative rounded"
-                    type="button"
-                  >
+                  <button onClick={openAccountModal} className="btn btn-sm relative rounded" type="button">
                     <span className="text-sm">{account.displayName}</span>
                     {account.displayBalance ? (
-                      <span className="text-nowrap rounded-sm bg-secondary px-1 py-0.5 text-xs text-black">
+                      <span className="bg-secondary text-nowrap rounded-sm px-1 py-0.5 text-xs text-black">
                         {account.displayBalance}
                       </span>
                     ) : (

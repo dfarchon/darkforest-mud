@@ -1,13 +1,14 @@
 import {
   CanvasCoords,
-  RendererType,
-  RenderZIndex,
   RGBAVec,
+  RenderZIndex,
+  RendererType,
   TextAlign,
   TextAnchor,
   TextRendererType,
   WorldCoords,
 } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { TEXT_PROGRAM_DEFINITION } from "../Programs/TextProgram";
@@ -142,23 +143,11 @@ export class TextRenderer
 
     text
       .split("")
-      .forEach((char: string, i: number) =>
-        this.queueGlyph(char, x - dX + i * screenW, y + dY, color, zIdx),
-      );
+      .forEach((char: string, i: number) => this.queueGlyph(char, x - dX + i * screenW, y + dY, color, zIdx));
   }
 
-  private queueGlyph(
-    glyph: string,
-    x: number,
-    y: number,
-    color: RGBAVec,
-    zIdx: number,
-  ): void {
-    const {
-      position: posA,
-      texcoord: texcoordA,
-      color: colorA,
-    } = this.attribManagers;
+  private queueGlyph(glyph: string, x: number, y: number, color: RGBAVec, zIdx: number): void {
+    const { position: posA, texcoord: texcoordA, color: colorA } = this.attribManagers;
 
     const info = this.glyphData.get(glyph);
     if (!info) {

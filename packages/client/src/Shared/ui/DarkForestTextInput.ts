@@ -1,5 +1,6 @@
-import { css, html, LitElement, unsafeCSS } from "lit";
+import { LitElement, css, html, unsafeCSS } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
+
 import * as dfstyles from "./styles";
 
 export class DarkForestTextInput extends LitElement {

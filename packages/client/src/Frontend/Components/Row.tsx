@@ -1,6 +1,7 @@
-import { DarkForestRow } from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
+
+import { DarkForestRow } from "@df/ui";
 
 customElements.define(DarkForestRow.tagName, DarkForestRow);
 

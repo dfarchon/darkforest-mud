@@ -1,6 +1,8 @@
 import React from "react";
+
 /* ancient label */
 import styled, { css, keyframes } from "styled-components";
+
 import { ANCIENT_BLUE, ANCIENT_PURPLE } from "../Styles/Colors";
 
 const shakeAndFlash = keyframes`
@@ -42,14 +44,10 @@ const StyledAncientLabelAnim = styled.span`
   color: ${ANCIENT_PURPLE};
 `;
 
-export const AncientLabelAnim = () => (
-  <StyledAncientLabelAnim>Ancient</StyledAncientLabelAnim>
-);
+export const AncientLabelAnim = () => <StyledAncientLabelAnim>Ancient</StyledAncientLabelAnim>;
 
 const StyledAncientLabel = styled.span`
   color: ${ANCIENT_PURPLE};
 `;
 
-export const AncientLabel = () => (
-  <StyledAncientLabel>Ancient</StyledAncientLabel>
-);
+export const AncientLabel = () => <StyledAncientLabel>Ancient</StyledAncientLabel>;

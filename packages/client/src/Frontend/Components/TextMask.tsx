@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+
 import { TextPreview } from "./TextPreview";
 
 const DEFAULT_UNFOCUSED_WIDTH = "50px";
@@ -29,22 +30,14 @@ export function TextMask({
 
   if (mask) {
     return (
-      <span
-        style={{ color: "white", backgroundColor: "#00DC82" }}
-        onClick={onClick}
-      >
+      <span style={{ color: "white", backgroundColor: "#00DC82" }} onClick={onClick}>
         {maskText}
       </span>
     );
   } else {
     return (
       <span>
-        <TextPreview
-          text={text}
-          unFocusedWidth={unFocusedWidth}
-          focusedWidth={focusedWidth}
-          style={style}
-        />
+        <TextPreview text={text} unFocusedWidth={unFocusedWidth} focusedWidth={focusedWidth} style={style} />
         <span style={{ color: "pink" }}> {noticeText} </span>
       </span>
     );

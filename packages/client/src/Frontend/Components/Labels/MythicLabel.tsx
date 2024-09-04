@@ -1,6 +1,8 @@
-import { ArtifactRarity, ArtifactRarityNames } from "@df/types";
 import React from "react";
+
+import { ArtifactRarity, ArtifactRarityNames } from "@df/types";
 import styled, { keyframes } from "styled-components";
+
 import { RarityColors } from "../../Styles/Colors";
 
 const color = keyframes`
@@ -24,13 +26,7 @@ const Anim = styled.span`
   color: ${RarityColors[ArtifactRarity.Mythic]};
 `;
 
-export function MythicLabelText({
-  text,
-  style,
-}: {
-  text: string;
-  style?: React.CSSProperties;
-}) {
+export function MythicLabelText({ text, style }: { text: string; style?: React.CSSProperties }) {
   return (
     <Anim style={style}>
       {text.split("").map((c, i) => (

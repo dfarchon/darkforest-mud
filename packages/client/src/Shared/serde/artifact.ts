@@ -1,17 +1,11 @@
 // import type { DarkForest } from "@df/contracts/typechain";
-import {
-  Artifact,
-  ArtifactId,
-  ArtifactPointValues,
-  ArtifactRarity,
-  ArtifactType,
-  Biome,
-  VoyageId,
-} from "@df/types";
+import { Artifact, ArtifactId, ArtifactPointValues, ArtifactRarity, ArtifactType, Biome, VoyageId } from "@df/types";
 import bigInt from "big-integer";
 import type { BigNumber as EthersBN } from "ethers";
+
 import { address } from "./address";
 import { locationIdFromDecStr, locationIdFromEthersBN } from "./location";
+
 // import { decodeUpgrade } from "./upgrade";
 
 /**

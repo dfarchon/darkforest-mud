@@ -1,10 +1,5 @@
-import {
-  BackgroundRendererType,
-  Chunk,
-  RendererType,
-  RGBVec,
-  SpaceType,
-} from "@df/types";
+import { BackgroundRendererType, Chunk, RGBVec, RendererType, SpaceType } from "@df/types";
+
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { RectRenderer } from "./RectRenderer";
@@ -54,27 +49,9 @@ export class BackgroundRenderer implements BackgroundRendererType {
     const viewport = this.manager.renderer.getViewport();
 
     // draw large background rect underneath everything
-    unminedRenderer.queueRect(
-      { x: 0, y: 0 },
-      viewport.viewportWidth,
-      viewport.viewportHeight,
-      [0, 0, 0],
-      4,
-    );
-    if (
-      innerNebulaColor &&
-      nebulaColor &&
-      spaceColor &&
-      deepSpaceColor &&
-      deadSpaceColor
-    ) {
-      spaceRenderer.setColorConfiguration(
-        innerNebulaColor,
-        nebulaColor,
-        spaceColor,
-        deepSpaceColor,
-        deadSpaceColor,
-      );
+    unminedRenderer.queueRect({ x: 0, y: 0 }, viewport.viewportWidth, viewport.viewportHeight, [0, 0, 0], 4);
+    if (innerNebulaColor && nebulaColor && spaceColor && deepSpaceColor && deadSpaceColor) {
+      spaceRenderer.setColorConfiguration(innerNebulaColor, nebulaColor, spaceColor, deepSpaceColor, deadSpaceColor);
     }
 
     for (const exploredChunk of exploredChunks) {
@@ -82,10 +59,7 @@ export class BackgroundRenderer implements BackgroundRendererType {
         // add this chunk to the verts array
         if (this.highQuality) {
           spaceRenderer.queueChunk(exploredChunk);
-          this.chunkShadowRenderer.queueChunkBorderWithPadding(
-            exploredChunk,
-            1 + 1 * viewport.scale,
-          );
+          this.chunkShadowRenderer.queueChunkBorderWithPadding(exploredChunk, 1 + 1 * viewport.scale);
         } else {
           perlinRenderer.queueChunk(exploredChunk);
         }
@@ -112,10 +86,7 @@ export class BackgroundRenderer implements BackgroundRendererType {
       for (let y = 0; y < height; y += 100) {
         const worldCoords = viewport.canvasToWorldCoords({ x, y });
         const distFromOrigin = Math.floor(Math.sqrt(x ** 2 + y ** 2));
-        const space = context.spaceTypeFromPerlin(
-          context.getSpaceTypePerlin(worldCoords, false),
-          distFromOrigin,
-        );
+        const space = context.spaceTypeFromPerlin(context.getSpaceTypePerlin(worldCoords, false), distFromOrigin);
 
         let color: RGBVec = [255, 0, 0];
         // if (space === SpaceType.NEBULA) ctx.fillStyle = '#ff0000';

@@ -38,20 +38,14 @@ const posMod = (m: number, n: number) => {
 const sigma = (x: number, y: number) => {
   const val = 256 * x + y;
   const idx = posMod(val, SIZE);
-  const ret: [number, number] = [
-    Math.floor(lookup[idx] / 256),
-    lookup[idx] % 256,
-  ];
+  const ret: [number, number] = [Math.floor(lookup[idx] / 256), lookup[idx] % 256];
   return ret;
 };
 
 const sigmaInv = (x: number, y: number) => {
   const val = 256 * x + y;
   const idx = posMod(val, SIZE);
-  const ret: [number, number] = [
-    Math.floor(lookupInv[idx] / 256),
-    lookupInv[idx] % 256,
-  ];
+  const ret: [number, number] = [Math.floor(lookupInv[idx] / 256), lookupInv[idx] % 256];
   return ret;
 };
 
@@ -87,11 +81,7 @@ export const getPlanetLocations =
     }
     const preImages: [number, number][] = [];
     for (const postImage of postImages) {
-      preImages.push(
-        sigmaInv(
-          ...cycInv(mPrime, nPrime)(...sigmaInv(postImage[0], postImage[1])),
-        ),
-      );
+      preImages.push(sigmaInv(...cycInv(mPrime, nPrime)(...sigmaInv(postImage[0], postImage[1]))));
     }
     const coords: WorldCoords[] = preImages.map((preImage) => ({
       x: m * 256 + preImage[0],

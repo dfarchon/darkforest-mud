@@ -1,23 +1,14 @@
-import {
-  DarkForestCheckbox,
-  DarkForestColorInput,
-  DarkForestNumberInput,
-  DarkForestTextInput,
-} from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
+
+import { DarkForestCheckbox, DarkForestColorInput, DarkForestNumberInput, DarkForestTextInput } from "@df/ui";
 
 customElements.define(DarkForestCheckbox.tagName, DarkForestCheckbox);
 customElements.define(DarkForestColorInput.tagName, DarkForestColorInput);
 customElements.define(DarkForestNumberInput.tagName, DarkForestNumberInput);
 customElements.define(DarkForestTextInput.tagName, DarkForestTextInput);
 
-export {
-  DarkForestCheckbox,
-  DarkForestColorInput,
-  DarkForestNumberInput,
-  DarkForestTextInput,
-};
+export { DarkForestCheckbox, DarkForestColorInput, DarkForestNumberInput, DarkForestTextInput };
 
 // This wraps the customElement in a React wrapper to make it behave exactly like a React component
 export const Checkbox = createComponent<

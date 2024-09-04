@@ -8,7 +8,6 @@
  * lets you add user defined components, which may or may not have
  * an onchain component.
  */
-
 import { SetupNetworkResult } from "./setupNetwork";
 
 export type ClientComponents = ReturnType<typeof createClientComponents>;

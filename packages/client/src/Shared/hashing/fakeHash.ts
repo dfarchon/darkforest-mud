@@ -46,10 +46,7 @@ const posMod = (m: number, n: number) => {
 const sigma = (x: number, y: number) => {
   const val = 256 * x + y;
   const idx = posMod(val, SIZE);
-  const ret: [number, number] = [
-    Math.floor(lookup[idx] / 256),
-    lookup[idx] % 256,
-  ];
+  const ret: [number, number] = [Math.floor(lookup[idx] / 256), lookup[idx] % 256];
   return ret;
 };
 

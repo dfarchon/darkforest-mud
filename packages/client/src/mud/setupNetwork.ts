@@ -22,7 +22,6 @@ import { getNetworkConfig } from "./getNetworkConfig";
 import { world } from "./world";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 
-
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
 import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
 import { syncToZustand } from "@latticexyz/store-sync/zustand";
@@ -166,7 +165,6 @@ export async function setupNetwork() {
    * events from the chain.
    */
 
-
   const {
     tables,
     useStore,
@@ -180,25 +178,21 @@ export async function setupNetwork() {
     startBlock: BigInt(networkConfig.initialBlockNumber),
   });
 
-//   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } =
-//     await syncToRecs({
-//       world,
-//       config: mudConfig,
-//       address: networkConfig.worldAddress as Hex,
-//       publicClient,
-//       startBlock: BigInt(networkConfig.initialBlockNumber),
-//     });
-
+  //   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } =
+  //     await syncToRecs({
+  //       world,
+  //       config: mudConfig,
+  //       address: networkConfig.worldAddress as Hex,
+  //       publicClient,
+  //       startBlock: BigInt(networkConfig.initialBlockNumber),
+  //     });
 
   return {
     tables,
     useStore,
     world,
     components,
-    playerEntity: encodeEntity(
-      { address: "address" },
-      { address: burnerWalletClient.account.address },
-    ),
+    playerEntity: encodeEntity({ address: "address" }, { address: burnerWalletClient.account.address }),
     publicClient,
     txReceiptClient,
     walletClient: burnerWalletClient,

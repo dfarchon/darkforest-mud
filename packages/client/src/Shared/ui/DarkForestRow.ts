@@ -1,4 +1,4 @@
-import { css, html, LitElement } from "lit";
+import { LitElement, css, html } from "lit";
 
 export class DarkForestRow extends LitElement {
   // Not part of LitElement but let's tack on the tagName for easier registration

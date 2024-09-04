@@ -1,12 +1,5 @@
-import {
-  CanvasCoords,
-  Chunk,
-  RectRendererType,
-  RendererType,
-  RenderZIndex,
-  RGBVec,
-  WorldCoords,
-} from "@df/types";
+import { CanvasCoords, Chunk, RGBVec, RectRendererType, RenderZIndex, RendererType, WorldCoords } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { RECT_PROGRAM_DEFINITION } from "../Programs/RectProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";
@@ -95,13 +88,7 @@ export class RectRenderer
       chunkFootprint: { bottomLeft, sideLength },
     } = chunk;
 
-    this.queueRectWorld(
-      { x: bottomLeft.x, y: bottomLeft.y + sideLength },
-      sideLength,
-      sideLength,
-      [255, 0, 0],
-      1,
-    );
+    this.queueRectWorld({ x: bottomLeft.x, y: bottomLeft.y + sideLength }, sideLength, sideLength, [255, 0, 0], 1);
   }
 
   public queueChunkBorderWithPadding(chunk: Chunk, padding: number): void {

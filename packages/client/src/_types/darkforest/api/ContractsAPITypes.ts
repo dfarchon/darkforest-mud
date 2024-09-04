@@ -236,18 +236,7 @@ export interface ContractConstants {
      Note: This does not control if a planet spawns or not, just the level
      when it spawns.
    */
-  PLANET_LEVEL_THRESHOLDS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  PLANET_LEVEL_THRESHOLDS: [number, number, number, number, number, number, number, number, number, number];
 
   PLANET_RARITY: number;
   PLANET_TRANSFER_ENABLED: boolean;
@@ -281,18 +270,7 @@ export interface ContractConstants {
      gives the player when moving to it for the
      first time.
    */
-  PLANET_LEVEL_JUNK: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  PLANET_LEVEL_JUNK: [number, number, number, number, number, number, number, number, number, number];
 
   /**
      The speed boost a movement receives when abandoning
@@ -311,18 +289,7 @@ export interface ContractConstants {
   CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL: number;
   CAPTURE_ZONE_RADIUS: number;
 
-  CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  CAPTURE_ZONE_PLANET_LEVEL_SCORE: [number, number, number, number, number, number, number, number, number, number];
   CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED: number;
   CAPTURE_ZONES_PER_5000_WORLD_RADIUS: number;
 
@@ -426,31 +393,9 @@ export interface ContractConstants {
   BURN_PLANET_COOLDOWN: number;
   PINK_PLANET_COOLDOWN: number;
 
-  BURN_PLANET_LEVEL_EFFECT_RADIUS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  BURN_PLANET_LEVEL_EFFECT_RADIUS: [number, number, number, number, number, number, number, number, number, number];
 
-  BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [number, number, number, number, number, number, number, number, number, number];
 
   MAX_LEVEL_DIST: number[];
   MAX_LEVEL_LIMIT: number[];
@@ -459,42 +404,9 @@ export interface ContractConstants {
   KARDASHEV_END_TIMESTAMP: number;
   KARDASHEV_PLANET_COOLDOWN: number;
   BLUE_PLANET_COOLDOWN: number;
-  KARDASHEV_EFFECT_RADIUS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-  KARDASHEV_REQUIRE_SILVER_AMOUNTS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-  BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  KARDASHEV_EFFECT_RADIUS: [number, number, number, number, number, number, number, number, number, number];
+  KARDASHEV_REQUIRE_SILVER_AMOUNTS: [number, number, number, number, number, number, number, number, number, number];
+  BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [number, number, number, number, number, number, number, number, number, number];
 }
 
 export type ClientMockchainData =

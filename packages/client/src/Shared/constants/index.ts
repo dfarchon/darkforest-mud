@@ -32,12 +32,29 @@ import {
   LocationId,
   PlanetLevel,
 } from "@df/types";
+
+import { Entity } from "@latticexyz/recs";
+
 import bigInt, { BigInteger } from "big-integer";
+
+export const WORLD_ADDRESS = "fixed world adress";
+
+// REDSTONE
+// TODO explorer for garnet?
+export const NETWORK_EXPLORER = "https://explorer.redstone.xyz/";
+
+export const DEFAULT_RPC = "https://rpc.garnet.redstone.xyz";
+
+export const LOW_BALANCE_THRESHOLD = BigInt("1000000000000000"); // 0.001 ETH in wei
+export const RECOMMENDED_BALANCE = BigInt("5000000000000000"); // 0.005 ETH in wei
+/**
+ * A blank LocationID (all zeros).
+ */
+export const EMPTY_ID = "0x0000000000000000000000000000000000000000000000000000000000000000" as Entity;
 
 export const TOKEN_NAME = "ETH";
 export const BLOCKCHAIN_NAME = "Redstone";
 export const HOST_TEAM_NAME = "DF Archon";
-
 export const GAS_ADJUST_DELTA = "0.00000001"; // '0.000000001'; //'1'; //'0.00000005';
 
 export const FIXED_DIGIT_NUMBER = 9;
@@ -69,20 +86,17 @@ export const LOCATION_ID_UB: BigInteger = bigInt(
 /**
  * The 0x0 Ethereum address, which is used for unowned planets, artifacts without an owner, etc.
  */
-export const EMPTY_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as EthAddress;
+export const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000" as EthAddress;
 
 /**
  * A blank LocationID (all zeros).
  */
-export const EMPTY_LOCATION_ID =
-  "0000000000000000000000000000000000000000000000000000000000000000" as LocationId;
+export const EMPTY_LOCATION_ID = "0000000000000000000000000000000000000000000000000000000000000000" as LocationId;
 
 /**
  * A blank ArtifactID (all zeros).
  */
-export const EMPTY_ARTIFACT_ID =
-  "0000000000000000000000000000000000000000000000000000000000000000" as ArtifactId;
+export const EMPTY_ARTIFACT_ID = "0000000000000000000000000000000000000000000000000000000000000000" as ArtifactId;
 
 /**
  * The value of the minimum, valid artifact type
@@ -135,8 +149,7 @@ export const MAX_BIOME = Biome.CORRUPTED;
  *
  * https://www.xdaichain.com/for-developers/developer-resources/gas-price-oracle
  */
-export const GAS_PRICE_API =
-  "https://blockscout.com/xdai/mainnet/api/v1/gas-price-oracle" as const;
+export const GAS_PRICE_API = "https://blockscout.com/xdai/mainnet/api/v1/gas-price-oracle" as const;
 
 /**
  * In case we cannot load gas prices from xDai, these are the default auto gas prices.
@@ -235,11 +248,9 @@ export const MAX_AVATAR_TYPE = 24;
 /**
  * This should be updated every round.
  */
-export const THEGRAPH_API_URL =
-  "https://api.thegraph.com/subgraphs/name/darkforest-eth/dark-forest-v06-round-5";
+export const THEGRAPH_API_URL = "https://api.thegraph.com/subgraphs/name/darkforest-eth/dark-forest-v06-round-5";
 
-export const PLAYER_GUIDE =
-  "https://dfares.notion.site/DFAres-Round-4-Guide-c52181824f21461f9fa50a9f7989555c?pvs=74";
+export const PLAYER_GUIDE = "https://dfares.notion.site/DFAres-Round-4-Guide-c52181824f21461f9fa50a9f7989555c?pvs=74";
 
 export const HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE =
   "https://dfares.notion.site/How-to-transfer-ETH-from-L2-to-Redstone-Mainnet-f0be2d7a3d274e8a88f8e83d0ef4e212?pvs=74";

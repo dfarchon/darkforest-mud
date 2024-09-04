@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from "react";
+
 import styled from "styled-components";
+
 import { EmSpacer, TextButton } from "./CoreUI";
 
 export function ReadMore({
@@ -21,16 +23,14 @@ export function ReadMore({
 
   return (
     <>
-      <ContentContainer style={{ height: collapsed ? height : "unset" }}>
-        {children}
-      </ContentContainer>
+      <ContentContainer style={{ height: collapsed ? height : "unset" }}>{children}</ContentContainer>
       {!collapsed && <EmSpacer height={0.1} />}
       <TextButton
         style={{
           fontSize: "80%",
           display: "block",
           textAlign: "right",
-          marginTop: collapsed ? toggleButtonMargin ?? "-0.6em" : undefined,
+          marginTop: collapsed ? (toggleButtonMargin ?? "-0.6em") : undefined,
         }}
         onClick={toggle}
       >

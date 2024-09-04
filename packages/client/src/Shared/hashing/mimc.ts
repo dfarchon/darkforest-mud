@@ -1,8 +1,6 @@
 import bigInt, { BigInteger } from "big-integer";
 
-export const p = bigInt(
-  "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-);
+export const p = bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
 
 const c = [
   "0",
@@ -256,12 +254,7 @@ class FeistelState {
   }
 }
 
-export function mimcSponge(
-  inputs: BigInteger[],
-  nOutputs: number,
-  rounds: number,
-  key: number,
-): BigInteger[] {
+export function mimcSponge(inputs: BigInteger[], nOutputs: number, rounds: number, key: number): BigInteger[] {
   const state = new FeistelState(rounds, bigInt(key));
   for (const elt of inputs) {
     state.inject(elt);

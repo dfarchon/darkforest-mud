@@ -1,26 +1,12 @@
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+
 import EventEmitter from "events";
-import React, {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
 import styled, { css } from "styled-components";
+
 import { Link } from "../Components/CoreUI";
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
-import {
-  Blue,
-  Green,
-  Invisible,
-  Pink,
-  Red,
-  Sub,
-  Subber,
-  Text,
-  White,
-} from "../Components/Text";
+import { Blue, Green, Invisible, Pink, Red, Sub, Subber, Text, White } from "../Components/Text";
 import { LoadingBarHandle, TextLoadingBar } from "../Components/TextLoadingBar";
 import dfstyles from "../Styles/dfstyles";
 import { isFirefox } from "../Utils/BrowserChecks";
@@ -32,19 +18,12 @@ const ON_INPUT = "ON_INPUT";
 
 export interface TerminalHandle {
   printElement: (element: React.ReactElement) => void;
-  printLoadingBar: (
-    prettyEntityName: string,
-    ref: React.RefObject<LoadingBarHandle>,
-  ) => void;
+  printLoadingBar: (prettyEntityName: string, ref: React.RefObject<LoadingBarHandle>) => void;
   printLoadingSpinner: () => void;
   print: (str: string, style?: TerminalTextStyle) => void;
   println: (str: string, style?: TerminalTextStyle) => void;
   printShellLn: (str: string) => void;
-  printLink: (
-    str: string,
-    onClick: () => void,
-    style: TerminalTextStyle,
-  ) => void;
+  printLink: (str: string, onClick: () => void, style: TerminalTextStyle) => void;
   focus: () => void;
   removeLast: (n: number) => void;
   getInput: () => Promise<string>;
@@ -60,16 +39,11 @@ export interface TerminalProps {
   useCaretElement?: boolean;
 }
 
-export const Terminal = React.forwardRef<TerminalHandle, TerminalProps>(
-  TerminalImpl,
-);
+export const Terminal = React.forwardRef<TerminalHandle, TerminalProps>(TerminalImpl);
 
 let terminalLineKey = 0;
 
-function TerminalImpl(
-  { promptCharacter, visible, useCaretElement }: TerminalProps,
-  ref: React.Ref<TerminalHandle>,
-) {
+function TerminalImpl({ promptCharacter, visible, useCaretElement }: TerminalProps, ref: React.Ref<TerminalHandle>) {
   const containerRef = useRef(document.createElement("div"));
   const inputRef = useRef(document.createElement("textarea"));
   const heightMeasureRef = useRef(document.createElement("textarea"));
@@ -84,10 +58,7 @@ function TerminalImpl(
   const append = useCallback(
     (node: React.ReactNode) => {
       setFragments((lines) => {
-        return [
-          ...lines.slice(-199),
-          <span key={terminalLineKey++}>{node}</span>,
-        ];
+        return [...lines.slice(-199), <span key={terminalLineKey++}>{node}</span>];
       });
     },
     [setFragments],
@@ -107,11 +78,7 @@ function TerminalImpl(
   }, [append]);
 
   const print = useCallback(
-    (
-      str: string,
-      style = TerminalTextStyle.Sub,
-      onClick: (() => void) | undefined = undefined,
-    ) => {
+    (str: string, style = TerminalTextStyle.Sub, onClick: (() => void) | undefined = undefined) => {
       let fragment: JSX.Element;
       let innerFragment: JSX.Element = <span>{str}</span>;
 
@@ -187,19 +154,13 @@ function TerminalImpl(
       setPreviousInput(inputText);
       setInputHeight(1);
       setInputText("");
-    } else if (
-      e.keyCode === UP_ARROW_KEY_CODE &&
-      inputText === "" &&
-      previousInput !== ""
-    ) {
+    } else if (e.keyCode === UP_ARROW_KEY_CODE && inputText === "" && previousInput !== "") {
       setInputHeight(1);
       setInputText(previousInput);
     }
   };
 
-  const preventEnterDefault = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>,
-  ): void => {
+  const preventEnterDefault = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     e.stopPropagation();
     if (e.keyCode === ENTER_KEY_CODE && !e.shiftKey) {
       e.preventDefault();
@@ -230,13 +191,8 @@ function TerminalImpl(
       printElement: (element: React.ReactElement) => {
         append(element);
       },
-      printLoadingBar: (
-        prettyEntityName: string,
-        ref: React.RefObject<LoadingBarHandle>,
-      ) => {
-        append(
-          <TextLoadingBar prettyEntityName={prettyEntityName} ref={ref} />,
-        );
+      printLoadingBar: (prettyEntityName: string, ref: React.RefObject<LoadingBarHandle>) => {
+        append(<TextLoadingBar prettyEntityName={prettyEntityName} ref={ref} />);
       },
       print: (str: string, style?: TerminalTextStyle) => {
         print(str, style, undefined);
@@ -245,11 +201,7 @@ function TerminalImpl(
         print(str, style, undefined);
         newline();
       },
-      printLink: (
-        str: string,
-        onClick: () => void,
-        style: TerminalTextStyle,
-      ) => {
+      printLink: (str: string, onClick: () => void, style: TerminalTextStyle) => {
         print(str, style, onClick);
       },
       getInput: async () => {
@@ -284,24 +236,12 @@ function TerminalImpl(
         setFragments([]);
       },
     }),
-    [
-      onInputEmitter,
-      promptCharacter,
-      newline,
-      print,
-      append,
-      removeLast,
-      setFragments,
-    ],
+    [onInputEmitter, promptCharacter, newline, print, append, removeLast, setFragments],
   );
 
-  const containerStyle = visible
-    ? undefined
-    : ({ display: "none" } as React.CSSProperties);
+  const containerStyle = visible ? undefined : ({ display: "none" } as React.CSSProperties);
 
-  const inputRefStyles = !useCaretElement
-    ? undefined
-    : ({ caretColor: "transparent" } as React.CSSProperties);
+  const inputRefStyles = !useCaretElement ? undefined : ({ caretColor: "transparent" } as React.CSSProperties);
 
   return (
     <TerminalContainer ref={containerRef} style={containerStyle}>
@@ -329,12 +269,7 @@ function TerminalImpl(
             style={inputRefStyles}
           />
           {/* "ghost" textarea used to measure the scrollHeight of the input */}
-          <InputTextArea
-            height={0}
-            ref={heightMeasureRef}
-            onChange={() => {}}
-            value={inputText}
-          />
+          <InputTextArea height={0} ref={heightMeasureRef} onChange={() => {}} value={inputText} />
 
           {/* "ghost" input to fake caret block element such as in real terminals */}
           {useCaretElement ? (

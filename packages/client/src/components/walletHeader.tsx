@@ -4,7 +4,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useDisconnect } from "wagmi";
 
 import { SessionWalletManager } from "../SessionWalletManager";
-import { shortedAddress } from "../shared";
+import { shortedAddress } from "./utils";
 
 export const WalletHeader: React.FC = () => {
   const { isConnected, address, chain } = useAccount();

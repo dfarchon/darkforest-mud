@@ -1,6 +1,8 @@
-import { Biome, BiomeNames } from "@df/types";
 import React from "react";
+
+import { Biome, BiomeNames } from "@df/types";
 import styled, { keyframes } from "styled-components";
+
 import { BiomeTextColors } from "../../Styles/Colors";
 
 const Wrap = styled.span`

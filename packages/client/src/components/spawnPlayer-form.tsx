@@ -12,7 +12,7 @@ const SpawnPlayer = () => {
   } = useMUD();
 
   const handleMintPlayer = () => {
-    if (name.length <= 8 && name.length > 0) {
+    if (name.length <= 8 && name.length > 0 && linkedAccount && linkedAccount.address) {
       mintPlayer(name, linkedAccount.address);
     } else {
       alert("Name must be between 1 and 8 characters.");

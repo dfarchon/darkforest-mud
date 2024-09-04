@@ -22,9 +22,7 @@ export function createDefinedContext<T>(): ContextHookWithProvider<T> {
     const used = React.useContext(context);
     // not doing !used because `used` could be a number
     if (used === undefined) {
-      throw new Error(
-        "useDefinedContext is undefined! Make sure it is used in a provider and passed a defined value.",
-      );
+      throw new Error("useDefinedContext is undefined! Make sure it is used in a provider and passed a defined value.");
     }
     return used;
   };

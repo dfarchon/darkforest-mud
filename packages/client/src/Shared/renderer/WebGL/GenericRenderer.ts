@@ -1,11 +1,6 @@
-import {
-  AttribProps,
-  DrawMode,
-  UniformProps,
-  UniformType,
-  Vec3,
-} from "@df/types";
+import { AttribProps, DrawMode, UniformProps, UniformType, Vec3 } from "@df/types";
 import { mat3, mat4 } from "gl-matrix";
+
 import { AttribManager } from "./AttribManager";
 import { ProgramUtils } from "./ProgramUtils";
 import { WebGLManager } from "./WebGLManager";
@@ -94,10 +89,7 @@ export function getUniformSetter(
  * - uniform setters
  * - skeleton code for rendering in our engine via `flush()`
  */
-export class GenericRenderer<
-  T extends EngineProgramDefinition,
-  U extends WebGLManager = WebGLManager,
-> {
+export class GenericRenderer<T extends EngineProgramDefinition, U extends WebGLManager = WebGLManager> {
   /** The program corresponding to this renderer. */
   public program: WebGLProgram;
 
@@ -141,12 +133,7 @@ export class GenericRenderer<
     this.manager = glManager;
     const { gl } = glManager;
 
-    const {
-      vertexShader: vert,
-      fragmentShader: frag,
-      uniforms,
-      attribs,
-    } = programData;
+    const { vertexShader: vert, fragmentShader: frag, uniforms, attribs } = programData;
 
     const program = ProgramUtils.programFromSources(gl, vert, frag);
     if (program === null) throw "error compiling program";
@@ -186,8 +173,7 @@ export class GenericRenderer<
    * should always override this.
    */
   public setUniforms() {
-    if (Object.keys(this.uniformData).length !== 0)
-      console.error("did not override setUniforms!");
+    if (Object.keys(this.uniformData).length !== 0) console.error("did not override setUniforms!");
     return;
   }
 

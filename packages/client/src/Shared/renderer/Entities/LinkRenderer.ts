@@ -1,14 +1,9 @@
-import {
-  ArtifactId,
-  ArtifactType,
-  LinkRendererType,
-  LocationId,
-  RendererType,
-  RenderZIndex,
-} from "@df/types";
+import { ArtifactId, ArtifactType, LinkRendererType, LocationId, RenderZIndex, RendererType } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";
+
 const { purpleA, blueA, pinkA, sensaichaA } = engineConsts.colors;
 
 export class LinkRenderer implements LinkRendererType {
@@ -38,12 +33,7 @@ export class LinkRenderer implements LinkRendererType {
     }
   }
 
-  private drawVoyagePath(
-    from: LocationId,
-    to: LocationId,
-    artifactId: ArtifactId,
-    confirmed: boolean,
-  ) {
+  private drawVoyagePath(from: LocationId, to: LocationId, artifactId: ArtifactId, confirmed: boolean) {
     const { context: gameUIManager } = this.renderer;
 
     const fromLoc = gameUIManager.getLocationOfPlanet(from);

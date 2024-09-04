@@ -10,10 +10,7 @@ export function sinusoidalAnimation(rps: number): DFAnimation {
   });
 }
 
-export function easeInAnimation(
-  durationMs: number,
-  delayMs?: number,
-): DFAnimation {
+export function easeInAnimation(durationMs: number, delayMs?: number): DFAnimation {
   const progress = {
     percent: 0,
   };

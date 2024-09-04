@@ -1,6 +1,7 @@
-import { css, html, LitElement, nothing, PropertyValues, unsafeCSS } from "lit";
+import { LitElement, PropertyValues, css, html, nothing, unsafeCSS } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
+
 import * as dfstyles from "./styles";
 
 type Coords = { x: number; y: number };
@@ -158,10 +159,8 @@ export class DarkForestModal extends LitElement {
   private _coords?: Coords;
 
   firstUpdated() {
-    const initialX =
-      this.initialX ?? 0.5 * (window.innerWidth - this.offsetWidth);
-    const initialY =
-      this.initialY ?? 0.5 * (window.innerHeight - this.offsetHeight);
+    const initialX = this.initialX ?? 0.5 * (window.innerWidth - this.offsetWidth);
+    const initialY = this.initialY ?? 0.5 * (window.innerHeight - this.offsetHeight);
     this._coords = {
       x: initialX,
       y: initialY,

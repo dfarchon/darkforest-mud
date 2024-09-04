@@ -1,5 +1,7 @@
 import React, { useImperativeHandle, useState } from "react";
+
 import styled from "styled-components";
+
 import dfstyles from "../Styles/dfstyles";
 import { Sub } from "./Text";
 
@@ -11,15 +13,9 @@ interface LoadingBarProps {
   prettyEntityName: string;
 }
 
-export const TextLoadingBar = React.forwardRef<
-  LoadingBarHandle,
-  LoadingBarProps
->(TextLoadingBarImpl);
+export const TextLoadingBar = React.forwardRef<LoadingBarHandle, LoadingBarProps>(TextLoadingBarImpl);
 
-export function TextLoadingBarImpl(
-  { prettyEntityName }: LoadingBarProps,
-  ref: React.Ref<LoadingBarHandle>,
-) {
+export function TextLoadingBarImpl({ prettyEntityName }: LoadingBarProps, ref: React.Ref<LoadingBarHandle>) {
   // value between 0 and 1
   const [fractionCompleted, setFractionCompleted] = useState(0);
 
@@ -44,9 +40,7 @@ export function TextLoadingBarImpl(
   return (
     <span>
       [<Sub>{progressText}</Sub>]{" "}
-      <span style={{ fontWeight: percentText === "100" ? "bold" : undefined }}>
-        {percentText}%{" "}
-      </span>
+      <span style={{ fontWeight: percentText === "100" ? "bold" : undefined }}>{percentText}% </span>
       <LoadingTitle>{prettyEntityName}</LoadingTitle>
     </span>
   );
