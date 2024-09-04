@@ -67,6 +67,19 @@ export default defineWorld({
       },
       key: ["spaceType", "level"],
     },
+    UpgradeConfig: {
+      schema: {
+        populationCapMultiplier: "uint8",
+        populationGrowthMultiplier: "uint8",
+        rangeMultiplier: "uint8",
+        speedMultiplier: "uint8",
+        defenseMultiplier: "uint8",
+        maxSingleLevel: "uint8",
+        maxTotalLevel: "uint32", // per space type, dead space | deep space | space | nebula
+        silverCost: "uint80", // percentage of silver cap, lvl max | ... | lvl 0
+      },
+      key: [],
+    },
     SnarkConfig: {
       schema: {
         planetHashKey: "uint64",
@@ -117,6 +130,7 @@ export default defineWorld({
       spaceType: "SpaceType",
       population: "uint64",
       silver: "uint64",
+      upgrades: "uint24", // uint8 range | uint8 speed | uint8 defense
     },
     PlanetOwner: "address",
     PendingMove: {
