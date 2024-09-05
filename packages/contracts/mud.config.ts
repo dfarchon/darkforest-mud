@@ -8,11 +8,14 @@ export default defineWorld({
   },
   tables: {
     // todo remove this table and corresponding increment system
-    Counter: {
+    PlayersTable: {
       schema: {
-        value: "uint32",
+        owner: "address",
+        linked: "address",
+        minted: "uint256",
+        name: "string",
       },
-      key: [],
+      key: ["owner"],
     },
     TempConfigSet: {
       schema: {

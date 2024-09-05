@@ -7,6 +7,7 @@ import { getComponentValue } from "@latticexyz/recs";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { Address } from "viem";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
@@ -31,21 +32,28 @@ export function createSystemCalls(
    *   (https://github.com/latticexyz/mud/blob/main/templates/react/packages/client/src/mud/setupNetwork.ts#L77-L83).
    */
   { worldContract, waitForTransaction }: SetupNetworkResult,
-  { Counter }: ClientComponents,
+  { PlayersTable }: ClientComponents,
 ) {
-  const increment = async () => {
-    /*
-     * Because IncrementSystem
-     * (https://mud.dev/templates/typescript/contracts#incrementsystemsol)
-     * is in the root namespace, `.increment` can be called directly
-     * on the World contract.
-     */
-    const tx = await worldContract.write.df__increment();
+  // const increment = async () => {
+  //   /*
+  //    * Because IncrementSystem
+  //    * (https://mud.dev/templates/typescript/contracts#incrementsystemsol)
+  //    * is in the root namespace, `.increment` can be called directly
+  //    * on the World contract.
+  //    */
+  //   const tx = await worldContract.write.df__increment();
+  //   await waitForTransaction(tx);
+  //   return getComponentValue(Counter, singletonEntity);
+  // };
+
+  const mintPlayer = async (name: string, linked: Address) => {
+    const tx = await worldContract.write.df__mintPlayer([name, linked]);
+
     await waitForTransaction(tx);
-    return getComponentValue(Counter, singletonEntity);
+    return getComponentValue(PlayersTable, singletonEntity);
   };
 
   return {
-    increment,
+    mintPlayer,
   };
 }
