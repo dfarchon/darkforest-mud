@@ -11,7 +11,10 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@df/*": ["./src/Shared/*"]
+      "@df/*": ["./src/Shared/*"],
+      "@mud/*": ["./src/mud/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@wallet/*": ["./src/wallet/*"]
     },
     "strictPropertyInitialization": false,
     "useDefineForClassFields": false

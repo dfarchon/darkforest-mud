@@ -19,6 +19,8 @@ import "./Frontend/Styles/style.css";
 import { createGlobalStyle } from "styled-components";
 import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
+import { WelcomePage } from "./Frontend/Pages/WelcomePage";
+import { GamePage } from "./Frontend/Pages/GamePage";
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -47,6 +49,8 @@ export const App = () => {
             <Route path="/play/:contract" element={<GameLandingPage />} />
             <Route path="/landing" element={<ClassicLandingPage />} />
             <Route path="/sandbox" element={<SandboxPage />} />
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/game" element={<GamePage />} />
             <Route path="/" element={<HelloPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -26,6 +26,7 @@ import {
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
 
 import { Subject, share } from "rxjs";
+import { syncToZustand } from "@latticexyz/store-sync/zustand";
 
 /*
  * Import our MUD config, which includes strong types for
@@ -96,6 +97,19 @@ export async function setupNetwork() {
       startBlock: BigInt(networkConfig.initialBlockNumber),
     });
 
+  const {
+    tables,
+    useStore,
+    latestBlock$: latestBlockZu$,
+    storedBlockLogs$: storedBlockLogsZu$,
+    waitForTransaction: waitForTransactionZu,
+  } = await syncToZustand({
+    config: mudConfig,
+    address: networkConfig.worldAddress as Hex,
+    publicClient,
+    startBlock: BigInt(networkConfig.initialBlockNumber),
+  });
+
   return {
     world,
     components,
@@ -110,5 +124,10 @@ export async function setupNetwork() {
     waitForTransaction,
     worldContract,
     write$: write$.asObservable().pipe(share()),
+    tables,
+    useStore,
+    latestBlockZu$,
+    storedBlockLogsZu$,
+    waitForTransactionZu,
   };
 }
