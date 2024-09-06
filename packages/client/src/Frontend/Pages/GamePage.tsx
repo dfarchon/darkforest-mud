@@ -1,15 +1,16 @@
 import { useComponentValue } from "@latticexyz/react";
 import React, { useState } from "react";
-
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { useMUD } from "@mud/MUDContext";
+import SpawnPlayer from "@wallet/Components/SpawnPlayerPane";
+import SyncClientStatusRec from "@wallet/Components/SyncClientStatusRec";
+import WalletButton from "@wallet/WalletButton";
 
-import { useMUD } from "../../MUDContext";
-import SpawnPlayer from "@wallet/SpawnPlayerPane";
-import SyncClientStatusRec from "@wallet/SyncClientStatusRec";
-import WalletHeader from "@wallet/WalletHeader";
+export function entityToAddress(entity: string): string {
+  return entity.slice(0, 2) + entity.slice(26);
+}
 
 // Adjust the import path as needed
-
 export const GamePage: React.FC = () => {
   const {
     network: { tables, useStore, playerEntity },
@@ -29,21 +30,28 @@ export const GamePage: React.FC = () => {
 
   // Get the player's data to check if they have spawned a player
   const playerSpawned = useStore((state) => {
-    const record = Object.values(state.getRecords(tables.PlayersTable));
+    const records = Object.values(state.getRecords(tables.PlayersTable));
     // TODO zustand sync apply !!! this is not optimal for now is avoiding error if zustand not synced
 
-    if (record.length > 0) {
-      record.find((pl) => pl.key.owner === playerEntity);
-      if (name !== record[0].value.name) {
-        setName(record[0].value.name);
+    if (records.length > 0) {
+      const record = records.filter(
+        (pl) =>
+          pl.fields.owner.toLowerCase() ===
+          entityToAddress(playerEntity).toLowerCase(),
+      );
+
+      if (record.length > 0) {
+        if (name !== record[0].value.name) {
+          setName(record[0].value.name);
+        }
       }
+      return record.length > 0; // Check if the player has spawned
     }
-    return record.length > 0; // Check if the player has spawned
   });
 
   return (
     <div>
-      <WalletHeader />
+      <WalletButton />
       {playerSpawned && (
         <>
           {" "}

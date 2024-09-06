@@ -1,13 +1,13 @@
 import { useCallback, useState } from "react";
 import { useAccount, useBalance } from "wagmi";
-import { useMUD } from "../MUDContext";
+import { useMUD } from "../mud/MUDContext";
 import { formatEther } from "viem";
 import {
   LOW_BALANCE_THRESHOLD,
   MINIMUM_BALANCE,
   RECOMMENDED_BALANCE,
   zeroAddress,
-} from "@wallet/utils";
+} from "@wallet/Utils";
 
 // You can define a threshold constant for low balance
 

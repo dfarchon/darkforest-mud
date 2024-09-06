@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
-import WalletHeader from "@wallet/WalletHeader";
+import WalletButton from "@wallet/WalletButton";
 
 export const WelcomePage: React.FC = () => {
   const { isConnected } = useAccount();
@@ -16,8 +16,8 @@ export const WelcomePage: React.FC = () => {
 
   return (
     <div className="flex h-screen">
-      <WalletHeader />
-      <div className="m-auto ">
+      <WalletButton />
+      <div className="m-auto">
         {!isConnected && (
           <>
             <h1 className="mb-6 text-2xl font-bold">

@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
 import { setup } from "./mud/setup";
-import { MUDProvider } from "./MUDContext";
+import { MUDProvider } from "./mud/MUDContext";
 import mudConfig from "contracts/mud.config";
 import { Providers } from "@wallet/Providers";
 

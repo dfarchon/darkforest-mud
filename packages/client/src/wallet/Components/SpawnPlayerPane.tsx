@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAccount } from "wagmi";
-import { useMUD } from "../MUDContext";
+import { useMUD } from "@mud/MUDContext";
 
 const SpawnPlayer = () => {
   const [name, setName] = useState("");

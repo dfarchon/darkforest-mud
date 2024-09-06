@@ -1,5 +1,4 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-
 export const CustomConnectButton = () => {
   return (
     <ConnectButton.Custom>
@@ -30,7 +29,6 @@ export const CustomConnectButton = () => {
                 userSelect: "none",
               },
             })}
-            className="h-[32px] flex justify-center items-center border-2 p-2 px-4 bg-white rounded-2xl"
           >
             {(() => {
               if (!connected) {

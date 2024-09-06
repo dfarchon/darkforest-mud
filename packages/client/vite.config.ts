@@ -21,6 +21,8 @@ export default defineConfig({
       "@mud": path.resolve(__dirname, "./src/mud"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
       "@wallet": path.resolve(__dirname, "./src/wallet"),
+      "@frontend": path.resolve(__dirname, "./src/Frontend"),
+      "@backend": path.resolve(__dirname, "./src/Backend"),
     },
   },
   css: {

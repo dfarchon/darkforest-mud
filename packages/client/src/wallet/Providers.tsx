@@ -7,10 +7,10 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { WagmiProvider, http } from "wagmi";
 import { getNetworkConfig } from "@mud/getNetworkConfig";
 import { ExternalWalletProvider } from "./ExternalWalletProvider";
-import "@rainbow-me/rainbowkit/styles.css";
-
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { structuralSharing } from "@wagmi/core/query";
+import { mainnet } from "viem/chains";
+import "@rainbow-me/rainbowkit/styles.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,7 +50,7 @@ export function Providers({ children }: Props) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={darkTheme()}>
+        <RainbowKitProvider theme={darkTheme()} initialChain={mainnet}>
           <ExternalWalletProvider networkConfig={networkConfig}>
             {children}
           </ExternalWalletProvider>

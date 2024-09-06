@@ -2,7 +2,7 @@
 // import { useMUD } from "../../MUDContext";
 // import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { hello } from "utils";
-import { getNetworkConfig } from "../../mud/getNetworkConfig";
+import { getNetworkConfig } from "@mud/getNetworkConfig";
 
 export const SandboxPage = () => {
   const networkConfig = getNetworkConfig();
@@ -14,7 +14,7 @@ export const SandboxPage = () => {
         onClick={() => {
           console.log(networkConfig);
         }}
-        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+        className="rounded bg-blue-500 px-4 py-2 font-bold text-white"
       >
         Print Network Config
       </button>
