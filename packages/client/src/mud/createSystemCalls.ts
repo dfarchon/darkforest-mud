@@ -154,10 +154,24 @@ export function createSystemCalls(
     }
   };
 
+  const tick = async () => {
+    try {
+      const tx = await worldContract.write.df__tick();
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("Tick:", receipt);
+      getComponentValue(Ticker, singletonEntity);
+    } catch (error) {
+      console.error("Create Paused:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
+  };
+
   return {
     createPlanet,
     move,
     unPause,
     pause,
+    tick,
   };
 }

@@ -6,7 +6,7 @@ import { singletonEntity } from "@latticexyz/store-sync/recs";
 export const PlayPauseButton = () => {
   const {
     components: { Ticker },
-    systemCalls: { unPause, pause },
+    systemCalls: { unPause, pause, tick },
   } = useMUD();
 
   const [isPaused, setIsPaused] = useState<boolean | null>(null);
@@ -38,6 +38,9 @@ export const PlayPauseButton = () => {
     return <div>Loading...</div>;
   }
 
+  const handleTick = async () => {
+    tick();
+  };
   return (
     <div>
       <button
@@ -49,6 +52,14 @@ export const PlayPauseButton = () => {
         }`}
       >
         {isPaused ? "Play" : "Pause"}
+      </button>
+
+      <button
+        onClick={handleTick}
+        className={`px-4 py-2 rounded-md text-white 
+            bg-red-500 hover:bg-red-600`}
+      >
+        Tick
       </button>
     </div>
   );
