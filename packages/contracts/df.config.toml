@@ -1,0 +1,235 @@
+[universe]
+a_sparsity = 16384
+b_radius = 150000
+
+[temp]
+a_biome_check = false
+b_skip_proof_check = true
+
+[space_type]
+a_perlin_thresholds = [14, 15, 19]
+b_planet_level_limits = [4, 5, 9, 9]
+c_planet_level_bonus = [0, 0, 0, 0]
+
+[universe_zone]
+a_borders = [56250, 75000, 93750, 112500, 131250] # from zone0 to zone4
+b_planet_level_limits = [9, 8, 7, 6, 5, 9]        # from zone0 to zone5
+c_planet_level_bonus = [1, 0, 0, 0, 0, 0]         # from zone0 to zone5
+
+[planet_level]
+thresholds = [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
+
+# the reason for putting the thresholds in a nested object instead of an explicit
+# 3-dimentional array is to avoid the toml formattor from spreading the array,
+# which makes it hard to read and maintain
+[planet_type.thresholds.1] # Nebula
+0 = [256, 0, 0, 0, 0] # planet, asteroid field, foundry, spacetime rip, quasar
+1 = [253, 2, 0, 1, 0]
+2 = [253, 2, 0, 1, 0]
+3 = [253, 2, 0, 0, 1]
+4 = [253, 2, 0, 0, 1]
+5 = [253, 2, 0, 0, 1]
+6 = [253, 2, 0, 0, 1]
+7 = [253, 2, 0, 0, 1]
+8 = [253, 2, 0, 0, 1]
+9 = [253, 2, 0, 0, 1]
+
+[planet_type.thresholds.2] # Space
+0 = [256, 0, 0, 0, 0]
+1 = [253, 2, 1, 0, 0]
+2 = [252, 2, 1, 1, 0]
+3 = [251, 2, 1, 1, 1]
+4 = [252, 2, 1, 0, 1]
+5 = [252, 2, 1, 0, 1]
+6 = [252, 2, 1, 0, 1]
+7 = [252, 2, 1, 0, 1]
+8 = [252, 2, 1, 0, 1]
+9 = [252, 2, 1, 0, 1]
+
+[planet_type.thresholds.3] # Deep Space
+0 = [256, 0, 0, 0, 0]
+1 = [250, 4, 2, 0, 0]
+2 = [250, 4, 1, 1, 0]
+3 = [248, 4, 1, 2, 1]
+4 = [248, 4, 1, 2, 1]
+5 = [248, 4, 1, 2, 1]
+6 = [248, 4, 1, 2, 1]
+7 = [248, 4, 1, 2, 1]
+8 = [248, 4, 1, 2, 1]
+9 = [248, 4, 1, 2, 1]
+
+[planet_type.thresholds.4] # Dead Space
+0 = [256, 0, 0, 0, 0]
+1 = [251, 4, 1, 0, 0]
+2 = [251, 4, 1, 0, 0]
+3 = [247, 4, 2, 2, 1]
+4 = [247, 4, 2, 2, 1]
+5 = [247, 4, 2, 2, 1]
+6 = [247, 4, 2, 2, 1]
+7 = [247, 4, 2, 2, 1]
+8 = [247, 4, 2, 2, 1]
+9 = [247, 4, 2, 2, 1]
+
+[snark]
+a_planet_hash_key = 2020
+b_biome_base_key = 4567
+c_space_type_key = 8020
+d_perlin_length_scale = 8192
+e_perlin_mirror_x = 0
+f_perlin_mirror_y = 0
+
+[ticker]
+rate = 1
+
+[inner_circle]
+a_radius = 0
+b_speed = 0
+
+# 0 0 998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b
+# 0 1000 2f2f570496eba865f0f7e547c58e5f408c59b1a4888738ef05f9ced2334a98cc
+# 1000 1000 2b793eaafe86e97e2bf670ba48d5a1c3984ad11e335d87bc9657c7ab6d030caf
+# 1000 0 f2a81649e22806f1615bfbb872f588b58160304fa9f6342ceaf0497e9b62f7a
+# 1000 -1000 29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963
+# 0 -1000 157da9a7cd70b3252ce6646b096689251290d66bbd57342caaffab0ecf37db2
+# -1000 -1000 1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0
+# -1000 0 25ecb2c15cc398a7ddd3d754aed037383a0e2cf7b0a58c41a02d9d57c716ba0b
+# -1000 1000 14b55d058b07af5273662702312b29198cf6afe55df1a247ce99c145cf00b1f1
+# 0 2000 1d59241414f7a646581a6377b1ee760365d723833f850feab56701aa1c59e472
+# 0 -2000 144a621ea775acd784a5cdbf44e1a4ba3660cebba835834b8eef6c8277a93e07
+# 2000 0 2bb1f24d6e4d57fb10f1848b416b4853b3d12e4ce32875c728c8523ad9d47547
+# -2000 0 287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64
+
+[[test_planets]]
+a_x = 0
+b_y = 0
+c_hash = "0x0998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b"
+d_owner = "0x0000000000000000000000000000000000000000"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 9
+d_planet_type = 1
+e_space_type = 2
+f_population = 800000000
+g_silver = 200000000
+
+[[test_planets]]
+a_x = 0
+b_y = 1000
+c_hash = "0x2f2f570496eba865f0f7e547c58e5f408c59b1a4888738ef05f9ced2334a98cc"
+d_owner = "0x0000000000000000000000000000000000000000"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 7
+d_planet_type = 2
+e_space_type = 3
+f_population = 500000000
+g_silver = 100000000
+
+[[test_planets]]
+a_x = 1000
+b_y = 0
+c_hash = "0x0f2a81649e22806f1615bfbb872f588b58160304fa9f6342ceaf0497e9b62f7a"
+d_owner = "0x0000000000000000000000000000000000000000"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 5
+d_planet_type = 3
+e_space_type = 3
+f_population = 100000000
+g_silver = 25000000
+
+[[test_planets]]
+a_x = 0
+b_y = -1000
+c_hash = "0x0157da9a7cd70b3252ce6646b096689251290d66bbd57342caaffab0ecf37db2"
+d_owner = "0x0000000000000000000000000000000000000000"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 3
+d_planet_type = 4
+e_space_type = 3
+f_population = 6000000
+g_silver = 1500000
+
+[[test_planets]]
+a_x = -1000
+b_y = 0
+c_hash = "0x25ecb2c15cc398a7ddd3d754aed037383a0e2cf7b0a58c41a02d9d57c716ba0b"
+d_owner = "0x0000000000000000000000000000000000000000"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 1
+d_planet_type = 5
+e_space_type = 3
+f_population = 400000
+g_silver = 500000
+
+[[test_planets]]
+a_x = 1000
+b_y = 1000
+c_hash = "0x2b793eaafe86e97e2bf670ba48d5a1c3984ad11e335d87bc9657c7ab6d030caf"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 8
+d_planet_type = 1
+e_space_type = 1
+f_population = 700000000
+g_silver = 100000000
+
+[[test_planets]]
+a_x = -1000
+b_y = -1000
+c_hash = "0x1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 6
+d_planet_type = 1
+e_space_type = 2
+f_population = 300000000
+g_silver = 50000000
+
+[[test_planets]]
+a_x = -1000
+b_y = 1000
+c_hash = "0x287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 4
+d_planet_type = 1
+e_space_type = 3
+f_population = 25000000
+g_silver = 6000000
+
+[[test_planets]]
+a_x = 1000
+b_y = -1000
+c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+
+[test_planets.e_data]
+a_last_update_tick = 0
+b_perlin = 0
+c_level = 2
+d_planet_type = 1
+e_space_type = 4
+f_population = 1600000
+g_silver = 200000
