@@ -1,29 +1,57 @@
-import { useComponentValue } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
-
+import { CreatePlanetForm } from "./CreatePlanetFormTest";
+import { CreateMoveForm } from "./CreateMoveFormTest";
+import { PlayPauseButton } from "./PlayPauseButton";
 export const App = () => {
-  const {
-    components: { Counter },
-    systemCalls: { increment },
-  } = useMUD();
+  // Function to handle planet creation
+  const handleCreatePlanet = (
+    planetHash: string,
+    owner: string,
+    perlin: number,
+    level: number,
+    planetType: string,
+    spaceType: string,
+    population: number,
+    silver: number
+  ) => {
+    console.log("Planet Created:", {
+      planetHash,
+      owner,
+      perlin,
+      level,
+      planetType,
+      spaceType,
+      population,
+      silver,
+    });
 
-  const counter = useComponentValue(Counter, singletonEntity);
+    // Here you can call the df__createPlanet function (smart contract interaction) using MUD's system call
+    // df__createPlanet(planetHash, owner, perlin, level, planetType, spaceType, population, silver);
+  };
+
+  const handleMoveSubmit = async (
+    proof: string,
+    moveInput: string,
+    population: number,
+    silver: number,
+    artifact: number
+  ) => {
+    console.log("Move sent:", {
+      proof,
+      moveInput,
+      population,
+      silver,
+      artifact,
+    });
+  };
 
   return (
-    <>
-      <div>
-        Counter: <span>{counter?.value ?? "??"}</span>
-      </div>
-      <button
-        type="button"
-        onClick={async (event) => {
-          event.preventDefault();
-          console.log("new counter value:", await increment());
-        }}
-      >
-        Increment
-      </button>
-    </>
+    <div>
+      <h1 className="text-2xl font-bold mb-4">Create a Planet</h1>
+      <CreatePlanetForm onSubmit={handleCreatePlanet} />
+
+      <CreateMoveForm onSubmit={handleMoveSubmit} />
+      <PlayPauseButton />
+    </div>
   );
 };

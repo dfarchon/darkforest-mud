@@ -3,12 +3,45 @@
  * for changes in the World state (using the System contracts).
  */
 
-import { getComponentValue } from "@latticexyz/recs";
+import { Entity, getComponentValue } from "@latticexyz/recs";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
+interface Proof {
+  // Your proof structure here
+  a: [string, string];
+  b: [[string, string], [string, string]];
+  c: [string, string];
+  input: string[];
+}
+
+interface MoveInput {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  isTeleport: boolean;
+  isAttack: boolean;
+}
+
+// PlanetType Enum
+export enum PlanetType {
+  PLANET = 0,
+  ASTEROID_FIELD = 1,
+  FOUNDRY = 2,
+  SPACETIME_RIP = 3,
+  QUASAR = 4,
+}
+
+// SpaceType Enum
+export enum SpaceType {
+  NEBULA = 0,
+  SPACE = 1,
+  DEEP_SPACE = 2,
+  DEAD_SPACE = 3,
+}
 
 export function createSystemCalls(
   /*
@@ -31,21 +64,100 @@ export function createSystemCalls(
    *   (https://github.com/latticexyz/mud/blob/main/templates/react/packages/client/src/mud/setupNetwork.ts#L77-L83).
    */
   { worldContract, waitForTransaction }: SetupNetworkResult,
-  { Counter }: ClientComponents,
+  { Move, Planet, Ticker }: ClientComponents
 ) {
-  const increment = async () => {
-    /*
-     * Because IncrementSystem
-     * (https://mud.dev/templates/typescript/contracts#incrementsystemsol)
-     * is in the root namespace, `.increment` can be called directly
-     * on the World contract.
-     */
-    const tx = await worldContract.write.app__increment();
-    await waitForTransaction(tx);
-    return getComponentValue(Counter, singletonEntity);
+  const createPlanet = async (
+    planetHash: string,
+    owner: string,
+    perlin: number,
+    level: number,
+    planetType: PlanetType,
+    spaceType: SpaceType,
+    population: number,
+    silver: number
+  ): Promise<void> => {
+    try {
+      // Call the createPlanet function on the contract
+      const tx = await worldContract.write.df__createPlanet([
+        planetHash,
+        owner as `0x${string}`,
+        perlin,
+        level,
+        planetType,
+        spaceType,
+        BigInt(population),
+        BigInt(silver),
+      ]);
+      // Wait for the transaction to be confirmed
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("Planet created successfully:", receipt);
+      getComponentValue(Planet, singletonEntity);
+    } catch (error) {
+      console.error("Create planet transaction failed:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
+  };
+
+  const move = async (
+    proof: Proof,
+    moveInput: MoveInput,
+    population: number,
+    silver: number,
+    artifact: number
+  ): Promise<number> => {
+    try {
+      // Call the move function on the contract
+      const tx = await worldContract.write.df__move({
+        proof,
+        moveInput,
+        population,
+        silver,
+        artifact,
+      });
+      const receipt = await waitForTransaction(tx);
+
+      console.log("Move created successfully:", receipt);
+      getComponentValue(Move, singletonEntity);
+      return 0;
+    } catch (error) {
+      console.error("Move transaction failed:", error);
+      throw error;
+    }
+  };
+
+  const unPause = async () => {
+    try {
+      const tx = await worldContract.write.df__unpause();
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("UnPaused:", receipt);
+      getComponentValue(Ticker, singletonEntity);
+    } catch (error) {
+      console.error("Create UnPaused:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
+  };
+
+  const pause = async () => {
+    try {
+      const tx = await worldContract.write.df__pause();
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("Paused:", receipt);
+      getComponentValue(Ticker, singletonEntity);
+    } catch (error) {
+      console.error("Create Paused:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
   };
 
   return {
-    increment,
+    createPlanet,
+    move,
+    unPause,
+    pause,
   };
 }

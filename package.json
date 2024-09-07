@@ -14,8 +14,8 @@
   "devDependencies": {
     "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
-    "@latticexyz/cli": "2.1.1",
-    "@latticexyz/common": "2.1.1",
+    "@latticexyz/cli": "2.2.2",
+    "@latticexyz/common": "2.2.2",
     "@types/debug": "4.1.7",
     "@typescript-eslint/eslint-plugin": "7.1.1",
     "@typescript-eslint/parser": "7.1.1",
@@ -31,6 +31,6 @@
   },
   "dependencies": {
     "@latticexyz/explorer": "^2.2.2",
-    "@latticexyz/store-indexer": "^2.2.2"
+    "@latticexyz/store-indexer": "2.2.2"
   }
 }

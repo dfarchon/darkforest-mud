@@ -193,7 +193,7 @@ g_silver = 100000000
 a_x = -1000
 b_y = -1000
 c_hash = "0x1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+d_owner = "0xE86b3a037D1F6aED93781C0241674908583435E0"
 
 [test_planets.e_data]
 a_last_update_tick = 0
@@ -208,7 +208,7 @@ g_silver = 50000000
 a_x = -1000
 b_y = 1000
 c_hash = "0x287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+d_owner = "0xE86b3a037D1F6aED93781C0241674908583435E0"
 
 [test_planets.e_data]
 a_last_update_tick = 0
@@ -218,18 +218,18 @@ d_planet_type = 1
 e_space_type = 3
 f_population = 25000000
 g_silver = 6000000
+# implement as default for CreatePlanet form
+# [[test_planets]]
+# a_x = 1000
+# b_y = -1000
+# c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
+# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 
-[[test_planets]]
-a_x = 1000
-b_y = -1000
-c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 2
-d_planet_type = 1
-e_space_type = 4
-f_population = 1600000
-g_silver = 200000
+# [test_planets.e_data]
+# a_last_update_tick = 0
+# b_perlin = 0
+# c_level = 2
+# d_planet_type = 1
+# e_space_type = 4
+# f_population = 1600000
+# g_silver = 200000
