@@ -28,5 +28,9 @@
   "engines": {
     "node": "^18",
     "pnpm": ">=9.8.0 <10.0.0"
+  },
+  "dependencies": {
+    "@latticexyz/explorer": "^2.2.2",
+    "@latticexyz/store-indexer": "^2.2.2"
   }
 }
