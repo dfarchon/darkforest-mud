@@ -30,6 +30,8 @@ contract PlanetSystem is System, Errors {
   }
 
   function upgradePlanet(uint256 planetHash, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades) public {
+    IWorld(_world()).df__tick();
+    
     Planet memory planet = readPlanet(planetHash);
     address executor = _msgSender();
     planet.upgrade(executor, rangeUpgrades, speedUpgrades, defenseUpgrades);
