@@ -3,14 +3,11 @@
  * for changes in the World state (using the System contracts).
  */
 
-import { Entity, getComponentValue } from "@latticexyz/recs";
+import { getComponentValue } from "@latticexyz/recs";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { Address } from "viem";
-import { address } from "@df/serde/address";
-import bigInt from "big-integer";
-import { BigNumberish } from "ethers";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 interface Proof {
@@ -141,16 +138,14 @@ export function createSystemCalls(
     owner: string,
     perlin: number,
     level: number,
-    planetType: PlanetType,
-    spaceType: SpaceType,
+    planetType: number,
+    spaceType: number,
     population: number,
     silver: number,
     upgrade: number,
   ): Promise<void> => {
     try {
       // Call the createPlanet function on the contract
-
-      console.log("PlanetHash:", BigInt(planetHash));
 
       const tx = await worldContract.write.df__createPlanet([
         planetHash,

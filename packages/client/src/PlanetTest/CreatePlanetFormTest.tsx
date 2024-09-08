@@ -45,8 +45,8 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
   const [owner, setOwner] = useState<string>(entityToAddress(playerEntity));
   const [perlin, setPerlin] = useState<number>(0);
   const [level, setLevel] = useState<number>(2);
-  const [planetType, setPlanetType] = useState<PlanetType>(PlanetType.PLANET);
-  const [spaceType, setSpaceType] = useState<SpaceType>(SpaceType.DEAD_SPACE);
+  const [planetType, setPlanetType] = useState<number>(1);
+  const [spaceType, setSpaceType] = useState<number>(2);
   const [population, setPopulation] = useState<number>(100000);
   const [silver, setSilver] = useState<number>(50000);
   const [upgrade, setUpgrade] = useState<number>(0);
@@ -130,15 +130,14 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             <label className="block text-gray-700">Planet Type</label>
             <select
               value={planetType}
-              onChange={(e) =>
-                setPlanetType(Number(e.target.value) as PlanetType)
-              }
+              onChange={(e) => setPlanetType(Number(e.target.value))}
               className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             >
-              <option value="PLANET">PLANET</option>
-              <option value="FOUNDRY">FOUNDRY</option>
-              <option value="SPACETIME_RIP">SPACETIME_RIP</option>
-              <option value="QUASAR">QUASAR</option>
+              <option value="1">PLANET</option>
+              <option value="2">SILVER_MINE</option>
+              <option value="3">FOUNDRY</option>
+              <option value="4">SPACETIME_RIP</option>
+              <option value="5">QUASAR</option>
             </select>
           </div>
 
@@ -146,15 +145,13 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             <label className="block text-gray-700">Space Type</label>
             <select
               value={spaceType}
-              onChange={(e) =>
-                setSpaceType(Number(e.target.value) as SpaceType)
-              }
+              onChange={(e) => setSpaceType(Number(e.target.value))}
               className="mt-1 block rounded-md border border-gray-300 p-2"
             >
-              <option value="NEBULA">NEBULA</option>
-              <option value="SPACE">SPACE</option>
-              <option value="DEEP_SPACE">DEEP_SPACE</option>
-              <option value="DEAD_SPACE">DEEP_SPACE</option>
+              <option value="1">NEBULA</option>
+              <option value="2">SPACE</option>
+              <option value="3">DEEP_SPACE</option>
+              <option value="4">DEAD_SPACE</option>
             </select>
           </div>
         </div>
