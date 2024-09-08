@@ -27,23 +27,4 @@ contract TestOnlySystem is System {
     PlanetOwner.set(bytes32(planetHash), owner);
   }
 
-  function createPlanetClient(
-    uint256 planetHash,
-    address owner,
-    uint8 perlin,
-    uint8 level,
-    PlanetType planetType,
-    SpaceType spaceType,
-    uint64 population,
-    uint64 silver,
-    uint24 upgrades
-  ) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
-
-    Planet.set(
-      bytes32(planetHash), Ticker.getTickNumber(), perlin, level, planetType, spaceType, population, silver, upgrades
-    );
-    PlanetOwner.set(bytes32(planetHash), owner);
-  }
 }

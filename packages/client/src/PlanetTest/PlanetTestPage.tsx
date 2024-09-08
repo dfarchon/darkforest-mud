@@ -18,6 +18,7 @@ export const PlanetTestPage = () => {
     spaceType: SpaceType,
     population: number,
     silver: number,
+    upgrade: number,
   ) => {
     console.log("Planet Created:", {
       planetHash,
@@ -28,6 +29,7 @@ export const PlanetTestPage = () => {
       spaceType,
       population,
       silver,
+      upgrade,
     });
 
     // Here you can call the df__createPlanet function (smart contract interaction) using MUD's system call

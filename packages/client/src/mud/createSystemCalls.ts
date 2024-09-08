@@ -9,6 +9,8 @@ import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { Address } from "viem";
 import { address } from "@df/serde/address";
+import bigInt from "big-integer";
+import { BigNumberish } from "ethers";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 interface Proof {
@@ -135,7 +137,7 @@ export function createSystemCalls(
 
   // Create planet
   const createPlanet = async (
-    planetHash: string,
+    planetHash: bigint,
     owner: string,
     perlin: number,
     level: number,
@@ -148,11 +150,11 @@ export function createSystemCalls(
     try {
       // Call the createPlanet function on the contract
 
-      const bigIntPlanetHesh = BigInt(planetHash);
-      debugger;
+      console.log("PlanetHash:", BigInt(planetHash));
+
       const tx = await worldContract.write.df__createPlanet([
         planetHash,
-        owner,
+        owner as `0x${string}`,
         perlin,
         level,
         planetType,
@@ -194,9 +196,9 @@ export function createSystemCalls(
       const upgrade = `0x${rangeUpgrades}${speedUpgrades}${defenseUpgrades}`;
       const tx = await worldContract.write.df__upgradePlanet([
         planetHash,
-        rangeUpgrades,
-        speedUpgrades,
-        defenseUpgrades,
+        BigInt(rangeUpgrades),
+        BigInt(speedUpgrades),
+        BigInt(defenseUpgrades),
       ]);
 
       // Wait for the transaction to be confirmed
@@ -292,7 +294,7 @@ export function createSystemCalls(
     b: BigInt[][],
     c: BigInt[],
     input: BigInt[],
-  ): Promise<boolean> => {
+  ): Promise<`0x${string}`> => {
     try {
       const result = await worldContract.write.df__verifyInitProof(
         a,
@@ -310,7 +312,7 @@ export function createSystemCalls(
   const verifyMoveProof = async (
     proof: { a: BigInt[]; b: BigInt[][]; c: BigInt[] },
     moveInput: { [key: string]: BigInt },
-  ): Promise<boolean> => {
+  ): Promise<`0x${string}`> => {
     try {
       const result = await worldContract.write.df__verifyMoveProof(
         proof,
@@ -328,7 +330,7 @@ export function createSystemCalls(
     b: BigInt[][],
     c: BigInt[],
     input: BigInt[],
-  ): Promise<boolean> => {
+  ): Promise<`0x${string}`> => {
     try {
       const result = await worldContract.write.df__verifyBiomebaseProof(
         a,
@@ -348,7 +350,7 @@ export function createSystemCalls(
     b: BigInt[][],
     c: BigInt[],
     input: BigInt[],
-  ): Promise<boolean> => {
+  ): Promise<`0x${string}`> => {
     try {
       const result = await worldContract.write.df__verifyRevealProof(
         a,
@@ -368,7 +370,7 @@ export function createSystemCalls(
     b: BigInt[][],
     c: BigInt[],
     input: BigInt[],
-  ): Promise<boolean> => {
+  ): Promise<`0x${string}`> => {
     try {
       const result = await worldContract.write.df__verifyWhitelistProof(
         a,

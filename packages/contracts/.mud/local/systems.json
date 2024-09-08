@@ -115,12 +115,10 @@
       "name": "TestOnlySystem",
       "systemId": "0x73796466000000000000000000000000546573744f6e6c7953797374656d0000",
       "abi": [
-        "function createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)",
-        "function createPlanetClient(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)"
+        "function createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)"
       ],
       "worldAbi": [
-        "function df__createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)",
-        "function df__createPlanetClient(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)"
+        "function df__createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)"
       ]
     },
     {
@@ -190,5 +188,5 @@
       ]
     }
   ],
-  "createdAt": 1725796901480
+  "createdAt": 1725814132229
 }

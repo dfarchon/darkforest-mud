@@ -80,7 +80,20 @@ contract PostDeploy is Script {
       0
     );
 
-    IWorld(worldAddress).df__setPlanetMetadata(1, PlanetMetadataData(177, 160, 400, 400000, 833, 100000, 56), 1);
+    // IWorld(worldAddress).df__setPlanetMetadata(1, PlanetMetadataData(177, 160, 400, 400000, 833, 100000, 56), 1);
+
+    IWorld(worldAddress).df__createPlanet(
+      uint256(0x2f2f570496eba865f0f7e547c58e5f408c59b1a4888738ef05f9ced2334a98cc),
+      address(0x0),
+      0,
+      9,
+      PlanetType.PLANET,
+      SpaceType.DEAD_SPACE,
+      800000000,
+      200000000,
+      0
+    );
+
     IWorld(worldAddress).df__setPlanetMetadata(2, PlanetMetadataData(315, 160, 300, 1600000, 1250, 500000, 167), 2);
     IWorld(worldAddress).df__setPlanetMetadata(3, PlanetMetadataData(591, 160, 300, 6000000, 1667, 2500000, 417), 3);
     IWorld(worldAddress).df__setPlanetMetadata(4, PlanetMetadataData(1025, 160, 300, 25000000, 2083, 12000000, 833), 4);

@@ -21,6 +21,7 @@ interface CreatePlanetProps {
     spaceType: SpaceType,
     population: number,
     silver: number,
+    upgrade: number,
   ) => void;
 }
 
@@ -34,6 +35,10 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
     network: { playerEntity },
   } = useMUD();
 
+  // const [planetHash, setPlanetHash] =
+  //   useState(
+  //     18920765300854138771997186876586659751147670158227643843351042871587377703267n,
+  //   );
   const [planetHash, setPlanetHash] = useState<string>(
     "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963",
   );
@@ -49,7 +54,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createPlanet(
-      planetHash,
+      BigInt(planetHash),
       owner,
       perlin,
       level,
@@ -80,7 +85,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
           <label className="block text-gray-700">Planet Hash</label>
           <input
             type="text"
-            value={planetHash}
+            value={planetHash.toString()}
             onChange={(e) => setPlanetHash(e.target.value)}
             className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Planet Hash"
