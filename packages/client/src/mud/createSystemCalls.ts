@@ -94,7 +94,8 @@ export function createSystemCalls(
     planetType: PlanetType,
     spaceType: SpaceType,
     population: number,
-    silver: number
+    silver: number,
+    upgrade: uint24,
   ): Promise<void> => {
     try {
       // Call the createPlanet function on the contract
@@ -107,7 +108,7 @@ export function createSystemCalls(
         spaceType,
         BigInt(population),
         BigInt(silver),
-        0, //TODO add upgrade input
+        upgrade as uint24, //TODO add upgrade input
       ]);
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
@@ -120,13 +121,13 @@ export function createSystemCalls(
       throw error; // Re-throw error to handle it higher up if needed
     }
   };
-
+  // Todo types!!
   const move = async (
     proof: Proof,
     moveInput: MoveInput,
     population: number,
     silver: number,
-    artifact: number
+    artifact: number,
   ): Promise<number> => {
     try {
       // Call the move function on the contract
@@ -147,7 +148,8 @@ export function createSystemCalls(
       throw error;
     }
   };
-
+  // GAME MANAGER
+  // unPause function call for game contract
   const unPause = async () => {
     try {
       const tx = await worldContract.write.df__unpause();
@@ -161,7 +163,7 @@ export function createSystemCalls(
       throw error; // Re-throw error to handle it higher up if needed
     }
   };
-
+  // pause function call for game contract
   const pause = async () => {
     try {
       const tx = await worldContract.write.df__pause();
@@ -174,7 +176,7 @@ export function createSystemCalls(
       throw error; // Re-throw error to handle it higher up if needed
     }
   };
-
+  // tick function call for game contract
   const tick = async () => {
     try {
       const tx = await worldContract.write.df__tick();
@@ -187,7 +189,7 @@ export function createSystemCalls(
       throw error; // Re-throw error to handle it higher up if needed
     }
   };
-
+  // do not forget init function calls to be accessable in MUD systems calls
   return {
     mintPlayer,
     createPlanet,

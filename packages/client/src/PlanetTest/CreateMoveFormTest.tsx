@@ -8,7 +8,7 @@ interface CreateMoveProps {
     population: number,
 
     silver: number,
-    artifact: number
+    artifact: number,
   ) => void;
 }
 
@@ -26,8 +26,8 @@ export const CreateMoveForm: React.FC<CreateMoveProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-semibold text-center mb-4">
+    <div className="mx-auto max-w-md rounded-lg bg-white p-4 shadow-md">
+      <h2 className="mb-4 text-center text-2xl font-semibold">
         Move Function Form
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -37,7 +37,7 @@ export const CreateMoveForm: React.FC<CreateMoveProps> = ({ onSubmit }) => {
             type="text"
             value={proof}
             onChange={(e) => setProof(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200"
             required
           />
         </div>
@@ -50,48 +50,48 @@ export const CreateMoveForm: React.FC<CreateMoveProps> = ({ onSubmit }) => {
             type="text"
             value={moveInput}
             onChange={(e) => setMoveInput(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200"
             required
           />
         </div>
+        <div className="flex flex-row gap-3">
+          <div>
+            <label className="block text-gray-700">Population:</label>
+            <input
+              type="number"
+              value={population}
+              onChange={(e) => setPopulation(Number(e.target.value))}
+              className="w-3/4 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-gray-700">Population:</label>
-          <input
-            type="number"
-            value={population}
-            onChange={(e) => setPopulation(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
-            required
-          />
+          <div>
+            <label className="block text-gray-700">Silver:</label>
+            <input
+              type="number"
+              value={silver}
+              onChange={(e) => setSilver(Number(e.target.value))}
+              className="w-3/4 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700">Artifact:</label>
+            <input
+              type="number"
+              value={artifact}
+              onChange={(e) => setArtifact(Number(e.target.value))}
+              className="w-3/4 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200"
+              required
+            />
+          </div>
         </div>
-
-        <div>
-          <label className="block text-gray-700">Silver:</label>
-          <input
-            type="number"
-            value={silver}
-            onChange={(e) => setSilver(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Artifact:</label>
-          <input
-            type="number"
-            value={artifact}
-            onChange={(e) => setArtifact(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
-            required
-          />
-        </div>
-
         <div className="text-center">
           <button
             type="submit"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-200"
+            className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-200"
           >
             Submit
           </button>
