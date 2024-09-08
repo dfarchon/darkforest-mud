@@ -8,13 +8,13 @@ export default defineWorld({
   },
   systems: {
     TickSystem: {
-      openAccess: false,
+      openAccess: true,
     },
     InitializeSystem: {
       openAccess: false,
     },
     TestOnlySystem: {
-      openAccess: false,
+      openAccess: true,
     },
   },
   tables: {

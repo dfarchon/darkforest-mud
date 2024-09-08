@@ -237,18 +237,19 @@ f_population = 25000000
 g_silver = 6000000
 h_upgrades = 0
 
-[[test_planets]]
-a_x = 1000
-b_y = -1000
-c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+# implement as default for CreatePlanet form
+# [[test_planets]]
+# a_x = 1000
+# b_y = -1000
+# c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
+# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 2
-d_planet_type = 1
-e_space_type = 4
-f_population = 1600000
-g_silver = 200000
-h_upgrades = 0
+# [test_planets.e_data]
+# a_last_update_tick = 0
+# b_perlin = 0
+# c_level = 2
+# d_planet_type = 1
+# e_space_type = 4
+# f_population = 1600000
+# g_silver = 200000
+# h_upgrades = 0
