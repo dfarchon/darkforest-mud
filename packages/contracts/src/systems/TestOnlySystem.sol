@@ -15,12 +15,15 @@ contract TestOnlySystem is System {
     PlanetType planetType,
     SpaceType spaceType,
     uint64 population,
-    uint64 silver
+    uint64 silver,
+    uint24 upgrades
   ) public {
     IWorld world = IWorld(_world());
     world.df__tick();
 
-    Planet.set(bytes32(planetHash), Ticker.getTickNumber(), perlin, level, planetType, spaceType, population, silver);
+    Planet.set(
+      bytes32(planetHash), Ticker.getTickNumber(), perlin, level, planetType, spaceType, population, silver, upgrades
+    );
     PlanetOwner.set(bytes32(planetHash), owner);
   }
 }

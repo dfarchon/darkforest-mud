@@ -19,4 +19,7 @@ interface Errors {
   // planet system
   error InvalidPlanetHash();
   error UnknownPlanetType();
+  error InvalidUpgradeTarget();
+  error UpgradeExceedMaxLevel();
+  error NotEnoughSilverToUpgrade();
 }

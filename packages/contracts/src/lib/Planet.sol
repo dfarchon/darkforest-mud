@@ -8,6 +8,7 @@ import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codege
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData, Ticker, PlanetOwner } from "../codegen/index.sol";
 import { PendingMoveData, MoveData } from "../codegen/index.sol";
+import { UpgradeConfig, UpgradeConfigData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "./Move.sol";
 
@@ -26,6 +27,9 @@ struct Planet {
   uint256 universeZone; // only for newly initialized toPlanet in a move
   uint256 population;
   uint256 silver;
+  uint256 rangeUpgrades;
+  uint256 speedUpgrades;
+  uint256 defenseUpgrades;
   // properties read from planet metadata
   uint256 range;
   uint256 speed;
@@ -49,6 +53,8 @@ library PlanetLib {
     planet.moveQueue.ReadFromStore(planet.planetHash);
 
     _readMetadata(planet);
+    _luckilyDouble(planet);
+    _activateUpgrades(planet);
   }
 
   function writeToStore(Planet memory planet) internal {
@@ -59,7 +65,8 @@ library PlanetLib {
       planetType: planet.planetType,
       spaceType: planet.spaceType,
       population: uint64(planet.population),
-      silver: uint64(planet.silver)
+      silver: uint64(planet.silver),
+      upgrades: uint24(planet.rangeUpgrades << 16 | planet.speedUpgrades << 8 | planet.defenseUpgrades)
     });
     PlanetTable.set(bytes32(planet.planetHash), data);
     PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
@@ -85,6 +92,49 @@ library PlanetLib {
 
   function popArrivedMove(Planet memory planet, uint256 untilTick) internal view returns (MoveData memory move) {
     return planet.moveQueue.PopArrivedMove(untilTick);
+  }
+
+  function upgrade(
+    Planet memory planet,
+    address executor,
+    uint256 rangeUpgrades,
+    uint256 speedUpgrades,
+    uint256 defenseUpgrades
+  ) internal view {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.planetType != PlanetType.PLANET || planet.level == 0) {
+      revert Errors.InvalidUpgradeTarget();
+    }
+    UpgradeConfigData memory config = UpgradeConfig.get();
+    uint256 totalLevel = planet.rangeUpgrades + planet.speedUpgrades + planet.defenseUpgrades;
+    planet.rangeUpgrades += rangeUpgrades;
+    planet.speedUpgrades += speedUpgrades;
+    planet.defenseUpgrades += defenseUpgrades;
+    uint256 curTotalLevel = totalLevel + rangeUpgrades + speedUpgrades + defenseUpgrades;
+    uint256 maxSingleLevel = config.maxSingleLevel;
+    uint256 maxTotalLevel = uint8(config.maxTotalLevel >> ((uint8(planet.spaceType) - 1) * 8));
+    if (
+      curTotalLevel > maxTotalLevel || planet.rangeUpgrades > maxSingleLevel
+        || planet.speedUpgrades > maxSingleLevel || planet.defenseUpgrades > maxSingleLevel
+    ) {
+      revert Errors.UpgradeExceedMaxLevel();
+    }
+    uint256 totalCost;
+    uint256 silverCost = config.silverCost >> (totalLevel * 8);
+    for (uint256 i = totalLevel; i < curTotalLevel;) {
+      totalCost += uint8(silverCost);
+      unchecked {
+        silverCost >>= 8;
+        ++i;
+      }
+    }
+    totalCost = totalCost * planet.silverCap / 100;
+    if (planet.silver < totalCost) {
+      revert Errors.NotEnoughSilverToUpgrade();
+    }
+    planet.silver -= totalCost;
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -114,7 +164,7 @@ library PlanetLib {
       planet.spaceType = SpaceType.NEBULA;
       return;
     }
-    for (uint256 i; i < thresholds.length;) {
+    for (uint256 i; i < length;) {
       if (perlin < thresholds[i]) {
         planet.spaceType = SpaceType(i + 1);
         return;
@@ -123,7 +173,7 @@ library PlanetLib {
         ++i;
       }
     }
-    planet.spaceType = SpaceType(length);
+    planet.spaceType = SpaceType(length + 1);
   }
 
   function _initZone(Planet memory planet) internal view {
@@ -218,6 +268,10 @@ library PlanetLib {
     planet.spaceType = data.spaceType;
     planet.population = data.population;
     planet.silver = data.silver;
+    uint256 upgrades = data.upgrades;
+    planet.rangeUpgrades = uint8(upgrades >> 16);
+    planet.speedUpgrades = uint8(upgrades >> 8);
+    planet.defenseUpgrades = uint8(upgrades);
   }
 
   function _readMetadata(Planet memory planet) internal view {
@@ -229,7 +283,9 @@ library PlanetLib {
     planet.populationGrowth = metadata.populationGrowth;
     planet.silverCap = metadata.silverCap;
     planet.silverGrowth = metadata.silverGrowth;
+  }
 
+  function _luckilyDouble(Planet memory planet) internal pure {
     uint256 value = planet.planetHash >> 32;
     if (uint8(value) < 16) {
       planet.populationCap *= 2;
@@ -250,6 +306,24 @@ library PlanetLib {
     if (uint8(value) < 16) {
       planet.defense *= 2;
     }
+  }
+
+  function _activateUpgrades(Planet memory planet) internal view {
+    uint256 totalLevel = planet.rangeUpgrades + planet.speedUpgrades + planet.defenseUpgrades;
+    if (totalLevel == 0) {
+      return;
+    }
+    UpgradeConfigData memory config = UpgradeConfig.get();
+    planet.populationCap =
+      planet.populationCap * uint256(config.populationCapMultiplier) ** totalLevel / uint256(100) ** totalLevel;
+    planet.populationGrowth = planet.populationGrowth * uint256(config.populationGrowthMultiplier) ** totalLevel
+      / uint256(100) ** totalLevel;
+    planet.range =
+      planet.range * uint256(config.rangeMultiplier) ** planet.rangeUpgrades / uint256(100) ** planet.rangeUpgrades;
+    planet.speed =
+      planet.speed * uint256(config.speedMultiplier) ** planet.speedUpgrades / uint256(100) ** planet.speedUpgrades;
+    planet.defense = planet.defense * uint256(config.defenseMultiplier) ** planet.defenseUpgrades
+      / uint256(100) ** planet.defenseUpgrades;
   }
 
   function _populationGrow(Planet memory planet, uint256 tickElapsed) internal pure {

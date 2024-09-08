@@ -17,6 +17,7 @@ import { UniverseZoneConfig, UniverseZoneConfigData } from "../src/codegen/index
 import { PlanetLevelConfig, PlanetTypeConfig } from "../src/codegen/index.sol";
 import { SnarkConfig, SnarkConfigData, Ticker } from "../src/codegen/index.sol";
 import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
+import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
 
 contract PostDeploy is Script {
   using stdToml for string;
@@ -52,6 +53,7 @@ contract PostDeploy is Script {
     SnarkConfig.set(abi.decode(toml.parseRaw(".snark"), (SnarkConfigData)));
     Ticker.set(0, uint64(toml.readUint(".ticker.rate")), 0, true);
     InnerCircle.set(abi.decode(toml.parseRaw(".inner_circle"), (InnerCircleData)));
+    UpgradeConfig.set(abi.decode(toml.parseRaw(".upgrade_config"), (UpgradeConfigData)));
 
     // set test planets
     _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));

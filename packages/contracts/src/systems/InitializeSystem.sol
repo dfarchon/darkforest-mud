@@ -10,8 +10,15 @@ contract InitializeSystem is System {
   function setPlanetMetadata(uint8 level, PlanetMetadataData memory metadata, uint256 initialPopulationPercentage)
     public
   {
-    PlanetMetadataData memory md = metadata;
+    PlanetMetadataData memory md;
     // NEBULA
+    md.range = metadata.range;
+    md.speed = metadata.speed;
+    md.populationCap = metadata.populationCap;
+    md.populationGrowth = metadata.populationGrowth;
+    md.silverCap = metadata.silverCap;
+    md.silverGrowth = metadata.silverGrowth;
+    md.defense = metadata.defense;
     _initPlanetMetadataWithSpaceType(SpaceType.NEBULA, level, md, initialPopulationPercentage);
 
     // SPACE
@@ -59,30 +66,29 @@ contract InitializeSystem is System {
     PlanetMetadataData memory metadata,
     uint256 initialPopulationPercentage
   ) internal {
-    PlanetMetadataData memory md = metadata;
-    md.defense /= 2;
-    md.silverCap *= 2;
-    PlanetMetadata.set(spaceType, PlanetType.ASTEROID_FIELD, level, md);
-    uint64 population = uint64(md.populationCap * initialPopulationPercentage / 100);
+    uint256 defense = metadata.defense;
+    metadata.defense /= 2;
+    metadata.silverCap *= 2;
+    PlanetMetadata.set(spaceType, PlanetType.ASTEROID_FIELD, level, metadata);
+    uint64 population = uint64(metadata.populationCap * initialPopulationPercentage / 100);
     PlanetInitialResource.set(
-      spaceType, PlanetType.ASTEROID_FIELD, level, PlanetInitialResourceData(population, md.silverCap / 2)
+      spaceType, PlanetType.ASTEROID_FIELD, level, PlanetInitialResourceData(population, metadata.silverCap / 2)
     );
-
-    md.silverGrowth = 0;
-    PlanetMetadata.set(spaceType, PlanetType.SPACETIME_RIP, level, md);
+    metadata.silverGrowth = 0;
+    PlanetMetadata.set(spaceType, PlanetType.SPACETIME_RIP, level, metadata);
     PlanetInitialResource.set(spaceType, PlanetType.SPACETIME_RIP, level, PlanetInitialResourceData(population, 0));
-    md.defense = metadata.defense;
-    md.silverCap = metadata.silverCap;
-    PlanetMetadata.set(spaceType, PlanetType.PLANET, level, md);
+    metadata.defense = uint16(defense);
+    metadata.silverCap /= 2;
+    PlanetMetadata.set(spaceType, PlanetType.PLANET, level, metadata);
     PlanetInitialResource.set(spaceType, PlanetType.PLANET, level, PlanetInitialResourceData(population, 0));
-    PlanetMetadata.set(spaceType, PlanetType.FOUNDRY, level, md);
+    PlanetMetadata.set(spaceType, PlanetType.FOUNDRY, level, metadata);
     PlanetInitialResource.set(spaceType, PlanetType.FOUNDRY, level, PlanetInitialResourceData(population, 0));
-    md.silverCap *= 10;
-    md.populationCap *= 5;
+    metadata.silverCap *= 10;
+    metadata.populationCap *= 5;
     population *= 5;
-    md.speed *= 2;
-    md.populationGrowth = 0;
-    PlanetMetadata.set(spaceType, PlanetType.QUASAR, level, md);
+    metadata.speed *= 2;
+    metadata.populationGrowth = 0;
+    PlanetMetadata.set(spaceType, PlanetType.QUASAR, level, metadata);
     PlanetInitialResource.set(spaceType, PlanetType.QUASAR, level, PlanetInitialResourceData(population / 2, 0));
   }
 }

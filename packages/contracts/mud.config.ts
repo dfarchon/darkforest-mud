@@ -67,6 +67,19 @@ export default defineWorld({
       },
       key: ["spaceType", "level"],
     },
+    UpgradeConfig: {
+      schema: {
+        populationCapMultiplier: "uint8",
+        populationGrowthMultiplier: "uint8",
+        rangeMultiplier: "uint8",
+        speedMultiplier: "uint8",
+        defenseMultiplier: "uint8",
+        maxSingleLevel: "uint8",
+        maxTotalLevel: "uint32", // per space type, dead space | deep space | space | nebula
+        silverCost: "uint80", // percentage of silver cap, lvl max | ... | lvl 0
+      },
+      key: [],
+    },
     SnarkConfig: {
       schema: {
         planetHashKey: "uint64",
@@ -78,11 +91,11 @@ export default defineWorld({
         // use 1 instead of true
         perlinMirrorY: "uint8",
       },
-      key: [],
+      key: []
     },
     // we restrict the type length of speed, defense, so that all fiels fit into one slot
     // if we need larger values, we can make the PlanetInitialResource table be the second
-    // metadata table, and benefit from the 2nd slot.
+    // metadata table, and benefit from the 2nd slot. 
     PlanetMetadata: {
       schema: {
         range: "uint32",
@@ -117,6 +130,7 @@ export default defineWorld({
       spaceType: "SpaceType",
       population: "uint64",
       silver: "uint64",
+      upgrades: "uint24", // uint8 range | uint8 speed | uint8 defense
     },
     PlanetOwner: "address",
     PendingMove: {
@@ -138,7 +152,7 @@ export default defineWorld({
         arrivalTime: "uint64",
         population: "uint64",
         silver: "uint64",
-        artifact: "uint256",
+        artifact: "uint256"
       },
       key: ["to", "index"],
     },
@@ -157,6 +171,6 @@ export default defineWorld({
         speed: "uint64",
       },
       key: [],
-    },
+    }
   },
 });

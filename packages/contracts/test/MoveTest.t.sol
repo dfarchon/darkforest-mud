@@ -29,8 +29,8 @@ contract MoveTest is MudTest {
     }
 
     // init 2 planets
-    IWorld(worldAddress).df__createPlanet(1, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000);
-    IWorld(worldAddress).df__createPlanet(2, user2, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000);
+    IWorld(worldAddress).df__createPlanet(1, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(2, user2, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000, 0);
     vm.stopPrank();
   }
 
@@ -92,6 +92,7 @@ contract MoveTest is MudTest {
 
     input.distance *= 2;
     vm.roll(_getBlockNumberAtTick(move2.arrivalTime));
+    planet2 = IWorld(worldAddress).df__readPlanet(2);
     vm.prank(user1);
     IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));

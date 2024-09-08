@@ -70,6 +70,16 @@ thresholds = [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
 8 = [247, 4, 2, 2, 1]
 9 = [247, 4, 2, 2, 1]
 
+[upgrade_config]
+a_population_cap_multiplier = 120
+b_population_growth_multiplier = 120
+c_range_multiplier = 125
+d_speed_multiplier = 175
+e_defense_multiplier = 120
+f_max_single_level = 4
+g_max_total_level = 0x05050403         # [5, 5, 4, 3]
+h_silver_cost = 0x000000000064503c2814 # [100, 80, 60, 40, 20]
+
 [snark]
 a_planet_hash_key = 2020
 b_biome_base_key = 4567
@@ -113,6 +123,7 @@ d_planet_type = 1
 e_space_type = 2
 f_population = 800000000
 g_silver = 200000000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = 0
@@ -128,6 +139,7 @@ d_planet_type = 2
 e_space_type = 3
 f_population = 500000000
 g_silver = 100000000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = 1000
@@ -143,6 +155,7 @@ d_planet_type = 3
 e_space_type = 3
 f_population = 100000000
 g_silver = 25000000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = 0
@@ -158,6 +171,7 @@ d_planet_type = 4
 e_space_type = 3
 f_population = 6000000
 g_silver = 1500000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = -1000
@@ -173,6 +187,7 @@ d_planet_type = 5
 e_space_type = 3
 f_population = 400000
 g_silver = 500000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = 1000
@@ -188,12 +203,13 @@ d_planet_type = 1
 e_space_type = 1
 f_population = 700000000
 g_silver = 100000000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = -1000
 b_y = -1000
 c_hash = "0x1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0"
-d_owner = "0xE86b3a037D1F6aED93781C0241674908583435E0"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 
 [test_planets.e_data]
 a_last_update_tick = 0
@@ -203,12 +219,13 @@ d_planet_type = 1
 e_space_type = 2
 f_population = 300000000
 g_silver = 50000000
+h_upgrades = 0
 
 [[test_planets]]
 a_x = -1000
 b_y = 1000
 c_hash = "0x287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64"
-d_owner = "0xE86b3a037D1F6aED93781C0241674908583435E0"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 
 [test_planets.e_data]
 a_last_update_tick = 0
@@ -218,6 +235,8 @@ d_planet_type = 1
 e_space_type = 3
 f_population = 25000000
 g_silver = 6000000
+h_upgrades = 0
+
 # implement as default for CreatePlanet form
 # [[test_planets]]
 # a_x = 1000
@@ -233,3 +252,4 @@ g_silver = 6000000
 # e_space_type = 4
 # f_population = 1600000
 # g_silver = 200000
+# h_upgrades = 0
