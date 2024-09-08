@@ -11,3 +11,4 @@ src/codegen/
 deploys/**/*.json
 
 .env
+indexer.db

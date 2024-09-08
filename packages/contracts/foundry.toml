@@ -4,7 +4,7 @@ ffi = false
 fuzz_runs = 256
 optimizer = true
 optimizer_runs = 3000
-verbosity = 2
+verbosity = 3
 src = "src"
 test = "test"
 out = "out"
@@ -16,11 +16,8 @@ allow_paths = [
   # projects created from this template and using linked mud packages
   "../../../mud/packages",
 ]
-extra_output_files = [
-  "abi",
-  "evm.bytecode"
-]
-fs_permissions = [{ access = "read", path = "./"}]
+extra_output_files = ["abi", "evm.bytecode"]
+fs_permissions = [{ access = "read", path = "./" }]
 
 [profile.garnet]
 eth_rpc_url = "https://rpc.garnetchain.com"

@@ -1,0 +1,159 @@
+{
+  "systems": [
+    {
+      "namespaceLabel": "df",
+      "label": "InitializeSystem",
+      "namespace": "df",
+      "name": "InitializeSystem",
+      "systemId": "0x73796466000000000000000000000000496e697469616c697a6553797374656d",
+      "abi": [
+        "function setPlanetMetadata(uint8 level, (uint32 range, uint16 speed, uint16 defense, uint64 populationCap, uint32 populationGrowth, uint64 silverCap, uint32 silverGrowth) metadata, uint256 initialPopulationPercentage)"
+      ],
+      "worldAbi": [
+        "function df__setPlanetMetadata(uint8 level, (uint32 range, uint16 speed, uint16 defense, uint64 populationCap, uint32 populationGrowth, uint64 silverCap, uint32 silverGrowth) metadata, uint256 initialPopulationPercentage)"
+      ]
+    },
+    {
+      "namespaceLabel": "df",
+      "label": "MoveSystem",
+      "namespace": "df",
+      "name": "MoveSystem",
+      "systemId": "0x737964660000000000000000000000004d6f766553797374656d000000000000",
+      "abi": [
+        "error InvalidMoveInput(uint8 index)",
+        "error InvalidMoveProof()",
+        "error InvalidPlanetHash()",
+        "error NotEnoughPopulation()",
+        "error NotEnoughSilver()",
+        "error NotPaused()",
+        "error NotPlanetOwner()",
+        "error Paused()",
+        "error ReachMaxMoveToLimit(uint8 limit)",
+        "error UnknownPlanetType()",
+        "function move(((uint256 X, uint256 Y) A, (uint256[2] X, uint256[2] Y) B, (uint256 X, uint256 Y) C) _proof, (uint256 fromPlanetHash, uint256 toPlanetHash, uint256 toPerlin, uint256 universeRadius, uint256 distance, uint256 mimcHashKey, uint256 spaceTypeKey, uint256 perlinLengthScale, uint256 perlinMirrorX, uint256 perlinMirrorY, uint256 toRadiusSquare) _input, uint256 _population, uint256 _silver, uint256 _artifact) returns (uint256)"
+      ],
+      "worldAbi": [
+        "error InvalidMoveInput(uint8 index)",
+        "error InvalidMoveProof()",
+        "error InvalidPlanetHash()",
+        "error NotEnoughPopulation()",
+        "error NotEnoughSilver()",
+        "error NotPaused()",
+        "error NotPlanetOwner()",
+        "error Paused()",
+        "error ReachMaxMoveToLimit(uint8 limit)",
+        "error UnknownPlanetType()",
+        "function df__move(((uint256 X, uint256 Y) A, (uint256[2] X, uint256[2] Y) B, (uint256 X, uint256 Y) C) _proof, (uint256 fromPlanetHash, uint256 toPlanetHash, uint256 toPerlin, uint256 universeRadius, uint256 distance, uint256 mimcHashKey, uint256 spaceTypeKey, uint256 perlinLengthScale, uint256 perlinMirrorX, uint256 perlinMirrorY, uint256 toRadiusSquare) _input, uint256 _population, uint256 _silver, uint256 _artifact) returns (uint256)"
+      ]
+    },
+    {
+      "namespaceLabel": "df",
+      "label": "PlanetSystem",
+      "namespace": "df",
+      "name": "PlanetSystem",
+      "systemId": "0x73796466000000000000000000000000506c616e657453797374656d00000000",
+      "abi": [
+        "error InvalidMoveInput(uint8 index)",
+        "error InvalidMoveProof()",
+        "error InvalidPlanetHash()",
+        "error NotEnoughPopulation()",
+        "error NotEnoughSilver()",
+        "error NotPaused()",
+        "error NotPlanetOwner()",
+        "error Paused()",
+        "error ReachMaxMoveToLimit(uint8 limit)",
+        "error UnknownPlanetType()",
+        "function readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
+        "function readPlanet(uint256 planetHash) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)"
+      ],
+      "worldAbi": [
+        "error InvalidMoveInput(uint8 index)",
+        "error InvalidMoveProof()",
+        "error InvalidPlanetHash()",
+        "error NotEnoughPopulation()",
+        "error NotEnoughSilver()",
+        "error NotPaused()",
+        "error NotPlanetOwner()",
+        "error Paused()",
+        "error ReachMaxMoveToLimit(uint8 limit)",
+        "error UnknownPlanetType()",
+        "function df__readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
+        "function df__readPlanet(uint256 planetHash) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)"
+      ]
+    },
+    {
+      "namespaceLabel": "df",
+      "label": "TestOnlySystem",
+      "namespace": "df",
+      "name": "TestOnlySystem",
+      "systemId": "0x73796466000000000000000000000000546573744f6e6c7953797374656d0000",
+      "abi": [
+        "function createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver)"
+      ],
+      "worldAbi": [
+        "function df__createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver)"
+      ]
+    },
+    {
+      "namespaceLabel": "df",
+      "label": "TickSystem",
+      "namespace": "df",
+      "name": "TickSystem",
+      "systemId": "0x737964660000000000000000000000005469636b53797374656d000000000000",
+      "abi": [
+        "error InvalidMoveInput(uint8 index)",
+        "error InvalidMoveProof()",
+        "error InvalidPlanetHash()",
+        "error NotEnoughPopulation()",
+        "error NotEnoughSilver()",
+        "error NotPaused()",
+        "error NotPlanetOwner()",
+        "error Paused()",
+        "error ReachMaxMoveToLimit(uint8 limit)",
+        "error UnknownPlanetType()",
+        "function pause()",
+        "function tick()",
+        "function unpause()"
+      ],
+      "worldAbi": [
+        "error InvalidMoveInput(uint8 index)",
+        "error InvalidMoveProof()",
+        "error InvalidPlanetHash()",
+        "error NotEnoughPopulation()",
+        "error NotEnoughSilver()",
+        "error NotPaused()",
+        "error NotPlanetOwner()",
+        "error Paused()",
+        "error ReachMaxMoveToLimit(uint8 limit)",
+        "error UnknownPlanetType()",
+        "function df__pause()",
+        "function df__tick()",
+        "function df__unpause()"
+      ]
+    },
+    {
+      "namespaceLabel": "df",
+      "label": "VerifySystem",
+      "namespace": "df",
+      "name": "VerifySystem",
+      "systemId": "0x7379646600000000000000000000000056657269667953797374656d00000000",
+      "abi": [
+        "error InvalidMoveInput(uint8 index)",
+        "function verifyBiomebaseProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[7] input) view returns (bool)",
+        "function verifyInitProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[9] input) view returns (bool)",
+        "function verifyMoveProof(((uint256 X, uint256 Y) A, (uint256[2] X, uint256[2] Y) B, (uint256 X, uint256 Y) C) proof, (uint256 fromPlanetHash, uint256 toPlanetHash, uint256 toPerlin, uint256 universeRadius, uint256 distance, uint256 mimcHashKey, uint256 spaceTypeKey, uint256 perlinLengthScale, uint256 perlinMirrorX, uint256 perlinMirrorY, uint256 toRadiusSquare) input) view returns (bool)",
+        "function verifyRevealProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[9] input) view returns (bool)",
+        "function verifyWhitelistProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[2] input) view returns (bool)"
+      ],
+      "worldAbi": [
+        "error InvalidMoveInput(uint8 index)",
+        "function df__verifyBiomebaseProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[7] input) view returns (bool)",
+        "function df__verifyInitProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[9] input) view returns (bool)",
+        "function df__verifyMoveProof(((uint256 X, uint256 Y) A, (uint256[2] X, uint256[2] Y) B, (uint256 X, uint256 Y) C) proof, (uint256 fromPlanetHash, uint256 toPlanetHash, uint256 toPerlin, uint256 universeRadius, uint256 distance, uint256 mimcHashKey, uint256 spaceTypeKey, uint256 perlinLengthScale, uint256 perlinMirrorX, uint256 perlinMirrorY, uint256 toRadiusSquare) input) view returns (bool)",
+        "function df__verifyRevealProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[9] input) view returns (bool)",
+        "function df__verifyWhitelistProof(uint256[2] a, uint256[2][2] b, uint256[2] c, uint256[2] input) view returns (bool)"
+      ]
+    }
+  ],
+  "createdAt": 1725747870532
+}
