@@ -29,6 +29,13 @@ contract PlanetSystem is System, Errors {
     _sync(planet);
   }
 
+  function upgradePlanet(uint256 planetHash, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades) public {
+    Planet memory planet = readPlanet(planetHash);
+    address executor = _msgSender();
+    planet.upgrade(executor, rangeUpgrades, speedUpgrades, defenseUpgrades);
+    planet.writeToStore();
+  }
+
   function _sync(Planet memory planet) internal view {
     uint256 untilTick = Ticker.getTickNumber();
     MoveData memory move = planet.popArrivedMove(untilTick);
