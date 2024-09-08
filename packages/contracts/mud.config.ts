@@ -18,7 +18,7 @@ export default defineWorld({
     },
   },
   tables: {
-     // todo remove this table and corresponding increment system
+    // todo remove this table and corresponding increment system
     PlayersTable: {
       schema: {
         owner: "address",

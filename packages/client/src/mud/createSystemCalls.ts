@@ -65,7 +65,7 @@ export function createSystemCalls(
    *   (https://github.com/latticexyz/mud/blob/main/templates/react/packages/client/src/mud/setupNetwork.ts#L77-L83).
    */
   { worldContract, waitForTransaction }: SetupNetworkResult,
-  { PlayersTable,Move, Planet, Ticker }: ClientComponents,
+  { PlayersTable, Move, Planet, Ticker }: ClientComponents,
 ) {
   // const increment = async () => {
   //   /*
@@ -107,6 +107,7 @@ export function createSystemCalls(
         spaceType,
         BigInt(population),
         BigInt(silver),
+        0, //TODO add upgrade input
       ]);
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
@@ -186,8 +187,8 @@ export function createSystemCalls(
       throw error; // Re-throw error to handle it higher up if needed
     }
   };
-  
- return {
+
+  return {
     mintPlayer,
     createPlanet,
     move,

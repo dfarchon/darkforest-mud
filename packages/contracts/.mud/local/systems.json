@@ -23,26 +23,32 @@
         "error InvalidMoveInput(uint8 index)",
         "error InvalidMoveProof()",
         "error InvalidPlanetHash()",
+        "error InvalidUpgradeTarget()",
         "error NotEnoughPopulation()",
         "error NotEnoughSilver()",
+        "error NotEnoughSilverToUpgrade()",
         "error NotPaused()",
         "error NotPlanetOwner()",
         "error Paused()",
         "error ReachMaxMoveToLimit(uint8 limit)",
         "error UnknownPlanetType()",
+        "error UpgradeExceedMaxLevel()",
         "function move(((uint256 X, uint256 Y) A, (uint256[2] X, uint256[2] Y) B, (uint256 X, uint256 Y) C) _proof, (uint256 fromPlanetHash, uint256 toPlanetHash, uint256 toPerlin, uint256 universeRadius, uint256 distance, uint256 mimcHashKey, uint256 spaceTypeKey, uint256 perlinLengthScale, uint256 perlinMirrorX, uint256 perlinMirrorY, uint256 toRadiusSquare) _input, uint256 _population, uint256 _silver, uint256 _artifact) returns (uint256)"
       ],
       "worldAbi": [
         "error InvalidMoveInput(uint8 index)",
         "error InvalidMoveProof()",
         "error InvalidPlanetHash()",
+        "error InvalidUpgradeTarget()",
         "error NotEnoughPopulation()",
         "error NotEnoughSilver()",
+        "error NotEnoughSilverToUpgrade()",
         "error NotPaused()",
         "error NotPlanetOwner()",
         "error Paused()",
         "error ReachMaxMoveToLimit(uint8 limit)",
         "error UnknownPlanetType()",
+        "error UpgradeExceedMaxLevel()",
         "function df__move(((uint256 X, uint256 Y) A, (uint256[2] X, uint256[2] Y) B, (uint256 X, uint256 Y) C) _proof, (uint256 fromPlanetHash, uint256 toPlanetHash, uint256 toPerlin, uint256 universeRadius, uint256 distance, uint256 mimcHashKey, uint256 spaceTypeKey, uint256 perlinLengthScale, uint256 perlinMirrorX, uint256 perlinMirrorY, uint256 toRadiusSquare) _input, uint256 _population, uint256 _silver, uint256 _artifact) returns (uint256)"
       ]
     },
@@ -56,29 +62,50 @@
         "error InvalidMoveInput(uint8 index)",
         "error InvalidMoveProof()",
         "error InvalidPlanetHash()",
+        "error InvalidUpgradeTarget()",
         "error NotEnoughPopulation()",
         "error NotEnoughSilver()",
+        "error NotEnoughSilverToUpgrade()",
         "error NotPaused()",
         "error NotPlanetOwner()",
         "error Paused()",
         "error ReachMaxMoveToLimit(uint8 limit)",
         "error UnknownPlanetType()",
-        "function readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
-        "function readPlanet(uint256 planetHash) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)"
+        "error UpgradeExceedMaxLevel()",
+        "function readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
+        "function readPlanet(uint256 planetHash) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
+        "function upgradePlanet(uint256 planetHash, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades)"
       ],
       "worldAbi": [
         "error InvalidMoveInput(uint8 index)",
         "error InvalidMoveProof()",
         "error InvalidPlanetHash()",
+        "error InvalidUpgradeTarget()",
         "error NotEnoughPopulation()",
         "error NotEnoughSilver()",
+        "error NotEnoughSilverToUpgrade()",
         "error NotPaused()",
         "error NotPlanetOwner()",
         "error Paused()",
         "error ReachMaxMoveToLimit(uint8 limit)",
         "error UnknownPlanetType()",
-        "function df__readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
-        "function df__readPlanet(uint256 planetHash) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)"
+        "error UpgradeExceedMaxLevel()",
+        "function df__readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
+        "function df__readPlanet(uint256 planetHash) view returns ((uint256 planetHash, uint256 distSquare, uint256 perlin, address owner, uint256 lastUpdateTick, uint256 level, uint8 planetType, uint8 spaceType, uint256 universeZone, uint256 population, uint256 silver, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades, uint256 range, uint256 speed, uint256 defense, uint256 populationCap, uint256 populationGrowth, uint256 silverCap, uint256 silverGrowth, (uint256 planetHash, uint256 head, uint256 number, uint256[] indexes, bool shouldWrite) moveQueue) planet)",
+        "function df__upgradePlanet(uint256 planetHash, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades)"
+      ]
+    },
+    {
+      "namespaceLabel": "df",
+      "label": "PlayerSpawnSystem",
+      "namespace": "df",
+      "name": "PlayerSpawnSyste",
+      "systemId": "0x73796466000000000000000000000000506c61796572537061776e5379737465",
+      "abi": [
+        "function mintPlayer(string name, address linked)"
+      ],
+      "worldAbi": [
+        "function df__mintPlayer(string name, address linked)"
       ]
     },
     {
@@ -88,10 +115,10 @@
       "name": "TestOnlySystem",
       "systemId": "0x73796466000000000000000000000000546573744f6e6c7953797374656d0000",
       "abi": [
-        "function createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver)"
+        "function createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)"
       ],
       "worldAbi": [
-        "function df__createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver)"
+        "function df__createPlanet(uint256 planetHash, address owner, uint8 perlin, uint8 level, uint8 planetType, uint8 spaceType, uint64 population, uint64 silver, uint24 upgrades)"
       ]
     },
     {
@@ -104,13 +131,16 @@
         "error InvalidMoveInput(uint8 index)",
         "error InvalidMoveProof()",
         "error InvalidPlanetHash()",
+        "error InvalidUpgradeTarget()",
         "error NotEnoughPopulation()",
         "error NotEnoughSilver()",
+        "error NotEnoughSilverToUpgrade()",
         "error NotPaused()",
         "error NotPlanetOwner()",
         "error Paused()",
         "error ReachMaxMoveToLimit(uint8 limit)",
         "error UnknownPlanetType()",
+        "error UpgradeExceedMaxLevel()",
         "function pause()",
         "function tick()",
         "function unpause()"
@@ -119,13 +149,16 @@
         "error InvalidMoveInput(uint8 index)",
         "error InvalidMoveProof()",
         "error InvalidPlanetHash()",
+        "error InvalidUpgradeTarget()",
         "error NotEnoughPopulation()",
         "error NotEnoughSilver()",
+        "error NotEnoughSilverToUpgrade()",
         "error NotPaused()",
         "error NotPlanetOwner()",
         "error Paused()",
         "error ReachMaxMoveToLimit(uint8 limit)",
         "error UnknownPlanetType()",
+        "error UpgradeExceedMaxLevel()",
         "function df__pause()",
         "function df__tick()",
         "function df__unpause()"
@@ -155,5 +188,5 @@
       ]
     }
   ],
-  "createdAt": 1725747870532
+  "createdAt": 1725773795816
 }

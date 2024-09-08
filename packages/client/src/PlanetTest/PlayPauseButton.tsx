@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useMUD } from "./MUDContext";
+import { useMUD } from "@mud/MUDContext";
 import { useComponentValue } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 
@@ -45,11 +45,10 @@ export const PlayPauseButton = () => {
     <div>
       <button
         onClick={handleToggle}
-        className={`px-4 py-2 rounded-md text-white ${
-          isPaused
+        className={`px-4 py-2 rounded-md text-white ${isPaused
             ? "bg-green-500 hover:bg-green-600"
             : "bg-red-500 hover:bg-red-600"
-        }`}
+          }`}
       >
         {isPaused ? "Play" : "Pause"}
       </button>

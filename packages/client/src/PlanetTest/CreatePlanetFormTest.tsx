@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useMUD } from "./MUDContext";
-import { PlanetType, SpaceType } from "./mud/createSystemCalls";
+import { useMUD } from "@mud/MUDContext";
+import { PlanetType, SpaceType } from "@df/types";
 
 // type PlanetType =
 //   | "UNKNOWN"
@@ -56,7 +56,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
       planetType,
       spaceType,
       population,
-      silver
+      silver,
     );
     onSubmit(
       planetHash,
@@ -66,7 +66,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
       planetType,
       spaceType,
       population,
-      silver
+      silver,
     );
   };
 
@@ -122,7 +122,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
           <label className="block text-gray-700">Planet Type</label>
           <select
             value={planetType}
-            onChange={(e) => setPlanetType(e.target.value as PlanetType)}
+            onChange={(e) => setPlanetType(Number(e.target.value) as PlanetType)}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
           >
             <option value="PLANET">PLANET</option>
@@ -136,7 +136,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
           <label className="block text-gray-700">Space Type</label>
           <select
             value={spaceType}
-            onChange={(e) => setSpaceType(e.target.value as SpaceType)}
+            onChange={(e) => setSpaceType(Number(e.target.value) as SpaceType)}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
           >
             <option value="NEBULA">NEBULA</option>

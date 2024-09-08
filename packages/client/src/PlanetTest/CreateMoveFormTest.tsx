@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMUD } from "./MUDContext"; // Assume MUDContext provides the contract instance
+import { useMUD } from "@mud/MUDContext";
 
 interface CreateMoveProps {
   onSubmit: (
@@ -60,7 +60,7 @@ export const CreateMoveForm: React.FC<CreateMoveProps> = ({ onSubmit }) => {
           <input
             type="number"
             value={population}
-            onChange={(e) => setPopulation(e.target.value)}
+            onChange={(e) => setPopulation(Number(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
             required
           />
@@ -71,7 +71,7 @@ export const CreateMoveForm: React.FC<CreateMoveProps> = ({ onSubmit }) => {
           <input
             type="number"
             value={silver}
-            onChange={(e) => setSilver(e.target.value)}
+            onChange={(e) => setSilver(Number(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
             required
           />
@@ -82,7 +82,7 @@ export const CreateMoveForm: React.FC<CreateMoveProps> = ({ onSubmit }) => {
           <input
             type="number"
             value={artifact}
-            onChange={(e) => setArtifact(e.target.value)}
+            onChange={(e) => setArtifact(Number(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-indigo-200"
             required
           />
