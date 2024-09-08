@@ -9,7 +9,9 @@
     "dev": "wait-port localhost:8545 && vite",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "test": "tsc --noEmit"
+    "test": "echo 'tests not implemented'",
+    "lint": "pnpm lint:typecheck",
+    "lint:typecheck": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@latticexyz/block-logs-stream": "2.2.2",

@@ -5,7 +5,7 @@ import {
   RECOMMENDED_BALANCE,
   LOW_BALANCE_THRESHOLD,
   zeroAddress,
-} from "@wallet/Utils";
+} from "@wallet/utils";
 import { formatEther, parseEther, Hex } from "viem";
 import { useMUD } from "@mud/MUDContext";
 import { Btn } from "@frontend/Components/Btn";
