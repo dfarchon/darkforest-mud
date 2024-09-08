@@ -7,7 +7,7 @@ import {
   MINIMUM_BALANCE,
   RECOMMENDED_BALANCE,
   zeroAddress,
-} from "@wallet/Utils";
+} from "@wallet/utils";
 
 // You can define a threshold constant for low balance
 

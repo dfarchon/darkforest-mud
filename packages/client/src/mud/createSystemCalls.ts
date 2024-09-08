@@ -99,6 +99,7 @@ export function createSystemCalls(
     try {
       // Call the createPlanet function on the contract
       const tx = await worldContract.write.df__createPlanet([
+        // @ts-expect-error will be fixed in 9stx6/main-Iworld merge
         planetHash,
         owner as `0x${string}`,
         perlin,
@@ -131,6 +132,7 @@ export function createSystemCalls(
     try {
       // Call the move function on the contract
       const tx = await worldContract.write.df__move({
+        // @ts-expect-error needs to be fixed wrong type
         proof,
         moveInput,
         population,

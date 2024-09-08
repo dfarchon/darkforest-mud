@@ -1,25 +1,43 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["vite/client"],
+    "types": [
+      "vite/client"
+    ],
     "target": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "jsx": "react-jsx",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "module": "esnext",
     "strict": true,
-    "baseUrl": ".",
-    "paths": {
-      "@df/*": ["./src/Shared/*"],
-      "@mud/*": ["./src/mud/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@wallet/*": ["./src/wallet/*"],
-      "@frontend/*": ["./src/Frontend/*"],
-      "@backend/*": ["./src/Backend/*"]
-    },
     "strictPropertyInitialization": false,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "jsx": "react-jsx",
+    "paths": {
+      "@df/*": [
+        "./src/Shared/*"
+      ],
+      "@mud/*": [
+        "./src/mud/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@wallet/*": [
+        "./src/wallet/*"
+      ],
+      "@frontend/*": [
+        "./src/Frontend/*"
+      ],
+      "@backend/*": [
+        "./src/Backend/*"
+      ]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "./src/**/*.ts"
+  ]
 }
