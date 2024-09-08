@@ -7,13 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@latticexyz/explorer':
-        specifier: ^2.2.2
-        version: 2.2.2(@aws-sdk/client-kms@3.635.0)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.54.1)(@types/react-dom@18.2.7)(@types/react@18.2.22)(asn1.js@5.4.1)(postcss@8.4.41)(typescript@5.4.2)
-      '@latticexyz/store-indexer':
-        specifier: 2.2.2
-        version: 2.2.2(@aws-sdk/client-kms@3.635.0)(@opentelemetry/api@1.9.0)(@types/react@18.2.22)(asn1.js@5.4.1)(kysely@0.26.3)(react@18.3.1)(sql.js@1.11.0)(typescript@5.4.2)
     devDependencies:
       '@commitlint/cli':
         specifier: 19.4.0
@@ -27,6 +20,12 @@ importers:
       '@latticexyz/common':
         specifier: 2.2.2
         version: 2.2.2(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/explorer':
+        specifier: ^2.2.2
+        version: 2.2.2(@aws-sdk/client-kms@3.635.0)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.54.1)(@types/react-dom@18.2.7)(@types/react@18.2.22)(asn1.js@5.4.1)(postcss@8.4.41)(typescript@5.4.2)
+      '@latticexyz/store-indexer':
+        specifier: 2.2.2
+        version: 2.2.2(@aws-sdk/client-kms@3.635.0)(@opentelemetry/api@1.9.0)(@types/react@18.2.22)(asn1.js@5.4.1)(kysely@0.26.3)(react@18.3.1)(sql.js@1.11.0)(typescript@5.4.2)
       '@types/debug':
         specifier: 4.1.7
         version: 4.1.7

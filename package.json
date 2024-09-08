@@ -16,6 +16,8 @@
     "@commitlint/config-conventional": "19.2.2",
     "@latticexyz/cli": "2.2.2",
     "@latticexyz/common": "2.2.2",
+    "@latticexyz/explorer": "^2.2.2",
+    "@latticexyz/store-indexer": "2.2.2",
     "@types/debug": "4.1.7",
     "@typescript-eslint/eslint-plugin": "7.1.1",
     "@typescript-eslint/parser": "7.1.1",
@@ -26,11 +28,7 @@
     "typescript": "5.4.2"
   },
   "engines": {
-    "node": "^18 || ^20",
+    "node": ">=20 <21",
     "pnpm": ">=9.8.0 <10.0.0"
-  },
-  "dependencies": {
-    "@latticexyz/explorer": "^2.2.2",
-    "@latticexyz/store-indexer": "2.2.2"
   }
 }
