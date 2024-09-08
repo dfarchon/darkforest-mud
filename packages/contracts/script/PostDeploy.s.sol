@@ -8,7 +8,7 @@ import { stdToml } from "forge-std/StdToml.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { SpaceType } from "../src/codegen/common.sol";
+import { SpaceType, PlanetType } from "../src/codegen/common.sol";
 import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData } from "../src/codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData } from "../src/codegen/index.sol";
 import { UniverseConfig, UniverseConfigData, TempConfigSet, TempConfigSetData } from "../src/codegen/index.sol";
@@ -63,11 +63,23 @@ contract PostDeploy is Script {
 
   function _setPlanetMetadata(address worldAddress) internal {
     console.log("Setting planet metadata");
-    IWorld(worldAddress).df__setPlanetMetadata(
+    // IWorld(worldAddress).df__setPlanetMetadata(
+    //   0,
+    //   PlanetMetadataData(99, 160, 400, 100000, 417, 0, 0), // range, speed, defense, populationCap, populationGrowth, silverCap, silverGrowth
+    //   0 // initialPopulationPercentage
+    // );
+    IWorld(worldAddress).df__createPlanet(
+      uint256(0x0998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b),
+      address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266),
       0,
-      PlanetMetadataData(99, 160, 400, 100000, 417, 0, 0), // range, speed, defense, populationCap, populationGrowth, silverCap, silverGrowth
-      0 // initialPopulationPercentage
+      9,
+      PlanetType.PLANET,
+      SpaceType.DEAD_SPACE,
+      800000000,
+      200000000,
+      0
     );
+
     IWorld(worldAddress).df__setPlanetMetadata(1, PlanetMetadataData(177, 160, 400, 400000, 833, 100000, 56), 1);
     IWorld(worldAddress).df__setPlanetMetadata(2, PlanetMetadataData(315, 160, 300, 1600000, 1250, 500000, 167), 2);
     IWorld(worldAddress).df__setPlanetMetadata(3, PlanetMetadataData(591, 160, 300, 6000000, 1667, 2500000, 417), 3);

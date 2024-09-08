@@ -8,22 +8,27 @@ import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { Address } from "viem";
+import { address } from "@df/serde/address";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 interface Proof {
-  // Your proof structure here
-  a: [string, string];
-  b: [[string, string], [string, string]];
-  c: [string, string];
-  input: string[];
+  A: { X: bigint; Y: bigint };
+  B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+  C: { X: bigint; Y: bigint };
 }
 
 interface MoveInput {
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  isTeleport: boolean;
+  fromPlanetHash: bigint;
+  toPlanetHash: bigint;
+  toPerlin: bigint;
+  universeRadius: bigint;
+  distance: bigint;
+  mimcHashKey: bigint;
+  spaceTypeKey: bigint;
+  perlinLengthScale: bigint;
+  perlinMirrorX: bigint;
+  perlinMirrorY: bigint;
+  toRadiusSquare: bigint;
   isAttack: boolean;
 }
 
@@ -130,7 +135,7 @@ export function createSystemCalls(
 
   // Create planet
   const createPlanet = async (
-    planetHash: bigint,
+    planetHash: string,
     owner: string,
     perlin: number,
     level: number,
@@ -142,9 +147,12 @@ export function createSystemCalls(
   ): Promise<void> => {
     try {
       // Call the createPlanet function on the contract
+
+      const bigIntPlanetHesh = BigInt(planetHash);
+      debugger;
       const tx = await worldContract.write.df__createPlanet([
         planetHash,
-        owner as `0x${string}`,
+        owner,
         perlin,
         level,
         planetType,
@@ -183,11 +191,12 @@ export function createSystemCalls(
   ): Promise<void> => {
     try {
       // Call the upgradePlanet function on the contract
+      const upgrade = `0x${rangeUpgrades}${speedUpgrades}${defenseUpgrades}`;
       const tx = await worldContract.write.df__upgradePlanet([
         planetHash,
-        BigInt(rangeUpgrades),
-        BigInt(speedUpgrades),
-        BigInt(defenseUpgrades),
+        rangeUpgrades,
+        speedUpgrades,
+        defenseUpgrades,
       ]);
 
       // Wait for the transaction to be confirmed
@@ -206,10 +215,10 @@ export function createSystemCalls(
   const move = async (
     proof: Proof,
     moveInput: MoveInput,
-    population: number,
-    silver: number,
-    artifact: number,
-  ): Promise<number> => {
+    population: bigint,
+    silver: bigint,
+    artifact: bigint,
+  ): Promise<bigint> => {
     try {
       // Call the move function on the contract
       const tx = await worldContract.write.df__move([
@@ -223,7 +232,7 @@ export function createSystemCalls(
 
       console.log("Move created successfully:", receipt);
       getComponentValue(Move, singletonEntity);
-      return 0;
+      return BigInt(0);
     } catch (error) {
       console.error("Move transaction failed:", error);
       throw error;
