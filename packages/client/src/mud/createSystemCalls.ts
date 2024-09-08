@@ -7,6 +7,7 @@ import { Entity, getComponentValue } from "@latticexyz/recs";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { Address } from "viem";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 interface Proof {
@@ -64,8 +65,27 @@ export function createSystemCalls(
    *   (https://github.com/latticexyz/mud/blob/main/templates/react/packages/client/src/mud/setupNetwork.ts#L77-L83).
    */
   { worldContract, waitForTransaction }: SetupNetworkResult,
-  { Move, Planet, Ticker }: ClientComponents
+  { PlayersTable, Move, Planet, Ticker }: ClientComponents,
 ) {
+  // const increment = async () => {
+  //   /*
+  //    * Because IncrementSystem
+  //    * (https://mud.dev/templates/typescript/contracts#incrementsystemsol)
+  //    * is in the root namespace, `.increment` can be called directly
+  //    * on the World contract.
+  //    */
+  //   const tx = await worldContract.write.df__increment();
+  //   await waitForTransaction(tx);
+  //   return getComponentValue(Counter, singletonEntity);
+  // };
+
+  const mintPlayer = async (name: string, linked: Address) => {
+    const tx = await worldContract.write.df__mintPlayer([name, linked]);
+
+    await waitForTransaction(tx);
+    return getComponentValue(PlayersTable, singletonEntity);
+  };
+
   const createPlanet = async (
     planetHash: string,
     owner: string,
@@ -87,6 +107,7 @@ export function createSystemCalls(
         spaceType,
         BigInt(population),
         BigInt(silver),
+        0, //TODO add upgrade input
       ]);
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
@@ -168,6 +189,7 @@ export function createSystemCalls(
   };
 
   return {
+    mintPlayer,
     createPlanet,
     move,
     unPause,

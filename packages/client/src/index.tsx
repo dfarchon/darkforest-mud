@@ -1,8 +1,9 @@
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
 import { setup } from "./mud/setup";
-import { MUDProvider } from "./MUDContext";
+import { MUDProvider } from "./mud/MUDContext";
 import mudConfig from "contracts/mud.config";
+import { Providers } from "@wallet/Providers";
 
 const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("React root not found");
@@ -12,7 +13,9 @@ const root = ReactDOM.createRoot(rootElement);
 setup().then(async (result) => {
   root.render(
     <MUDProvider value={result}>
-      <App />
+      <Providers>
+        <App />
+      </Providers>
     </MUDProvider>,
   );
 

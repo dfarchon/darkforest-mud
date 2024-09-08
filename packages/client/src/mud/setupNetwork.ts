@@ -18,10 +18,15 @@ import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
 import { getNetworkConfig } from "./getNetworkConfig";
 import { world } from "./world";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
-import { createBurnerAccount, transportObserver, ContractWrite } from "@latticexyz/common";
+import {
+  createBurnerAccount,
+  transportObserver,
+  ContractWrite,
+} from "@latticexyz/common";
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
 
 import { Subject, share } from "rxjs";
+import { syncToZustand } from "@latticexyz/store-sync/zustand";
 
 /*
  * Import our MUD config, which includes strong types for
@@ -36,7 +41,7 @@ import mudConfig from "contracts/mud.config";
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
-  const networkConfig = await getNetworkConfig();
+  const networkConfig = getNetworkConfig();
 
   /*
    * Create a viem public (read only) client
@@ -83,8 +88,22 @@ export async function setupNetwork() {
    * to the viem publicClient to make RPC calls to fetch MUD
    * events from the chain.
    */
-  const { components, latestBlock$, storedBlockLogs$, waitForTransaction } = await syncToRecs({
-    world,
+  const { components, latestBlock$, storedBlockLogs$, waitForTransaction } =
+    await syncToRecs({
+      world,
+      config: mudConfig,
+      address: networkConfig.worldAddress as Hex,
+      publicClient,
+      startBlock: BigInt(networkConfig.initialBlockNumber),
+    });
+
+  const {
+    tables,
+    useStore,
+    latestBlock$: latestBlockZu$,
+    storedBlockLogs$: storedBlockLogsZu$,
+    waitForTransaction: waitForTransactionZu,
+  } = await syncToZustand({
     config: mudConfig,
     address: networkConfig.worldAddress as Hex,
     publicClient,
@@ -94,7 +113,10 @@ export async function setupNetwork() {
   return {
     world,
     components,
-    playerEntity: encodeEntity({ address: "address" }, { address: burnerWalletClient.account.address }),
+    playerEntity: encodeEntity(
+      { address: "address" },
+      { address: burnerWalletClient.account.address },
+    ),
     publicClient,
     walletClient: burnerWalletClient,
     latestBlock$,
@@ -102,5 +124,10 @@ export async function setupNetwork() {
     waitForTransaction,
     worldContract,
     write$: write$.asObservable().pipe(share()),
+    tables,
+    useStore,
+    latestBlockZu$,
+    storedBlockLogsZu$,
+    waitForTransactionZu,
   };
 }

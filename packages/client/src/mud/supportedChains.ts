@@ -11,7 +11,12 @@
  *
  */
 
-import { MUDChain, mudFoundry, redstone, garnet } from "@latticexyz/common/chains";
+import {
+  MUDChain,
+  mudFoundry,
+  redstone,
+  garnet,
+} from "@latticexyz/common/chains";
 
 /*
  * See https://mud.dev/guides/hello-world/add-chain-client

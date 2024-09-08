@@ -8,22 +8,68 @@
  * By default the template just creates a temporary wallet
  * (called a burner wallet).
  */
-import { getBurnerPrivateKey } from "@latticexyz/common";
+// import { getBurnerPrivateKey } from "@latticexyz/common";
 
 /*
  * Import the addresses of the World, possibly on multiple chains,
  * from packages/contracts/worlds.json. When the contracts package
  * deploys a new `World`, it updates this file.
  */
-import worlds from "contracts/worlds.json";
+// import worlds from "contracts/worlds.json";
 
 /*
  * The supported chains.
  * By default, there are only two chains here:
  */
 import { supportedChains } from "./supportedChains";
+import { Wallet } from "ethers";
+import worldsJson from "contracts/worlds.json";
+// import { Entity } from "@latticexyz/recs";
 
-export async function getNetworkConfig() {
+export type NetworkConfig = Awaited<ReturnType<typeof getNetworkConfig>>;
+
+export const LIVE_WORLDS = worldsJson as Partial<
+  Record<string, { address: string; blockNumber?: number }>
+>;
+
+export const getWorldFromChainId = (chainId: number) => {
+  return LIVE_WORLDS[chainId.toString()];
+};
+
+export const getChain = (chainId: number) => {
+  const chainIndex = supportedChains.findIndex((c) => c.id === chainId);
+  const chain = supportedChains[chainIndex];
+
+  if (!chain) {
+    throw new Error(`Chain ${chainId} not supported`);
+  }
+
+  return chain;
+};
+
+export const getBurnerWallet = () => {
+  const params = new URLSearchParams(window.location.search);
+
+  const manualPrivateKey = params.get("privateKey");
+  if (manualPrivateKey) return new Wallet(manualPrivateKey).privateKey;
+
+  const useAnvilAdminKey = import.meta.env.DEV && !params.has("asPlayer");
+  if (useAnvilAdminKey) {
+    // default anvil admin key
+    return "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+  }
+
+  const storageKey = "mud:burnerWallet";
+
+  const privateKey = localStorage.getItem(storageKey);
+  if (privateKey) return privateKey;
+
+  const burnerWallet = Wallet.createRandom();
+  localStorage.setItem(storageKey, burnerWallet.privateKey);
+  return burnerWallet.privateKey;
+};
+
+export function getNetworkConfig() {
   const params = new URLSearchParams(window.location.search);
 
   /*
@@ -34,13 +80,15 @@ export async function getNetworkConfig() {
    *    vite dev server was started or client was built
    * 4. The default, 31337 (anvil)
    */
-  const chainId = Number(params.get("chainId") || params.get("chainid") || import.meta.env.VITE_CHAIN_ID || 31337);
+
+  const chainId = Number(
+    params.get("chainId") || import.meta.env.VITE_CHAIN_ID || 31337,
+  );
 
   /*
    * Find the chain (unless it isn't in the list of supported chains).
    */
-  const chainIndex = supportedChains.findIndex((c) => c.id === chainId);
-  const chain = supportedChains[chainIndex];
+  const chain = getChain(chainId);
   if (!chain) {
     throw new Error(`Chain ${chainId} not found`);
   }
@@ -50,10 +98,12 @@ export async function getNetworkConfig() {
    * different address than the one in worlds.json,
    * provide it as worldAddress in the query string.
    */
-  const world = worlds[chain.id.toString()];
+  const world = getWorldFromChainId(chain.id);
   const worldAddress = params.get("worldAddress") || world?.address;
   if (!worldAddress) {
-    throw new Error(`No world address found for chain ${chainId}. Did you run \`mud deploy\`?`);
+    throw new Error(
+      `No world address found for chain ${chainId}. Did you run \`mud deploy\`?`,
+    );
   }
 
   /*
@@ -65,13 +115,33 @@ export async function getNetworkConfig() {
    */
   const initialBlockNumber = params.has("initialBlockNumber")
     ? Number(params.get("initialBlockNumber"))
-    : world?.blockNumber ?? 0n;
+    : world?.blockNumber ?? -1; // -1 will attempt to find the block number from RPC
+
+  const useBurner =
+    (import.meta.env.DEV && !params.has("useExternalWallet")) ||
+    params.has("useBurner");
+  const burnerWalletPrivateKey = params.has("anon")
+    ? Wallet.createRandom().privateKey
+    : getBurnerWallet();
 
   return {
-    privateKey: getBurnerPrivateKey(),
+    clock: {
+      period: 1000,
+      initialTime: 0,
+      syncInterval: 2000,
+    },
+    provider: {
+      chainId,
+      jsonRpcUrl: params.get("rpc") ?? chain.rpcUrls.default.http[0],
+      wsRpcUrl: params.get("wsRpc") ?? chain.rpcUrls.default.webSocket?.[0],
+    },
+    privateKey: burnerWalletPrivateKey,
+    useBurner,
     chainId,
-    chain,
+    faucetServiceUrl: params.get("faucet") ?? chain.faucetUrl,
     worldAddress,
     initialBlockNumber,
+    disableCache: import.meta.env.PROD,
+    chain,
   };
 }

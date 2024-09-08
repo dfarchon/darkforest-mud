@@ -2,7 +2,7 @@
   "name": "contracts",
   "version": "0.0.0",
   "private": true,
-  "license": "MIT",
+  "license": "GPL-3.0",
   "scripts": {
     "build": "mud build",
     "clean": "forge clean && rimraf src/codegen",
@@ -28,7 +28,7 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#1714bee72e286e73f76e320d110e0eaf5c4e649d",
     "prettier": "3.2.5",
     "prettier-plugin-solidity": "1.3.1",
-    "solhint": "^3.3.7",
+    "solhint": "4.5.4",
     "solhint-config-mud": "2.2.2",
     "solhint-plugin-mud": "2.2.2"
   }

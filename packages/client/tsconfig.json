@@ -5,7 +5,21 @@
     "target": "ESNext",
     "lib": ["ESNext", "DOM"],
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@df/*": ["./src/Shared/*"],
+      "@mud/*": ["./src/mud/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@wallet/*": ["./src/wallet/*"],
+      "@frontend/*": ["./src/Frontend/*"],
+      "@backend/*": ["./src/Backend/*"]
+    },
+    "strictPropertyInitialization": false,
+    "useDefineForClassFields": false
   },
   "include": ["src"]
 }

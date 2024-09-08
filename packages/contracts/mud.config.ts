@@ -18,6 +18,16 @@ export default defineWorld({
     },
   },
   tables: {
+    // todo remove this table and corresponding increment system
+    PlayersTable: {
+      schema: {
+        owner: "address",
+        linked: "address",
+        minted: "uint256",
+        name: "string",
+      },
+      key: ["owner"],
+    },
     TempConfigSet: {
       schema: {
         biomeCheck: "bool",
