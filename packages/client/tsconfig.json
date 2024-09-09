@@ -27,5 +27,8 @@
       "@backend/*": ["./src/Backend/*"]
     }
   },
-  "include": ["./src/**/*.ts"]
+  "include": [
+      "./src/**/*.ts",
+      "./src/**/*.tsx",
+  ]
 }
