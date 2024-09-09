@@ -4,11 +4,12 @@ import { transactionQueue } from "@latticexyz/common/actions";
 import type { NetworkConfig } from "@mud/getNetworkConfig";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import { useEffect } from "react";
-import type { ClientConfig, Hex } from "viem";
 import {
+  type ClientConfig,
   createPublicClient,
   fallback,
   getContract,
+  type Hex,
   http,
   webSocket,
 } from "viem";

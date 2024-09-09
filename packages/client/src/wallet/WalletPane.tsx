@@ -10,8 +10,7 @@ import {
   zeroAddress,
 } from "@wallet/utils";
 import { useEffect, useState } from "react";
-import type { Hex } from "viem";
-import { formatEther, parseEther } from "viem";
+import { formatEther, type Hex, parseEther } from "viem";
 import { useWalletClient } from "wagmi";
 
 export const WalletPane = ({ onClose }: { onClose: () => void }) => {

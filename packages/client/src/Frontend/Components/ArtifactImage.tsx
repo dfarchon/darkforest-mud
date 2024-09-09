@@ -21,10 +21,8 @@ function getArtifactUrl(
 export function ArtifactImage({
   artifact,
   size,
-  // @ts-expect-error unused
-  thumb,
-  // @ts-expect-error unused
-  bgColor,
+  thumb: _thumb,
+  bgColor: _bgColor,
 }: {
   artifact: Artifact;
   size: number;

@@ -1,5 +1,8 @@
-import type { Dispatch, SetStateAction } from "react";
-import React, { useLayoutEffect } from "react";
+import React, {
+  type Dispatch,
+  type SetStateAction,
+  useLayoutEffect,
+} from "react";
 import styled, { css } from "styled-components";
 
 import dfstyles from "../Styles/dfstyles";

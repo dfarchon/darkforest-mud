@@ -7,8 +7,8 @@ import {
   numToLogoType,
   numToMemeType,
 } from "@df/procedural";
-import type { Artifact } from "@df/types";
 import {
+  type Artifact,
   ArtifactRarity,
   ArtifactRarityNames,
   ArtifactType,
