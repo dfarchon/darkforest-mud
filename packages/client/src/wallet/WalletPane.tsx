@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useWalletClient } from "wagmi";
 import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
 import {
@@ -6,7 +6,7 @@ import {
   LOW_BALANCE_THRESHOLD,
   zeroAddress,
 } from "@wallet/utils";
-import { formatEther, parseEther, Hex } from "viem";
+import { formatEther, parseEther, type Hex } from "viem";
 import { useMUD } from "@mud/MUDContext";
 import { Btn } from "@frontend/Components/Btn";
 import { Modal } from "@frontend/Components/Modal";

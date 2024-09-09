@@ -1,5 +1,5 @@
 import { isLocatable } from "@df/gamelogic";
-import { Planet, PlanetType } from "@df/types";
+import { type Planet, PlanetType } from "@df/types";
 import { css, keyframes } from "styled-components";
 import { BiomeBackgroundColors } from "./Colors";
 

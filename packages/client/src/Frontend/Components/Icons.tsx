@@ -1,5 +1,5 @@
 // should be able to be treated as a text element
-import { Planet, UpgradeBranchName } from "@df/types";
+import { type Planet, UpgradeBranchName } from "@df/types";
 import { DarkForestIcon, IconType } from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
