@@ -25,24 +25,25 @@
 import { mimcSponge } from "@df/hashing";
 import bigInt from "big-integer";
 import { ethers } from "ethers";
-import { chunk, padStart, replace } from "lodash";
 
 export const keysPerTx = 400;
 
-export const generateKey = () => {
-  const hexArray = padStart(
+export function generateKey() {
+  // generate 24 characters hex value
+  const hexValue = 
     bigInt(
       ethers.BigNumber.from(ethers.utils.randomBytes(12)).toString(),
-    ).toString(16),
-    24,
-    "0",
-  ).split("");
+    ).toString(16).padStart(24, '0');
 
-  return chunk(hexArray, 6)
-    .map((s) => s.join(""))
-    .join("-")
+  // split 24 character hex value into 4 words of 6 chars length
+  const words = Array.from(hexValue.matchAll(/(.{6})/g))
+    .map(([match]) => match);
+  
+  // return uppercased key on the form e.g. 862C58-D02664-2BC1F8-FD3CDF
+  return words
+    .join('-')
     .toUpperCase();
-};
+}
 
 export const generateKeys = (count: number) => {
   const keys = [] as string[];
@@ -54,7 +55,7 @@ export const generateKeys = (count: number) => {
 };
 
 export const bigIntFromKey = (key: string) =>
-  bigInt(replace(key, /\-/g, ""), 16);
+  bigInt(key.replaceAll('-', ''), 16);
 
 export const keyHash = (key: string) =>
   mimcSponge([bigIntFromKey(key)], 1, 220, 0)[0].toString();

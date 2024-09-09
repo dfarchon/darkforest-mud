@@ -1,7 +1,6 @@
 import { perlin } from "@df/hashing";
 import type { Chunk, PerlinConfig, Rectangle } from "@df/types";
 import { EventEmitter } from "events";
-import _ from "lodash";
 import type { ChunkStore } from "../../_types/darkforest/api/ChunkStoreTypes";
 import type {
   HashConfig,
@@ -19,6 +18,9 @@ export type workerFactory = () => Worker;
 function defaultWorker() {
   return new Worker(new URL("./miner.worker.ts", import.meta.url));
 }
+
+const range = (size: number) =>
+    [...new Array(size)].map((_, index) => index);
 
 export class HomePlanetMinerChunkStore implements ChunkStore {
   private initPerlinMin: number;
@@ -150,7 +152,10 @@ class MinerManager extends EventEmitter {
       useMockHash,
       workerFactory,
     );
-    _.range(minerManager.cores).forEach((i) => minerManager.initWorker(i));
+
+    for (const index of range(minerManager.cores)) {
+      minerManager.initWorker(index);
+    }
 
     return minerManager;
   }
@@ -232,7 +237,9 @@ class MinerManager extends EventEmitter {
       this.cores = nCores;
     }
 
-    _.range(this.cores).forEach((i) => this.initWorker(i));
+    for(const index of range(this.cores)) {
+      this.initWorker(index);
+    }
 
     if (wasMining) {
       this.startExplore();
