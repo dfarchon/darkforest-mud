@@ -24,8 +24,8 @@ contract MoveSystem is System, Errors {
    * @param _artifact Id of artifact moved along with the population.
    */
   function move(
-    Proof calldata _proof,
-    MoveInput calldata _input,
+    Proof memory _proof,
+    MoveInput memory _input,
     uint256 _population,
     uint256 _silver,
     uint256 _artifact
@@ -51,5 +51,25 @@ contract MoveSystem is System, Errors {
     // write back to storage
     fromPlanet.writeToStore();
     toPlanet.writeToStore();
+  }
+
+  /**
+   * @notice For backward compatibility, we keep the old move function signature.
+   */
+  function move(
+    uint256[2] memory _a,
+    uint256[2][2] memory _b,
+    uint256[2] memory _c,
+    uint256[11] memory _input,
+    uint256 popMoved,
+    uint256 silverMoved,
+    uint256 movedArtifactId,
+    uint256 isAbandoning
+  ) public returns (uint256) {
+    Proof memory proof;
+    proof.genFrom(_a, _b, _c);
+    MoveInput memory input;
+    input.genFrom(_input);
+    return move(proof, input, popMoved, silverMoved, movedArtifactId);
   }
 }
