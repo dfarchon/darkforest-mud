@@ -110,9 +110,9 @@ contract PostDeploy is Script {
       8, PlanetMetadataData(6306, 160, 200, 700000000, 3750, 300000000, 2778), 20
     );
     // used in create Planet form
-    // IWorld(worldAddress).df__setPlanetMetadata(
-    //   9, PlanetMetadataData(8829, 160, 200, 800000000, 4167, 400000000, 2778), 25
-    // );
+    IWorld(worldAddress).df__setPlanetMetadata(
+      9, PlanetMetadataData(8829, 160, 200, 800000000, 4167, 400000000, 2778), 25
+    );
   }
 
   struct TestPlanet {
