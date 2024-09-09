@@ -349,11 +349,11 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     for (let i = 0; i < artifacts.length; i++) {
       const x =
         Math.cos(anglePerArtifact * i + startingAngle + nowAngle) *
-        distanceFromCenterOfPlanet +
+          distanceFromCenterOfPlanet +
         centerW.x;
       const y =
         Math.sin(anglePerArtifact * i + startingAngle + nowAngle) *
-        distanceFromCenterOfPlanet +
+          distanceFromCenterOfPlanet +
         centerW.y;
       if (
         artifacts[i].artifactType === ArtifactType.Avatar

@@ -167,5 +167,5 @@ export class UIRenderer implements UIRendererType {
   }
 
   // eslint-disable-next-line
-  flush(): void { }
+  flush(): void {}
 }

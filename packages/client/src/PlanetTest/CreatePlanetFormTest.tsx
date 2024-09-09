@@ -20,7 +20,7 @@ interface CreatePlanetProps {
     planetType: PlanetType,
     spaceType: SpaceType,
     population: number,
-    silver: number
+    silver: number,
   ) => void;
 }
 
@@ -35,7 +35,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
   } = useMUD();
 
   const [planetHash, setPlanetHash] = useState<string>(
-    "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
+    "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963",
   );
   const [owner, setOwner] = useState<string>(entityToAddress(playerEntity));
   const [perlin, setPerlin] = useState<number>(0);
@@ -44,7 +44,6 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
   const [spaceType, setSpaceType] = useState<SpaceType>(SpaceType.DEAD_SPACE);
   const [population, setPopulation] = useState<number>(100000);
   const [silver, setSilver] = useState<number>(50000);
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +70,8 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Create Planet</h2>
+    <div className="mx-auto mt-10 max-w-md rounded-lg bg-white p-6 shadow-md">
+      <h2 className="mb-6 text-center text-2xl font-bold">Create Planet</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-gray-700">Planet Hash</label>
@@ -80,7 +79,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             type="text"
             value={planetHash}
             onChange={(e) => setPlanetHash(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Planet Hash"
           />
         </div>
@@ -91,7 +90,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             type="text"
             value={owner}
             onChange={(e) => setOwner(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Owner Address"
           />
         </div>
@@ -102,7 +101,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             type="number"
             value={perlin}
             onChange={(e) => setPerlin(Number(e.target.value))}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Perlin Noise"
           />
         </div>
@@ -113,7 +112,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             type="number"
             value={level}
             onChange={(e) => setLevel(Number(e.target.value))}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Level"
           />
         </div>
@@ -122,8 +121,10 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
           <label className="block text-gray-700">Planet Type</label>
           <select
             value={planetType}
-            onChange={(e) => setPlanetType(Number(e.target.value) as PlanetType)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            onChange={(e) =>
+              setPlanetType(Number(e.target.value) as PlanetType)
+            }
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
           >
             <option value="PLANET">PLANET</option>
             <option value="FOUNDRY">FOUNDRY</option>
@@ -137,7 +138,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
           <select
             value={spaceType}
             onChange={(e) => setSpaceType(Number(e.target.value) as SpaceType)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
           >
             <option value="NEBULA">NEBULA</option>
             <option value="SPACE">SPACE</option>
@@ -152,7 +153,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             type="number"
             value={population}
             onChange={(e) => setPopulation(Number(e.target.value))}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Population"
           />
         </div>
@@ -163,14 +164,14 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
             type="number"
             value={silver}
             onChange={(e) => setSilver(Number(e.target.value))}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
             placeholder="Enter Silver"
           />
         </div>
 
         <button
           type="submit"
-          className="block w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+          className="block w-full rounded-md bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
         >
           Create Planet
         </button>
