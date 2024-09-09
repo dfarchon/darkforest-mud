@@ -5,9 +5,9 @@
  */
 
 import {
+  type ContractWrite,
   createBurnerAccount,
   transportObserver,
-  type ContractWrite,
 } from "@latticexyz/common";
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
 import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
@@ -22,16 +22,16 @@ import { syncToZustand } from "@latticexyz/store-sync/zustand";
  */
 import mudConfig from "contracts/mud.config";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
-import { Subject, share } from "rxjs";
+import { share, Subject } from "rxjs";
 import {
-  createPublicClient,
-  fallback,
-  webSocket,
-  http,
-  createWalletClient,
-  type Hex,
   type ClientConfig,
+  createPublicClient,
+  createWalletClient,
+  fallback,
   getContract,
+  type Hex,
+  http,
+  webSocket,
 } from "viem";
 
 import { getNetworkConfig } from "./getNetworkConfig";

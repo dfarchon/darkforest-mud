@@ -6,9 +6,10 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { RendererType, RenderZIndex } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { RECT_PROGRAM_DEFINITION } from "../Programs/RectProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class RectRenderer

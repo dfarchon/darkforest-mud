@@ -15,7 +15,6 @@ customElements.define(
 export { DarkForestButton, DarkForestShortcutButton, ShortcutPressedEvent };
 
 // This wraps the customElement in a React wrapper to make it behave exactly like a React component
-// @ts-ignore: This method is deprecated, replace it in the future
 export const Btn = createComponent<
   DarkForestButton,
   {

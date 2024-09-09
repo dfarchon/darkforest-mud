@@ -1,14 +1,8 @@
 import { isAncient, isLocatable } from "@df/gamelogic";
-import type {
-  Artifact,
-  LocatablePlanet,
-  Planet,
-} from "@df/types";
-import {
-  Biome,
-  BiomeNames,
-} from "@df/types";
+import type { Artifact, LocatablePlanet, Planet } from "@df/types";
+import { Biome, BiomeNames } from "@df/types";
 import styled from "styled-components";
+
 import { BiomeTextColors } from "../../Styles/Colors";
 import { AncientLabel, AncientLabelAnim } from "../AncientLabel";
 import { icyAnim, shakeAnim } from "../BiomeAnims";
@@ -20,7 +14,7 @@ export const BiomeLabel = styled.span<{ biome: Biome }>`
   color: ${({ biome }) => BiomeTextColors[biome]};
 `;
 
-const StyledBiomeLabelAnim = styled(BiomeLabel) <{ biome: Biome }>`
+const StyledBiomeLabelAnim = styled(BiomeLabel)<{ biome: Biome }>`
   ${({ biome }) => biome === Biome.CORRUPTED && shakeAnim};
   ${({ biome }) => biome === Biome.ICE && icyAnim};
 `;

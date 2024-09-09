@@ -36,16 +36,16 @@ import {
 } from "./perlin";
 
 export {
+  fakeHash,
+  Fraction,
+  getRandomGradientAt,
+  type IntegerVector,
+  MAX_PERLIN_VALUE,
   mimcHash,
   mimcSponge,
-  type IntegerVector,
-  perlin,
-  rand,
-  getRandomGradientAt,
   modPBigInt,
   modPBigIntNative,
-  fakeHash,
+  perlin,
+  rand,
   seededRandom,
-  Fraction,
-  MAX_PERLIN_VALUE,
 };

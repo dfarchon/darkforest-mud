@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "preview": "vite preview",
     "test": "echo 'tests not implemented'",
-    "lint": "pnpm lint:typecheck",
+    "lint": "pnpm run lint:eslint && pnpm run lint:typecheck",
+    "lint:eslint": "eslint --ext .js,.ts,tsx,.json src",
     "lint:typecheck": "tsc"
   },
   "dependencies": {
@@ -61,8 +62,6 @@
     "@types/styled-components": "5.1.34",
     "@vitejs/plugin-react": "4.3.1",
     "autoprefixer": "10.4.20",
-    "eslint": "8.57.0",
-    "eslint-plugin-import": "2.30.0",
     "eslint-plugin-react": "7.31.11",
     "eslint-plugin-react-hooks": "4.6.0",
     "postcss": "8.4.41",

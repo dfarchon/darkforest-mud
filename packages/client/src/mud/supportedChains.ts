@@ -12,10 +12,10 @@
  */
 
 import {
+  garnet,
   type MUDChain,
   mudFoundry,
   redstone,
-  garnet,
 } from "@latticexyz/common/chains";
 
 /*

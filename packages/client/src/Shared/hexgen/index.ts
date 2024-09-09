@@ -52,7 +52,9 @@ const bonusById = new Map<LocationId, PlanetBonus>();
  */
 export function bonusFromHex(hex: LocationId): PlanetBonus {
   const bonus = bonusById.get(hex);
-  if (bonus) return bonus;
+  if (bonus) {
+    return bonus;
+  }
 
   const newBonus = Array(6).fill(false) as PlanetBonus;
 
@@ -70,6 +72,8 @@ export function bonusFromHex(hex: LocationId): PlanetBonus {
  * @param planet Planet to check for bonuses.
  */
 export function planetHasBonus(planet?: Planet): boolean {
-  if (!planet) return false;
+  if (!planet) {
+    return false;
+  }
   return bonusFromHex(planet.locationId).some((bonus) => bonus);
 }

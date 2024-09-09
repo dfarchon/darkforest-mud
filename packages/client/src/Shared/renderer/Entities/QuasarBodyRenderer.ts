@@ -6,9 +6,10 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { QUASARBODY_PROGRAM_DEFINITION } from "../Programs/QuasarBodyProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class QuasarBodyRenderer

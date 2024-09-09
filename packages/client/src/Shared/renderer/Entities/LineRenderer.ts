@@ -7,8 +7,9 @@ import {
   type RGBAVec,
   type WorldCoords,
 } from "@df/types";
+
 import { LINE_PROGRAM_DEFINITION } from "../Programs/LineProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class LineRenderer
@@ -47,7 +48,9 @@ export class LineRenderer
     const { x: x2, y: y2 } = end;
 
     let dist = 0;
-    if (dashed) dist = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+    if (dashed) {
+      dist = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+    }
 
     const { x: dX, y: dY } = this.getOffset(start, end);
 

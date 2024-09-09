@@ -1,4 +1,3 @@
-import { getPlanetCosmetic } from "../../procedural";
 import type {
   AsteroidRendererType,
   CanvasCoords,
@@ -7,9 +6,11 @@ import type {
   RGBVec,
 } from "@df/types";
 import { DrawMode, RendererType } from "@df/types";
+
+import { getPlanetCosmetic } from "../../procedural";
 import { EngineUtils } from "../EngineUtils";
 import { ASTEROID_PROGRAM_DEFINITION } from "../Programs/AsteroidProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class AsteroidRenderer

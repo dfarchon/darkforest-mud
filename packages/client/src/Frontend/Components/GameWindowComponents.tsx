@@ -1,5 +1,6 @@
-import React from "react";
+import type React from "react";
 import styled from "styled-components";
+
 import dfstyles from "../../Frontend/Styles/dfstyles";
 
 export const WindowWrapper = styled.div`

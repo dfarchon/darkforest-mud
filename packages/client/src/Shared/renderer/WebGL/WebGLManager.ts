@@ -45,8 +45,11 @@ export class WebGLManager {
     const { gl, canvas } = this;
     gl.viewport(0, 0, canvas.width, canvas.height);
 
-    if (color) gl.clearColor(...color);
-    else gl.clearColor(0, 0, 0, 0);
+    if (color) {
+      gl.clearColor(...color);
+    } else {
+      gl.clearColor(0, 0, 0, 0);
+    }
 
     gl.clear(bits || gl.COLOR_BUFFER_BIT);
   }

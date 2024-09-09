@@ -6,10 +6,11 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { BLACKDOMAIN_PROGRAM_DEFINITION } from "../Programs/BlackDomainProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
-import { GenericRenderer } from "../WebGL/GenericRenderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
+import { GenericRenderer } from "../WebGL/GenericRenderer.js";
 
 /** Renders a shadow-type thing over destroyed planets */
 export class BlackDomainRenderer

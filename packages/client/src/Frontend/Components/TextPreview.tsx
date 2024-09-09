@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import styled, { css } from "styled-components";
+
 import { TextInput } from "./Input";
 
 const DEFAULT_UNFOCUSED_WIDTH = "50px";

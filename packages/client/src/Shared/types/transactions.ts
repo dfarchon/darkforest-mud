@@ -1,4 +1,5 @@
 import type { Contract } from "ethers";
+
 import type { ArtifactId, EthAddress, LocationId, UnionId } from "./identifier";
 import type { WorldLocation } from "./world";
 

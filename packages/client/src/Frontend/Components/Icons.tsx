@@ -3,8 +3,9 @@ import { type Planet, UpgradeBranchName } from "@df/types";
 import { DarkForestIcon, IconType } from "@df/ui";
 import { createComponent } from "@lit-labs/react";
 import React from "react";
-import { getPlanetRank, isFullRank } from "../../Backend/Utils/Utils";
+
 import { StatIdx } from "../../_types/global/GlobalTypes";
+import { getPlanetRank, isFullRank } from "../../Backend/Utils/Utils";
 
 // TODO: Decide if this is the best place to register the custom elements
 customElements.define(DarkForestIcon.tagName, DarkForestIcon);
@@ -28,31 +29,47 @@ export { IconType } from "@df/ui";
 // instead of an Icon JSXElement
 export const RankIcon = ({ planet }: { planet: Planet | undefined }) => {
   const rank = getPlanetRank(planet);
-  if (isFullRank(planet)) return <Icon type={IconType.RankMax} />;
-  if (rank === 1) return <Icon type={IconType.RankOne} />;
-  else if (rank === 2) return <Icon type={IconType.RankTwo} />;
-  else if (rank === 3) return <Icon type={IconType.RankThree} />;
+  if (isFullRank(planet)) {
+    return <Icon type={IconType.RankMax} />;
+  }
+  if (rank === 1) {
+    return <Icon type={IconType.RankOne} />;
+  } else if (rank === 2) {
+    return <Icon type={IconType.RankTwo} />;
+  } else if (rank === 3) {
+    return <Icon type={IconType.RankThree} />;
+  }
   return <Icon type={IconType.RankFour} />;
 };
 
 export const BranchIcon = ({ branch }: { branch: number }) => {
-  if (branch === UpgradeBranchName.Range)
+  if (branch === UpgradeBranchName.Range) {
     return <Icon type={IconType.Energy} />;
+  }
   // TODO: Wat
-  else if (branch === UpgradeBranchName.Defense)
+  else if (branch === UpgradeBranchName.Defense) {
     return <Icon type={IconType.Silver} />;
-  else return <Icon type={IconType.Range} />;
+  } else {
+    return <Icon type={IconType.Range} />;
+  }
 };
 
 export const StatIcon = ({ stat }: { stat: StatIdx }) => {
-  if (stat === StatIdx.Defense) return <Icon type={IconType.Defense} />;
-  else if (stat === StatIdx.EnergyGro)
+  if (stat === StatIdx.Defense) {
+    return <Icon type={IconType.Defense} />;
+  } else if (stat === StatIdx.EnergyGro) {
     return <Icon type={IconType.EnergyGrowth} />;
-  else if (stat === StatIdx.EnergyCap) return <Icon type={IconType.Energy} />;
-  else if (stat === StatIdx.Range) return <Icon type={IconType.Range} />;
-  else if (stat === StatIdx.Speed) return <Icon type={IconType.Speed} />;
+  } else if (stat === StatIdx.EnergyCap) {
+    return <Icon type={IconType.Energy} />;
+  } else if (stat === StatIdx.Range) {
+    return <Icon type={IconType.Range} />;
+  } else if (stat === StatIdx.Speed) {
+    return <Icon type={IconType.Speed} />;
+  }
   // TODO: lulz what
-  else return <Icon type={IconType.Defense} />;
+  else {
+    return <Icon type={IconType.Defense} />;
+  }
 };
 
 /**

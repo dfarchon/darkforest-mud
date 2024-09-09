@@ -8,6 +8,7 @@ import {
 } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
+
 import * as dfstyles from "./styles";
 
 type Coords = { x: number; y: number };
@@ -188,7 +189,9 @@ export class DarkForestModal extends LitElement {
     }
 
     // Always try to update the position if any update was requested
-    if (!this._coords) return;
+    if (!this._coords) {
+      return;
+    }
     const delX = this._delCoords ? this._delCoords.x : 0;
     const delY = this._delCoords ? this._delCoords.y : 0;
 
@@ -257,8 +260,12 @@ export class DarkForestModal extends LitElement {
 
   // Handler is attached to Window, so we use an arrow function to bind `this`
   private _handleMouseMove = (evt: MouseEvent) => {
-    if (!this._dragging) return;
-    if (!this._mousedownCoords) return;
+    if (!this._dragging) {
+      return;
+    }
+    if (!this._mousedownCoords) {
+      return;
+    }
 
     this._delCoords = {
       x: evt.clientX - this._mousedownCoords.x,
@@ -268,9 +275,15 @@ export class DarkForestModal extends LitElement {
 
   // Handler is attached to Window, so we use an arrow function to bind `this`
   private _handleMoveEnd = (evt: MouseEvent) => {
-    if (!this._dragging) return;
-    if (!this._mousedownCoords) return;
-    if (!this._coords) return;
+    if (!this._dragging) {
+      return;
+    }
+    if (!this._mousedownCoords) {
+      return;
+    }
+    if (!this._coords) {
+      return;
+    }
 
     const delX = evt.clientX - this._mousedownCoords.x;
     const delY = evt.clientY - this._mousedownCoords.y;

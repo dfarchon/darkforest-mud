@@ -1,12 +1,12 @@
-import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
+import type IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import type {
+  Account,
+  Address,
+  Chain,
   GetContractReturnType,
   PublicClient,
   Transport,
-  Chain,
   WalletClient,
-  Address,
-  Account,
 } from "viem";
 import type { Config } from "wagmi";
 import { create } from "zustand";

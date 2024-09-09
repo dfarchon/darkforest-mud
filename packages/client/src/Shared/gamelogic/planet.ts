@@ -8,7 +8,9 @@ import type {
 import { PlanetMessageType } from "@df/types";
 
 export const getPlanetRank = (planet: Planet | undefined): number => {
-  if (!planet) return 0;
+  if (!planet) {
+    return 0;
+  }
   return planet.upgradeState.reduce((a, b) => a + b);
 };
 
@@ -22,7 +24,9 @@ export function getRange(
   percentEnergySending = 100,
   rangeBoost = 1,
 ): number {
-  if (percentEnergySending === 0) return 0;
+  if (percentEnergySending === 0) {
+    return 0;
+  }
   return (
     Math.max(Math.log2(percentEnergySending / 5), 0) * planet.range * rangeBoost
   );

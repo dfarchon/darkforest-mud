@@ -1,5 +1,6 @@
 import type { Abstract } from "@df/types";
 import { css, LitElement, nothing, svg, unsafeCSS } from "lit";
+
 import * as dfstyles from "./styles";
 
 export type IconType = Abstract<string, "IconType">;

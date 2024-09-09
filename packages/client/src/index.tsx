@@ -1,12 +1,15 @@
-import ReactDOM from "react-dom/client";
-import { App } from "./App";
-import { setup } from "./mud/setup";
-import { MUDProvider } from "./mud/MUDContext";
-import mudConfig from "contracts/mud.config";
 import { Providers } from "@wallet/Providers";
+import mudConfig from "contracts/mud.config";
+import ReactDOM from "react-dom/client";
+
+import { App } from "./App";
+import { MUDProvider } from "./mud/MUDContext";
+import { setup } from "./mud/setup";
 
 const rootElement = document.getElementById("react-root");
-if (!rootElement) throw new Error("React root not found");
+if (!rootElement) {
+  throw new Error("React root not found");
+}
 const root = ReactDOM.createRoot(rootElement);
 
 // TODO: figure out if we actually want this to be async or if we should render something else in the meantime

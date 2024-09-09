@@ -3,7 +3,7 @@ import type {
   EthAddress,
   UpgradeBranches,
 } from "@df/types";
-import { BigNumber as EthersBN } from "ethers";
+import type { BigNumber as EthersBN } from "ethers";
 
 export const enum ZKArgIdx {
   PROOF_A,
