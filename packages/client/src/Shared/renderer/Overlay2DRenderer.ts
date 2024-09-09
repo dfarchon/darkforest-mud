@@ -90,6 +90,7 @@ export class Overlay2DRenderer {
   }
 
   drawArtifactAroundPlanet(
+    // @ts-expect-error `artifact` argument seems to be unused, double check and remove if redundant
     artifact: Artifact,
     coords: CanvasCoords,
     size: number,

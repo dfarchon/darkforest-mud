@@ -10,6 +10,7 @@ const nV = {
   noise: "v_noise",
 };
 
+// @ts-ignore - unused
 const _noiseVert = glsl`
   precision highp float;
 
@@ -27,6 +28,7 @@ const _noiseVert = glsl`
   }
 `;
 
+// @ts-ignore - unused
 // https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 const _noiseFrag = glsl`
   precision highp float;
