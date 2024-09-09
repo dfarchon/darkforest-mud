@@ -8,26 +8,22 @@ Our TypeScript configuration extends the root `tsconfig.json`, which in turn ext
 
 ### Compiler Options:
 
+- [`noEmit = true`](https://www.typescriptlang.org/tsconfig#noEmit); disables generating js files from ts files under compilation.
+- [`skipLibCheck = true`](https://www.typescriptlang.org/tsconfig#skipLibCheck); disables checking all d.ts files.
 - [`types = [...]`](https://www.typescriptlang.org/tsconfig#types); specifies the types we want to include without being referenced in a source file.
+- [`module = "ESNext"`](https://www.typescriptlang.org/tsconfig#module); tells TypeScript to set the [module](https://www.typescriptlang.org/docs/handbook/modules.html) system for the program to `ESNext`.
+- [`moduleResolution = "Bundler"`](https://www.typescriptlang.org/tsconfig#moduleResolution); Specifies the module resolution strategy to `bundler`.
+- [`esModuleInterop = true`](https://www.typescriptlang.org/tsconfig#esModuleInterop); is enabled and ensures interop with CommonJS/AMD/UMD modules. This also enables the [`allowSyntheticDefaultImports`](https://www.typescriptlang.org/tsconfig#allowSyntheticDefaultImports) option.
 - [`target = "ESNext"`](https://www.typescriptlang.org/tsconfig#target); is set to `ESNext` and its up to the tools such like [esbuild](https://github.com/evanw/esbuild) and/or [rollup](https://rollupjs.org) to transpile and generate the correct code for the given client browser(s) target platform.
 - [`lib = ["ESNext", "DOM", "DOM.iterable"]`](https://www.typescriptlang.org/tsconfig#lib); tells TypeScript to include the type definitions for [`ESNext`](https://github.com/microsoft/TypeScript/blob/main/lib/lib.esnext.d.ts), [`DOM`](https://github.com/microsoft/TypeScript/blob/main/lib/lib.dom.d.ts) and [`DOM.Iterable`](https://github.com/microsoft/TypeScript/blob/main/lib/lib.dom.iterable.d.ts).
-- [`module = "ESNext"`](https://www.typescriptlang.org/tsconfig#module); tells TypeScript to set the [module](https://www.typescriptlang.org/docs/handbook/modules.html) system for the program to `ESNext`.
-- [`esModuleInterop = true`](https://www.typescriptlang.org/tsconfig#esModuleInterop); is enabled and ensures interop with CommonJS/AMD/UMD modules. This also enables the [`allowSyntheticDefaultImports`](https://www.typescriptlang.org/tsconfig#allowSyntheticDefaultImports) option.
 - [`strict = true`](https://www.typescriptlang.org/tsconfig#strict); is enabled and ensures a wide range of type checking behavior that results in stronger guarantees of program correctness.
 - [`strictPropertyInitialization = false`](https://www.typescriptlang.org/tsconfig#strictPropertyInitialization); is disabled so that we get no error on properties that are declared but not set in constructor (will enable it in upcoming code, enabled by default by strict mode).
 - [`useDefineForClassFields = false`](https://www.typescriptlang.org/tsconfig#useDefineForClassFields); is disabled so we are not actually emitting standard ECMA compliant class field (we will enable it in upcoming code)
-- [`jsx = "react-jsx"`](https://www.typescriptlang.org/tsconfig#jsx); specifies that react-jsx code is generated.
-- [`paths = ["@package-name": ["location"], …`](https://www.typescriptlang.org/tsconfig#jsx); Specifies a set of entries that re-map imports to additional lookup locations.
-
-
-#### Inherited from `@latticexyz/common/tsconfig.base.json`
-
-- [`noEmit = true`](https://www.typescriptlang.org/tsconfig#noEmit); disables generating js files from ts files under compilation.
-- [`declaration = true`](https://www.typescriptlang.org/tsconfig#declaration); Emits declaration `d.ts` files when emit is enabled, or emit declaration only flag is used (not relevant)
 - [`noErrorTruncation = true`](https://www.typescriptlang.org/tsconfig#noErrorTruncation); Disable truncating types in error messages.
 - [`resolveJsonModule = true`](https://www.typescriptlang.org/tsconfig#resolveJsonModule); Enabled importing JSON files.
 - [`forceConsistentCasingInFileNames = true`](https://www.typescriptlang.org/tsconfig#forceConsistentCasingInFileNames); Ensures that casing is correct in imports.
-- [`sourceMap = true`](https://www.typescriptlang.org/tsconfig#resolveJsonModule); Creates sourceMap for emmited JS files.
+- [`jsx = "react-jsx"`](https://www.typescriptlang.org/tsconfig#jsx); specifies that react-jsx code is generated.
+- [`paths = ["@package-name": ["location"], …`](https://www.typescriptlang.org/tsconfig#jsx); Specifies a set of entries that re-map imports to additional lookup locations.
 
 #### Strict mode
 
