@@ -34,10 +34,20 @@ struct VerificationKey {
   G1Point[] IC;
 }
 
+using ProofLib for Proof global;
+
 struct Proof {
   G1Point A;
   G2Point B;
   G1Point C;
+}
+
+library ProofLib {
+  function genFrom(Proof memory proof, uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c) internal pure {
+    proof.A = G1Point(a[0], a[1]);
+    proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
+    proof.C = G1Point(c[0], c[1]);
+  }
 }
 
 library Pairing {

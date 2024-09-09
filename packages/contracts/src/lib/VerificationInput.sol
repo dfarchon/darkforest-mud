@@ -66,6 +66,20 @@ library MoveInputLib {
     }
   }
 
+  function genFrom(MoveInput memory input, uint256[11] memory rawInput) internal pure {
+    input.fromPlanetHash = rawInput[0];
+    input.toPlanetHash = rawInput[1];
+    input.toPerlin = rawInput[2];
+    input.universeRadius = rawInput[3];
+    input.distance = rawInput[4];
+    input.mimcHashKey = rawInput[5];
+    input.spaceTypeKey = rawInput[6];
+    input.perlinLengthScale = rawInput[7];
+    input.perlinMirrorX = rawInput[8];
+    input.perlinMirrorY = rawInput[9];
+    input.toRadiusSquare = rawInput[10];
+  }
+
   function flatten(MoveInput memory input) internal pure returns (uint256[] memory res) {
     res = new uint256[](11);
     res[0] = input.fromPlanetHash;
