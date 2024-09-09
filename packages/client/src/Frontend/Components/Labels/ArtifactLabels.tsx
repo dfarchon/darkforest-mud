@@ -8,7 +8,7 @@ import {
   numToMemeType,
 } from "@df/procedural";
 import {
-  Artifact,
+  type Artifact,
   ArtifactRarity,
   ArtifactRarityNames,
   ArtifactType,
@@ -19,7 +19,6 @@ import {
   LogoTypeNames,
   MemeTypeNames,
 } from "@df/types";
-import React from "react";
 import styled from "styled-components";
 import { RarityColors } from "../../Styles/Colors";
 import { LegendaryLabel } from "./LegendaryLabel";

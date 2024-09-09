@@ -8,11 +8,11 @@ import {
   webSocket,
   http,
   getContract,
-  Hex,
-  ClientConfig,
+  type Hex,
+  type ClientConfig,
 } from "viem";
 import { useWalletClient } from "wagmi";
-import { NetworkConfig } from "@mud/getNetworkConfig";
+import type { NetworkConfig } from "@mud/getNetworkConfig";
 import { useStore } from "@hooks/useStore";
 
 export type Props = {

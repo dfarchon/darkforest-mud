@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { CustomConnectButton } from "@wallet/CustomConnectButton";
 import { useAccount, useDisconnect, useWalletClient } from "wagmi";
 import { formatAddress } from "./utils";
 import { getNetworkConfig } from "@mud/getNetworkConfig";

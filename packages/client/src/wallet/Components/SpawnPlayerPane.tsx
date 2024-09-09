@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAccount } from "wagmi";
 import { useMUD } from "@mud/MUDContext";
 
