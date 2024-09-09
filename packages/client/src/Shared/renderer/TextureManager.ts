@@ -201,6 +201,8 @@ function ancientSpriteInfo(): AncientSpriteLocations {
 
   return result as AncientSpriteLocations;
 }
+
+// @ts-expect-error `ancientSpriteLocs` variable seems to be unused, double check and remove if redundant
 const ancientSpriteLocs = ancientSpriteInfo();
 
 const artifactSpriteMap: Map<ArtifactId, SpriteRectangle> = new Map();

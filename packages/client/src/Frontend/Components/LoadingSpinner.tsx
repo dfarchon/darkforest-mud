@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import _, { useEffect, useState } from "react";
 
 export function LoadingSpinner({
   initialText,

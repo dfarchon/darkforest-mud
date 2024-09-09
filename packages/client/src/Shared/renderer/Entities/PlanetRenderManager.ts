@@ -347,11 +347,11 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     for (let i = 0; i < artifacts.length; i++) {
       const x =
         Math.cos(anglePerArtifact * i + startingAngle + nowAngle) *
-          distanceFromCenterOfPlanet +
+        distanceFromCenterOfPlanet +
         centerW.x;
       const y =
         Math.sin(anglePerArtifact * i + startingAngle + nowAngle) *
-          distanceFromCenterOfPlanet +
+        distanceFromCenterOfPlanet +
         centerW.y;
       if (
         artifacts[i].artifactType === ArtifactType.Avatar
@@ -525,6 +525,7 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     center: WorldCoords,
     radius: number,
   ) {
+    // @ts-expect-error - Remove circleRenderer if not needed later one
     const { blackDomainRenderer: bR, circleRenderer: cR } = this.renderer;
 
     bR.queueBlackDomain(planet, center, radius);
