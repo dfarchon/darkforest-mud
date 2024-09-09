@@ -1,14 +1,7 @@
 import { isLocatable } from "@df/gamelogic";
 import { isUnconfirmedMoveTx } from "@df/serde";
-import {
-  ArtifactType,
-  Planet,
-  RendererType,
-  RenderZIndex,
-  RGBVec,
-  UIRendererType,
-  WorldCoords,
-} from "@df/types";
+import type { Planet, RGBVec, UIRendererType, WorldCoords } from "@df/types";
+import { ArtifactType, RendererType, RenderZIndex } from "@df/types";
 import { engineConsts } from "./EngineConsts";
 import { Renderer } from "./Renderer";
 import { GameGLManager } from "./WebGL/GameGLManager";

@@ -1,10 +1,5 @@
-import {
-  BackgroundRendererType,
-  Chunk,
-  RendererType,
-  RGBVec,
-  SpaceType,
-} from "@df/types";
+import type { BackgroundRendererType, Chunk, RGBVec } from "@df/types";
+import { RendererType, SpaceType } from "@df/types";
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";
 import { RectRenderer } from "./RectRenderer";

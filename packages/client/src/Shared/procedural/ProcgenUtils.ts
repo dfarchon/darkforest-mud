@@ -15,24 +15,26 @@ import {
 import { getPlanetRank, isLocatable } from "@df/gamelogic";
 import { seededRandom } from "@df/hashing";
 import { hashToInt } from "@df/serde";
-import {
+import type {
   ArtifactId,
-  AvatarType,
-  AvatarTypeNames,
-  Biome,
   EthAddress,
-  HatType,
   HSLVec,
   LocationId,
-  LogoType,
-  LogoTypeNames,
-  MemeType,
-  MemeTypeNames,
   Planet,
   PlanetCosmeticInfo,
   RGBAVec,
   RGBVec,
   RuinsInfo,
+} from "@df/types";
+import {
+  AvatarType,
+  AvatarTypeNames,
+  Biome,
+  HatType,
+  LogoType,
+  LogoTypeNames,
+  MemeType,
+  MemeTypeNames,
   UpgradeBranchName,
 } from "../types";
 import Noise from "./Noise";

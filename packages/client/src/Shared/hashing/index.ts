@@ -29,7 +29,7 @@ import { Fraction } from "./fractions/bigFraction";
 import mimcHash, { mimcSponge, modPBigInt, modPBigIntNative } from "./mimc";
 import {
   getRandomGradientAt,
-  IntegerVector,
+  type IntegerVector,
   MAX_PERLIN_VALUE,
   perlin,
   rand,
@@ -38,7 +38,7 @@ import {
 export {
   mimcHash,
   mimcSponge,
-  IntegerVector,
+  type IntegerVector,
   perlin,
   rand,
   getRandomGradientAt,

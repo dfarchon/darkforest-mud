@@ -1,11 +1,11 @@
-import {
+import type {
   Chunk,
   PerlinConfig,
   Rectangle,
-  RendererType,
   SpaceRendererType,
   Vec3,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { SPACE_PROGRAM_DEFINITION } from "../Programs/SpaceProgram";
 import { AttribManager } from "../WebGL/AttribManager";

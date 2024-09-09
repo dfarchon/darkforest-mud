@@ -1,15 +1,15 @@
 import {
   buildContractCallArgs,
-  SnarkJSProofAndSignals,
-  WhitelistSnarkContractCallArgs,
-  WhitelistSnarkInput,
+  type SnarkJSProofAndSignals,
+  type WhitelistSnarkContractCallArgs,
+  type WhitelistSnarkInput,
 } from "../../Shared/snarks";
 import whitelistCircuitPath from "../../Shared/snarks/whitelist.wasm";
 import whitelistZkeyPath from "../../Shared/snarks/whitelist.zkey";
-import { EthAddress } from "../../Shared/types";
-import bigInt, { BigInteger } from "big-integer";
+import type { EthAddress } from "../../Shared/types";
+import bigInt, { type BigInteger } from "big-integer";
 import { TerminalTextStyle } from "../../Frontend/Utils/TerminalTypes";
-import { TerminalHandle } from "../../Frontend/Views/Terminal";
+import type { TerminalHandle } from "../../Frontend/Views/Terminal";
 
 /**
  * Helper method for generating whitelist SNARKS.

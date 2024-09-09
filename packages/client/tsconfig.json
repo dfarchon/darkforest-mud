@@ -2,18 +2,12 @@
   "compilerOptions": {
     "noEmit": true,
     "skipLibCheck": true,
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "module": "ESNext",
     "esModuleInterop": true,
     "moduleResolution": "Bundler",
     "target": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "strict": true,
     "strictPropertyInitialization": false,
     "useDefineForClassFields": false,
@@ -22,29 +16,16 @@
     "noUnusedParameters": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
     "paths": {
-      "@df/*": [
-        "./src/Shared/*"
-      ],
-      "@mud/*": [
-        "./src/mud/*"
-      ],
-      "@hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@wallet/*": [
-        "./src/wallet/*"
-      ],
-      "@frontend/*": [
-        "./src/Frontend/*"
-      ],
-      "@backend/*": [
-        "./src/Backend/*"
-      ]
+      "@df/*": ["./src/Shared/*"],
+      "@mud/*": ["./src/mud/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@wallet/*": ["./src/wallet/*"],
+      "@frontend/*": ["./src/Frontend/*"],
+      "@backend/*": ["./src/Backend/*"]
     }
   },
-  "include": [
-    "./src/**/*.ts"
-  ]
+  "include": ["./src/**/*.ts"]
 }

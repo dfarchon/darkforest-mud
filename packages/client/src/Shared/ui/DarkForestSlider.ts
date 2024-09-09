@@ -3,7 +3,7 @@ import {
   Slider,
   SliderHandle,
 } from "@spectrum-web-components/slider";
-import { css, CSSResultArray, unsafeCSS } from "lit";
+import { css, type CSSResultArray, unsafeCSS } from "lit";
 import * as dfstyles from "./styles";
 
 export class DarkForestSlider extends Slider {

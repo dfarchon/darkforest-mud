@@ -1,11 +1,11 @@
-import {
+import type {
   Chunk,
   PerlinConfig,
   PerlinRendererType,
   Rectangle,
-  RendererType,
   Vec3,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { PERLIN_PROGRAM_DEFINITION } from "../Programs/PerlinProgram";
 import { AttribManager } from "../WebGL/AttribManager";

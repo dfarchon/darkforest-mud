@@ -1,11 +1,11 @@
 import {
-  CanvasCoords,
+  type CanvasCoords,
   DrawMode,
-  LineRendererType,
+  type LineRendererType,
   RendererType,
   RenderZIndex,
-  RGBAVec,
-  WorldCoords,
+  type RGBAVec,
+  type WorldCoords,
 } from "@df/types";
 import { LINE_PROGRAM_DEFINITION } from "../Programs/LineProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

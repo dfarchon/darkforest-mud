@@ -1,10 +1,5 @@
-import {
-  CanvasCoords,
-  RendererType,
-  RenderZIndex,
-  RGBVec,
-  UnminedRendererType,
-} from "@df/types";
+import type { CanvasCoords, RGBVec, UnminedRendererType } from "@df/types";
+import { RendererType, RenderZIndex } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { UNMINED_PROGRAM_DEFINITION } from "../Programs/UnminedProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

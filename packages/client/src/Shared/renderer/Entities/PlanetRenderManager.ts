@@ -18,23 +18,25 @@ import {
   memeTypeToNum,
 } from "@df/procedural";
 import { isUnconfirmedMoveTx } from "@df/serde";
-import {
+import type {
   Artifact,
-  ArtifactType,
-  AvatarType,
-  HatType,
   LocatablePlanet,
   LocationId,
-  LogoType,
-  MemeType,
   Planet,
   PlanetRenderInfo,
   PlanetRenderManagerType,
+  WorldCoords,
+} from "@df/types";
+import {
+  ArtifactType,
+  AvatarType,
+  HatType,
+  LogoType,
+  MemeType,
   PlanetType,
   RendererType,
   TextAlign,
   TextAnchor,
-  WorldCoords,
 } from "@df/types";
 import { avatars } from "../Avatars";
 import { engineConsts } from "../EngineConsts";

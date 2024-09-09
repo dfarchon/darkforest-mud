@@ -1,6 +1,6 @@
 import { fakeHash, perlin, seededRandom } from "@df/hashing";
 import { locationIdFromBigInt } from "@df/serde";
-import { Rectangle, WorldCoords, WorldLocation } from "@df/types";
+import type { Rectangle, WorldCoords, WorldLocation } from "@df/types";
 
 type IdxWithRand = {
   idx: number;

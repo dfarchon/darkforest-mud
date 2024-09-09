@@ -1,11 +1,11 @@
 import { BLOCK_EXPLORER_URL } from "@df/constants";
-// import { isLocatable } from "@df/gamelogic";
-// import { artifactName, getPlanetName } from "@df/procedural";
-import {
-  // Artifact,
-  // ArtifactId,
-  // Chunk,
-  // Planet,
+import { isLocatable } from "@df/gamelogic";
+import { artifactName, getPlanetName } from "@df/procedural";
+import type {
+  Artifact,
+  ArtifactId,
+  Chunk,
+  Planet,
   Transaction,
   WorldCoords,
 } from "@df/types";

@@ -1,17 +1,19 @@
 import { EMPTY_ADDRESS } from "@df/constants";
 import { formatNumber, hasOwner } from "@df/gamelogic";
 import { getOwnerColorVec } from "@df/procedural";
-import {
-  ArtifactType,
+import type {
   LocationId,
   Planet,
   Player,
   QueuedArrival,
+  VoyageRendererType,
+} from "@df/types";
+import {
+  ArtifactType,
   RendererType,
   RenderZIndex,
   TextAlign,
   TextAnchor,
-  VoyageRendererType,
 } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { Renderer } from "../Renderer";

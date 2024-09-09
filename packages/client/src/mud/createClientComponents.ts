@@ -9,7 +9,7 @@
  * an onchain component.
  */
 
-import { SetupNetworkResult } from "./setupNetwork";
+import type { SetupNetworkResult } from "./setupNetwork";
 
 export type ClientComponents = ReturnType<typeof createClientComponents>;
 

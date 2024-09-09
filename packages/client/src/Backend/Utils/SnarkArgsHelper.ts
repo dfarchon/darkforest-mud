@@ -5,11 +5,9 @@ import {
   modPBigIntNative,
   perlin,
 } from "../../Shared/hashing";
-import {
+import type {
   BiomebaseSnarkContractCallArgs,
   BiomebaseSnarkInput,
-  buildContractCallArgs,
-  fakeProof,
   InitSnarkContractCallArgs,
   InitSnarkInput,
   MoveSnarkContractCallArgs,
@@ -18,6 +16,7 @@ import {
   RevealSnarkInput,
   SnarkJSProofAndSignals,
 } from "../../Shared/snarks";
+import { buildContractCallArgs, fakeProof } from "../../Shared/snarks";
 import biomebaseCircuitPath from "../../Shared/snarks/biomebase.wasm";
 import biomebaseZkeyPath from "../../Shared/snarks/biomebase.zkey";
 import initCircuitPath from "../../Shared/snarks/init.wasm";
@@ -26,14 +25,14 @@ import moveCircuitPath from "../../Shared/snarks/move.wasm";
 import moveZkeyPath from "../../Shared/snarks/move.zkey";
 import revealCircuitPath from "../../Shared/snarks/reveal.wasm";
 import revealZkeyPath from "../../Shared/snarks/reveal.zkey";
-import { PerlinConfig } from "../../Shared/types";
+import type { PerlinConfig } from "../../Shared/types";
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer";
+import type { BigInteger } from "big-integer";
 import FastQueue from "fastq";
 import { LRUMap } from "mnemonist";
 import { TerminalTextStyle } from "../../Frontend/Utils/TerminalTypes";
-import { TerminalHandle } from "../../Frontend/Views/Terminal";
-import { HashConfig } from "../../_types/global/GlobalTypes";
+import type { TerminalHandle } from "../../Frontend/Views/Terminal";
+import type { HashConfig } from "../../_types/global/GlobalTypes";
 
 type ZKPTask = {
   taskId: number;

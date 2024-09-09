@@ -1,4 +1,11 @@
-import { css, html, LitElement, nothing, PropertyValues, unsafeCSS } from "lit";
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  unsafeCSS,
+} from "lit";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import * as dfstyles from "./styles";

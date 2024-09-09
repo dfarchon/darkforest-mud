@@ -1,7 +1,6 @@
 import { EMPTY_ADDRESS, EMPTY_LOCATION_ID } from "@df/constants";
+import type { Artifact, ArtifactId } from "@df/types";
 import {
-  Artifact,
-  ArtifactId,
   artifactNameFromArtifact,
   ArtifactRarity,
   ArtifactType,

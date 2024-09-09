@@ -3,31 +3,15 @@
  * (https://viem.sh/docs/getting-started.html).
  * This line imports the functions we need from it.
  */
-import {
-  createPublicClient,
-  fallback,
-  webSocket,
-  http,
-  createWalletClient,
-  Hex,
-  ClientConfig,
-  getContract,
-} from "viem";
-import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
 
-import { getNetworkConfig } from "./getNetworkConfig";
-import { world } from "./world";
-import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import {
   createBurnerAccount,
   transportObserver,
-  ContractWrite,
+  type ContractWrite,
 } from "@latticexyz/common";
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
-
-import { Subject, share } from "rxjs";
+import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
 import { syncToZustand } from "@latticexyz/store-sync/zustand";
-
 /*
  * Import our MUD config, which includes strong types for
  * our tables and other config options. We use this to generate
@@ -37,6 +21,21 @@ import { syncToZustand } from "@latticexyz/store-sync/zustand";
  * for the source of this information.
  */
 import mudConfig from "contracts/mud.config";
+import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
+import { Subject, share } from "rxjs";
+import {
+  createPublicClient,
+  fallback,
+  webSocket,
+  http,
+  createWalletClient,
+  type Hex,
+  type ClientConfig,
+  getContract,
+} from "viem";
+
+import { getNetworkConfig } from "./getNetworkConfig";
+import { world } from "./world";
 
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 

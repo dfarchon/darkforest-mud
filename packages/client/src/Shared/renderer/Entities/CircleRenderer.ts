@@ -1,11 +1,11 @@
-import {
+import type {
   CanvasCoords,
   CircleRendererType,
   GameViewport,
-  RendererType,
   RGBAVec,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { CIRCLE_PROGRAM_DEFINITION } from "../Programs/CircleProgram";

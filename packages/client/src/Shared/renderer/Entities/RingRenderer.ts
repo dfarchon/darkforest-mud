@@ -1,16 +1,16 @@
-import {
+import type {
   CanvasCoords,
   GameViewport,
   Planet,
-  RendererType,
   RGBVec,
   RingRendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import {
   propsFromIdx,
-  RingProps,
+  type RingProps,
   RING_PROGRAM_DEFINITION,
 } from "../Programs/RingProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

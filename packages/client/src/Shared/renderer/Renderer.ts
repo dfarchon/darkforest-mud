@@ -1,7 +1,6 @@
-import {
+import type {
   Artifact,
   ArtifactId,
-  ArtifactType,
   AsteroidRendererType,
   BackgroundRendererType,
   BaseRenderer,
@@ -29,7 +28,6 @@ import {
   PinkZone,
   PinkZoneRendererType,
   Planet,
-  PlanetLevel,
   PlanetRendererType,
   PlanetRenderInfo,
   PlanetRenderManagerType,
@@ -39,13 +37,10 @@ import {
   QuasarRendererType,
   QueuedArrival,
   RectRendererType,
-  RendererType,
   RingRendererType,
   RuinsRendererType,
-  Setting,
   SpaceRendererType,
   SpacetimeRipRendererType,
-  SpaceType,
   SpriteRendererType,
   TextRendererType,
   Transaction,
@@ -56,6 +51,13 @@ import {
   VoyageRendererType,
   WorldCoords,
   WorldLocation,
+} from "@df/types";
+import {
+  ArtifactType,
+  PlanetLevel,
+  RendererType,
+  Setting,
+  SpaceType,
 } from "@df/types";
 import autoBind from "auto-bind";
 import { AsteroidRenderer } from "./Entities/AsteroidRenderer";

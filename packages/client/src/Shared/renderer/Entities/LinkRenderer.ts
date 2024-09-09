@@ -1,11 +1,5 @@
-import {
-  ArtifactId,
-  ArtifactType,
-  LinkRendererType,
-  LocationId,
-  RendererType,
-  RenderZIndex,
-} from "@df/types";
+import type { ArtifactId, LinkRendererType, LocationId } from "@df/types";
+import { ArtifactType, RendererType, RenderZIndex } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { Renderer } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";

@@ -1,15 +1,15 @@
-import {
+import type {
   BeltRendererType,
   CanvasCoords,
   Planet,
-  RendererType,
   RGBVec,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import autoBind from "auto-bind";
 import { EngineUtils } from "../EngineUtils";
 import {
-  BeltProps,
+  type BeltProps,
   BELT_PROGRAM_DEFINITION,
   propsFromIdx,
 } from "../Programs/BeltProgram";

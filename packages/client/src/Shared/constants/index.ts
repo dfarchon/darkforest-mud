@@ -22,17 +22,9 @@
  *
  * @packageDocumentation
  */
-import {
-  ArtifactId,
-  ArtifactRarity,
-  ArtifactType,
-  Biome,
-  EthAddress,
-  GasPrices,
-  LocationId,
-  PlanetLevel,
-} from "@df/types";
-import bigInt, { BigInteger } from "big-integer";
+import type { ArtifactId, EthAddress, GasPrices, LocationId } from "@df/types";
+import { ArtifactRarity, ArtifactType, Biome, PlanetLevel } from "@df/types";
+import bigInt, { type BigInteger } from "big-integer";
 
 export const TOKEN_NAME = "ETH";
 export const BLOCKCHAIN_NAME = "Redstone";

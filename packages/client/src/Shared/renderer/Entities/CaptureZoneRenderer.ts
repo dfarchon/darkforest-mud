@@ -1,5 +1,5 @@
-import { CaptureZoneRendererType, RendererType } from "@df/types";
-import { Renderer, RendererGameContext } from "../Renderer";
+import { type CaptureZoneRendererType, RendererType } from "@df/types";
+import { Renderer, type RendererGameContext } from "../Renderer";
 import { GameGLManager } from "../WebGL/GameGLManager";
 
 export class CaptureZoneRenderer implements CaptureZoneRendererType {

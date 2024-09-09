@@ -1,4 +1,4 @@
-import { Chunk } from "@df/types";
+import type { Chunk } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { MASK_PROGRAM_DEFINITION } from "../Programs/MaskProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

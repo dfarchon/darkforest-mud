@@ -1,9 +1,9 @@
 import {
-  AttribProps,
+  type AttribProps,
   DrawMode,
-  UniformProps,
+  type UniformProps,
   UniformType,
-  Vec3,
+  type Vec3,
 } from "@df/types";
 import { mat3, mat4 } from "gl-matrix";
 import { AttribManager } from "./AttribManager";

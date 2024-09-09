@@ -21,9 +21,10 @@
  * The supported chains.
  * By default, there are only two chains here:
  */
-import { supportedChains } from "./supportedChains";
-import { Wallet } from "ethers";
 import worldsJson from "contracts/worlds.json";
+import { Wallet } from "ethers";
+
+import { supportedChains } from "./supportedChains";
 // import { Entity } from "@latticexyz/recs";
 
 export type NetworkConfig = Awaited<ReturnType<typeof getNetworkConfig>>;
