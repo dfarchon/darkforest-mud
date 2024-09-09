@@ -9,7 +9,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { SpaceType } from "../src/codegen/common.sol";
-import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData } from "../src/codegen/index.sol";
+import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData, PlanetOwner } from "../src/codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData } from "../src/codegen/index.sol";
 import { UniverseConfig, UniverseConfigData, TempConfigSet, TempConfigSetData } from "../src/codegen/index.sol";
 import { SpaceTypeConfig, SpaceTypeConfigData } from "../src/codegen/index.sol";
@@ -102,6 +102,7 @@ contract PostDeploy is Script {
     console.log("Dropping test planets");
     for (uint256 i; i < planets.length; i++) {
       Planet.set(planets[i].planetHash, planets[i].data);
+      PlanetOwner.set(planets[i].planetHash, planets[i].owner);
     }
   }
 }
