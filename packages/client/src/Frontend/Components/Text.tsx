@@ -14,7 +14,7 @@ import styled from "styled-components";
 // import Viewport from '../Game/Viewport';
 import dfstyles from "../Styles/dfstyles";
 // import { useUIManager } from '../Utils/AppHooks';
-import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
+// import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { Link } from "./CoreUI";
 
 export function BlinkCursor() {

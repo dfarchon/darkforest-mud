@@ -20,6 +20,8 @@ Our TypeScript configuration extends the root `tsconfig.json`, which in turn ext
 - [`strictPropertyInitialization = false`](https://www.typescriptlang.org/tsconfig#strictPropertyInitialization); is disabled so that we get no error on properties that are declared but not set in constructor (will enable it in upcoming code, enabled by default by strict mode).
 - [`useDefineForClassFields = false`](https://www.typescriptlang.org/tsconfig#useDefineForClassFields); is disabled so we are not actually emitting standard ECMA compliant class field (we will enable it in upcoming code)
 - [`noErrorTruncation = true`](https://www.typescriptlang.org/tsconfig#noErrorTruncation); Disable truncating types in error messages.
+- [`noUnusedLocals = true`](https://www.typescriptlang.org/tsconfig#noUnusedLocals); Reports on unused local variables.
+- [`noUnusedParameters = true`](https://www.typescriptlang.org/tsconfig#noUnusedParameters); Reports on unused parameters in functions.
 - [`resolveJsonModule = true`](https://www.typescriptlang.org/tsconfig#resolveJsonModule); Enabled importing JSON files.
 - [`forceConsistentCasingInFileNames = true`](https://www.typescriptlang.org/tsconfig#forceConsistentCasingInFileNames); Ensures that casing is correct in imports.
 - [`verbatimModuleSyntax = true`](https://www.typescriptlang.org/tsconfig#verbatimModuleSyntax); Do not transform or elide any imports or exports not marked as type-only, ensuring they are written in the output file's format based on the 'module' setting.

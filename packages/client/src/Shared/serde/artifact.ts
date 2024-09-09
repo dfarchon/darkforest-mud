@@ -8,9 +8,9 @@ import type {
 import { ArtifactRarity, ArtifactType, Biome } from "@df/types";
 import bigInt from "big-integer";
 import type { BigNumber as EthersBN } from "ethers";
-import { address } from "./address";
-import { locationIdFromDecStr, locationIdFromEthersBN } from "./location";
 import type { from } from "rxjs";
+// import { address } from "./address";
+// import { locationIdFromDecStr, locationIdFromEthersBN } from "./location";
 // import { decodeUpgrade } from "./upgrade";
 
 /**

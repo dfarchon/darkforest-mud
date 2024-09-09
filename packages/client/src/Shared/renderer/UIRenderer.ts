@@ -32,6 +32,7 @@ export class UIRenderer implements UIRendererType {
       context: uiManager,
       lineRenderer: lR,
       textRenderer: tR,
+      // @ts-expect-error `cr` variable seems to be unused, double check and remove if redundant
       circleRenderer: cR,
     } = this.renderer;
     const mouseDownPlanet = uiManager.getMouseDownPlanet();
@@ -166,5 +167,5 @@ export class UIRenderer implements UIRendererType {
   }
 
   // eslint-disable-next-line
-  flush(): void {}
+  flush(): void { }
 }
