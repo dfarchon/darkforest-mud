@@ -5,10 +5,11 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { RendererType, RenderZIndex, TextAlign, TextAnchor } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { TEXT_PROGRAM_DEFINITION } from "../Programs/TextProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 type GlyphInfo = {
@@ -176,7 +177,9 @@ export class TextRenderer
     EngineUtils.makeQuadVec2Buffered(this.quad2Buffer, tx1, ty1, tx2, ty2);
     texcoordA.setVertex(this.quad2Buffer, this.verts);
 
-    for (let i = 0; i < 6; i++) colorA.setVertex(color, this.verts + i);
+    for (let i = 0; i < 6; i++) {
+      colorA.setVertex(color, this.verts + i);
+    }
 
     this.verts += 6;
   }

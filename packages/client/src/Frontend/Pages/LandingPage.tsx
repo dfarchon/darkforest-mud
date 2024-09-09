@@ -1,8 +1,7 @@
-import { hello } from "utils";
 import { PLAYER_GUIDE } from "@df/constants";
-import { address } from "@df/serde";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+
 import { Link, Spacer, Title } from "../Components/CoreUI";
 import { Modal } from "../Components/Modal";
 import { Pink } from "../Components/Text";
@@ -201,6 +200,7 @@ const SubTitle = styled.div`
   transform: translate(-50%, -50%);
 `;
 
+// @ts-expect-error unused
 const PrettyOverlayGradient = styled.div`
   width: 100vw;
   height: 100vh;
@@ -222,11 +222,13 @@ const Header = styled.div`
   text-align: center;
 `;
 
+// @ts-expect-error unused
 const EmailWrapper = styled.div`
   display: flex;
   flex-direction: row;
 `;
 
+// @ts-expect-error unused
 const TRow = styled.tr`
   & td:first-child {
     color: ${dfstyles.colors.subtext};
@@ -268,6 +270,7 @@ const Page = styled.div`
   /* background-position: 1%; */
 `;
 
+// @ts-expect-error unused
 const HallOfFameTitle = styled.div`
   color: ${dfstyles.colors.subtext};
   display: inline-block;
@@ -339,8 +342,8 @@ function Fundraising() {
           <br />
           <br />
           Interested in supporting us? Contact{" "}
-          <Link to="https://t.me/cherryblue1024">cherryblue1024</Link>. We'll
-          respond ASAP.
+          <Link to="https://t.me/cherryblue1024">cherryblue1024</Link>.
+          We&apos;ll respond ASAP.
         </div>
       </Modal>
     </HideOnMobile>
@@ -359,6 +362,7 @@ const OnlyMobile = styled.div`
   }
 `;
 
+// @ts-expect-error unused
 const Involved = styled.div`
   width: 100%;
   padding-left: 16px;
@@ -373,6 +377,7 @@ const Involved = styled.div`
   }
 `;
 
+// @ts-expect-error unused
 const InvolvedItem = styled.a`
   height: 150px;
   display: inline-block;
@@ -394,6 +399,7 @@ const InvolvedItem = styled.a`
   }
 `;
 
+// @ts-expect-error unused
 const HallOfFame = styled.div`
   @media only screen and (max-device-width: 1000px) {
     font-size: 70%;

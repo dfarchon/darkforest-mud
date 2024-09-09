@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+
 import { TextPreview } from "./TextPreview";
 
 const DEFAULT_UNFOCUSED_WIDTH = "50px";

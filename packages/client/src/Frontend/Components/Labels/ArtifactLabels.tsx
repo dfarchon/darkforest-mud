@@ -7,8 +7,8 @@ import {
   numToLogoType,
   numToMemeType,
 } from "@df/procedural";
+import type { Artifact } from "@df/types";
 import {
-  Artifact,
   ArtifactRarity,
   ArtifactRarityNames,
   ArtifactType,
@@ -19,8 +19,8 @@ import {
   LogoTypeNames,
   MemeTypeNames,
 } from "@df/types";
-import React from "react";
 import styled from "styled-components";
+
 import { RarityColors } from "../../Styles/Colors";
 import { LegendaryLabel } from "./LegendaryLabel";
 import { MythicLabel } from "./MythicLabel";
@@ -37,11 +37,15 @@ export const ArtifactTypeText = ({ artifact }: { artifact: Artifact }) => {
   const imageType = artifact.imageType;
   let content = "";
 
-  if (isMeme(imageType)) content = MemeTypeNames[numToMemeType(imageType)];
-  else if (isLogo(imageType)) content = LogoTypeNames[numToLogoType(imageType)];
-  else if (isAvatar(imageType))
+  if (isMeme(imageType)) {
+    content = MemeTypeNames[numToMemeType(imageType)];
+  } else if (isLogo(imageType)) {
+    content = LogoTypeNames[numToLogoType(imageType)];
+  } else if (isAvatar(imageType)) {
     content = AvatarTypeNames[numToAvatarType(imageType)];
-  else content = LogoTypeNames[LogoType.DFARES];
+  } else {
+    content = LogoTypeNames[LogoType.DFARES];
+  }
 
   // console.log(imageType);
   // console.log(isAvatar(imageType));

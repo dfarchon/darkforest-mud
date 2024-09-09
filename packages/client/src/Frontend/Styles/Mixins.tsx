@@ -1,6 +1,8 @@
 import { isLocatable } from "@df/gamelogic";
-import { Planet, PlanetType } from "@df/types";
+import type { Planet } from "@df/types";
+import { PlanetType } from "@df/types";
 import { css, keyframes } from "styled-components";
+
 import { BiomeBackgroundColors } from "./Colors";
 
 const scrolling = keyframes`
@@ -13,17 +15,18 @@ const scrolling = keyframes`
 `;
 
 export function planetBackground({ planet }: { planet: Planet | undefined }) {
-  if (!planet || planet.planetType === PlanetType.TRADING_POST)
+  if (!planet || planet.planetType === PlanetType.TRADING_POST) {
     return css`
       background: url("/public/img/spacebg.jpg");
       background-size: 200px 200px;
       background-repeat: repeat;
       animation: ${scrolling} 10s linear infinite;
     `;
-  else
+  } else {
     return isLocatable(planet)
       ? css`
           background: ${BiomeBackgroundColors[planet.biome]};
         `
       : ``;
+  }
 }

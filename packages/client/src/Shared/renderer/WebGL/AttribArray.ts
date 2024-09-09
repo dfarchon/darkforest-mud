@@ -2,18 +2,22 @@ import { AttribType } from "@df/types";
 import autoBind from "auto-bind";
 
 const getAttribTypeSize = (type: AttribType): number => {
-  if (type === AttribType.Float) return 4;
-  else if (type === AttribType.UByte) return 1;
-  else {
+  if (type === AttribType.Float) {
+    return 4;
+  } else if (type === AttribType.UByte) {
+    return 1;
+  } else {
     console.error("unrecognized attrib type");
     return 0;
   }
 };
 
 const getConstructor = (type: AttribType): GLArrayConstructor => {
-  if (type === AttribType.Float) return Float32Array;
-  else if (type === AttribType.UByte) return Uint8Array;
-  else {
+  if (type === AttribType.Float) {
+    return Float32Array;
+  } else if (type === AttribType.UByte) {
+    return Uint8Array;
+  } else {
     console.error("unrecognized attrib type");
     return Float32Array;
   }
@@ -79,7 +83,9 @@ export class AttribArray {
    * @param idx - The array index to start at.
    */
   public set(els: ArrayLike<number>, idx: number): void {
-    while (idx + els.length > this.size) this.doubleLen();
+    while (idx + els.length > this.size) {
+      this.doubleLen();
+    }
     this.array.set(els, idx);
   }
 }

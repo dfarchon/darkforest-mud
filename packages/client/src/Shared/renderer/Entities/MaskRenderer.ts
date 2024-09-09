@@ -1,7 +1,8 @@
 import type { Chunk } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { MASK_PROGRAM_DEFINITION } from "../Programs/MaskProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class MaskRenderer extends GenericRenderer<
@@ -35,9 +36,15 @@ export class MaskRenderer extends GenericRenderer<
 
     let color = 0; // 0 is nebula, 3 is dead space
 
-    if (perlin > t1) color = 1;
-    if (perlin > t2) color = 2;
-    if (perlin > t3) color = 3;
+    if (perlin > t1) {
+      color = 1;
+    }
+    if (perlin > t2) {
+      color = 2;
+    }
+    if (perlin > t3) {
+      color = 3;
+    }
 
     const { position } = this.attribManagers;
 

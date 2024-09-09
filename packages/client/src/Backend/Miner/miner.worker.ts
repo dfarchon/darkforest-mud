@@ -1,10 +1,11 @@
 import { mimcHash, perlin } from "@df/hashing";
 import { locationIdFromBigInt } from "@df/serde";
 import type { Chunk, PerlinConfig, Rectangle, WorldLocation } from "@df/types";
-import bigInt from "big-integer";
 import type { BigInteger } from "big-integer";
-import { LOCATION_ID_UB } from "../../Frontend/Utils/constants";
+import bigInt from "big-integer";
+
 import type { MinerWorkerMessage } from "../../_types/global/GlobalTypes";
+import { LOCATION_ID_UB } from "../../Frontend/Utils/constants";
 import { getPlanetLocations } from "./permutation";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

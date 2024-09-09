@@ -1,14 +1,10 @@
-import { formatNumber } from "../../Shared/gamelogic";
-import {
-  type EthAddress,
-  type Planet,
-  SpaceType,
-  type Upgrade,
-  UpgradeBranchName,
-} from "../../Shared/types";
-import bigInt from "big-integer";
+import type { EthAddress, Planet, Upgrade, UpgradeBranchName } from "@df/types";
+import { SpaceType } from "@df/types";
 import type { BigInteger } from "big-integer";
+import bigInt from "big-integer";
+
 import { StatIdx } from "../../_types/global/GlobalTypes";
+import { formatNumber } from "../../Shared/gamelogic";
 
 export const ONE_DAY = 24 * 60 * 60 * 1000;
 
@@ -37,12 +33,19 @@ export const hexifyBigIntNestedArray = (
  * returns stat of an upgrade given a stat index
  */
 export const getUpgradeStat = (upgrade: Upgrade, stat: StatIdx): number => {
-  if (stat === StatIdx.EnergyCap) return upgrade.energyCapMultiplier;
-  else if (stat === StatIdx.EnergyGro) return upgrade.energyGroMultiplier;
-  else if (stat === StatIdx.Range) return upgrade.rangeMultiplier;
-  else if (stat === StatIdx.Speed) return upgrade.speedMultiplier;
-  else if (stat === StatIdx.Defense) return upgrade.defMultiplier;
-  else return upgrade.energyCapMultiplier;
+  if (stat === StatIdx.EnergyCap) {
+    return upgrade.energyCapMultiplier;
+  } else if (stat === StatIdx.EnergyGro) {
+    return upgrade.energyGroMultiplier;
+  } else if (stat === StatIdx.Range) {
+    return upgrade.rangeMultiplier;
+  } else if (stat === StatIdx.Speed) {
+    return upgrade.speedMultiplier;
+  } else if (stat === StatIdx.Defense) {
+    return upgrade.defMultiplier;
+  } else {
+    return upgrade.energyCapMultiplier;
+  }
 };
 
 // color utils
@@ -84,21 +87,31 @@ export const getFormatProp = (
   planet: Planet | undefined,
   prop: string,
 ): string => {
-  if (!planet) return "0";
+  if (!planet) {
+    return "0";
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const myPlanet = planet as any;
-  if (prop === "silverGrowth") return formatNumber(myPlanet[prop] * 60);
-  else return formatNumber(myPlanet[prop]);
+  if (prop === "silverGrowth") {
+    return formatNumber(myPlanet[prop] * 60);
+  } else {
+    return formatNumber(myPlanet[prop]);
+  }
 };
 
 export const getPlanetRank = (planet: Planet | undefined): number => {
-  if (!planet) return 0;
+  if (!planet) {
+    return 0;
+  }
   return planet.upgradeState.reduce((a, b) => a + b);
 };
 
 export const getPlanetShortHash = (planet: Planet | undefined): string => {
-  if (!planet) return "00000";
-  else return planet.locationId.substring(4, 9);
+  if (!planet) {
+    return "00000";
+  } else {
+    return planet.locationId.substring(4, 9);
+  }
 };
 
 export const getPlayerShortHash = (address: EthAddress): string => {
@@ -106,7 +119,9 @@ export const getPlayerShortHash = (address: EthAddress): string => {
 };
 
 export const isFullRank = (planet: Planet | undefined): boolean => {
-  if (!planet) return true;
+  if (!planet) {
+    return true;
+  }
   const maxRank = getPlanetMaxRank(planet);
   const rank = getPlanetRank(planet);
 
@@ -118,11 +133,17 @@ export const upgradeName = (branchName: UpgradeBranchName) => {
 };
 
 export const getPlanetMaxRank = (planet: Planet | undefined): number => {
-  if (!planet) return 0;
+  if (!planet) {
+    return 0;
+  }
 
-  if (planet.spaceType === SpaceType.NEBULA) return 3;
-  else if (planet.spaceType === SpaceType.SPACE) return 4;
-  else return 5;
+  if (planet.spaceType === SpaceType.NEBULA) {
+    return 3;
+  } else if (planet.spaceType === SpaceType.SPACE) {
+    return 4;
+  } else {
+    return 5;
+  }
 };
 
 export const titleCase = (title: string): string =>
@@ -130,7 +151,9 @@ export const titleCase = (title: string): string =>
     .split(/ /g)
     .map((word, i) => {
       // don't capitalize articles unless it's the first word
-      if (i !== 0 && ["of", "the"].includes(word)) return word;
+      if (i !== 0 && ["of", "the"].includes(word)) {
+        return word;
+      }
       return `${word.substring(0, 1).toUpperCase()}${word.substring(1)}`;
     })
     .join(" ");

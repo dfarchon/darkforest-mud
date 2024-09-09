@@ -1,4 +1,4 @@
-import { Renderer } from "../Renderer";
+import type { Renderer } from "../Renderer";
 import { WebGLManager } from "./WebGLManager";
 
 export class GameGLManager extends WebGLManager {

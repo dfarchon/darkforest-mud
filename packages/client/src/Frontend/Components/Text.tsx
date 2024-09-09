@@ -11,11 +11,12 @@ import type {
 } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-// import Viewport from '../Game/Viewport';
+
 import dfstyles from "../Styles/dfstyles";
+import { Link } from "./CoreUI";
+// import Viewport from '../Game/Viewport';
 // import { useUIManager } from '../Utils/AppHooks';
 // import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
-import { Link } from "./CoreUI";
 
 export function BlinkCursor() {
   const [visible, setVisible] = useState<boolean>(false);

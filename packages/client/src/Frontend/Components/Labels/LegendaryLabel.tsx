@@ -1,6 +1,7 @@
 import { ArtifactRarity, ArtifactRarityNames } from "@df/types";
 import React from "react";
 import styled, { keyframes } from "styled-components";
+
 import { RarityColors } from "../../Styles/Colors";
 
 const color = keyframes`

@@ -1,4 +1,5 @@
 import type { providers } from "ethers";
+
 import type { AutoGasSetting } from "./setting";
 import type { EthTxStatus, TxIntent } from "./transactions";
 

@@ -1,27 +1,28 @@
-import React from 'react'
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { Theme } from "./Frontend/Components/Theme";
-import { HelloPage } from "./Frontend/Pages/HelloPage";
-import { SandboxPage } from "./Frontend/Pages/SandboxPage";
-import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
-import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
-import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
 import "./index.css";
 import "./Frontend/Styles/font/stylesheet.css";
 import "./Frontend/Styles/icomoon/style.css";
 import "./Frontend/Styles/preflight.css";
 import "./Frontend/Styles/Press_Start_2P/stylesheet.css";
 import "./Frontend/Styles/style.css";
+
+import {
+  BrowserRouter as Router,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
+
+import { Theme } from "./Frontend/Components/Theme";
+import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
+import { GamePage } from "./Frontend/Pages/GamePage";
+import { HelloPage } from "./Frontend/Pages/HelloPage";
+import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
+import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
+import { SandboxPage } from "./Frontend/Pages/SandboxPage";
+import { WelcomePage } from "./Frontend/Pages/WelcomePage";
 import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
-import { WelcomePage } from "./Frontend/Pages/WelcomePage";
-import { GamePage } from "./Frontend/Pages/GamePage";
 import { PlanetTestPage } from "./PlanetTest/PlanetTestPage";
 const GlobalStyle = createGlobalStyle`
 body {
@@ -61,5 +62,3 @@ export const App = () => {
     </>
   );
 };
-
-

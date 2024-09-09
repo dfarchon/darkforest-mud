@@ -1,16 +1,18 @@
 // import { useEffect } from "react";
 // import { useStore } from "@hooks/useStore";
-import { useMemo } from "react";
-// import { useNetworkLayer } from "./useNetworkLayer";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { WagmiProvider, http } from "wagmi";
-import { getNetworkConfig } from "@mud/getNetworkConfig";
-import { ExternalWalletProvider } from "./ExternalWalletProvider";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { structuralSharing } from "@wagmi/core/query";
-import { mainnet } from "viem/chains";
 import "@rainbow-me/rainbowkit/styles.css";
+
+import { getNetworkConfig } from "@mud/getNetworkConfig";
+// import { useNetworkLayer } from "./useNetworkLayer";
+import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { structuralSharing } from "@wagmi/core/query";
+import { useMemo } from "react";
+import { mainnet } from "viem/chains";
+import { http, WagmiProvider } from "wagmi";
+
+import { ExternalWalletProvider } from "./ExternalWalletProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {

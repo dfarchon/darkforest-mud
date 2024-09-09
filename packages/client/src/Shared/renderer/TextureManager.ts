@@ -211,8 +211,9 @@ export function spriteFromArtifact(
 ): SpriteRectangle {
   const { id, artifactType: type, planetBiome: biome, rarity } = artifact;
 
-  if (artifactSpriteMap.has(id))
+  if (artifactSpriteMap.has(id)) {
     return artifactSpriteMap.get(id) || EMPTY_SPRITE;
+  }
 
   if (isSpaceShip(artifact.artifactType)) {
     const idx = {

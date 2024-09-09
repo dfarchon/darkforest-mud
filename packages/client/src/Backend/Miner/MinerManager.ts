@@ -2,6 +2,7 @@ import { perlin } from "@df/hashing";
 import type { Chunk, PerlinConfig, Rectangle } from "@df/types";
 import { EventEmitter } from "events";
 import _ from "lodash";
+
 import type { ChunkStore } from "../../_types/darkforest/api/ChunkStoreTypes";
 import type {
   HashConfig,
@@ -49,14 +50,17 @@ export class HomePlanetMinerChunkStore implements ChunkStore {
 
   hasMinedChunk(chunkFootprint: Rectangle) {
     // return true if this chunk mined, or if perlin value >= threshold
-    if (this.minedChunkKeys.has(getChunkKey(chunkFootprint))) return true;
+    if (this.minedChunkKeys.has(getChunkKey(chunkFootprint))) {
+      return true;
+    }
     const center = {
       x: chunkFootprint.bottomLeft.x + chunkFootprint.sideLength / 2,
       y: chunkFootprint.bottomLeft.y + chunkFootprint.sideLength / 2,
     };
     const chunkPerlin = perlin(center, this.perlinOptions);
-    if (chunkPerlin >= this.initPerlinMax || chunkPerlin < this.initPerlinMin)
+    if (chunkPerlin >= this.initPerlinMax || chunkPerlin < this.initPerlinMin) {
       return true;
+    }
     return false;
   }
 }
@@ -199,7 +203,7 @@ class MinerManager extends EventEmitter {
   private exploreNext(fromChunk: Rectangle, jobId: number) {
     this.nextValidExploreTarget(fromChunk, jobId).then(
       (nextChunk: Rectangle | undefined) => {
-        if (!!nextChunk) {
+        if (nextChunk) {
           const nextChunkKey = this.chunkLocationToKey(nextChunk, jobId);
           const center = {
             x: nextChunk.bottomLeft.x + nextChunk.sideLength / 2,
