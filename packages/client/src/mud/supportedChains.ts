@@ -12,7 +12,7 @@
  */
 
 import {
-  MUDChain,
+  type MUDChain,
   mudFoundry,
   redstone,
   garnet,

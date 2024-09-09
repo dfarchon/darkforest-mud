@@ -1,6 +1,6 @@
-import { PerlinConfig } from "@df/types";
-import BigInt, { BigInteger } from "big-integer";
-import { Fraction, IFraction } from "./fractions/bigFraction";
+import type { PerlinConfig } from "@df/types";
+import BigInt, { type BigInteger } from "big-integer";
+import { Fraction, type IFraction } from "./fractions/bigFraction";
 import { perlinRandHash } from "./mimc";
 
 const TRACK_LCM = false;

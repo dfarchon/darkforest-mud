@@ -1,13 +1,12 @@
 import { getPlanetCosmetic } from "../../procedural";
-import {
+import type {
   AsteroidRendererType,
   CanvasCoords,
-  DrawMode,
   GameViewport,
   Planet,
-  RendererType,
   RGBVec,
 } from "@df/types";
+import { DrawMode, RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { ASTEROID_PROGRAM_DEFINITION } from "../Programs/AsteroidProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

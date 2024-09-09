@@ -1,11 +1,11 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
+import type {
   CanvasCoords,
   Planet,
   QuasarRayRendererType,
-  RendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { QUASARRAY_PROGRAM_DEFINITION } from "../Programs/QuasarRayProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

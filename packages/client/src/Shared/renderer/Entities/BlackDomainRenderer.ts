@@ -1,11 +1,11 @@
-import {
+import type {
   BlackDomainRendererType,
   CanvasCoords,
   GameViewport,
   Planet,
-  RendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { BLACKDOMAIN_PROGRAM_DEFINITION } from "../Programs/BlackDomainProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

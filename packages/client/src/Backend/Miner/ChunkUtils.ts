@@ -1,5 +1,5 @@
-import { Chunk, Rectangle, WorldCoords, WorldLocation } from "@df/types";
-import {
+import type { Chunk, Rectangle, WorldCoords, WorldLocation } from "@df/types";
+import type {
   BucketId,
   ChunkId,
   PersistedChunk,

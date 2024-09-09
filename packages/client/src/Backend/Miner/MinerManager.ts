@@ -1,14 +1,14 @@
 import { perlin } from "@df/hashing";
-import { Chunk, PerlinConfig, Rectangle } from "@df/types";
+import type { Chunk, PerlinConfig, Rectangle } from "@df/types";
 import { EventEmitter } from "events";
 import _ from "lodash";
-import { ChunkStore } from "../../_types/darkforest/api/ChunkStoreTypes";
-import {
+import type { ChunkStore } from "../../_types/darkforest/api/ChunkStoreTypes";
+import type {
   HashConfig,
   MinerWorkerMessage,
 } from "../../_types/global/GlobalTypes";
 import { getChunkKey } from "./ChunkUtils";
-import { MiningPattern } from "./MiningPatterns";
+import type { MiningPattern } from "./MiningPatterns";
 
 export const enum MinerManagerEvent {
   DiscoveredNewChunk = "DiscoveredNewChunk",

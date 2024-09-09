@@ -1,4 +1,4 @@
-import {
+import type {
   AsteroidRendererType,
   BackgroundRendererType,
   BaseRenderer,
@@ -19,7 +19,6 @@ import {
   QuasarRayRendererType,
   QuasarRendererType,
   RectRendererType,
-  RendererType,
   RingRendererType,
   RuinsRendererType,
   SpaceRendererType,
@@ -30,6 +29,7 @@ import {
   UnminedRendererType,
   VoyageRendererType,
 } from "@df/types";
+import { RendererType } from "@df/types";
 
 export function isPlanetRenderer(
   renderer: BaseRenderer,

@@ -1,4 +1,5 @@
-import { Planet, RenderZIndex, RGBVec } from "@df/types";
+import type { Planet, RGBVec } from "@df/types";
+import { RenderZIndex } from "@df/types";
 
 /* generic template string which, combined with a vscode package, let us get syntax highlighting. */
 
@@ -127,17 +128,17 @@ export class EngineUtils {
 
   /* makes a 3d quad and writes it into buffer b. saves time from GC. */
   // prettier-ignore
-  public static makeQuadBuffered (
+  public static makeQuadBuffered(
     b: number[], // quadBuffer
     x1: number, y1: number,
     x2: number, y2: number,
     z: number,
   ): void {
-    b[0]  = x1; b[1]  = y1; b[2]  = z;
-    b[3]  = x1; b[4]  = y2; b[5]  = z;
-    b[6]  = x2; b[7]  = y1; b[8]  = z;
+    b[0] = x1; b[1] = y1; b[2] = z;
+    b[3] = x1; b[4] = y2; b[5] = z;
+    b[6] = x2; b[7] = y1; b[8] = z;
 
-    b[9]  = x2; b[10] = y1; b[11] = z;
+    b[9] = x2; b[10] = y1; b[11] = z;
     b[12] = x1; b[13] = y2; b[14] = z;
     b[15] = x2; b[16] = y2; b[17] = z;
   }
@@ -163,7 +164,7 @@ export class EngineUtils {
 
   /* like above, but 2d */
   // prettier-ignore
-  public static makeQuadVec2Buffered (
+  public static makeQuadVec2Buffered(
     b: number[], // quadBuffer
     x1: number, y1: number,
     x2: number, y2: number,
@@ -187,9 +188,9 @@ export class EngineUtils {
     bx1: number, by1: number,
     bx2: number, by2: number,
   ): void {
-    b[0]  = ax1; b[1]  = ay1; b[2]  = bx1; b[3]  = by1;
-    b[4]  = ax1; b[5]  = ay2; b[6]  = bx1; b[7]  = by2;
-    b[8]  = ax2; b[9]  = ay1; b[10] = bx2; b[11] = by1;
+    b[0] = ax1; b[1] = ay1; b[2] = bx1; b[3] = by1;
+    b[4] = ax1; b[5] = ay2; b[6] = bx1; b[7] = by2;
+    b[8] = ax2; b[9] = ay1; b[10] = bx2; b[11] = by1;
 
     b[12] = ax2; b[13] = ay1; b[14] = bx2; b[15] = by1;
     b[16] = ax1; b[17] = ay2; b[18] = bx1; b[19] = by2;

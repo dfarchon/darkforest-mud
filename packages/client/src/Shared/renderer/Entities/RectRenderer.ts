@@ -1,12 +1,11 @@
-import {
+import type {
   CanvasCoords,
   Chunk,
   RectRendererType,
-  RendererType,
-  RenderZIndex,
   RGBVec,
   WorldCoords,
 } from "@df/types";
+import { RendererType, RenderZIndex } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { RECT_PROGRAM_DEFINITION } from "../Programs/RectProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

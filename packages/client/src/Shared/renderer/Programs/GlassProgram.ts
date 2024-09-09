@@ -1,4 +1,4 @@
-import { AttribProps, AttribType } from "@df/types";
+import { type AttribProps, AttribType } from "@df/types";
 import { glsl } from "../EngineUtils";
 import { ProgramUtils } from "../WebGL/ProgramUtils";
 

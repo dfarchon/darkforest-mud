@@ -1,5 +1,5 @@
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
-import {
+import type {
   GetContractReturnType,
   PublicClient,
   Transport,
@@ -8,13 +8,12 @@ import {
   Address,
   Account,
 } from "viem";
-
+import type { Config } from "wagmi";
 import { create } from "zustand";
 // import { HeadlessLayer } from "./layers/Headless";
 // import { LocalLayer } from "./layers/Local";
 // import { NetworkLayer } from "./layers/Network";
 // import { PhaserLayer } from "./layers/Renderer/Phaser";
-import { Config } from "wagmi";
 
 // export type ContractType = GetContractReturnType<typeof IWorldAbi, PublicClient, Address>;
 export type ContractType = GetContractReturnType<

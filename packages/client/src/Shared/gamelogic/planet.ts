@@ -1,11 +1,11 @@
 import { EMPTY_ADDRESS } from "@df/constants";
-import {
+import type {
   EmojiFlagBody,
   LocatablePlanet,
   Planet,
   PlanetMessage,
-  PlanetMessageType,
 } from "@df/types";
+import { PlanetMessageType } from "@df/types";
 
 export const getPlanetRank = (planet: Planet | undefined): number => {
   if (!planet) return 0;

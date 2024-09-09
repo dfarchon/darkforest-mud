@@ -3,11 +3,12 @@
  * for changes in the World state (using the System contracts).
  */
 
-import { Entity, getComponentValue } from "@latticexyz/recs";
-import { ClientComponents } from "./createClientComponents";
-import { SetupNetworkResult } from "./setupNetwork";
+import { type Entity, getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { Address } from "viem";
+import type { Address } from "viem";
+
+import type { ClientComponents } from "./createClientComponents";
+import type { SetupNetworkResult } from "./setupNetwork";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 interface Proof {
@@ -94,7 +95,7 @@ export function createSystemCalls(
     planetType: PlanetType,
     spaceType: SpaceType,
     population: number,
-    silver: number
+    silver: number,
   ): Promise<void> => {
     try {
       // Call the createPlanet function on the contract
@@ -127,7 +128,7 @@ export function createSystemCalls(
     moveInput: MoveInput,
     population: number,
     silver: number,
-    artifact: number
+    artifact: number,
   ): Promise<number> => {
     try {
       // Call the move function on the contract

@@ -9,17 +9,16 @@ import {
   numToLogoType,
   numToMemeType,
 } from "@df/procedural";
-import {
+import type {
   Artifact,
   CanvasCoords,
   Chunk,
   EmojiFlagBody,
-  LogoType,
   PlanetMessage,
   PlanetRenderInfo,
-  TextAlign,
   WorldCoords,
 } from "@df/types";
+import { LogoType, TextAlign } from "@df/types";
 import { avatarFromType } from "./Avatars";
 import { engineConsts } from "./EngineConsts";
 import { hatFromType } from "./Hats";

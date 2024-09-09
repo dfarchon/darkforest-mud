@@ -1,16 +1,15 @@
 import { isUnconfirmedMoveTx } from "@df/serde";
-import {
+import type {
   Artifact,
-  ArtifactRarity,
   CanvasCoords,
   GameViewport,
   RenderedArtifact,
-  RendererType,
   RGBAVec,
   RGBVec,
   SpriteRendererType,
   WorldCoords,
 } from "@df/types";
+import { ArtifactRarity, RendererType } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { SPRITE_PROGRAM_DEFINITION } from "../Programs/SpriteProgram";
@@ -18,7 +17,7 @@ import {
   loadArtifactAtlas,
   loadArtifactThumbAtlas,
   spriteFromArtifact,
-  SpriteRectangle,
+  type SpriteRectangle,
 } from "../TextureManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 import { WebGLManager } from "../WebGL/WebGLManager";

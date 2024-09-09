@@ -1,7 +1,7 @@
 import { BLOCK_EXPLORER_URL } from "@df/constants";
 import { isLocatable } from "@df/gamelogic";
 import { artifactName, getPlanetName } from "@df/procedural";
-import {
+import type {
   Artifact,
   ArtifactId,
   Chunk,

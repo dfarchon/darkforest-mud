@@ -4,21 +4,23 @@ import {
   MIN_SPACESHIP_TYPE,
 } from "@df/constants";
 import { hashToInt } from "@df/serde";
-import {
+import type {
   Abstract,
   Artifact,
   ArtifactId,
+  EthAddress,
+  Planet,
+  RenderedArtifact,
+} from "@df/types";
+import {
   ArtifactRarity,
   ArtifactRarityNames,
   ArtifactType,
   ArtifactTypeNames,
   Biome,
   BiomeNames,
-  EthAddress,
-  Planet,
   PlanetLevel,
   PlanetType,
-  RenderedArtifact,
 } from "@df/types";
 
 export const RelicsList: ArtifactType[] = [

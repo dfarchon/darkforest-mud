@@ -1,4 +1,4 @@
-import { AutoGasSetting, NetworkEvent } from "@df/types";
+import { AutoGasSetting, type NetworkEvent } from "@df/types";
 
 /**
  * Returns whether or not the given event is an instance of {@link NetworkEvent}. Not super

@@ -1,5 +1,5 @@
 import colors from "color";
-import React, { ChangeEvent, useCallback } from "react";
+import React, { type ChangeEvent, useCallback } from "react";
 import styled, { css } from "styled-components";
 import dfstyles from "../Styles/dfstyles";
 import { DFZIndex } from "../Utils/constants";
@@ -34,16 +34,16 @@ export const TextButton = styled.span`
 
 export const Padded = styled.div`
   ${({
-    left,
-    top,
-    right,
-    bottom,
-  }: {
-    left?: string;
-    top?: string;
-    right?: string;
-    bottom?: string;
-  }) => css`
+  left,
+  top,
+  right,
+  bottom,
+}: {
+  left?: string;
+  top?: string;
+  right?: string;
+  bottom?: string;
+}) => css`
     padding-left: ${left || "8px"};
     padding-top: ${top || "8px"};
     padding-right: ${right || "8px"};
@@ -208,8 +208,8 @@ const LinkImpl = styled.a`
 
     &:hover {
       color: ${colors(color || dfstyles.colors.dfblue)
-        .lighten(0.3)
-        .hex()};
+      .lighten(0.3)
+      .hex()};
     }
   `}
 `;

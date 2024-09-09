@@ -1,4 +1,4 @@
-import { Rectangle, WorldCoords } from "@df/types";
+import type { Rectangle, WorldCoords } from "@df/types";
 
 export const enum MiningPatternType {
   Home,

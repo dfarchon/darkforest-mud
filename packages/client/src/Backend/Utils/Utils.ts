@@ -1,13 +1,13 @@
 import { formatNumber } from "../../Shared/gamelogic";
 import {
-  EthAddress,
-  Planet,
+  type EthAddress,
+  type Planet,
   SpaceType,
-  Upgrade,
+  type Upgrade,
   UpgradeBranchName,
 } from "../../Shared/types";
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer";
+import type { BigInteger } from "big-integer";
 import { StatIdx } from "../../_types/global/GlobalTypes";
 
 export const ONE_DAY = 24 * 60 * 60 * 1000;

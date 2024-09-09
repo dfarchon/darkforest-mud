@@ -1,13 +1,10 @@
-import {
+import type {
   CanvasCoords,
-  RendererType,
-  RenderZIndex,
   RGBAVec,
-  TextAlign,
-  TextAnchor,
   TextRendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType, RenderZIndex, TextAlign, TextAnchor } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { TEXT_PROGRAM_DEFINITION } from "../Programs/TextProgram";

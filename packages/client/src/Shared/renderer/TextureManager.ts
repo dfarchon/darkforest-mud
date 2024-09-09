@@ -1,12 +1,7 @@
 import { MAX_ARTIFACT_TYPE, MAX_BIOME, MIN_ARTIFACT_TYPE } from "@df/constants";
 import { isBasic, isRelic, isSpaceShip } from "@df/gamelogic";
-import {
-  ArtifactId,
-  ArtifactRarity,
-  ArtifactType,
-  Biome,
-  RenderedArtifact,
-} from "@df/types";
+import type { ArtifactId, RenderedArtifact } from "@df/types";
+import { ArtifactRarity, ArtifactType, Biome } from "@df/types";
 
 export const ARTIFACTS_URL = "/public/sprites/artifacts.png";
 export const ARTIFACTS_THUMBS_URL = "/public/sprites/artifactthumbs.png";

@@ -22,6 +22,7 @@ Our TypeScript configuration extends the root `tsconfig.json`, which in turn ext
 - [`noErrorTruncation = true`](https://www.typescriptlang.org/tsconfig#noErrorTruncation); Disable truncating types in error messages.
 - [`resolveJsonModule = true`](https://www.typescriptlang.org/tsconfig#resolveJsonModule); Enabled importing JSON files.
 - [`forceConsistentCasingInFileNames = true`](https://www.typescriptlang.org/tsconfig#forceConsistentCasingInFileNames); Ensures that casing is correct in imports.
+- [`verbatimModuleSyntax = true`](https://www.typescriptlang.org/tsconfig#verbatimModuleSyntax); Do not transform or elide any imports or exports not marked as type-only, ensuring they are written in the output file's format based on the 'module' setting.
 - [`jsx = "react-jsx"`](https://www.typescriptlang.org/tsconfig#jsx); specifies that react-jsx code is generated.
 - [`paths = ["@package-name": ["location"], …`](https://www.typescriptlang.org/tsconfig#jsx); Specifies a set of entries that re-map imports to additional lookup locations.
 

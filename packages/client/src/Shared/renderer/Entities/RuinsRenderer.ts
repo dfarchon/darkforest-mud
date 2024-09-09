@@ -1,13 +1,12 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
+import type {
   CanvasCoords,
   Planet,
-  PlanetLevel,
-  RendererType,
   RGBVec,
   RuinsRendererType,
   WorldCoords,
 } from "@df/types";
+import { PlanetLevel, RendererType } from "@df/types";
 import { EngineUtils } from "../EngineUtils";
 import { RUINS_PROGRAM_DEFINITION } from "../Programs/RuinsProgram";
 import { GameGLManager } from "../WebGL/GameGLManager";

@@ -21,7 +21,7 @@ import {
   Text,
   White,
 } from "../Components/Text";
-import { LoadingBarHandle, TextLoadingBar } from "../Components/TextLoadingBar";
+import { type LoadingBarHandle, TextLoadingBar } from "../Components/TextLoadingBar";
 import dfstyles from "../Styles/dfstyles";
 import { isFirefox } from "../Utils/BrowserChecks";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
@@ -319,7 +319,7 @@ function TerminalImpl(
             ref={inputRef}
             onKeyUp={onKeyUp}
             onKeyDown={preventEnterDefault}
-            onKeyPress={isFirefox() ? () => {} : preventEnterDefault}
+            onKeyPress={isFirefox() ? () => { } : preventEnterDefault}
             value={inputText}
             onChange={(e) => {
               if (userInputEnabled) {
@@ -332,7 +332,7 @@ function TerminalImpl(
           <InputTextArea
             height={0}
             ref={heightMeasureRef}
-            onChange={() => {}}
+            onChange={() => { }}
             value={inputText}
           />
 
