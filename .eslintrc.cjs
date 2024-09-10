@@ -74,7 +74,7 @@ module.exports = {
     // ],
 
     // "no-only-tests/no-only-tests": "error",
-    "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error",
+    "simple-import-sort/imports": "warn",
+    "simple-import-sort/exports": "warn",
   },
 };
