@@ -1,8 +1,7 @@
+import type { GameManager } from "@backend/GameLogic/GameManager";
+import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 import type { Rectangle } from "@df/types";
 import type { Dispatch, SetStateAction } from "react";
-
-import type GameManager from "../../Backend/GameLogic/GameManager";
-import type GameUIManager from "../../Backend/GameLogic/GameUIManager";
 
 export type Hook<T> = [T, Dispatch<SetStateAction<T>>];
 

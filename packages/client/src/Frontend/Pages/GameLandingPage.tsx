@@ -1,28 +1,28 @@
-import type { GameManager } from "@backend/GameLogic/GameManager";
-import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
+// import type { GameManager } from "@backend/GameLogic/GameManager";
+// import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 import {
-  BLOCK_EXPLORER_URL,
-  BLOCKCHAIN_BRIDGE,
-  HOW_TO_ENABLE_POPUPS,
-  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
+  // BLOCK_EXPLORER_URL,
+  // BLOCKCHAIN_BRIDGE,
+  // HOW_TO_ENABLE_POPUPS,
+  // HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   PLAYER_GUIDE,
-  TOKEN_NAME,
+  // TOKEN_NAME,
 } from "@df/constants";
 import {
   type BrowserCompatibleState,
   BrowserIssues,
 } from "@frontend/Components/BrowserIssues";
 import {
-  GameWindowWrapper,
+  // GameWindowWrapper,
   InitRenderState,
-  TerminalToggler,
+  // TerminalToggler,
   TerminalWrapper,
   Wrapper,
 } from "@frontend/Components/GameLandingPageComponents";
-import {
-  TopLevelDivProvider,
-  UIManagerProvider,
-} from "@frontend/Utils/AppHooks";
+// import {
+//   TopLevelDivProvider,
+//   UIManagerProvider,
+// } from "@frontend/Utils/AppHooks";
 import {
   type Incompatibility,
   unsupportedFeatures,
@@ -84,19 +84,25 @@ export function GameLandingPage() {
   const terminalHandle = useRef<TerminalHandle>(null);
   // const miniMapRef = useRef<MiniMapHandle>();
 
-  const [gameManager, setGameManager] = useState<GameManager | undefined>();
-  const gameUIManagerRef = useRef<GameUIManager | undefined>();
+  // const [gameManager, setGameManager] = useState<GameManager | undefined>();
+  // const gameUIManagerRef = useRef<GameUIManager | undefined>();
 
-  const [terminalVisible, setTerminalVisible] = useState(true);
-  const [initRenderState, setInitRenderState] = useState(InitRenderState.NONE);
+  const [
+    terminalVisible,
+    // setTerminalVisible
+  ] = useState(true);
+  const [
+    initRenderState,
+    // setInitRenderState
+  ] = useState(InitRenderState.NONE);
   const [step, setStep] = useState(TerminalPromptStep.NONE);
 
   const [browserCompatibleState, setBrowserCompatibleState] =
     useState<BrowserCompatibleState>("unknown");
 
   const [browserIssues, setBrowserIssues] = useState<Incompatibility[]>([]);
-  const [isMiniMapOn, setMiniMapOn] = useState(false);
-  const [spectate, setSpectate] = useState(false);
+  // const [isMiniMapOn, setMiniMapOn] = useState(false);
+  // const [spectate, setSpectate] = useState(false);
 
   useEffect(() => {
     unsupportedFeatures().then((issues) => {
@@ -206,7 +212,7 @@ export function GameLandingPage() {
         }
       }
     },
-    [],
+    [mainAccount],
   );
 
   const advanceState = useCallback(
