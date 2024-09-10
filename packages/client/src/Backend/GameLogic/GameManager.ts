@@ -1,5 +1,3 @@
 import EventEmitter from "events";
 
-class GameManager extends EventEmitter {}
-
-export default GameManager;
+export class GameManager extends EventEmitter { }

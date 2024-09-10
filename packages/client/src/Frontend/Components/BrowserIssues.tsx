@@ -1,6 +1,5 @@
-
+import type { Incompatibility } from '@frontend/Utils/BrowserChecks';
 import styled from 'styled-components';
-import { Incompatibility } from '@frontend/Utils/BrowserChecks';
 
 const BrowserIssue = styled.p`
   color: red;

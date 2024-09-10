@@ -18,7 +18,7 @@ module.exports = {
     // We ignore the snarks folder which will be moved under ./packages/snarks
     "src/Shared/snarks/*",
   ],
-  plugins: ["react", "react-hooks"],
+  plugins: ["react", "react-hooks", "simple-import-sort"],
   settings: {
     react: {
       version: "detect",
@@ -27,6 +27,8 @@ module.exports = {
   rules: {
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
     // "import/order": [
     //   "error",
     //   {

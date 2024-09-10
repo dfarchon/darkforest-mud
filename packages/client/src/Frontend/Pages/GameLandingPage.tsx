@@ -1,8 +1,8 @@
 import { useLocation, useParams } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Terminal, type TerminalHandle } from '../Views/Terminal';
-import GameManager from '@backend/GameLogic/GameManager';
-import GameUIManager from '@backend/GameLogic/GameUIManager';
+import type { GameManager } from '@backend/GameLogic/GameManager';
+import type { GameUIManager } from '@backend/GameLogic/GameUIManager';
 import {
   GameWindowWrapper,
   InitRenderState,
@@ -11,7 +11,7 @@ import {
   Wrapper,
 } from '@frontend/Components/GameLandingPageComponents';
 import { type BrowserCompatibleState, BrowserIssues } from '@frontend/Components/BrowserIssues';
-import { Incompatibility, unsupportedFeatures } from '@frontend/Utils/BrowserChecks';
+import { type Incompatibility, unsupportedFeatures } from '@frontend/Utils/BrowserChecks';
 import UIEmitter, { UIEmitterEvent } from '@frontend/Utils/UIEmitter';
 import { MythicLabelText } from '../Components/Labels/MythicLabel';
 import { TerminalTextStyle } from '../Utils/TerminalTypes';
@@ -228,13 +228,13 @@ export function GameLandingPage() {
     uiEmitter.emit(UIEmitterEvent.UIChange);
   }, [initRenderState]);
 
-  useEffect(() => {
-    const gameUiManager = gameUIManagerRef.current;
-    if (!terminalVisible && gameUiManager) {
-      const tutorialManager = TutorialManager.getInstance(gameUiManager);
-      tutorialManager.acceptInput(TutorialState.Terminal);
-    }
-  }, [terminalVisible]);
+  // useEffect(() => {
+  //   const gameUiManager = gameUIManagerRef.current;
+  //   if (!terminalVisible && gameUiManager) {
+  //     const tutorialManager = TutorialManager.getInstance(gameUiManager);
+  //     tutorialManager.acceptInput(TutorialState.Terminal);
+  //   }
+  // }, [terminalVisible]);
 
 
   useEffect(() => {

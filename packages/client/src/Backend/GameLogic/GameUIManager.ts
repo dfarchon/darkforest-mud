@@ -1,12 +1,7 @@
 import EventEmitter from "events";
 
-class GameUIManager extends EventEmitter {
-
-
-
-
-
+export class GameUIManager extends EventEmitter {
 
 }
 
-export default GameUIManager;
+

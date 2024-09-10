@@ -1,4 +1,4 @@
-import GameUIManager from '../../Backend/GameLogic/GameUIManager';
+import type { GameUIManager } from '@backend/GameLogic/GameUIManager';
 import { createDefinedContext } from './createDefinedContext';
 
 
