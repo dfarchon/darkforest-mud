@@ -8,12 +8,12 @@
     "dev:contracts": "pnpm --filter 'contracts' dev",
     "foundry:up": "curl -L https://foundry.paradigm.xyz | bash && bash $HOME/.foundry/bin/foundryup",
     "mud:up": "pnpm mud set-version --tag main && pnpm install",
-    "prepare": "(forge --version || pnpm foundry:up) && husky install",
-    "format": "prettier --write '{packages}/**/*'",
+    "format": "prettier --write 'packages/**/*'",
     "lint": "pnpm --recursive run lint",
-    "lint:eslint": "pnpm --recursive run lint:eslint",
-    "lint:typecheck": "pnpm --recursive run lint:typecheck",
-    "test": "pnpm recursive run test"
+    "lint-fix": "pnpm --recursive run lint-fix",
+    "test": "pnpm recursive run test",
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "(forge --version || pnpm foundry:up) && husky"
   },
   "devDependencies": {
     "@commitlint/cli": "19.4.0",
@@ -31,7 +31,7 @@
     "eslint-plugin-import": "2.30.0",
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-simple-import-sort": "12.1.1",
-    "husky": "8.0.3",
+    "husky": "9.1.5",
     "lint-staged": "15.2.10",
     "mprocs": "0.6.4",
     "rimraf": "6.0.1",
