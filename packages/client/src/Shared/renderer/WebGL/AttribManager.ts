@@ -1,4 +1,5 @@
 import type { AttribProps } from "@df/types";
+
 import { AttribArray } from "./AttribArray";
 
 /**
@@ -53,9 +54,13 @@ export class AttribManager {
 
     const loc = gl.getAttribLocation(program, props.name);
     const buffer = gl.createBuffer();
-    if (!buffer) throw "Error creating buffer for attrib: " + props.name;
+    if (!buffer) {
+      throw "Error creating buffer for attrib: " + props.name;
+    }
 
-    if (enable) gl.enableVertexAttribArray(loc);
+    if (enable) {
+      gl.enableVertexAttribArray(loc);
+    }
 
     this.loc = loc;
     this.buffer = buffer;

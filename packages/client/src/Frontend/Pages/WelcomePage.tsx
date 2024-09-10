@@ -1,7 +1,7 @@
+import WalletButton from "@wallet/WalletButton";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
-import WalletButton from "@wallet/WalletButton";
 
 export const WelcomePage: React.FC = () => {
   const { isConnected } = useAccount();

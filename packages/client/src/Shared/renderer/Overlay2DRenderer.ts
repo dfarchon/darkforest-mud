@@ -19,12 +19,13 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { LogoType, TextAlign } from "@df/types";
+
 import { avatarFromType } from "./Avatars";
 import { engineConsts } from "./EngineConsts";
 import { hatFromType } from "./Hats";
 import { logoFromType } from "./Logos";
 import { memeFromType } from "./Memes";
-import { Renderer } from "./Renderer";
+import type { Renderer } from "./Renderer";
 /*
    this is mostly migration code from the old renderer; it holds all of the old renderer primitives,
    but most of them have been re-implemented in GL. still useful for debugging sometimes - draws
@@ -115,11 +116,17 @@ export class Overlay2DRenderer {
     const viewport = this.renderer.getViewport();
 
     const getHat = (num: number) => {
-      if (isHat(num)) return hatFromType(numToHatType(num));
-      else if (isMeme(num)) return memeFromType(numToMemeType(num));
-      else if (isLogo(num)) return logoFromType(numToLogoType(num));
-      else if (isAvatar(num)) return avatarFromType(numToAvatarType(num));
-      else return logoFromType(LogoType.DFARES);
+      if (isHat(num)) {
+        return hatFromType(numToHatType(num));
+      } else if (isMeme(num)) {
+        return memeFromType(numToMemeType(num));
+      } else if (isLogo(num)) {
+        return logoFromType(numToLogoType(num));
+      } else if (isAvatar(num)) {
+        return avatarFromType(numToAvatarType(num));
+      } else {
+        return logoFromType(LogoType.DFARES);
+      }
     };
 
     const hat = getHat(hatType);
@@ -282,8 +289,11 @@ export class Overlay2DRenderer {
       false,
     );
 
-    if (dotted) this.ctx.setLineDash([15, 15]);
-    else this.ctx.setLineDash([]);
+    if (dotted) {
+      this.ctx.setLineDash([15, 15]);
+    } else {
+      this.ctx.setLineDash([]);
+    }
     this.ctx.stroke();
 
     this.ctx.setLineDash([]);
@@ -309,8 +319,11 @@ export class Overlay2DRenderer {
       viewport.worldToCanvasCoords(endCoords);
     this.ctx.lineTo(endCanvasCoords.x, endCanvasCoords.y);
 
-    if (dotted) this.ctx.setLineDash([15, 15]);
-    else this.ctx.setLineDash([]);
+    if (dotted) {
+      this.ctx.setLineDash([15, 15]);
+    } else {
+      this.ctx.setLineDash([]);
+    }
     this.ctx.stroke();
 
     this.ctx.setLineDash([]);
@@ -427,12 +440,16 @@ export class Overlay2DRenderer {
     const { ctx } = this;
 
     const minerLocs = gameUIManager.getAllMinerLocations();
-    if (minerLocs.length === 0) return;
+    if (minerLocs.length === 0) {
+      return;
+    }
 
     const viewport = this.renderer.getViewport();
     for (const minerLoc of minerLocs) {
       // Somehow a miner can end up undefined at this point
-      if (!minerLoc) continue;
+      if (!minerLoc) {
+        continue;
+      }
 
       const loc = viewport.worldToCanvasCoords(minerLoc);
 

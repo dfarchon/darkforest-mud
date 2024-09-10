@@ -1,5 +1,13 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
+  // Always format on save
   "editor.formatOnSave": true,
-  "solidity.formatter": "forge",
+  // Enables prettier as the default formatter throughout the workspace
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // Always insert a newline at the end of the file when you save a file, good for git diffs
+  "files.insertFinalNewline": true,
+  // Always trim trailing whitespace
+  "files.trimTrailingWhitespace": true,
+  // Don't allow the solidity plugin to format because we already use prettier
+  "solidity.formatter": "none"
 }

@@ -6,10 +6,11 @@ import type {
   Vec3,
 } from "@df/types";
 import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { SPACE_PROGRAM_DEFINITION } from "../Programs/SpaceProgram";
-import { AttribManager } from "../WebGL/AttribManager";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { AttribManager } from "../WebGL/AttribManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 import {
   getCachedGradient,
@@ -184,8 +185,12 @@ export class SpaceRenderer
     // calculate gradients
     if (chunk.chunkFootprint.sideLength > this.config.scale) {
       const rects = getPerlinChunks(chunk.chunkFootprint, this.config.scale);
-      for (const rect of rects) this.queueRect(rect);
-    } else this.queueRect(chunk.chunkFootprint);
+      for (const rect of rects) {
+        this.queueRect(rect);
+      }
+    } else {
+      this.queueRect(chunk.chunkFootprint);
+    }
   }
 
   public setColorConfiguration(

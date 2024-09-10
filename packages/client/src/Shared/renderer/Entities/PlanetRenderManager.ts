@@ -20,8 +20,10 @@ import {
 import { isUnconfirmedMoveTx } from "@df/serde";
 import type {
   Artifact,
+  AvatarType,
   LocatablePlanet,
   LocationId,
+  MemeType,
   Planet,
   PlanetRenderInfo,
   PlanetRenderManagerType,
@@ -29,21 +31,20 @@ import type {
 } from "@df/types";
 import {
   ArtifactType,
-  AvatarType,
   HatType,
   LogoType,
-  MemeType,
   PlanetType,
   RendererType,
   TextAlign,
   TextAnchor,
 } from "@df/types";
+
 import { avatars } from "../Avatars";
 import { engineConsts } from "../EngineConsts";
 import { logos } from "../Logos";
 import { memes } from "../Memes";
-import { Renderer } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { Renderer } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 
 const { whiteA, barbsA, gold } = engineConsts.colors;
 const { maxRadius } = engineConsts.planet;
@@ -392,7 +393,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     radiusW: number,
     textAlpha: number,
   ) {
-    if (!renderInfo.planet.messages) return;
+    if (!renderInfo.planet.messages) {
+      return;
+    }
     const { overlay2dRenderer: cM } = this.renderer;
     cM.drawPlanetMessages(coords, radiusW, renderInfo, textAlpha);
   }
@@ -404,7 +407,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
   ) {
     const { overlay2dRenderer: cM } = this.renderer;
 
-    if (!isLocatable(planet)) return;
+    if (!isLocatable(planet)) {
+      return;
+    }
     const mineable = planet.planetType === PlanetType.RUINS;
 
     const iconLoc = { x: x - radius, y: y + radius };
@@ -413,7 +418,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       const viewport = this.renderer.getViewport();
       const screenRadius = viewport.worldToCanvasDist(radius);
       const scale = Math.min(1, screenRadius / 20);
-      if (screenRadius > 4) cM.drawArtifactIcon(iconLoc, scale);
+      if (screenRadius > 4) {
+        cM.drawArtifactIcon(iconLoc, scale);
+      }
     }
   }
 
@@ -456,7 +463,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     const fromPlanet = context.getMouseDownPlanet();
     const toPlanet = context.getHoveringOverPlanet();
 
-    if (!fromPlanet || !toPlanet) return undefined;
+    if (!fromPlanet || !toPlanet) {
+      return undefined;
+    }
 
     let effectiveEnergy = fromPlanet.energy;
     for (const unconfirmedMove of fromPlanet.transactions?.getTransactions(
@@ -604,7 +613,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
   }
 
   queueArtifactImage(center: WorldCoords, radius: number, artifact?: Artifact) {
-    if (!artifact) return;
+    if (!artifact) {
+      return;
+    }
     const { context } = this.renderer;
     const hoveringPlanet = context.getHoveringOverPlanet() !== undefined;
     const hoverCoords = context.getHoveringOverCoords();
@@ -639,7 +650,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     hatType: HatType,
     hatLevel: number,
   ) {
-    if (isMeme(hatType) === false) return;
+    if (isMeme(hatType) === false) {
+      return;
+    }
 
     // MyTodo: determine the size limit
     hatLevel = Math.min(hatLevel, 1);
@@ -670,10 +683,14 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     hatLevel: number,
     ifAdminSet: boolean,
   ) {
-    if (isLogo(hatType) === false) return;
+    if (isLogo(hatType) === false) {
+      return;
+    }
 
     //MyTodo: determine the size limit
-    if (ifAdminSet === false) hatLevel = Math.min(hatLevel, 1);
+    if (ifAdminSet === false) {
+      hatLevel = Math.min(hatLevel, 1);
+    }
 
     const { context } = this.renderer;
     const hoveringPlanet = context.getHoveringOverPlanet() !== undefined;
@@ -698,7 +715,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     hatType: number,
     hatLevel: number,
   ) {
-    if (isAvatar(hatType) === false) return;
+    if (isAvatar(hatType) === false) {
+      return;
+    }
 
     //MyTodo: determine the size limit
     hatLevel = Math.min(hatLevel, 1);
@@ -734,7 +753,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
 
     // construct base energy string
     let energyString = energy <= 0 ? "" : formatNumber(energy);
-    if (lockedEnergy > 0) energyString += ` (-${formatNumber(lockedEnergy)})`;
+    if (lockedEnergy > 0) {
+      energyString += ` (-${formatNumber(lockedEnergy)})`;
+    }
 
     const playerColor = hasOwner(planet) ? getOwnerColorVec(planet) : barbsA;
     const color = uiManager.isOwnedByMe(planet) ? whiteA : playerColor;
@@ -823,7 +844,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     );
     const sendingSpaceShip = isSpaceShip(sendingArtifact?.artifactType);
 
-    if (sendingSpaceShip) return;
+    if (sendingSpaceShip) {
+      return;
+    }
 
     const abandonRangeBoost =
       this.renderer.context.getAbandonRangeChangePercent() / 100;
@@ -834,7 +857,9 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       this.drawRangeAtPercent(planet, 25);
     }
 
-    if (planet.owner === EMPTY_ADDRESS) return;
+    if (planet.owner === EMPTY_ADDRESS) {
+      return;
+    }
 
     const percentForces = context.getForcesSending(planet.locationId); // [0, 100]
     const forces = (percentForces / 100) * planet.energy;

@@ -2,6 +2,7 @@ import { getPlanetCosmetic } from "@df/procedural";
 import type { Planet, PlanetRendererType, WorldCoords } from "@df/types";
 import { RendererType } from "@df/types";
 import { mat4 } from "gl-matrix";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import {
@@ -9,7 +10,7 @@ import {
   PLANET_PROGRAM_DEFINITION,
   propsFromPlanet,
 } from "../Programs/PlanetProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 const { maxRadius } = engineConsts.planet;

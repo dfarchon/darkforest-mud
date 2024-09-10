@@ -52,7 +52,9 @@ export const getBurnerWallet = () => {
   const params = new URLSearchParams(window.location.search);
 
   const manualPrivateKey = params.get("privateKey");
-  if (manualPrivateKey) return new Wallet(manualPrivateKey).privateKey;
+  if (manualPrivateKey) {
+    return new Wallet(manualPrivateKey).privateKey;
+  }
 
   const useAnvilAdminKey = import.meta.env.DEV && !params.has("asPlayer");
   if (useAnvilAdminKey) {
@@ -63,7 +65,9 @@ export const getBurnerWallet = () => {
   const storageKey = "mud:burnerWallet";
 
   const privateKey = localStorage.getItem(storageKey);
-  if (privateKey) return privateKey;
+  if (privateKey) {
+    return privateKey;
+  }
 
   const burnerWallet = Wallet.createRandom();
   localStorage.setItem(storageKey, burnerWallet.privateKey);

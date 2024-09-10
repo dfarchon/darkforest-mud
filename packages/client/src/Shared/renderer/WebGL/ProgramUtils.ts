@@ -19,7 +19,9 @@ export class ProgramUtils {
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (success) return shader;
+    if (success) {
+      return shader;
+    }
 
     // log errors
     console.error("error compiling shader");
@@ -43,7 +45,9 @@ export class ProgramUtils {
     gl.attachShader(program, fragShader);
     gl.linkProgram(program);
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (success) return program;
+    if (success) {
+      return program;
+    }
 
     // log errors
     console.error("error creating program!");
@@ -70,7 +74,9 @@ export class ProgramUtils {
     }
 
     const program = createProgram(gl, vertexShader, fragShader);
-    if (!program) console.error("error creating program");
+    if (!program) {
+      console.error("error creating program");
+    }
 
     return program;
   }

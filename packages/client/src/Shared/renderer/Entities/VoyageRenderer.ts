@@ -15,9 +15,10 @@ import {
   TextAlign,
   TextAnchor,
 } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
-import { Renderer } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { Renderer } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 
 const { white, gold } = engineConsts.colors;
 const { enemyA, mineA, shipA, supportA } = engineConsts.colors.voyage;
@@ -179,14 +180,15 @@ export class VoyageRenderer implements VoyageRendererType {
           const k = 40;
           const size = (k * 20.0) / (1.0 * viewport.worldToCanvasDist(20));
 
-          if (artifact.artifactType !== ArtifactType.Avatar)
+          if (artifact.artifactType !== ArtifactType.Avatar) {
             sR.queueArtifact(artifact, { x, y }, artifactSizePixels);
-          else
+          } else {
             pRM.queueArtifactImage(
               viewport.canvasToWorldCoords({ x, y }),
               size,
               artifact,
             );
+          }
         }
       }
 

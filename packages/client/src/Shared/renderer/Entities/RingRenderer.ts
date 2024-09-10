@@ -7,13 +7,14 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import {
   propsFromIdx,
-  type RingProps,
   RING_PROGRAM_DEFINITION,
+  type RingProps,
 } from "../Programs/RingProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class RingRenderer

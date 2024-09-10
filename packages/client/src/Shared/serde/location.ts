@@ -15,9 +15,13 @@ import type { BigNumber as EthersBN } from "ethers";
  */
 export function locationIdFromHexStr(location: string) {
   const locationBI = bigInt(location, 16);
-  if (locationBI.geq(LOCATION_ID_UB)) throw new Error("not a valid location");
+  if (locationBI.geq(LOCATION_ID_UB)) {
+    throw new Error("not a valid location");
+  }
   let ret = locationBI.toString(16);
-  while (ret.length < 64) ret = "0" + ret;
+  while (ret.length < 64) {
+    ret = "0" + ret;
+  }
   return ret as LocationId;
 }
 
@@ -33,9 +37,13 @@ export function locationIdFromHexStr(location: string) {
  */
 export function locationIdFromDecStr(location: string) {
   const locationBI = bigInt(location);
-  if (locationBI.geq(LOCATION_ID_UB)) throw new Error("not a valid location");
+  if (locationBI.geq(LOCATION_ID_UB)) {
+    throw new Error("not a valid location");
+  }
   let ret = locationBI.toString(16);
-  while (ret.length < 64) ret = "0" + ret;
+  while (ret.length < 64) {
+    ret = "0" + ret;
+  }
   return ret as LocationId;
 }
 
@@ -50,9 +58,13 @@ export function locationIdFromDecStr(location: string) {
  */
 export function locationIdFromBigInt(location: BigInteger): LocationId {
   const locationBI = bigInt(location);
-  if (locationBI.geq(LOCATION_ID_UB)) throw new Error("not a valid location");
+  if (locationBI.geq(LOCATION_ID_UB)) {
+    throw new Error("not a valid location");
+  }
   let ret = locationBI.toString(16);
-  while (ret.length < 64) ret = "0" + ret;
+  while (ret.length < 64) {
+    ret = "0" + ret;
+  }
   return ret as LocationId;
 }
 

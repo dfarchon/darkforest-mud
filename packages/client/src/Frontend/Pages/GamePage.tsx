@@ -1,10 +1,10 @@
 import { useComponentValue } from "@latticexyz/react";
-import React, { useState } from "react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import SpawnPlayer from "@wallet/Components/SpawnPlayerPane";
 import SyncClientStatusRec from "@wallet/Components/SyncClientStatusRec";
 import WalletButton from "@wallet/WalletButton";
+import React, { useState } from "react";
 
 export function entityToAddress(entity: string): string {
   return entity.slice(0, 2) + entity.slice(26);

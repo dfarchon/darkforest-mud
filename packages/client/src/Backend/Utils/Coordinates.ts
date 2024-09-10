@@ -14,7 +14,9 @@ export const vectorLength = (a: CanvasCoords | WorldCoords): number =>
 export const normalizeVector = (a: WorldCoords): WorldCoords => {
   const len = vectorLength(a);
 
-  if (len < 0.00001) return a; // prevent div by 0
+  if (len < 0.00001) {
+    return a;
+  } // prevent div by 0
 
   return {
     x: a.x / len,

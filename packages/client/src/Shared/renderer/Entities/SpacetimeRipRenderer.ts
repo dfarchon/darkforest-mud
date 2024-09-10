@@ -6,9 +6,10 @@ import type {
   WorldCoords,
 } from "@df/types";
 import { RendererType, SpaceType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { SPACETIMERIP_PROGRAM_DEFINITION } from "../Programs/SpacetimeRipProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class SpacetimeRipRenderer
@@ -50,9 +51,13 @@ export class SpacetimeRipRenderer
     // these are just the space colors
     let c = [0, 24, 122]; // NEBULA
 
-    if (planet.spaceType === SpaceType.SPACE) c = [0, 5, 43];
-    else if (planet.spaceType === SpaceType.DEEP_SPACE) c = [2, 0, 6];
-    else if (planet.spaceType === SpaceType.DEAD_SPACE) c = [0, 36, 0];
+    if (planet.spaceType === SpaceType.SPACE) {
+      c = [0, 5, 43];
+    } else if (planet.spaceType === SpaceType.DEEP_SPACE) {
+      c = [2, 0, 6];
+    } else if (planet.spaceType === SpaceType.DEAD_SPACE) {
+      c = [0, 36, 0];
+    }
 
     const cosmetic = getPlanetCosmetic(planet);
 

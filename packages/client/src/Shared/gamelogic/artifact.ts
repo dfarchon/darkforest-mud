@@ -133,16 +133,24 @@ export const rarityNameFromArtifact = (a: Artifact): string =>
   rarityName(a.rarity);
 
 export function artifactBiomeName(artifact: Artifact): string {
-  if (isAncient(artifact)) return "Ancient";
+  if (isAncient(artifact)) {
+    return "Ancient";
+  }
   return biomeName(artifact.planetBiome);
 }
 
 export const levelFromRarity = (rarity: ArtifactRarity): PlanetLevel => {
-  if (rarity === ArtifactRarity.Mythic) return PlanetLevel.NINE;
-  else if (rarity === ArtifactRarity.Legendary) return PlanetLevel.SEVEN;
-  else if (rarity === ArtifactRarity.Epic) return PlanetLevel.FIVE;
-  else if (rarity === ArtifactRarity.Rare) return PlanetLevel.THREE;
-  else return PlanetLevel.ONE;
+  if (rarity === ArtifactRarity.Mythic) {
+    return PlanetLevel.NINE;
+  } else if (rarity === ArtifactRarity.Legendary) {
+    return PlanetLevel.SEVEN;
+  } else if (rarity === ArtifactRarity.Epic) {
+    return PlanetLevel.FIVE;
+  } else if (rarity === ArtifactRarity.Rare) {
+    return PlanetLevel.THREE;
+  } else {
+    return PlanetLevel.ONE;
+  }
 };
 
 const artifactFileNamesById: Map<ArtifactId, string> = new Map();
@@ -160,9 +168,13 @@ export function artifactRoll(id: ArtifactId): number {
 }
 
 export function isAncient(artifact: RenderedArtifact): boolean {
-  if (forceAncient !== undefined) return forceAncient;
+  if (forceAncient !== undefined) {
+    return forceAncient;
+  }
 
-  if (isSpaceShip(artifact.artifactType)) return false;
+  if (isSpaceShip(artifact.artifactType)) {
+    return false;
+  }
 
   const { id, planetBiome: biome } = artifact;
 
@@ -173,8 +185,11 @@ export function isAncient(artifact: RenderedArtifact): boolean {
   let ancient = false;
   const roll = artifactRoll(id);
 
-  if (biome === Biome.CORRUPTED) ancient = roll % 2 === 0;
-  else ancient = roll % 16 === 0;
+  if (biome === Biome.CORRUPTED) {
+    ancient = roll % 2 === 0;
+  } else {
+    ancient = roll % 16 === 0;
+  }
 
   artifactIsAncientMap.set(id, ancient);
 
@@ -241,10 +256,14 @@ export function artifactFileName(
     fileName = `${typeStr}-${rarityStr}-${nameStr}`;
   }
 
-  if (!debugProps?.skipCaching) artifactFileNamesById.set(id, fileName);
+  if (!debugProps?.skipCaching) {
+    artifactFileNamesById.set(id, fileName);
+  }
 
   let colorStr = "";
-  if (color === ArtifactFileColor.APP_BACKGROUND) colorStr = "-bg";
+  if (color === ArtifactFileColor.APP_BACKGROUND) {
+    colorStr = "-bg";
+  }
 
   return `${size}-${fileName}${colorStr}.${ext}`;
 }
@@ -256,14 +275,17 @@ export function getActiveBlackDomain(
     if (
       artifact.artifactType === ArtifactType.BlackDomain &&
       isActivated(artifact)
-    )
+    ) {
       return artifact;
+    }
   }
   return undefined;
 }
 
 export const dateMintedAt = (artifact: Artifact | undefined): string => {
-  if (!artifact) return "00/00/0000";
+  if (!artifact) {
+    return "00/00/0000";
+  }
   return new Date(artifact.mintedAtTimestamp * 1000).toDateString();
 };
 
@@ -287,7 +309,7 @@ export function canActivateArtifact(
     const anyArtifactActive = artifactsOnPlanet.some((a) => isActivated(a));
     const waitUntilAvailable = available - now;
     const availableToActivate =
-      waitUntilAvailable <= -0 &&
+      waitUntilAvailable <= 0 &&
       !anyArtifactActive &&
       planet?.locationId === artifact.onPlanetId &&
       !!artifact.onPlanetId;
@@ -332,7 +354,9 @@ export function getPlayerControlledSpaceships(
   artifacts: (Artifact | undefined)[] | undefined,
   owner: EthAddress | undefined,
 ) {
-  if (!owner) return [];
+  if (!owner) {
+    return [];
+  }
   return (artifacts || []).filter((a) => a?.controller === owner);
 }
 

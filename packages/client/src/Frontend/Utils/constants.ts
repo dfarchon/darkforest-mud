@@ -18,12 +18,12 @@ const LOCATION_ID_UB = bigInt(
   "21888242871839275222246405745257275088548364400416034343698204186575808495617",
 );
 
-export { MIN_CHUNK_SIZE, MAX_CHUNK_SIZE, LOCATION_ID_UB };
+export { LOCATION_ID_UB, MAX_CHUNK_SIZE, MIN_CHUNK_SIZE };
 
 export const enum DFZIndex {
   MenuBar = 4,
   HoverPlanet = 1001,
-  Modal = 1001,
+  Modal = 1002,
   Tooltip = 16000000,
   Notification = 1000,
 }

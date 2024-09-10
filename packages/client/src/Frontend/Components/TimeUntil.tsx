@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Given a timestamp, displays the amount of time until the timestamp from now in hh:mm:ss format.

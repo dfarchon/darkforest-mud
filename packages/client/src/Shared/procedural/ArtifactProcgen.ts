@@ -9,10 +9,14 @@ import {
 
 const namesById = new Map<ArtifactId, string>();
 export const artifactName = (artifact: Artifact | undefined): string => {
-  if (!artifact) return "Unknown";
+  if (!artifact) {
+    return "Unknown";
+  }
 
   const myName = namesById.get(artifact.id);
-  if (myName) return myName;
+  if (myName) {
+    return myName;
+  }
 
   const name = artifactNameFromArtifact(artifact);
   namesById.set(artifact.id, name);
