@@ -29,7 +29,7 @@ export const WalletButton: React.FC = () => {
   };
 
   return (
-    <div className="fixed">
+    <div >
       {!isConnected && <ConnectButton />}
       {/* {!isConnected && <CustomConnectButton />} */}
 

@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), nodePolyfills()],
   server: {
     port: 3000,
     fs: {
@@ -15,6 +16,9 @@ export default defineConfig({
     minify: true,
     sourcemap: true,
   },
+  css: {
+    devSourcemap: false,
+  },
   resolve: {
     alias: {
       "@df": path.resolve(__dirname, "./src/Shared"),
@@ -24,8 +28,5 @@ export default defineConfig({
       "@frontend": path.resolve(__dirname, "./src/Frontend"),
       "@backend": path.resolve(__dirname, "./src/Backend"),
     },
-  },
-  css: {
-    devSourcemap: false,
   },
 });
