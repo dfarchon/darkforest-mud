@@ -1,8 +1,17 @@
-import { useLocation, useParams } from "react-router-dom";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Terminal, type TerminalHandle } from "../Views/Terminal";
 import type { GameManager } from "@backend/GameLogic/GameManager";
 import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
+import {
+  BLOCK_EXPLORER_URL,
+  BLOCKCHAIN_BRIDGE,
+  HOW_TO_ENABLE_POPUPS,
+  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
+  PLAYER_GUIDE,
+  TOKEN_NAME,
+} from "@df/constants";
+import {
+  type BrowserCompatibleState,
+  BrowserIssues,
+} from "@frontend/Components/BrowserIssues";
 import {
   GameWindowWrapper,
   InitRenderState,
@@ -11,32 +20,24 @@ import {
   Wrapper,
 } from "@frontend/Components/GameLandingPageComponents";
 import {
-  type BrowserCompatibleState,
-  BrowserIssues,
-} from "@frontend/Components/BrowserIssues";
+  TopLevelDivProvider,
+  UIManagerProvider,
+} from "@frontend/Utils/AppHooks";
 import {
   type Incompatibility,
   unsupportedFeatures,
 } from "@frontend/Utils/BrowserChecks";
 import UIEmitter, { UIEmitterEvent } from "@frontend/Utils/UIEmitter";
+import { useMUD } from "@mud/MUDContext";
+import WalletButton from "@wallet/WalletButton";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import { zeroAddress } from "viem";
+import { useWalletClient } from "wagmi";
+
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
-import WalletButton from "@wallet/WalletButton";
-import { useMUD } from "@mud/MUDContext";
-import { useWalletClient } from "wagmi";
-import { zeroAddress } from "viem";
-import {
-  BLOCKCHAIN_BRIDGE,
-  BLOCK_EXPLORER_URL,
-  HOW_TO_ENABLE_POPUPS,
-  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
-  PLAYER_GUIDE,
-  TOKEN_NAME,
-} from "@df/constants";
-import {
-  TopLevelDivProvider,
-  UIManagerProvider,
-} from "@frontend/Utils/AppHooks";
+import { Terminal, type TerminalHandle } from "../Views/Terminal";
 // import { GameWindowLayout } from '../Views/GameWindowLayout';
 
 const enum TerminalPromptStep {

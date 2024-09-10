@@ -1,4 +1,5 @@
 import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
+
 import { createDefinedContext } from "./createDefinedContext";
 
 export const { useDefinedContext: useUIManager, provider: UIManagerProvider } =
