@@ -1,20 +1,26 @@
 import { useLocation, useParams } from "react-router-dom";
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Terminal, type TerminalHandle } from '../Views/Terminal';
-import type { GameManager } from '@backend/GameLogic/GameManager';
-import type { GameUIManager } from '@backend/GameLogic/GameUIManager';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Terminal, type TerminalHandle } from "../Views/Terminal";
+import type { GameManager } from "@backend/GameLogic/GameManager";
+import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 import {
   GameWindowWrapper,
   InitRenderState,
   TerminalToggler,
   TerminalWrapper,
   Wrapper,
-} from '@frontend/Components/GameLandingPageComponents';
-import { type BrowserCompatibleState, BrowserIssues } from '@frontend/Components/BrowserIssues';
-import { type Incompatibility, unsupportedFeatures } from '@frontend/Utils/BrowserChecks';
-import UIEmitter, { UIEmitterEvent } from '@frontend/Utils/UIEmitter';
-import { MythicLabelText } from '../Components/Labels/MythicLabel';
-import { TerminalTextStyle } from '../Utils/TerminalTypes';
+} from "@frontend/Components/GameLandingPageComponents";
+import {
+  type BrowserCompatibleState,
+  BrowserIssues,
+} from "@frontend/Components/BrowserIssues";
+import {
+  type Incompatibility,
+  unsupportedFeatures,
+} from "@frontend/Utils/BrowserChecks";
+import UIEmitter, { UIEmitterEvent } from "@frontend/Utils/UIEmitter";
+import { MythicLabelText } from "../Components/Labels/MythicLabel";
+import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import WalletButton from "@wallet/WalletButton";
 import { useMUD } from "@mud/MUDContext";
 import { useWalletClient } from "wagmi";
@@ -26,10 +32,12 @@ import {
   HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   PLAYER_GUIDE,
   TOKEN_NAME,
-} from '@df/constants';
-import { TopLevelDivProvider, UIManagerProvider } from '@frontend/Utils/AppHooks';
+} from "@df/constants";
+import {
+  TopLevelDivProvider,
+  UIManagerProvider,
+} from "@frontend/Utils/AppHooks";
 // import { GameWindowLayout } from '../Views/GameWindowLayout';
-
 
 const enum TerminalPromptStep {
   NONE,
@@ -58,7 +66,6 @@ type TerminalStateOptions = {
   showHelp: boolean;
 };
 
-
 export function GameLandingPage() {
   const { contract } = useParams();
   const location = useLocation();
@@ -72,8 +79,6 @@ export function GameLandingPage() {
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
-
-
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const terminalHandle = useRef<TerminalHandle>(null);
   // const miniMapRef = useRef<MiniMapHandle>();
@@ -81,29 +86,26 @@ export function GameLandingPage() {
   const [gameManager, setGameManager] = useState<GameManager | undefined>();
   const gameUIManagerRef = useRef<GameUIManager | undefined>();
 
-
   const [terminalVisible, setTerminalVisible] = useState(true);
   const [initRenderState, setInitRenderState] = useState(InitRenderState.NONE);
   const [step, setStep] = useState(TerminalPromptStep.NONE);
 
   const [browserCompatibleState, setBrowserCompatibleState] =
-    useState<BrowserCompatibleState>('unknown');
+    useState<BrowserCompatibleState>("unknown");
 
   const [browserIssues, setBrowserIssues] = useState<Incompatibility[]>([]);
   const [isMiniMapOn, setMiniMapOn] = useState(false);
   const [spectate, setSpectate] = useState(false);
-
-
 
   useEffect(() => {
     unsupportedFeatures().then((issues) => {
       const supported = issues.length === 0;
       setBrowserIssues(issues);
       if (supported) {
-        setBrowserCompatibleState('supported');
+        setBrowserCompatibleState("supported");
         setStep(TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED);
       } else {
-        setBrowserCompatibleState('unsupported');
+        setBrowserCompatibleState("unsupported");
       }
     });
   }, []);
@@ -113,67 +115,70 @@ export function GameLandingPage() {
       terminal: React.MutableRefObject<TerminalHandle | null>,
       { showHelp }: TerminalStateOptions = {
         showHelp: true,
-      }
+      },
     ) => {
-
       if (showHelp) {
         terminal.current?.newline();
         terminal.current?.newline();
 
-        terminal.current?.print('Player guide: ', TerminalTextStyle.Pink);
+        terminal.current?.print("Player guide: ", TerminalTextStyle.Pink);
 
         terminal.current?.printLink(
-          'Please Click Here',
+          "Please Click Here",
           () => {
             window.open(PLAYER_GUIDE);
           },
-          TerminalTextStyle.Blue
+          TerminalTextStyle.Blue,
         );
 
         terminal.current?.println(
-          ' <= New player please check this guide !!!',
-          TerminalTextStyle.Pink
+          " <= New player please check this guide !!!",
+          TerminalTextStyle.Pink,
         );
 
         terminal.current?.newline();
-        terminal.current?.println('Login or create an account.', TerminalTextStyle.Green);
-        terminal.current?.println('Choose an option, type its symbol and press ENTER.');
+        terminal.current?.println(
+          "Login or create an account.",
+          TerminalTextStyle.Green,
+        );
+        terminal.current?.println(
+          "Choose an option, type its symbol and press ENTER.",
+        );
         terminal.current?.newline();
       }
 
-
       if (mainAccount === zeroAddress) {
-
         terminal.current?.println(``);
 
-
         terminal.current?.println(
-          `(a) Please connect to your wallet`, TerminalTextStyle.Sub
+          `(a) Please connect to your wallet`,
+          TerminalTextStyle.Sub,
         );
-
       }
 
       terminal.current?.println(`(s) Spectate.`, TerminalTextStyle.Sub);
       terminal.current?.println(``);
 
-      terminal.current?.println('Select one of the options above [a] or [s], then press [enter].', TerminalTextStyle.Sub);
+      terminal.current?.println(
+        "Select one of the options above [a] or [s], then press [enter].",
+        TerminalTextStyle.Sub,
+      );
 
-
-      const userInput = (await terminal.current?.getInput())?.trim() ?? '';
+      const userInput = (await terminal.current?.getInput())?.trim() ?? "";
 
       // stop options, go to next step
       switch (true) {
-        case userInput === 'a':
+        case userInput === "a":
           setStep(TerminalPromptStep.DISPLAY_ACCOUNTS);
           return;
-        case userInput === 's':
+        case userInput === "s":
           setStep(TerminalPromptStep.SPECTATING);
           return;
       }
 
       // continue waiting for user input
       switch (true) {
-        case userInput === 'clear': {
+        case userInput === "clear": {
           terminal.current?.clear();
           showHelp = false;
           advanceStateFromCompatibilityPassed(terminal, {
@@ -181,7 +186,7 @@ export function GameLandingPage() {
           });
           break;
         }
-        case userInput === 'h' || userInput === 'help': {
+        case userInput === "h" || userInput === "help": {
           showHelp = true;
           advanceStateFromCompatibilityPassed(terminal, {
             showHelp,
@@ -190,8 +195,8 @@ export function GameLandingPage() {
         }
         default: {
           terminal.current?.println(
-            'Invalid option, please try press [help]',
-            TerminalTextStyle.Pink
+            "Invalid option, please try press [help]",
+            TerminalTextStyle.Pink,
           );
           showHelp = false;
           advanceStateFromCompatibilityPassed(terminal, {
@@ -200,12 +205,12 @@ export function GameLandingPage() {
         }
       }
     },
-    []
+    [],
   );
 
   const advanceState = useCallback(
     (terminal: React.MutableRefObject<TerminalHandle | null>) => {
-      if (browserCompatibleState !== 'supported') {
+      if (browserCompatibleState !== "supported") {
         return;
       }
 
@@ -213,14 +218,9 @@ export function GameLandingPage() {
         case step === TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED:
           advanceStateFromCompatibilityPassed(terminal);
           return;
-
       }
     },
-    [
-      step,
-      browserCompatibleState,
-      advanceStateFromCompatibilityPassed,
-    ]
+    [step, browserCompatibleState, advanceStateFromCompatibilityPassed],
   );
 
   useEffect(() => {
@@ -236,18 +236,14 @@ export function GameLandingPage() {
   //   }
   // }, [terminalVisible]);
 
-
   useEffect(() => {
     if (terminalHandle.current && topLevelContainer.current) {
       advanceState(terminalHandle);
     }
   }, [terminalHandle, topLevelContainer, advanceState]);
 
-
   return (
-
     <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
-
       {/* <GameWindowWrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
         {gameUIManagerRef.current && topLevelContainer.current && gameManager && (
           <TopLevelDivProvider value={topLevelContainer.current}>
@@ -264,18 +260,20 @@ export function GameLandingPage() {
         />
       </GameWindowWrapper> */}
 
-      <TerminalWrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
+      <TerminalWrapper
+        initRender={initRenderState}
+        terminalEnabled={terminalVisible}
+      >
         <MythicLabelText
           text={`Welcome To Dark Forest MUD`}
           style={{
             fontFamily: "'Start Press 2P', sans-serif",
-            display: initRenderState !== InitRenderState.COMPLETE ? 'block' : 'none',
+            display:
+              initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
           }}
         />
 
         <WalletButton />
-
-
 
         <BrowserIssues issues={browserIssues} state={browserCompatibleState} />
 
@@ -286,21 +284,16 @@ export function GameLandingPage() {
           <p> Main Account: {mainAccount}</p>
           <p> Game Account: {gameAccount}</p>
           <br />
-
-
         </div>
 
         <Terminal
           ref={terminalHandle}
-          promptCharacter={'>'}
-          visible={browserCompatibleState === 'supported'}
+          promptCharacter={">"}
+          visible={browserCompatibleState === "supported"}
           useCaretElement={initRenderState !== InitRenderState.COMPLETE}
         />
       </TerminalWrapper>
       <div ref={topLevelContainer}></div>
-
-
-
     </Wrapper>
   );
 }
