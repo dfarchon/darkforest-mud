@@ -1,14 +1,14 @@
 import { perlin } from "@df/hashing";
-import { Chunk, PerlinConfig, Rectangle } from "@df/types";
+import type { Chunk, PerlinConfig, Rectangle } from "@df/types";
 import { EventEmitter } from "events";
-import _ from "lodash";
-import { ChunkStore } from "../../_types/darkforest/api/ChunkStoreTypes";
-import {
+
+import type { ChunkStore } from "../../_types/darkforest/api/ChunkStoreTypes";
+import type {
   HashConfig,
   MinerWorkerMessage,
 } from "../../_types/global/GlobalTypes";
 import { getChunkKey } from "./ChunkUtils";
-import { MiningPattern } from "./MiningPatterns";
+import type { MiningPattern } from "./MiningPatterns";
 
 export const enum MinerManagerEvent {
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -19,6 +19,8 @@ export type workerFactory = () => Worker;
 function defaultWorker() {
   return new Worker(new URL("./miner.worker.ts", import.meta.url));
 }
+
+const range = (size: number) => [...new Array(size)].map((_, index) => index);
 
 export class HomePlanetMinerChunkStore implements ChunkStore {
   private initPerlinMin: number;
@@ -49,20 +51,25 @@ export class HomePlanetMinerChunkStore implements ChunkStore {
 
   hasMinedChunk(chunkFootprint: Rectangle) {
     // return true if this chunk mined, or if perlin value >= threshold
-    if (this.minedChunkKeys.has(getChunkKey(chunkFootprint))) return true;
+    if (this.minedChunkKeys.has(getChunkKey(chunkFootprint))) {
+      return true;
+    }
     const center = {
       x: chunkFootprint.bottomLeft.x + chunkFootprint.sideLength / 2,
       y: chunkFootprint.bottomLeft.y + chunkFootprint.sideLength / 2,
     };
     const chunkPerlin = perlin(center, this.perlinOptions);
-    if (chunkPerlin >= this.initPerlinMax || chunkPerlin < this.initPerlinMin)
+    if (chunkPerlin >= this.initPerlinMax || chunkPerlin < this.initPerlinMin) {
       return true;
+    }
     return false;
   }
 }
 
 class MinerManager extends EventEmitter {
   private readonly minedChunksStore: ChunkStore;
+
+  // @ts-expect-error `planetRarity` property seems to be unused, double check and remove if redundant
   private readonly planetRarity: number;
 
   private isExploring = false;
@@ -148,7 +155,10 @@ class MinerManager extends EventEmitter {
       useMockHash,
       workerFactory,
     );
-    _.range(minerManager.cores).forEach((i) => minerManager.initWorker(i));
+
+    for (const index of range(minerManager.cores)) {
+      minerManager.initWorker(index);
+    }
 
     return minerManager;
   }
@@ -197,7 +207,7 @@ class MinerManager extends EventEmitter {
   private exploreNext(fromChunk: Rectangle, jobId: number) {
     this.nextValidExploreTarget(fromChunk, jobId).then(
       (nextChunk: Rectangle | undefined) => {
-        if (!!nextChunk) {
+        if (nextChunk) {
           const nextChunkKey = this.chunkLocationToKey(nextChunk, jobId);
           const center = {
             x: nextChunk.bottomLeft.x + nextChunk.sideLength / 2,
@@ -230,7 +240,9 @@ class MinerManager extends EventEmitter {
       this.cores = nCores;
     }
 
-    _.range(this.cores).forEach((i) => this.initWorker(i));
+    for (const index of range(this.cores)) {
+      this.initWorker(index);
+    }
 
     if (wasMining) {
       this.startExplore();

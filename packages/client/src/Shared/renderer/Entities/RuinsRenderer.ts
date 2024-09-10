@@ -1,16 +1,17 @@
 import { getPlanetCosmetic } from "@df/procedural";
-import {
+import type {
   CanvasCoords,
   Planet,
   PlanetLevel,
-  RendererType,
   RGBVec,
   RuinsRendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { RUINS_PROGRAM_DEFINITION } from "../Programs/RuinsProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class RuinsRenderer
@@ -44,7 +45,9 @@ export class RuinsRenderer
     const c3 = cosmetic.baseColor3;
 
     for (let i = 0; i < planet.planetLevel + 1; i++) {
-      if (!cosmetic.ruins) break;
+      if (!cosmetic.ruins) {
+        break;
+      }
 
       const idx = i as PlanetLevel;
 

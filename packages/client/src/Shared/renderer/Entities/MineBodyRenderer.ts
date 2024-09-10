@@ -1,16 +1,16 @@
 import { getPlanetCosmetic, hslToRgb } from "@df/procedural";
-import {
+import type {
   CanvasCoords,
-  DrawMode,
   MineBodyRendererType,
   Planet,
-  RendererType,
   RGBVec,
   WorldCoords,
 } from "@df/types";
+import { DrawMode, RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import { MINE_PROGRAM_DEFINITION } from "../Programs/MineProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 /** Renderers asteroids at the center of silver mines  */

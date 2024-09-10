@@ -1,14 +1,15 @@
 import {
-  AttribProps,
+  type AttribProps,
   DrawMode,
-  UniformProps,
+  type UniformProps,
   UniformType,
-  Vec3,
+  type Vec3,
 } from "@df/types";
-import { mat3, mat4 } from "gl-matrix";
+import type { mat3, mat4 } from "gl-matrix";
+
 import { AttribManager } from "./AttribManager";
 import { ProgramUtils } from "./ProgramUtils";
-import { WebGLManager } from "./WebGLManager";
+import type { WebGLManager } from "./WebGLManager";
 
 export type UniformData = {
   [key: string]: UniformProps;
@@ -149,7 +150,9 @@ export class GenericRenderer<
     } = programData;
 
     const program = ProgramUtils.programFromSources(gl, vert, frag);
-    if (program === null) throw "error compiling program";
+    if (program === null) {
+      throw "error compiling program";
+    }
     this.program = program;
 
     this.uniformData = uniforms;
@@ -164,7 +167,9 @@ export class GenericRenderer<
       const { name } = props;
       const k = key as keyof T["uniforms"];
       const loc = gl.getUniformLocation(program, name);
-      if (!loc) throw `uniform ${name} doesn't exist!`;
+      if (!loc) {
+        throw `uniform ${name} doesn't exist!`;
+      }
 
       uniformLocs[k] = loc;
       uniformSetters[k] = getUniformSetter(gl, loc, props);
@@ -186,8 +191,9 @@ export class GenericRenderer<
    * should always override this.
    */
   public setUniforms() {
-    if (Object.keys(this.uniformData).length !== 0)
+    if (Object.keys(this.uniformData).length !== 0) {
       console.error("did not override setUniforms!");
+    }
     return;
   }
 
@@ -196,7 +202,9 @@ export class GenericRenderer<
    * @param drawMode The drawing mode for the buffered vertices. Default: Triangles.
    */
   public flush(drawMode: DrawMode = DrawMode.Triangles) {
-    if (this.verts === 0) return;
+    if (this.verts === 0) {
+      return;
+    }
 
     const { gl } = this.manager;
     gl.useProgram(this.program);

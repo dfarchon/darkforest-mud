@@ -1,9 +1,7 @@
-import {
-  HandleController,
-  Slider,
-  SliderHandle,
-} from "@spectrum-web-components/slider";
-import { css, CSSResultArray, unsafeCSS } from "lit";
+import type { HandleController } from "@spectrum-web-components/slider";
+import { Slider, SliderHandle } from "@spectrum-web-components/slider";
+import { css, type CSSResultArray, unsafeCSS } from "lit";
+
 import * as dfstyles from "./styles";
 
 export class DarkForestSlider extends Slider {
@@ -55,17 +53,23 @@ export class DarkForestSlider extends Slider {
   public handlePointerdown(event: PointerEvent): void {
     try {
       return super.handlePointerdown(event);
-    } catch {}
+    } catch {
+      // eslint-disable-line no-empty
+    }
   }
   public handlePointerup(event: PointerEvent): void {
     try {
       return super.handlePointerup(event);
-    } catch {}
+    } catch {
+      // eslint-disable-line no-empty
+    }
   }
   public handlePointermove(event: PointerEvent): void {
     try {
       return super.handlePointermove(event);
-    } catch {}
+    } catch {
+      // eslint-disable-line no-empty
+    }
   }
 
   private _handleKeyUp = (evt: Event) => {

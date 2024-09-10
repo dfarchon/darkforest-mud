@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useMUD } from "@mud/MUDContext";
 import { PlanetType, SpaceType } from "@df/types";
+import { useMUD } from "@mud/MUDContext";
+import React, { useState } from "react";
 
 // type PlanetType =
 //   | "UNKNOWN"
@@ -17,8 +17,8 @@ interface CreatePlanetProps {
     owner: string,
     perlin: number,
     level: number,
-    planetType: PlanetType,
-    spaceType: SpaceType,
+    planetType: number,
+    spaceType: number,
     population: number,
     silver: number,
     upgrade: number,

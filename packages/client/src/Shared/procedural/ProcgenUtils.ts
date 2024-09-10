@@ -15,25 +15,28 @@ import {
 import { getPlanetRank, isLocatable } from "@df/gamelogic";
 import { seededRandom } from "@df/hashing";
 import { hashToInt } from "@df/serde";
-import {
+import type {
   ArtifactId,
-  AvatarType,
-  AvatarTypeNames,
-  Biome,
   EthAddress,
-  HatType,
   HSLVec,
   LocationId,
-  LogoType,
-  LogoTypeNames,
-  MemeType,
-  MemeTypeNames,
   Planet,
   PlanetCosmeticInfo,
   RGBAVec,
   RGBVec,
   RuinsInfo,
-  UpgradeBranchName,
+} from "@df/types";
+
+import type { UpgradeBranchName } from "../types";
+import {
+  AvatarType,
+  AvatarTypeNames,
+  Biome,
+  HatType,
+  LogoType,
+  LogoTypeNames,
+  MemeType,
+  MemeTypeNames,
 } from "../types";
 import Noise from "./Noise";
 import {
@@ -61,7 +64,9 @@ export const titleCase = (title: string): string =>
     .split(/ /g)
     .map((word, i) => {
       // don't capitalize articles unless it's the first word
-      if (i !== 0 && ["of", "the"].includes(word)) return word;
+      if (i !== 0 && ["of", "the"].includes(word)) {
+        return word;
+      }
       return `${word.substring(0, 1).toUpperCase()}${word.substring(1)}`;
     })
     .join(" ");
@@ -98,10 +103,14 @@ const oceanByBiome: { readonly [Biome: number]: HSLVec } = {
 
 const strByBiome = new Map<Biome, string>();
 export function getBiomeRgbStr(biome: Biome): string {
-  if (biome === Biome.WASTELAND) return "#888";
+  if (biome === Biome.WASTELAND) {
+    return "#888";
+  }
 
   const s = strByBiome.get(biome);
-  if (s) return s;
+  if (s) {
+    return s;
+  }
 
   const str = rgbStr(hslToRgb(baseByBiome[biome]));
   strByBiome.set(biome, str);
@@ -215,54 +224,78 @@ export function isAvatar(hatType: number): boolean {
 }
 
 export function numToHatType(num: number): HatType {
-  if (isHat(num) === false) return HatType.Unknown;
+  if (isHat(num) === false) {
+    return HatType.Unknown;
+  }
   const res = num;
   return res as HatType;
 }
 
 export function numToMemeType(num: number): MemeType {
-  if (isMeme(num) === false) return MemeType.Unknown;
+  if (isMeme(num) === false) {
+    return MemeType.Unknown;
+  }
   const res = num - minMemeLimit + 1;
   return res as MemeType;
 }
 
 export function numToLogoType(num: number): LogoType {
-  if (isLogo(num) === false) return LogoType.Unknown;
+  if (isLogo(num) === false) {
+    return LogoType.Unknown;
+  }
   const res = num - minLogoLimit + 1;
   return res as LogoType;
 }
 
 export function numToAvatarType(num: number): AvatarType {
-  if (isAvatar(num) === false) return AvatarType.Unknown;
+  if (isAvatar(num) === false) {
+    return AvatarType.Unknown;
+  }
   const res = num - minAvatarLimit + 1;
   return res as AvatarType;
 }
 
 export function hatTypeToNum(hatType: HatType): number {
-  if (hatType === HatType.Unknown) return 0;
+  if (hatType === HatType.Unknown) {
+    return 0;
+  }
   const res = hatType;
-  if (isHat(res) === false) return 0;
+  if (isHat(res) === false) {
+    return 0;
+  }
   return res as number;
 }
 
 export function memeTypeToNum(memeType: MemeType): number {
-  if (memeType === MemeType.Unknown) return 0;
+  if (memeType === MemeType.Unknown) {
+    return 0;
+  }
   const res = memeType + minMemeLimit - 1;
-  if (isMeme(res) === false) return 0;
+  if (isMeme(res) === false) {
+    return 0;
+  }
   return res as number;
 }
 
 export function logoTypeToNum(logoType: LogoType): number {
-  if (logoType === LogoType.Unknown) return 0;
+  if (logoType === LogoType.Unknown) {
+    return 0;
+  }
   const res = logoType + minLogoLimit - 1;
-  if (isLogo(res) === false) return 0;
+  if (isLogo(res) === false) {
+    return 0;
+  }
   return res as number;
 }
 
 export function avatarTypeToNum(avatarType: AvatarType): number {
-  if (avatarType === AvatarType.Unknown) return 0;
+  if (avatarType === AvatarType.Unknown) {
+    return 0;
+  }
   const res = avatarType + minAvatarLimit - 1;
-  if (isAvatar(res) === false) return 0;
+  if (isAvatar(res) === false) {
+    return 0;
+  }
   return res as number;
 }
 
@@ -271,8 +304,9 @@ export function artifactImageTypeToNum(artifactImageType: number): number {
     isMeme(artifactImageType) ||
     isLogo(artifactImageType) ||
     isAvatar(artifactImageType)
-  )
+  ) {
     return artifactImageType;
+  }
   return 0;
 }
 
@@ -360,12 +394,16 @@ export function getPlayerColorVec(player: EthAddress): RGBAVec {
 }
 
 export function getOwnerColorVec(planet: Planet): RGBAVec {
-  if (planet.owner === EMPTY_ADDRESS) return [153, 153, 102, 255];
+  if (planet.owner === EMPTY_ADDRESS) {
+    return [153, 153, 102, 255];
+  }
   return getPlayerColorVec(planet.owner);
 }
 
 export function getOwnerColor(planet: Planet): string {
-  if (planet.owner === EMPTY_ADDRESS) return "#996666";
+  if (planet.owner === EMPTY_ADDRESS) {
+    return "#996666";
+  }
   return getPlayerColor(planet.owner);
 }
 
@@ -467,7 +505,9 @@ export function getRuinsInfo(loc: LocationId): RuinsInfo {
 export function getPlanetCosmetic(
   planet: Planet | undefined,
 ): PlanetCosmeticInfo {
-  if (!planet) return grayColors;
+  if (!planet) {
+    return grayColors;
+  }
   if (cosmeticByLocId.has(planet.locationId)) {
     return cosmeticByLocId.get(planet.locationId) || grayColors;
   }
@@ -547,7 +587,9 @@ export function getPlanetCosmetic(
 }
 
 export function getPlanetTitle(planet: Planet | undefined) {
-  if (!planet) return "Unknown";
+  if (!planet) {
+    return "Unknown";
+  }
 
   const myRank = getPlanetRank(planet);
 
@@ -569,7 +611,9 @@ export function getPlanetTitle(planet: Planet | undefined) {
 }
 
 export function getPlanetName(planet: Planet | undefined): string {
-  if (!planet) return "Unknown";
+  if (!planet) {
+    return "Unknown";
+  }
   if (planet.hatLevel > 0 && isMeme(planet.hatType)) {
     return MemeTypeNames[numToMemeType(planet.hatType)];
   }
@@ -585,7 +629,9 @@ export function getPlanetName(planet: Planet | undefined): string {
 
 export function getPlanetNameHash(locId: LocationId): string {
   const name = namesById.get(locId);
-  if (name) return name;
+  if (name) {
+    return name;
+  }
 
   let planetName = "";
 
@@ -604,10 +650,14 @@ export function getPlanetNameHash(locId: LocationId): string {
 }
 
 export function getPlanetTagline(planet: Planet | undefined): string {
-  if (!planet) return "The empty unknown";
+  if (!planet) {
+    return "The empty unknown";
+  }
 
   const tagline = taglinesById.get(planet.locationId);
-  if (tagline) return tagline;
+  if (tagline) {
+    return tagline;
+  }
 
   let myTagline = "";
 
@@ -627,11 +677,14 @@ export function getPlanetTagline(planet: Planet | undefined): string {
 
 // this one doesn't mention the name
 export function getPlanetBlurb(planet: Planet | undefined): string {
-  if (!planet)
+  if (!planet) {
     return "The vast, empty unknown of space contains worlds of infinite possibilities. Select a planet to learn more...";
+  }
 
   const myBlurb = blurbsById.get(planet.locationId);
-  if (myBlurb) return myBlurb;
+  if (myBlurb) {
+    return myBlurb;
+  }
 
   let append = "";
   if (getPlanetName(planet) === "Clown Town") {
@@ -646,7 +699,7 @@ export function getPlanetBlurb(planet: Planet | undefined): string {
         `The #air# is #descair#. ` +
         `#myflora.capitalize# #bloom# #colors#. ` +
         `#many.capitalize# species of #species# #populate# the #habitat#. ` +
-        `#funfact.capitalize#\.`,
+        `#funfact.capitalize#.`,
     ],
     origin: ["#[myflora:#flora#]story#"],
   };
@@ -661,16 +714,20 @@ export function getPlanetBlurb(planet: Planet | undefined): string {
 
 // this one mentions the name
 export function getPlanetBlurb2(planet: Planet | undefined): string {
-  if (!planet) return "";
+  if (!planet) {
+    return "";
+  }
 
   const myBlurb = blurbs2ById.get(planet.locationId);
-  if (myBlurb) return myBlurb;
+  if (myBlurb) {
+    return myBlurb;
+  }
 
   const name = getPlanetName(planet);
   const tagline = getPlanetTagline(planet);
   const myGrammar = {
     story: [
-      `The people of ${name} have #learned# to #live# in a ${tagline}. ${name}'s #mysun# #sends# an #flock# of #bads# #sometimes#. Over the #years#, they've #removed# the #mysun# by #throwing# #warbears#. In doing so, they've learned that #lesson#\.`,
+      `The people of ${name} have #learned# to #live# in a ${tagline}. ${name}'s #mysun# #sends# an #flock# of #bads# #sometimes#. Over the #years#, they've #removed# the #mysun# by #throwing# #warbears#. In doing so, they've learned that #lesson#.`,
     ],
     origin: [`#[mysun:#sun#]story#`],
   };
@@ -688,6 +745,9 @@ export function getHatSizeName(planet: Planet) {
   const maxHat = HAT_SIZES.length;
   const lv = planet.hatLevel;
 
-  if (lv < maxHat) return HAT_SIZES[lv];
-  else return "H" + "A".repeat(4 * 2 ** (lv - maxHat + 1)) + "T";
+  if (lv < maxHat) {
+    return HAT_SIZES[lv];
+  } else {
+    return "H" + "A".repeat(4 * 2 ** (lv - maxHat + 1)) + "T";
+  }
 }

@@ -1,5 +1,6 @@
 import { isLocatable } from "@df/gamelogic";
-import { AttribType, Biome, Planet, UniformType } from "@df/types";
+import { AttribType, Biome, type Planet, UniformType } from "@df/types";
+
 import { glsl } from "../EngineUtils";
 import { ShaderMixins } from "../WebGL/ShaderMixins";
 
@@ -363,7 +364,10 @@ export const cloudsFromPlanet = (p: Planet): number =>
   ][p.planetLevel];
 
 export const morphFromPlanet = (p: Planet): number => {
-  if (isLocatable(p) && (p.biome === Biome.LAVA || p.biome === Biome.CORRUPTED))
+  if (
+    isLocatable(p) &&
+    (p.biome === Biome.LAVA || p.biome === Biome.CORRUPTED)
+  ) {
     return [
       0.8, // Asteroid
       1.0, // BrownDwarf
@@ -376,11 +380,12 @@ export const morphFromPlanet = (p: Planet): number => {
       0.3, // level 8
       0.25, // level 9
     ][p.planetLevel];
+  }
   return 0;
 };
 
 export function distortFromPlanet(p: Planet): number {
-  if (isLocatable(p) && p.biome === Biome.CORRUPTED)
+  if (isLocatable(p) && p.biome === Biome.CORRUPTED) {
     return [
       0.04, // Asteroid
       0.06, // BrownDwarf
@@ -393,6 +398,7 @@ export function distortFromPlanet(p: Planet): number {
       0.13, // level 8
       0.14, // level 9
     ][p.planetLevel];
+  }
   return 0;
 }
 

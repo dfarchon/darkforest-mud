@@ -1,12 +1,14 @@
-import { ArtifactFileColor, artifactFileName } from "@df/gamelogic";
-import { Artifact } from "@df/types";
-import React from "react";
+import type { ArtifactFileColor } from "@df/gamelogic";
+import { artifactFileName } from "@df/gamelogic";
+import type { Artifact } from "@df/types";
 import styled, { css } from "styled-components";
+
 import dfstyles from "../Styles/dfstyles";
 
 // export const ARTIFACT_URL = 'https://d2wspbczt15cqu.cloudfront.net/v0.6.0-artifacts/';
 export const ARTIFACT_URL = "/public/df_ares_artifact_icons/";
 
+// @ts-expect-error unused
 function getArtifactUrl(
   thumb: boolean,
   artifact: Artifact,
@@ -19,8 +21,8 @@ function getArtifactUrl(
 export function ArtifactImage({
   artifact,
   size,
-  thumb,
-  bgColor,
+  thumb: _thumb,
+  bgColor: _bgColor,
 }: {
   artifact: Artifact;
   size: number;

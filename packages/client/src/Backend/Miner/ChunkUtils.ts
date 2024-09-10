@@ -1,5 +1,6 @@
-import { Chunk, Rectangle, WorldCoords, WorldLocation } from "@df/types";
-import {
+import type { Chunk, Rectangle, WorldCoords, WorldLocation } from "@df/types";
+
+import type {
   BucketId,
   ChunkId,
   PersistedChunk,
@@ -16,7 +17,9 @@ export function getBucket(chunk: Rectangle): BucketId {
     (Math.floor(chunk.bottomLeft.x / chunk.sideLength) +
       Math.floor(chunk.bottomLeft.y / chunk.sideLength)) %
     alphanumeric.length;
-  if (sum < 0) sum += alphanumeric.length;
+  if (sum < 0) {
+    sum += alphanumeric.length;
+  }
   return alphanumeric[sum] as BucketId;
 }
 
@@ -182,7 +185,9 @@ export function addToChunkMap(
         break;
       }
     }
-    if (!siblingsMined) break;
+    if (!siblingsMined) {
+      break;
+    }
     sideLength *= 2;
     let planetLocations: WorldLocation[] = chunkToAdd.planetLocations;
     let newPerlin = chunkToAdd.perlin / 4;

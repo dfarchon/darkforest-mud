@@ -1,13 +1,8 @@
 import { isAncient, isLocatable } from "@df/gamelogic";
-import {
-  Artifact,
-  Biome,
-  BiomeNames,
-  LocatablePlanet,
-  Planet,
-} from "@df/types";
-import React from "react";
+import type { Artifact, LocatablePlanet, Planet } from "@df/types";
+import { Biome, BiomeNames } from "@df/types";
 import styled from "styled-components";
+
 import { BiomeTextColors } from "../../Styles/Colors";
 import { AncientLabel, AncientLabelAnim } from "../AncientLabel";
 import { icyAnim, shakeAnim } from "../BiomeAnims";

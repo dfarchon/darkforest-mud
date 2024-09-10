@@ -1,15 +1,16 @@
 import { MAX_PLANET_LEVEL } from "@df/constants";
-import {
+import type {
   CanvasCoords,
   MineRendererType,
   Planet,
-  RendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
-import { Renderer } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { Renderer } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 
 export class MineRenderer implements MineRendererType {
   manager: GameGLManager;
@@ -39,7 +40,7 @@ export class MineRenderer implements MineRendererType {
 
     const now = EngineUtils.getNow() * 0.3;
 
-    if (level >= 1)
+    if (level >= 1) {
       beltRenderer.queueBeltAtIdx(
         planet,
         center,
@@ -49,7 +50,8 @@ export class MineRenderer implements MineRendererType {
         now * 0.5,
         true,
       );
-    if (level >= 3)
+    }
+    if (level >= 3) {
       beltRenderer.queueBeltAtIdx(
         planet,
         center,
@@ -59,7 +61,8 @@ export class MineRenderer implements MineRendererType {
         -now * 0.5,
         true,
       );
-    if (level >= 5)
+    }
+    if (level >= 5) {
       beltRenderer.queueBeltAtIdx(
         planet,
         center,
@@ -69,7 +72,8 @@ export class MineRenderer implements MineRendererType {
         -now * 0.3,
         true,
       );
-    if (level >= 7)
+    }
+    if (level >= 7) {
       beltRenderer.queueBeltAtIdx(
         planet,
         center,
@@ -79,6 +83,7 @@ export class MineRenderer implements MineRendererType {
         now * 0.3,
         true,
       );
+    }
     if (level === MAX_PLANET_LEVEL) {
       beltRenderer.queueBeltAtIdx(planet, center, radius, silver, 2, 0, true);
     }
@@ -104,7 +109,11 @@ export class MineRenderer implements MineRendererType {
 
   public setUniforms() {
     const { beltRenderer, mineBodyRenderer } = this.manager.renderer;
-    if (mineBodyRenderer.setUniforms) mineBodyRenderer.setUniforms();
-    if (beltRenderer.setUniforms) beltRenderer.setUniforms();
+    if (mineBodyRenderer.setUniforms) {
+      mineBodyRenderer.setUniforms();
+    }
+    if (beltRenderer.setUniforms) {
+      beltRenderer.setUniforms();
+    }
   }
 }

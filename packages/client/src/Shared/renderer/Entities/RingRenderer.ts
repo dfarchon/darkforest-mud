@@ -1,19 +1,20 @@
-import {
+import type {
   CanvasCoords,
   GameViewport,
   Planet,
-  RendererType,
   RGBVec,
   RingRendererType,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
 import {
   propsFromIdx,
-  RingProps,
   RING_PROGRAM_DEFINITION,
+  type RingProps,
 } from "../Programs/RingProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class RingRenderer

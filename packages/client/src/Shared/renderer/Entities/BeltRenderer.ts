@@ -1,19 +1,20 @@
-import {
+import type {
   BeltRendererType,
   CanvasCoords,
   Planet,
-  RendererType,
   RGBVec,
   WorldCoords,
 } from "@df/types";
+import { RendererType } from "@df/types";
 import autoBind from "auto-bind";
+
 import { EngineUtils } from "../EngineUtils";
 import {
-  BeltProps,
   BELT_PROGRAM_DEFINITION,
+  type BeltProps,
   propsFromIdx,
 } from "../Programs/BeltProgram";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
 
 export class BeltRenderer

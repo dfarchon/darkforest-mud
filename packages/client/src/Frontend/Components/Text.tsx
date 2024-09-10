@@ -1,21 +1,22 @@
 import { BLOCK_EXPLORER_URL } from "@df/constants";
-import { isLocatable } from "@df/gamelogic";
-import { artifactName, getPlanetName } from "@df/procedural";
-import {
-  Artifact,
-  ArtifactId,
-  Chunk,
-  Planet,
+// import { isLocatable } from "@df/gamelogic";
+// import { artifactName, getPlanetName } from "@df/procedural";
+import type {
+  // Artifact,
+  // ArtifactId,
+  // Chunk,
+  // Planet,
   Transaction,
   WorldCoords,
 } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-// import Viewport from '../Game/Viewport';
+
 import dfstyles from "../Styles/dfstyles";
-// import { useUIManager } from '../Utils/AppHooks';
-import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { Link } from "./CoreUI";
+// import Viewport from '../Game/Viewport';
+// import { useUIManager } from '../Utils/AppHooks';
+// import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 
 export function BlinkCursor() {
   const [visible, setVisible] = useState<boolean>(false);

@@ -1,6 +1,8 @@
-import { ModalId } from "@df/types";
+import type { ModalId } from "@df/types";
 import * as React from "react";
 import ReactDOM from "react-dom";
+
+// @ts-expect-error We need to add ModalPane code
 import { ModalPane } from "../Views/ModalPane";
 
 /**

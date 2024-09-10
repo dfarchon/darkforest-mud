@@ -1,19 +1,19 @@
+import { useStore } from "@hooks/useStore";
 import { transportObserver } from "@latticexyz/common";
 import { transactionQueue } from "@latticexyz/common/actions";
+import type { NetworkConfig } from "@mud/getNetworkConfig";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import { useEffect } from "react";
 import {
+  type ClientConfig,
   createPublicClient,
   fallback,
-  webSocket,
-  http,
   getContract,
-  Hex,
-  ClientConfig,
+  type Hex,
+  http,
+  webSocket,
 } from "viem";
 import { useWalletClient } from "wagmi";
-import { NetworkConfig } from "@mud/getNetworkConfig";
-import { useStore } from "@hooks/useStore";
 
 export type Props = {
   networkConfig: NetworkConfig;
@@ -23,7 +23,9 @@ export type Props = {
 export function ExternalWalletProvider({ networkConfig, children }: Props) {
   const { data: externalWalletClient } = useWalletClient();
   useEffect(() => {
-    if (networkConfig.useBurner) return;
+    if (networkConfig.useBurner) {
+      return;
+    }
 
     if (!externalWalletClient) {
       useStore.setState({

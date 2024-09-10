@@ -1,16 +1,16 @@
 import { isUnconfirmedMoveTx } from "@df/serde";
-import {
+import type {
   Artifact,
-  ArtifactRarity,
   CanvasCoords,
   GameViewport,
   RenderedArtifact,
-  RendererType,
   RGBAVec,
   RGBVec,
   SpriteRendererType,
   WorldCoords,
 } from "@df/types";
+import { ArtifactRarity, RendererType } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
 import { EngineUtils } from "../EngineUtils";
 import { SPRITE_PROGRAM_DEFINITION } from "../Programs/SpriteProgram";
@@ -18,10 +18,10 @@ import {
   loadArtifactAtlas,
   loadArtifactThumbAtlas,
   spriteFromArtifact,
-  SpriteRectangle,
+  type SpriteRectangle,
 } from "../TextureManager";
 import { GenericRenderer } from "../WebGL/GenericRenderer";
-import { WebGLManager } from "../WebGL/WebGLManager";
+import type { WebGLManager } from "../WebGL/WebGLManager";
 export class SpriteRenderer
   extends GenericRenderer<typeof SPRITE_PROGRAM_DEFINITION>
   implements SpriteRendererType
@@ -136,7 +136,9 @@ export class SpriteRenderer
     atFrame: number | undefined = undefined,
     theta: number | undefined = undefined, // rotate around [w/2, w/2]
   ) {
-    if (!this.loaded) return;
+    if (!this.loaded) {
+      return;
+    }
 
     const { rarity } = artifact;
     const shine = rarity >= ArtifactRarity.Rare;
@@ -320,7 +322,9 @@ export class SpriteRenderer
   }
 
   flush() {
-    if (!this.loaded || this.verts === 0) return;
+    if (!this.loaded || this.verts === 0) {
+      return;
+    }
 
     const { gl } = this.manager;
     gl.activeTexture(gl.TEXTURE0 + this.texIdx);

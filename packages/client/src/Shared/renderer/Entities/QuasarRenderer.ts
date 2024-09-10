@@ -1,12 +1,9 @@
-import {
-  Planet,
-  QuasarRendererType,
-  RendererType,
-  WorldCoords,
-} from "@df/types";
+import type { Planet, QuasarRendererType, WorldCoords } from "@df/types";
+import { RendererType } from "@df/types";
+
 import { EngineUtils } from "../EngineUtils";
-import { Renderer } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { Renderer } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 
 export class QuasarRenderer implements QuasarRendererType {
   manager: GameGLManager;
@@ -43,8 +40,14 @@ export class QuasarRenderer implements QuasarRendererType {
 
   public setUniforms() {
     const { quasarBodyRenderer, quasarRayRenderer } = this.renderer;
-    if (quasarRayRenderer.setUniforms) quasarRayRenderer.setUniforms();
-    if (quasarRayRenderer.setUniforms) quasarRayRenderer.setUniforms();
-    if (quasarBodyRenderer.setUniforms) quasarBodyRenderer.setUniforms();
+    if (quasarRayRenderer.setUniforms) {
+      quasarRayRenderer.setUniforms();
+    }
+    if (quasarRayRenderer.setUniforms) {
+      quasarRayRenderer.setUniforms();
+    }
+    if (quasarBodyRenderer.setUniforms) {
+      quasarBodyRenderer.setUniforms();
+    }
   }
 }

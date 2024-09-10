@@ -1,12 +1,8 @@
-import {
-  BackgroundRendererType,
-  Chunk,
-  RendererType,
-  RGBVec,
-  SpaceType,
-} from "@df/types";
-import { Renderer } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { BackgroundRendererType, Chunk, RGBVec } from "@df/types";
+import { RendererType, SpaceType } from "@df/types";
+
+import type { Renderer } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 import { RectRenderer } from "./RectRenderer";
 
 export class BackgroundRenderer implements BackgroundRendererType {
@@ -44,7 +40,9 @@ export class BackgroundRenderer implements BackgroundRendererType {
   ): void {
     // upload current camera transform to shader
     const { unminedRenderer, spaceRenderer, perlinRenderer } = this.renderer;
-    if (highPerfMode) return;
+    if (highPerfMode) {
+      return;
+    }
 
     // use low quality effect if:
     // the user explicitly disabled it OR the user is in high perf mode
@@ -119,9 +117,15 @@ export class BackgroundRenderer implements BackgroundRendererType {
 
         let color: RGBVec = [255, 0, 0];
         // if (space === SpaceType.NEBULA) ctx.fillStyle = '#ff0000';
-        if (space === SpaceType.SPACE) color = [0, 255, 0];
-        if (space === SpaceType.DEEP_SPACE) color = [0, 0, 255];
-        if (space === SpaceType.DEAD_SPACE) color = [0, 255, 0];
+        if (space === SpaceType.SPACE) {
+          color = [0, 255, 0];
+        }
+        if (space === SpaceType.DEEP_SPACE) {
+          color = [0, 0, 255];
+        }
+        if (space === SpaceType.DEAD_SPACE) {
+          color = [0, 255, 0];
+        }
 
         // ctx.beginPath();
         // ctx.fillRect(x, y, 20, 20);

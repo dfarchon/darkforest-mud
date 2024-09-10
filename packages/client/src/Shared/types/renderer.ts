@@ -1,4 +1,5 @@
 import type { mat3, mat4 } from "gl-matrix";
+
 import type { Artifact, RenderedArtifact } from "./artifact";
 import type { HatType } from "./hat";
 import type { LocationId } from "./identifier";

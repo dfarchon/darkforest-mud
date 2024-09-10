@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useWalletClient } from "wagmi";
-import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
-import {
-  RECOMMENDED_BALANCE,
-  LOW_BALANCE_THRESHOLD,
-  zeroAddress,
-} from "@wallet/Utils";
-import { formatEther, parseEther, Hex } from "viem";
-import { useMUD } from "@mud/MUDContext";
 import { Btn } from "@frontend/Components/Btn";
+import { Spacer, Title } from "@frontend/Components/CoreUI";
 import { Modal } from "@frontend/Components/Modal";
-import { Title, Spacer } from "@frontend/Components/CoreUI";
 import { Green, Red } from "@frontend/Components/Text";
+import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
+import { useMUD } from "@mud/MUDContext";
+import {
+  LOW_BALANCE_THRESHOLD,
+  RECOMMENDED_BALANCE,
+  zeroAddress,
+} from "@wallet/utils";
+import { useEffect, useState } from "react";
+import { formatEther, type Hex, parseEther } from "viem";
+import { useWalletClient } from "wagmi";
 
 export const WalletPane = ({ onClose }: { onClose: () => void }) => {
   const {
@@ -62,7 +62,9 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
   ]);
 
   const transferToBurner = async () => {
-    if (!burnerWalletClient || !walletClient) return;
+    if (!burnerWalletClient || !walletClient) {
+      return;
+    }
     const value = parseEther((transferAmount ?? 0).toString());
     try {
       const gasLimit = 21000; // Typical gas limit for simple ETH transfers
@@ -80,7 +82,9 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
   };
 
   const drainBurner = async () => {
-    if (!burnerWalletClient || !walletClient) return;
+    if (!burnerWalletClient || !walletClient) {
+      return;
+    }
     const value = burnerBalance; // Draining all funds
     try {
       await burnerWalletClient.sendTransaction({

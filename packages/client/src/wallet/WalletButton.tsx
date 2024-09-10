@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { CustomConnectButton } from "@wallet/CustomConnectButton";
-import { useAccount, useDisconnect, useWalletClient } from "wagmi";
-import { formatAddress } from "./Utils";
 import { getNetworkConfig } from "@mud/getNetworkConfig";
-import { WalletPane } from "./WalletPane";
 import { useMUD } from "@mud/MUDContext";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import React, { useState } from "react";
+import { useAccount, useDisconnect, useWalletClient } from "wagmi";
+
+import { formatAddress } from "./utils";
+import { WalletPane } from "./WalletPane";
 
 export const WalletButton: React.FC = () => {
   const { isConnected, address, chain } = useAccount();

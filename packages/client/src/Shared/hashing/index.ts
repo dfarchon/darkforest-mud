@@ -29,23 +29,23 @@ import { Fraction } from "./fractions/bigFraction";
 import mimcHash, { mimcSponge, modPBigInt, modPBigIntNative } from "./mimc";
 import {
   getRandomGradientAt,
-  IntegerVector,
+  type IntegerVector,
   MAX_PERLIN_VALUE,
   perlin,
   rand,
 } from "./perlin";
 
 export {
+  fakeHash,
+  Fraction,
+  getRandomGradientAt,
+  type IntegerVector,
+  MAX_PERLIN_VALUE,
   mimcHash,
   mimcSponge,
-  IntegerVector,
-  perlin,
-  rand,
-  getRandomGradientAt,
   modPBigInt,
   modPBigIntNative,
-  fakeHash,
+  perlin,
+  rand,
   seededRandom,
-  Fraction,
-  MAX_PERLIN_VALUE,
 };

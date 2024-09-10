@@ -1,17 +1,11 @@
 import { isLocatable } from "@df/gamelogic";
 import { isUnconfirmedMoveTx } from "@df/serde";
-import {
-  ArtifactType,
-  Planet,
-  RendererType,
-  RenderZIndex,
-  RGBVec,
-  UIRendererType,
-  WorldCoords,
-} from "@df/types";
+import type { Planet, RGBVec, UIRendererType, WorldCoords } from "@df/types";
+import { ArtifactType, RendererType, RenderZIndex } from "@df/types";
+
 import { engineConsts } from "./EngineConsts";
-import { Renderer } from "./Renderer";
-import { GameGLManager } from "./WebGL/GameGLManager";
+import type { Renderer } from "./Renderer";
+import type { GameGLManager } from "./WebGL/GameGLManager";
 
 const { orangeA, red, redA, white, whiteA, purpleA, blueA, pinkA, sensaichaA } =
   engineConsts.colors;
@@ -39,6 +33,7 @@ export class UIRenderer implements UIRendererType {
       context: uiManager,
       lineRenderer: lR,
       textRenderer: tR,
+      // @ts-expect-error `cr` variable seems to be unused, double check and remove if redundant
       circleRenderer: cR,
     } = this.renderer;
     const mouseDownPlanet = uiManager.getMouseDownPlanet();
@@ -140,7 +135,9 @@ export class UIRenderer implements UIRendererType {
     const { context: uiManager } = this.renderer;
     const selectedCoords = uiManager.getSelectedCoords();
     const selectedPlanet = uiManager.getSelectedPlanet();
-    if (!selectedPlanet || !selectedCoords) return;
+    if (!selectedPlanet || !selectedCoords) {
+      return;
+    }
 
     redA[3] = 255;
     this.queueRectAtPlanet(selectedPlanet, selectedCoords, red);
@@ -151,7 +148,9 @@ export class UIRenderer implements UIRendererType {
 
     const hoverCoords = uiManager.getHoveringOverCoords();
     const hoverPlanet = uiManager.getHoveringOverPlanet();
-    if (!hoverCoords) return;
+    if (!hoverCoords) {
+      return;
+    }
     if (!hoverPlanet) {
       rectRenderer.queueRectCenterWorld(hoverCoords, 1, 1, white, 2);
     } else {

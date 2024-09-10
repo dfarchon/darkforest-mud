@@ -1,15 +1,23 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
     "types": ["vite/client"],
-    "target": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "jsx": "react-jsx",
+    "module": "ESNext",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "strict": true,
-    "baseUrl": ".",
+    "strictPropertyInitialization": false,
+    "useDefineForClassFields": false,
+    "noErrorTruncation": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "jsx": "react-jsx",
     "paths": {
       "@df/*": ["./src/Shared/*"],
       "@mud/*": ["./src/mud/*"],
@@ -17,9 +25,11 @@
       "@wallet/*": ["./src/wallet/*"],
       "@frontend/*": ["./src/Frontend/*"],
       "@backend/*": ["./src/Backend/*"]
-    },
-    "strictPropertyInitialization": false,
-    "useDefineForClassFields": false
+    }
   },
-  "include": ["src"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "exclude": [
+    // should be moved into a publishable separate package
+    "./src/Shared/snarks/*"
+  ]
 }

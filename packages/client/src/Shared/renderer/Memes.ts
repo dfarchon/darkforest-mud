@@ -33,18 +33,21 @@ const chunZhen = {
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const iKunBird = {
   legacy: false,
   topLayer: [URL + "/img/meme/iKunBird.png"],
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const mike = {
   legacy: false,
   topLayer: [URL + "/img/meme/mike.png"],
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const panda = {
   legacy: false,
   topLayer: [URL + "/img/meme/panda.png"],
@@ -57,6 +60,7 @@ const pepe = {
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const pigMan = {
   legacy: false,
   topLayer: [URL + "/img/meme/pigMan.png"],
@@ -69,18 +73,21 @@ const robotCat = {
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const taiKuLa = {
   legacy: false,
   topLayer: [URL + "/img/meme/taiKuLa.png"],
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const wojak1 = {
   legacy: false,
   topLayer: [URL + "/img/meme/wojak1.png"],
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const wojak2 = {
   legacy: false,
   topLayer: [URL + "/img/meme/wojak2.png"],
@@ -93,6 +100,7 @@ const wojak3 = {
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const wojak4 = {
   legacy: false,
   topLayer: [URL + "/img/meme/wojak4.png"],
@@ -111,6 +119,7 @@ const Harold = {
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const TheMerge = {
   legacy: false,
   topLayer: [URL + "/img/meme/TheMerge.png"],
@@ -123,12 +132,14 @@ const Undream = {
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const KakaiKiki = {
   legacy: false,
   topLayer: [URL + "/img/meme/KaikaiKiki.png"],
   bottomLayer: [],
 };
 
+// @ts-expect-error - unused
 const SuccessfulKid = {
   legacy: false,
   topLayer: [URL + "/img/meme/sucessful-kid.png"],

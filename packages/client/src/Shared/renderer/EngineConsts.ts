@@ -1,5 +1,5 @@
 import { hslToRgb } from "@df/procedural";
-import { RGBAVec, RGBVec } from "@df/types";
+import type { RGBAVec, RGBVec } from "@df/types";
 
 export const engineConsts = {
   fontStyle: "64px monospace",

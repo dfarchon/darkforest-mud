@@ -1,6 +1,7 @@
-import { PinkZoneRendererType, RendererType } from "@df/types";
-import { Renderer, RendererGameContext } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import { type PinkZoneRendererType, RendererType } from "@df/types";
+
+import type { Renderer, RendererGameContext } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 
 export class PinkZoneRenderer implements PinkZoneRendererType {
   rendererType = RendererType.PinkZone;

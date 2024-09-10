@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useMUD } from "@mud/MUDContext";
 import { useComponentValue } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { useMUD } from "@mud/MUDContext";
+import { useEffect, useState } from "react";
 
 export const PlayPauseTickButton = () => {
   const {

@@ -1,6 +1,7 @@
-import { BlueZoneRendererType, RendererType } from "@df/types";
-import { Renderer, RendererGameContext } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import { type BlueZoneRendererType, RendererType } from "@df/types";
+
+import type { Renderer, RendererGameContext } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 
 export class BlueZoneRenderer implements BlueZoneRendererType {
   rendererType = RendererType.BlueZone;

@@ -9,7 +9,10 @@
     "dev": "wait-port localhost:8545 && vite",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "test": "tsc --noEmit"
+    "test": "echo 'tests not implemented'",
+    "lint": "pnpm run lint:eslint && pnpm run lint:typecheck",
+    "lint:eslint": "eslint --ext .js,.ts,tsx,.json src",
+    "lint:typecheck": "tsc"
   },
   "dependencies": {
     "@latticexyz/block-logs-stream": "2.2.2",
@@ -39,7 +42,6 @@
     "fastq": "1.17.1",
     "gl-matrix": "3.4.3",
     "lit": "2.1.2",
-    "lodash": "4.17.15",
     "mnemonist": "0.39.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -58,15 +60,14 @@
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
     "@types/styled-components": "5.1.34",
-    "@vitejs/plugin-react": "3.1.0",
+    "@vitejs/plugin-react": "4.3.1",
     "autoprefixer": "10.4.20",
-    "eslint": "8.57.0",
     "eslint-plugin-react": "7.31.11",
     "eslint-plugin-react-hooks": "4.6.0",
     "postcss": "8.4.41",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "tailwindcss": "3.4.10",
-    "vite": "4.2.1",
+    "vite": "5.4.3",
     "wait-port": "1.0.4"
   }
 }

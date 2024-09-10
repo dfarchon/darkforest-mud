@@ -1,5 +1,5 @@
 import { Fraction, getRandomGradientAt, rand } from "@df/hashing";
-import { Abstract, PerlinConfig, Rectangle, WorldCoords } from "@df/types";
+import type { Abstract, PerlinConfig, Rectangle, WorldCoords } from "@df/types";
 
 /* types */
 type Vector = { x: number; y: number };
@@ -34,7 +34,9 @@ export function isGridPoint(
   scale: number,
 ): coords is GridPoint {
   const isGrid = coords.x % scale === 0 && coords.y % scale === 0;
-  if (!isGrid) throw "tried to get gradient of a non-grid point!";
+  if (!isGrid) {
+    throw "tried to get gradient of a non-grid point!";
+  }
 
   return isGrid;
 }
@@ -55,8 +57,9 @@ export function getPerlinChunks(
   lengthScale: number,
 ): Iterable<Rectangle> {
   const { bottomLeft, sideLength } = footprint;
-  if (sideLength <= lengthScale)
+  if (sideLength <= lengthScale) {
     throw "getPerlinChunks called on a small chunk";
+  }
 
   const perlinChunks: Set<Rectangle> = new Set();
 
@@ -127,7 +130,9 @@ export function getCachedGradient(
   }
 
   const cached = gradientCache.get(gradKey);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   let res = getRandomGradientAt(
     {

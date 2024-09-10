@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import styled, { css } from "styled-components";
+
 import { Link } from "../Components/CoreUI";
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
@@ -21,7 +22,10 @@ import {
   Text,
   White,
 } from "../Components/Text";
-import { LoadingBarHandle, TextLoadingBar } from "../Components/TextLoadingBar";
+import {
+  type LoadingBarHandle,
+  TextLoadingBar,
+} from "../Components/TextLoadingBar";
 import dfstyles from "../Styles/dfstyles";
 import { isFirefox } from "../Utils/BrowserChecks";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
@@ -309,7 +313,9 @@ function TerminalImpl(
       <Prompt
         userInputEnabled={userInputEnabled}
         onClick={() => {
-          if (userInputEnabled) inputRef.current.focus();
+          if (userInputEnabled) {
+            inputRef.current.focus();
+          }
         }}
       >
         <Green>{promptCharacter + " "}</Green>

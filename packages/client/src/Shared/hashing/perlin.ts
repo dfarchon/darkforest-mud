@@ -1,6 +1,7 @@
-import { PerlinConfig } from "@df/types";
-import BigInt, { BigInteger } from "big-integer";
-import { Fraction, IFraction } from "./fractions/bigFraction";
+import type { PerlinConfig } from "@df/types";
+import BigInt, { type BigInteger } from "big-integer";
+
+import { Fraction, type IFraction } from "./fractions/bigFraction";
 import { perlinRandHash } from "./mimc";
 
 const TRACK_LCM = false;
@@ -217,8 +218,12 @@ export const MAX_PERLIN_VALUE = 32;
  */
 export function perlin(coords: IntegerVector, options: PerlinConfig) {
   let { x, y } = coords;
-  if (options.mirrorY) x = Math.abs(x); // mirror across the vertical y-axis
-  if (options.mirrorX) y = Math.abs(y); // mirror across the horizontal x-axis
+  if (options.mirrorY) {
+    x = Math.abs(x);
+  } // mirror across the vertical y-axis
+  if (options.mirrorX) {
+    y = Math.abs(y);
+  } // mirror across the horizontal x-axis
   const fractionalP = { x: new Fraction(x), y: new Fraction(y) };
   let ret = new Fraction(0);
   const pValues: IFraction[] = [];
@@ -241,7 +246,9 @@ export function perlin(coords: IntegerVector, options: PerlinConfig) {
   runningLCM = updateLCM(runningLCM, BigInt(ret.d));
 
   ret = ret.mul(MAX_PERLIN_VALUE / 2);
-  if (options.floor) ret = ret.floor();
+  if (options.floor) {
+    ret = ret.floor();
+  }
   ret = ret.add(MAX_PERLIN_VALUE / 2);
 
   const out = ret.valueOf();

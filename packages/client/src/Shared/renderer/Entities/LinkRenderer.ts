@@ -1,14 +1,9 @@
-import {
-  ArtifactId,
-  ArtifactType,
-  LinkRendererType,
-  LocationId,
-  RendererType,
-  RenderZIndex,
-} from "@df/types";
+import type { ArtifactId, LinkRendererType, LocationId } from "@df/types";
+import { ArtifactType, RendererType, RenderZIndex } from "@df/types";
+
 import { engineConsts } from "../EngineConsts";
-import { Renderer } from "../Renderer";
-import { GameGLManager } from "../WebGL/GameGLManager";
+import type { Renderer } from "../Renderer";
+import type { GameGLManager } from "../WebGL/GameGLManager";
 const { purpleA, blueA, pinkA, sensaichaA } = engineConsts.colors;
 
 export class LinkRenderer implements LinkRendererType {
@@ -24,13 +19,14 @@ export class LinkRenderer implements LinkRendererType {
     const { context: gameUIManager } = this.renderer;
 
     for (const unconfirmedLink of gameUIManager.getUnconfirmedLinkActivations()) {
-      if (unconfirmedLink.intent.linkTo)
+      if (unconfirmedLink.intent.linkTo) {
         this.drawVoyagePath(
           unconfirmedLink.intent.locationId,
           unconfirmedLink.intent.linkTo,
           unconfirmedLink.intent.artifactId,
           false,
         );
+      }
     }
 
     for (const link of gameUIManager.getLinks()) {

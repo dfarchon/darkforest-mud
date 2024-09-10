@@ -1,8 +1,10 @@
-import { Theme } from "@spectrum-web-components/theme";
 // Only registering the themes we want to support
 import "@spectrum-web-components/theme/scale-medium.js";
 import "@spectrum-web-components/theme/theme-dark.js";
+
+import { Theme } from "@spectrum-web-components/theme";
 import { css, unsafeCSS } from "lit";
+
 import * as dfstyles from "./styles";
 
 export class DarkForestTheme extends Theme {

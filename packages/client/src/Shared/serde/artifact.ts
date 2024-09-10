@@ -1,17 +1,16 @@
 // import type { DarkForest } from "@df/contracts/typechain";
-import {
-  Artifact,
+import type {
+  // Artifact,
   ArtifactId,
-  ArtifactPointValues,
-  ArtifactRarity,
-  ArtifactType,
-  Biome,
-  VoyageId,
+  // ArtifactPointValues,
+  // VoyageId,
 } from "@df/types";
+// import { ArtifactRarity, ArtifactType, Biome } from "@df/types";
 import bigInt from "big-integer";
 import type { BigNumber as EthersBN } from "ethers";
-import { address } from "./address";
-import { locationIdFromDecStr, locationIdFromEthersBN } from "./location";
+// import type { from } from "rxjs";
+// import { address } from "./address";
+// import { locationIdFromDecStr, locationIdFromEthersBN } from "./location";
 // import { decodeUpgrade } from "./upgrade";
 
 /**
@@ -26,8 +25,12 @@ import { locationIdFromDecStr, locationIdFromEthersBN } from "./location";
 export function artifactIdFromHexStr(artifactId: string): ArtifactId {
   const artifactIdBI = bigInt(artifactId, 16);
   let ret = artifactIdBI.toString(16);
-  if (ret.length > 64) throw new Error("not a valid artifact id");
-  while (ret.length < 64) ret = "0" + ret;
+  if (ret.length > 64) {
+    throw new Error("not a valid artifact id");
+  }
+  while (ret.length < 64) {
+    ret = "0" + ret;
+  }
   return ret as ArtifactId;
 }
 
@@ -43,7 +46,9 @@ export function artifactIdFromHexStr(artifactId: string): ArtifactId {
 export function artifactIdFromDecStr(artifactId: string): ArtifactId {
   const locationBI = bigInt(artifactId);
   let ret = locationBI.toString(16);
-  while (ret.length < 64) ret = "0" + ret;
+  while (ret.length < 64) {
+    ret = "0" + ret;
+  }
   return ret as ArtifactId;
 }
 
@@ -69,7 +74,9 @@ export function artifactIdFromEthersBN(artifactId: EthersBN): ArtifactId {
  */
 export function artifactIdToDecStr(artifactId: ArtifactId): string {
   let str = artifactId.toString().toLowerCase();
-  if (str[0] === "0" && str[1] === "x") str = str.slice(2);
+  if (str[0] === "0" && str[1] === "x") {
+    str = str.slice(2);
+  }
   return bigInt(str, 16).toString(10);
 }
 

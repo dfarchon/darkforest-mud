@@ -1,8 +1,10 @@
-import { useMUD } from "@mud/MUDContext";
-import { CreatePlanetForm } from "./CreatePlanetFormTest";
+import type { PlanetType, SpaceType } from "@df/types";
+
 import { CreateMoveForm } from "./CreateMoveFormTest";
+import { CreatePlanetForm } from "./CreatePlanetFormTest";
+
 import { PlayPauseTickButton } from "./PlayPauseTickButton";
-import { PlanetType, SpaceType } from "@df/types";
+
 import { PlanetUpgradeForm } from "./PlanetUpgradeFormTest";
 import { ProofVerificationForm } from "./ProofVerificationForm";
 import { PlanetReadForm } from "./PlanetReadForm";
@@ -14,8 +16,8 @@ export const PlanetTestPage = () => {
     owner: string,
     perlin: number,
     level: number,
-    planetType: PlanetType,
-    spaceType: SpaceType,
+    planetType: number,
+    spaceType: number,
     population: number,
     silver: number,
     upgrade: number,

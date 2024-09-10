@@ -1,4 +1,4 @@
-import {
+import type {
   Artifact,
   ArtifactId,
   ArtifactType,
@@ -39,10 +39,8 @@ import {
   QuasarRendererType,
   QueuedArrival,
   RectRendererType,
-  RendererType,
   RingRendererType,
   RuinsRendererType,
-  Setting,
   SpaceRendererType,
   SpacetimeRipRendererType,
   SpaceType,
@@ -57,7 +55,9 @@ import {
   WorldCoords,
   WorldLocation,
 } from "@df/types";
+import { RendererType, Setting } from "@df/types";
 import autoBind from "auto-bind";
+
 import { AsteroidRenderer } from "./Entities/AsteroidRenderer";
 import { BackgroundRenderer } from "./Entities/BackgroundRenderer";
 import { BeltRenderer } from "./Entities/BeltRenderer";

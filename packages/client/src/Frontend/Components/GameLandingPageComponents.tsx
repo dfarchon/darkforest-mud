@@ -1,5 +1,10 @@
-import React, { Dispatch, SetStateAction, useLayoutEffect } from "react";
+import React, {
+  type Dispatch,
+  type SetStateAction,
+  useLayoutEffect,
+} from "react";
 import styled, { css } from "styled-components";
+
 import dfstyles from "../Styles/dfstyles";
 import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 
@@ -56,8 +61,11 @@ const StyledTerminalWrapper = styled.div<{
   terminalEnabled: boolean;
 }>`
   display: ${({ initRender, terminalEnabled }) => {
-    if (initRender === InitRenderState.NONE) return "block";
-    else return terminalEnabled ? "block" : "none";
+    if (initRender === InitRenderState.NONE) {
+      return "block";
+    } else {
+      return terminalEnabled ? "block" : "none";
+    }
   }};
   border-left: ${({ terminalEnabled, initRender }) =>
     terminalEnabled && initRender !== InitRenderState.NONE

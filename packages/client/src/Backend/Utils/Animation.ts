@@ -1,4 +1,5 @@
-import { DFAnimation, DFStatefulAnimation, PlanetLevel } from "@df/types";
+import type { PlanetLevel } from "@df/types";
+import { DFAnimation, DFStatefulAnimation } from "@df/types";
 import anime from "animejs";
 
 export function sinusoidalAnimation(rps: number): DFAnimation {
