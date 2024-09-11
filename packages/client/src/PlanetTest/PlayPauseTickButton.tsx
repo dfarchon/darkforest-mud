@@ -3,7 +3,7 @@ import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import { useEffect, useState } from "react";
 
-export const PlayPauseButton = () => {
+export const PlayPauseTickButton = () => {
   const {
     components: { Ticker },
     systemCalls: { unPause, pause, tick },
@@ -42,7 +42,7 @@ export const PlayPauseButton = () => {
     tick();
   };
   return (
-    <div>
+    <div className="flex gap-2">
       <button
         onClick={handleToggle}
         className={`rounded-md px-4 py-2 text-white ${

@@ -59,16 +59,17 @@ library Pairing {
   /// @return the generator of G2
   function P2() internal pure returns (G2Point memory) {
     // Original code point
-    return G2Point(
-      [
-        11559732032986387107991004021392285783925812861821192530917403151452391805634,
-        10857046999023057135944570762232829481370756359578518086990519993285655852781
-      ],
-      [
-        4082367875863433681332203403145435568316851327593401208105741076214120093531,
-        8495653923123431417604973247489272438418190587263600148770280649306958101930
-      ]
-    );
+    return
+      G2Point(
+        [
+          11559732032986387107991004021392285783925812861821192530917403151452391805634,
+          10857046999023057135944570762232829481370756359578518086990519993285655852781
+        ],
+        [
+          4082367875863433681332203403145435568316851327593401208105741076214120093531,
+          8495653923123431417604973247489272438418190587263600148770280649306958101930
+        ]
+      );
 
     /*
         // Changed by Jordi point
@@ -103,7 +104,9 @@ library Pairing {
       success := staticcall(sub(gas(), 2000), 6, input, 0xc0, r, 0x60)
       // Use "invalid" to make gas estimation work
       switch success
-      case 0 { invalid() }
+      case 0 {
+        invalid()
+      }
     }
     require(success, "pairing-add-failed");
   }
@@ -121,7 +124,9 @@ library Pairing {
       success := staticcall(sub(gas(), 2000), 7, input, 0x80, r, 0x60)
       // Use "invalid" to make gas estimation work
       switch success
-      case 0 { invalid() }
+      case 0 {
+        invalid()
+      }
     }
     require(success, "pairing-mul-failed");
   }
@@ -150,18 +155,21 @@ library Pairing {
       success := staticcall(sub(gas(), 2000), 8, add(input, 0x20), mul(inputSize, 0x20), out, 0x20)
       // Use "invalid" to make gas estimation work
       switch success
-      case 0 { invalid() }
+      case 0 {
+        invalid()
+      }
     }
     require(success, "pairing-opcode-failed");
     return out[0] != 0;
   }
 
   /// Convenience method for a pairing check for two pairs.
-  function pairingProd2(G1Point memory a1, G2Point memory a2, G1Point memory b1, G2Point memory b2)
-    internal
-    view
-    returns (bool)
-  {
+  function pairingProd2(
+    G1Point memory a1,
+    G2Point memory a2,
+    G1Point memory b1,
+    G2Point memory b2
+  ) internal view returns (bool) {
     G1Point[] memory p1 = new G1Point[](2);
     G2Point[] memory p2 = new G2Point[](2);
     p1[0] = a1;

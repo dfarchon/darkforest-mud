@@ -19,11 +19,11 @@ contract PlanetSystem is System, Errors {
    * @param perlin Perlin noise
    * @param distanceSquare Square of distance to universe center
    */
-  function readPlanet(uint256 planetHash, uint256 perlin, uint256 distanceSquare)
-    public
-    view
-    returns (Planet memory planet)
-  {
+  function readPlanet(
+    uint256 planetHash,
+    uint256 perlin,
+    uint256 distanceSquare
+  ) public view returns (Planet memory planet) {
     planet.planetHash = planetHash;
     planet.perlin = perlin;
     planet.distSquare = distanceSquare;
@@ -51,9 +51,14 @@ contract PlanetSystem is System, Errors {
    * @param defenseUpgrades Times of defense upgrades
    */
 
-  function upgradePlanet(uint256 planetHash, uint256 rangeUpgrades, uint256 speedUpgrades, uint256 defenseUpgrades) public {
+  function upgradePlanet(
+    uint256 planetHash,
+    uint256 rangeUpgrades,
+    uint256 speedUpgrades,
+    uint256 defenseUpgrades
+  ) public {
     IWorld(_world()).df__tick();
-    
+
     Planet memory planet = readPlanet(planetHash);
     address executor = _msgSender();
     planet.upgrade(executor, rangeUpgrades, speedUpgrades, defenseUpgrades);
