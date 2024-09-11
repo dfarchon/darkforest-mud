@@ -4,7 +4,6 @@
  */
 
 import { getComponentValue } from "@latticexyz/recs";
-
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import type { Address } from "viem";
 
@@ -281,101 +280,101 @@ export function createSystemCalls(
   };
 
   // VERIFICATIONS FUNCTIONS
-  const verifyInitProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
-    try {
-      const result = await worldContract.write.df__verifyInitProof(
-        a,
-        b,
-        c,
-        input,
-      );
-      return result;
-    } catch (error) {
-      console.error("Error in df__verifyInitProof:", error);
-      throw error;
-    }
-  };
+  // const verifyInitProof = async (
+  //   a: bigint[],
+  //   b: bigint[][],
+  //   c: bigint[],
+  //   input: bigint[],
+  // ): Promise<`0x${string}`> => {
+  //   try {
+  //     const result = await worldContract.write.df__verifyInitProof(
+  //       a,
+  //       b,
+  //       c,
+  //       input,
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error in df__verifyInitProof:", error);
+  //     throw error;
+  //   }
+  // };
 
-  const verifyMoveProof = async (
-    proof: { a: bigint[]; b: bigint[][]; c: bigint[] },
-    moveInput: { [key: string]: bigint },
-  ): Promise<`0x${string}`> => {
-    try {
-      const result = await worldContract.write.df__verifyMoveProof(
-        proof,
-        moveInput,
-      );
-      return result;
-    } catch (error) {
-      console.error("Error in df__verifyMoveProof:", error);
-      throw error;
-    }
-  };
+  // const verifyMoveProof = async (
+  //   proof: { a: bigint[]; b: bigint[][]; c: bigint[] },
+  //   moveInput: { [key: string]: bigint },
+  // ): Promise<`0x${string}`> => {
+  //   try {
+  //     const result = await worldContract.write.df__verifyMoveProof(
+  //       proof,
+  //       moveInput,
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error in df__verifyMoveProof:", error);
+  //     throw error;
+  //   }
+  // };
 
-  const verifyBiomebaseProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
-    try {
-      const result = await worldContract.write.df__verifyBiomebaseProof(
-        a,
-        b,
-        c,
-        input,
-      );
-      return result;
-    } catch (error) {
-      console.error("Error in df__verifyBiomebaseProof:", error);
-      throw error;
-    }
-  };
+  // const verifyBiomebaseProof = async (
+  //   a: bigint[],
+  //   b: bigint[][],
+  //   c: bigint[],
+  //   input: bigint[],
+  // ): Promise<`0x${string}`> => {
+  //   try {
+  //     const result = await worldContract.write.df__verifyBiomebaseProof(
+  //       a,
+  //       b,
+  //       c,
+  //       input,
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error in df__verifyBiomebaseProof:", error);
+  //     throw error;
+  //   }
+  // };
 
-  const verifyRevealProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
-    try {
-      const result = await worldContract.write.df__verifyRevealProof(
-        a,
-        b,
-        c,
-        input,
-      );
-      return result;
-    } catch (error) {
-      console.error("Error in df__verifyRevealProof:", error);
-      throw error;
-    }
-  };
+  // const verifyRevealProof = async (
+  //   a: bigint[],
+  //   b: bigint[][],
+  //   c: bigint[],
+  //   input: bigint[],
+  // ): Promise<`0x${string}`> => {
+  //   try {
+  //     const result = await worldContract.write.df__verifyRevealProof(
+  //       a,
+  //       b,
+  //       c,
+  //       input,
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error in df__verifyRevealProof:", error);
+  //     throw error;
+  //   }
+  // };
 
-  const verifyWhitelistProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
-    try {
-      const result = await worldContract.write.df__verifyWhitelistProof(
-        a,
-        b,
-        c,
-        input,
-      );
-      return result;
-    } catch (error) {
-      console.error("Error in df__verifyWhitelistProof:", error);
-      throw error;
-    }
-  };
+  // const verifyWhitelistProof = async (
+  //   a: bigint[],
+  //   b: bigint[][],
+  //   c: bigint[],
+  //   input: bigint[],
+  // ): Promise<`0x${string}`> => {
+  //   try {
+  //     const result = await worldContract.write.df__verifyWhitelistProof(
+  //       a,
+  //       b,
+  //       c,
+  //       input,
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error in df__verifyWhitelistProof:", error);
+  //     throw error;
+  //   }
+  // };
 
   // do not forget init function calls to be accessable in MUD systems calls
   return {
@@ -386,11 +385,11 @@ export function createSystemCalls(
     pause,
     tick,
     planetUpgrade,
-    verifyInitProof,
-    verifyMoveProof,
-    verifyBiomebaseProof,
-    verifyRevealProof,
-    verifyWhitelistProof,
+    // verifyInitProof,
+    // verifyMoveProof,
+    // verifyBiomebaseProof,
+    // verifyRevealProof,
+    // verifyWhitelistProof,
     readPlanetWithHash,
     readPlanetWithHashPerlinDistance,
   };
