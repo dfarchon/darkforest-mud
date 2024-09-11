@@ -1,4 +1,4 @@
-import type { Incompatibility } from "@frontend/Utils/BrowserChecks";
+import { Incompatibility } from "@frontend/Utils/BrowserChecks";
 import styled from "styled-components";
 
 const BrowserIssue = styled.p`
