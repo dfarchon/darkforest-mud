@@ -33,6 +33,7 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
   const {
     systemCalls: { createPlanet },
     network: { playerEntity },
+    components: { Planet },
   } = useMUD();
 
   // const [planetHash, setPlanetHash] =
@@ -76,6 +77,15 @@ export const CreatePlanetForm: React.FC<CreatePlanetProps> = ({ onSubmit }) => {
       upgrade,
     );
   };
+
+  Planet.update$.subscribe((update) => {
+    console.warn("Planet Update");
+    const [nextValue, preValue] = update.value;
+    console.log("next value:");
+    console.log(nextValue);
+    console.log("pre value");
+    console.log(preValue);
+  });
 
   return (
     <div className="mx-auto max-w-md rounded-lg bg-white p-6 shadow-md">

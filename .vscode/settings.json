@@ -9,5 +9,8 @@
   // Always trim trailing whitespace
   "files.trimTrailingWhitespace": true,
   // Don't allow the solidity plugin to format because we already use prettier
-  "solidity.formatter": "none"
+  "solidity.formatter": "none",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

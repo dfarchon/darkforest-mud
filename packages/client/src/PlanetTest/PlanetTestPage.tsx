@@ -2,12 +2,10 @@ import type { PlanetType, SpaceType } from "@df/types";
 
 import { CreateMoveForm } from "./CreateMoveFormTest";
 import { CreatePlanetForm } from "./CreatePlanetFormTest";
-
-import { PlayPauseTickButton } from "./PlayPauseTickButton";
-
-import { PlanetUpgradeForm } from "./PlanetUpgradeFormTest";
-import { ProofVerificationForm } from "./ProofVerificationForm";
 import { PlanetReadForm } from "./PlanetReadForm";
+import { PlanetUpgradeForm } from "./PlanetUpgradeFormTest";
+import { PlayPauseTickButton } from "./PlayPauseTickButton";
+import { ProofVerificationForm } from "./ProofVerificationForm";
 
 export const PlanetTestPage = () => {
   // Function to handle planet creation

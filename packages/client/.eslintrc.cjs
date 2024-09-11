@@ -17,6 +17,7 @@ module.exports = {
     // "*.json",
     // We ignore the snarks folder which will be moved under ./packages/snarks
     "src/Shared/snarks/*",
+    "vite.config.ts",
   ],
   plugins: ["react", "react-hooks"],
   settings: {

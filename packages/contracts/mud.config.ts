@@ -101,11 +101,11 @@ export default defineWorld({
         // use 1 instead of true
         perlinMirrorY: "uint8",
       },
-      key: []
+      key: [],
     },
     // we restrict the type length of speed, defense, so that all fiels fit into one slot
     // if we need larger values, we can make the PlanetInitialResource table be the second
-    // metadata table, and benefit from the 2nd slot. 
+    // metadata table, and benefit from the 2nd slot.
     PlanetMetadata: {
       schema: {
         range: "uint32",
@@ -162,7 +162,7 @@ export default defineWorld({
         arrivalTime: "uint64",
         population: "uint64",
         silver: "uint64",
-        artifact: "uint256"
+        artifact: "uint256",
       },
       key: ["to", "index"],
     },
@@ -181,6 +181,6 @@ export default defineWorld({
         speed: "uint64",
       },
       key: [],
-    }
+    },
   },
 });
