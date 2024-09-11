@@ -20,13 +20,12 @@ module.exports = {
     "plugin:prettier/recommended",
   ],
   rules: {
-    curly: 2,
+    // curly: 2,
     "no-restricted-globals": ["error", "history", "location", "name"],
     // "no-nested-ternary": "error",
     // "max-params": ["error", 4],
     "prefer-const": ["error", { destructuring: "all" }],
     // "require-await": "error",
-
     "@typescript-eslint/no-import-type-side-effects": "error",
     "@typescript-eslint/consistent-type-imports": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
@@ -53,7 +52,6 @@ module.exports = {
       },
     ],
     "@typescript-eslint/no-var-requires": "warn",
-
     // we must turn off the js variants to leg the "@typescript-eslint/no-unused-vars" variant to run
     "no-unused-vars": "off",
     "no-var": "off",
@@ -76,5 +74,6 @@ module.exports = {
     // "no-only-tests/no-only-tests": "error",
     "simple-import-sort/imports": "warn",
     "simple-import-sort/exports": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
   },
 };
