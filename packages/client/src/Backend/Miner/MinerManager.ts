@@ -93,7 +93,7 @@ class MinerManager extends EventEmitter {
     minedChunksStore: ChunkStore,
     miningPattern: MiningPattern,
     worldRadius: number,
-    innerRadius: number,
+    // innerRadius: number,
     planetRarity: number,
     hashConfig: HashConfig,
     useMockHash: boolean,
@@ -103,7 +103,7 @@ class MinerManager extends EventEmitter {
     this.minedChunksStore = minedChunksStore;
     this.miningPattern = miningPattern;
     this.worldRadius = worldRadius;
-    this.innerRadius = innerRadius;
+    // this.innerRadius = innerRadius;
     this.planetRarity = planetRarity;
     this.workers = [];
     this.hashConfig = hashConfig;
@@ -139,7 +139,7 @@ class MinerManager extends EventEmitter {
     chunkStore: ChunkStore,
     miningPattern: MiningPattern,
     worldRadius: number,
-    innerRadius: number,
+    // innerRadius: number,
     planetRarity: number,
     hashConfig: HashConfig,
     useMockHash = false,
@@ -149,7 +149,7 @@ class MinerManager extends EventEmitter {
       chunkStore,
       miningPattern,
       worldRadius,
-      innerRadius,
+      // innerRadius,
       planetRarity,
       hashConfig,
       useMockHash,

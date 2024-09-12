@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { useMUD } from "@mud/MUDContext";
+import React, { useState } from "react";
 
 interface Proof {
   a: [string, string];

@@ -19,6 +19,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@df": path.resolve(__dirname, "./src/Shared"),
+      "@dfares": path.resolve(__dirname, "./src/Shared"),
       "@mud": path.resolve(__dirname, "./src/mud"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
       "@wallet": path.resolve(__dirname, "./src/wallet"),

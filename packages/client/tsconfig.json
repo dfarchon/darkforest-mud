@@ -20,6 +20,7 @@
     "jsx": "react-jsx",
     "paths": {
       "@df/*": ["./src/Shared/*"],
+      "@dfares/*": ["./src/Shared/*"],
       "@mud/*": ["./src/mud/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@wallet/*": ["./src/wallet/*"],

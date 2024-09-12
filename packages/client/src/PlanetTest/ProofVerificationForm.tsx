@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { useMUD } from "@mud/MUDContext";
+import React, { useState } from "react";
 
 type ProofType =
   | "InitProof"
@@ -47,13 +47,14 @@ export const ProofVerificationForm: React.FC = () => {
             inputValues.slice(0, 9),
           );
           break;
-        case "MoveProof":
+        case "MoveProof": {
           const moveInput = { ...inputValues }; // Adjust this based on actual MoveInput structure
           result = await verifyMoveProof(
             { a: aValues, b: bValues, c: cValues },
             moveInput,
           );
           break;
+        }
         case "BiomebaseProof":
           result = await verifyBiomebaseProof(
             aValues,

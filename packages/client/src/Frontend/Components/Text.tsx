@@ -1,22 +1,22 @@
 import { BLOCK_EXPLORER_URL } from "@df/constants";
-// import { isLocatable } from "@df/gamelogic";
-// import { artifactName, getPlanetName } from "@df/procedural";
+import { isLocatable } from "@df/gamelogic";
+import { artifactName, getPlanetName } from "@df/procedural";
 import type {
-  // Artifact,
-  // ArtifactId,
-  // Chunk,
-  // Planet,
+  Artifact,
+  ArtifactId,
+  Chunk,
+  Planet,
   Transaction,
   WorldCoords,
 } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
+import Viewport from "../Game/Viewport";
 import dfstyles from "../Styles/dfstyles";
+import { useUIManager } from "../Utils/AppHooks";
+import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { Link } from "./CoreUI";
-// import Viewport from '../Game/Viewport';
-// import { useUIManager } from '../Utils/AppHooks';
-// import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 
 export function BlinkCursor() {
   const [visible, setVisible] = useState<boolean>(false);
@@ -103,47 +103,60 @@ export function TxLink({ tx }: { tx: Transaction }) {
   return <Sub>-</Sub>;
 }
 
-// export function CenterPlanetLink({
-//   planet,
-//   children,
-// }: {
-//   planet: Planet;
-//   children: React.ReactNode;
-// }) {
-//   const uiManager = useUIManager();
-//   return (
-//     <a>
-//       <u
-//         onClick={() => {
-//           if (isLocatable(planet)) {
-//             uiManager.centerPlanet(planet);
-//           }
-//         }}
-//       >
-//         {children}
-//       </u>
-//     </a>
-//   );
-// }
+export function CenterPlanetLink({
+  planet,
+  children,
+}: {
+  planet: Planet;
+  children: React.ReactNode;
+}) {
+  const uiManager = useUIManager();
+  return (
+    <a>
+      <u
+        onClick={() => {
+          if (isLocatable(planet)) {
+            uiManager.centerPlanet(planet);
+          }
+        }}
+      >
+        {children}
+      </u>
+    </a>
+  );
+}
 
-// export function ArtifactNameLink({ id }: { id: ArtifactId }) {
-//   const uiManager = useUIManager();
-//   const artifact: Artifact | undefined = uiManager && uiManager.getArtifactWithId(id);
+export function ArtifactNameLink({ id }: { id: ArtifactId }) {
+  const uiManager = useUIManager();
+  const artifact: Artifact | undefined =
+    uiManager && uiManager.getArtifactWithId(id);
 
-//   const click = () => {
-//     UIEmitter.getInstance().emit(UIEmitterEvent.ShowArtifact, artifact);
-//   };
+  const click = () => {
+    UIEmitter.getInstance().emit(UIEmitterEvent.ShowArtifact, artifact);
+  };
 
-//   return <Link onClick={click}>{artifactName(artifact)}</Link>;
-// }
+  return <Link onClick={click}>{artifactName(artifact)}</Link>;
+}
 
-// export function PlanetNameLink({ planet }: { planet: Planet }) {
-//   return <CenterPlanetLink planet={planet}>{getPlanetName(planet)}</CenterPlanetLink>;
-// }
+export function PlanetNameLink({ planet }: { planet: Planet }) {
+  return (
+    <CenterPlanetLink planet={planet}>{getPlanetName(planet)}</CenterPlanetLink>
+  );
+}
 
-// export function CenterChunkLink({ chunk, children }: { chunk: Chunk; children: React.ReactNode }) {
-//   return <Link onClick={() => Viewport.getInstance().centerChunk(chunk)}>{children}</Link>;
-// }
+export function CenterChunkLink({
+  chunk,
+  children,
+}: {
+  chunk: Chunk;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link onClick={() => Viewport.getInstance().centerChunk(chunk)}>
+      {children}
+    </Link>
+  );
+}
 
 export function FAQ04Link({ children }: { children: React.ReactNode }) {
   return <Link to={"https://blog.zkga.me/df-04-faq"}>{children} </Link>;

@@ -18,6 +18,7 @@ module.exports = {
     // We ignore the snarks folder which will be moved under ./packages/snarks
     "src/Shared/snarks/*",
     "vite.config.ts",
+    "src/Backend/Plugins/minimapSpawn.js",
   ],
   plugins: ["react", "react-hooks"],
   settings: {

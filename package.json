@@ -20,7 +20,7 @@
     "@commitlint/config-conventional": "19.2.2",
     "@latticexyz/cli": "2.2.2",
     "@latticexyz/common": "2.2.2",
-    "@latticexyz/explorer": "^2.2.2",
+    "@latticexyz/explorer": "2.2.2",
     "@latticexyz/store-indexer": "2.2.2",
     "@types/debug": "4.1.7",
     "@typescript-eslint/eslint-plugin": "7.18.0",
