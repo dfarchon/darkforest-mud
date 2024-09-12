@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 import { G1Point, G2Point, Proof, VerificationKey, Pairing } from "../lib/SnarkProof.sol";
-import { MoveInput } from "../lib/VerificationInput.sol";
+import { MoveInput, SpawnInput } from "../lib/VerificationInput.sol";
 import { TempConfigSet } from "../codegen/index.sol";
 
 // todo store verification key in tables
@@ -24,7 +24,7 @@ contract VerifySystem is System {
     return true;
   }
 
-  function InitVerifyingKey() internal pure returns (VerificationKey memory vk) {
+  function SpawnVerifyingKey() internal pure returns (VerificationKey memory vk) {
     vk.alfa1 = G1Point(
       20491192805390485299153009773594534940189261866228447918068658471970481763042,
       9383485363053290200918347156157836566562967994039712273449902621266178545958
@@ -114,27 +114,14 @@ contract VerifySystem is System {
   }
   /// @return r  bool true if proof is valid
 
-  function verifyInitProof(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[9] memory input)
-    public
-    view
-    returns (bool)
-  {
+  function verifySpawnProof(Proof memory proof, SpawnInput memory input) public view returns (bool) {
     // check whether to skip proof verification
     if (TempConfigSet.getSkipProofCheck()) {
       return true;
     }
 
-    Proof memory proof;
-    proof.A = G1Point(a[0], a[1]);
-    proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
-    proof.C = G1Point(c[0], c[1]);
-
-    VerificationKey memory vk = InitVerifyingKey();
-    uint256[] memory inputValues = new uint256[](input.length);
-    for (uint256 i = 0; i < input.length; i++) {
-      inputValues[i] = input[i];
-    }
-    return verify(inputValues, proof, vk);
+    input.validate();
+    return verify(input.flatten(), proof, SpawnVerifyingKey());
   }
 
   function MoveVerifyingKey() internal pure returns (VerificationKey memory vk) {
@@ -440,11 +427,12 @@ contract VerifySystem is System {
   }
   /// @return r  bool true if proof is valid
 
-  function verifyRevealProof(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[9] memory input)
-    public
-    view
-    returns (bool)
-  {
+  function verifyRevealProof(
+    uint256[2] memory a,
+    uint256[2][2] memory b,
+    uint256[2] memory c,
+    uint256[9] memory input
+  ) public view returns (bool) {
     // check whether to skip proof verification
     if (TempConfigSet.getSkipProofCheck()) {
       return true;

@@ -16,22 +16,43 @@ export default defineWorld({
     TestOnlySystem: {
       openAccess: true,
     },
+    DfDelegationControlSystem: {
+      name: "DfDelegationCtrl",
+    },
   },
   tables: {
-    // todo remove this table and corresponding increment system
-    PlayersTable: {
+    Counter: {
+      schema: {
+        player: "uint64",
+      },
+      key: [],
+    },
+    Player: {
       schema: {
         owner: "address",
-        linked: "address",
-        minted: "uint256",
+        burner: "address",
+        index: "uint32",
+        createdAt: "uint64",
         name: "string",
       },
       key: ["owner"],
+    },
+    BurnerToPlayer: "address",
+    NameToPlayer: "address",
+    SpawnPlanet: {
+      schema: {
+        player: "address",
+        planet: "uint256",
+      },
+      key: ["player"],
     },
     TempConfigSet: {
       schema: {
         biomeCheck: "bool",
         skipProofCheck: "bool",
+        playerLimit: "uint32",
+        spawnPerlinMin: "uint8",
+        spawnPerlinMax: "uint8",
       },
       key: [],
     },
@@ -101,11 +122,11 @@ export default defineWorld({
         // use 1 instead of true
         perlinMirrorY: "uint8",
       },
-      key: []
+      key: [],
     },
     // we restrict the type length of speed, defense, so that all fiels fit into one slot
     // if we need larger values, we can make the PlanetInitialResource table be the second
-    // metadata table, and benefit from the 2nd slot. 
+    // metadata table, and benefit from the 2nd slot.
     PlanetMetadata: {
       schema: {
         range: "uint32",
@@ -162,7 +183,7 @@ export default defineWorld({
         arrivalTime: "uint64",
         population: "uint64",
         silver: "uint64",
-        artifact: "uint256"
+        artifact: "uint256",
       },
       key: ["to", "index"],
     },
@@ -181,6 +202,6 @@ export default defineWorld({
         speed: "uint64",
       },
       key: [],
-    }
+    },
   },
 });
