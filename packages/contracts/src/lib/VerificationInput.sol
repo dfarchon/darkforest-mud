@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { TempConfigSet, UniverseConfig, SnarkConfig, SnarkConfigData } from "../codegen/index.sol";
+import { TempConfigSet, TempConfigSetData, UniverseConfig, SnarkConfig, SnarkConfigData } from "../codegen/index.sol";
 import { InnerCircle } from "../codegen/index.sol";
 import { Errors } from "../interfaces/errors.sol";
 
@@ -37,32 +37,21 @@ struct MoveInput {
 library MoveInputLib {
   function validate(MoveInput memory input) internal view {
     if (input.universeRadius > UniverseConfig.getRadius()) {
-      revert Errors.InvalidMoveInput(4);
+      revert Errors.InvalidProofInput(3);
     }
-    SnarkConfigData memory config = SnarkConfig.get();
-    if (input.mimcHashKey != config.planetHashKey) {
-      revert Errors.InvalidMoveInput(5);
-    }
-    if (TempConfigSet.getBiomeCheck()) {
-      if (input.spaceTypeKey != config.biomeBaseKey) {
-        revert Errors.InvalidMoveInput(6);
-      }
-    } else {
-      if (input.spaceTypeKey != config.spaceTypeKey) {
-        revert Errors.InvalidMoveInput(6);
-      }
-    }
-    if (input.perlinLengthScale != config.perlinLengthScale) {
-      revert Errors.InvalidMoveInput(7);
-    }
-    if (input.perlinMirrorX != config.perlinMirrorX) {
-      revert Errors.InvalidMoveInput(8);
-    }
-    if (input.perlinMirrorY != config.perlinMirrorY) {
-      revert Errors.InvalidMoveInput(9);
+    if (
+      !CommonLib.checkSnarkAndPerlinConfig(
+        input.mimcHashKey,
+        input.spaceTypeKey,
+        input.perlinLengthScale,
+        input.perlinMirrorX,
+        input.perlinMirrorY
+      )
+    ) {
+      revert Errors.InvalidProofInput(255);
     }
     if (input.toRadiusSquare < InnerCircle.getRadius() ** 2) {
-      revert Errors.InvalidMoveInput(10);
+      revert Errors.InvalidProofInput(10);
     }
   }
 
@@ -93,5 +82,104 @@ library MoveInputLib {
     res[8] = input.perlinMirrorX;
     res[9] = input.perlinMirrorY;
     res[10] = input.toRadiusSquare;
+  }
+}
+
+using SpawnInputLib for SpawnInput global;
+
+struct SpawnInput {
+  uint256 planetHash;
+  uint256 perlin;
+  uint256 universeRadius;
+  uint256 mimcHashKey;
+  uint256 spaceTypeKey;
+  uint256 perlinLengthScale;
+  uint256 perlinMirrorX;
+  uint256 perlinMirrorY;
+  uint256 radiusSquare;
+}
+
+library SpawnInputLib {
+  function validate(SpawnInput memory input) internal view {
+    TempConfigSetData memory configSet = TempConfigSet.get();
+    if (input.perlin < configSet.spawnPerlinMin || input.perlin >= configSet.spawnPerlinMax) {
+      revert Errors.InvalidProofInput(1);
+    }
+    if (input.universeRadius > UniverseConfig.getRadius()) {
+      revert Errors.InvalidProofInput(2);
+    }
+    if (
+      !CommonLib.checkSnarkAndPerlinConfig(
+        input.mimcHashKey,
+        input.spaceTypeKey,
+        input.perlinLengthScale,
+        input.perlinMirrorX,
+        input.perlinMirrorY
+      )
+    ) {
+      revert Errors.InvalidProofInput(255);
+    }
+    if (input.radiusSquare < InnerCircle.getRadius() ** 2) {
+      revert Errors.InvalidProofInput(8);
+    }
+  }
+
+  function genFrom(SpawnInput memory input, uint256[9] memory rawInput) internal pure {
+    input.planetHash = rawInput[0];
+    input.perlin = rawInput[1];
+    input.universeRadius = rawInput[2];
+    input.mimcHashKey = rawInput[3];
+    input.spaceTypeKey = rawInput[4];
+    input.perlinLengthScale = rawInput[5];
+    input.perlinMirrorX = rawInput[6];
+    input.perlinMirrorY = rawInput[7];
+    input.radiusSquare = rawInput[8];
+  }
+
+  function flatten(SpawnInput memory input) internal pure returns (uint256[] memory res) {
+    res = new uint256[](9);
+    res[0] = input.planetHash;
+    res[1] = input.perlin;
+    res[2] = input.universeRadius;
+    res[3] = input.mimcHashKey;
+    res[4] = input.spaceTypeKey;
+    res[5] = input.perlinLengthScale;
+    res[6] = input.perlinMirrorX;
+    res[7] = input.perlinMirrorY;
+    res[8] = input.radiusSquare;
+  }
+}
+
+library CommonLib {
+  function checkSnarkAndPerlinConfig(
+    uint256 mimcHashKey,
+    uint256 spaceTypeKey,
+    uint256 perlinLengthScale,
+    uint256 perlinMirrorX,
+    uint256 perlinMirrorY
+  ) internal view returns (bool) {
+    SnarkConfigData memory config = SnarkConfig.get();
+    if (mimcHashKey != config.planetHashKey) {
+      return false;
+    }
+    if (TempConfigSet.getBiomeCheck()) {
+      if (spaceTypeKey != config.biomeBaseKey) {
+        return false;
+      }
+    } else {
+      if (spaceTypeKey != config.spaceTypeKey) {
+        return false;
+      }
+    }
+    if (perlinLengthScale != config.perlinLengthScale) {
+      return false;
+    }
+    if (perlinMirrorX != config.perlinMirrorX) {
+      return false;
+    }
+    if (perlinMirrorY != config.perlinMirrorY) {
+      return false;
+    }
+    return true;
   }
 }

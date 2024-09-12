@@ -6,6 +6,7 @@ import { console } from "forge-std/console.sol";
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { stdToml } from "forge-std/StdToml.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { SpaceType, PlanetType } from "../src/codegen/common.sol";
@@ -57,6 +58,13 @@ contract PostDeploy is Script {
 
     // set test planets
     _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
+
+    // register fallback delegation of df namespace
+    IWorld(worldAddress).registerNamespaceDelegation(
+      WorldResourceIdLib.encodeNamespace("df"),
+      WorldResourceIdLib.encode("sy", "df", "DfDelegationCtrl"),
+      new bytes(0)
+    );
 
     vm.stopBroadcast();
   }

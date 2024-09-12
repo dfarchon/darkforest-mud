@@ -29,7 +29,7 @@ contract MoveTest is MudTest {
     }
 
     // init 2 planets
-    IWorld(worldAddress).df__createPlanet(1, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(1, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(2, user2, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000, 0);
     vm.stopPrank();
   }
@@ -38,7 +38,7 @@ contract MoveTest is MudTest {
     vm.roll(200);
     Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
     Planet memory planet2 = IWorld(worldAddress).df__readPlanet(2);
-    assertEq(planet1.population, 200000);
+    assertEq(planet1.population, 300000);
     assertEq(planet1.silver, 10000);
 
     Proof memory proof;
@@ -62,13 +62,17 @@ contract MoveTest is MudTest {
       move1.population,
       ABDKMath64x64.toUInt(
         ABDKMath64x64.div(
-          ABDKMath64x64.fromUInt(100000), ABDKMath64x64.exp_2(ABDKMath64x64.divu(input.distance, planet1.range))
+          ABDKMath64x64.fromUInt(100000),
+          ABDKMath64x64.exp_2(ABDKMath64x64.divu(input.distance, planet1.range))
         ) - ABDKMath64x64.divu(planet1.populationCap, 20)
       )
     );
     assertEq(move1.silver, 1000);
     assertEq(move1.artifact, 0);
-    assertEq(_getPopulationAtTick(planet1, move1.departureTime) - 100000, PlanetTable.getPopulation(bytes32(planet1.planetHash)));
+    assertEq(
+      _getPopulationAtTick(planet1, move1.departureTime) - 100000,
+      PlanetTable.getPopulation(bytes32(planet1.planetHash))
+    );
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
 
     input.distance /= 2;
@@ -104,7 +108,10 @@ contract MoveTest is MudTest {
     index = _getIndexAt(pendingMove, 1);
     assertEq(index, 1);
     MoveData memory move3 = Move.get(bytes32(planet2.planetHash), uint8(index));
-    assertEq(_getPopulationAtTick(planet2, move2.arrivalTime) - move2.population * 100 / planet2.defense, PlanetTable.getPopulation(bytes32(planet2.planetHash)));
+    assertEq(
+      _getPopulationAtTick(planet2, move2.arrivalTime) - (move2.population * 100) / planet2.defense,
+      PlanetTable.getPopulation(bytes32(planet2.planetHash))
+    );
     assertEq(planet2.silver + move2.silver, PlanetTable.getSilver(bytes32(planet2.planetHash)));
 
     vm.roll(_getBlockNumberAtTick(move1.arrivalTime));
@@ -116,7 +123,10 @@ contract MoveTest is MudTest {
     IWorld(worldAddress).df__tick();
     Planet memory latestPlanet2 = IWorld(worldAddress).df__readPlanet(2);
     assertEq(latestPlanet2.owner, user1);
-    assertEq(latestPlanet2.population, move1.population - (_getPopulationAtTick(planet2, move1.arrivalTime) * planet2.defense / 100));
+    assertEq(
+      latestPlanet2.population,
+      move1.population - ((_getPopulationAtTick(planet2, move1.arrivalTime) * planet2.defense) / 100)
+    );
     assertEq(latestPlanet2.silver, move1.silver + planet2.silver);
 
     vm.roll(_getBlockNumberAtTick(move3.arrivalTime));
@@ -129,7 +139,7 @@ contract MoveTest is MudTest {
   }
 
   function _getIndexAt(PendingMoveData memory pendingMove, uint8 i) internal pure returns (uint8) {
-    return uint8(pendingMove.indexes >> (8 * (29 - (pendingMove.head + i) % 30)));
+    return uint8(pendingMove.indexes >> (8 * (29 - ((pendingMove.head + i) % 30))));
   }
 
   function _getBlockNumberAtTick(uint256 tick) internal view returns (uint256) {
@@ -153,7 +163,8 @@ contract MoveTest is MudTest {
         ABDKMath64x64.exp(
           ABDKMath64x64.div(
             ABDKMath64x64.mul(
-              ABDKMath64x64.mul(ABDKMath64x64.fromInt(-4), ABDKMath64x64.fromUInt(planet.populationGrowth)), time
+              ABDKMath64x64.mul(ABDKMath64x64.fromInt(-4), ABDKMath64x64.fromUInt(planet.populationGrowth)),
+              time
             ),
             ABDKMath64x64.fromUInt(planet.populationCap)
           )
@@ -166,7 +177,6 @@ contract MoveTest is MudTest {
       one
     );
 
-    return
-      ABDKMath64x64.toUInt(ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), denominator));
+    return ABDKMath64x64.toUInt(ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), denominator));
   }
 }
