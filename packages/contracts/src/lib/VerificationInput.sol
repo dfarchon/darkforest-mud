@@ -150,6 +150,61 @@ library SpawnInputLib {
   }
 }
 
+using RevealInputLib for RevealInput global;
+
+struct RevealInput {
+  uint256 planetHash;
+  uint256 perlin;
+  uint256 x;
+  uint256 y;
+  uint256 mimcHashKey;
+  uint256 spaceTypeKey;
+  uint256 perlinLengthScale;
+  uint256 perlinMirrorX;
+  uint256 perlinMirrorY;
+}
+
+library RevealInputLib {
+  function validate(RevealInput memory input) internal view {
+    if (
+      !CommonLib.checkSnarkAndPerlinConfig(
+        input.mimcHashKey,
+        input.spaceTypeKey,
+        input.perlinLengthScale,
+        input.perlinMirrorX,
+        input.perlinMirrorY
+      )
+    ) {
+      revert Errors.InvalidProofInput(255);
+    }
+  }
+
+  function genFrom(RevealInput memory input, uint256[9] memory rawInput) internal pure {
+    input.planetHash = rawInput[0];
+    input.perlin = rawInput[1];
+    input.x = rawInput[2];
+    input.y = rawInput[3];
+    input.mimcHashKey = rawInput[4];
+    input.spaceTypeKey = rawInput[5];
+    input.perlinLengthScale = rawInput[6];
+    input.perlinMirrorX = rawInput[7];
+    input.perlinMirrorY = rawInput[8];
+  }
+
+  function flatten(RevealInput memory input) internal pure returns (uint256[] memory res) {
+    res = new uint256[](9);
+    res[0] = input.planetHash;
+    res[1] = input.perlin;
+    res[2] = input.x;
+    res[3] = input.y;
+    res[4] = input.mimcHashKey;
+    res[5] = input.spaceTypeKey;
+    res[6] = input.perlinLengthScale;
+    res[7] = input.perlinMirrorX;
+    res[8] = input.perlinMirrorY;
+  }
+}
+
 library CommonLib {
   function checkSnarkAndPerlinConfig(
     uint256 mimcHashKey,
