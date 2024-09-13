@@ -53,6 +53,7 @@ export default defineWorld({
         playerLimit: "uint32",
         spawnPerlinMin: "uint8",
         spawnPerlinMax: "uint8",
+        revealCd: "uint32",
       },
       key: [],
     },
@@ -151,6 +152,19 @@ export default defineWorld({
         spaceType: "SpaceType",
       },
       key: ["spaceType", "planetType", "level"],
+    },
+    LastReveal: {
+      schema: {
+        player: "address",
+        tickNumber: "uint64",
+      },
+      key: ["player"],
+    },
+    RevealedPlanet: {
+      id: "bytes32",
+      x: "int32",
+      y: "int32",
+      revealer: "address",
     },
     Planet: {
       id: "bytes32",

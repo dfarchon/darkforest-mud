@@ -32,4 +32,6 @@ interface Errors {
   error InvalidUpgradeTarget();
   error UpgradeExceedMaxLevel();
   error NotEnoughSilverToUpgrade();
+  error InvalidRevealProof();
+  error RevealTooOften();
 }
