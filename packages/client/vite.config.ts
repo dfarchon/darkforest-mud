@@ -2,9 +2,10 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import wasm from "@rollup/plugin-wasm";
 
 export default defineConfig({
-  plugins: [react(), nodePolyfills()],
+  plugins: [react(), nodePolyfills(), wasm()],
   server: {
     port: 3000,
     fs: {
@@ -19,7 +20,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@df": path.resolve(__dirname, "./src/Shared"),
-      "@dfares": path.resolve(__dirname, "./src/Shared"),
       "@mud": path.resolve(__dirname, "./src/mud"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
       "@wallet": path.resolve(__dirname, "./src/wallet"),
@@ -30,4 +30,5 @@ export default defineConfig({
   css: {
     devSourcemap: false,
   },
+  assetsInclude: ["**/*.zkey", "**/*.wasm"],
 });

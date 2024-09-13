@@ -1,7 +1,6 @@
-import { address } from "@dfares/serde";
-import type { EthAddress } from "@dfares/types";
+import { address } from "@df/serde";
+import type { EthAddress } from "@df/types";
 import { utils } from "ethers";
-import stringify from "json-stable-stringify";
 
 /**
  * Represents an account with which the user plays the game.
@@ -28,7 +27,7 @@ const accounts: Account[] = load();
 function save() {
   localStorage.setItem(
     ADDRESS_LOCAL_STORAGE_KEY,
-    stringify(accounts.map((account) => account.address)),
+    JSON.stringify(accounts.map((account) => account.address)),
   );
 
   for (const account of accounts) {

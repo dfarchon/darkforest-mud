@@ -20,7 +20,6 @@
     "jsx": "react-jsx",
     "paths": {
       "@df/*": ["./src/Shared/*"],
-      "@dfares/*": ["./src/Shared/*"],
       "@mud/*": ["./src/mud/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@wallet/*": ["./src/wallet/*"],
@@ -28,9 +27,12 @@
       "@backend/*": ["./src/Backend/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "./src/_types/file-loader/FileWorkerTypes.ts"
+  ],
   "exclude": [
     // should be moved into a publishable separate package
-    "./src/Shared/snarks/*"
   ]
 }

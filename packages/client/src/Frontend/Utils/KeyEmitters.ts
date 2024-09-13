@@ -1,6 +1,6 @@
-import { SpecialKey } from "@dfares/constants";
-import { monomitter } from "@dfares/events";
-import { Setting } from "@dfares/types";
+import { SpecialKey } from "@df/constants";
+import { monomitter } from "@df/events";
+import { Setting } from "@df/types";
 import { useEffect, useState } from "react";
 
 import { Wrapper } from "../../Backend/Utils/Wrapper";

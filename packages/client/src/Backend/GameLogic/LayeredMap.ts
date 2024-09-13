@@ -1,10 +1,5 @@
-import { MAX_PLANET_LEVEL, MIN_PLANET_LEVEL } from "@dfares/constants";
-import type {
-  LocationId,
-  Radii,
-  WorldCoords,
-  WorldLocation,
-} from "@dfares/types";
+import { MAX_PLANET_LEVEL, MIN_PLANET_LEVEL } from "@df/constants";
+import type { LocationId, Radii, WorldCoords, WorldLocation } from "@df/types";
 import { Box, Circle, Point, QuadTree } from "js-quadtree";
 
 /**

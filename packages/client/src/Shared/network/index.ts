@@ -7,16 +7,16 @@
  * [`yarn`](https://classic.yarnpkg.com/lang/en/) by running:
  *
  * ```bash
- * npm install --save @dfares/network
+ * npm install --save @df/network
  * ```
  * ```bash
- * yarn add @dfares/network
+ * yarn add @df/network
  * ```
  *
  * When using this in a plugin, you might want to load it with [skypack](https://www.skypack.dev)
  *
  * ```js
- * import * as network from 'http://cdn.skypack.dev/@dfares/network'
+ * import * as network from 'http://cdn.skypack.dev/@df/network'
  * ```
  *
  * @packageDocumentation

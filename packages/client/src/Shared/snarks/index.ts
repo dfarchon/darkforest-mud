@@ -275,49 +275,75 @@ export function fakeProof(
 /**
  * @hidden
  */
-export const revealSnarkWasmPath = require.resolve("./reveal.wasm");
+
+// export const revealSnarkWasmPath = require.resolve("./reveal.wasm");
+
+export const revealSnarkWasmPath = new URL("./reveal.wasm", import.meta.url)
+  .href;
 
 /**
  * @hidden
  */
-export const revealSnarkZkeyPath = require.resolve("./reveal.zkey");
+// export const revealSnarkZkeyPath = require.resolve("./reveal.zkey");
+
+export const revealSnarkZkeyPath = new URL("./reveal.zkey", import.meta.url)
+  .href;
+/**
+ * @hidden
+ */
+// export const initSnarkWasmPath = require.resolve("./init.wasm");
+export const initSnarkWasmPath = new URL("./init.wasm", import.meta.url).href;
+/**
+ * @hidden
+ */
+// export const initSnarkZkeyPath = require.resolve("./init.zkey");
+export const initSnarkZkeyPath = new URL("./init.zkey", import.meta.url).href;
 
 /**
  * @hidden
  */
-export const initSnarkWasmPath = require.resolve("./init.wasm");
+// export const moveSnarkWasmPath = require.resolve("./move.wasm");
+export const moveSnarkWasmPath = new URL("./move.wasm", import.meta.url).href;
 
 /**
  * @hidden
  */
-export const initSnarkZkeyPath = require.resolve("./init.zkey");
+// export const moveSnarkZkeyPath = require.resolve("./move.zkey");
+export const moveSnarkZkeyPath = new URL("./move.zkey", import.meta.url).href;
 
 /**
  * @hidden
  */
-export const moveSnarkWasmPath = require.resolve("./move.wasm");
+// export const biomebaseSnarkWasmPath = require.resolve("./biomebase.wasm");
+export const biomebaseSnarkWasmPath = new URL(
+  "./biomebase.wasm",
+  import.meta.url,
+).href;
 
 /**
  * @hidden
  */
-export const moveSnarkZkeyPath = require.resolve("./move.zkey");
+// export const biomebaseSnarkZkeyPath = require.resolve("./biomebase.zkey");
+export const biomebaseSnarkZkeyPath = new URL(
+  "./biomebase.zkey",
+  import.meta.url,
+).href;
 
 /**
  * @hidden
  */
-export const biomebaseSnarkWasmPath = require.resolve("./biomebase.wasm");
+
+// export const whitelistSnarkWasmPath = require.resolve("./whitelist.wasm");
+export const whitelistSnarkWasmPath = new URL(
+  "./whitelist.wasm",
+  import.meta.url,
+).href;
 
 /**
  * @hidden
  */
-export const biomebaseSnarkZkeyPath = require.resolve("./biomebase.zkey");
-
-/**
- * @hidden
- */
-export const whitelistSnarkWasmPath = require.resolve("./whitelist.wasm");
-
-/**
- * @hidden
- */
-export const whitelistSnarkZkeyPath = require.resolve("./whitelist.zkey");
+// export const whitelistSnarkZkeyPath = require.resolve("./whitelist.zkey");
+export const whitelistSnarkZkeyPath = new URL(
+  "./whitelist.zkey",
+  import.meta.url,
+).href;

@@ -1,7 +1,7 @@
-import { DEFAULT_MAX_CALL_RETRIES } from "@dfares/constants";
-import { address } from "@dfares/serde";
-import type { EthAddress, GasPrices, SignedMessage } from "@dfares/types";
-import { AutoGasSetting } from "@dfares/types";
+import { DEFAULT_MAX_CALL_RETRIES } from "@df/constants";
+import { address } from "@df/serde";
+import type { EthAddress, GasPrices, SignedMessage } from "@df/types";
+import { AutoGasSetting } from "@df/types";
 import type { BigNumber, ContractInterface, Wallet } from "ethers";
 import { Contract, providers, utils } from "ethers";
 import retry from "p-retry";

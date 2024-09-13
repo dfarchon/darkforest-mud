@@ -1,6 +1,6 @@
-import type { Monomitter } from "@dfares/events";
-import { monomitter } from "@dfares/events";
-import type { PluginId } from "@dfares/types";
+import type { Monomitter } from "@df/events";
+import { monomitter } from "@df/events";
+import type { PluginId } from "@df/types";
 
 import type { EmbeddedPlugin } from "../Plugins/EmbeddedPluginLoader";
 import { getEmbeddedPlugins } from "../Plugins/EmbeddedPluginLoader";

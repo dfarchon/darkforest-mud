@@ -1,7 +1,8 @@
 // These are loaded as URL paths by a webpack loader
-import diamondContractAbiUrl from "@df/contracts/abis/DarkForest.json";
+// import diamondContractAbiUrl from "@df/contracts/abis/DarkForest.json";
 import type { EthConnection } from "@df/network";
 import { createContract, createEthConnection } from "@df/network";
+import diamondContractAbiUrl from "contracts/out/IWorld.sol/IWorld.abi.json";
 import type { Contract, providers, Wallet } from "ethers";
 
 /**
@@ -12,7 +13,7 @@ export async function loadDiamondContract<T extends Contract>(
   provider: providers.JsonRpcProvider,
   signer?: Wallet,
 ): Promise<T> {
-  const abi = await fetch(diamondContractAbiUrl).then((r) => r.json());
+  const abi = diamondContractAbiUrl; //;await fetch(diamondContractAbiUrl).then((r) => r.json());
 
   return createContract<T>(address, abi, provider, signer);
 }

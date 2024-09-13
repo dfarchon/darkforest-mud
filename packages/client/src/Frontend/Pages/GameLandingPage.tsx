@@ -1,44 +1,64 @@
-// import type { GameManager } from "@backend/GameLogic/GameManager";
-// import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 import {
-  // BLOCK_EXPLORER_URL,
-  // BLOCKCHAIN_BRIDGE,
-  // HOW_TO_ENABLE_POPUPS,
-  // HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
-  PLAYER_GUIDE,
-  // TOKEN_NAME,
+  BLOCK_EXPLORER_URL,
+  BLOCKCHAIN_BRIDGE,
+  TOKEN_NAME,
 } from "@df/constants";
-import {
-  type BrowserCompatibleState,
-  BrowserIssues,
-} from "@frontend/Components/BrowserIssues";
-import {
-  // GameWindowWrapper,
-  InitRenderState,
-  // TerminalToggler,
-  TerminalWrapper,
-  Wrapper,
-} from "@frontend/Components/GameLandingPageComponents";
-// import {
-//   TopLevelDivProvider,
-//   UIManagerProvider,
-// } from "@frontend/Utils/AppHooks";
-import {
-  type Incompatibility,
-  unsupportedFeatures,
-} from "@frontend/Utils/BrowserChecks";
-import UIEmitter, { UIEmitterEvent } from "@frontend/Utils/UIEmitter";
+import type { EthConnection } from "@df/network";
+import { neverResolves, weiToEth } from "@df/network";
+import { address } from "@df/serde";
+import type { UnconfirmedUseKey } from "@df/types";
+import { bigIntFromKey } from "@df/whitelist";
 import { useMUD } from "@mud/MUDContext";
-import WalletButton from "@wallet/WalletButton";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { utils, Wallet } from "ethers";
+import { reverse } from "lodash-es";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { zeroAddress } from "viem";
 import { useWalletClient } from "wagmi";
 
+import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
+import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
+import { GameManager } from "../../Backend/GameLogic/GameManager";
+import { GameManagerEvent } from "../../Backend/GameLogic/GameManager";
+import { GameUIManager } from "../../Backend/GameLogic/GameUIManager";
+import TutorialManager, {
+  TutorialState,
+} from "../../Backend/GameLogic/TutorialManager";
+import { addAccount, getAccounts } from "../../Backend/Network/AccountManager";
+import {
+  getEthConnection,
+  loadDiamondContract,
+} from "../../Backend/Network/Blockchain";
+import type { RegisterConfirmationResponse } from "../../Backend/Network/UtilityServerAPI";
+import {
+  callRegisterAndWaitForConfirmation,
+  EmailResponse,
+  requestDevFaucet,
+  submitInterestedEmail,
+  submitPlayerEmail,
+} from "../../Backend/Network/UtilityServerAPI";
+import { getWhitelistArgs } from "../../Backend/Utils/WhitelistSnarkArgsHelper";
+import type { BrowserCompatibleState } from "../Components/BrowserIssues";
+import { BrowserIssues } from "../Components/BrowserIssues";
+import {
+  GameWindowWrapper,
+  InitRenderState,
+  TerminalToggler,
+  TerminalWrapper,
+  Wrapper,
+} from "../Components/GameLandingPageComponents";
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
+import type { MiniMapHandle } from "../Components/MiniMap";
+import { MiniMap } from "../Components/MiniMap";
+import { TextMask } from "../Components/TextMask";
+import { TopLevelDivProvider, UIManagerProvider } from "../Utils/AppHooks";
+import type { Incompatibility } from "../Utils/BrowserChecks";
+import { unsupportedFeatures } from "../Utils/BrowserChecks";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
-import { Terminal, type TerminalHandle } from "../Views/Terminal";
-// import { GameWindowLayout } from '../Views/GameWindowLayout';
+import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
+// import { GameWindowLayout } from "../Views/GameWindowLayout";
+import type { TerminalHandle } from "../Views/Terminal";
+import { Terminal } from "../Views/Terminal";
 
 const enum TerminalPromptStep {
   NONE,
@@ -68,6 +88,7 @@ type TerminalStateOptions = {
 };
 
 export function GameLandingPage() {
+  const navigate = useNavigate();
   const { contract } = useParams();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -80,29 +101,40 @@ export function GameLandingPage() {
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
-  const topLevelContainer = useRef<HTMLDivElement>(null);
-  const terminalHandle = useRef<TerminalHandle>(null);
-  // const miniMapRef = useRef<MiniMapHandle>();
+  const terminalHandle = useRef<TerminalHandle>();
+  const gameUIManagerRef = useRef<GameUIManager | undefined>();
+  const topLevelContainer = useRef<HTMLDivElement | null>(null);
+  const miniMapRef = useRef<MiniMapHandle>();
 
-  // const [gameManager, setGameManager] = useState<GameManager | undefined>();
-  // const gameUIManagerRef = useRef<GameUIManager | undefined>();
-
-  const [
-    terminalVisible,
-    // setTerminalVisible
-  ] = useState(true);
-  const [
-    initRenderState,
-    // setInitRenderState
-  ] = useState(InitRenderState.NONE);
+  const [gameManager, setGameManager] = useState<GameManager | undefined>();
+  const [terminalVisible, setTerminalVisible] = useState(true);
+  const [initRenderState, setInitRenderState] = useState(InitRenderState.NONE);
+  const [ethConnection, setEthConnection] = useState<
+    EthConnection | undefined
+  >();
   const [step, setStep] = useState(TerminalPromptStep.NONE);
 
   const [browserCompatibleState, setBrowserCompatibleState] =
     useState<BrowserCompatibleState>("unknown");
-
   const [browserIssues, setBrowserIssues] = useState<Incompatibility[]>([]);
-  // const [isMiniMapOn, setMiniMapOn] = useState(false);
-  // const [spectate, setSpectate] = useState(false);
+  const [isMiniMapOn, setMiniMapOn] = useState(false);
+  const [spectate, setSpectate] = useState(false);
+
+  // NOTE: round 2
+  const useZkWhitelist = true;
+  // const useZkWhitelist = params.has('zkWhitelist');
+  const selectedAddress = params.get("account");
+  const contractAddress = contract ? address(contract) : address(zeroAddress);
+  const isLobby = false; // NOTE: contractAddress !== address(CONTRACT_ADDRESS);
+
+  useEffect(() => {
+    getEthConnection()
+      .then((ethConnection) => setEthConnection(ethConnection))
+      .catch((e) => {
+        alert("error connecting to blockchain");
+        console.log(e);
+      });
+  }, []);
 
   useEffect(() => {
     unsupportedFeatures().then((issues) => {
@@ -117,13 +149,18 @@ export function GameLandingPage() {
     });
   }, []);
 
+  const isProd = process.env.NODE_ENV === "production";
+
   const advanceStateFromCompatibilityPassed = useCallback(
     async (
-      terminal: React.MutableRefObject<TerminalHandle | null>,
+      terminal: React.MutableRefObject<TerminalHandle | undefined>,
       { showHelp }: TerminalStateOptions = {
         showHelp: true,
       },
     ) => {
+      const accounts = getAccounts();
+      const totalAccounts = accounts.length;
+
       if (showHelp) {
         terminal.current?.newline();
         terminal.current?.newline();
@@ -133,7 +170,9 @@ export function GameLandingPage() {
         terminal.current?.printLink(
           "Please Click Here",
           () => {
-            window.open(PLAYER_GUIDE);
+            window.open(
+              "https://dfares.notion.site/DFAres-Round-3-Guide-3980998d8f65440085c116ba0df0d99a",
+            );
           },
           TerminalTextStyle.Blue,
         );
@@ -144,39 +183,99 @@ export function GameLandingPage() {
         );
 
         terminal.current?.newline();
-        terminal.current?.println(
-          "Login or create an account.",
-          TerminalTextStyle.Green,
-        );
-        terminal.current?.println(
-          "Choose an option, type its symbol and press ENTER.",
-        );
-        terminal.current?.newline();
-      }
 
-      if (mainAccount === zeroAddress) {
+        if (isLobby) {
+          terminal.current?.newline();
+          terminal.current?.printElement(
+            <MythicLabelText
+              text={`You are joining a Dark Forest Ares lobby`}
+            />,
+          );
+          terminal.current?.newline();
+          terminal.current?.newline();
+        } else {
+          terminal.current?.newline();
+          terminal.current?.println(
+            "Login or create an account.",
+            TerminalTextStyle.Green,
+          );
+          terminal.current?.println(
+            "Choose an option, type its symbol and press ENTER.",
+          );
+          terminal.current?.newline();
+        }
+        if (totalAccounts > 0) {
+          terminal.current?.println(
+            `Found ${totalAccounts} account${totalAccounts > 1 ? "s" : ""} on this device.`,
+          );
+          terminal.current?.println(``);
+          terminal.current?.println(
+            "(a) Login with existing account.",
+            TerminalTextStyle.Sub,
+          );
+        }
+
+        terminal.current?.println(
+          "(n) Generate new burner wallet account.",
+          TerminalTextStyle.Sub,
+        );
+        terminal.current?.println(`(i) Import private key.`);
+
+        terminal.current?.println(`(s) Spectate.`, TerminalTextStyle.Sub);
         terminal.current?.println(``);
 
         terminal.current?.println(
-          `(a) Please connect to your wallet`,
+          totalAccounts > 0
+            ? "Select one of the options above [a], [n], [i] or [s], then press [enter]."
+            : "Select one of the options above [n], [i] or [s], then press [enter].",
           TerminalTextStyle.Sub,
         );
       }
 
-      terminal.current?.println(`(s) Spectate.`, TerminalTextStyle.Sub);
-      terminal.current?.println(``);
+      if (selectedAddress !== null) {
+        terminal.current?.println(
+          `Selecting account ${selectedAddress} from url...`,
+          TerminalTextStyle.Green,
+        );
 
-      terminal.current?.println(
-        "Select one of the options above [a] or [s], then press [enter].",
-        TerminalTextStyle.Sub,
-      );
+        // Search accounts backwards in case a player has used a private key more than once.
+        // In that case, we want to take the most recently created account.
+        const account = reverse(getAccounts()).find(
+          (a) => a.address === selectedAddress,
+        );
+        if (!account) {
+          terminal.current?.println(
+            "Unrecognized account found in url.",
+            TerminalTextStyle.Red,
+          );
+          return;
+        }
+
+        try {
+          await ethConnection?.setAccount(account.privateKey);
+          setStep(TerminalPromptStep.ACCOUNT_SET);
+        } catch (e) {
+          // unwanted state, client will need to reload browser here
+          terminal.current?.println(
+            "An unknown error occurred. please refresh the client",
+            TerminalTextStyle.Red,
+          );
+        }
+        return;
+      }
 
       const userInput = (await terminal.current?.getInput())?.trim() ?? "";
 
       // stop options, go to next step
       switch (true) {
-        case userInput === "a":
+        case userInput === "a" && totalAccounts > 0:
           setStep(TerminalPromptStep.DISPLAY_ACCOUNTS);
+          return;
+        case userInput === "n":
+          setStep(TerminalPromptStep.GENERATE_ACCOUNT);
+          return;
+        case userInput === "i":
+          setStep(TerminalPromptStep.IMPORT_ACCOUNT);
           return;
         case userInput === "s":
           setStep(TerminalPromptStep.SPECTATING);
@@ -212,12 +311,1251 @@ export function GameLandingPage() {
         }
       }
     },
-    [mainAccount],
+    [isLobby, ethConnection, selectedAddress],
+  );
+
+  const advanceStateFromDisplayAccounts = useCallback(
+    async (
+      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      { showHelp }: TerminalStateOptions = {
+        showHelp: true,
+      },
+    ) => {
+      const accounts = getAccounts();
+      const totalAccounts = accounts.length;
+      if (showHelp) {
+        terminal.current?.println(
+          "Login with existing account.",
+          TerminalTextStyle.Green,
+        );
+        terminal.current?.println("select account.", TerminalTextStyle.Sub);
+        terminal.current?.println("");
+
+        for (let i = 0; i < accounts.length; i += 1) {
+          const rawResult = await ethConnection?.loadBalance(
+            accounts[i].address,
+          );
+          const balance = rawResult ? weiToEth(rawResult) : 0;
+
+          terminal.current?.print(
+            `(${i + 1}): ${accounts[i].address}  `,
+            TerminalTextStyle.Sub,
+          );
+          if (balance < 0.0001) {
+            terminal.current?.print(
+              balance.toFixed(9) + " " + TOKEN_NAME,
+              TerminalTextStyle.Red,
+            );
+            terminal.current?.println(
+              " => select this account to know how to get enough ETH",
+            );
+          } else {
+            terminal.current?.println(
+              balance.toFixed(9) + " " + TOKEN_NAME,
+              TerminalTextStyle.Green,
+            );
+          }
+        }
+        terminal.current?.println("");
+
+        let accountsMessage = "Select account option [1], then press [enter].";
+        if (totalAccounts > 1) {
+          const args = [...Array(totalAccounts - 1)].map(
+            (_, i) => `[${i + 1}]`,
+          );
+          accountsMessage = `Select one of the account options ${args.join(
+            ", ",
+          )} or [${totalAccounts}], then press [enter].`;
+        }
+
+        terminal.current?.println(accountsMessage, TerminalTextStyle.Sub);
+      }
+
+      const userInput = (await terminal.current?.getInput())?.trim() ?? "";
+      const selection = userInput !== "" ? Number(userInput) : NaN;
+
+      // stop option, go to next step
+      if (
+        Number.isInteger(selection) &&
+        accounts[selection - 1] !== undefined
+      ) {
+        const account = accounts[selection - 1];
+        try {
+          await ethConnection?.setAccount(account.privateKey);
+          setStep(TerminalPromptStep.ACCOUNT_SET);
+        } catch (e) {
+          terminal.current?.println(
+            "An unknown error occurred. please refresh the client.",
+            TerminalTextStyle.Red,
+          );
+          advanceStateFromDisplayAccounts(terminal, {
+            showHelp: false,
+          });
+        }
+        return;
+      }
+
+      // continue waiting for user input
+      switch (true) {
+        case userInput === "clear": {
+          terminal.current?.clear();
+          showHelp = false;
+          break;
+        }
+        case userInput === "h" || userInput === "help": {
+          showHelp = true;
+          break;
+        }
+        default: {
+          terminal.current?.println(
+            "Invalid option, please try press [help].",
+            TerminalTextStyle.Pink,
+          );
+          showHelp = false;
+        }
+      }
+
+      advanceStateFromDisplayAccounts(terminal, { showHelp });
+    },
+    [ethConnection],
+  );
+
+  const advanceStateFromGenerateAccount = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      const newWallet = Wallet.createRandom();
+      const newSKey = newWallet.privateKey;
+      const newAddr = address(newWallet.address);
+
+      try {
+        addAccount(newSKey);
+        ethConnection?.setAccount(newSKey);
+
+        terminal.current?.println(``);
+        terminal.current?.print(`Created new burner wallet account `);
+        terminal.current?.print(newAddr, TerminalTextStyle.Pink);
+
+        terminal.current?.println(``);
+        terminal.current?.println("");
+        terminal.current?.println(
+          "NOTE: Burner wallets are stored in local storage.",
+          TerminalTextStyle.Pink,
+        );
+        terminal.current?.println(
+          "They are relatively insecure and you should avoid ",
+        );
+        terminal.current?.println("storing substantial funds in them.");
+        terminal.current?.println("");
+        terminal.current?.println(
+          "Also, clearing browser local storage/cache will render your",
+        );
+        terminal.current?.println(
+          "burner wallets inaccessible, unless you export your private keys.",
+        );
+        terminal.current?.println("");
+        terminal.current?.println("Press [enter] to continue.");
+
+        await terminal.current?.getInput();
+        setStep(TerminalPromptStep.ACCOUNT_SET);
+      } catch (e) {
+        // unwanted state, user will need to reload browser here
+        terminal.current?.println(
+          "An unknown error occurred. please refresh the client.",
+          TerminalTextStyle.Red,
+        );
+      }
+    },
+    [ethConnection],
+  );
+
+  const advanceStateFromImportAccount = useCallback(
+    async (
+      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      { showHelp }: TerminalStateOptions = {
+        showHelp: true,
+      },
+    ) => {
+      if (showHelp) {
+        terminal.current?.println(
+          "Import private key.",
+          TerminalTextStyle.Green,
+        );
+        terminal.current?.println(
+          "Enter the 0x-prefixed private key of the account you wish to import",
+          TerminalTextStyle.Text,
+        );
+        terminal.current?.println(
+          "NOTE: THIS WILL STORE THE PRIVATE KEY IN YOUR BROWSER'S LOCAL STORAGE",
+          TerminalTextStyle.Text,
+        );
+        terminal.current?.println(
+          "Local storage is relatively insecure. We recommend only importing accounts with zero-to-no funds.",
+        );
+      }
+
+      const userInput = (await terminal.current?.getInput())?.trim() ?? "";
+      const validSkeyPattern = /^0x[0-9a-fA-F]{64}$/;
+      if (validSkeyPattern.test(userInput)) {
+        try {
+          const newSKey = userInput;
+          const newAddr = address(utils.computeAddress(newSKey));
+
+          addAccount(newSKey);
+
+          ethConnection?.setAccount(newSKey);
+          terminal.current?.println(
+            `Imported account with address ${newAddr}.`,
+          );
+          setStep(TerminalPromptStep.ACCOUNT_SET);
+          return;
+        } catch (e) {
+          terminal.current?.println(
+            "An unknown error occurred. please refresh the page.",
+            TerminalTextStyle.Red,
+          );
+          advanceStateFromImportAccount(terminal, { showHelp: false });
+          return;
+        }
+      }
+
+      // continue waiting for user input
+      switch (true) {
+        case userInput === "clear": {
+          terminal.current?.clear();
+          showHelp = false;
+          break;
+        }
+        case userInput === "h" || userInput === "help": {
+          showHelp = true;
+          break;
+        }
+        default: {
+          terminal.current?.println(
+            "Invalid option, please try again.",
+            TerminalTextStyle.Red,
+          );
+          showHelp = false;
+        }
+      }
+
+      advanceStateFromImportAccount(terminal, { showHelp });
+    },
+    [ethConnection],
+  );
+
+  const advanceStateFromAccountSet = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      try {
+        const playerAddress = ethConnection?.getAddress();
+        if (!playerAddress || !ethConnection) throw new Error("not logged in");
+
+        terminal.current?.println("Checking account balance... ");
+
+        const balance = weiToEth(
+          await ethConnection.loadBalance(playerAddress),
+        );
+
+        if (balance < 0.0001) {
+          terminal.current?.print(`   Your account: `);
+          terminal.current?.println(
+            `${playerAddress}`,
+            TerminalTextStyle.Green,
+          );
+
+          terminal.current?.print("    Private Key: ");
+          terminal.current?.printElement(
+            <TextMask
+              maskText="Click here to get private key"
+              text={ethConnection.getPrivateKey()}
+              noticeText="<= click here to copy private key"
+              unFocusedWidth={"150px"}
+              focusedWidth={"150px"}
+              style={{ color: "#00DC82" }}
+            />,
+          );
+
+          terminal.current?.println("");
+
+          terminal.current?.print(`   Your balance: `);
+          terminal.current?.print(
+            `${balance.toFixed(9)} ${TOKEN_NAME}`,
+            TerminalTextStyle.Red,
+          );
+
+          terminal.current?.println(" <= recommend depositing 0.003 ETH");
+
+          terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
+
+          terminal.current?.println(
+            "You can use bridge to transfer ETH to Redstone Mainnet",
+            TerminalTextStyle.Pink,
+          );
+
+          terminal.current?.print("   L2-L2 bridge: ");
+
+          terminal.current?.printLink(
+            BLOCKCHAIN_BRIDGE,
+            () => {
+              window.open(BLOCKCHAIN_BRIDGE);
+            },
+            TerminalTextStyle.Green,
+          );
+
+          terminal.current?.println(
+            " <= transfer ETH from L2 (e.g. optimism) to Redstone Mainnet",
+          );
+
+          terminal.current?.print("   Player guide: ");
+
+          terminal.current?.printLink(
+            "How to get ETH on the Redstone mainnet for your account",
+            () => {
+              window.open(
+                "https://dfares.notion.site/How-to-transfer-ETH-from-L2-to-Redstone-Mainnet-89198e3016a444779c121efa2590bddd?pvs=74",
+              );
+            },
+            TerminalTextStyle.Green,
+          );
+          terminal.current?.println(
+            " <= New player please check this guide !!!",
+            TerminalTextStyle.Pink,
+          );
+
+          terminal.current?.println("");
+
+          terminal.current?.println(
+            "After your account get ETH on Redstone Mainet, press [enter] to continue.",
+            TerminalTextStyle.Pink,
+          );
+
+          const userInput = (await terminal.current?.getInput())?.trim() ?? "";
+          let showHelp = true;
+
+          // continue waiting for user input
+          switch (true) {
+            case userInput === "": {
+              advanceStateFromAccountSet(terminal);
+              return;
+            }
+            case userInput === "clear": {
+              terminal.current?.clear();
+              showHelp = false;
+              advanceStateFromCompatibilityPassed(terminal, {
+                showHelp,
+              });
+              break;
+            }
+            case userInput === "h" || userInput === "help": {
+              showHelp = true;
+              advanceStateFromCompatibilityPassed(terminal, {
+                showHelp,
+              });
+              break;
+            }
+            default: {
+              terminal.current?.println(
+                "Invalid option, please try press [help].",
+                TerminalTextStyle.Pink,
+              );
+              showHelp = false;
+              advanceStateFromCompatibilityPassed(terminal, {
+                showHelp,
+              });
+            }
+          }
+          return;
+        }
+
+        const whitelist = await ethConnection.loadContract(
+          contractAddress,
+          loadDiamondContract,
+        );
+        const isWhitelisted = await whitelist.isWhitelisted(playerAddress);
+        // TODO(#2329): isWhitelisted should just check the contractOwner
+        const adminAddress = address(await whitelist.adminAddress());
+
+        if (isWhitelisted === false && playerAddress !== adminAddress) {
+          terminal.current?.println("");
+          terminal.current?.println(
+            "Registered players can enter in advance. The Game will be open to everyone soon.",
+            TerminalTextStyle.Pink,
+          );
+        }
+        terminal.current?.println("");
+
+        terminal.current?.print("Checking if whitelisted... ");
+
+        // TODO(#2329): isWhitelisted should just check the contractOwner
+        if (isWhitelisted || playerAddress === adminAddress) {
+          terminal.current?.println("Player whitelisted.");
+          terminal.current?.println("");
+          terminal.current?.println(`Welcome, player ${playerAddress}.`);
+          // TODO: Provide own env variable for this feature
+          if (!isProd) {
+            // in development, automatically get some ether from faucet
+            const balance = weiToEth(
+              await ethConnection?.loadBalance(playerAddress),
+            );
+            if (balance === 0) {
+              await requestDevFaucet(playerAddress);
+            }
+          }
+          setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+        } else {
+          setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);
+        }
+      } catch (e) {
+        console.error(`error connecting to whitelist: ${e}`);
+        terminal.current?.println(
+          "ERROR: Could not connect to whitelist contract. Please refresh and try again in a few minutes.",
+          TerminalTextStyle.Red,
+        );
+        setStep(TerminalPromptStep.TERMINATED);
+      }
+    },
+    [ethConnection, isProd, contractAddress],
+  );
+
+  const advanceStateFromAskHasWhitelistKey = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      terminal.current?.print(
+        "Do you have a whitelist key?",
+        TerminalTextStyle.Text,
+      );
+      terminal.current?.println(" (y/n)");
+      const userInput = await terminal.current?.getInput();
+      if (userInput === "y") {
+        setStep(TerminalPromptStep.ASKING_WHITELIST_KEY);
+      } else if (userInput === "n") {
+        setStep(TerminalPromptStep.ASKING_WAITLIST_EMAIL);
+      } else {
+        terminal.current?.println("Unrecognized input. Please try again.");
+        advanceStateFromAskHasWhitelistKey(terminal);
+      }
+    },
+    [],
+  );
+
+  const advanceStateFromAskWhitelistKey = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      const address = ethConnection?.getAddress();
+      if (!address) throw new Error("not logged in");
+
+      terminal.current?.println(
+        "Please enter your invite key (XXXXXX-XXXXXX-XXXXXX-XXXXXX):",
+        TerminalTextStyle.Sub,
+      );
+
+      const key = (await terminal.current?.getInput()) || "";
+
+      terminal.current?.print("Processing key... (this may take up to 30s)");
+      terminal.current?.newline();
+
+      if (!useZkWhitelist) {
+        let registerConfirmationResponse = {} as RegisterConfirmationResponse;
+        try {
+          registerConfirmationResponse =
+            await callRegisterAndWaitForConfirmation(key, address, terminal);
+        } catch (e) {
+          registerConfirmationResponse = {
+            canRetry: true,
+            errorMessage:
+              "There was an error connecting to the whitelist server. Please try again later.",
+          };
+        }
+
+        if (!registerConfirmationResponse.txHash) {
+          terminal.current?.println(
+            "ERROR: " + registerConfirmationResponse.errorMessage,
+            TerminalTextStyle.Red,
+          );
+          if (registerConfirmationResponse.canRetry) {
+            terminal.current?.println("Press any key to try again.");
+            await terminal.current?.getInput();
+            advanceStateFromAskWhitelistKey(terminal);
+          } else {
+            setStep(TerminalPromptStep.ASKING_WAITLIST_EMAIL);
+          }
+        } else {
+          terminal.current?.print(
+            "Successfully joined game. ",
+            TerminalTextStyle.Green,
+          );
+          terminal.current?.print(`Welcome, player `);
+          terminal.current?.println(address, TerminalTextStyle.Text);
+          terminal.current?.print(
+            "Sent player $0.15 :) ",
+            TerminalTextStyle.Blue,
+          );
+          terminal.current?.printLink(
+            "(View Transaction)",
+            () => {
+              window.open(
+                `${BLOCK_EXPLORER_URL}/tx/${registerConfirmationResponse.txHash}`,
+              );
+            },
+            TerminalTextStyle.Blue,
+          );
+          terminal.current?.newline();
+          setStep(TerminalPromptStep.ASKING_PLAYER_EMAIL);
+        }
+      } else {
+        if (!ethConnection) throw new Error("no eth connection");
+        const contractsAPI = await makeContractsAPI({
+          connection: ethConnection,
+          contractAddress,
+        });
+
+        const keyBigInt = bigIntFromKey(key);
+        const snarkArgs = await getWhitelistArgs(keyBigInt, address, terminal);
+        try {
+          const getArgs = async () => {
+            return [
+              snarkArgs[ZKArgIdx.PROOF_A],
+              snarkArgs[ZKArgIdx.PROOF_B],
+              snarkArgs[ZKArgIdx.PROOF_C],
+              [...snarkArgs[ZKArgIdx.DATA]],
+            ];
+          };
+
+          const txIntent: UnconfirmedUseKey = {
+            contract: contractsAPI.contract,
+            methodName: "useKey",
+            args: getArgs(),
+          };
+
+          console.log(txIntent);
+          const tx = await contractsAPI.submitTransaction(txIntent);
+          console.log(tx);
+
+          // const ukReceipt = await contractsAPI.contract.useKey(
+          //   snarkArgs[ZKArgIdx.PROOF_A],
+          //   snarkArgs[ZKArgIdx.PROOF_B],
+          //   snarkArgs[ZKArgIdx.PROOF_C],
+          //   [...snarkArgs[ZKArgIdx.DATA]]
+          // );
+          // await ukReceipt.wait();
+          terminal.current?.print(
+            "Successfully joined game. ",
+            TerminalTextStyle.Green,
+          );
+          terminal.current?.print(`Welcome, player `);
+          terminal.current?.println(address, TerminalTextStyle.Text);
+          // terminal.current?.print('Sent player $0.15 :) ', TerminalTextStyle.Blue);
+          // terminal.current?.printLink(
+          //   '(View Transaction)',
+          //   () => {
+          //     window.open(`${BLOCK_EXPLORER_URL}/tx/${ukReceipt.hash}`);
+          //   },
+          //   TerminalTextStyle.Blue
+          // );
+
+          terminal.current?.printLink(
+            "(View Transaction)",
+            () => {
+              window.open(`${BLOCK_EXPLORER_URL}/tx/${tx.hash}`);
+            },
+            TerminalTextStyle.Pink,
+          );
+          terminal.current?.newline();
+          // setStep(TerminalPromptStep.ASKING_PLAYER_EMAIL);
+          setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+        } catch (e) {
+          const error = e as Error;
+          if (error instanceof Error) {
+            //NOTE: Here might be some bugs
+            const invalidKey = error.message.includes("invalid key");
+            if (invalidKey) {
+              terminal.current?.println(
+                `ERROR: Key ${key} is not valid.`,
+                TerminalTextStyle.Red,
+              );
+              setStep(TerminalPromptStep.ASKING_WAITLIST_EMAIL);
+            } else {
+              terminal.current?.println(
+                `ERROR: Something went wrong.`,
+                TerminalTextStyle.Red,
+              );
+              terminal.current?.println(
+                "Press [Enter] to try again.",
+                TerminalTextStyle.Pink,
+              );
+              await terminal.current?.getInput();
+              advanceStateFromAskWhitelistKey(terminal);
+            }
+          }
+          console.error("Error whitelisting.");
+        }
+      }
+    },
+    [ethConnection, contractAddress, useZkWhitelist],
+  );
+
+  const advanceStateFromAskWaitlistEmail = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      terminal.current?.println(
+        "Enter your email address to sign up for the whitelist.",
+        TerminalTextStyle.Text,
+      );
+      const email = (await terminal.current?.getInput()) || "";
+      terminal.current?.print("Response pending... ");
+      const response = await submitInterestedEmail(email);
+      if (response === EmailResponse.Success) {
+        terminal.current?.println(
+          "Email successfully recorded. ",
+          TerminalTextStyle.Green,
+        );
+        terminal.current?.println(
+          "Keep an eye out for updates and invite keys in the next few weeks. Press ENTER to return to the homepage.",
+          TerminalTextStyle.Sub,
+        );
+        setStep(TerminalPromptStep.TERMINATED);
+        (await await terminal.current?.getInput()) || "";
+        navigate("/");
+      } else if (response === EmailResponse.Invalid) {
+        terminal.current?.println(
+          "Email invalid. Please try again.",
+          TerminalTextStyle.Red,
+        );
+      } else {
+        terminal.current?.print("ERROR: Server error. ", TerminalTextStyle.Red);
+        terminal.current?.print(
+          "Press ENTER to return to homepage.",
+          TerminalTextStyle.Sub,
+        );
+        (await await terminal.current?.getInput()) || "";
+        setStep(TerminalPromptStep.TERMINATED);
+        navigate("/");
+      }
+    },
+    [navigate],
+  );
+
+  const advanceStateFromAskPlayerEmail = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      const address = ethConnection?.getAddress();
+      if (!address) throw new Error("not logged in");
+
+      terminal.current?.print(
+        "Enter your email address. ",
+        TerminalTextStyle.Text,
+      );
+      terminal.current?.println(
+        "We'll use this email address to notify you if you win a prize.",
+      );
+
+      const email = (await terminal.current?.getInput()) || "";
+      const response = await submitPlayerEmail(
+        await ethConnection?.signMessageObject({ email }),
+      );
+
+      if (response === EmailResponse.Success) {
+        terminal.current?.println("Email successfully recorded.");
+        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+      } else if (response === EmailResponse.Invalid) {
+        terminal.current?.println("Email invalid.", TerminalTextStyle.Red);
+        advanceStateFromAskPlayerEmail(terminal);
+      } else {
+        terminal.current?.println(
+          "Error recording email.",
+          TerminalTextStyle.Red,
+        );
+        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+      }
+    },
+    [ethConnection],
+  );
+
+  const advanceStateFromFetchingEthData = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      let newGameManager: GameManager;
+
+      try {
+        if (!ethConnection) throw new Error("no eth connection");
+
+        newGameManager = await GameManager.create({
+          connection: ethConnection,
+          terminal,
+          contractAddress,
+          spectate,
+        });
+      } catch (e) {
+        console.error(e);
+
+        setStep(TerminalPromptStep.ERROR);
+
+        terminal.current?.print(
+          "Network under heavy load. Please refresh the page, and check ",
+          TerminalTextStyle.Red,
+        );
+
+        terminal.current?.printLink(
+          BLOCK_EXPLORER_URL,
+          () => {
+            window.open(BLOCK_EXPLORER_URL);
+          },
+          TerminalTextStyle.Red,
+        );
+
+        terminal.current?.println("");
+
+        return;
+      }
+
+      setGameManager(newGameManager);
+
+      window.df = newGameManager;
+
+      const newGameUIManager = await GameUIManager.create(
+        newGameManager,
+        terminal,
+      );
+
+      window.ui = newGameUIManager;
+
+      terminal.current?.newline();
+      terminal.current?.println("Connected to Dark Forest Ares Contract");
+
+      terminal.current?.newline();
+      terminal.current?.println("Welcome to DARK FOREST ARES.");
+      terminal.current?.newline();
+      //NOTE: round 3 don't collect those information
+      // terminal.current?.println('We collect a minimal set of statistics such as SNARK proving');
+      // terminal.current?.println('times and average transaction times across browsers, to help ');
+      // terminal.current?.println('us optimize performance and fix bugs. You can opt out of this');
+      // terminal.current?.println('in the Settings pane.');
+      // terminal.current?.newline();
+
+      gameUIManagerRef.current = newGameUIManager;
+
+      if (!newGameManager.hasJoinedGame() && spectate === false) {
+        setStep(TerminalPromptStep.NO_HOME_PLANET);
+      } else {
+        const browserHasData = !!newGameManager.getHomeCoords();
+
+        if (spectate) {
+          terminal.current?.println(
+            "Spectate mode need to input the center coords.",
+            TerminalTextStyle.Text,
+          );
+          setStep(TerminalPromptStep.ASK_ADD_ACCOUNT);
+          return;
+        }
+
+        if (!browserHasData) {
+          terminal.current?.println(
+            "ERROR: Home coords not found on this browser.",
+            TerminalTextStyle.Red,
+          );
+          setStep(TerminalPromptStep.ASK_ADD_ACCOUNT);
+          return;
+        }
+
+        terminal.current?.println("Validated Local Data...");
+        setStep(TerminalPromptStep.ALL_CHECKS_PASS);
+      }
+    },
+    [ethConnection, contractAddress, spectate],
+  );
+
+  const advanceStateFromAskAddAccount = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      if (spectate) {
+        setStep(TerminalPromptStep.ADD_ACCOUNT);
+        return;
+      }
+
+      terminal.current?.println(
+        "Import account home coordinates? (y/n)",
+        TerminalTextStyle.Text,
+      );
+      terminal.current?.println(
+        "If you're importing an account, make sure you know what you're doing.",
+      );
+      const userInput = await terminal.current?.getInput();
+      if (userInput === "y") {
+        setStep(TerminalPromptStep.ADD_ACCOUNT);
+      } else if (userInput === "n") {
+        terminal.current?.println("Try using a different account and reload.");
+        setStep(TerminalPromptStep.TERMINATED);
+      } else {
+        terminal.current?.println("Unrecognized input. Please try again.");
+        advanceStateFromAskAddAccount(terminal);
+      }
+    },
+    [spectate],
+  );
+
+  const advanceStateFromAddAccount = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      const gameUIManager = gameUIManagerRef.current;
+
+      if (gameUIManager) {
+        try {
+          if (spectate) {
+            if (await gameUIManager.addAccount({ x: 0, y: 0 })) {
+              terminal.current?.println("Successfully added account.");
+              terminal.current?.println("Initializing game...");
+              setStep(TerminalPromptStep.ALL_CHECKS_PASS);
+            } else {
+              throw "Invalid home coordinates.";
+            }
+          } else {
+            terminal.current?.println("x: ", TerminalTextStyle.Blue);
+            const x = parseInt((await terminal.current?.getInput()) || "");
+            terminal.current?.println("y: ", TerminalTextStyle.Blue);
+            const y = parseInt((await terminal.current?.getInput()) || "");
+            if (
+              Number.isNaN(x) ||
+              Number.isNaN(y) ||
+              Math.abs(x) > 2 ** 32 ||
+              Math.abs(y) > 2 ** 32
+            ) {
+              throw "Invalid home coordinates.";
+            }
+            if (await gameUIManager.addAccount({ x, y })) {
+              terminal.current?.println("Successfully added account.");
+              terminal.current?.println("Initializing game...");
+              setStep(TerminalPromptStep.ALL_CHECKS_PASS);
+            } else {
+              throw "Invalid home coordinates.";
+            }
+          }
+        } catch (e) {
+          terminal.current?.println(`ERROR: ${e}`, TerminalTextStyle.Red);
+          terminal.current?.println("Please try again.");
+        }
+      } else {
+        terminal.current?.println(
+          "ERROR: Game UI Manager not found. Terminating session.",
+        );
+        setStep(TerminalPromptStep.TERMINATED);
+      }
+    },
+    [spectate],
+  );
+
+  const advanceStateFromNoHomePlanet = useCallback(
+    async (
+      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      { showHelp }: TerminalStateOptions = {
+        showHelp: true,
+      },
+    ) => {
+      const gameUIManager = gameUIManagerRef.current;
+      if (!gameUIManager) {
+        terminal.current?.println(
+          "ERROR: Game UI Manager not found. Terminating session.",
+          TerminalTextStyle.Red,
+        );
+        setStep(TerminalPromptStep.TERMINATED);
+        return;
+      }
+
+      // if (Date.now() / 1000 > gameUIManager.getEndTimeSeconds()) {
+      //   terminal.current?.println(
+      //     'ERROR: This game has ended. Terminating session.',
+      //     TerminalTextStyle.Red
+      //   );
+      //   setStep(TerminalPromptStep.TERMINATED);
+      //   return;
+      // }
+
+      let setX = undefined;
+      let setY = undefined;
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("searchCenter")) {
+        const parts = params.get("searchCenter")?.split(",");
+
+        if (parts) {
+          setX = parseInt(parts[0], 10);
+          setY = parseInt(parts[1], 10);
+        }
+      }
+
+      if (setX && setY) {
+        const coords = { x: setX, y: setY };
+        const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
+        terminal.current?.println(
+          `Spawn coordinates: (${coords.x.toFixed(0)}, ${coords.y.toFixed(
+            0,
+          )}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
+        );
+
+        gameUIManager
+          .getGameManager()
+          .on(GameManagerEvent.InitializedPlayer, () => {
+            setTimeout(() => {
+              setMiniMapOn(false);
+
+              terminal.current?.println("Initializing game...");
+              setStep(TerminalPromptStep.ALL_CHECKS_PASS);
+            });
+          });
+
+        gameUIManager
+          .joinGame(
+            async (e) => {
+              // TODO: Handle 2min timeout error
+              setMiniMapOn(false);
+
+              console.error(e);
+
+              terminal.current?.println("Error Joining Game:");
+              terminal.current?.println(e.message, TerminalTextStyle.Red);
+              terminal.current?.newline();
+
+              console.log(e.message.slice(0, 20));
+
+              if (e.message.slice(0, 20) === "Please enable popups") {
+                terminal.current?.print(
+                  "Player guide: ",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.printLink(
+                  "How to enable popups",
+                  () => {
+                    window.open(
+                      "https://dfares.notion.site/How-to-enable-popups-f01552bd77984ad582e1d7cc33b9523d",
+                    );
+                  },
+                  TerminalTextStyle.Green,
+                );
+                terminal.current?.println(
+                  " <= New player please check this guide!!!",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.println("");
+              } else if (e.message === "transaction reverted") {
+                terminal.current?.println(
+                  "Please refresh the client, choose another area and try again.",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.println("");
+              }
+
+              // terminal.current?.println(
+              //   "Don't worry :-) you can get more ETH on Redstone this way 😘",
+              //   TerminalTextStyle.Pink
+              // );
+
+              // terminal.current?.newline();
+              // terminal.current?.printLink(
+              //   'Deposit ETH to Redstone',
+              //   () => {
+              //     window.open(BLOCKCHAIN_BRIDGE);
+              //   },
+              //   TerminalTextStyle.Pink
+              // );
+              // terminal.current?.newline();
+              // terminal.current?.newline();
+
+              terminal.current?.println("Press [enter] to Try Again:");
+
+              await terminal.current?.getInput();
+              return true;
+            },
+            coords,
+            spectate,
+          )
+          .catch((error: Error) => {
+            terminal.current?.println(
+              `[ERROR] An error occurred: ${error.toString().slice(0, 10000)}`,
+              TerminalTextStyle.Red,
+            );
+            terminal.current?.println(
+              "please refresh client to try again.",
+              TerminalTextStyle.Pink,
+            );
+          });
+      } else {
+        if (showHelp) {
+          terminal.current?.println(
+            "Select home planet.",
+            TerminalTextStyle.Green,
+          );
+          terminal.current?.print("Please ");
+          terminal.current?.print("left-click", TerminalTextStyle.Pink);
+          terminal.current?.print(" on ");
+          terminal.current?.print(
+            "blue squares on the map",
+            TerminalTextStyle.Blue,
+          );
+          terminal.current?.println(" to select your spawn area.");
+          terminal.current?.newline();
+          terminal.current?.print("After selecting your spawn area, ");
+          terminal.current?.print(
+            "left-click the below line",
+            TerminalTextStyle.Pink,
+          );
+          terminal.current?.println(", then press [enter].");
+        }
+
+        setMiniMapOn(true);
+        // let the miniMap component mount
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const userInput = ((await terminal.current?.getInput()) ?? "").trim();
+        const selectedSpawnArea = miniMapRef.current?.getSelectedSpawnArea();
+        switch (true) {
+          case userInput === "clear": {
+            terminal.current?.clear();
+            advanceStateFromNoHomePlanet(terminal, { showHelp: false });
+            return;
+          }
+          case userInput === "h" || userInput === "help": {
+            advanceStateFromNoHomePlanet(terminal, { showHelp: true });
+            return;
+          }
+          case userInput !== "": {
+            terminal.current?.println(
+              "Invalid option, please try press [help]",
+              TerminalTextStyle.Pink,
+            );
+            advanceStateFromNoHomePlanet(terminal, { showHelp: false });
+            return;
+          }
+        }
+
+        if (!selectedSpawnArea) {
+          terminal.current?.println(
+            "Please select a spawn area, then press [enter]",
+            TerminalTextStyle.Red,
+          );
+          advanceStateFromNoHomePlanet(terminal, { showHelp: false });
+          return;
+        }
+
+        // disable reselect of spawn posistion when we start searching
+        miniMapRef.current?.setSelectable(false);
+
+        const coords = selectedSpawnArea.worldPoint;
+        const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
+        terminal.current?.println(
+          `Spawn coordinates: (${coords.x.toFixed(0)}, ${coords.y.toFixed(
+            0,
+          )}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
+        );
+
+        gameUIManager
+          .getGameManager()
+          .on(GameManagerEvent.InitializedPlayer, () => {
+            setTimeout(() => {
+              setMiniMapOn(false);
+
+              terminal.current?.println("Initializing game...");
+              setStep(TerminalPromptStep.ALL_CHECKS_PASS);
+            });
+          });
+
+        gameUIManager
+          .joinGame(
+            async (e) => {
+              // TODO: Handle 2min timeout error
+              setMiniMapOn(false);
+
+              console.error(e);
+
+              terminal.current?.println("Error Joining Game:");
+              terminal.current?.println(e.message, TerminalTextStyle.Red);
+              terminal.current?.newline();
+
+              console.log(e.message.slice(0, 20));
+
+              if (e.message.slice(0, 20) === "Please enable popups") {
+                terminal.current?.print(
+                  "Player guide: ",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.printLink(
+                  "How to enable popups",
+                  () => {
+                    window.open(
+                      "https://dfares.notion.site/How-to-enable-popups-f01552bd77984ad582e1d7cc33b9523d",
+                    );
+                  },
+                  TerminalTextStyle.Green,
+                );
+                terminal.current?.println(
+                  " <= New player please check this guide!!!",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.println("");
+              } else if (e.message === "transaction reverted") {
+                terminal.current?.println(
+                  "Please refresh the client, choose another area and try again.",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.println("");
+              }
+
+              // terminal.current?.println(
+              //   "Don't worry :-) you can get more ETH on Redstone this way 😘",
+              //   TerminalTextStyle.Pink
+              // );
+
+              // terminal.current?.newline();
+              // terminal.current?.printLink(
+              //   'Deposit ETH to Redstone',
+              //   () => {
+              //     window.open(BLOCKCHAIN_BRIDGE);
+              //   },
+              //   TerminalTextStyle.Pink
+              // );
+              // terminal.current?.newline();
+              // terminal.current?.newline();
+
+              terminal.current?.println("Press [enter] to Try Again:");
+
+              await terminal.current?.getInput();
+              return true;
+            },
+            coords,
+            spectate,
+          )
+          .catch((error: Error) => {
+            terminal.current?.println(
+              `[ERROR] An error occurred: ${error.toString().slice(0, 10000)}`,
+              TerminalTextStyle.Red,
+            );
+            terminal.current?.println(
+              "please refresh client to try again.",
+              TerminalTextStyle.Pink,
+            );
+          });
+      }
+    },
+    [ethConnection, spectate],
+  );
+
+  const advanceStateFromAllChecksPass = useCallback(
+    async (
+      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      showHelp = true,
+    ) => {
+      if (showHelp) {
+        terminal.current?.println("Enter game.", TerminalTextStyle.Green);
+        terminal.current?.println("Press [enter] to begin");
+        terminal.current?.println(
+          "Press [s] then [enter] to begin in SAFE MODE - plugins disabled",
+        );
+      }
+
+      const input = (await terminal.current?.getInput())?.trim() ?? "";
+      switch (true) {
+        // set safe mode
+        case input === "s": {
+          const gameUIManager = gameUIManagerRef.current;
+          gameUIManager?.getGameManager()?.setSafeMode(true);
+          break;
+        }
+
+        // recursive advance
+        case input === "h" || input === "help": {
+          advanceStateFromAllChecksPass(terminal, true);
+          return;
+        }
+        case input === "clear": {
+          terminal.current?.clear();
+          advanceStateFromAllChecksPass(terminal, false);
+          return;
+        }
+        case input !== "": {
+          terminal.current?.println(
+            "Invalid option, please try again...",
+            TerminalTextStyle.Red,
+          );
+          advanceStateFromAllChecksPass(terminal, false);
+          return;
+        }
+      }
+
+      setStep(TerminalPromptStep.COMPLETE);
+      setInitRenderState(InitRenderState.COMPLETE);
+      terminal.current?.clear();
+
+      terminal.current?.println(
+        "Welcome to the Dark Forest Ares.",
+        TerminalTextStyle.Green,
+      );
+      terminal.current?.println("");
+      terminal.current?.println(
+        "This is the Dark Forest interactive JavaScript terminal. Only use this if you know exactly what you're doing.",
+      );
+      terminal.current?.println("");
+      terminal.current?.println("Try running: df.getAccount()");
+      terminal.current?.println("");
+    },
+    [],
+  );
+
+  const advanceStateFromComplete = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      const input = (await terminal.current?.getInput()) || "";
+      let res = "";
+      try {
+        // indrect eval call: http://perfectionkills.com/global-eval-what-are-the-options/
+        res = (1, eval)(input);
+        if (res !== undefined) {
+          terminal.current?.println(res.toString(), TerminalTextStyle.Text);
+        }
+      } catch (e) {
+        res = (e as Error).message;
+        terminal.current?.println(`ERROR: ${res}`, TerminalTextStyle.Red);
+      }
+      advanceStateFromComplete(terminal);
+    },
+    [],
+  );
+
+  const advanceStateFromError = useCallback(async () => {
+    await neverResolves();
+  }, []);
+
+  const advanceStateFromSpectating = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+      try {
+        if (!ethConnection) throw new Error("not logged in");
+
+        setSpectate(true);
+        setMiniMapOn(false);
+        console.log("specatate:", spectate);
+        console.log("isMiniMapOn:", isMiniMapOn);
+
+        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+      } catch (e) {
+        console.error(e);
+        setStep(TerminalPromptStep.ERROR);
+        terminal.current?.print(
+          "Network under heavy load. Please refresh the page, and check ",
+          TerminalTextStyle.Red,
+        );
+        terminal.current?.printLink(
+          BLOCK_EXPLORER_URL,
+          () => {
+            window.open(BLOCK_EXPLORER_URL);
+          },
+          TerminalTextStyle.Red,
+        );
+        terminal.current?.println("");
+        return;
+      }
+    },
+    [ethConnection, isProd, contractAddress, spectate],
   );
 
   const advanceState = useCallback(
-    (terminal: React.MutableRefObject<TerminalHandle | null>) => {
+    (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
       if (browserCompatibleState !== "supported") {
+        return;
+      }
+      if (ethConnection === undefined) {
         return;
       }
 
@@ -225,9 +1563,78 @@ export function GameLandingPage() {
         case step === TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED:
           advanceStateFromCompatibilityPassed(terminal);
           return;
+        case step === TerminalPromptStep.DISPLAY_ACCOUNTS:
+          advanceStateFromDisplayAccounts(terminal);
+          return;
+        case step === TerminalPromptStep.GENERATE_ACCOUNT:
+          advanceStateFromGenerateAccount(terminal);
+          return;
+        case step === TerminalPromptStep.IMPORT_ACCOUNT:
+          advanceStateFromImportAccount(terminal);
+          return;
+        case step === TerminalPromptStep.ACCOUNT_SET:
+          advanceStateFromAccountSet(terminal);
+          return;
+        case step === TerminalPromptStep.ASKING_HAS_WHITELIST_KEY:
+          advanceStateFromAskHasWhitelistKey(terminal);
+          return;
+        case step === TerminalPromptStep.ASKING_WHITELIST_KEY:
+          advanceStateFromAskWhitelistKey(terminal);
+          return;
+        case step === TerminalPromptStep.ASKING_WAITLIST_EMAIL:
+          advanceStateFromAskWaitlistEmail(terminal);
+          return;
+        case step === TerminalPromptStep.ASKING_PLAYER_EMAIL:
+          advanceStateFromAskPlayerEmail(terminal);
+          return;
+        case step === TerminalPromptStep.FETCHING_ETH_DATA:
+          advanceStateFromFetchingEthData(terminal);
+          return;
+        case step === TerminalPromptStep.ASK_ADD_ACCOUNT:
+          advanceStateFromAskAddAccount(terminal);
+          return;
+        case step === TerminalPromptStep.ADD_ACCOUNT:
+          advanceStateFromAddAccount(terminal);
+          return;
+        case step === TerminalPromptStep.NO_HOME_PLANET:
+          advanceStateFromNoHomePlanet(terminal);
+          return;
+        case step === TerminalPromptStep.ALL_CHECKS_PASS:
+          advanceStateFromAllChecksPass(terminal);
+          return;
+        case step === TerminalPromptStep.COMPLETE:
+          advanceStateFromComplete(terminal);
+          return;
+        case step === TerminalPromptStep.ERROR:
+          advanceStateFromError();
+          return;
+        case step === TerminalPromptStep.SPECTATING:
+          advanceStateFromSpectating(terminal);
+          return;
       }
     },
-    [step, browserCompatibleState, advanceStateFromCompatibilityPassed],
+    [
+      step,
+      advanceStateFromAccountSet,
+      advanceStateFromAddAccount,
+      advanceStateFromAllChecksPass,
+      advanceStateFromAskAddAccount,
+      advanceStateFromAskHasWhitelistKey,
+      advanceStateFromAskPlayerEmail,
+      advanceStateFromAskWaitlistEmail,
+      advanceStateFromAskWhitelistKey,
+      advanceStateFromCompatibilityPassed,
+      advanceStateFromComplete,
+      advanceStateFromDisplayAccounts,
+      advanceStateFromError,
+      advanceStateFromFetchingEthData,
+      advanceStateFromGenerateAccount,
+      advanceStateFromImportAccount,
+      advanceStateFromNoHomePlanet,
+      advanceStateFromSpectating,
+      ethConnection,
+      browserCompatibleState,
+    ],
   );
 
   useEffect(() => {
@@ -235,13 +1642,13 @@ export function GameLandingPage() {
     uiEmitter.emit(UIEmitterEvent.UIChange);
   }, [initRenderState]);
 
-  // useEffect(() => {
-  //   const gameUiManager = gameUIManagerRef.current;
-  //   if (!terminalVisible && gameUiManager) {
-  //     const tutorialManager = TutorialManager.getInstance(gameUiManager);
-  //     tutorialManager.acceptInput(TutorialState.Terminal);
-  //   }
-  // }, [terminalVisible]);
+  useEffect(() => {
+    const gameUiManager = gameUIManagerRef.current;
+    if (!terminalVisible && gameUiManager) {
+      const tutorialManager = TutorialManager.getInstance(gameUiManager);
+      tutorialManager.acceptInput(TutorialState.Terminal);
+    }
+  }, [terminalVisible]);
 
   useEffect(() => {
     if (terminalHandle.current && topLevelContainer.current) {
@@ -251,48 +1658,40 @@ export function GameLandingPage() {
 
   return (
     <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
-      {/* <GameWindowWrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
-        {gameUIManagerRef.current && topLevelContainer.current && gameManager && (
-          <TopLevelDivProvider value={topLevelContainer.current}>
-            <UIManagerProvider value={gameUIManagerRef.current}>
-              <GameWindowLayout
-                terminalVisible={terminalVisible}
-                setTerminalVisible={setTerminalVisible} />
-            </UIManagerProvider>
-          </TopLevelDivProvider>
-        )}
+      <GameWindowWrapper
+        initRender={initRenderState}
+        terminalEnabled={terminalVisible}
+      >
+        {gameUIManagerRef.current &&
+          topLevelContainer.current &&
+          gameManager && (
+            <TopLevelDivProvider value={topLevelContainer.current}>
+              <UIManagerProvider value={gameUIManagerRef.current}>
+                {/* <GameWindowLayout
+                  terminalVisible={terminalVisible}
+                  setTerminalVisible={setTerminalVisible}
+                /> */}
+              </UIManagerProvider>
+            </TopLevelDivProvider>
+          )}
         <TerminalToggler
           terminalEnabled={terminalVisible}
           setTerminalEnabled={setTerminalVisible}
         />
-      </GameWindowWrapper> */}
-
+      </GameWindowWrapper>
       <TerminalWrapper
         initRender={initRenderState}
         terminalEnabled={terminalVisible}
       >
         <MythicLabelText
-          text={`Welcome To Dark Forest MUD`}
+          text={`Welcome To Dark Forest Ares v0.1.3: Kardashev`}
           style={{
             fontFamily: "'Start Press 2P', sans-serif",
             display:
               initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
           }}
         />
-
-        <WalletButton />
-
         <BrowserIssues issues={browserIssues} state={browserCompatibleState} />
-
-        <div>
-          <p>Contract: {contract}</p>
-          <p>Location: {location.pathname}</p>
-          <p>Search: {queryParam}</p>
-          <p> Main Account: {mainAccount}</p>
-          <p> Game Account: {gameAccount}</p>
-          <br />
-        </div>
-
         <Terminal
           ref={terminalHandle}
           promptCharacter={">"}
@@ -301,6 +1700,13 @@ export function GameLandingPage() {
         />
       </TerminalWrapper>
       <div ref={topLevelContainer}></div>
+      <div>
+        {isMiniMapOn && (
+          <div style={{ position: "absolute", right: "100px", top: "100px" }}>
+            <MiniMap ref={miniMapRef} />
+          </div>
+        )}
+      </div>
     </Wrapper>
   );
 }
