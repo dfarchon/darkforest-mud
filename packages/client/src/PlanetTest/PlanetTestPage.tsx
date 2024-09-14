@@ -1,5 +1,3 @@
-import type { PlanetType, SpaceType } from "@df/types";
-
 import { CreateMoveForm } from "./CreateMoveFormTest";
 import { CreatePlanetForm } from "./CreatePlanetFormTest";
 
@@ -8,6 +6,8 @@ import { PlayPauseTickButton } from "./PlayPauseTickButton";
 import { PlanetUpgradeForm } from "./PlanetUpgradeFormTest";
 import { ProofVerificationForm } from "./ProofVerificationForm";
 import { PlanetReadForm } from "./PlanetReadForm";
+import PlayerForm from "./PlayerForm";
+import { PlanetUpgradeBranchForm } from "./PlanetUpgradeFormBranchTest";
 
 export const PlanetTestPage = () => {
   // Function to handle planet creation
@@ -82,9 +82,24 @@ export const PlanetTestPage = () => {
     });
   };
 
+  const handlePlanetBranchUpgradeSubmit = async (
+    planetHash: string,
+    branch: number,
+  ) => {
+    console.log("Upgrade sent:", {
+      planetHash,
+      branch,
+    });
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-start gap-4">
+        <div className="flex flex-col">
+          {" "}
+          <PlayerForm />
+          {/* <SpawnPlayer/> */}
+        </div>
         <div className="flex">
           <CreatePlanetForm onSubmit={handleCreatePlanet} />
         </div>
@@ -94,6 +109,7 @@ export const PlanetTestPage = () => {
         </div>
         <div className="flex">
           <PlanetUpgradeForm onSubmit={handlePlanetUpgradeSubmit} />
+          <PlanetUpgradeBranchForm onSubmit={handlePlanetBranchUpgradeSubmit} />
         </div>
       </div>
 
