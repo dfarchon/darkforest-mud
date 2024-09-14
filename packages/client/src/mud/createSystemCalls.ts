@@ -71,7 +71,7 @@ export function createSystemCalls(
    *   (https://github.com/latticexyz/mud/blob/main/templates/react/packages/client/src/mud/setupNetwork.ts#L77-L83).
    */
   { worldContract, waitForTransaction }: SetupNetworkResult,
-  { PlayersTable, Move, Planet, Ticker }: ClientComponents,
+  { Player, Move, Planet, Ticker }: ClientComponents,
 ) {
   // const increment = async () => {
   //   /*
@@ -170,12 +170,57 @@ export function createSystemCalls(
   // PLAYER CALLS
   //
   // Basic mint player to enter the game - TODO be as ERC20?
-  const mintPlayer = async (name: string, linked: Address) => {
-    const tx = await worldContract.write.df__mintPlayer([name, linked]);
-
-    await waitForTransaction(tx);
-    return getComponentValue(PlayersTable, singletonEntity);
+  const registerPlayer = async (name: string, burner: Address) => {
+    const tx = await worldContract.write.df__registerPlayer([name, burner]);
+    const receipt = await waitForTransaction(tx);
+    // Log the receipt or trigger additional actions, e.g., update game state
+    console.log("Register player successfully:", receipt);
+    return getComponentValue(Player, singletonEntity);
   };
+
+  // Function to change player name
+  const changePlayerName = async (newName: string) => {
+    const tx = await worldContract.write.df__changePlayerName([newName]);
+    const receipt = await waitForTransaction(tx);
+    // Log the receipt or trigger additional actions, e.g., update game state
+    console.log("Change Player Name successfully:", receipt);
+    return getComponentValue(Player, singletonEntity);
+  };
+
+  // Function to change burner wallet
+  const changeBurnerWallet = async (newAddress: Address) => {
+    const tx = await worldContract.write.df__changeBurnerWallet([newAddress]);
+    const receipt = await waitForTransaction(tx);
+    // Log the receipt or trigger additional actions, e.g., update game state
+    console.log("Change Burner successfully:", receipt);
+    return getComponentValue(Player, singletonEntity);
+  };
+  // TODO
+  // Function to spawn a player
+  // const spawnPlayer = async (proof, input) => {
+  //   const tx = await worldContract.write.df__spawnPlayer([proof, input]);
+  //   const receipt = await waitForTransaction(tx);
+  //   // Log the receipt or trigger additional actions, e.g., update game state
+  //   console.log("Spawn Player successfully:", receipt);
+  //   // Replace this with the actual method to get the newly spawned planet
+  //   return getComponentValue(Player, singletonEntity);
+  // };
+
+  // // Function to spawn a player from burner
+  // const spawnPlayerFromBurner = async (proof, input) => {
+  //   const tx = await worldContract.write.callFrom(
+  //     worldContract.address,
+  //     "sy.df.PlayerSystem.spawnPlayer",
+  //     [proof, input],
+  //   );
+  //   const receipt = await waitForTransaction(tx);
+  //   // Log the receipt or trigger additional actions, e.g., update game state
+  //   console.log("Spawn Player from Burner successfully:", receipt);
+  //   // Replace this with the actual method to get the newly spawned planet
+  //   return getComponentValue(Player, singletonEntity);
+  // };
+
+  // PLANET
 
   const planetUpgrade = async (
     planetHash: bigint,
@@ -191,6 +236,30 @@ export function createSystemCalls(
         BigInt(rangeUpgrades),
         BigInt(speedUpgrades),
         BigInt(defenseUpgrades),
+      ]);
+
+      // Wait for the transaction to be confirmed
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("Planet upgraded successfully:", receipt);
+      getComponentValue(Planet, singletonEntity);
+    } catch (error) {
+      console.error("Upgrade planet transaction failed:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
+  };
+
+  const planetUpgradeBranch = async (
+    planetHash: bigint,
+    rangeUpgrades: number,
+  ): Promise<void> => {
+    try {
+      // Call the upgradePlanet function on the contract
+
+      const tx = await worldContract.write.df__upgradePlanet([
+        planetHash,
+        BigInt(rangeUpgrades),
       ]);
 
       // Wait for the transaction to be confirmed
@@ -288,7 +357,7 @@ export function createSystemCalls(
     input: bigint[],
   ): Promise<`0x${string}`> => {
     try {
-      const result = await worldContract.write.df__verifyInitProof(
+      const result = await worldContract.read.df__verifyInitProof(
         a,
         b,
         c,
@@ -306,7 +375,7 @@ export function createSystemCalls(
     moveInput: { [key: string]: bigint },
   ): Promise<`0x${string}`> => {
     try {
-      const result = await worldContract.write.df__verifyMoveProof(
+      const result = await worldContract.read.df__verifyMoveProof(
         proof,
         moveInput,
       );
@@ -324,7 +393,7 @@ export function createSystemCalls(
     input: bigint[],
   ): Promise<`0x${string}`> => {
     try {
-      const result = await worldContract.write.df__verifyBiomebaseProof(
+      const result = await worldContract.read.df__verifyBiomebaseProof(
         a,
         b,
         c,
@@ -344,7 +413,7 @@ export function createSystemCalls(
     input: bigint[],
   ): Promise<`0x${string}`> => {
     try {
-      const result = await worldContract.write.df__verifyRevealProof(
+      const result = await worldContract.read.df__verifyRevealProof(
         a,
         b,
         c,
@@ -364,7 +433,7 @@ export function createSystemCalls(
     input: bigint[],
   ): Promise<`0x${string}`> => {
     try {
-      const result = await worldContract.write.df__verifyWhitelistProof(
+      const result = await worldContract.read.df__verifyWhitelistProof(
         a,
         b,
         c,
@@ -379,13 +448,17 @@ export function createSystemCalls(
 
   // do not forget init function calls to be accessable in MUD systems calls
   return {
-    mintPlayer,
+    registerPlayer,
+    changePlayerName,
+    changeBurnerWallet,
+
     createPlanet,
     move,
     unPause,
     pause,
     tick,
     planetUpgrade,
+    planetUpgradeBranch,
     verifyInitProof,
     verifyMoveProof,
     verifyBiomebaseProof,
