@@ -3,13 +3,7 @@ import { useMUD } from "@mud/MUDContext";
 import { entityToAddress } from "@frontend/Pages/GamePage";
 const PlayerForm = () => {
   const {
-    systemCalls: {
-      registerPlayer,
-      changePlayerName,
-      changeBurnerWallet,
-      spawnPlayer,
-      spawnPlayerFromBurner,
-    },
+    systemCalls: { registerPlayer, changePlayerName, changeBurnerWallet },
     network: { playerEntity },
   } = useMUD();
 
