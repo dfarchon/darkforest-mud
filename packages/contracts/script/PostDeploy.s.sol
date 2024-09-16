@@ -6,6 +6,7 @@ import { console } from "forge-std/console.sol";
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { stdToml } from "forge-std/StdToml.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { SpaceType, PlanetType } from "../src/codegen/common.sol";
@@ -18,6 +19,7 @@ import { PlanetLevelConfig, PlanetTypeConfig } from "../src/codegen/index.sol";
 import { SnarkConfig, SnarkConfigData, Ticker } from "../src/codegen/index.sol";
 import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
+import { RevealedPlanet } from "../src/codegen/index.sol";
 
 contract PostDeploy is Script {
   using stdToml for string;
@@ -57,6 +59,13 @@ contract PostDeploy is Script {
 
     // set test planets
     _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
+
+    // register fallback delegation of df namespace
+    IWorld(worldAddress).registerNamespaceDelegation(
+      WorldResourceIdLib.encodeNamespace("df"),
+      WorldResourceIdLib.encode("sy", "df", "DfDelegationCtrl"),
+      new bytes(0)
+    );
 
     vm.stopBroadcast();
   }
@@ -126,8 +135,8 @@ contract PostDeploy is Script {
   }
 
   struct TestPlanet {
-    int64 x;
-    int64 y;
+    int32 x;
+    int32 y;
     bytes32 planetHash;
     address owner;
     PlanetData data;
@@ -138,6 +147,7 @@ contract PostDeploy is Script {
     for (uint256 i; i < planets.length; i++) {
       Planet.set(planets[i].planetHash, planets[i].data);
       PlanetOwner.set(planets[i].planetHash, planets[i].owner);
+      RevealedPlanet.set(planets[i].planetHash, planets[i].x, planets[i].y, planets[i].owner);
     }
   }
 }

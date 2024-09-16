@@ -4,23 +4,32 @@ import React, { useState } from "react";
 // Define a Planet type based on the Planet structure
 type Planet = {
   name: string;
-  size: number;
-  gravity: number;
+
   // Add more fields as per your Planet structure
 };
 
-type ReadPlanetType = "readPlanetWithHash" | "readPlanetWithHashPerlinDistance";
+type ReadPlanetType =
+  | "readPlanetWithHash"
+  | "readPlanetWithHashPerlinDistance"
+  | "readPlanetAt";
 
 export const PlanetReadForm: React.FC = () => {
   const {
-    systemCalls: { readPlanetWithHash, readPlanetWithHashPerlinDistance },
+    systemCalls: {
+      readPlanetWithHash,
+      readPlanetWithHashPerlinDistance,
+      readPlanetAt,
+    },
   } = useMUD();
 
   const [readType, setReadType] =
     useState<ReadPlanetType>("readPlanetWithHash");
-  const [planetHash, setPlanetHash] = useState<string>("");
-  const [perlin, setPerlin] = useState<string>(0);
-  const [distanceSquare, setDistanceSquare] = useState<string>(0);
+  const [planetHash, setPlanetHash] = useState<string>(
+    "0x1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0",
+  );
+  const [perlin, setPerlin] = useState<string>("0");
+  const [distanceSquare, setDistanceSquare] = useState<string>("0");
+  const [tickNumber, setTickNumber] = useState<string>("0"); // New state for tick number
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +38,7 @@ export const PlanetReadForm: React.FC = () => {
       let planet: Planet | undefined;
       switch (readType) {
         case "readPlanetWithHash":
-          planet = await readPlanetWithHashPerlinDistance(planetHash, 0, 0);
+          planet = await readPlanetWithHash(planetHash);
           break;
         case "readPlanetWithHashPerlinDistance":
           planet = await readPlanetWithHashPerlinDistance(
@@ -38,14 +47,11 @@ export const PlanetReadForm: React.FC = () => {
             BigInt(distanceSquare),
           );
           break;
+        case "readPlanetAt":
+          planet = await readPlanetAt(planetHash, BigInt(tickNumber));
+          break;
         default:
           throw new Error("Invalid read type selected.");
-      }
-
-      if (planet) {
-        console.log(`Planet data:`, planet);
-      } else {
-        console.error("No planet data found");
       }
     } catch (error) {
       console.error(`Error reading planet data:`, error);
@@ -67,10 +73,11 @@ export const PlanetReadForm: React.FC = () => {
             <option value="readPlanetWithHashPerlinDistance">
               Read Planet (by Hash, Perlin, and Distance)
             </option>
+            <option value="readPlanetAt">Read Planet (by Hash and Tick)</option>
           </select>
         </div>
 
-        {/* Conditionally render the appropriate inputs */}
+        {/* Planet Hash input field */}
         <div>
           <label className="block text-gray-700">Planet Hash</label>
           <input
@@ -82,6 +89,7 @@ export const PlanetReadForm: React.FC = () => {
           />
         </div>
 
+        {/* Conditionally render fields for reading by Perlin and Distance */}
         {readType === "readPlanetWithHashPerlinDistance" && (
           <>
             <div>
@@ -105,6 +113,20 @@ export const PlanetReadForm: React.FC = () => {
               />
             </div>
           </>
+        )}
+
+        {/* Conditionally render fields for reading by Tick */}
+        {readType === "readPlanetAt" && (
+          <div>
+            <label className="block text-gray-700">Tick Number</label>
+            <input
+              type="text"
+              value={tickNumber}
+              onChange={(e) => setTickNumber(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+              placeholder="Enter Tick Number"
+            />
+          </div>
         )}
 
         <button

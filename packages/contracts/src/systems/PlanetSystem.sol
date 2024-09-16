@@ -44,6 +44,17 @@ contract PlanetSystem is System, Errors {
   }
 
   /**
+   * @notice Read a planet from storage and sync it to the given tick. Designed for front-end.
+   * @param planetHash Planet hash
+   * @param tickNumber Tick number
+   */
+  function readPlanetAt(uint256 planetHash, uint256 tickNumber) public view returns (Planet memory planet) {
+    planet.planetHash = planetHash;
+    planet.readFromStore();
+    _syncTo(planet, tickNumber);
+  }
+
+  /**
    * @notice Upgrade a planet. Supports fast upgrading.
    * @param planetHash Planet hash
    * @param rangeUpgrades Times of range upgrades
@@ -83,6 +94,10 @@ contract PlanetSystem is System, Errors {
 
   function _sync(Planet memory planet) internal view {
     uint256 untilTick = Ticker.getTickNumber();
+    _syncTo(planet, untilTick);
+  }
+
+  function _syncTo(Planet memory planet, uint256 untilTick) internal view {
     MoveData memory move = planet.popArrivedMove(untilTick);
     while (uint256(move.from) != 0) {
       planet.naturalGrowth(move.arrivalTime);

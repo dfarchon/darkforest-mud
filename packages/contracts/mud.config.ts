@@ -16,22 +16,44 @@ export default defineWorld({
     TestOnlySystem: {
       openAccess: true,
     },
+    DfDelegationControlSystem: {
+      name: "DfDelegationCtrl",
+    },
   },
   tables: {
-    // todo remove this table and corresponding increment system
-    PlayersTable: {
+    Counter: {
+      schema: {
+        player: "uint64",
+      },
+      key: [],
+    },
+    Player: {
       schema: {
         owner: "address",
-        linked: "address",
-        minted: "uint256",
+        burner: "address",
+        index: "uint32",
+        createdAt: "uint64",
         name: "string",
       },
       key: ["owner"],
+    },
+    BurnerToPlayer: "address",
+    NameToPlayer: "address",
+    SpawnPlanet: {
+      schema: {
+        player: "address",
+        planet: "uint256",
+      },
+      key: ["player"],
     },
     TempConfigSet: {
       schema: {
         biomeCheck: "bool",
         skipProofCheck: "bool",
+        playerLimit: "uint32",
+        spawnPerlinMin: "uint8",
+        spawnPerlinMax: "uint8",
+        revealCd: "uint32",
       },
       key: [],
     },
@@ -130,6 +152,19 @@ export default defineWorld({
         spaceType: "SpaceType",
       },
       key: ["spaceType", "planetType", "level"],
+    },
+    LastReveal: {
+      schema: {
+        player: "address",
+        tickNumber: "uint64",
+      },
+      key: ["player"],
+    },
+    RevealedPlanet: {
+      id: "bytes32",
+      x: "int32",
+      y: "int32",
+      revealer: "address",
     },
     Planet: {
       id: "bytes32",
