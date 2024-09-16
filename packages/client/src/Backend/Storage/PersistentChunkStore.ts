@@ -516,7 +516,9 @@ class PersistentChunkStore implements ChunkStore {
    */
   public async onEthTxSubmit(tx: Transaction): Promise<void> {
     // in case the tx was mined and saved already
-    if (!tx.hash || this.confirmedTxHashes.has(tx.hash)) return;
+    if (!tx.hash || this.confirmedTxHashes.has(tx.hash)) {
+      return;
+    }
     const ser: PersistedTransaction = { hash: tx.hash, intent: tx.intent };
     await this.db.put(
       ObjectStore.UNCONFIRMED_ETH_TXS,
@@ -559,14 +561,17 @@ class PersistentChunkStore implements ChunkStore {
   public async saveModalPositions(
     modalPositions: Map<ModalId, ModalPosition>,
   ): Promise<void> {
-    if (!this.db.objectStoreNames.contains(ObjectStore.MODAL_POS)) return;
+    if (!this.db.objectStoreNames.contains(ObjectStore.MODAL_POS)) {
+      return;
+    }
     const serialized = JSON.stringify(Array.from(modalPositions.entries()));
     await this.setKey(MODAL_POSITIONS_KEY, serialized, ObjectStore.MODAL_POS);
   }
 
   public async loadModalPositions(): Promise<Map<ModalId, ModalPosition>> {
-    if (!this.db.objectStoreNames.contains(ObjectStore.MODAL_POS))
+    if (!this.db.objectStoreNames.contains(ObjectStore.MODAL_POS)) {
       return new Map();
+    }
     const winPos = await this.getKey(
       MODAL_POSITIONS_KEY,
       ObjectStore.MODAL_POS,

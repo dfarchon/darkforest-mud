@@ -546,7 +546,9 @@ export function GameLandingPage() {
     async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
       try {
         const playerAddress = ethConnection?.getAddress();
-        if (!playerAddress || !ethConnection) throw new Error("not logged in");
+        if (!playerAddress || !ethConnection) {
+          throw new Error("not logged in");
+        }
 
         terminal.current?.println("Checking account balance... ");
 
@@ -738,7 +740,9 @@ export function GameLandingPage() {
   const advanceStateFromAskWhitelistKey = useCallback(
     async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
       const address = ethConnection?.getAddress();
-      if (!address) throw new Error("not logged in");
+      if (!address) {
+        throw new Error("not logged in");
+      }
 
       terminal.current?.println(
         "Please enter your invite key (XXXXXX-XXXXXX-XXXXXX-XXXXXX):",
@@ -799,7 +803,9 @@ export function GameLandingPage() {
           setStep(TerminalPromptStep.ASKING_PLAYER_EMAIL);
         }
       } else {
-        if (!ethConnection) throw new Error("no eth connection");
+        if (!ethConnection) {
+          throw new Error("no eth connection");
+        }
         const contractsAPI = await makeContractsAPI({
           connection: ethConnection,
           contractAddress,
@@ -933,7 +939,9 @@ export function GameLandingPage() {
   const advanceStateFromAskPlayerEmail = useCallback(
     async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
       const address = ethConnection?.getAddress();
-      if (!address) throw new Error("not logged in");
+      if (!address) {
+        throw new Error("not logged in");
+      }
 
       terminal.current?.print(
         "Enter your email address. ",
@@ -970,7 +978,9 @@ export function GameLandingPage() {
       let newGameManager: GameManager;
 
       try {
-        if (!ethConnection) throw new Error("no eth connection");
+        if (!ethConnection) {
+          throw new Error("no eth connection");
+        }
 
         newGameManager = await GameManager.create({
           connection: ethConnection,
@@ -1521,7 +1531,9 @@ export function GameLandingPage() {
   const advanceStateFromSpectating = useCallback(
     async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
       try {
-        if (!ethConnection) throw new Error("not logged in");
+        if (!ethConnection) {
+          throw new Error("not logged in");
+        }
 
         setSpectate(true);
         setMiniMapOn(false);

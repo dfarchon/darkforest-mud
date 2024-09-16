@@ -123,7 +123,9 @@ class ReaderDataStore {
             break;
           }
         }
-        if (planetLocation) break;
+        if (planetLocation) {
+          break;
+        }
       }
     }
 
@@ -149,7 +151,9 @@ class ReaderDataStore {
     const nowInSeconds = Date.now() / 1000;
 
     for (const arrival of arrivals) {
-      if (nowInSeconds < arrival.arrivalTime) break;
+      if (nowInSeconds < arrival.arrivalTime) {
+        break;
+      }
       arrive(planet, [], arrival, undefined, contractConstants);
     }
 
@@ -179,8 +183,9 @@ class ReaderDataStore {
     if (
       distFromOrigin > MAX_LEVEL_DIST[1] &&
       distFromOrigin < MAX_LEVEL_DIST[0]
-    )
+    ) {
       return SpaceType.NEBULA;
+    }
 
     if (perlin < this.contractConstants.PERLIN_THRESHOLD_1) {
       return SpaceType.NEBULA;
@@ -200,12 +205,18 @@ class ReaderDataStore {
 
     const spaceType = this.spaceTypeFromPerlin(perlin, distFromOrigin);
 
-    if (spaceType === SpaceType.DEAD_SPACE) return Biome.CORRUPTED;
+    if (spaceType === SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
 
     let biome = 3 * spaceType;
-    if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) biome += 1;
-    else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) biome += 2;
-    else biome += 3;
+    if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) {
+      biome += 1;
+    } else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) {
+      biome += 2;
+    } else {
+      biome += 3;
+    }
 
     return biome as Biome;
   }

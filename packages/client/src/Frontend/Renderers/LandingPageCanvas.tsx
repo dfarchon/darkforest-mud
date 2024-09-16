@@ -91,7 +91,9 @@ class LandingPageCanvasRenderer {
     for (let i = 0; i < numEdges; i++) {
       const p1 = Math.floor(Math.random() * numPoints);
       let p2 = p1;
-      while (p2 === p1) p2 = Math.floor(Math.random() * numPoints);
+      while (p2 === p1) {
+        p2 = Math.floor(Math.random() * numPoints);
+      }
       newEdges.push([p1, p2]);
     }
 
@@ -244,7 +246,9 @@ class LandingPageCanvasRenderer {
   }
 
   private mouseMove(e: MouseEvent) {
-    if (!this.allowMouse()) return;
+    if (!this.allowMouse()) {
+      return;
+    }
     this._mouseMove(e);
   }
 
@@ -260,7 +264,9 @@ class LandingPageCanvasRenderer {
       if (base.x ** 2 + base.y ** 2 > max ** 2) {
         const mult = max / Math.sqrt(base.x ** 2 + base.y ** 2);
         return { x: base.x * mult, y: base.y * mult };
-      } else return base;
+      } else {
+        return base;
+      }
     };
 
     const _tIdentity = (x: Position, _m: number) => x;
@@ -315,9 +321,11 @@ export default function LandingPageCanvas() {
   }, []);
 
   useEffect(() => {
-    if (canvasRef.current)
+    if (canvasRef.current) {
       LandingPageCanvasRenderer.initialize(canvasRef.current);
-    else console.error("could not init draw");
+    } else {
+      console.error("could not init draw");
+    }
 
     window.addEventListener("resize", onResize);
 

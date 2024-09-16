@@ -710,12 +710,24 @@ export class GameManager extends EventEmitter {
 
         const knownScoringPlanets = [];
         for (const planet of this.getAllPlanets()) {
-          if (!isLocatable(planet)) continue;
-          if (planet.destroyed || planet.frozen) continue;
-          if (planet.planetLevel < 3) continue;
-          if (!planet?.location?.coords) continue;
-          if (planet.claimer === EMPTY_ADDRESS) continue;
-          if (planet.claimer === undefined) continue;
+          if (!isLocatable(planet)) {
+            continue;
+          }
+          if (planet.destroyed || planet.frozen) {
+            continue;
+          }
+          if (planet.planetLevel < 3) {
+            continue;
+          }
+          if (!planet?.location?.coords) {
+            continue;
+          }
+          if (planet.claimer === EMPTY_ADDRESS) {
+            continue;
+          }
+          if (planet.claimer === undefined) {
+            continue;
+          }
           knownScoringPlanets.push({
             locationId: planet.locationId,
             claimer: planet.claimer,
@@ -733,9 +745,13 @@ export class GameManager extends EventEmitter {
 
         for (const planet of knownScoringPlanets) {
           const claimer = planet.claimer;
-          if (claimer === undefined) continue;
+          if (claimer === undefined) {
+            continue;
+          }
           const player = this.players.get(claimer);
-          if (player === undefined) continue;
+          if (player === undefined) {
+            continue;
+          }
 
           const cnt = cntMap.get(claimer);
           let cntNextValue = undefined;
@@ -759,7 +775,9 @@ export class GameManager extends EventEmitter {
           const result = haveScorePlayersMap.get(playerItem.address);
 
           const player = this.players.get(playerItem.address);
-          if (player === undefined) continue;
+          if (player === undefined) {
+            continue;
+          }
 
           if (result === false || result === undefined) {
             player.score = undefined;
@@ -1043,7 +1061,9 @@ export class GameManager extends EventEmitter {
         gameManager.onTxSubmit(tx);
       })
       .on(ContractsAPIEvent.TxConfirmed, async (tx: Transaction) => {
-        if (!tx.hash) return; // this should never happen
+        if (!tx.hash) {
+          return;
+        } // this should never happen
         gameManager.persistentChunkStore.onEthTxComplete(tx.hash);
 
         if (isUnconfirmedRevealTx(tx)) {
@@ -1269,9 +1289,13 @@ export class GameManager extends EventEmitter {
   }
 
   private async hardRefreshPlayer(address?: EthAddress): Promise<void> {
-    if (!address) return;
+    if (!address) {
+      return;
+    }
     const playerFromBlockchain = await this.contractsAPI.getPlayerById(address);
-    if (!playerFromBlockchain) return;
+    if (!playerFromBlockchain) {
+      return;
+    }
 
     const localPlayer = this.getPlayer(address);
 
@@ -1287,9 +1311,13 @@ export class GameManager extends EventEmitter {
     address?: EthAddress,
     show?: boolean,
   ): Promise<void> {
-    if (!address) return;
+    if (!address) {
+      return;
+    }
     const spaceships = await this.contractsAPI.getPlayerSpaceships(address);
-    if (show) console.log(spaceships.length);
+    if (show) {
+      console.log(spaceships.length);
+    }
     for (let i = 0; i < spaceships.length; i++) {
       if (show) {
         console.log("--- spaceship ", i, " ---");
@@ -1302,7 +1330,9 @@ export class GameManager extends EventEmitter {
 
       if (voyageId !== undefined) {
         const arrival = await this.contractsAPI.getArrival(Number(voyageId));
-        if (show) console.log("voyageId:", voyageId);
+        if (show) {
+          console.log("voyageId:", voyageId);
+        }
         // console.log(arrival);
         if (arrival) {
           const fromPlanet = arrival.fromPlanet;
@@ -1315,7 +1345,9 @@ export class GameManager extends EventEmitter {
             this.hardRefreshPlanet(fromPlanet),
             this.hardRefreshPlanet(toPlanet),
           ]);
-          if (show) console.log("[OK] finish hard refresh from & to planets");
+          if (show) {
+            console.log("[OK] finish hard refresh from & to planets");
+          }
         }
       }
     }
@@ -1334,13 +1366,17 @@ export class GameManager extends EventEmitter {
   // Dirty hack for only refreshing properties on a planet and nothing else
   public async softRefreshPlanet(planetId: LocationId): Promise<void> {
     const planet = await this.contractsAPI.getPlanetById(planetId);
-    if (!planet) return;
+    if (!planet) {
+      return;
+    }
     this.entityStore.replacePlanetFromContractData(planet);
   }
 
   public async hardRefreshPlanet(planetId: LocationId): Promise<void> {
     const planet = await this.contractsAPI.getPlanetById(planetId);
-    if (!planet) return;
+    if (!planet) {
+      return;
+    }
     const arrivals = await this.contractsAPI.getArrivalsForPlanet(planetId);
 
     const artifactsOnPlanets =
@@ -1478,7 +1514,9 @@ export class GameManager extends EventEmitter {
 
   public async hardRefreshArtifact(artifactId: ArtifactId): Promise<void> {
     const artifact = await this.contractsAPI.getArtifactById(artifactId);
-    if (!artifact) return;
+    if (!artifact) {
+      return;
+    }
     this.entityStore.replaceArtifactFromContractData(artifact);
   }
 
@@ -1490,7 +1528,9 @@ export class GameManager extends EventEmitter {
     for (const item of loadedBurnedCoords) {
       const locationId = item.hash;
       const planet = this.getPlanetWithId(locationId);
-      if (planet === undefined) continue;
+      if (planet === undefined) {
+        continue;
+      }
 
       const burnedLocation = {
         ...this.locationFromCoords(item),
@@ -1513,7 +1553,9 @@ export class GameManager extends EventEmitter {
     for (const item of loadedKardashevCoords) {
       const locationId = item.hash;
       const planet = this.getPlanetWithId(locationId);
-      if (planet === undefined) continue;
+      if (planet === undefined) {
+        continue;
+      }
 
       const kardashevLocation = {
         ...this.locationFromCoords(item),
@@ -1618,8 +1660,11 @@ export class GameManager extends EventEmitter {
    */
   public getTwitter(address: EthAddress | undefined): string | undefined {
     let myAddress;
-    if (!address) myAddress = this.getAccount();
-    else myAddress = address;
+    if (!address) {
+      myAddress = this.getAccount();
+    } else {
+      myAddress = address;
+    }
 
     if (!myAddress) {
       return undefined;
@@ -1803,8 +1848,12 @@ export class GameManager extends EventEmitter {
 
   public getPlayerScore(addr: EthAddress): number | undefined {
     const player = this.players.get(addr);
-    if (!player) return undefined;
-    if (player.lastClaimTimestamp === 0) return undefined;
+    if (!player) {
+      return undefined;
+    }
+    if (player.lastClaimTimestamp === 0) {
+      return undefined;
+    }
     return player?.score;
   }
 
@@ -1837,7 +1886,9 @@ export class GameManager extends EventEmitter {
   }
 
   private initMiningManager(homeCoords: WorldCoords, cores?: number): void {
-    if (this.minerManager) return;
+    if (this.minerManager) {
+      return;
+    }
 
     const myPattern: MiningPattern = new SpiralPattern(
       homeCoords,
@@ -1891,8 +1942,11 @@ export class GameManager extends EventEmitter {
    * Gets the mining pattern that the miner is currently using.
    */
   getMiningPattern(): MiningPattern | undefined {
-    if (this.minerManager) return this.minerManager.getMiningPattern();
-    else return undefined;
+    if (this.minerManager) {
+      return this.minerManager.getMiningPattern();
+    } else {
+      return undefined;
+    }
   }
 
   /**
@@ -2016,7 +2070,9 @@ export class GameManager extends EventEmitter {
    * gets both deposited artifacts that are on planets i own as well as artifacts i own
    */
   getMyArtifacts(): Artifact[] {
-    if (!this.account) return [];
+    if (!this.account) {
+      return [];
+    }
     const ownedByMe = this.entityStore.getArtifactsOwnedBy(this.account);
     const onPlanetsOwnedByMe = this.entityStore
       .getArtifactsOnPlanetsOwnedBy(this.account)
@@ -2196,7 +2252,9 @@ export class GameManager extends EventEmitter {
    * Gets the balance of the account measured in Eth (i.e. in full units of the chain).
    */
   getMyBalanceEth(): number {
-    if (!this.account) return 0;
+    if (!this.account) {
+      return 0;
+    }
     return weiToEth(this.getMyBalance());
   }
 
@@ -2248,7 +2306,9 @@ export class GameManager extends EventEmitter {
    * Gets the location of your home planet.
    */
   getHomeCoords(): WorldCoords | undefined {
-    if (!this.homeLocation) return undefined;
+    if (!this.homeLocation) {
+      return undefined;
+    }
     return {
       x: this.homeLocation.coords.x,
       y: this.homeLocation.coords.y,
@@ -2353,7 +2413,9 @@ export class GameManager extends EventEmitter {
    * process by telling the Dark Forest webserver to look at that tweet.
    */
   async submitVerifyTwitter(twitter: string): Promise<boolean> {
-    if (!this.account) return Promise.resolve(false);
+    if (!this.account) {
+      return Promise.resolve(false);
+    }
     const success = await verifyTwitterHandle(
       await this.ethConnection.signMessageObject({ twitter }),
     );
@@ -2455,7 +2517,9 @@ export class GameManager extends EventEmitter {
       throw new Error("no account set");
     }
     const planet = this.getPlanetWithId(planetId);
-    if (!isLocatable(planet)) return 0;
+    if (!isLocatable(planet)) {
+      return 0;
+    }
     const myPinkZones = this.getMyPinkZones();
     let result = -1;
     for (const pinkZone of myPinkZones) {
@@ -2463,19 +2527,29 @@ export class GameManager extends EventEmitter {
       const coords = pinkZone.coords;
       const radius = pinkZone.radius;
       const burnPlanet = this.getPlanetWithId(burnPlanetId);
-      if (!burnPlanet) continue;
-      if (!burnPlanet.burnStartTimestamp) continue;
+      if (!burnPlanet) {
+        continue;
+      }
+      if (!burnPlanet.burnStartTimestamp) {
+        continue;
+      }
 
       const dis = this.getDistCoords(coords, planet.location.coords);
 
       if (dis <= radius) {
-        if (result === -1) result = burnPlanet.burnStartTimestamp;
-        else result = result = Math.min(result, burnPlanet.burnStartTimestamp);
+        if (result === -1) {
+          result = burnPlanet.burnStartTimestamp;
+        } else {
+          result = result = Math.min(result, burnPlanet.burnStartTimestamp);
+        }
       }
     }
 
-    if (result === 1) return 0;
-    else return (result + this.contractConstants.PINK_PLANET_COOLDOWN) * 1000;
+    if (result === 1) {
+      return 0;
+    } else {
+      return (result + this.contractConstants.PINK_PLANET_COOLDOWN) * 1000;
+    }
   }
 
   /**
@@ -2488,7 +2562,9 @@ export class GameManager extends EventEmitter {
       throw new Error("no account set");
     }
     const planet = this.getPlanetWithId(planetId);
-    if (!isLocatable(planet)) return undefined;
+    if (!isLocatable(planet)) {
+      return undefined;
+    }
     const myBlueZones = this.getMyBlueZones();
 
     for (const blueZone of myBlueZones) {
@@ -2496,8 +2572,12 @@ export class GameManager extends EventEmitter {
       const coords = blueZone.coords;
 
       const centerPlanet = this.getPlanetWithId(blueZoneCenterPlanetId);
-      if (!centerPlanet) continue;
-      if (!centerPlanet.kardashevTimestamp) continue;
+      if (!centerPlanet) {
+        continue;
+      }
+      if (!centerPlanet.kardashevTimestamp) {
+        continue;
+      }
       const distanceToZone = this.getDistCoords(coords, planet.location.coords);
       if (
         distanceToZone <=
@@ -2511,9 +2591,15 @@ export class GameManager extends EventEmitter {
           dis = distanceToZone;
         } else if (distanceToZone === dis) {
           const tmp = this.getPlanetWithId(centerPlanetId);
-          if (!tmp) continue;
-          if (!tmp.kardashevTimestamp) continue;
-          if (!centerPlanet.kardashevTimestamp) continue;
+          if (!tmp) {
+            continue;
+          }
+          if (!tmp.kardashevTimestamp) {
+            continue;
+          }
+          if (!centerPlanet.kardashevTimestamp) {
+            continue;
+          }
           if (tmp.kardashevTimestamp > centerPlanet.kardashevTimestamp) {
             centerPlanetId = centerPlanet.locationId;
             dis = distanceToZone;
@@ -2552,13 +2638,21 @@ export class GameManager extends EventEmitter {
       throw new Error("no account set");
     }
     const planet = this.getPlanetWithId(planetId);
-    if (!isLocatable(planet)) return 0;
+    if (!isLocatable(planet)) {
+      return 0;
+    }
 
     const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
-    if (centerPlanetId === undefined) return 0;
+    if (centerPlanetId === undefined) {
+      return 0;
+    }
     const centerPlanet = this.getPlanetWithId(centerPlanetId);
-    if (!centerPlanet) return 0;
-    if (!centerPlanet.kardashevTimestamp) return 0;
+    if (!centerPlanet) {
+      return 0;
+    }
+    if (!centerPlanet.kardashevTimestamp) {
+      return 0;
+    }
     return (
       (centerPlanet.kardashevTimestamp +
         this.contractConstants.BLUE_PLANET_COOLDOWN) *
@@ -2629,7 +2723,9 @@ export class GameManager extends EventEmitter {
 
     for (const item of allBurnedLocationsValues) {
       const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) continue;
+      if (planet === undefined) {
+        continue;
+      }
       const locationId = planet.locationId;
       const coords = { x: item.coords.x, y: item.coords.y };
       const operator = item.operator;
@@ -2656,8 +2752,12 @@ export class GameManager extends EventEmitter {
 
     for (const item of allBurnedLocationsValues) {
       const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) continue;
-      if (planet.burnOperator !== this.account) continue;
+      if (planet === undefined) {
+        continue;
+      }
+      if (planet.burnOperator !== this.account) {
+        continue;
+      }
       const locationId = planet.locationId;
       const coords = { x: item.coords.x, y: item.coords.y };
       const operator = item.operator;
@@ -2684,7 +2784,9 @@ export class GameManager extends EventEmitter {
 
     for (const item of allKardashevLocationsValues) {
       const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) continue;
+      if (planet === undefined) {
+        continue;
+      }
       const locationId = planet.locationId;
       const coords = { x: item.coords.x, y: item.coords.y };
       const operator = item.operator;
@@ -2709,8 +2811,12 @@ export class GameManager extends EventEmitter {
 
     for (const item of allKardashevLocationsValues) {
       const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) continue;
-      if (planet.kardashevOperator !== this.account) continue;
+      if (planet === undefined) {
+        continue;
+      }
+      if (planet.kardashevOperator !== this.account) {
+        continue;
+      }
       const locationId = planet.locationId;
       const coords = { x: item.coords.x, y: item.coords.y };
       const operator = item.operator;
@@ -3058,10 +3164,16 @@ export class GameManager extends EventEmitter {
   }
 
   public checkPlanetCanPink(planetId: LocationId): boolean {
-    if (!this.account) return false;
+    if (!this.account) {
+      return false;
+    }
     const planet = this.getPlanetWithId(planetId);
-    if (!planet) return false;
-    if (!isLocatable(planet)) return false;
+    if (!planet) {
+      return false;
+    }
+    if (!isLocatable(planet)) {
+      return false;
+    }
     const myPinkZones = this.getMyPinkZones();
     for (const pinkZone of myPinkZones) {
       const coords = pinkZone.coords;
@@ -3069,7 +3181,9 @@ export class GameManager extends EventEmitter {
 
       const dis = this.getDistCoords(coords, planet.location.coords);
 
-      if (dis <= radius) return true;
+      if (dis <= radius) {
+        return true;
+      }
     }
     return false;
   }
@@ -3310,14 +3424,24 @@ export class GameManager extends EventEmitter {
   }
 
   public checkPlanetCanBlue(planetId: LocationId): boolean {
-    if (!this.account) return false;
+    if (!this.account) {
+      return false;
+    }
     const planet = this.getPlanetWithId(planetId);
-    if (!planet) return false;
-    if (!isLocatable(planet)) return false;
+    if (!planet) {
+      return false;
+    }
+    if (!isLocatable(planet)) {
+      return false;
+    }
     const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
 
-    if (!centerPlanetId) return false;
-    if (centerPlanetId === planetId) return false;
+    if (!centerPlanetId) {
+      return false;
+    }
+    if (centerPlanetId === planetId) {
+      return false;
+    }
     return true;
   }
 
@@ -3706,7 +3830,9 @@ export class GameManager extends EventEmitter {
   }
   // mytodo: some player can't get spaceships, the homeLocation.hash is not right
   private async getSpaceships() {
-    if (!this.account) return;
+    if (!this.account) {
+      return;
+    }
     if (
       !Object.values(this.contractConstants.SPACESHIPS).some((a) => a === true)
     ) {
@@ -3715,10 +3841,16 @@ export class GameManager extends EventEmitter {
     }
 
     const player = await this.contractsAPI.getPlayerById(this.account);
-    if (!player) return;
-    if (player?.claimedShips) return;
+    if (!player) {
+      return;
+    }
+    if (player?.claimedShips) {
+      return;
+    }
 
-    if (this.getGameObjects().isGettingSpaceships()) return;
+    if (this.getGameObjects().isGettingSpaceships()) {
+      return;
+    }
 
     const homePlanetLocationId = "0x" + player.homePlanetId;
 
@@ -4014,7 +4146,9 @@ export class GameManager extends EventEmitter {
       }
 
       if (!bypassChecks) {
-        if (this.checkGameHasEnded()) throw new Error("game ended");
+        if (this.checkGameHasEnded()) {
+          throw new Error("game ended");
+        }
 
         if (!planet) {
           throw new Error("you can't prospect a planet you haven't discovered");
@@ -4150,7 +4284,9 @@ export class GameManager extends EventEmitter {
                 ) as Artifact;
             },
           ).then((foundArtifact) => {
-            if (!foundArtifact) throw new Error("Artifact not found?");
+            if (!foundArtifact) {
+              throw new Error("Artifact not found?");
+            }
             const notifManager = NotificationManager.getInstance();
 
             notifManager.artifactFound(
@@ -4524,12 +4660,24 @@ export class GameManager extends EventEmitter {
       // eslint-disable-next-line no-inner-declarations
       function isTypeOK() {
         const val = Number(type);
-        if (val === Number(ArtifactType.Wormhole)) return true;
-        if (val === Number(ArtifactType.PlanetaryShield)) return true;
-        if (val === Number(ArtifactType.BloomFilter)) return true;
-        if (val === Number(ArtifactType.FireLink)) return true;
-        if (val === Number(ArtifactType.StellarShield)) return true;
-        if (val === Number(ArtifactType.Avatar)) return true;
+        if (val === Number(ArtifactType.Wormhole)) {
+          return true;
+        }
+        if (val === Number(ArtifactType.PlanetaryShield)) {
+          return true;
+        }
+        if (val === Number(ArtifactType.BloomFilter)) {
+          return true;
+        }
+        if (val === Number(ArtifactType.FireLink)) {
+          return true;
+        }
+        if (val === Number(ArtifactType.StellarShield)) {
+          return true;
+        }
+        if (val === Number(ArtifactType.Avatar)) {
+          return true;
+        }
 
         return false;
       }
@@ -4540,8 +4688,12 @@ export class GameManager extends EventEmitter {
         const rarityVal = parseInt(rarity.toString());
         const typeVal = parseInt(type.toString());
 
-        if (rarityVal === 0 || rarityVal >= 5) return 0;
-        if (isTypeOK() === false) return 0;
+        if (rarityVal === 0 || rarityVal >= 5) {
+          return 0;
+        }
+        if (isTypeOK() === false) {
+          return 0;
+        }
         if (
           typeVal === Number(ArtifactType.Wormhole) ||
           typeVal === Number(ArtifactType.PlanetaryShield) ||
@@ -4553,7 +4705,9 @@ export class GameManager extends EventEmitter {
           return 1;
         } else if (typeVal === Number(ArtifactType.StellarShield)) {
           return 8;
-        } else return 0;
+        } else {
+          return 0;
+        }
       }
 
       //NOTE: this will not be the true artifactId
@@ -4608,7 +4762,9 @@ export class GameManager extends EventEmitter {
   ): Promise<Transaction<UnconfirmedWithdrawSilver>> {
     try {
       if (!bypassChecks) {
-        if (!this.account) throw new Error("no account");
+        if (!this.account) {
+          throw new Error("no account");
+        }
         // if (this.checkGameHasEnded()) {
         //   throw new Error('game has ended');
         // }
@@ -5113,7 +5269,9 @@ export class GameManager extends EventEmitter {
       // price requirements
       const balanceEth = this.getMyBalanceEth();
       let hatCostEth = planet.hatLevel === 0 ? 0.002 : 0;
-      if (halfPrice) hatCostEth *= 0.5;
+      if (halfPrice) {
+        hatCostEth *= 0.5;
+      }
 
       if (balanceEth < hatCostEth) {
         throw new Error("you don't have enough ETH");
@@ -5310,7 +5468,9 @@ export class GameManager extends EventEmitter {
 
       // 0.003 *(2**(num-1)) eth
       let fee = bigInt(3_000_000_000_000_000).multiply(fee_delete);
-      if (halfPrice) fee = bigInt(1_500_000_000_000_000).multiply(fee_delete);
+      if (halfPrice) {
+        fee = bigInt(1_500_000_000_000_000).multiply(fee_delete);
+      }
 
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
         value: fee.toString(),
@@ -5393,7 +5553,9 @@ export class GameManager extends EventEmitter {
       };
 
       let fee = bigInt(1_000_000_000_000_000).toString(); //0.001 eth
-      if (halfPrice) fee = bigInt(500_000_000_000_000).toString();
+      if (halfPrice) {
+        fee = bigInt(500_000_000_000_000).toString();
+      }
 
       localStorage.setItem(
         `${this.getAccount()?.toLowerCase()}-buySpaceshipOnPlanetId`,
@@ -5623,7 +5785,9 @@ export class GameManager extends EventEmitter {
     abandoning: boolean,
   ): number {
     const planet = this.getPlanetWithId(planetId);
-    if (!planet) throw new Error("origin planet unknown");
+    if (!planet) {
+      throw new Error("origin planet unknown");
+    }
     return getRange(planet, sendingPercent, this.getRangeBuff(abandoning));
   }
 
@@ -5677,8 +5841,12 @@ export class GameManager extends EventEmitter {
     abandoning: boolean,
   ): Planet[] {
     const planet = this.entityStore.getPlanetWithId(planetId);
-    if (!planet) throw new Error("planet unknown");
-    if (!isLocatable(planet)) throw new Error("planet location unknown");
+    if (!planet) {
+      throw new Error("planet unknown");
+    }
+    if (!isLocatable(planet)) {
+      throw new Error("planet location unknown");
+    }
 
     // Performance improvements originally suggested by [@modokon](https://github.com/modukon)
     // at https://github.com/darkforest-eth/client/issues/15
@@ -5713,7 +5881,9 @@ export class GameManager extends EventEmitter {
     abandoning = false,
   ): number {
     const from = this.getPlanetWithId(fromId);
-    if (!from) throw new Error("origin planet unknown");
+    if (!from) {
+      throw new Error("origin planet unknown");
+    }
     const dist = this.getDist(fromId, toId);
     const range = from.range * this.getRangeBuff(abandoning);
     const rangeSteps = dist / range;
@@ -5738,9 +5908,12 @@ export class GameManager extends EventEmitter {
     const from = this.getPlanetWithId(fromId);
     const to = this.getPlanetWithId(toId);
 
-    if (!from) throw new Error(`unknown planet`);
-    if (distance === undefined && toId === undefined)
+    if (!from) {
+      throw new Error(`unknown planet`);
+    }
+    if (distance === undefined && toId === undefined) {
       throw new Error(`you must provide either a target planet or a distance`);
+    }
 
     const dist = (toId && this.getDist(fromId, toId)) || (distance as number);
 
@@ -5756,7 +5929,9 @@ export class GameManager extends EventEmitter {
     const range = from.range * this.getRangeBuff(abandoning);
     const scale = (1 / 2) ** (dist / range);
     let ret = scale * sentEnergy - 0.05 * from.energyCap;
-    if (ret < 0) ret = 0;
+    if (ret < 0) {
+      ret = 0;
+    }
 
     return ret;
   }

@@ -163,8 +163,11 @@ export class GifRenderer extends WebGLManager {
         rarity++
       ) {
         for (let biome = MIN_BIOME; biome <= MAX_BIOME; biome++) {
-          if (videoMode) await this.addVideo(dir, type, biome, rarity, false);
-          else this.addSprite(dir, type, biome, rarity, false);
+          if (videoMode) {
+            await this.addVideo(dir, type, biome, rarity, false);
+          } else {
+            this.addSprite(dir, type, biome, rarity, false);
+          }
         }
       }
     }
@@ -178,9 +181,11 @@ export class GifRenderer extends WebGLManager {
         rarity <= MAX_ARTIFACT_RARITY;
         rarity++
       ) {
-        if (videoMode)
+        if (videoMode) {
           await this.addVideo(dir, type, Biome.OCEAN, rarity, true);
-        else this.addSprite(dir, type, Biome.OCEAN, rarity, true);
+        } else {
+          this.addSprite(dir, type, Biome.OCEAN, rarity, true);
+        }
       }
     }
   }

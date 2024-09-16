@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useMUD } from "@mud/MUDContext";
 import { entityToAddress } from "@frontend/Pages/GamePage";
+import { useMUD } from "@mud/MUDContext";
+import React, { useState } from "react";
 import { useAccount } from "wagmi";
 const PlayerForm = () => {
   const {

@@ -51,7 +51,9 @@ class ModalManager extends EventEmitter {
   }
 
   public acceptInputForTarget(input: WorldCoords): void {
-    if (this.cursorState !== CursorState.TargetingExplorer) return;
+    if (this.cursorState !== CursorState.TargetingExplorer) {
+      return;
+    }
     this.emit(ModalManagerEvent.MiningCoordsUpdate, input);
     this.setCursorState(CursorState.Normal);
   }
@@ -63,10 +65,14 @@ class ModalManager extends EventEmitter {
   public getModalPositions(
     modalIds: ModalId[] = [],
   ): Map<ModalId, ModalPosition> {
-    if (modalIds.length === 0) return this.modalPositions;
+    if (modalIds.length === 0) {
+      return this.modalPositions;
+    }
     return modalIds.reduce<Map<ModalId, ModalPosition>>((acc, cur) => {
       const winPos = this.modalPositions.get(cur);
-      if (!winPos) return acc;
+      if (!winPos) {
+        return acc;
+      }
       return acc.set(cur, winPos);
     }, new Map());
   }

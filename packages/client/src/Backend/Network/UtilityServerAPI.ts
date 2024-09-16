@@ -137,8 +137,9 @@ export async function callRegisterAndWaitForConfirmation(
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const statusResponse = await whitelistStatus(address);
-    if (!statusResponse)
+    if (!statusResponse) {
       return { errorMessage: "Cannot connect to server.", canRetry: false };
+    }
 
     terminal.current?.newline();
     if (statusResponse.failedAt) {

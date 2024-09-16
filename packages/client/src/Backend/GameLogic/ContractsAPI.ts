@@ -159,7 +159,9 @@ export class ContractsAPI extends EventEmitter {
     overrides?: providers.TransactionRequest,
   ): Promise<void> {
     const address = this.ethConnection.getAddress();
-    if (!address) throw new Error("can't send a transaction, no signer");
+    if (!address) {
+      throw new Error("can't send a transaction, no signer");
+    }
 
     const balance = await this.ethConnection.loadBalance(address);
 
@@ -620,7 +622,9 @@ export class ContractsAPI extends EventEmitter {
   async getScoreV3(
     address: EthAddress | undefined,
   ): Promise<number | undefined> {
-    if (address === undefined) return undefined;
+    if (address === undefined) {
+      return undefined;
+    }
 
     const score = await this.makeCall<EthersBN>(this.contract.getScore, [
       address,
@@ -1171,7 +1175,9 @@ export class ContractsAPI extends EventEmitter {
     );
 
     const scoreFromBlockchain = await this.getScoreV3(playerId);
-    if (!rawPlayer.isInitialized) return undefined;
+    if (!rawPlayer.isInitialized) {
+      return undefined;
+    }
 
     const player = decodePlayer(rawPlayer);
     player.lastClaimTimestamp = lastClaimedTimestamp.toNumber();
@@ -1505,7 +1511,9 @@ export class ContractsAPI extends EventEmitter {
       this.contract.doesArtifactExist,
       [artifactIdToDecStr(artifactId)],
     );
-    if (!exists) return undefined;
+    if (!exists) {
+      return undefined;
+    }
     const rawArtifact = await this.makeCall(this.contract.getArtifactById, [
       artifactIdToDecStr(artifactId),
     ]);
@@ -1558,7 +1566,9 @@ export class ContractsAPI extends EventEmitter {
     playerId?: EthAddress,
     onProgress?: (percent: number) => void,
   ): Promise<Artifact[]> {
-    if (playerId === undefined) return [];
+    if (playerId === undefined) {
+      return [];
+    }
 
     const mySpacespaceIds = (
       await this.makeCall(this.contract.getPlayerArtifactIds, [playerId])
@@ -1570,7 +1580,9 @@ export class ContractsAPI extends EventEmitter {
     playerId?: EthAddress,
     onProgress?: (percent: number) => void,
   ): Promise<Artifact[]> {
-    if (playerId === undefined) return [];
+    if (playerId === undefined) {
+      return [];
+    }
 
     const myArtifactIds = (
       await this.makeCall<EthersBN[]>(this.contract.getMySpaceshipIds, [

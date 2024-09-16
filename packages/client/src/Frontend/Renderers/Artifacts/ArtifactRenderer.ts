@@ -130,8 +130,11 @@ export class ArtifactRenderer extends WebGLManager {
   }
 
   private draw() {
-    if (this.isDex) this.drawDex();
-    else this.drawList();
+    if (this.isDex) {
+      this.drawDex();
+    } else {
+      this.drawList();
+    }
 
     this.spriteRenderer.flush();
   }
