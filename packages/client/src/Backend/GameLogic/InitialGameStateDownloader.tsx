@@ -87,7 +87,7 @@ export class InitialGameStateDownloader {
       await persistentChunkStore.getSavedClaimedCoords();
     const storedBurnedCoords =
       await persistentChunkStore.getSavedBurnedCoords();
-    const storedKardashevCoords: any[] = [];
+    const storedKardashevCoords: KardashevCoords[] = [];
     //TODO: fix this
     // await persistentChunkStore.getSavedKardashevCoords();
 

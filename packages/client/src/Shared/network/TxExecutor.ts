@@ -454,12 +454,10 @@ export class TxExecutor {
       logEvent.wait_error = time_errored - time_exec_called;
 
       try {
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        if ((error as any).body) {
-          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        if ("body" in error) {
           logEvent.parsed_error = String.fromCharCode.apply(
             null,
-            (error as any).body || [],
+            Array.isArray(error.body) ? error.body : [],
           );
         }
       } catch (e) {

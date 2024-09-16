@@ -74,6 +74,6 @@ module.exports = {
     // "no-only-tests/no-only-tests": "error",
     "simple-import-sort/imports": "warn",
     "simple-import-sort/exports": "warn",
-    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-explicit-any": "error",
   },
 };
