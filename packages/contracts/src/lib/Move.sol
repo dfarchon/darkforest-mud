@@ -19,13 +19,19 @@ library MoveLib {
     move.from = bytes32(from.planetHash);
   }
 
-  function loadPopulation(MoveData memory move, Planet memory from, uint256 population, uint256 distance) internal pure {
+  function loadPopulation(
+    MoveData memory move,
+    Planet memory from,
+    uint256 population,
+    uint256 distance
+  ) internal pure {
     if (from.population <= population) {
       revert Errors.NotEnoughPopulation();
     }
     int256 constantLoss = ABDKMath64x64.divu(from.populationCap, 20);
     int256 alive = ABDKMath64x64.div(
-      ABDKMath64x64.fromUInt(population), ABDKMath64x64.exp_2(ABDKMath64x64.divu(distance, from.range))
+      ABDKMath64x64.fromUInt(population),
+      ABDKMath64x64.exp_2(ABDKMath64x64.divu(distance, from.range))
     );
     if (alive <= constantLoss) {
       revert Errors.NotEnoughPopulation();
@@ -47,7 +53,7 @@ library MoveLib {
   }
 
   function headTo(MoveData memory move, Planet memory to, uint256 distance, uint256 speed) internal {
-    uint256 time = distance * 100 / speed;
+    uint256 time = (distance * 100) / speed;
     uint256 present = to.lastUpdateTick;
     move.departureTime = uint64(present);
     move.arrivalTime = uint64(present + time);
@@ -124,7 +130,7 @@ library PendingMoveQueueLib {
       indexes = DEFAULT_INDEXES;
     }
     uint256[] memory indexArray = new uint256[](MAX_MOVE_QUEUE_SIZE);
-    for (uint256 i = MAX_MOVE_QUEUE_SIZE - 1; i > 0;) {
+    for (uint256 i = MAX_MOVE_QUEUE_SIZE - 1; i > 0; ) {
       indexArray[i] = uint8(indexes);
       unchecked {
         --i;
@@ -138,7 +144,7 @@ library PendingMoveQueueLib {
   function WriteToStore(PendingMoveQueue memory _q) internal {
     if (_q.shouldWrite) {
       uint256 indexes;
-      for (uint256 i; i < MAX_MOVE_QUEUE_SIZE;) {
+      for (uint256 i; i < MAX_MOVE_QUEUE_SIZE; ) {
         indexes <<= 8;
         indexes += _q.indexes[i];
         unchecked {

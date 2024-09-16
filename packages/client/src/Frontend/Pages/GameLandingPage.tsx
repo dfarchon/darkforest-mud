@@ -8,10 +8,18 @@ import { neverResolves, weiToEth } from "@df/network";
 import { address } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
+import { useComponentValue } from "@latticexyz/react";
+import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import { utils, Wallet } from "ethers";
 import { reverse } from "lodash-es";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { zeroAddress } from "viem";
 import { useWalletClient } from "wagmi";
@@ -96,14 +104,28 @@ export function GameLandingPage() {
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
+    components: { SyncProgress },
   } = useMUD();
+
+  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
+    message: "Connecting",
+    percentage: 0,
+    step: "Initialize",
+    latestBlockNumber: 0n,
+    lastBlockNumberProcessed: 0n,
+  });
+
+  const syncSign = useMemo(() => {
+    console.log(syncProgress);
+    return syncProgress.step === "live" && syncProgress.percentage == 100;
+  }, [syncProgress]);
 
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
-  const terminalHandle = useRef<TerminalHandle>();
-  const gameUIManagerRef = useRef<GameUIManager | undefined>();
-  const topLevelContainer = useRef<HTMLDivElement | null>(null);
+  const terminalHandle = useRef<TerminalHandle>(null);
+  const gameUIManagerRef = useRef<GameUIManager>(null);
+  const topLevelContainer = useRef<HTMLDivElement>(null);
   const miniMapRef = useRef<MiniMapHandle>();
 
   const [gameManager, setGameManager] = useState<GameManager | undefined>();
@@ -1679,6 +1701,7 @@ export function GameLandingPage() {
           setTerminalEnabled={setTerminalVisible}
         />
       </GameWindowWrapper>
+
       <TerminalWrapper
         initRender={initRenderState}
         terminalEnabled={terminalVisible}
@@ -1691,6 +1714,11 @@ export function GameLandingPage() {
               initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
           }}
         />
+
+        <div>
+          step: {syncProgress.step} percent: {syncProgress.percentage} %
+        </div>
+
         <BrowserIssues issues={browserIssues} state={browserCompatibleState} />
         <Terminal
           ref={terminalHandle}
@@ -1699,6 +1727,7 @@ export function GameLandingPage() {
           useCaretElement={initRenderState !== InitRenderState.COMPLETE}
         />
       </TerminalWrapper>
+
       <div ref={topLevelContainer}></div>
       <div>
         {isMiniMapOn && (

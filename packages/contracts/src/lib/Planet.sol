@@ -66,7 +66,7 @@ library PlanetLib {
       spaceType: planet.spaceType,
       population: uint64(planet.population),
       silver: uint64(planet.silver),
-      upgrades: uint24(planet.rangeUpgrades << 16 | planet.speedUpgrades << 8 | planet.defenseUpgrades)
+      upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades)
     });
     PlanetTable.set(bytes32(planet.planetHash), data);
     PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
@@ -116,21 +116,23 @@ library PlanetLib {
     uint256 maxSingleLevel = config.maxSingleLevel;
     uint256 maxTotalLevel = uint8(config.maxTotalLevel >> ((uint8(planet.spaceType) - 1) * 8));
     if (
-      curTotalLevel > maxTotalLevel || planet.rangeUpgrades > maxSingleLevel
-        || planet.speedUpgrades > maxSingleLevel || planet.defenseUpgrades > maxSingleLevel
+      curTotalLevel > maxTotalLevel ||
+      planet.rangeUpgrades > maxSingleLevel ||
+      planet.speedUpgrades > maxSingleLevel ||
+      planet.defenseUpgrades > maxSingleLevel
     ) {
       revert Errors.UpgradeExceedMaxLevel();
     }
     uint256 totalCost;
     uint256 silverCost = config.silverCost >> (totalLevel * 8);
-    for (uint256 i = totalLevel; i < curTotalLevel;) {
+    for (uint256 i = totalLevel; i < curTotalLevel; ) {
       totalCost += uint8(silverCost);
       unchecked {
         silverCost >>= 8;
         ++i;
       }
     }
-    totalCost = totalCost * planet.silverCap / 100;
+    totalCost = (totalCost * planet.silverCap) / 100;
     if (planet.silver < totalCost) {
       revert Errors.NotEnoughSilverToUpgrade();
     }
@@ -139,8 +141,8 @@ library PlanetLib {
 
   function _validateHash(Planet memory planet) internal view {
     if (
-      planet.planetHash
-        >= (21888242871839275222246405745257275088548364400416034343698204186575808495617 / UniverseConfig.getSparsity())
+      planet.planetHash >=
+      (21888242871839275222246405745257275088548364400416034343698204186575808495617 / UniverseConfig.getSparsity())
     ) {
       revert Errors.InvalidPlanetHash();
     }
@@ -164,7 +166,7 @@ library PlanetLib {
       planet.spaceType = SpaceType.NEBULA;
       return;
     }
-    for (uint256 i; i < length;) {
+    for (uint256 i; i < length; ) {
       if (perlin < thresholds[i]) {
         planet.spaceType = SpaceType(i + 1);
         return;
@@ -180,7 +182,7 @@ library PlanetLib {
     uint64[] memory borders = UniverseZoneConfig.getBorders();
     uint256 distanceSquare = planet.distSquare;
     uint256 maxZone = borders.length;
-    for (uint256 i; i < maxZone;) {
+    for (uint256 i; i < maxZone; ) {
       if (distanceSquare < borders[i] ** 2) {
         planet.universeZone = i;
         return;
@@ -196,7 +198,7 @@ library PlanetLib {
     uint256 value = uint24(planet.planetHash);
     uint32[] memory thresholds = PlanetLevelConfig.getThresholds();
     uint256 maxLvl = thresholds.length;
-    for (uint256 i; i < maxLvl;) {
+    for (uint256 i; i < maxLvl; ) {
       if (value < thresholds[i]) {
         planet.level = maxLvl - i;
         break;
@@ -235,7 +237,7 @@ library PlanetLib {
     uint16[] memory thresholds = PlanetTypeConfig.getThresholds(planet.spaceType, uint8(planet.level));
     uint256 length = thresholds.length;
     uint256 cumulativeThreshold;
-    for (uint256 i; i < length;) {
+    for (uint256 i; i < length; ) {
       cumulativeThreshold += thresholds[i];
       if (value < cumulativeThreshold) {
         planet.planetType = PlanetType(i + 1);
@@ -249,8 +251,11 @@ library PlanetLib {
   }
 
   function _initPopulationAndSilver(Planet memory planet) internal view {
-    PlanetInitialResourceData memory initialResources =
-      PlanetInitialResource.get(planet.spaceType, planet.planetType, uint8(planet.level));
+    PlanetInitialResourceData memory initialResources = PlanetInitialResource.get(
+      planet.spaceType,
+      planet.planetType,
+      uint8(planet.level)
+    );
     planet.population = initialResources.population;
     planet.silver = initialResources.silver;
   }
@@ -315,15 +320,20 @@ library PlanetLib {
     }
     UpgradeConfigData memory config = UpgradeConfig.get();
     planet.populationCap =
-      planet.populationCap * uint256(config.populationCapMultiplier) ** totalLevel / uint256(100) ** totalLevel;
-    planet.populationGrowth = planet.populationGrowth * uint256(config.populationGrowthMultiplier) ** totalLevel
-      / uint256(100) ** totalLevel;
+      (planet.populationCap * uint256(config.populationCapMultiplier) ** totalLevel) /
+      uint256(100) ** totalLevel;
+    planet.populationGrowth =
+      (planet.populationGrowth * uint256(config.populationGrowthMultiplier) ** totalLevel) /
+      uint256(100) ** totalLevel;
     planet.range =
-      planet.range * uint256(config.rangeMultiplier) ** planet.rangeUpgrades / uint256(100) ** planet.rangeUpgrades;
+      (planet.range * uint256(config.rangeMultiplier) ** planet.rangeUpgrades) /
+      uint256(100) ** planet.rangeUpgrades;
     planet.speed =
-      planet.speed * uint256(config.speedMultiplier) ** planet.speedUpgrades / uint256(100) ** planet.speedUpgrades;
-    planet.defense = planet.defense * uint256(config.defenseMultiplier) ** planet.defenseUpgrades
-      / uint256(100) ** planet.defenseUpgrades;
+      (planet.speed * uint256(config.speedMultiplier) ** planet.speedUpgrades) /
+      uint256(100) ** planet.speedUpgrades;
+    planet.defense =
+      (planet.defense * uint256(config.defenseMultiplier) ** planet.defenseUpgrades) /
+      uint256(100) ** planet.defenseUpgrades;
   }
 
   function _populationGrow(Planet memory planet, uint256 tickElapsed) internal pure {
@@ -338,7 +348,8 @@ library PlanetLib {
         ABDKMath64x64.exp(
           ABDKMath64x64.div(
             ABDKMath64x64.mul(
-              ABDKMath64x64.mul(ABDKMath64x64.fromInt(-4), ABDKMath64x64.fromUInt(planet.populationGrowth)), time
+              ABDKMath64x64.mul(ABDKMath64x64.fromInt(-4), ABDKMath64x64.fromUInt(planet.populationGrowth)),
+              time
             ),
             ABDKMath64x64.fromUInt(planet.populationCap)
           )
@@ -351,8 +362,9 @@ library PlanetLib {
       one
     );
 
-    planet.population =
-      ABDKMath64x64.toUInt(ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), denominator));
+    planet.population = ABDKMath64x64.toUInt(
+      ABDKMath64x64.div(ABDKMath64x64.fromUInt(planet.populationCap), denominator)
+    );
   }
 
   function _silverGrow(Planet memory planet, uint256 tickElapsed) internal pure {

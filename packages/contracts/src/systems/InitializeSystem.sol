@@ -7,9 +7,11 @@ import { PlanetInitialResource, PlanetInitialResourceData } from "../codegen/ind
 import { SpaceType, PlanetType } from "../codegen/common.sol";
 
 contract InitializeSystem is System {
-  function setPlanetMetadata(uint8 level, PlanetMetadataData memory metadata, uint256 initialPopulationPercentage)
-    public
-  {
+  function setPlanetMetadata(
+    uint8 level,
+    PlanetMetadataData memory metadata,
+    uint256 initialPopulationPercentage
+  ) public {
     PlanetMetadataData memory md;
     // NEBULA
     md.range = metadata.range;
@@ -70,9 +72,12 @@ contract InitializeSystem is System {
     metadata.defense /= 2;
     metadata.silverCap *= 2;
     PlanetMetadata.set(spaceType, PlanetType.ASTEROID_FIELD, level, metadata);
-    uint64 population = uint64(metadata.populationCap * initialPopulationPercentage / 100);
+    uint64 population = uint64((metadata.populationCap * initialPopulationPercentage) / 100);
     PlanetInitialResource.set(
-      spaceType, PlanetType.ASTEROID_FIELD, level, PlanetInitialResourceData(population, metadata.silverCap / 2)
+      spaceType,
+      PlanetType.ASTEROID_FIELD,
+      level,
+      PlanetInitialResourceData(population, metadata.silverCap / 2)
     );
     metadata.silverGrowth = 0;
     PlanetMetadata.set(spaceType, PlanetType.SPACETIME_RIP, level, metadata);

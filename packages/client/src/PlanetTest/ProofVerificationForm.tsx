@@ -73,7 +73,6 @@ export const ProofVerificationForm: React.FC = () => {
           console.log("SpawnProof", aValues, bValues, cValues, inputValues);
           break;
 
-
         case "MoveProof":
           result = verifyMoveProof(
             {
@@ -97,7 +96,6 @@ export const ProofVerificationForm: React.FC = () => {
               perlinMirrorY: inputValues[9],
               toRadiusSquare: inputValues[10],
             },
-
           );
           console.log("Move proof", aValues, bValues, cValues, inputValues);
           break;
