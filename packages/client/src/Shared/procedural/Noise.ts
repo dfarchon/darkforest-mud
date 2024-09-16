@@ -19,7 +19,7 @@
 // @ts-nocheck
 
 // Modified for TypeScript by Alan Luo
-class Noise {
+export default class Noise {
   noise: any;
   static instance: Noise;
   static initialize(): Noise {
@@ -404,5 +404,3 @@ class Noise {
     this.noise = module;
   }
 }
-
-export default Noise;

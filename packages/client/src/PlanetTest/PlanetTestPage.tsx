@@ -1,13 +1,11 @@
 import { CreateMoveForm } from "./CreateMoveFormTest";
 import { CreatePlanetForm } from "./CreatePlanetFormTest";
-
-import { PlayPauseTickButton } from "./PlayPauseTickButton";
-
-import { PlanetUpgradeForm } from "./PlanetUpgradeFormTest";
-import { ProofVerificationForm } from "./ProofVerificationForm";
 import { PlanetReadForm } from "./PlanetReadForm";
-import PlayerForm from "./PlayerForm";
 import { PlanetUpgradeBranchForm } from "./PlanetUpgradeFormBranchTest";
+import { PlanetUpgradeForm } from "./PlanetUpgradeFormTest";
+import PlayerForm from "./PlayerForm";
+import { PlayPauseTickButton } from "./PlayPauseTickButton";
+import { ProofVerificationForm } from "./ProofVerificationForm";
 import { RevealPlanetForm } from "./RevealPlanetForm";
 
 export const PlanetTestPage = () => {

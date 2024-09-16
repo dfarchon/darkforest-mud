@@ -1,9 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+import wasm from "@rollup/plugin-wasm";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), nodePolyfills(), wasm()],
   server: {
     port: 3000,
     fs: {
@@ -28,4 +30,5 @@ export default defineConfig({
   css: {
     devSourcemap: false,
   },
+  assetsInclude: ["**/*.zkey", "**/*.wasm"],
 });

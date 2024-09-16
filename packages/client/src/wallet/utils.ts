@@ -1,4 +1,4 @@
-import { numberToHex, padHex, parseEther, type Hex, stringToHex } from "viem";
+import { type Hex, numberToHex, padHex, parseEther, stringToHex } from "viem";
 
 export const MINIMUM_BALANCE = parseEther("0.000006");
 export const LOW_BALANCE_THRESHOLD = parseEther("0.0005");

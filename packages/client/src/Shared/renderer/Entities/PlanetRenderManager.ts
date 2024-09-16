@@ -784,7 +784,7 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       let atkString = "";
       if (
         uiManager.isOwnedByMe(planet) ||
-        uiManager.isOwnedByPlayerInMyUnion(planet) ||
+        // uiManager.isOwnedByPlayerInMyUnion(planet) ||
         planet.energy === 0
       ) {
         atkString += ` (+${formatNumber(myAtk)})`;

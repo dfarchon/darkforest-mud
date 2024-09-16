@@ -4,7 +4,6 @@
  */
 
 import { getComponentValue } from "@latticexyz/recs";
-
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import type { Address } from "viem";
 

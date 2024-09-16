@@ -27,9 +27,12 @@
       "@backend/*": ["./src/Backend/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "./src/_types/file-loader/FileWorkerTypes.ts"
+  ],
   "exclude": [
     // should be moved into a publishable separate package
-    "./src/Shared/snarks/*"
   ]
 }

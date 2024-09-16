@@ -98,7 +98,7 @@ export interface IFraction {
   clone(): IFraction;
 }
 
-const { Fraction, errorConstructor } = (function (root) {
+export const { Fraction, errorConstructor } = (function (root) {
   "use strict";
 
   function errorConstructor() {
@@ -842,7 +842,8 @@ const { Fraction, errorConstructor } = (function (root) {
     },
   };
 
-  Object.defineProperty(exports, "__esModule", { value: true });
+  // NOTE: unsure whether this will introduce bugs here
+  // Object.defineProperty(exports, "__esModule", { value: true });
   Fraction["default"] = Fraction;
   Fraction["Fraction"] = Fraction;
   return {
@@ -850,5 +851,3 @@ const { Fraction, errorConstructor } = (function (root) {
     errorConstructor,
   };
 })(this);
-
-export { Fraction, errorConstructor };

@@ -7,7 +7,7 @@ const CadetWormholeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-image: url(/public/img/cadet-wormhole.png);
+  background-image: url(/img/cadet-wormhole.png);
   background-attachment: fixed;
   background-position: top;
   background-repeat: no-repeat;
