@@ -33,8 +33,12 @@ export class ContractCaller {
   private diagnosticsUpdater?: DiagnosticUpdater;
 
   public constructor(queue?: Queue, maxRetries?: number) {
-    if (queue) this.queue = queue;
-    if (maxRetries) this.maxRetries = maxRetries;
+    if (queue) {
+      this.queue = queue;
+    }
+    if (maxRetries) {
+      this.maxRetries = maxRetries;
+    }
   }
 
   /**

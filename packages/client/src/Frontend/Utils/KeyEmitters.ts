@@ -12,17 +12,19 @@ export const keyUp$ = monomitter<Wrapper<string>>();
 export const keyDown$ = monomitter<Wrapper<string>>();
 
 const onKeyUp = (e: KeyboardEvent) => {
-  if (!shouldIgnoreShortcutKeypress(e))
+  if (!shouldIgnoreShortcutKeypress(e)) {
     keyUp$.publish(
       new Wrapper(getSpecialKeyFromEvent(e) || e.key.toLowerCase()),
     );
+  }
 };
 
 const onKeyDown = (e: KeyboardEvent) => {
-  if (!shouldIgnoreShortcutKeypress(e))
+  if (!shouldIgnoreShortcutKeypress(e)) {
     keyDown$.publish(
       new Wrapper(getSpecialKeyFromEvent(e) || e.key.toLowerCase()),
     );
+  }
 };
 
 export function listenForKeyboardEvents() {
@@ -41,8 +43,9 @@ export function unlinkKeyboardEvents() {
  */
 function shouldIgnoreShortcutKeypress(e: KeyboardEvent): boolean {
   const targetElement = e.target as HTMLElement;
-  if (targetElement.tagName === "INPUT")
+  if (targetElement.tagName === "INPUT") {
     return targetElement.attributes.getNamedItem("type")?.value !== "range";
+  }
   return targetElement.tagName === "TEXTAREA";
 }
 

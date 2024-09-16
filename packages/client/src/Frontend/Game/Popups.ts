@@ -46,7 +46,9 @@ export async function openConfirmationWindowForTransaction({
     localStorage.setItem(`${from}-gasFeeGwei`, gasFeeGwei.toString());
     localStorage.setItem(`${from}-gasFeeLimit`, gasFeeLimit.toString());
     const account = connection.getAddress();
-    if (!account) throw new Error("no account");
+    if (!account) {
+      throw new Error("no account");
+    }
     const balanceEth = weiToEth(await connection.loadBalance(account));
     const method = intent.methodName;
     const popup = window.open(

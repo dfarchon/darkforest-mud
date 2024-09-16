@@ -32,7 +32,9 @@ export function getObjectWithIdFromMap<Obj, Id>(
   });
 
   objUpdated$.subscribe((id: Id) => {
-    if (lastId && lastId === id) publishIdEvent(id);
+    if (lastId && lastId === id) {
+      publishIdEvent(id);
+    }
   });
 
   return selectedObj$;
@@ -57,7 +59,9 @@ export function getDisposableEmitter<Obj, Id>(
   };
 
   objUpdated$.subscribe((id: Id) => {
-    if (objId === id) publishIdEvent(id);
+    if (objId === id) {
+      publishIdEvent(id);
+    }
   });
 
   return selectedObj$;

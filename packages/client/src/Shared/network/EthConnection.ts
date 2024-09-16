@@ -409,7 +409,9 @@ export class EthConnection {
   public sendTransaction(
     request: providers.TransactionRequest,
   ): Promise<providers.TransactionResponse> {
-    if (!this.signer) throw new Error(`no signer`);
+    if (!this.signer) {
+      throw new Error(`no signer`);
+    }
     return this.signer.sendTransaction(request);
   }
 

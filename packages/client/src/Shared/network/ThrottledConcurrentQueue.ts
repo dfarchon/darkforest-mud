@@ -142,7 +142,9 @@ export class ThrottledConcurrentQueue<U = unknown> implements Queue {
       (task: QueuedTask<unknown, U>) => predicate(task.metadata),
     );
 
-    if (foundIndex === -1) throw new Error(`specified task was not found`);
+    if (foundIndex === -1) {
+      throw new Error(`specified task was not found`);
+    }
 
     return this.taskQueue.splice(foundIndex, 1)[0];
   }
@@ -165,7 +167,9 @@ export class ThrottledConcurrentQueue<U = unknown> implements Queue {
       (task: QueuedTask<unknown, U>) => predicate(task.metadata),
     );
 
-    if (foundIndex === -1) throw new Error(`specified task was not found`);
+    if (foundIndex === -1) {
+      throw new Error(`specified task was not found`);
+    }
 
     const foundTask = this.taskQueue.splice(foundIndex, 1)[0];
     this.taskQueue.push(foundTask);

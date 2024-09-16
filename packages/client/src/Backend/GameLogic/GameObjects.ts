@@ -439,7 +439,9 @@ export class GameObjects {
       return planet;
     }
     const loc = this.getLocationOfPlanet(planetId);
-    if (!loc) return undefined;
+    if (!loc) {
+      return undefined;
+    }
     return this.getPlanetWithLocation(loc);
   }
 
@@ -626,7 +628,9 @@ export class GameObjects {
   public getPlanetWithLocation(
     location: WorldLocation | undefined,
   ): Planet | undefined {
-    if (!location) return undefined;
+    if (!location) {
+      return undefined;
+    }
 
     const planet = this.planets.get(location.hash);
     if (planet) {
@@ -1482,16 +1486,27 @@ export class GameObjects {
       const MAX_LEVEL_DIST = this.contractConstants.MAX_LEVEL_DIST; //    [40000, 30000, 20000, 10000, 5000];
       const MAX_LEVEL_LIMIT = this.contractConstants.MAX_LEVEL_LIMIT.map(
         (x) => {
-          if (x === 1) return PlanetLevel.ONE;
-          else if (x === 2) return PlanetLevel.TWO;
-          else if (x === 3) return PlanetLevel.THREE;
-          else if (x === 4) return PlanetLevel.FOUR;
-          else if (x === 5) return PlanetLevel.FIVE;
-          else if (x === 6) return PlanetLevel.SIX;
-          else if (x === 7) return PlanetLevel.SEVEN;
-          else if (x === 8) return PlanetLevel.EIGHT;
-          else if (x === 9) return PlanetLevel.NINE;
-          else return PlanetLevel.ZERO;
+          if (x === 1) {
+            return PlanetLevel.ONE;
+          } else if (x === 2) {
+            return PlanetLevel.TWO;
+          } else if (x === 3) {
+            return PlanetLevel.THREE;
+          } else if (x === 4) {
+            return PlanetLevel.FOUR;
+          } else if (x === 5) {
+            return PlanetLevel.FIVE;
+          } else if (x === 6) {
+            return PlanetLevel.SIX;
+          } else if (x === 7) {
+            return PlanetLevel.SEVEN;
+          } else if (x === 8) {
+            return PlanetLevel.EIGHT;
+          } else if (x === 9) {
+            return PlanetLevel.NINE;
+          } else {
+            return PlanetLevel.ZERO;
+          }
         },
       );
 
@@ -1535,8 +1550,9 @@ export class GameObjects {
     if (
       distFromOrigin < MAX_LEVEL_DIST[0] &&
       distFromOrigin > MAX_LEVEL_DIST[1]
-    )
+    ) {
       return SpaceType.NEBULA;
+    }
 
     if (perlin < this.contractConstants.PERLIN_THRESHOLD_1) {
       return SpaceType.NEBULA;
@@ -1556,12 +1572,18 @@ export class GameObjects {
 
   public static planetCanUpgrade(planet: Planet): boolean {
     const totalRank = planet.upgradeState.reduce((a, b) => a + b);
-    if (planet.spaceType === SpaceType.NEBULA && totalRank >= 3) return false;
-    if (planet.spaceType === SpaceType.SPACE && totalRank >= 4) return false;
-    if (planet.spaceType === SpaceType.DEEP_SPACE && totalRank >= 5)
+    if (planet.spaceType === SpaceType.NEBULA && totalRank >= 3) {
       return false;
-    if (planet.spaceType === SpaceType.DEAD_SPACE && totalRank >= 5)
+    }
+    if (planet.spaceType === SpaceType.SPACE && totalRank >= 4) {
       return false;
+    }
+    if (planet.spaceType === SpaceType.DEEP_SPACE && totalRank >= 5) {
+      return false;
+    }
+    if (planet.spaceType === SpaceType.DEAD_SPACE && totalRank >= 5) {
+      return false;
+    }
     return (
       planet.planetLevel !== 0 &&
       planet.planetType === PlanetType.PLANET &&
@@ -1609,12 +1631,18 @@ export class GameObjects {
     const distFromOrigin = Math.floor(Math.sqrt(coords.x ** 2 + coords.y ** 2));
     const spaceType = this.spaceTypeFromPerlin(perlin, distFromOrigin);
 
-    if (spaceType === SpaceType.DEAD_SPACE) return Biome.CORRUPTED;
+    if (spaceType === SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
 
     let biome = 3 * spaceType;
-    if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) biome += 1;
-    else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) biome += 2;
-    else biome += 3;
+    if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) {
+      biome += 1;
+    } else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) {
+      biome += 2;
+    } else {
+      biome += 3;
+    }
 
     return biome as Biome;
   }
@@ -1743,11 +1771,17 @@ export class GameObjects {
         this.contractConstants.defaultBarbarianPercentage[planetLevel]) /
       100;
     // increase pirates
-    if (spaceType === SpaceType.DEAD_SPACE) pirates *= 20;
-    else if (spaceType === SpaceType.DEEP_SPACE) pirates *= 10;
-    else if (spaceType === SpaceType.SPACE) pirates *= 4;
+    if (spaceType === SpaceType.DEAD_SPACE) {
+      pirates *= 20;
+    } else if (spaceType === SpaceType.DEEP_SPACE) {
+      pirates *= 10;
+    } else if (spaceType === SpaceType.SPACE) {
+      pirates *= 4;
+    }
 
-    if (planetType === PlanetType.SILVER_BANK) pirates /= 2;
+    if (planetType === PlanetType.SILVER_BANK) {
+      pirates /= 2;
+    }
 
     pirates = Math.floor(pirates);
 
@@ -1914,7 +1948,9 @@ export class GameObjects {
   public getArrivalIdsForLocation(
     location: LocationId | undefined,
   ): VoyageId[] | undefined {
-    if (!location) return [];
+    if (!location) {
+      return [];
+    }
 
     return this.planetArrivalIds.get(location);
   }

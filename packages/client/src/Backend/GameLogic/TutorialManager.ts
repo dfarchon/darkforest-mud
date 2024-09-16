@@ -60,7 +60,9 @@ class TutorialManager extends EventEmitter {
 
   private advance() {
     let newState = Math.min(this.tutorialState + 1, TutorialState.Completed);
-    if (this.shouldSkipState(newState)) newState++;
+    if (this.shouldSkipState(newState)) {
+      newState++;
+    }
 
     this.setTutorialState(newState);
   }
@@ -90,7 +92,9 @@ class TutorialManager extends EventEmitter {
   }
 
   acceptInput(state: TutorialState) {
-    if (state === this.tutorialState) this.advance();
+    if (state === this.tutorialState) {
+      this.advance();
+    }
   }
 }
 

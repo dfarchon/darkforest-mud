@@ -31,7 +31,9 @@ export function GifMaker() {
 
   const [renderer, setRenderer] = useState<GifRenderer | null>(null);
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      return;
+    }
 
     setRenderer(new GifRenderer(canvasRef.current, GIF_DIM, IS_THUMB));
   }, [canvasRef]);

@@ -101,7 +101,9 @@ const BiomeNotificationMap = {
   [Biome.CORRUPTED]: NotificationType.FoundBiomeCorrupted,
 };
 function getNotificationTypeFromPlanetBiome(biome: Biome): NotificationType {
-  if (!biome) throw new Error("Biome is a required to get a NotificationType");
+  if (!biome) {
+    throw new Error("Biome is a required to get a NotificationType");
+  }
   return BiomeNotificationMap[biome];
 }
 

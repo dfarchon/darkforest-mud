@@ -84,7 +84,9 @@ export default function ControllableCanvas() {
 
   // TODO fix this
   useLayoutEffect(() => {
-    if (canvasRef.current) doResize();
+    if (canvasRef.current) {
+      doResize();
+    }
   }, [
     // dep array gives eslint issues, but it's fine i tested it i swear - Alan
     canvasRef,
@@ -96,7 +98,9 @@ export default function ControllableCanvas() {
   ]);
 
   useEffect(() => {
-    if (!gameUIManager) return;
+    if (!gameUIManager) {
+      return;
+    }
     // if (!fCanvas && canvasRef.current) {
     //   // setFCanvas(new fabric.Canvas(canvasRef.current));
     // }
@@ -116,8 +120,9 @@ export default function ControllableCanvas() {
 
     // const canvas = fCanvas?.getSelectionElement();
     const canvas = evtRef.current;
-    if (!canvas || !canvasRef.current || !glRef.current || !bufferRef.current)
+    if (!canvas || !canvasRef.current || !glRef.current || !bufferRef.current) {
       return;
+    }
 
     // This zooms your home world in really close to show the awesome details
     // TODO: Store this as it changes and re-initialize to that if stored
@@ -168,7 +173,9 @@ export default function ControllableCanvas() {
 
   // attach event listeners
   useEffect(() => {
-    if (!evtRef.current) return;
+    if (!evtRef.current) {
+      return;
+    }
     const canvas = evtRef.current;
 
     const uiEmitter: UIEmitter = UIEmitter.getInstance();

@@ -20,7 +20,7 @@ module.exports = {
     "plugin:prettier/recommended",
   ],
   rules: {
-    // curly: 2,
+    curly: 2,
     "no-restricted-globals": ["error", "history", "location", "name"],
     // "no-nested-ternary": "error",
     // "max-params": ["error", 4],

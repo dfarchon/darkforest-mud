@@ -321,7 +321,9 @@ export class TxExecutor {
     }
 
     const nonce = this.nonce;
-    if (this.nonce !== undefined) this.nonce++;
+    if (this.nonce !== undefined) {
+      this.nonce++;
+    }
 
     return nonce;
   }

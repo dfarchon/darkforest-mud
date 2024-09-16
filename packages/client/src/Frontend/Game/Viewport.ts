@@ -252,7 +252,9 @@ class Viewport {
   getStorage(): ViewportData | undefined {
     const key = this.getStorageKey();
     const stored = localStorage.getItem(key);
-    if (stored) return (JSON.parse(stored) as ViewportData) || undefined;
+    if (stored) {
+      return (JSON.parse(stored) as ViewportData) || undefined;
+    }
     return undefined;
   }
 
@@ -283,7 +285,9 @@ class Viewport {
 
   // centers on a planet and makes it fill the viewport
   zoomPlanet(planet?: Planet, radii?: number): void {
-    if (!planet || !isLocatable(planet)) return;
+    if (!planet || !isLocatable(planet)) {
+      return;
+    }
     this.centerPlanet(planet);
     // in world coords
     const rad = this.gameUIManager.getRadiusOfPlanetLevel(planet.planetLevel);
@@ -294,8 +298,9 @@ class Viewport {
   }
 
   centerCoords(coords: WorldCoords): void {
-    if (typeof coords.x !== "number" || typeof coords.y !== "number")
+    if (typeof coords.x !== "number" || typeof coords.y !== "number") {
       throw new Error("please pass in an object that looks like {x: 0, y: 0}");
+    }
     this.centerWorldCoords = { ...coords };
   }
 
@@ -317,7 +322,9 @@ class Viewport {
 
   // Event handlers
   onMouseDown(canvasCoords: CanvasCoords) {
-    if (this.isSending) return;
+    if (this.isSending) {
+      return;
+    }
 
     this.mousedownCoords = canvasCoords;
 
