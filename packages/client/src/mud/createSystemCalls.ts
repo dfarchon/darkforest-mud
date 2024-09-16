@@ -12,26 +12,6 @@ import type { ClientComponents } from "./createClientComponents";
 import type { SetupNetworkResult } from "./setupNetwork";
 
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
-interface Proof {
-  A: { X: bigint; Y: bigint };
-  B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
-  C: { X: bigint; Y: bigint };
-}
-
-interface MoveInput {
-  fromPlanetHash: bigint;
-  toPlanetHash: bigint;
-  toPerlin: bigint;
-  universeRadius: bigint;
-  distance: bigint;
-  mimcHashKey: bigint;
-  spaceTypeKey: bigint;
-  perlinLengthScale: bigint;
-  perlinMirrorX: bigint;
-  perlinMirrorY: bigint;
-  toRadiusSquare: bigint;
-  isAttack: boolean;
-}
 
 // PlanetType Enum
 export enum PlanetType {
@@ -153,7 +133,7 @@ export function createSystemCalls(
         spaceType,
         BigInt(population),
         BigInt(silver),
-        upgrade, //TODO add upgrade input
+        upgrade,
       ]);
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
@@ -170,12 +150,18 @@ export function createSystemCalls(
   // PLAYER CALLS
   //
   // Basic mint player to enter the game - TODO be as ERC20?
+
   const registerPlayer = async (name: string, burner: Address) => {
-    const tx = await worldContract.write.df__registerPlayer([name, burner]);
-    const receipt = await waitForTransaction(tx);
-    // Log the receipt or trigger additional actions, e.g., update game state
-    console.log("Register player successfully:", receipt);
-    return getComponentValue(Player, singletonEntity);
+    try {
+      const tx = await worldContract.write.df__registerPlayer([name, burner]);
+      const receipt = await waitForTransaction(tx);
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("Register player successfully:", receipt);
+      return getComponentValue(Player, singletonEntity);
+    } catch (error) {
+      console.error("Create planet transaction failed:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
   };
 
   // Function to change player name
@@ -195,32 +181,132 @@ export function createSystemCalls(
     console.log("Change Burner successfully:", receipt);
     return getComponentValue(Player, singletonEntity);
   };
-  // TODO
-  // Function to spawn a player
-  // const spawnPlayer = async (proof, input) => {
-  //   const tx = await worldContract.write.df__spawnPlayer([proof, input]);
-  //   const receipt = await waitForTransaction(tx);
-  //   // Log the receipt or trigger additional actions, e.g., update game state
-  //   console.log("Spawn Player successfully:", receipt);
-  //   // Replace this with the actual method to get the newly spawned planet
-  //   return getComponentValue(Player, singletonEntity);
-  // };
 
+  // Function to spawn a player
+  const spawnPlayer = async (
+    proof: {
+      A: { X: bigint; Y: bigint };
+      B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+      C: { X: bigint; Y: bigint };
+    },
+    SpawnInput: {
+      planetHash: bigint;
+      perlin: bigint;
+      universeRadius: bigint;
+      mimcHashKey: bigint;
+      spaceTypeKey: bigint;
+      perlinLengthScale: bigint;
+      perlinMirrorX: bigint;
+      perlinMirrorY: bigint;
+      radiusSquare: bigint;
+    },
+  ) => {
+    const tx = await worldContract.write.df__spawnPlayer([proof, SpawnInput]);
+    const receipt = await waitForTransaction(tx);
+    // Log the receipt or trigger additional actions, e.g., update game state
+    console.log("Spawn Player successfully:", receipt);
+    // Replace this with the actual method to get the newly spawned planet
+    return getComponentValue(Player, singletonEntity);
+  };
+  // TODO CHECK FUNCTION !!!
   // // Function to spawn a player from burner
-  // const spawnPlayerFromBurner = async (proof, input) => {
-  //   const tx = await worldContract.write.callFrom(
-  //     worldContract.address,
-  //     "sy.df.PlayerSystem.spawnPlayer",
-  //     [proof, input],
-  //   );
-  //   const receipt = await waitForTransaction(tx);
-  //   // Log the receipt or trigger additional actions, e.g., update game state
-  //   console.log("Spawn Player from Burner successfully:", receipt);
-  //   // Replace this with the actual method to get the newly spawned planet
-  //   return getComponentValue(Player, singletonEntity);
-  // };
+  const spawnPlayerFromBurner = async (
+    proof: {
+      A: { X: bigint; Y: bigint };
+      B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+      C: { X: bigint; Y: bigint };
+    },
+    SpawnInput: {
+      planetHash: bigint;
+      perlin: bigint;
+      universeRadius: bigint;
+      mimcHashKey: bigint;
+      spaceTypeKey: bigint;
+      perlinLengthScale: bigint;
+      perlinMirrorX: bigint;
+      perlinMirrorY: bigint;
+      radiusSquare: bigint;
+    },
+  ) => {
+    const tx = await worldContract.write.callFrom(
+      worldContract.address,
+      "sy.df.PlayerSystem.spawnPlayer",
+      [proof, SpawnInput],
+    );
+    const receipt = await waitForTransaction(tx);
+    // Log the receipt or trigger additional actions, e.g., update game state
+    console.log("Spawn Player from Burner successfully:", receipt);
+    // Replace this with the actual method to get the newly spawned planet
+    return getComponentValue(Player, singletonEntity);
+  };
+
+  const initializePlayer = async (
+    proof: {
+      A: [bigint, bigint];
+      B: [readonly [bigint, bigint], readonly [bigint, bigint]];
+      C: [bigint, bigint];
+    },
+    InitializeInput: [
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+    ],
+  ) => {
+    const tx = await worldContract.write.df__initializePlayer([
+      proof.A,
+      proof.B,
+      proof.C,
+      InitializeInput,
+    ]);
+    const receipt = await waitForTransaction(tx);
+    // Log the receipt or trigger additional actions, e.g., update game state
+    console.log("Spawn Player successfully:", receipt);
+    // Replace this with the actual method to get the newly spawned planet
+    return getComponentValue(Player, singletonEntity);
+  };
 
   // PLANET
+  // TODO test reveal location
+  const revealLocation = async (
+    proof: {
+      A: { X: bigint; Y: bigint };
+      B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+      C: { X: bigint; Y: bigint };
+    },
+    RevealInput: {
+      planetHash: bigint;
+      perlin: bigint;
+      x: bigint;
+      y: bigint;
+      mimcHashKey: bigint;
+      spaceTypeKey: bigint;
+      perlinLengthScale: bigint;
+      perlinMirrorX: bigint;
+      perlinMirrorY: bigint;
+    },
+  ): Promise<void> => {
+    try {
+      // Call the reveal location function on the contract
+      const tx = await worldContract.write.df__revealLocation([
+        proof,
+        RevealInput,
+      ]);
+      // Wait for the transaction to be confirmed
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      // Log the receipt or trigger additional actions, e.g., update game state
+      console.log("Reveal location successfully:", receipt);
+      getComponentValue(Planet, singletonEntity);
+    } catch (error) {
+      console.error("Reveal location transaction failed:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
+  };
 
   const planetUpgrade = async (
     planetHash: bigint,
@@ -274,44 +360,94 @@ export function createSystemCalls(
     }
   };
 
-  // Todo types!!
+  // MOVE call
   const move = async (
-    proof: Proof,
-    moveInput: MoveInput,
+    proof: {
+      A: [bigint, bigint];
+      B: [[bigint, bigint], [bigint, bigint]];
+      C: [bigint, bigint];
+    },
+    input: [
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+    ],
     population: bigint,
     silver: bigint,
     artifact: bigint,
-  ): Promise<bigint> => {
+    isAbandoning: boolean,
+  ) => {
     try {
-      // Call the move function on the contract
-      const tx = await worldContract.write.df__move([
-        proof,
-        moveInput,
+      // Transform the inputs to arguments
+      const argsMove: [
+        readonly [bigint, bigint],
+        readonly [readonly [bigint, bigint], readonly [bigint, bigint]],
+        readonly [bigint, bigint],
+        readonly [
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+        ],
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+      ] = [
+        proof.A, // [bigint, bigint]
+        proof.B, // [[bigint, bigint], [bigint, bigint]]
+        proof.C, // [bigint, bigint]
+        input,
         population,
         silver,
         artifact,
-      ]);
-      const receipt = await waitForTransaction(tx);
+        isAbandoning ? BigInt(1) : BigInt(0),
+      ];
 
+      // Call the move function on the contract
+      const tx = await worldContract.write.df__move(argsMove);
+
+      const receipt = await waitForTransaction(tx);
       console.log("Move created successfully:", receipt);
       getComponentValue(Move, singletonEntity);
-      return BigInt(0);
     } catch (error) {
       console.error("Move transaction failed:", error);
       throw error;
     }
   };
+
   // Player Read
   // Basic read function
-  const readPlanetWithHash = async (planetHash: bigint): Promise<void> => {
+  const readPlanetWithHash = async (planethash: bigint): Promise<void> => {
     try {
       // Call the readPlanet function on the contract with only planetHash
-      const planet = await worldContract.read.df__readPlanet([planetHash]);
-      const receipt = await waitForTransaction(planet);
+      const planet = await worldContract.read.df__readPlanet([
+        planethash,
+        BigInt(0),
+        BigInt(0),
+      ]);
+
       // Log the planet details or trigger additional actions, e.g., update game state
       console.log("Planet Details (Hash):", planet);
-      console.log("Planet Details (Hash) receipt:", receipt);
+
       getComponentValue(Planet, singletonEntity);
+
+      return planet;
       // Optionally trigger updates or use the planet data for further actions
     } catch (error) {
       console.error("Error reading planet with hash:", error);
@@ -349,20 +485,54 @@ export function createSystemCalls(
     }
   };
 
-  // VERIFICATIONS FUNCTIONS
-  const verifyInitProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
+  const readPlanetAt = async (
+    planetHash: bigint,
+    tickNumber: number,
+  ): Promise<void> => {
     try {
-      const result = await worldContract.read.df__verifyInitProof(
-        a,
-        b,
-        c,
-        input,
-      );
+      // Call the readPlanet function on the contract with only planetHash
+      const planet = await worldContract.read.df__readPlanetAt([
+        planetHash,
+        BigInt(tickNumber),
+      ]);
+
+      // Log the planet details or trigger additional actions, e.g., update game state
+      console.log("Planet At Details :", planet);
+
+      getComponentValue(Planet, singletonEntity);
+
+      // Optionally trigger updates or use the planet data for further actions
+    } catch (error) {
+      console.error("Error reading planet at:", error);
+      throw error; // Re-throw error to handle it higher up if needed
+    }
+  };
+
+  // VERIFICATIONS FUNCTIONS
+  // TODO test verification form!!
+  const verifySpawnProof = async (
+    proof: {
+      A: { X: bigint; Y: bigint };
+      B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+      C: { X: bigint; Y: bigint };
+    },
+    SpawnInput: {
+      planetHash: bigint;
+      perlin: bigint;
+      universeRadius: bigint;
+      mimcHashKey: bigint;
+      spaceTypeKey: bigint;
+      perlinLengthScale: bigint;
+      perlinMirrorX: bigint;
+      perlinMirrorY: bigint;
+      radiusSquare: bigint;
+    },
+  ): Promise<boolean> => {
+    try {
+      const result = await worldContract.read.df__verifySpawnProof([
+        proof,
+        SpawnInput,
+      ]);
       return result;
     } catch (error) {
       console.error("Error in df__verifyInitProof:", error);
@@ -371,14 +541,30 @@ export function createSystemCalls(
   };
 
   const verifyMoveProof = async (
-    proof: { a: bigint[]; b: bigint[][]; c: bigint[] },
-    moveInput: { [key: string]: bigint },
-  ): Promise<`0x${string}`> => {
+    proof: {
+      A: { X: bigint; Y: bigint };
+      B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+      C: { X: bigint; Y: bigint };
+    },
+    MoveInput: {
+      fromPlanetHash: bigint;
+      toPlanetHash: bigint;
+      toPerlin: bigint;
+      universeRadius: bigint;
+      distance: bigint;
+      mimcHashKey: bigint;
+      spaceTypeKey: bigint;
+      perlinLengthScale: bigint;
+      perlinMirrorX: bigint;
+      perlinMirrorY: bigint;
+      toRadiusSquare: bigint;
+    },
+  ): Promise<boolean> => {
     try {
-      const result = await worldContract.read.df__verifyMoveProof(
+      const result = await worldContract.read.df__verifyMoveProof([
         proof,
-        moveInput,
-      );
+        MoveInput,
+      ]);
       return result;
     } catch (error) {
       console.error("Error in df__verifyMoveProof:", error);
@@ -387,18 +573,20 @@ export function createSystemCalls(
   };
 
   const verifyBiomebaseProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
+    proof: {
+      A: [bigint, bigint];
+      B: readonly [readonly [bigint, bigint], readonly [bigint, bigint]];
+      C: [bigint, bigint];
+    },
+    BiomaseInput: [bigint, bigint, bigint, bigint, bigint, bigint, bigint],
+  ): Promise<boolean> => {
     try {
-      const result = await worldContract.read.df__verifyBiomebaseProof(
-        a,
-        b,
-        c,
-        input,
-      );
+      const result = await worldContract.read.df__verifyBiomebaseProof([
+        proof.A,
+        proof.B,
+        proof.C,
+        BiomaseInput,
+      ]);
       return result;
     } catch (error) {
       console.error("Error in df__verifyBiomebaseProof:", error);
@@ -407,18 +595,28 @@ export function createSystemCalls(
   };
 
   const verifyRevealProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
+    proof: {
+      A: { X: bigint; Y: bigint };
+      B: { X: readonly [bigint, bigint]; Y: readonly [bigint, bigint] };
+      C: { X: bigint; Y: bigint };
+    },
+    RevealInput: {
+      planetHash: bigint;
+      perlin: bigint;
+      x: bigint;
+      y: bigint;
+      mimcHashKey: bigint;
+      spaceTypeKey: bigint;
+      perlinLengthScale: bigint;
+      perlinMirrorX: bigint;
+      perlinMirrorY: bigint;
+    },
+  ): Promise<boolean> => {
     try {
-      const result = await worldContract.read.df__verifyRevealProof(
-        a,
-        b,
-        c,
-        input,
-      );
+      const result = await worldContract.read.df__verifyRevealProof([
+        proof,
+        RevealInput,
+      ]);
       return result;
     } catch (error) {
       console.error("Error in df__verifyRevealProof:", error);
@@ -427,18 +625,20 @@ export function createSystemCalls(
   };
 
   const verifyWhitelistProof = async (
-    a: bigint[],
-    b: bigint[][],
-    c: bigint[],
-    input: bigint[],
-  ): Promise<`0x${string}`> => {
+    proof: {
+      A: [bigint, bigint];
+      B: readonly [readonly [bigint, bigint], readonly [bigint, bigint]];
+      C: [bigint, bigint];
+    },
+    WhitelistInput: [bigint, bigint],
+  ): Promise<boolean> => {
     try {
-      const result = await worldContract.read.df__verifyWhitelistProof(
-        a,
-        b,
-        c,
-        input,
-      );
+      const result = await worldContract.read.df__verifyWhitelistProof([
+        proof.A,
+        proof.B,
+        proof.C,
+        WhitelistInput,
+      ]);
       return result;
     } catch (error) {
       console.error("Error in df__verifyWhitelistProof:", error);
@@ -446,25 +646,50 @@ export function createSystemCalls(
     }
   };
 
+  // Define the system call for 'verify'
+  const verify = async (
+    delegator: Address, // Address type for the delegator
+    resourceId: string, // String type for the resource ID
+    dataBytes: string, // Byte array type for additional proof data  Uint8Array ??
+  ): Promise<boolean> => {
+    try {
+      const result = await worldContract.read.df__verify([
+        delegator as `0x${string}`,
+        resourceId as `0x${string}`,
+        dataBytes as `0x${string}`,
+      ]);
+
+      // Assuming the contract returns a boolean value
+      return result;
+    } catch (error) {
+      console.error("Error in df__verifyWhitelistProof:", error);
+      throw error;
+    }
+  };
   // do not forget init function calls to be accessable in MUD systems calls
   return {
     registerPlayer,
     changePlayerName,
     changeBurnerWallet,
-
+    spawnPlayer,
+    spawnPlayerFromBurner,
+    initializePlayer,
     createPlanet,
     move,
     unPause,
     pause,
     tick,
+    revealLocation,
     planetUpgrade,
     planetUpgradeBranch,
-    verifyInitProof,
+    verifySpawnProof,
     verifyMoveProof,
     verifyBiomebaseProof,
     verifyRevealProof,
     verifyWhitelistProof,
+    verify,
     readPlanetWithHash,
     readPlanetWithHashPerlinDistance,
+    readPlanetAt,
   };
 }

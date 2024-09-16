@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useMUD } from "@mud/MUDContext";
 import { entityToAddress } from "@frontend/Pages/GamePage";
+import { useAccount } from "wagmi";
 const PlayerForm = () => {
   const {
     systemCalls: { registerPlayer, changePlayerName, changeBurnerWallet },
     network: { playerEntity },
   } = useMUD();
-
+  const account = useAccount();
   const [playerName, setPlayerName] = useState("");
 
   const [newPlayerName, setNewPlayerName] = useState("");

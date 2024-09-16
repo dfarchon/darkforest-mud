@@ -8,6 +8,7 @@ import { ProofVerificationForm } from "./ProofVerificationForm";
 import { PlanetReadForm } from "./PlanetReadForm";
 import PlayerForm from "./PlayerForm";
 import { PlanetUpgradeBranchForm } from "./PlanetUpgradeFormBranchTest";
+import { RevealPlanetForm } from "./RevealPlanetForm";
 
 export const PlanetTestPage = () => {
   // Function to handle planet creation
@@ -111,6 +112,10 @@ export const PlanetTestPage = () => {
           <PlanetUpgradeForm onSubmit={handlePlanetUpgradeSubmit} />
           <PlanetUpgradeBranchForm onSubmit={handlePlanetBranchUpgradeSubmit} />
         </div>
+
+        <div>
+          <RevealPlanetForm />
+        </div>
       </div>
 
       <div className="flex items-start gap-4 pt-4">
@@ -118,7 +123,7 @@ export const PlanetTestPage = () => {
           <ProofVerificationForm />
         </div>{" "}
         <div className="flex">
-          <CreateMoveForm onSubmit={handleMoveSubmit} />
+          <CreateMoveForm />
         </div>
       </div>
       <div className="mt-6">
