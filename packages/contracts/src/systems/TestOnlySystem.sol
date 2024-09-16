@@ -22,9 +22,16 @@ contract TestOnlySystem is System {
     world.df__tick();
 
     Planet.set(
-      bytes32(planetHash), Ticker.getTickNumber(), perlin, level, planetType, spaceType, population, silver, upgrades
+      bytes32(planetHash),
+      Ticker.getTickNumber(),
+      perlin,
+      level,
+      planetType,
+      spaceType,
+      population,
+      silver,
+      upgrades
     );
     PlanetOwner.set(bytes32(planetHash), owner);
   }
-
 }

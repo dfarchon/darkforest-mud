@@ -28,9 +28,12 @@ import {
   unsupportedFeatures,
 } from "@frontend/Utils/BrowserChecks";
 import UIEmitter, { UIEmitterEvent } from "@frontend/Utils/UIEmitter";
+// import { GameWindowLayout } from '../Views/GameWindowLayout';
+import { useComponentValue } from "@latticexyz/react";
+import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import WalletButton from "@wallet/WalletButton";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { zeroAddress } from "viem";
 import { useWalletClient } from "wagmi";
@@ -38,7 +41,6 @@ import { useWalletClient } from "wagmi";
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import { Terminal, type TerminalHandle } from "../Views/Terminal";
-// import { GameWindowLayout } from '../Views/GameWindowLayout';
 
 const enum TerminalPromptStep {
   NONE,
@@ -67,7 +69,9 @@ type TerminalStateOptions = {
   showHelp: boolean;
 };
 
-export function GameLandingPage() {
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export function GameLandingPage_v1() {
   const { contract } = useParams();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -75,7 +79,21 @@ export function GameLandingPage() {
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
+    components: { SyncProgress },
   } = useMUD();
+
+  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
+    message: "Connecting",
+    percentage: 0,
+    step: "Initialize",
+    latestBlockNumber: 0n,
+    lastBlockNumberProcessed: 0n,
+  });
+
+  const syncSign = useMemo(() => {
+    console.log(syncProgress);
+    return syncProgress.step === "live" && syncProgress.percentage == 100;
+  }, [syncProgress]);
 
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
@@ -266,40 +284,47 @@ export function GameLandingPage() {
           setTerminalEnabled={setTerminalVisible}
         />
       </GameWindowWrapper> */}
-
-      <TerminalWrapper
-        initRender={initRenderState}
-        terminalEnabled={terminalVisible}
-      >
-        <MythicLabelText
-          text={`Welcome To Dark Forest MUD`}
-          style={{
-            fontFamily: "'Start Press 2P', sans-serif",
-            display:
-              initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
-          }}
-        />
-
-        <WalletButton />
-
-        <BrowserIssues issues={browserIssues} state={browserCompatibleState} />
-
+      {!syncSign && (
         <div>
-          <p>Contract: {contract}</p>
-          <p>Location: {location.pathname}</p>
-          <p>Search: {queryParam}</p>
-          <p> Main Account: {mainAccount}</p>
-          <p> Game Account: {gameAccount}</p>
-          <br />
+          step: {syncProgress.step} percent: {syncProgress.percentage} %
         </div>
+      )}
 
-        <Terminal
-          ref={terminalHandle}
-          promptCharacter={">"}
-          visible={browserCompatibleState === "supported"}
-          useCaretElement={initRenderState !== InitRenderState.COMPLETE}
-        />
-      </TerminalWrapper>
+      {syncSign && (
+        <TerminalWrapper
+          initRender={initRenderState}
+          terminalEnabled={terminalVisible}
+        >
+          <MythicLabelText
+            text={`Welcome To Dark Forest MUD`}
+            style={{
+              fontFamily: "'Start Press 2P', sans-serif",
+              display:
+                initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
+            }}
+          />
+
+          <WalletButton />
+          <BrowserIssues
+            issues={browserIssues}
+            state={browserCompatibleState}
+          />
+          <div>
+            <p>Contract: {contract}</p>
+            <p>Location: {location.pathname}</p>
+            <p>Search: {queryParam}</p>
+            <p> Main Account: {mainAccount}</p>
+            <p> Game Account: {gameAccount}</p>
+            <br />
+          </div>
+          <Terminal
+            ref={terminalHandle}
+            promptCharacter={">"}
+            visible={browserCompatibleState === "supported"}
+            useCaretElement={initRenderState !== InitRenderState.COMPLETE}
+          />
+        </TerminalWrapper>
+      )}
       <div ref={topLevelContainer}></div>
     </Wrapper>
   );

@@ -5,6 +5,7 @@ import "./Frontend/Styles/preflight.css";
 import "./Frontend/Styles/Press_Start_2P/stylesheet.css";
 import "./Frontend/Styles/style.css";
 
+import { GameLandingPage_v1 } from "@frontend/Pages/GameLandingPage_v1";
 import {
   BrowserRouter as Router,
   Navigate,
@@ -42,6 +43,13 @@ export const App = () => {
       <Theme color="dark" scale="medium">
         <Router>
           <Routes>
+            <Route
+              path="/play_v1/"
+              element={
+                <Navigate to={`/play/${defaultAddress}`} replace={true} />
+              }
+            />
+            <Route path="/play_v1/:contract" element={<GameLandingPage_v1 />} />
             <Route
               path="/play"
               element={
