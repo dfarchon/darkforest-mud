@@ -5,6 +5,7 @@ import SpawnPlayer from "@wallet/Components/SpawnPlayerPane";
 import SyncClientStatusRec from "@wallet/Components/SyncClientStatusRec";
 import WalletButton from "@wallet/WalletButton";
 import React, { useState } from "react";
+import { useAccount } from "wagmi";
 
 export function entityToAddress(entity: string): string {
   return entity.slice(0, 2) + entity.slice(26);
@@ -17,28 +18,27 @@ export const GamePage: React.FC = () => {
     components: { SyncProgress },
   } = useMUD();
   const [name, setName] = useState("");
+  // Zustand useStore state usage
+  const syncProgress = useStore((state) => state.syncProgress);
+  const { isConnected, address } = useAccount();
 
-  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
-    message: "Connecting",
-    percentage: 0,
-    step: "Initialize",
-    latestBlockNumber: 0n,
-    lastBlockNumberProcessed: 0n,
-  });
+  // const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
+  //   message: "Connecting",
+  //   percentage: 0,
+  //   step: "Initialize",
+  //   latestBlockNumber: 0n,
+  //   lastBlockNumberProcessed: 0n,
+  // });
   // Todo checking sync progress if huge tables on sync
   console.log(syncProgress);
 
   // Get the player's data to check if they have spawned a player
   const playerSpawned = useStore((state) => {
-    const records = Object.values(state.getRecords(tables.PlayersTable));
+    const records = Object.values(state.getRecords(tables.Player));
     // TODO zustand sync apply !!! this is not optimal for now is avoiding error if zustand not synced
 
     if (records.length > 0) {
-      const record = records.filter(
-        (pl) =>
-          pl.fields.owner.toLowerCase() ===
-          entityToAddress(playerEntity).toLowerCase(),
-      );
+      const record = records.filter((pl) => pl.fields.owner === address);
 
       if (record.length > 0) {
         if (name !== record[0].value.name) {
@@ -52,7 +52,7 @@ export const GamePage: React.FC = () => {
   return (
     <div>
       <WalletButton />
-      {playerSpawned && (
+      {isConnected && playerSpawned && (
         <>
           {" "}
           <div className="fixed left-1/2 top-4 -translate-x-1/2 transform text-center">
@@ -67,7 +67,7 @@ export const GamePage: React.FC = () => {
       <div className="flex items-center justify-center bg-gray-900 text-white">
         {syncProgress.step === "live" ? (
           <div className="text-center">
-            {!playerSpawned && (
+            {isConnected && !playerSpawned && (
               <>
                 {" "}
                 <h1 className="text-4xl font-bold">
