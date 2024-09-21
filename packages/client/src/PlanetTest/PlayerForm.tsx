@@ -1,35 +1,139 @@
 import { entityToAddress } from "@frontend/Pages/GamePage";
 import { useMUD } from "@mud/MUDContext";
 import React, { useState } from "react";
-import { useAccount } from "wagmi";
+import { encodeFunctionData, parseEther } from "viem";
+import { useWalletClient, useAccount } from "wagmi";
+
 const PlayerForm = () => {
   const {
     systemCalls: { registerPlayer, changePlayerName, changeBurnerWallet },
-    network: { playerEntity },
+    network: { playerEntity, worldContract },
   } = useMUD();
-  const account = useAccount();
-  const [playerName, setPlayerName] = useState("");
 
+  // Define your contract details
+
+  const { data: walletClient } = useWalletClient();
+  const [playerName, setPlayerName] = useState("");
+  const account = useAccount();
   const [newPlayerName, setNewPlayerName] = useState("");
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
-    // Handle player registration logic here
-    registerPlayer(playerName, entityToAddress(playerEntity) as `0x${string}`);
-    console.log(
-      "Registering player:",
-      playerName,
-      entityToAddress(playerEntity),
-    );
+    // Check if walletClient is available
+    if (!walletClient) {
+      console.error("No wallet client available");
+      return;
+    }
+
+    // Get the address of the burner wallet from playerEntity
+    const burnerWalletAddress = entityToAddress(playerEntity);
+    if (!burnerWalletAddress) {
+      console.error("No burner wallet address available");
+      return;
+    }
+
+    try {
+      // Define the ABI for the registerPlayer function
+      const registerPlayerAbi = [
+        {
+          inputs: [
+            { internalType: "string", name: "name", type: "string" },
+            { internalType: "address", name: "burner", type: "address" },
+          ],
+          name: "df__registerPlayer",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ];
+
+      // Encode function data using viem's encodeFunctionData
+      const data = encodeFunctionData({
+        abi: registerPlayerAbi,
+        functionName: "df__registerPlayer",
+        args: [playerName, burnerWalletAddress],
+      });
+      const gasLimit = 21000;
+      // Prepare the transaction data
+      const txData = {
+        to: worldContract.address, // The address of the contract that handles registration
+        data, // The encoded function data
+        gasLimit,
+        // Adjust gas limit as needed
+      };
+
+      // Send the transaction using walletClient
+      const txResponse = await walletClient.sendTransaction(txData);
+
+      console.log("Transaction sent:", txResponse);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
   };
 
-  const handleChangeNameSubmit = (e) => {
+  const handleChangeNameSubmit = async (e) => {
     e.preventDefault();
-    changePlayerName(newPlayerName);
-    // Handle change player name logic here
-    console.log("Changing player name to:", newPlayerName);
+
+    // Check if walletClient is available
+    if (!walletClient) {
+      console.error("No wallet client available");
+      return;
+    }
+
+    try {
+      // Define the ABI for the changePlayerName function
+      const changePlayerNameAbi = [
+        {
+          inputs: [{ internalType: "string", name: "newName", type: "string" }],
+          name: "df__changePlayerName",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ];
+
+      // Encode function data using viem's encodeFunctionData
+      const data = encodeFunctionData({
+        abi: changePlayerNameAbi,
+        functionName: "df__changePlayerName",
+        args: [newPlayerName],
+      });
+
+      // Prepare the transaction data
+      const txData = {
+        to: worldContract.address, // The address of the contract that handles the changePlayerName function
+        data, // The encoded function data
+        gasLimit: 21000, // Adjust the gas limit as needed
+      };
+
+      // Send the transaction using walletClient
+      const txResponse = await walletClient.sendTransaction(txData);
+
+      console.log("Transaction sent:", txResponse);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
   };
+
+  // const handleRegisterSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   // Handle player registration logic here
+  //   registerPlayer(playerName, entityToAddress(playerEntity) as `0x${string}`);
+  //   console.log(
+  //     "Registering player:",
+  //     playerName,
+  //     entityToAddress(playerEntity),
+  //   );
+  // };
+
+  // const handleChangeNameSubmit = (e) => {
+  //   e.preventDefault();
+  //   changePlayerName(newPlayerName, account.address);
+  //   // Handle change player name logic here
+  //   console.log("Changing player name to:", newPlayerName);
+  // };
 
   const handleChangeBurnerSubmit = (e) => {
     e.preventDefault();
