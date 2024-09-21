@@ -9,7 +9,7 @@ import { Planet } from "../lib/Planet.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { RevealInput } from "../lib/VerificationInput.sol";
 
-contract RevealPlanetSystem is System, Errors {
+contract PlanetRevealSystem is System, Errors {
   function revealLocation(Proof memory proof, RevealInput memory input) public {
     IWorld world = IWorld(_world());
     world.df__tick();

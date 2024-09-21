@@ -29,7 +29,7 @@ library TickerLib {
     ticker.paused = true;
   }
 
-  function unpause(TickerData memory ticker) internal {
+  function unpause(TickerData memory ticker) internal view {
     if (!ticker.paused) {
       revert Errors.NotPaused();
     }

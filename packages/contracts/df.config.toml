@@ -23,6 +23,10 @@ c_planet_level_bonus = [1, 0, 0, 0, 0, 0]         # from zone0 to zone5
 [planet_level]
 thresholds = [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
 
+[planet_biome]
+threshold1 = 15
+threshold2 = 17
+
 # the reason for putting the thresholds in a nested object instead of an explicit
 # 3-dimentional array is to avoid the toml formattor from spreading the array,
 # which makes it hard to read and maintain
@@ -73,6 +77,14 @@ thresholds = [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
 7 = [247, 4, 2, 2, 1]
 8 = [247, 4, 2, 2, 1]
 9 = [247, 4, 2, 2, 1]
+
+# wormhole, planetary_shield, cannon, bloom_filter, black_domain, stellar_shield, bomb, kardashev, avatar
+[artifact]
+1 = [455, 455, 455, 455, 455, 455, 455, 455, 456]
+2 = [455, 455, 455, 455, 455, 455, 455, 455, 456]
+3 = [512, 512, 512, 512, 512, 512, 512, 512, 0]
+4 = [512, 512, 512, 512, 512, 512, 512, 512, 0]
+5 = [512, 512, 512, 512, 512, 512, 512, 512, 0]
 
 [upgrade_config]
 a_population_cap_multiplier = 120

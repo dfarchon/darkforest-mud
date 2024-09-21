@@ -3,12 +3,10 @@ pragma solidity >=0.8.24;
 
 import { Errors } from "../interfaces/errors.sol";
 import { Move, MoveData, Ticker, PendingMove, PendingMoveData } from "../codegen/index.sol";
+import { Artifact as ArtifactTable, ArtifactOwner } from "../codegen/index.sol";
 import { PlanetType } from "../codegen/common.sol";
 import { Planet } from "./Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-
-uint8 constant MAX_MOVE_QUEUE_SIZE = 30;
-uint240 constant DEFAULT_INDEXES = 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d;
 
 library MoveLib {
   function NewMove(Planet memory from, address captain) internal pure returns (MoveData memory move) {
@@ -48,8 +46,12 @@ library MoveLib {
     from.silver -= silver;
   }
 
-  function loadArtifact(MoveData memory move, Planet memory from, uint256 artifact) internal pure {
-    //todo
+  function loadArtifact(MoveData memory move, Planet memory from, uint256 artifact) internal view {
+    if (artifact == 0) {
+      return;
+    }
+    move.artifact = artifact;
+    from.removeArtifact(artifact);
   }
 
   function headTo(MoveData memory move, Planet memory to, uint256 distance, uint256 speed) internal {
@@ -65,7 +67,7 @@ library MoveLib {
     }
   }
 
-  function arrivedAt(MoveData memory move, Planet memory planet) internal pure {
+  function arrivedAt(MoveData memory move, Planet memory planet) internal view {
     assert(move.arrivalTime == planet.lastUpdateTick);
     unloadPopulation(move, planet);
     unloadSilver(move, planet);
@@ -104,8 +106,10 @@ library MoveLib {
     }
   }
 
-  function unloadArtifact(MoveData memory move, Planet memory to) internal pure {
-    //todo
+  function unloadArtifact(MoveData memory move, Planet memory to) internal view {
+    if (move.artifact != 0) {
+      to.pushArtifact(move.artifact);
+    }
   }
 }
 
@@ -120,6 +124,9 @@ struct PendingMoveQueue {
 using PendingMoveQueueLib for PendingMoveQueue global;
 
 library PendingMoveQueueLib {
+  uint8 constant MAX_MOVE_QUEUE_SIZE = 30;
+  uint240 constant DEFAULT_INDEXES = 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d;
+
   function ReadFromStore(PendingMoveQueue memory _q, uint256 _planet) internal view {
     PendingMoveData memory data = PendingMove.get(bytes32(_planet));
     _q.planetHash = _planet;

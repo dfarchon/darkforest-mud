@@ -5,6 +5,45 @@ export default defineWorld({
   enums: {
     PlanetType: ["UNKNOWN", "PLANET", "ASTEROID_FIELD", "FOUNDRY", "SPACETIME_RIP", "QUASAR"],
     SpaceType: ["UNKNOWN", "NEBULA", "SPACE", "DEEP_SPACE", "DEAD_SPACE"],
+    Biome: [
+      "UNKNOWN",
+      "OCEAN",
+      "FOREST",
+      "GRASSLAND",
+      "TUNDRA",
+      "SWAMP",
+      "DESERT",
+      "ICE",
+      "WASTELAND",
+      "LAVA",
+      "CORRUPTED",
+    ],
+    ArtifactRarity: ["UNKNOWN", "COMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC"],
+    ArtifactType: [
+      "UNKNOWN",
+      "WORMHOLE",
+      "PLANETARY_SHIELD",
+      "PHOTOID_CANNON",
+      "BLOOM_FILTER",
+      "BLACK_DOMAIN",
+      "STELLAR_SHIELD",
+      "BOMB",
+      "KARDASHEV",
+      "AVATAR",
+      "MONOLITH",
+      "COLLOSSUS",
+      "SPACESHIP",
+      "PYRAMID",
+      "ICE_LINK",
+      "FIRE_LINK",
+      "BLIND_BOX",
+      "SHIP_MOTHERSHIP",
+      "SHIP_CRESCENT",
+      "SHIP_WHALE",
+      "SHIP_GEAR",
+      "SHIP_TITAN",
+      "SHIP_PINK",
+    ],
   },
   systems: {
     TickSystem: {
@@ -23,7 +62,8 @@ export default defineWorld({
   tables: {
     Counter: {
       schema: {
-        player: "uint64",
+        player: "uint32",
+        artifact: "uint32",
       },
       key: [],
     },
@@ -80,12 +120,48 @@ export default defineWorld({
       },
       key: [],
     },
+    ArtifactConfig: {
+      schema: {
+        rarity: "ArtifactRarity",
+        typeProbabilities: "uint16[]",
+      },
+      key: ["rarity"],
+    },
+    Artifact: {
+      schema: {
+        id: "uint32",
+        rarity: "ArtifactRarity",
+        artifactType: "ArtifactType",
+        availability: "bool",
+      },
+      key: ["id"],
+    },
+    // planets owns artifacts
+    ArtifactOwner: {
+      schema: {
+        artifact: "uint32",
+        planet: "bytes32",
+      },
+      key: ["artifact"],
+    },
+    PlanetArtifact: {
+      id: "bytes32",
+      number: "uint8",
+      artifacts: "uint160", // which means each planet can have at most 5 artifacts
+    },
     PlanetLevelConfig: {
       schema: {
         // default level is 0
         // 9 elements indicates 9 levels, from level 1 to level 9
         // ex: [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
         thresholds: "uint32[]",
+      },
+      key: [],
+    },
+    PlanetBiomeConfig: {
+      schema: {
+        threshold1: "uint32",
+        threshold2: "uint32",
       },
       key: [],
     },
@@ -166,6 +242,11 @@ export default defineWorld({
       y: "int32",
       revealer: "address",
     },
+    ProspectedPlanet: {
+      id: "bytes32",
+      blockNumber: "uint64",
+    },
+    ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
       lastUpdateTick: "uint64",

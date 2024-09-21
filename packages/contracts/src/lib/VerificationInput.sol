@@ -205,6 +205,55 @@ library RevealInputLib {
   }
 }
 
+using BiomebaseInputLib for BiomebaseInput global;
+
+struct BiomebaseInput {
+  uint256 planetHash;
+  uint256 biomebase;
+  uint256 mimcHashKey;
+  uint256 spaceTypeKey;
+  uint256 perlinLengthScale;
+  uint256 perlinMirrorX;
+  uint256 perlinMirrorY;
+}
+
+library BiomebaseInputLib {
+  function validate(BiomebaseInput memory input) internal view {
+    if (
+      !CommonLib.checkSnarkAndPerlinConfig(
+        input.mimcHashKey,
+        input.spaceTypeKey,
+        input.perlinLengthScale,
+        input.perlinMirrorX,
+        input.perlinMirrorY
+      )
+    ) {
+      revert Errors.InvalidProofInput(255);
+    }
+  }
+
+  function genFrom(BiomebaseInput memory input, uint256[7] memory rawInput) internal pure {
+    input.planetHash = rawInput[0];
+    input.biomebase = rawInput[1];
+    input.mimcHashKey = rawInput[2];
+    input.spaceTypeKey = rawInput[3];
+    input.perlinLengthScale = rawInput[4];
+    input.perlinMirrorX = rawInput[5];
+    input.perlinMirrorY = rawInput[6];
+  }
+
+  function flatten(BiomebaseInput memory input) internal pure returns (uint256[] memory res) {
+    res = new uint256[](7);
+    res[0] = input.planetHash;
+    res[1] = input.biomebase;
+    res[2] = input.mimcHashKey;
+    res[3] = input.spaceTypeKey;
+    res[4] = input.perlinLengthScale;
+    res[5] = input.perlinMirrorX;
+    res[6] = input.perlinMirrorY;
+  }
+}
+
 library CommonLib {
   function checkSnarkAndPerlinConfig(
     uint256 mimcHashKey,

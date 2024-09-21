@@ -29,7 +29,7 @@ contract MoveSystem is System, Errors {
     uint256 _population,
     uint256 _silver,
     uint256 _artifact
-  ) public returns (uint256) {
+  ) public {
     IWorld world = IWorld(_world());
     world.df__tick();
 
@@ -64,8 +64,8 @@ contract MoveSystem is System, Errors {
     uint256 popMoved,
     uint256 silverMoved,
     uint256 movedArtifactId,
-    uint256 isAbandoning
-  ) public returns (uint256) {
+    uint256 // isAbandoning
+  ) public {
     Proof memory proof;
     proof.genFrom(_a, _b, _c);
     MoveInput memory input;
