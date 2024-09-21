@@ -16,13 +16,13 @@
     "prepare": "(forge --version || pnpm foundry:up) && husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.4.0",
-    "@commitlint/config-conventional": "19.2.2",
+    "@commitlint/cli": "19.5.0",
+    "@commitlint/config-conventional": "19.5.0",
     "@latticexyz/cli": "2.2.7",
     "@latticexyz/common": "2.2.7",
     "@latticexyz/explorer": "2.2.7",
     "@latticexyz/store-indexer": "2.2.7",
-    "@types/debug": "4.1.7",
+    "@types/debug": "4.1.12",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "eslint": "8.57.0",
@@ -33,9 +33,9 @@
     "eslint-plugin-simple-import-sort": "12.1.1",
     "husky": "9.1.5",
     "lint-staged": "15.2.10",
-    "mprocs": "0.6.4",
+    "mprocs": "0.7.1",
     "rimraf": "6.0.1",
-    "typescript": "5.4.2"
+    "typescript": "5.6.2"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json}": [
