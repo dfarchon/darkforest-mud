@@ -146,8 +146,7 @@ export default defineWorld({
     },
     PlanetArtifact: {
       id: "bytes32",
-      number: "uint8",
-      artifacts: "uint160", // which means each planet can have at most 5 artifacts
+      artifacts: "uint256", // which means each planet can have at most 8 artifacts
     },
     PlanetLevelConfig: {
       schema: {

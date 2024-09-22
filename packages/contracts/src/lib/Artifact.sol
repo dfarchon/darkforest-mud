@@ -4,77 +4,71 @@ pragma solidity >=0.8.24;
 import { Errors } from "../interfaces/errors.sol";
 import { PlanetType, SpaceType, Biome, ArtifactType, ArtifactRarity } from "../codegen/common.sol";
 import { Counter, ArtifactConfig, Artifact as ArtifactTable, PlanetArtifact } from "../codegen/index.sol";
-import { PlanetArtifact, PlanetArtifactData, ArtifactOwner } from "../codegen/index.sol";
+import { PlanetArtifact, ArtifactOwner } from "../codegen/index.sol";
 
 using ArtifactStorageLib for ArtifactStorage global;
 
 struct ArtifactStorage {
-  bool initialized;
   uint256 planetHash;
   uint256 number;
-  uint256[] artifacts;
+  // uint256[] artifacts;
+  uint256 artifacts;
   bool shouldWrite;
-  uint256 inNumber;
-  uint256[] inArtifacts;
-  uint256 outNumber;
-  uint256[] outArtifacts;
+  uint256 inArtifacts;
+  uint256 outArtifacts;
 }
 
 library ArtifactStorageLib {
-  uint8 constant MAX_ARTIFACTS_PER_PLANET = 5;
+  uint8 constant MAX_ARTIFACTS_PER_PLANET = 8;
 
-  function readFromStore(ArtifactStorage memory _s) private view {
-    uint256[] memory artifacts = new uint256[](MAX_ARTIFACTS_PER_PLANET);
-    PlanetArtifactData memory data = PlanetArtifact.get(bytes32(_s.planetHash));
-    uint256 number = data.number;
-    if (number == 0) {
-      _s.artifacts = artifacts;
-      return;
-    }
-    _s.number = number;
-    uint256 artifactsArray = data.artifacts;
-    for (uint256 i; i < number; ) {
-      artifacts[i] = uint32(artifactsArray);
+  function ReadFromStore(ArtifactStorage memory _s, uint256 _planet) internal view {
+    uint256 artifacts = PlanetArtifact.get(bytes32(_planet));
+    _s.planetHash = _planet;
+    _s.artifacts = artifacts;
+    _s.number = MAX_ARTIFACTS_PER_PLANET;
+    for (uint256 i; i < MAX_ARTIFACTS_PER_PLANET; ) {
+      uint32 artifact = uint32(artifacts);
+      if (artifact == 0) {
+        _s.number = i;
+        break;
+      }
       unchecked {
-        artifactsArray >>= 32;
         ++i;
+        artifacts >>= 32;
       }
     }
-    _s.artifacts = artifacts;
-    _s.initialized = true;
   }
 
   function WriteToStore(ArtifactStorage memory _s) internal {
     if (!_s.shouldWrite) {
       return;
     }
-    uint256 artifactsArray;
-    uint256 number = _s.number;
-    for (uint256 i; i < number; ) {
-      artifactsArray <<= 32;
-      artifactsArray += _s.artifacts[i];
-      unchecked {
-        ++i;
-      }
-    }
-    PlanetArtifact.set(bytes32(_s.planetHash), uint8(number), uint160(artifactsArray));
+    PlanetArtifact.set(bytes32(_s.planetHash), _s.artifacts);
 
-    number = _s.inNumber;
-    for (uint256 i; i < number; ) {
-      uint32 artifact = uint32(_s.inArtifacts[i]);
+    uint256 artifacts = _s.inArtifacts;
+    for (uint256 i; i < MAX_ARTIFACTS_PER_PLANET; ) {
+      uint32 artifact = uint32(artifacts);
+      if (artifact == 0) {
+        break;
+      }
       ArtifactTable.setAvailability(artifact, true);
       ArtifactOwner.set(artifact, bytes32(_s.planetHash));
       unchecked {
         ++i;
+        artifacts >>= 32;
       }
     }
 
-    number = _s.outNumber;
-    for (uint256 i; i < number; ) {
-      uint32 artifact = uint32(_s.outArtifacts[i]);
+    artifacts = _s.outArtifacts;
+    for (uint256 i; i < MAX_ARTIFACTS_PER_PLANET; ) {
+      uint32 artifact = uint32(artifacts);
+      if (artifact == 0) {
+        break;
+      }
       ArtifactTable.setAvailability(artifact, false);
       unchecked {
         ++i;
+        artifacts >>= 32;
       }
     }
   }
@@ -87,29 +81,23 @@ library ArtifactStorageLib {
     return _s.number == MAX_ARTIFACTS_PER_PLANET;
   }
 
-  function Push(ArtifactStorage memory _s, uint256 _artifact) internal view {
-    if (!_s.initialized) {
-      readFromStore(_s);
-    }
+  function Get(ArtifactStorage memory _s, uint256 _index) internal pure returns (uint256 artifact) {
+    artifact = uint32(_s.artifacts >> (32 * _index));
+  }
+
+  function Push(ArtifactStorage memory _s, uint256 _artifact) internal pure {
     if (_s.isFull()) {
       revert Errors.ArtifactStorageFull();
     }
-    _s.artifacts[_s.number] = _artifact;
-    if (_s.inNumber == 0) {
-      _s.inArtifacts = new uint256[](MAX_ARTIFACTS_PER_PLANET);
-    }
-    _s.inArtifacts[_s.inNumber] = _artifact;
     _s.shouldWrite = true;
     unchecked {
+      _s.artifacts += _artifact << (32 * _s.number);
+      _s.inArtifacts = (_s.inArtifacts << 32) + _artifact;
       ++_s.number;
-      ++_s.inNumber;
     }
   }
 
   function Remove(ArtifactStorage memory _s, uint256 _artifact) internal view {
-    if (!_s.initialized) {
-      readFromStore(_s);
-    }
     if (_s.isEmpty()) {
       revert Errors.ArtifactNotOnPlanet();
     }
@@ -117,27 +105,21 @@ library ArtifactStorageLib {
       revert Errors.ArtifactNotOnPlanet();
     }
     uint256 number = _s.number;
-    uint256[] memory artifacts = _s.artifacts;
+    uint256 artifacts = _s.artifacts;
     for (uint256 i; i < number; ) {
-      if (artifacts[i] == _artifact) {
+      if (uint32(artifacts) == _artifact) {
+        _s.shouldWrite = true;
         unchecked {
           --number;
-        }
-        artifacts[i] = artifacts[number];
-        _s.number = number;
-        _s.artifacts = artifacts;
-        _s.shouldWrite = true;
-        if (_s.outNumber == 0) {
-          _s.outArtifacts = new uint256[](MAX_ARTIFACTS_PER_PLANET);
-        }
-        _s.outArtifacts[_s.outNumber] = _artifact;
-        unchecked {
-          ++_s.outNumber;
+          uint256 mod = 1 << (32 * i);
+          _s.artifacts = (artifacts % mod) + ((artifacts / mod) >> 32);
+          _s.outArtifacts = (_s.outArtifacts << 32) + _artifact;
         }
         return;
       }
       unchecked {
         ++i;
+        artifacts >>= 32;
       }
     }
     revert Errors.ArtifactNotOnPlanet();

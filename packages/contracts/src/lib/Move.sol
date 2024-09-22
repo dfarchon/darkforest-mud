@@ -59,6 +59,10 @@ library MoveLib {
     uint256 present = to.lastUpdateTick;
     move.departureTime = uint64(present);
     move.arrivalTime = uint64(present + time);
+    // check if the target planet is full of artifacts
+    if (to.artifactStorage.isFull() && move.artifact != 0) {
+      revert Errors.ArtifactStorageFull();
+    }
     // if time == 0, unload immediately
     if (time == 0) {
       arrivedAt(move, to);
@@ -67,7 +71,7 @@ library MoveLib {
     }
   }
 
-  function arrivedAt(MoveData memory move, Planet memory planet) internal view {
+  function arrivedAt(MoveData memory move, Planet memory planet) internal pure {
     assert(move.arrivalTime == planet.lastUpdateTick);
     unloadPopulation(move, planet);
     unloadSilver(move, planet);
@@ -106,7 +110,7 @@ library MoveLib {
     }
   }
 
-  function unloadArtifact(MoveData memory move, Planet memory to) internal view {
+  function unloadArtifact(MoveData memory move, Planet memory to) internal pure {
     if (move.artifact != 0) {
       to.pushArtifact(move.artifact);
     }

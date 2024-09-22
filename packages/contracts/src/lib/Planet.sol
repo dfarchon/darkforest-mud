@@ -56,7 +56,7 @@ library PlanetLib {
       _readLatestData(planet);
     }
 
-    planet.artifactStorage.planetHash = planet.planetHash;
+    planet.artifactStorage.ReadFromStore(planet.planetHash);
     planet.moveQueue.ReadFromStore(planet.planetHash);
 
     _readMetadata(planet);
@@ -104,7 +104,7 @@ library PlanetLib {
     return planet.moveQueue.PopArrivedMove(untilTick);
   }
 
-  function pushArtifact(Planet memory planet, uint256 artifact) internal view {
+  function pushArtifact(Planet memory planet, uint256 artifact) internal pure {
     planet.artifactStorage.Push(artifact);
   }
 
