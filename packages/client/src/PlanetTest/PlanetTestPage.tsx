@@ -51,6 +51,8 @@ export const PlanetTestPage = () => {
     isTeleport: boolean;
     isAttack: boolean;
   }
+
+  // @ts-expect-error unused handleMoveSubmit value
   const handleMoveSubmit = async (
     proof: Proof,
     moveInput: MoveInput,

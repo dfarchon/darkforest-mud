@@ -122,7 +122,7 @@ export type RegisterConfirmationResponse = {
 export async function callRegisterAndWaitForConfirmation(
   key: string,
   address: EthAddress,
-  terminal: React.MutableRefObject<TerminalHandle | undefined>,
+  terminal: React.MutableRefObject<TerminalHandle | null>,
 ): Promise<RegisterConfirmationResponse> {
   if (!process.env.DF_WEBSERVER_URL) {
     return { errorMessage: "Cannot connect to server.", canRetry: false };

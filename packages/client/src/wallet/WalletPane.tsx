@@ -87,10 +87,15 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
     }
     const value = burnerBalance; // Draining all funds
     try {
+      // TODO: Fix so that sendTransaction automatically infers type correctly something is off in
+      //       setupNetwork + ExternalWalletProvider types needs more investigation
+      type SendTransactionParameter = Parameters<
+        typeof burnerWalletClient.sendTransaction
+      >[0];
       await burnerWalletClient.sendTransaction({
-        to: walletClient.account?.address,
+        to: walletClient.account.address,
         value,
-      });
+      } as SendTransactionParameter);
       setTxSuccessful(true);
       // fetchBalances(); // Refresh balances after transaction
       setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds

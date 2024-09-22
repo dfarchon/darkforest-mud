@@ -113,7 +113,7 @@ class SnarkArgsHelper {
   private static readonly DEFAULT_SNARK_CACHE_SIZE = 20;
   private readonly useMockHash: boolean;
   private readonly snarkProverQueue: SnarkProverQueue;
-  private readonly terminal: React.MutableRefObject<TerminalHandle | undefined>;
+  private readonly terminal: React.MutableRefObject<TerminalHandle | null>;
   private readonly hashConfig: HashConfig;
   private readonly spaceTypePerlinOpts: PerlinConfig;
   private readonly biomebasePerlinOpts: PerlinConfig;
@@ -122,7 +122,7 @@ class SnarkArgsHelper {
 
   private constructor(
     hashConfig: HashConfig,
-    terminal: React.MutableRefObject<TerminalHandle | undefined>,
+    terminal: React.MutableRefObject<TerminalHandle | null>,
     useMockHash: boolean,
   ) {
     this.useMockHash = useMockHash;
@@ -153,7 +153,7 @@ class SnarkArgsHelper {
 
   static create(
     hashConfig: HashConfig,
-    terminal: React.MutableRefObject<TerminalHandle | undefined>,
+    terminal: React.MutableRefObject<TerminalHandle | null>,
     fakeHash = false,
   ): SnarkArgsHelper {
     const snarkArgsHelper = new SnarkArgsHelper(hashConfig, terminal, fakeHash);

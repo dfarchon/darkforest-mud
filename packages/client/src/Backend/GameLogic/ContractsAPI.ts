@@ -1,16 +1,20 @@
-import { EMPTY_LOCATION_ID, TOKEN_NAME } from "@df/constants";
+import {
+  // @ts-expect-error unused EMPTY_LOCATION_ID
+  EMPTY_LOCATION_ID,
+  TOKEN_NAME,
+} from "@df/constants";
 import type { EthConnection } from "@df/network";
 import {
   aggregateBulkGetter,
   ContractCaller,
   ethToWei,
-  TxCollection,
+  // TxCollection,
   TxExecutor,
 } from "@df/network";
 import {
   address,
   artifactIdFromEthersBN,
-  artifactIdToDecStr,
+  /// artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
   // decodeArtifactPointValues,
@@ -49,8 +53,8 @@ import { Setting } from "@df/types";
 import type { ContractFunction, Event, providers } from "ethers";
 import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
-import { flatten } from "lodash-es";
 
+// import { flatten } from "lodash-es";
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import {
   ContractEvent,
@@ -206,7 +210,7 @@ export class ContractsAPI extends EventEmitter {
 
   private async afterTransaction(
     _txRequest: Transaction,
-    txDiagnosticInfo: unknown,
+    _txDiagnosticInfo: unknown,
   ) {
     // NOTE: remove /event
     // eventLogger.logEvent(EventType.Transaction, txDiagnosticInfo);
@@ -643,552 +647,559 @@ export class ContractsAPI extends EventEmitter {
     return score.toNumber();
   }
 
+  // TODO: Fix getConstants
   async getConstants(): Promise<ContractConstants> {
-    const {
-      DISABLE_ZK_CHECKS,
-      PLANETHASH_KEY,
-      SPACETYPE_KEY,
-      BIOMEBASE_KEY,
-      PERLIN_LENGTH_SCALE,
-      PERLIN_MIRROR_X,
-      PERLIN_MIRROR_Y,
-    } = await this.makeCall(this.contract.getSnarkConstants);
+    // const {
+    //   DISABLE_ZK_CHECKS,
+    //   PLANETHASH_KEY,
+    //   SPACETYPE_KEY,
+    //   BIOMEBASE_KEY,
+    //   PERLIN_LENGTH_SCALE,
+    //   PERLIN_MIRROR_X,
+    //   PERLIN_MIRROR_Y,
+    // } = await this.makeCall(this.contract.getSnarkConstants);
 
-    const {
-      ADMIN_CAN_ADD_PLANETS,
-      WORLD_RADIUS_LOCKED,
-      WORLD_RADIUS_MIN,
-      MAX_NATURAL_PLANET_LEVEL,
-      MAX_ARTIFACT_PER_PLANET,
-      MAX_SENDING_PLANET,
-      MAX_RECEIVING_PLANET,
-      TIME_FACTOR_HUNDREDTHS,
-      PERLIN_THRESHOLD_1,
-      PERLIN_THRESHOLD_2,
-      PERLIN_THRESHOLD_3,
-      INIT_PERLIN_MIN,
-      INIT_PERLIN_MAX,
-      SPAWN_RIM_AREA,
-      BIOME_THRESHOLD_1,
-      BIOME_THRESHOLD_2,
-      PLANET_LEVEL_THRESHOLDS,
-      PLANET_RARITY,
-      PLANET_TRANSFER_ENABLED,
-      PHOTOID_ACTIVATION_DELAY,
-      STELLAR_ACTIVATION_DELAY,
-      LOCATION_REVEAL_COOLDOWN,
-      CLAIM_PLANET_COOLDOWN,
-      PLANET_TYPE_WEIGHTS,
-      SILVER_SCORE_VALUE,
-      ARTIFACT_POINT_VALUES,
-      SPACE_JUNK_ENABLED,
-      SPACE_JUNK_LIMIT,
-      PLANET_LEVEL_JUNK,
-      ABANDON_SPEED_CHANGE_PERCENT,
-      ABANDON_RANGE_CHANGE_PERCENT,
-      // Capture Zones
-      GAME_START_BLOCK,
-      CAPTURE_ZONES_ENABLED,
-      CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL,
-      CAPTURE_ZONE_RADIUS,
-      CAPTURE_ZONE_PLANET_LEVEL_SCORE,
-      CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED,
-      CAPTURE_ZONES_PER_5000_WORLD_RADIUS,
-      SPACESHIPS,
-      ROUND_END_REWARDS_BY_RANK,
-      TOKEN_MINT_END_TIMESTAMP,
-      CLAIM_END_TIMESTAMP,
-      BURN_END_TIMESTAMP,
-      BURN_PLANET_COOLDOWN,
-      PINK_PLANET_COOLDOWN,
-      ACTIVATE_ARTIFACT_COOLDOWN,
-      BUY_ARTIFACT_COOLDOWN,
-      BURN_PLANET_LEVEL_EFFECT_RADIUS,
-      BURN_PLANET_REQUIRE_SILVER_AMOUNTS,
-      MAX_LEVEL_DIST,
-      MAX_LEVEL_LIMIT,
-      MIN_LEVEL_BIAS,
-      ENTRY_FEE,
-      KARDASHEV_END_TIMESTAMP,
-      KARDASHEV_PLANET_COOLDOWN,
-      BLUE_PLANET_COOLDOWN,
-      KARDASHEV_EFFECT_RADIUS,
-      KARDASHEV_REQUIRE_SILVER_AMOUNTS,
-      BLUE_PANET_REQUIRE_SILVER_AMOUNTS,
-    } = await this.makeCall(this.contract.getGameConstants);
+    // const {
+    //   ADMIN_CAN_ADD_PLANETS,
+    //   WORLD_RADIUS_LOCKED,
+    //   WORLD_RADIUS_MIN,
+    //   MAX_NATURAL_PLANET_LEVEL,
+    //   MAX_ARTIFACT_PER_PLANET,
+    //   MAX_SENDING_PLANET,
+    //   MAX_RECEIVING_PLANET,
+    //   TIME_FACTOR_HUNDREDTHS,
+    //   PERLIN_THRESHOLD_1,
+    //   PERLIN_THRESHOLD_2,
+    //   PERLIN_THRESHOLD_3,
+    //   INIT_PERLIN_MIN,
+    //   INIT_PERLIN_MAX,
+    //   SPAWN_RIM_AREA,
+    //   BIOME_THRESHOLD_1,
+    //   BIOME_THRESHOLD_2,
+    //   PLANET_LEVEL_THRESHOLDS,
+    //   PLANET_RARITY,
+    //   PLANET_TRANSFER_ENABLED,
+    //   PHOTOID_ACTIVATION_DELAY,
+    //   STELLAR_ACTIVATION_DELAY,
+    //   LOCATION_REVEAL_COOLDOWN,
+    //   CLAIM_PLANET_COOLDOWN,
+    //   PLANET_TYPE_WEIGHTS,
+    //   SILVER_SCORE_VALUE,
+    //   ARTIFACT_POINT_VALUES,
+    //   SPACE_JUNK_ENABLED,
+    //   SPACE_JUNK_LIMIT,
+    //   PLANET_LEVEL_JUNK,
+    //   ABANDON_SPEED_CHANGE_PERCENT,
+    //   ABANDON_RANGE_CHANGE_PERCENT,
+    //   // Capture Zones
+    //   GAME_START_BLOCK,
+    //   CAPTURE_ZONES_ENABLED,
+    //   CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL,
+    //   CAPTURE_ZONE_RADIUS,
+    //   CAPTURE_ZONE_PLANET_LEVEL_SCORE,
+    //   CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED,
+    //   CAPTURE_ZONES_PER_5000_WORLD_RADIUS,
+    //   SPACESHIPS,
+    //   ROUND_END_REWARDS_BY_RANK,
+    //   TOKEN_MINT_END_TIMESTAMP,
+    //   CLAIM_END_TIMESTAMP,
+    //   BURN_END_TIMESTAMP,
+    //   BURN_PLANET_COOLDOWN,
+    //   PINK_PLANET_COOLDOWN,
+    //   ACTIVATE_ARTIFACT_COOLDOWN,
+    //   BUY_ARTIFACT_COOLDOWN,
+    //   BURN_PLANET_LEVEL_EFFECT_RADIUS,
+    //   BURN_PLANET_REQUIRE_SILVER_AMOUNTS,
+    //   MAX_LEVEL_DIST,
+    //   MAX_LEVEL_LIMIT,
+    //   MIN_LEVEL_BIAS,
+    //   ENTRY_FEE,
+    //   KARDASHEV_END_TIMESTAMP,
+    //   KARDASHEV_PLANET_COOLDOWN,
+    //   BLUE_PLANET_COOLDOWN,
+    //   KARDASHEV_EFFECT_RADIUS,
+    //   KARDASHEV_REQUIRE_SILVER_AMOUNTS,
+    //   BLUE_PANET_REQUIRE_SILVER_AMOUNTS,
+    // } = await this.makeCall(this.contract.getGameConstants);
 
-    // const TOKEN_MINT_END_TIMESTAMP = (
-    //   await this.makeCall(this.contract.TOKEN_MINT_END_TIMESTAMP)
-    // ).toNumber();
+    // // const TOKEN_MINT_END_TIMESTAMP = (
+    // //   await this.makeCall(this.contract.TOKEN_MINT_END_TIMESTAMP)
+    // // ).toNumber();
 
-    // const CLAIM_END_TIMESTAMP = (await this.makeCall(this.contract.CLAIM_END_TIMESTAMP)).toNumber();
+    // // const CLAIM_END_TIMESTAMP = (await this.makeCall(this.contract.CLAIM_END_TIMESTAMP)).toNumber();
 
-    const adminAddress = address(
-      await this.makeCall(this.contract.adminAddress),
-    );
+    // const adminAddress = address(
+    //   await this.makeCall(this.contract.adminAddress),
+    // );
 
-    const upgrades = decodeUpgradeBranches(
-      await this.makeCall(this.contract.getUpgrades),
-    );
+    // const upgrades = decodeUpgradeBranches(
+    //   await this.makeCall(this.contract.getUpgrades),
+    // );
 
-    // const PLANET_TYPE_WEIGHTS: PlanetTypeWeightsBySpaceType =
-    //   await this.makeCall<PlanetTypeWeightsBySpaceType>(this.contract.getTypeWeights);
+    // // const PLANET_TYPE_WEIGHTS: PlanetTypeWeightsBySpaceType =
+    // //   await this.makeCall<PlanetTypeWeightsBySpaceType>(this.contract.getTypeWeights);
 
-    // const rawPointValues = await this.makeCall(this.contract.getArtifactPointValues);
-    // const ARTIFACT_POINT_VALUES = decodeArtifactPointValues(rawPointValues);
+    // // const rawPointValues = await this.makeCall(this.contract.getArtifactPointValues);
+    // // const ARTIFACT_POINT_VALUES = decodeArtifactPointValues(rawPointValues);
 
-    const ARTIFACT_POINT_VALUES_decoded = decodeArtifactPointValues(
-      ARTIFACT_POINT_VALUES,
-    );
+    // const ARTIFACT_POINT_VALUES_decoded = decodeArtifactPointValues(
+    //   ARTIFACT_POINT_VALUES,
+    // );
 
-    const planetDefaults = decodePlanetDefaults(
-      await this.makeCall(this.contract.getDefaultStats),
-    );
+    // const planetDefaults = decodePlanetDefaults(
+    //   await this.makeCall(this.contract.getDefaultStats),
+    // );
 
-    const planetCumulativeRarities = (
-      await this.makeCall<EthersBN[]>(this.contract.getCumulativeRarities)
-    ).map((x: EthersBN) => x.toNumber());
+    // const planetCumulativeRarities = (
+    //   await this.makeCall<EthersBN[]>(this.contract.getCumulativeRarities)
+    // ).map((x: EthersBN) => x.toNumber());
 
-    const constants: ContractConstants = {
-      //SnarkConstants
-      DISABLE_ZK_CHECKS,
-      PLANETHASH_KEY: PLANETHASH_KEY.toNumber(),
-      SPACETYPE_KEY: SPACETYPE_KEY.toNumber(),
-      BIOMEBASE_KEY: BIOMEBASE_KEY.toNumber(),
-      PERLIN_MIRROR_X,
-      PERLIN_MIRROR_Y,
-      PERLIN_LENGTH_SCALE: PERLIN_LENGTH_SCALE.toNumber(),
+    // const constants: ContractConstants = {
+    //   //SnarkConstants
+    //   DISABLE_ZK_CHECKS,
+    //   PLANETHASH_KEY: PLANETHASH_KEY.toNumber(),
+    //   SPACETYPE_KEY: SPACETYPE_KEY.toNumber(),
+    //   BIOMEBASE_KEY: BIOMEBASE_KEY.toNumber(),
+    //   PERLIN_MIRROR_X,
+    //   PERLIN_MIRROR_Y,
+    //   PERLIN_LENGTH_SCALE: PERLIN_LENGTH_SCALE.toNumber(),
 
-      //GameConstants
-      ADMIN_CAN_ADD_PLANETS,
-      WORLD_RADIUS_LOCKED,
-      WORLD_RADIUS_MIN: WORLD_RADIUS_MIN.toNumber(),
-      MAX_NATURAL_PLANET_LEVEL: MAX_NATURAL_PLANET_LEVEL.toNumber(),
-      MAX_ARTIFACT_PER_PLANET: MAX_ARTIFACT_PER_PLANET.toNumber(),
-      MAX_SENDING_PLANET: MAX_SENDING_PLANET.toNumber(),
-      MAX_RECEIVING_PLANET: MAX_RECEIVING_PLANET.toNumber(),
-      TIME_FACTOR_HUNDREDTHS: TIME_FACTOR_HUNDREDTHS.toNumber(),
+    //   //GameConstants
+    //   ADMIN_CAN_ADD_PLANETS,
+    //   WORLD_RADIUS_LOCKED,
+    //   WORLD_RADIUS_MIN: WORLD_RADIUS_MIN.toNumber(),
+    //   MAX_NATURAL_PLANET_LEVEL: MAX_NATURAL_PLANET_LEVEL.toNumber(),
+    //   MAX_ARTIFACT_PER_PLANET: MAX_ARTIFACT_PER_PLANET.toNumber(),
+    //   MAX_SENDING_PLANET: MAX_SENDING_PLANET.toNumber(),
+    //   MAX_RECEIVING_PLANET: MAX_RECEIVING_PLANET.toNumber(),
+    //   TIME_FACTOR_HUNDREDTHS: TIME_FACTOR_HUNDREDTHS.toNumber(),
 
-      PERLIN_THRESHOLD_1: PERLIN_THRESHOLD_1.toNumber(),
-      PERLIN_THRESHOLD_2: PERLIN_THRESHOLD_2.toNumber(),
-      PERLIN_THRESHOLD_3: PERLIN_THRESHOLD_3.toNumber(),
-      INIT_PERLIN_MIN: INIT_PERLIN_MIN.toNumber(),
-      INIT_PERLIN_MAX: INIT_PERLIN_MAX.toNumber(),
-      SPAWN_RIM_AREA: SPAWN_RIM_AREA.toNumber(),
-      BIOME_THRESHOLD_1: BIOME_THRESHOLD_1.toNumber(),
-      BIOME_THRESHOLD_2: BIOME_THRESHOLD_2.toNumber(),
-      PLANET_LEVEL_THRESHOLDS: [
-        PLANET_LEVEL_THRESHOLDS[0].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[1].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[2].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[3].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[4].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[5].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[6].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[7].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[8].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[9].toNumber(),
-      ],
+    //   PERLIN_THRESHOLD_1: PERLIN_THRESHOLD_1.toNumber(),
+    //   PERLIN_THRESHOLD_2: PERLIN_THRESHOLD_2.toNumber(),
+    //   PERLIN_THRESHOLD_3: PERLIN_THRESHOLD_3.toNumber(),
+    //   INIT_PERLIN_MIN: INIT_PERLIN_MIN.toNumber(),
+    //   INIT_PERLIN_MAX: INIT_PERLIN_MAX.toNumber(),
+    //   SPAWN_RIM_AREA: SPAWN_RIM_AREA.toNumber(),
+    //   BIOME_THRESHOLD_1: BIOME_THRESHOLD_1.toNumber(),
+    //   BIOME_THRESHOLD_2: BIOME_THRESHOLD_2.toNumber(),
+    //   PLANET_LEVEL_THRESHOLDS: [
+    //     PLANET_LEVEL_THRESHOLDS[0].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[1].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[2].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[3].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[4].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[5].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[6].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[7].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[8].toNumber(),
+    //     PLANET_LEVEL_THRESHOLDS[9].toNumber(),
+    //   ],
 
-      PLANET_RARITY: PLANET_RARITY.toNumber(),
-      PLANET_TRANSFER_ENABLED,
+    //   PLANET_RARITY: PLANET_RARITY.toNumber(),
+    //   PLANET_TRANSFER_ENABLED,
 
-      PHOTOID_ACTIVATION_DELAY: PHOTOID_ACTIVATION_DELAY.toNumber(),
-      STELLAR_ACTIVATION_DELAY: STELLAR_ACTIVATION_DELAY.toNumber(),
-      LOCATION_REVEAL_COOLDOWN: LOCATION_REVEAL_COOLDOWN.toNumber(),
-      CLAIM_PLANET_COOLDOWN: CLAIM_PLANET_COOLDOWN.toNumber(),
-      PLANET_TYPE_WEIGHTS,
-      SILVER_SCORE_VALUE: SILVER_SCORE_VALUE.toNumber(),
-      ARTIFACT_POINT_VALUES: ARTIFACT_POINT_VALUES_decoded,
-      SPACE_JUNK_ENABLED,
-      SPACE_JUNK_LIMIT: SPACE_JUNK_LIMIT.toNumber(),
-      PLANET_LEVEL_JUNK: [
-        PLANET_LEVEL_JUNK[0].toNumber(),
-        PLANET_LEVEL_JUNK[1].toNumber(),
-        PLANET_LEVEL_JUNK[2].toNumber(),
-        PLANET_LEVEL_JUNK[3].toNumber(),
-        PLANET_LEVEL_JUNK[4].toNumber(),
-        PLANET_LEVEL_JUNK[5].toNumber(),
-        PLANET_LEVEL_JUNK[6].toNumber(),
-        PLANET_LEVEL_JUNK[7].toNumber(),
-        PLANET_LEVEL_JUNK[8].toNumber(),
-        PLANET_LEVEL_JUNK[9].toNumber(),
-      ],
+    //   PHOTOID_ACTIVATION_DELAY: PHOTOID_ACTIVATION_DELAY.toNumber(),
+    //   STELLAR_ACTIVATION_DELAY: STELLAR_ACTIVATION_DELAY.toNumber(),
+    //   LOCATION_REVEAL_COOLDOWN: LOCATION_REVEAL_COOLDOWN.toNumber(),
+    //   CLAIM_PLANET_COOLDOWN: CLAIM_PLANET_COOLDOWN.toNumber(),
+    //   PLANET_TYPE_WEIGHTS,
+    //   SILVER_SCORE_VALUE: SILVER_SCORE_VALUE.toNumber(),
+    //   ARTIFACT_POINT_VALUES: ARTIFACT_POINT_VALUES_decoded,
+    //   SPACE_JUNK_ENABLED,
+    //   SPACE_JUNK_LIMIT: SPACE_JUNK_LIMIT.toNumber(),
+    //   PLANET_LEVEL_JUNK: [
+    //     PLANET_LEVEL_JUNK[0].toNumber(),
+    //     PLANET_LEVEL_JUNK[1].toNumber(),
+    //     PLANET_LEVEL_JUNK[2].toNumber(),
+    //     PLANET_LEVEL_JUNK[3].toNumber(),
+    //     PLANET_LEVEL_JUNK[4].toNumber(),
+    //     PLANET_LEVEL_JUNK[5].toNumber(),
+    //     PLANET_LEVEL_JUNK[6].toNumber(),
+    //     PLANET_LEVEL_JUNK[7].toNumber(),
+    //     PLANET_LEVEL_JUNK[8].toNumber(),
+    //     PLANET_LEVEL_JUNK[9].toNumber(),
+    //   ],
 
-      ABANDON_SPEED_CHANGE_PERCENT: ABANDON_RANGE_CHANGE_PERCENT.toNumber(),
-      ABANDON_RANGE_CHANGE_PERCENT: ABANDON_SPEED_CHANGE_PERCENT.toNumber(),
+    //   ABANDON_SPEED_CHANGE_PERCENT: ABANDON_RANGE_CHANGE_PERCENT.toNumber(),
+    //   ABANDON_RANGE_CHANGE_PERCENT: ABANDON_SPEED_CHANGE_PERCENT.toNumber(),
 
-      // Capture Zones
-      GAME_START_BLOCK: GAME_START_BLOCK.toNumber(),
-      CAPTURE_ZONES_ENABLED,
-      CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL:
-        CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL.toNumber(),
-      CAPTURE_ZONE_RADIUS: CAPTURE_ZONE_RADIUS.toNumber(),
-      CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[0].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[1].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[2].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[3].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[4].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[5].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[6].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[7].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[8].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[9].toNumber(),
-      ],
-      CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED:
-        CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED.toNumber(),
-      CAPTURE_ZONES_PER_5000_WORLD_RADIUS:
-        CAPTURE_ZONES_PER_5000_WORLD_RADIUS.toNumber(),
-      SPACESHIPS: SPACESHIPS,
-      ROUND_END_REWARDS_BY_RANK: [
-        ROUND_END_REWARDS_BY_RANK[0].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[1].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[2].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[3].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[4].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[5].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[6].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[7].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[8].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[9].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[10].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[11].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[12].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[13].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[14].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[15].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[16].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[17].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[18].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[19].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[20].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[21].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[22].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[23].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[24].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[25].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[26].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[27].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[28].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[29].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[30].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[31].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[32].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[33].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[34].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[35].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[36].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[37].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[38].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[39].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[40].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[41].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[42].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[43].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[44].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[45].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[46].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[47].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[48].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[49].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[50].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[51].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[52].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[53].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[54].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[55].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[56].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[57].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[58].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[59].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[60].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[61].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[62].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[63].toNumber(),
-      ],
+    //   // Capture Zones
+    //   GAME_START_BLOCK: GAME_START_BLOCK.toNumber(),
+    //   CAPTURE_ZONES_ENABLED,
+    //   CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL:
+    //     CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL.toNumber(),
+    //   CAPTURE_ZONE_RADIUS: CAPTURE_ZONE_RADIUS.toNumber(),
+    //   CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[0].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[1].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[2].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[3].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[4].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[5].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[6].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[7].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[8].toNumber(),
+    //     CAPTURE_ZONE_PLANET_LEVEL_SCORE[9].toNumber(),
+    //   ],
+    //   CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED:
+    //     CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED.toNumber(),
+    //   CAPTURE_ZONES_PER_5000_WORLD_RADIUS:
+    //     CAPTURE_ZONES_PER_5000_WORLD_RADIUS.toNumber(),
+    //   SPACESHIPS: SPACESHIPS,
+    //   ROUND_END_REWARDS_BY_RANK: [
+    //     ROUND_END_REWARDS_BY_RANK[0].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[1].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[2].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[3].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[4].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[5].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[6].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[7].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[8].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[9].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[10].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[11].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[12].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[13].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[14].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[15].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[16].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[17].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[18].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[19].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[20].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[21].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[22].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[23].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[24].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[25].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[26].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[27].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[28].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[29].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[30].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[31].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[32].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[33].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[34].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[35].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[36].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[37].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[38].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[39].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[40].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[41].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[42].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[43].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[44].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[45].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[46].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[47].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[48].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[49].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[50].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[51].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[52].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[53].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[54].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[55].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[56].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[57].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[58].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[59].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[60].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[61].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[62].toNumber(),
+    //     ROUND_END_REWARDS_BY_RANK[63].toNumber(),
+    //   ],
 
-      TOKEN_MINT_END_TIMESTAMP: TOKEN_MINT_END_TIMESTAMP.toNumber(),
-      CLAIM_END_TIMESTAMP: CLAIM_END_TIMESTAMP.toNumber(),
+    //   TOKEN_MINT_END_TIMESTAMP: TOKEN_MINT_END_TIMESTAMP.toNumber(),
+    //   CLAIM_END_TIMESTAMP: CLAIM_END_TIMESTAMP.toNumber(),
 
-      defaultPopulationCap: planetDefaults.populationCap,
-      defaultPopulationGrowth: planetDefaults.populationGrowth,
-      defaultRange: planetDefaults.range,
-      defaultSpeed: planetDefaults.speed,
-      defaultDefense: planetDefaults.defense,
-      defaultSilverGrowth: planetDefaults.silverGrowth,
-      defaultSilverCap: planetDefaults.silverCap,
-      defaultBarbarianPercentage: planetDefaults.barbarianPercentage,
-      planetCumulativeRarities,
-      upgrades,
-      adminAddress,
+    //   defaultPopulationCap: planetDefaults.populationCap,
+    //   defaultPopulationGrowth: planetDefaults.populationGrowth,
+    //   defaultRange: planetDefaults.range,
+    //   defaultSpeed: planetDefaults.speed,
+    //   defaultDefense: planetDefaults.defense,
+    //   defaultSilverGrowth: planetDefaults.silverGrowth,
+    //   defaultSilverCap: planetDefaults.silverCap,
+    //   defaultBarbarianPercentage: planetDefaults.barbarianPercentage,
+    //   planetCumulativeRarities,
+    //   upgrades,
+    //   adminAddress,
 
-      BURN_END_TIMESTAMP: BURN_END_TIMESTAMP.toNumber(),
-      BURN_PLANET_COOLDOWN: BURN_PLANET_COOLDOWN.toNumber(),
-      PINK_PLANET_COOLDOWN: PINK_PLANET_COOLDOWN.toNumber(),
-      ACTIVATE_ARTIFACT_COOLDOWN: ACTIVATE_ARTIFACT_COOLDOWN.toNumber(),
-      BUY_ARTIFACT_COOLDOWN: BUY_ARTIFACT_COOLDOWN.toNumber(),
-      BURN_PLANET_LEVEL_EFFECT_RADIUS: [
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[0].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[1].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[2].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[3].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[4].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[5].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[6].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[7].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[8].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[9].toNumber(),
-      ],
-      BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
-      ],
+    //   BURN_END_TIMESTAMP: BURN_END_TIMESTAMP.toNumber(),
+    //   BURN_PLANET_COOLDOWN: BURN_PLANET_COOLDOWN.toNumber(),
+    //   PINK_PLANET_COOLDOWN: PINK_PLANET_COOLDOWN.toNumber(),
+    //   ACTIVATE_ARTIFACT_COOLDOWN: ACTIVATE_ARTIFACT_COOLDOWN.toNumber(),
+    //   BUY_ARTIFACT_COOLDOWN: BUY_ARTIFACT_COOLDOWN.toNumber(),
+    //   BURN_PLANET_LEVEL_EFFECT_RADIUS: [
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[0].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[1].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[2].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[3].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[4].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[5].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[6].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[7].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[8].toNumber(),
+    //     BURN_PLANET_LEVEL_EFFECT_RADIUS[9].toNumber(),
+    //   ],
+    //   BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
+    //     BURN_PLANET_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
+    //   ],
 
-      MAX_LEVEL_DIST: [
-        MAX_LEVEL_DIST[0].toNumber(),
-        MAX_LEVEL_DIST[1].toNumber(),
-        MAX_LEVEL_DIST[2].toNumber(),
-        MAX_LEVEL_DIST[3].toNumber(),
-        MAX_LEVEL_DIST[4].toNumber(),
-      ],
-      MAX_LEVEL_LIMIT: [
-        MAX_LEVEL_LIMIT[0].toNumber(),
-        MAX_LEVEL_LIMIT[1].toNumber(),
-        MAX_LEVEL_LIMIT[2].toNumber(),
-        MAX_LEVEL_LIMIT[3].toNumber(),
-        MAX_LEVEL_LIMIT[4].toNumber(),
-        MAX_LEVEL_LIMIT[5].toNumber(),
-      ],
-      MIN_LEVEL_BIAS: [
-        MIN_LEVEL_BIAS[0].toNumber(),
-        MIN_LEVEL_BIAS[1].toNumber(),
-        MIN_LEVEL_BIAS[2].toNumber(),
-        MIN_LEVEL_BIAS[3].toNumber(),
-        MIN_LEVEL_BIAS[4].toNumber(),
-        MIN_LEVEL_BIAS[5].toNumber(),
-      ],
+    //   MAX_LEVEL_DIST: [
+    //     MAX_LEVEL_DIST[0].toNumber(),
+    //     MAX_LEVEL_DIST[1].toNumber(),
+    //     MAX_LEVEL_DIST[2].toNumber(),
+    //     MAX_LEVEL_DIST[3].toNumber(),
+    //     MAX_LEVEL_DIST[4].toNumber(),
+    //   ],
+    //   MAX_LEVEL_LIMIT: [
+    //     MAX_LEVEL_LIMIT[0].toNumber(),
+    //     MAX_LEVEL_LIMIT[1].toNumber(),
+    //     MAX_LEVEL_LIMIT[2].toNumber(),
+    //     MAX_LEVEL_LIMIT[3].toNumber(),
+    //     MAX_LEVEL_LIMIT[4].toNumber(),
+    //     MAX_LEVEL_LIMIT[5].toNumber(),
+    //   ],
+    //   MIN_LEVEL_BIAS: [
+    //     MIN_LEVEL_BIAS[0].toNumber(),
+    //     MIN_LEVEL_BIAS[1].toNumber(),
+    //     MIN_LEVEL_BIAS[2].toNumber(),
+    //     MIN_LEVEL_BIAS[3].toNumber(),
+    //     MIN_LEVEL_BIAS[4].toNumber(),
+    //     MIN_LEVEL_BIAS[5].toNumber(),
+    //   ],
 
-      ENTRY_FEE: ENTRY_FEE.toNumber(),
-      KARDASHEV_END_TIMESTAMP: KARDASHEV_END_TIMESTAMP.toNumber(),
-      KARDASHEV_PLANET_COOLDOWN: KARDASHEV_PLANET_COOLDOWN.toNumber(),
-      BLUE_PLANET_COOLDOWN: BLUE_PLANET_COOLDOWN.toNumber(),
-      KARDASHEV_EFFECT_RADIUS: [
-        KARDASHEV_EFFECT_RADIUS[0].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[1].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[2].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[3].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[4].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[5].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[6].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[7].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[8].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[9].toNumber(),
-      ],
-      KARDASHEV_REQUIRE_SILVER_AMOUNTS: [
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
-      ],
-      BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
-      ],
-    };
-    // console.log(constants);
-    return constants;
+    //   ENTRY_FEE: ENTRY_FEE.toNumber(),
+    //   KARDASHEV_END_TIMESTAMP: KARDASHEV_END_TIMESTAMP.toNumber(),
+    //   KARDASHEV_PLANET_COOLDOWN: KARDASHEV_PLANET_COOLDOWN.toNumber(),
+    //   BLUE_PLANET_COOLDOWN: BLUE_PLANET_COOLDOWN.toNumber(),
+    //   KARDASHEV_EFFECT_RADIUS: [
+    //     KARDASHEV_EFFECT_RADIUS[0].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[1].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[2].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[3].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[4].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[5].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[6].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[7].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[8].toNumber(),
+    //     KARDASHEV_EFFECT_RADIUS[9].toNumber(),
+    //   ],
+    //   KARDASHEV_REQUIRE_SILVER_AMOUNTS: [
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
+    //     KARDASHEV_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
+    //   ],
+    //   BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
+    //     BLUE_PANET_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
+    //   ],
+    // };
+    // // console.log(constants);
+    // return constants;
+
+    return {} as ContractConstants;
   }
 
+  // TODO: Fix getPlayers code
   public async getPlayers(
-    onProgress?: (fractionCompleted: number) => void,
+    _onProgress?: (fractionCompleted: number) => void,
   ): Promise<Map<string, Player>> {
-    const nPlayers: number = (
-      await this.makeCall<EthersBN>(this.contract.getNPlayers)
-    ).toNumber();
+    // const nPlayers: number = (
+    //   await this.makeCall<EthersBN>(this.contract.getNPlayers)
+    // ).toNumber();
 
-    const players = await aggregateBulkGetter<Player>(
-      nPlayers,
-      200,
-      async (start, end) =>
-        (await this.makeCall(this.contract.bulkGetPlayers, [start, end])).map(
-          decodePlayer,
-        ),
-      onProgress,
-    );
+    // const players = await aggregateBulkGetter<Player>(
+    //   nPlayers,
+    //   200,
+    //   async (start, end) =>
+    //     (await this.makeCall(this.contract.bulkGetPlayers, [start, end])).map(
+    //       decodePlayer,
+    //     ),
+    //   onProgress,
+    // );
 
-    const lastClaimTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastClaimTimestamp, [start, end]),
-    );
-    const playerLastClaimTimestampMap = lastClaimTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastClaimTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
+    // const lastClaimTimestamps = await aggregateBulkGetter(
+    //   nPlayers,
+    //   5,
+    //   async (start: number, end: number) =>
+    //     this.makeCall(this.contract.bulkGetLastClaimTimestamp, [start, end]),
+    // );
+    // const playerLastClaimTimestampMap = lastClaimTimestamps.reduce(
+    //   (acc, pair): Map<string, EthersBN> => {
+    //     acc.set(pair.player.toLowerCase(), pair.lastClaimTimestamp);
+    //     return acc;
+    //   },
+    //   new Map<string, EthersBN>(),
+    // );
 
-    const lastBurnTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastBurnTimestamp, [start, end]),
-    );
+    // const lastBurnTimestamps = await aggregateBulkGetter(
+    //   nPlayers,
+    //   5,
+    //   async (start: number, end: number) =>
+    //     this.makeCall(this.contract.bulkGetLastBurnTimestamp, [start, end]),
+    // );
 
-    const playerLastBurnTimestampMap = lastBurnTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastBurnTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
+    // const playerLastBurnTimestampMap = lastBurnTimestamps.reduce(
+    //   (acc, pair): Map<string, EthersBN> => {
+    //     acc.set(pair.player.toLowerCase(), pair.lastBurnTimestamp);
+    //     return acc;
+    //   },
+    //   new Map<string, EthersBN>(),
+    // );
 
-    const lastKardashevTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastKardashevTimestamp, [
-          start,
-          end,
-        ]),
-    );
+    // const lastKardashevTimestamps = await aggregateBulkGetter(
+    //   nPlayers,
+    //   5,
+    //   async (start: number, end: number) =>
+    //     this.makeCall(this.contract.bulkGetLastKardashevTimestamp, [
+    //       start,
+    //       end,
+    //     ]),
+    // );
 
-    const playerLastKardashevTimestampMap = lastKardashevTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastKardashevTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
+    // const playerLastKardashevTimestampMap = lastKardashevTimestamps.reduce(
+    //   (acc, pair): Map<string, EthersBN> => {
+    //     acc.set(pair.player.toLowerCase(), pair.lastKardashevTimestamp);
+    //     return acc;
+    //   },
+    //   new Map<string, EthersBN>(),
+    // );
 
-    const lastActivateArtifactTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastActivateArtifactTimestamp, [
-          start,
-          end,
-        ]),
-    );
-    const playerLastActivateArtifactTimestampsMap =
-      lastActivateArtifactTimestamps.reduce(
-        (acc, pair): Map<string, EthersBN> => {
-          acc.set(
-            pair.player.toLowerCase(),
-            pair.lastActivateArtifactTimestamp,
-          );
-          return acc;
-        },
-        new Map<string, EthersBN>(),
-      );
+    // const lastActivateArtifactTimestamps = await aggregateBulkGetter(
+    //   nPlayers,
+    //   5,
+    //   async (start: number, end: number) =>
+    //     this.makeCall(this.contract.bulkGetLastActivateArtifactTimestamp, [
+    //       start,
+    //       end,
+    //     ]),
+    // );
+    // const playerLastActivateArtifactTimestampsMap =
+    //   lastActivateArtifactTimestamps.reduce(
+    //     (acc, pair): Map<string, EthersBN> => {
+    //       acc.set(
+    //         pair.player.toLowerCase(),
+    //         pair.lastActivateArtifactTimestamp,
+    //       );
+    //       return acc;
+    //     },
+    //     new Map<string, EthersBN>(),
+    //   );
 
-    const lastBuyArtifactTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastBuyArtifactTimestamp, [
-          start,
-          end,
-        ]),
-    );
-    const playerLastBuyArtifactTimestampsMap = lastBuyArtifactTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastBuyArtifactTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
+    // const lastBuyArtifactTimestamps = await aggregateBulkGetter(
+    //   nPlayers,
+    //   5,
+    //   async (start: number, end: number) =>
+    //     this.makeCall(this.contract.bulkGetLastBuyArtifactTimestamp, [
+    //       start,
+    //       end,
+    //     ]),
+    // );
+    // const playerLastBuyArtifactTimestampsMap = lastBuyArtifactTimestamps.reduce(
+    //   (acc, pair): Map<string, EthersBN> => {
+    //     acc.set(pair.player.toLowerCase(), pair.lastBuyArtifactTimestamp);
+    //     return acc;
+    //   },
+    //   new Map<string, EthersBN>(),
+    // );
 
     const playerMap: Map<EthAddress, Player> = new Map();
 
-    for (const player of players) {
-      player.lastClaimTimestamp =
-        playerLastClaimTimestampMap.get(player.address)?.toNumber() || 0;
-      player.lastBurnTimestamp =
-        playerLastBurnTimestampMap.get(player.address)?.toNumber() || 0;
-      player.lastKardashevTimestamp =
-        playerLastKardashevTimestampMap.get(player.address)?.toNumber() || 0;
+    // for (const player of players) {
+    //   player.lastClaimTimestamp =
+    //     playerLastClaimTimestampMap.get(player.address)?.toNumber() || 0;
+    //   player.lastBurnTimestamp =
+    //     playerLastBurnTimestampMap.get(player.address)?.toNumber() || 0;
+    //   player.lastKardashevTimestamp =
+    //     playerLastKardashevTimestampMap.get(player.address)?.toNumber() || 0;
 
-      player.lastActivateArtifactTimestamp =
-        playerLastActivateArtifactTimestampsMap
-          .get(player.address)
-          ?.toNumber() || 0;
-      player.lastBuyArtifactTimestamp =
-        playerLastBuyArtifactTimestampsMap.get(player.address)?.toNumber() || 0;
+    //   player.lastActivateArtifactTimestamp =
+    //     playerLastActivateArtifactTimestampsMap
+    //       .get(player.address)
+    //       ?.toNumber() || 0;
+    //   player.lastBuyArtifactTimestamp =
+    //     playerLastBuyArtifactTimestampsMap.get(player.address)?.toNumber() || 0;
 
-      playerMap.set(player.address, player);
-    }
+    //   playerMap.set(player.address, player);
+    // }
 
     return playerMap;
   }
 
+  // TODO: Fix getPlayerById
   public async getPlayerById(
-    playerId: EthAddress,
+    _playerId: EthAddress,
   ): Promise<Player | undefined> {
-    const rawPlayer = await this.makeCall(this.contract.players, [playerId]);
-    const lastClaimedTimestamp = await this.makeCall(
-      this.contract.getLastClaimTimestamp,
-      [playerId],
-    );
+    // const rawPlayer = await this.makeCall(this.contract.players, [playerId]);
+    // const lastClaimedTimestamp = await this.makeCall(
+    //   this.contract.getLastClaimTimestamp,
+    //   [playerId],
+    // );
 
-    const lastBurnTimestamp = await this.makeCall(
-      this.contract.getLastBurnTimestamp,
-      [playerId],
-    );
-    const lastKardashevTimestamp = await this.makeCall(
-      this.contract.getLastKardashevTimestamp,
-      [playerId],
-    );
-    const lastActivateArtifactTimestamp = await this.makeCall(
-      this.contract.getLastActivateArtifactTimestamp,
-      [playerId],
-    );
+    // const lastBurnTimestamp = await this.makeCall(
+    //   this.contract.getLastBurnTimestamp,
+    //   [playerId],
+    // );
+    // const lastKardashevTimestamp = await this.makeCall(
+    //   this.contract.getLastKardashevTimestamp,
+    //   [playerId],
+    // );
+    // const lastActivateArtifactTimestamp = await this.makeCall(
+    //   this.contract.getLastActivateArtifactTimestamp,
+    //   [playerId],
+    // );
 
-    const lastBuyArtifactTimestamp = await this.makeCall(
-      this.contract.getLastBuyArtifactTimestamp,
-      [playerId],
-    );
+    // const lastBuyArtifactTimestamp = await this.makeCall(
+    //   this.contract.getLastBuyArtifactTimestamp,
+    //   [playerId],
+    // );
 
-    const scoreFromBlockchain = await this.getScoreV3(playerId);
-    if (!rawPlayer.isInitialized) {
-      return undefined;
-    }
+    // const scoreFromBlockchain = await this.getScoreV3(playerId);
+    // if (!rawPlayer.isInitialized) {
+    //   return undefined;
+    // }
 
-    const player = decodePlayer(rawPlayer);
-    player.lastClaimTimestamp = lastClaimedTimestamp.toNumber();
-    player.lastBurnTimestamp = lastBurnTimestamp.toNumber();
-    player.lastKardashevTimestamp = lastKardashevTimestamp.toNumber();
-    player.lastActivateArtifactTimestamp =
-      lastActivateArtifactTimestamp.toNumber();
-    player.lastBuyArtifactTimestamp = lastBuyArtifactTimestamp.toNumber();
+    // const player = decodePlayer(rawPlayer);
+    // player.lastClaimTimestamp = lastClaimedTimestamp.toNumber();
+    // player.lastBurnTimestamp = lastBurnTimestamp.toNumber();
+    // player.lastKardashevTimestamp = lastKardashevTimestamp.toNumber();
+    // player.lastActivateArtifactTimestamp =
+    //   lastActivateArtifactTimestamp.toNumber();
+    // player.lastBuyArtifactTimestamp = lastBuyArtifactTimestamp.toNumber();
 
-    player.score = scoreFromBlockchain;
-    return player;
+    // player.score = scoreFromBlockchain;
+    // return player;
+
+    return undefined;
   }
 
   public async getWorldRadius(): Promise<number> {
@@ -1206,45 +1217,51 @@ export class ContractsAPI extends EventEmitter {
     return timestamp;
   }
 
+  // TODO: Fix getArrival
   public async getArrival(
-    arrivalId: number,
+    _arrivalId: number,
   ): Promise<QueuedArrival | undefined> {
-    const rawArrival = await this.makeCall(this.contract.planetArrivals, [
-      arrivalId,
-    ]);
-    return decodeArrival(rawArrival);
+    // const rawArrival = await this.makeCall(this.contract.planetArrivals, [
+    //   arrivalId,
+    // ]);
+    // return decodeArrival(rawArrival);
+    return undefined;
   }
 
+  // TODO: Fix getArrivalsForPlanet
   public async getArrivalsForPlanet(
-    planetId: LocationId,
+    _planetId: LocationId,
   ): Promise<QueuedArrival[]> {
-    const events = (
-      await this.makeCall(this.contract.getPlanetArrivals, [
-        locationIdToDecStr(planetId),
-      ])
-    ).map(decodeArrival);
+    // const events = (
+    //   await this.makeCall(this.contract.getPlanetArrivals, [
+    //     locationIdToDecStr(planetId),
+    //   ])
+    // ).map(decodeArrival);
 
-    return events;
+    // return events;
+    return [];
   }
 
+  // TODO: Fix getAllArrivals
   public async getAllArrivals(
-    planetsToLoad: LocationId[],
-    onProgress?: (fractionCompleted: number) => void,
+    _planetsToLoad: LocationId[],
+    _onProgress?: (fractionCompleted: number) => void,
   ): Promise<QueuedArrival[]> {
-    const arrivalsUnflattened = await aggregateBulkGetter<QueuedArrival[]>(
-      planetsToLoad.length,
-      200,
-      async (start, end) => {
-        return (
-          await this.makeCall(this.contract.bulkGetPlanetArrivalsByIds, [
-            planetsToLoad.slice(start, end).map(locationIdToDecStr),
-          ])
-        ).map((arrivals) => arrivals.map(decodeArrival));
-      },
-      onProgress,
-    );
+    // const arrivalsUnflattened = await aggregateBulkGetter<QueuedArrival[]>(
+    //   planetsToLoad.length,
+    //   200,
+    //   async (start, end) => {
+    //     return (
+    //       await this.makeCall(this.contract.bulkGetPlanetArrivalsByIds, [
+    //         planetsToLoad.slice(start, end).map(locationIdToDecStr),
+    //       ])
+    //     ).map((arrivals) => arrivals.map(decodeArrival));
+    //   },
+    //   onProgress,
+    // );
+    // return flatten(arrivalsUnflattened);
 
-    return flatten(arrivalsUnflattened);
+    return [];
   }
 
   public async getTouchedPlanetIds(
@@ -1268,19 +1285,22 @@ export class ContractsAPI extends EventEmitter {
     return planetIds.map(locationIdFromEthersBN);
   }
 
+  // TODO: Fix getRevealedCoordsByIdIfExists
   public async getRevealedCoordsByIdIfExists(
-    planetId: LocationId,
+    _planetId: LocationId,
   ): Promise<RevealedCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawRevealedCoords = await this.makeCall(
-      this.contract.revealedCoords,
-      [decStrId],
-    );
-    const ret = decodeRevealedCoords(rawRevealedCoords);
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
+    // const decStrId = locationIdToDecStr(planetId);
+    // const rawRevealedCoords = await this.makeCall(
+    //   this.contract.revealedCoords,
+    //   [decStrId],
+    // );
+    // const ret = decodeRevealedCoords(rawRevealedCoords);
+    // if (ret.hash === EMPTY_LOCATION_ID) {
+    //   return undefined;
+    // }
+    // return ret;
+
+    return undefined;
   }
 
   public async getIsPaused(): Promise<boolean> {
@@ -1291,289 +1311,306 @@ export class ContractsAPI extends EventEmitter {
     return this.makeCall(this.contract.halfPrice);
   }
 
+  // TODO: Fix getRevealedPlanetsCoords
   public async getRevealedPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
+    _startingAt: number,
+    _onProgressIds?: (fractionCompleted: number) => void,
+    _onProgressCoords?: (fractionCompleted: number) => void,
   ): Promise<RevealedCoords[]> {
-    const nRevealedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNRevealedPlanets)
-    ).toNumber();
+    // const nRevealedPlanets: number = (
+    //   await this.makeCall<EthersBN>(this.contract.getNRevealedPlanets)
+    // ).toNumber();
+    // const rawRevealedPlanetIds = await aggregateBulkGetter<EthersBN>(
+    //   nRevealedPlanets - startingAt,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetRevealedPlanetIds, [
+    //       start + startingAt,
+    //       end + startingAt,
+    //     ]),
+    //   onProgressIds,
+    // );
+    // const rawRevealedCoords = await aggregateBulkGetter(
+    //   rawRevealedPlanetIds.length,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetRevealedCoordsByIds, [
+    //       rawRevealedPlanetIds.slice(start, end),
+    //     ]),
+    //   onProgressCoords,
+    // );
+    // return rawRevealedCoords.map(decodeRevealedCoords);
 
-    const rawRevealedPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nRevealedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetRevealedPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawRevealedCoords = await aggregateBulkGetter(
-      rawRevealedPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetRevealedCoordsByIds, [
-          rawRevealedPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawRevealedCoords.map(decodeRevealedCoords);
+    return Promise.resolve([]);
   }
 
+  // TODO: Fix getClaimedCoordsByIdIfExists
   public async getClaimedCoordsByIdIfExists(
-    planetId: LocationId,
+    _planetId: LocationId,
   ): Promise<ClaimedCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawClaimedCoords = await this.makeCall(this.contract.claimedCoords, [
-      decStrId,
-    ]);
-    const ret = decodeClaimedCoords(rawClaimedCoords);
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
+    // const decStrId = locationIdToDecStr(planetId);
+    // const rawClaimedCoords = await this.makeCall(this.contract.claimedCoords, [
+    //   decStrId,
+    // ]);
+    // const ret = decodeClaimedCoords(rawClaimedCoords);
+    // if (ret.hash === EMPTY_LOCATION_ID) {
+    //   return undefined;
+    // }
+    // return ret;
+    return undefined;
   }
 
+  // TODO: Fix getClaimedPlanetsCoords
   public async getClaimedPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
+    _startingAt: number,
+    _onProgressIds?: (fractionCompleted: number) => void,
+    _onProgressCoords?: (fractionCompleted: number) => void,
   ): Promise<ClaimedCoords[]> {
-    const nClaimedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNClaimedPlanets)
-    ).toNumber();
+    // const nClaimedPlanets: number = (
+    //   await this.makeCall<EthersBN>(this.contract.getNClaimedPlanets)
+    // ).toNumber();
 
-    const rawClaimedPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nClaimedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetClaimedPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
+    // const rawClaimedPlanetIds = await aggregateBulkGetter<EthersBN>(
+    //   nClaimedPlanets - startingAt,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetClaimedPlanetIds, [
+    //       start + startingAt,
+    //       end + startingAt,
+    //     ]),
+    //   onProgressIds,
+    // );
 
-    const rawClaimedCoords = await aggregateBulkGetter(
-      rawClaimedPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetClaimedCoordsByIds, [
-          rawClaimedPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
+    // const rawClaimedCoords = await aggregateBulkGetter(
+    //   rawClaimedPlanetIds.length,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetClaimedCoordsByIds, [
+    //       rawClaimedPlanetIds.slice(start, end),
+    //     ]),
+    //   onProgressCoords,
+    // );
 
-    return rawClaimedCoords.map(decodeClaimedCoords);
+    // return rawClaimedCoords.map(decodeClaimedCoords);
+    return [];
   }
 
+  // TODO: Fix getBurnedCoordsByIdIfExists
   public async getBurnedCoordsByIdIfExists(
-    planetId: LocationId,
+    _planetId: LocationId,
   ): Promise<BurnedCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawBurnedCoords = await this.makeCall(this.contract.burnedCoords, [
-      decStrId,
-    ]);
-    const ret = decodeBurnedCoords(rawBurnedCoords);
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
+    // const decStrId = locationIdToDecStr(planetId);
+    // const rawBurnedCoords = await this.makeCall(this.contract.burnedCoords, [
+    //   decStrId,
+    // ]);
+    // const ret = decodeBurnedCoords(rawBurnedCoords);
+    // if (ret.hash === EMPTY_LOCATION_ID) {
+    //   return undefined;
+    // }
+    // return ret;
+    return undefined;
   }
 
+  // TODO: Fix getBurnedPlanetsCoords
   public async getBurnedPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
+    _startingAt: number,
+    _onProgressIds?: (fractionCompleted: number) => void,
+    _onProgressCoords?: (fractionCompleted: number) => void,
   ): Promise<BurnedCoords[]> {
-    const nBurnedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNBurnedPlanets)
-    ).toNumber();
-
-    const rawBurnedPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nBurnedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetBurnedPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawBurnedCoords = await aggregateBulkGetter(
-      rawBurnedPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetBurnedCoordsByIds, [
-          rawBurnedPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawBurnedCoords.map(decodeBurnedCoords);
+    // const nBurnedPlanets: number = (
+    //   await this.makeCall<EthersBN>(this.contract.getNBurnedPlanets)
+    // ).toNumber();
+    // const rawBurnedPlanetIds = await aggregateBulkGetter<EthersBN>(
+    //   nBurnedPlanets - startingAt,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetBurnedPlanetIds, [
+    //       start + startingAt,
+    //       end + startingAt,
+    //     ]),
+    //   onProgressIds,
+    // );
+    // const rawBurnedCoords = await aggregateBulkGetter(
+    //   rawBurnedPlanetIds.length,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetBurnedCoordsByIds, [
+    //       rawBurnedPlanetIds.slice(start, end),
+    //     ]),
+    //   onProgressCoords,
+    // );
+    // return rawBurnedCoords.map(decodeBurnedCoords);
+    return [];
   }
 
+  // TODO: Fix getKardashevCoordsByIdIfExists
   public async getKardashevCoordsByIdIfExists(
-    planetId: LocationId,
+    _planetId: LocationId,
   ): Promise<KardashevCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawKardashevCoords = await this.makeCall(
-      this.contract.kardashevCoords,
-      [decStrId],
-    );
-    const ret = decodeKardashevCoords(rawKardashevCoords);
+    // const decStrId = locationIdToDecStr(planetId);
+    // const rawKardashevCoords = await this.makeCall(
+    //   this.contract.kardashevCoords,
+    //   [decStrId],
+    // );
+    // const ret = decodeKardashevCoords(rawKardashevCoords);
 
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
+    // if (ret.hash === EMPTY_LOCATION_ID) {
+    //   return undefined;
+    // }
+    // return ret;
+    return undefined;
   }
 
+  // TODO: Fix getKardashevPlanetsCoords
   public async getKardashevPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
+    _startingAt: number,
+    _onProgressIds?: (fractionCompleted: number) => void,
+    _onProgressCoords?: (fractionCompleted: number) => void,
   ): Promise<KardashevCoords[]> {
-    const nBurnedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNKardashevPlanets)
-    ).toNumber();
-
-    const rawKardashevPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nBurnedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetKardashevPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawKardashevCoords = await aggregateBulkGetter(
-      rawKardashevPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetKardashevCoordsByIds, [
-          rawKardashevPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawKardashevCoords.map(decodeKardashevCoords);
+    // const nBurnedPlanets: number = (
+    //   await this.makeCall<EthersBN>(this.contract.getNKardashevPlanets)
+    // ).toNumber();
+    // const rawKardashevPlanetIds = await aggregateBulkGetter<EthersBN>(
+    //   nBurnedPlanets - startingAt,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetKardashevPlanetIds, [
+    //       start + startingAt,
+    //       end + startingAt,
+    //     ]),
+    //   onProgressIds,
+    // );
+    // const rawKardashevCoords = await aggregateBulkGetter(
+    //   rawKardashevPlanetIds.length,
+    //   500,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetKardashevCoordsByIds, [
+    //       rawKardashevPlanetIds.slice(start, end),
+    //     ]),
+    //   onProgressCoords,
+    // );
+    // return rawKardashevCoords.map(decodeKardashevCoords);
+    return [];
   }
 
+  // TODO: Fix bulkGetPlanets
   public async bulkGetPlanets(
-    toLoadPlanets: LocationId[],
-    onProgressPlanet?: (fractionCompleted: number) => void,
+    _toLoadPlanets: LocationId[],
+    _onProgressPlanet?: (fractionCompleted: number) => void,
   ): Promise<Map<LocationId, Planet>> {
-    const rawPlanets = await aggregateBulkGetter(
-      toLoadPlanets.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetPlanetsByIds, [
-          toLoadPlanets.slice(start, end).map(locationIdToDecStr),
-        ]),
-      onProgressPlanet,
-    );
+    // const rawPlanets = await aggregateBulkGetter(
+    //   toLoadPlanets.length,
+    //   200,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetPlanetsByIds, [
+    //       toLoadPlanets.slice(start, end).map(locationIdToDecStr),
+    //     ]),
+    //   onProgressPlanet,
+    // );
 
     const planets: Map<LocationId, Planet> = new Map();
 
-    for (let i = 0; i < toLoadPlanets.length; i += 1) {
-      if (rawPlanets[i]) {
-        const planet = decodePlanet(
-          locationIdToDecStr(toLoadPlanets[i]),
-          rawPlanets[i],
-        );
-        planet.transactions = new TxCollection();
-        planets.set(planet.locationId, planet);
-      }
-    }
+    // for (let i = 0; i < toLoadPlanets.length; i += 1) {
+    //   if (rawPlanets[i]) {
+    //     const planet = decodePlanet(
+    //       locationIdToDecStr(toLoadPlanets[i]),
+    //       rawPlanets[i],
+    //     );
+    //     planet.transactions = new TxCollection();
+    //     planets.set(planet.locationId, planet);
+    //   }
+    // }
     return planets;
   }
 
+  // TODO: Fix getPlanetById
   public async getPlanetById(
-    planetId: LocationId,
+    _planetId: LocationId,
   ): Promise<Planet | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawPlanet = await this.makeCall(this.contract.planets, [decStrId]);
-    return decodePlanet(decStrId, rawPlanet);
+    // const decStrId = locationIdToDecStr(planetId);
+    // const rawPlanet = await this.makeCall(this.contract.planets, [decStrId]);
+    // return decodePlanet(decStrId, rawPlanet);
+    return undefined;
   }
 
+  // TODO: Fix getArtifactById
   public async getArtifactById(
-    artifactId: ArtifactId,
+    _artifactId: ArtifactId,
   ): Promise<Artifact | undefined> {
-    const exists = await this.makeCall<boolean>(
-      this.contract.doesArtifactExist,
-      [artifactIdToDecStr(artifactId)],
-    );
-    if (!exists) {
-      return undefined;
-    }
-    const rawArtifact = await this.makeCall(this.contract.getArtifactById, [
-      artifactIdToDecStr(artifactId),
-    ]);
+    // const exists = await this.makeCall<boolean>(
+    //   this.contract.doesArtifactExist,
+    //   [artifactIdToDecStr(artifactId)],
+    // );
+    // if (!exists) {
+    //   return undefined;
+    // }
+    // const rawArtifact = await this.makeCall(this.contract.getArtifactById, [
+    //   artifactIdToDecStr(artifactId),
+    // ]);
 
-    const artifact = decodeArtifact(rawArtifact);
-    artifact.transactions = new TxCollection();
-    return artifact;
+    // const artifact = decodeArtifact(rawArtifact);
+    // artifact.transactions = new TxCollection();
+    // return artifact;
+    return undefined;
   }
 
+  // TODO: Fix bulkGetArtifactsOnPlanets
   public async bulkGetArtifactsOnPlanets(
-    locationIds: LocationId[],
-    onProgress?: (fractionCompleted: number) => void,
+    _locationIds: LocationId[],
+    _onProgress?: (fractionCompleted: number) => void,
   ): Promise<Artifact[][]> {
-    const rawArtifacts = await aggregateBulkGetter(
-      locationIds.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetPlanetArtifacts, [
-          locationIds.slice(start, end).map(locationIdToDecStr),
-        ]),
-      onProgress,
-    );
+    // const rawArtifacts = await aggregateBulkGetter(
+    //   locationIds.length,
+    //   200,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetPlanetArtifacts, [
+    //       locationIds.slice(start, end).map(locationIdToDecStr),
+    //     ]),
+    //   onProgress,
+    // );
 
-    return rawArtifacts.map((rawArtifactArray) => {
-      return rawArtifactArray.map(decodeArtifact);
-    });
+    // return rawArtifacts.map((rawArtifactArray) => {
+    //   return rawArtifactArray.map(decodeArtifact);
+    // });
+    return [];
   }
 
+  // TODO: Fix bulkGetArtifacts
   public async bulkGetArtifacts(
-    artifactIds: ArtifactId[],
-    onProgress?: (fractionCompleted: number) => void,
+    _artifactIds: ArtifactId[],
+    _onProgress?: (fractionCompleted: number) => void,
   ): Promise<Artifact[]> {
-    const rawArtifacts = await aggregateBulkGetter(
-      artifactIds.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetArtifactsByIds, [
-          artifactIds.slice(start, end).map(artifactIdToDecStr),
-        ]),
-      onProgress,
-    );
+    // const rawArtifacts = await aggregateBulkGetter(
+    //   artifactIds.length,
+    //   200,
+    //   async (start, end) =>
+    //     await this.makeCall(this.contract.bulkGetArtifactsByIds, [
+    //       artifactIds.slice(start, end).map(artifactIdToDecStr),
+    //     ]),
+    //   onProgress,
+    // );
 
-    const ret: Artifact[] = rawArtifacts.map(decodeArtifact);
-    ret.forEach((a) => (a.transactions = new TxCollection()));
+    // const ret: Artifact[] = rawArtifacts.map(decodeArtifact);
+    // ret.forEach((a) => (a.transactions = new TxCollection()));
 
-    return ret;
+    // return ret;
+    return [];
   }
 
+  // TODO: Fix getPlayerArtifacts
   public async getPlayerArtifacts(
-    playerId?: EthAddress,
-    onProgress?: (percent: number) => void,
+    _playerId?: EthAddress,
+    _onProgress?: (percent: number) => void,
   ): Promise<Artifact[]> {
-    if (playerId === undefined) {
-      return [];
-    }
+    // if (playerId === undefined) {
+    //   return [];
+    // }
 
-    const mySpacespaceIds = (
-      await this.makeCall(this.contract.getPlayerArtifactIds, [playerId])
-    ).map(artifactIdFromEthersBN);
-    return this.bulkGetArtifacts(mySpacespaceIds, onProgress);
+    // const mySpacespaceIds = (
+    //   await this.makeCall(this.contract.getPlayerArtifactIds, [playerId])
+    // ).map(artifactIdFromEthersBN);
+    // return this.bulkGetArtifacts(mySpacespaceIds, onProgress);
+    return [];
   }
 
   public async getPlayerSpaceships(
@@ -1635,30 +1672,32 @@ export class ContractsAPI extends EventEmitter {
     return result;
   }
 
+  // TODO: Fix getTargetPlanetAllArrivals
   public async getTargetPlanetAllArrivals(
-    planetId: LocationId,
-    timestamp: number,
-    onProgress?: (fractionCompleted: number) => void,
+    _planetId: LocationId,
+    _timestamp: number,
+    _onProgress?: (fractionCompleted: number) => void,
   ): Promise<QueuedArrival[]> {
-    const arrivalIds = await this.getTargetPlanetArrivalIdsWithTimestamp(
-      planetId,
-      timestamp,
-    );
+    // const arrivalIds = await this.getTargetPlanetArrivalIdsWithTimestamp(
+    //   planetId,
+    //   timestamp,
+    // );
 
-    const arrivalsUnflattened = await aggregateBulkGetter(
-      arrivalIds.length,
-      200,
-      async (start, end) => {
-        return (
-          await this.makeCall(this.contract.bulkGetVoyagesByIds, [
-            arrivalIds.slice(start, end),
-          ])
-        ).map(decodeArrival);
-      },
-      onProgress,
-    );
+    // const arrivalsUnflattened = await aggregateBulkGetter(
+    //   arrivalIds.length,
+    //   200,
+    //   async (start, end) => {
+    //     return (
+    //       await this.makeCall(this.contract.bulkGetVoyagesByIds, [
+    //         arrivalIds.slice(start, end),
+    //       ])
+    //     ).map(decodeArrival);
+    //   },
+    //   onProgress,
+    // );
 
-    return _.flatten(arrivalsUnflattened);
+    // return _.flatten(arrivalsUnflattened);
+    return [];
   }
 
   public setDiagnosticUpdater(diagnosticUpdater?: DiagnosticUpdater) {

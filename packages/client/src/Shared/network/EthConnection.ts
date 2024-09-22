@@ -192,6 +192,7 @@ export class EthConnection {
   /**
    * Loads gas prices from xDai.
    */
+  // @ts-expect-error unused refreshGasPrices method
   private async refreshGasPrices() {
     this.gasPrices = await getAutoGasPrices();
     this.gasPrices$.publish(this.gasPrices);

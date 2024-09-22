@@ -14,7 +14,8 @@ import {
 } from "@df/gamelogic";
 import { mockArtifactWithRarity } from "@df/procedural";
 import { SpriteRenderer, WebGLManager } from "@df/renderer";
-import type { Artifact, ArtifactRarity, ArtifactType, Biome } from "@df/types";
+import type { Artifact, ArtifactRarity, ArtifactType } from "@df/types";
+import { Biome } from "@df/types";
 import FileSaver from "file-saver";
 import type { mat4 } from "gl-matrix";
 import JSZip from "jszip";

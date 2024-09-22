@@ -13,7 +13,7 @@ import type { SetupNetworkResult } from "./setupNetwork";
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
 
 // PlanetType Enum
-export enum PlanetType {
+export const enum PlanetType {
   PLANET = 0,
   ASTEROID_FIELD = 1,
   FOUNDRY = 2,
@@ -22,12 +22,19 @@ export enum PlanetType {
 }
 
 // SpaceType Enum
-export enum SpaceType {
+export const enum SpaceType {
   NEBULA = 0,
   SPACE = 1,
   DEEP_SPACE = 2,
   DEAD_SPACE = 3,
 }
+
+// Define a Planet type based on the Planet structure
+export type PlanetStructure = {
+  name: string;
+
+  // Add more fields as per your Planet structure
+};
 
 export function createSystemCalls(
   /*
@@ -64,9 +71,18 @@ export function createSystemCalls(
   //   return getComponentValue(Counter, singletonEntity);
   // };
 
+  // NOTE: After we fixed types in setupNetwork there are some options that now must be sent on every write operation
+  //       need to dig more into why this happens, however casting undefined as the defaultWriteOptions for the time being.
+  type WorldContractWriteOptions = Parameters<
+    (typeof worldContract.write)["call"]
+  >[1];
+  type FirstOfUnionType<T> = T extends { 0: infer First } ? First : never;
+  const defaultWriteOptions =
+    undefined as unknown as FirstOfUnionType<WorldContractWriteOptions>;
+
   const unPause = async () => {
     try {
-      const tx = await worldContract.write.df__unpause();
+      const tx = await worldContract.write.df__unpause(defaultWriteOptions);
       const receipt = await waitForTransaction(tx as `0x${string}`);
 
       // Log the receipt or trigger additional actions, e.g., update game state
@@ -81,7 +97,7 @@ export function createSystemCalls(
   // pause function call for game contract
   const pause = async () => {
     try {
-      const tx = await worldContract.write.df__pause();
+      const tx = await worldContract.write.df__pause(defaultWriteOptions);
       const receipt = await waitForTransaction(tx as `0x${string}`);
       // Log the receipt or trigger additional actions, e.g., update game state
       console.log("Paused:", receipt);
@@ -95,7 +111,7 @@ export function createSystemCalls(
   // tick function call for game contract
   const tick = async () => {
     try {
-      const tx = await worldContract.write.df__tick();
+      const tx = await worldContract.write.df__tick(defaultWriteOptions);
       const receipt = await waitForTransaction(tx as `0x${string}`);
       // Log the receipt or trigger additional actions, e.g., update game state
       console.log("Tick:", receipt);
@@ -123,17 +139,20 @@ export function createSystemCalls(
     try {
       // Call the createPlanet function on the contract
 
-      const tx = await worldContract.write.df__createPlanet([
-        planetHash,
-        owner as `0x${string}`,
-        perlin,
-        level,
-        planetType,
-        spaceType,
-        BigInt(population),
-        BigInt(silver),
-        upgrade,
-      ]);
+      const tx = await worldContract.write.df__createPlanet(
+        [
+          planetHash,
+          owner as `0x${string}`,
+          perlin,
+          level,
+          planetType,
+          spaceType,
+          BigInt(population),
+          BigInt(silver),
+          upgrade,
+        ],
+        defaultWriteOptions,
+      );
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
 
@@ -152,7 +171,10 @@ export function createSystemCalls(
 
   const registerPlayer = async (name: string, burner: Address) => {
     try {
-      const tx = await worldContract.write.df__registerPlayer([name, burner]);
+      const tx = await worldContract.write.df__registerPlayer(
+        [name, burner as `0x${string}`],
+        defaultWriteOptions,
+      );
       const receipt = await waitForTransaction(tx);
       // Log the receipt or trigger additional actions, e.g., update game state
       console.log("Register player successfully:", receipt);
@@ -165,7 +187,10 @@ export function createSystemCalls(
 
   // Function to change player name
   const changePlayerName = async (newName: string) => {
-    const tx = await worldContract.write.df__changePlayerName([newName]);
+    const tx = await worldContract.write.df__changePlayerName(
+      [newName],
+      defaultWriteOptions,
+    );
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
     console.log("Change Player Name successfully:", receipt);
@@ -174,7 +199,10 @@ export function createSystemCalls(
 
   // Function to change burner wallet
   const changeBurnerWallet = async (newAddress: Address) => {
-    const tx = await worldContract.write.df__changeBurnerWallet([newAddress]);
+    const tx = await worldContract.write.df__changeBurnerWallet(
+      [newAddress],
+      defaultWriteOptions,
+    );
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
     console.log("Change Burner successfully:", receipt);
@@ -200,7 +228,10 @@ export function createSystemCalls(
       radiusSquare: bigint;
     },
   ) => {
-    const tx = await worldContract.write.df__spawnPlayer([proof, SpawnInput]);
+    const tx = await worldContract.write.df__spawnPlayer(
+      [proof, SpawnInput],
+      defaultWriteOptions,
+    );
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
     console.log("Spawn Player successfully:", receipt);
@@ -227,10 +258,16 @@ export function createSystemCalls(
       radiusSquare: bigint;
     },
   ) => {
+    // [args: [`0x${string}`, `0x${string}`, `0x${string}`], options: Options
+    // type Params = Parameters<(typeof worldContract.write)["callFrom"]>;
     const tx = await worldContract.write.callFrom(
-      worldContract.address,
-      "sy.df.PlayerSystem.spawnPlayer",
-      [proof, SpawnInput],
+      //  worldContract.address,
+      [
+        "sy.df.PlayerSystem.spawnPlayer" as `0x${string}`,
+        proof as unknown as `0x${string}`,
+        SpawnInput as unknown as `0x${string}`,
+      ],
+      defaultWriteOptions,
     );
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
@@ -257,12 +294,10 @@ export function createSystemCalls(
       bigint,
     ],
   ) => {
-    const tx = await worldContract.write.df__initializePlayer([
-      proof.A,
-      proof.B,
-      proof.C,
-      InitializeInput,
-    ]);
+    const tx = await worldContract.write.df__initializePlayer(
+      [proof.A, proof.B, proof.C, InitializeInput],
+      defaultWriteOptions,
+    );
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
     console.log("Spawn Player successfully:", receipt);
@@ -292,10 +327,10 @@ export function createSystemCalls(
   ): Promise<void> => {
     try {
       // Call the reveal location function on the contract
-      const tx = await worldContract.write.df__revealLocation([
-        proof,
-        RevealInput,
-      ]);
+      const tx = await worldContract.write.df__revealLocation(
+        [proof, RevealInput],
+        defaultWriteOptions,
+      );
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
       // Log the receipt or trigger additional actions, e.g., update game state
@@ -316,12 +351,15 @@ export function createSystemCalls(
     try {
       // Call the upgradePlanet function on the contract
 
-      const tx = await worldContract.write.df__upgradePlanet([
-        planetHash,
-        BigInt(rangeUpgrades),
-        BigInt(speedUpgrades),
-        BigInt(defenseUpgrades),
-      ]);
+      const tx = await worldContract.write.df__upgradePlanet(
+        [
+          planetHash,
+          BigInt(rangeUpgrades),
+          BigInt(speedUpgrades),
+          BigInt(defenseUpgrades),
+        ],
+        defaultWriteOptions,
+      );
 
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
@@ -342,10 +380,10 @@ export function createSystemCalls(
     try {
       // Call the upgradePlanet function on the contract
 
-      const tx = await worldContract.write.df__upgradePlanet([
-        planetHash,
-        BigInt(rangeUpgrades),
-      ]);
+      const tx = await worldContract.write.df__upgradePlanet(
+        [planetHash, BigInt(rangeUpgrades)],
+        defaultWriteOptions,
+      );
 
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
@@ -419,7 +457,10 @@ export function createSystemCalls(
       ];
 
       // Call the move function on the contract
-      const tx = await worldContract.write.df__move(argsMove);
+      const tx = await worldContract.write.df__move(
+        argsMove,
+        defaultWriteOptions,
+      );
 
       const receipt = await waitForTransaction(tx);
       console.log("Move created successfully:", receipt);
@@ -432,9 +473,12 @@ export function createSystemCalls(
 
   // Player Read
   // Basic read function
-  const readPlanetWithHash = async (planethash: bigint): Promise<void> => {
+  const readPlanetWithHash = async (
+    planethash: bigint,
+  ): Promise<PlanetStructure> => {
     try {
       // Call the readPlanet function on the contract with only planetHash
+      // NOTE: planet is of type never here
       const planet = await worldContract.read.df__readPlanet([
         planethash,
         BigInt(0),
@@ -458,9 +502,10 @@ export function createSystemCalls(
     planetHash: bigint,
     perlin: bigint,
     distanceSquare: bigint,
-  ): Promise<void> => {
+  ): Promise<PlanetStructure> => {
     try {
       // Call the readPlanet function on the contract with planetHash, perlin, and distanceSquare
+      // NOTE: planet is of type never here
       const planet = await worldContract.read.df__readPlanet([
         planetHash,
         perlin,
@@ -487,13 +532,13 @@ export function createSystemCalls(
   const readPlanetAt = async (
     planetHash: bigint,
     tickNumber: number,
-  ): Promise<void> => {
+  ): Promise<PlanetStructure> => {
     try {
       // Call the readPlanet function on the contract with only planetHash
-      const planet = await worldContract.read.df__readPlanetAt([
-        planetHash,
-        BigInt(tickNumber),
-      ]);
+      const planet = await worldContract.read.df__readPlanetAt(
+        [planetHash, BigInt(tickNumber)],
+        defaultWriteOptions,
+      );
 
       // Log the planet details or trigger additional actions, e.g., update game state
       console.log("Planet At Details :", planet);
@@ -501,6 +546,8 @@ export function createSystemCalls(
       getComponentValue(Planet, singletonEntity);
 
       // Optionally trigger updates or use the planet data for further actions
+      // @ts-expect-error name: string property is missing in planet
+      return planet;
     } catch (error) {
       console.error("Error reading planet at:", error);
       throw error; // Re-throw error to handle it higher up if needed

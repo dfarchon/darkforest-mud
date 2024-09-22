@@ -6,7 +6,7 @@ import type { EmbeddedPlugin } from "../Plugins/EmbeddedPluginLoader";
 import { getEmbeddedPlugins } from "../Plugins/EmbeddedPluginLoader";
 import type { PluginProcess } from "../Plugins/PluginProcess";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
-import type GameManager from "./GameManager";
+import type { GameManager } from "./GameManager";
 
 /**
  * Represents book-keeping information about a running process. We keep it
@@ -100,11 +100,8 @@ export class PluginManager {
     overwriteEmbeddedPlugins: boolean,
   ): Promise<void> {
     this.pluginLibrary = await this.gameManager.loadPlugins();
-
-    this.onNewEmbeddedPlugins(
-      getEmbeddedPlugins(isAdmin),
-      overwriteEmbeddedPlugins,
-    );
+    const newPlugins = await getEmbeddedPlugins(isAdmin);
+    this.onNewEmbeddedPlugins(newPlugins, overwriteEmbeddedPlugins);
 
     this.notifyPluginLibraryUpdated();
   }

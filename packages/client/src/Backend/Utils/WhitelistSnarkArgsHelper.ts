@@ -22,7 +22,7 @@ import type { TerminalHandle } from "../../Frontend/Views/Terminal";
 export const getWhitelistArgs = async (
   key: BigInteger,
   recipient: EthAddress,
-  terminal?: React.MutableRefObject<TerminalHandle | undefined>,
+  terminal?: React.MutableRefObject<TerminalHandle | null>,
 ): Promise<WhitelistSnarkContractCallArgs> => {
   // eslint-disable-next-line no-useless-catch
   try {

@@ -220,7 +220,7 @@ export class GameManager extends EventEmitter {
    * load into the game. This is the same exact terminal that appears inside the collapsable right
    * bar of the game.
    */
-  private readonly terminal: React.MutableRefObject<TerminalHandle | undefined>;
+  private readonly terminal: React.MutableRefObject<TerminalHandle | null>;
 
   /**
    * The ethereum address of the player who is currently logged in. We support 'no account',
@@ -424,7 +424,7 @@ export class GameManager extends EventEmitter {
   private captureZoneGenerator: CaptureZoneGenerator | undefined;
 
   private constructor(
-    terminal: React.MutableRefObject<TerminalHandle | undefined>,
+    terminal: React.MutableRefObject<TerminalHandle | null>,
     account: EthAddress | undefined,
     players: Map<string, Player>,
     touchedPlanets: Map<LocationId, Planet>,
@@ -824,7 +824,7 @@ export class GameManager extends EventEmitter {
     spectate = false,
   }: {
     connection: EthConnection;
-    terminal: React.MutableRefObject<TerminalHandle | undefined>;
+    terminal: React.MutableRefObject<TerminalHandle | null>;
     contractAddress: EthAddress;
     spectate: boolean;
   }): Promise<GameManager> {
@@ -1474,7 +1474,7 @@ export class GameManager extends EventEmitter {
       await this.contractsAPI.bulkGetPlanets(planetIds);
     const artifactsOnPlanets =
       await this.contractsAPI.bulkGetArtifactsOnPlanets(planetIds);
-    planetsToUpdateMap.forEach((planet, locId) => {
+    planetsToUpdateMap.forEach((_planet, locId) => {
       if (planetsToUpdateMap.has(locId)) {
         planetVoyageMap.set(locId, []);
       }
@@ -3800,14 +3800,14 @@ export class GameManager extends EventEmitter {
           });
           await tx.confirmedPromise;
           break;
-        } catch (e) {
+        } catch (e: unknown) {
           if (beforeRetry) {
             // make sure the tx intent has completed so all the message are printed together.
             while (!txIntentCompleted) {
               await sleep(100);
             }
 
-            if (await beforeRetry(e)) {
+            if (await beforeRetry(e as Error)) {
               continue;
             }
           } else {
@@ -4278,10 +4278,11 @@ export class GameManager extends EventEmitter {
             planet.locationId,
             ({ current }: Diff<Planet>) => {
               return current.heldArtifactIds
-                .map(this.getArtifactWithId.bind(this))
+                .map((artifactId) => this.getArtifactWithId(artifactId))
                 .find(
-                  (a: Artifact) => a?.planetDiscoveredOn === planet.locationId,
-                ) as Artifact;
+                  (a: Artifact | undefined) =>
+                    a?.planetDiscoveredOn === planet.locationId,
+                ) as Artifact | undefined;
             },
           ).then((foundArtifact) => {
             if (!foundArtifact) {
@@ -4657,58 +4658,56 @@ export class GameManager extends EventEmitter {
         return result;
       }
 
-      // eslint-disable-next-line no-inner-declarations
-      function isTypeOK() {
-        const val = Number(type);
-        if (val === Number(ArtifactType.Wormhole)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.PlanetaryShield)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.BloomFilter)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.FireLink)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.StellarShield)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.Avatar)) {
-          return true;
-        }
+      // function isTypeOK() {
+      //   const val = Number(type);
+      //   if (val === Number(ArtifactType.Wormhole)) {
+      //     return true;
+      //   }
+      //   if (val === Number(ArtifactType.PlanetaryShield)) {
+      //     return true;
+      //   }
+      //   if (val === Number(ArtifactType.BloomFilter)) {
+      //     return true;
+      //   }
+      //   if (val === Number(ArtifactType.FireLink)) {
+      //     return true;
+      //   }
+      //   if (val === Number(ArtifactType.StellarShield)) {
+      //     return true;
+      //   }
+      //   if (val === Number(ArtifactType.Avatar)) {
+      //     return true;
+      //   }
 
-        return false;
-      }
+      //   return false;
+      // }
 
-      // eslint-disable-next-line no-inner-declarations
-      function price() {
-        return 50;
-        const rarityVal = parseInt(rarity.toString());
-        const typeVal = parseInt(type.toString());
+      // function price() {
+      //   return 50;
+      //   const rarityVal = parseInt(rarity.toString());
+      //   const typeVal = parseInt(type.toString());
 
-        if (rarityVal === 0 || rarityVal >= 5) {
-          return 0;
-        }
-        if (isTypeOK() === false) {
-          return 0;
-        }
-        if (
-          typeVal === Number(ArtifactType.Wormhole) ||
-          typeVal === Number(ArtifactType.PlanetaryShield) ||
-          typeVal === Number(ArtifactType.BloomFilter) ||
-          typeVal === Number(ArtifactType.FireLink)
-        ) {
-          return 2 ** (parseInt(rarity.toString()) - 1);
-        } else if (typeVal === Number(ArtifactType.Avatar)) {
-          return 1;
-        } else if (typeVal === Number(ArtifactType.StellarShield)) {
-          return 8;
-        } else {
-          return 0;
-        }
-      }
+      //   if (rarityVal === 0 || rarityVal >= 5) {
+      //     return 0;
+      //   }
+      //   if (isTypeOK() === false) {
+      //     return 0;
+      //   }
+      //   if (
+      //     typeVal === Number(ArtifactType.Wormhole) ||
+      //     typeVal === Number(ArtifactType.PlanetaryShield) ||
+      //     typeVal === Number(ArtifactType.BloomFilter) ||
+      //     typeVal === Number(ArtifactType.FireLink)
+      //   ) {
+      //     return 2 ** (parseInt(rarity.toString()) - 1);
+      //   } else if (typeVal === Number(ArtifactType.Avatar)) {
+      //     return 1;
+      //   } else if (typeVal === Number(ArtifactType.StellarShield)) {
+      //     return 8;
+      //   } else {
+      //     return 0;
+      //   }
+      // }
 
       //NOTE: this will not be the true artifactId
       const artifactId: ArtifactId = random256Id() as ArtifactId;
@@ -4995,10 +4994,13 @@ export class GameManager extends EventEmitter {
    * Checks that a message signed by {@link GameManager#signMessage} was signed by the address that
    * it claims it was signed by.
    */
+  // @ts-expect-error unused verifyMessage function
   private async verifyMessage(
     message: SignedMessage<unknown>,
   ): Promise<boolean> {
-    const preSigned = JSON.stringify(messag(e as Error).message);
+    const preSigned = JSON.stringify(
+      (message as SignedMessage<unknown>).message,
+    );
 
     return verifySignature(
       preSigned,
@@ -6257,8 +6259,14 @@ export class GameManager extends EventEmitter {
     );
     const diffEmitter = generateDiffEmitter(disposableEmitter);
     return new Promise((resolve, reject) => {
-      diffEmitter.subscribe(({ current, previous }: Diff<Planet>) => {
+      // we get either a diff current and previous, or nothing in the callback
+      diffEmitter.subscribe((diff: Diff<Planet> | undefined) => {
+        if (!diff) {
+          return;
+        }
+
         try {
+          const { current, previous } = diff;
           const predicateResults = predicate({ current, previous });
           if (predicateResults) {
             disposableEmitter.clear();

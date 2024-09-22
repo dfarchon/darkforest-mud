@@ -2,6 +2,7 @@ import { getNetworkConfig } from "@mud/getNetworkConfig";
 import { useMUD } from "@mud/MUDContext";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import React, { useState } from "react";
+import type { Chain } from "viem";
 import { useAccount, useDisconnect, useWalletClient } from "wagmi";
 
 import { formatAddress } from "./utils";
@@ -21,11 +22,12 @@ export const WalletButton: React.FC = () => {
 
   const addNetwork = () => {
     const networkConfig = getNetworkConfig();
-    const chain = networkConfig.chain;
+    // downcast from Mud chain to Viem chain type
+    const chain = networkConfig.chain as Chain;
     (chain.blockExplorers = {
       default: { name: "Etherscan", url: "https://etherscan.io" },
     }),
-      externalWalletClient?.addChain({ chain: chain });
+      externalWalletClient?.addChain({ chain });
   };
 
   return (
@@ -34,7 +36,7 @@ export const WalletButton: React.FC = () => {
       {/* {!isConnected && <CustomConnectButton />} */}
 
       {/* TODO: Need to investigate why externalWalletClient is incorrect. */}
-      {isConnected && burnerWalletClient.chain.id !== chain?.id && (
+      {isConnected && burnerWalletClient.chain?.id !== chain?.id && (
         <button
           className="rounded-lg bg-gray-800 p-2 text-white shadow-md"
           onClick={addNetwork}
@@ -42,7 +44,7 @@ export const WalletButton: React.FC = () => {
           add network
         </button>
       )}
-      {isConnected && burnerWalletClient.chain.id === chain?.id && (
+      {isConnected && burnerWalletClient.chain?.id === chain?.id && (
         <div className="flex items-center space-x-2">
           {/* <span className="rounded-lg bg-gray-800 p-2 text-white shadow-md focus:outline-none">
             {chain?.name}

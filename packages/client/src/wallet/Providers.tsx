@@ -9,7 +9,7 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { structuralSharing } from "@wagmi/core/query";
 import { useMemo } from "react";
-import { mainnet } from "viem/chains";
+import { type Chain, mainnet } from "viem/chains";
 import { http, WagmiProvider } from "wagmi";
 
 import { ExternalWalletProvider } from "./ExternalWalletProvider";
@@ -28,13 +28,13 @@ export type Props = {
 
 export function Providers({ children }: Props) {
   const networkConfig = useMemo(() => getNetworkConfig(), []);
-
   const wagmiConfig = useMemo(
     () =>
       getDefaultConfig({
         appName: "DF-MUD",
         projectId: "4cb4d26de6508ef627675e916a2db64f",
-        chains: [networkConfig.chain],
+        // downcast Mud chain to Viem Chain type
+        chains: [networkConfig.chain as Chain],
         transports: {
           [networkConfig.chain.id]: http(),
         },

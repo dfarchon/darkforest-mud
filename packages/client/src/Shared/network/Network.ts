@@ -2,7 +2,8 @@ import { DEFAULT_MAX_CALL_RETRIES } from "@df/constants";
 import { address } from "@df/serde";
 import type { EthAddress, GasPrices, SignedMessage } from "@df/types";
 import { AutoGasSetting } from "@df/types";
-import type { BigNumber, ContractInterface, Wallet } from "ethers";
+import type { ContractInterface, Wallet } from "ethers";
+import { BigNumber } from "ethers";
 import { Contract, providers, utils } from "ethers";
 import retry from "p-retry";
 import timeout from "p-timeout";
@@ -277,5 +278,11 @@ export function ethToWei(eth: number): BigNumber {
  * Whether or not some value is being transferred in this transaction.
  */
 export function isPurchase(tx?: providers.TransactionRequest): boolean {
-  return tx !== undefined && tx.value !== undefined && tx.value > 0;
+  // TODO: investigate underlying type better tx.value says it is BigNumberish
+  return (
+    tx !== undefined &&
+    tx.value !== undefined &&
+    ((BigNumber.isBigNumber(tx.value) && tx.value.gt(0)) ||
+      Number(tx.value) > 0)
+  );
 }

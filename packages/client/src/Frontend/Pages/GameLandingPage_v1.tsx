@@ -69,6 +69,7 @@ type TerminalStateOptions = {
   showHelp: boolean;
 };
 
+// @ts-expect-error unused sleep helper function
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function GameLandingPage_v1() {
@@ -96,7 +97,7 @@ export function GameLandingPage_v1() {
   }, [syncProgress]);
 
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
-  const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
+  const gameAccount = burnerWalletClient?.account?.address ?? zeroAddress;
 
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const terminalHandle = useRef<TerminalHandle>(null);

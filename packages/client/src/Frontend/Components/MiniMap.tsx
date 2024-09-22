@@ -1,7 +1,13 @@
 /* eslint-disable */
+import type { GameManager } from "@backend/GameLogic/GameManager";
 import { SpaceType } from "@df/types";
 import React, { useEffect, useImperativeHandle, useRef } from "react";
 import styled from "styled-components";
+
+// TODO: Centralize global definition of df GameManage (since this is on globalThis / Window in the browserContext)
+declare global {
+  var df: GameManager;
+}
 
 type Point = Readonly<{
   x: number;
@@ -623,4 +629,5 @@ function MiniMapImpl({}, ref: React.Ref<MiniMapHandle>) {
   );
 }
 
+// @ts-expect-error Incompatible types needs to be fixed since 16.x impl  no compatible with 18.x
 export const MiniMap = React.forwardRef<MiniMapHandle | undefined>(MiniMapImpl);

@@ -1,4 +1,4 @@
-import { PlanetType, SpaceType } from "@df/types";
+// import { PlanetType, SpaceType } from "@df/types";
 import { useMUD } from "@mud/MUDContext";
 import React, { useState } from "react";
 

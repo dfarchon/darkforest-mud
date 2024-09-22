@@ -233,8 +233,8 @@ export function StringSetting({
 }) {
   const [settingValue, setSettingValue] = useSetting(uiManager, setting);
   const onChange = useCallback(
-    (e: Event & React.ChangeEvent<DarkForestTextInput>) => {
-      setSettingValue(e.target.value);
+    (event: Event & React.ChangeEvent<DarkForestTextInput>) => {
+      setSettingValue(event.target.value);
     },
     [setSettingValue],
   );
@@ -242,7 +242,12 @@ export function StringSetting({
     <>
       {settingDescription}
       <br />
-      <TextInput value={settingValue} onChange={onChange} />
+      <TextInput
+        value={settingValue}
+        onChange={(event) =>
+          onChange(event as Event & React.ChangeEvent<DarkForestTextInput>)
+        }
+      />
     </>
   );
 }
@@ -268,7 +273,12 @@ export function ColorSetting({
     <>
       {settingDescription}
       <br />
-      <ColorInput value={settingValue} onChange={onChange} />
+      <ColorInput
+        value={settingValue}
+        onChange={(event) =>
+          onChange(event as Event & React.ChangeEvent<DarkForestColorInput>)
+        }
+      />
     </>
   );
 }
@@ -336,9 +346,11 @@ export function BooleanSetting({
     <Checkbox
       label={settingDescription}
       checked={settingValue}
-      onChange={(e: Event & React.ChangeEvent<DarkForestCheckbox>) =>
-        setSettingValue(e.target.checked)
-      }
+      onChange={(event) => {
+        const target = (event as Event & React.ChangeEvent<DarkForestCheckbox>)
+          .target;
+        setSettingValue(target.checked);
+      }}
     />
   );
 }
@@ -356,9 +368,12 @@ export function NumberSetting({
     <NumberInput
       format="float"
       value={settingValue}
-      onChange={(e: React.ChangeEvent<DarkForestNumberInput>) => {
-        if (e.target.value) {
-          setSettingValue(e.target.value);
+      onChange={(event) => {
+        const target = (
+          event as Event & React.ChangeEvent<DarkForestNumberInput>
+        ).target;
+        if (target.value) {
+          setSettingValue(target.value);
         }
       }}
     />

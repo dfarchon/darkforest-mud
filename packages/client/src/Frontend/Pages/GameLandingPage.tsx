@@ -100,7 +100,7 @@ export function GameLandingPage() {
   const { contract } = useParams();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const queryParam = params.toString();
+  // const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
@@ -115,12 +115,15 @@ export function GameLandingPage() {
     lastBlockNumberProcessed: 0n,
   });
 
+  // @ts-expect-error unused syncSign
   const syncSign = useMemo(() => {
     console.log(syncProgress);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
 
+  // @ts-expect-error unused mainAccount
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
+  // @ts-expect-error unused gameAccoutn
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
   const terminalHandle = useRef<TerminalHandle>(null);
@@ -175,7 +178,7 @@ export function GameLandingPage() {
 
   const advanceStateFromCompatibilityPassed = useCallback(
     async (
-      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      terminal: React.MutableRefObject<TerminalHandle | null>,
       { showHelp }: TerminalStateOptions = {
         showHelp: true,
       },
@@ -338,7 +341,7 @@ export function GameLandingPage() {
 
   const advanceStateFromDisplayAccounts = useCallback(
     async (
-      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      terminal: React.MutableRefObject<TerminalHandle | null>,
       { showHelp }: TerminalStateOptions = {
         showHelp: true,
       },
@@ -443,7 +446,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromGenerateAccount = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       const newWallet = Wallet.createRandom();
       const newSKey = newWallet.privateKey;
       const newAddr = address(newWallet.address);
@@ -491,7 +494,7 @@ export function GameLandingPage() {
 
   const advanceStateFromImportAccount = useCallback(
     async (
-      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      terminal: React.MutableRefObject<TerminalHandle | null>,
       { showHelp }: TerminalStateOptions = {
         showHelp: true,
       },
@@ -565,7 +568,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromAccountSet = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       try {
         const playerAddress = ethConnection?.getAddress();
         if (!playerAddress || !ethConnection) {
@@ -736,11 +739,16 @@ export function GameLandingPage() {
         setStep(TerminalPromptStep.TERMINATED);
       }
     },
-    [ethConnection, isProd, contractAddress],
+    [
+      ethConnection,
+      isProd,
+      contractAddress,
+      advanceStateFromCompatibilityPassed,
+    ],
   );
 
   const advanceStateFromAskHasWhitelistKey = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       terminal.current?.print(
         "Do you have a whitelist key?",
         TerminalTextStyle.Text,
@@ -760,7 +768,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromAskWhitelistKey = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       const address = ethConnection?.getAddress();
       if (!address) {
         throw new Error("not logged in");
@@ -919,7 +927,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromAskWaitlistEmail = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       terminal.current?.println(
         "Enter your email address to sign up for the whitelist.",
         TerminalTextStyle.Text,
@@ -959,7 +967,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromAskPlayerEmail = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       const address = ethConnection?.getAddress();
       if (!address) {
         throw new Error("not logged in");
@@ -996,7 +1004,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromFetchingEthData = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       let newGameManager: GameManager;
 
       try {
@@ -1057,6 +1065,7 @@ export function GameLandingPage() {
       // terminal.current?.println('in the Settings pane.');
       // terminal.current?.newline();
 
+      // @ts-expect-error cannt override readonly current react 16.x impl version not compatible with 18.x
       gameUIManagerRef.current = newGameUIManager;
 
       if (!newGameManager.hasJoinedGame() && spectate === false) {
@@ -1090,7 +1099,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromAskAddAccount = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       if (spectate) {
         setStep(TerminalPromptStep.ADD_ACCOUNT);
         return;
@@ -1118,7 +1127,7 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromAddAccount = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       const gameUIManager = gameUIManagerRef.current;
 
       if (gameUIManager) {
@@ -1168,7 +1177,7 @@ export function GameLandingPage() {
 
   const advanceStateFromNoHomePlanet = useCallback(
     async (
-      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      terminal: React.MutableRefObject<TerminalHandle | null>,
       { showHelp }: TerminalStateOptions = {
         showHelp: true,
       },
@@ -1463,12 +1472,12 @@ export function GameLandingPage() {
           });
       }
     },
-    [ethConnection, spectate],
+    [spectate],
   );
 
   const advanceStateFromAllChecksPass = useCallback(
     async (
-      terminal: React.MutableRefObject<TerminalHandle | undefined>,
+      terminal: React.MutableRefObject<TerminalHandle | null>,
       showHelp = true,
     ) => {
       if (showHelp) {
@@ -1528,11 +1537,12 @@ export function GameLandingPage() {
   );
 
   const advanceStateFromComplete = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       const input = (await terminal.current?.getInput()) || "";
       let res = "";
       try {
         // indrect eval call: http://perfectionkills.com/global-eval-what-are-the-options/
+        // @ts-expect-error TODO: We should fix this somehow
         res = (1, eval)(input);
         if (res !== undefined) {
           terminal.current?.println(res.toString(), TerminalTextStyle.Text);
@@ -1551,7 +1561,7 @@ export function GameLandingPage() {
   }, []);
 
   const advanceStateFromSpectating = useCallback(
-    async (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       try {
         if (!ethConnection) {
           throw new Error("not logged in");
@@ -1581,11 +1591,11 @@ export function GameLandingPage() {
         return;
       }
     },
-    [ethConnection, isProd, contractAddress, spectate],
+    [ethConnection, spectate, isMiniMapOn],
   );
 
   const advanceState = useCallback(
-    (terminal: React.MutableRefObject<TerminalHandle | undefined>) => {
+    (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       if (browserCompatibleState !== "supported") {
         return;
       }

@@ -166,6 +166,7 @@ class PersistentChunkStore implements ChunkStore {
     );
   }
 
+  // @ts-expect-error ignore unused removeKey method
   private async removeKey(
     key: string,
     objStore: ObjectStore = ObjectStore.DEFAULT,

@@ -231,6 +231,9 @@ importers:
       '@types/color':
         specifier: 3.0.6
         version: 3.0.6
+      '@types/file-saver':
+        specifier: 2.0.7
+        version: 2.0.7
       '@types/lodash-es':
         specifier: 4.17.12
         version: 4.17.12
@@ -3605,6 +3608,9 @@ packages:
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
+
+  '@types/file-saver@2.0.7':
+    resolution: {integrity: sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==}
 
   '@types/hoist-non-react-statics@3.3.5':
     resolution: {integrity: sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==}
@@ -11487,7 +11493,7 @@ snapshots:
   '@metamask/utils@5.0.2':
     dependencies:
       '@ethereumjs/tx': 4.2.0
-      '@types/debug': 4.1.7
+      '@types/debug': 4.1.12
       debug: 4.3.6(supports-color@5.5.0)
       semver: 7.6.3
       superstruct: 1.0.4
@@ -13584,6 +13590,8 @@ snapshots:
   '@types/dom-screen-wake-lock@1.0.3': {}
 
   '@types/estree@1.0.5': {}
+
+  '@types/file-saver@2.0.7': {}
 
   '@types/hoist-non-react-statics@3.3.5':
     dependencies:

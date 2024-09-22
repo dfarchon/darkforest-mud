@@ -1,5 +1,5 @@
-import { useComponentValue } from "@latticexyz/react";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
+// import { useComponentValue } from "@latticexyz/react";
+// import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import SpawnPlayer from "@wallet/Components/SpawnPlayerPane";
 import SyncClientStatusRec from "@wallet/Components/SyncClientStatusRec";
@@ -14,7 +14,9 @@ export function entityToAddress(entity: string): string {
 // Adjust the import path as needed
 export const GamePage: React.FC = () => {
   const {
+    // @ts-expect-error unused playerEntity
     network: { tables, useStore, playerEntity },
+    // @ts-expect-error unused SyncProgress
     components: { SyncProgress },
   } = useMUD();
   const [name, setName] = useState("");

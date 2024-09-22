@@ -24,7 +24,9 @@ const SpawnPlayer = () => {
   //   }
   // };
 
-  const handleRegisterSubmit = async (e) => {
+  const handleRegisterSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
     e.preventDefault();
 
     // Check if walletClient is available

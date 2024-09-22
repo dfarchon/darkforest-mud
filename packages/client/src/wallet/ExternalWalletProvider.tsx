@@ -1,16 +1,18 @@
-import { useStore } from "@hooks/useStore";
+import { type ContractType, useStore } from "@hooks/useStore";
 import { transportObserver } from "@latticexyz/common";
 import { transactionQueue } from "@latticexyz/common/actions";
 import type { NetworkConfig } from "@mud/getNetworkConfig";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import { useEffect } from "react";
 import {
-  type ClientConfig,
+  type Chain,
   createPublicClient,
   fallback,
   getContract,
   type Hex,
   http,
+  type PublicClientConfig,
+  type Transport,
   webSocket,
 } from "viem";
 import { useWalletClient } from "wagmi";
@@ -35,14 +37,22 @@ export function ExternalWalletProvider({ networkConfig, children }: Props) {
       return;
     }
 
-    const customExternalWalletClient =
-      externalWalletClient.extend(transactionQueue());
+    type ExternalWalletClient = typeof externalWalletClient;
+    type ExtendFnType = Parameters<typeof externalWalletClient.extend>[0];
+    const customExternalWalletClient = externalWalletClient.extend(
+      transactionQueue() as ExtendFnType,
+    ) as unknown as ExternalWalletClient;
 
-    const clientOptions = {
-      chain: networkConfig.chain,
-      transport: transportObserver(fallback([webSocket(), http()])),
+    const fallbackTransport = fallback([webSocket(), http()]);
+    const clientOptions: PublicClientConfig = {
+      chain: networkConfig.chain as Chain,
+      transport: transportObserver(
+        // NOTE: Are we sure this is working correctly?, since underlying type of fallbackResponse is Transport[]
+        // while transportObserver wants Transport
+        fallbackTransport as Parameters<typeof transportObserver>[0],
+      ) as Transport,
       pollingInterval: 250,
-    } as const satisfies ClientConfig;
+    };
 
     // TODO: centralize this somewhere
     const publicClient = createPublicClient(clientOptions);
@@ -58,7 +68,7 @@ export function ExternalWalletProvider({ networkConfig, children }: Props) {
 
     useStore.setState({
       externalWalletClient: customExternalWalletClient,
-      externalWorldContract: externalWorldContract,
+      externalWorldContract: externalWorldContract as ContractType,
     });
   }, [
     externalWalletClient,

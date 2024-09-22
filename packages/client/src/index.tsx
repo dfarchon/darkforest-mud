@@ -25,10 +25,14 @@ setup().then(async (result) => {
   // https://vitejs.dev/guide/env-and-mode.html
   if (import.meta.env.DEV) {
     const { mount: mountDevTools } = await import("@latticexyz/dev-tools");
+    // TODO: Investigage why automatic infering of type is not working for the options
+    type MountDevToolsOptionsType = Parameters<typeof mountDevTools>[0];
     mountDevTools({
       config: mudConfig,
-      publicClient: result.network.publicClient,
-      walletClient: result.network.walletClient,
+      publicClient: result.network
+        .publicClient as MountDevToolsOptionsType["publicClient"],
+      walletClient: result.network
+        .walletClient as MountDevToolsOptionsType["walletClient"],
       latestBlock$: result.network.latestBlock$,
       storedBlockLogs$: result.network.storedBlockLogs$,
       worldAddress: result.network.worldContract.address,

@@ -10,7 +10,10 @@ import {
   transportObserver,
 } from "@latticexyz/common";
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
-import { observer } from "@latticexyz/explorer/observer";
+import {
+  observer,
+  type WaitForTransaction,
+} from "@latticexyz/explorer/observer";
 import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
 import { syncToZustand } from "@latticexyz/store-sync/zustand";
 /*
@@ -25,13 +28,15 @@ import mudConfig from "contracts/mud.config";
 import IWorldAbi from "contracts/out/IWorld.sol/IWorld.abi.json";
 import { share, Subject } from "rxjs";
 import {
-  type ClientConfig,
+  type Chain,
   createPublicClient,
   createWalletClient,
   fallback,
   getContract,
   type Hex,
   http,
+  type PublicClientConfig,
+  type Transport,
   webSocket,
 } from "viem";
 
@@ -42,18 +47,24 @@ export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
   const networkConfig = getNetworkConfig();
-  const waitForStateChange = Promise.withResolvers<WaitForStateChange>();
+  const waitForStateChange = Promise.withResolvers<WaitForTransaction>();
+  const fallbackTransport = fallback([webSocket(), http()]);
+
   /*
    * Create a viem public (read only) client
    * (https://viem.sh/docs/clients/public.html)
    */
-  const clientOptions = {
-    chain: networkConfig.chain,
-    transport: transportObserver(fallback([webSocket(), http()])),
+  const clientOptions: PublicClientConfig = {
+    chain: networkConfig.chain as Chain,
+    transport: transportObserver(
+      // NOTE: Are we sure this is working correctly?, since underlying type of fallbackResponse is Transport[]
+      // while transportObserver wants Transport
+      fallbackTransport as Parameters<typeof transportObserver>[0],
+    ) as Transport,
     pollingInterval: 1000,
-  } as const satisfies ClientConfig;
+  };
 
-  const publicClient = createPublicClient(clientOptions);
+  const publicClient = createPublicClient<Transport, Chain>(clientOptions);
 
   /*
    * Create an observable for contract writes that we can
@@ -71,7 +82,10 @@ export async function setupNetwork() {
       world,
       config: mudConfig,
       address: networkConfig.worldAddress as Hex,
-      publicClient,
+      // NOTE: We cast to type of publicClient in syncToRecs options need to investigate more here on how to get correct types
+      publicClient: publicClient as Parameters<
+        typeof syncToRecs
+      >[0]["publicClient"],
       startBlock: BigInt(networkConfig.initialBlockNumber),
     });
 
@@ -84,7 +98,10 @@ export async function setupNetwork() {
   } = await syncToZustand({
     config: mudConfig,
     address: networkConfig.worldAddress as Hex,
-    publicClient,
+    // NOTE: We cast to type of publicClient in syncToZustand options need to investigate more here on how to get correct types
+    publicClient: publicClient as Parameters<
+      typeof syncToZustand
+    >[0]["publicClient"],
     startBlock: BigInt(networkConfig.initialBlockNumber),
   });
 
@@ -93,13 +110,26 @@ export async function setupNetwork() {
    * (see https://viem.sh/docs/clients/wallet.html).
    */
   const burnerAccount = createBurnerAccount(networkConfig.privateKey as Hex);
-  const burnerWalletClient = createWalletClient({
+  type BurnerWalletClient = ReturnType<typeof createWalletClient>;
+  let burnerWalletClient: BurnerWalletClient = createWalletClient({
     ...clientOptions,
-    account: burnerAccount,
-  })
-    .extend(transactionQueue())
-    .extend(writeObserver({ onWrite: (write) => write$.next(write) }))
-    .extend(observer({ waitForTransaction }));
+    // NOTE: We cast to account type  in createWalletClient options need to investigate more here on how to get correct types
+    account: burnerAccount as Parameters<
+      typeof createWalletClient
+    >[0]["account"],
+  });
+
+  // TODO: Fix hacky mess to get types correct and remove never from burnerWalletClient
+  type ExtendFnType = Parameters<typeof burnerWalletClient.extend>[0];
+  burnerWalletClient = burnerWalletClient.extend(
+    transactionQueue() as ExtendFnType,
+  ) as unknown as BurnerWalletClient;
+  burnerWalletClient = burnerWalletClient.extend(
+    writeObserver({ onWrite: (write) => write$.next(write) }) as ExtendFnType,
+  ) as unknown as BurnerWalletClient;
+  burnerWalletClient = burnerWalletClient.extend(
+    observer({ waitForTransaction }) as ExtendFnType,
+  ) as unknown as BurnerWalletClient;
 
   /*
    * Create an object for communicating with the deployed World.
@@ -116,7 +146,7 @@ export async function setupNetwork() {
     components,
     playerEntity: encodeEntity(
       { address: "address" },
-      { address: burnerWalletClient.account.address },
+      { address: burnerWalletClient.account!.address },
     ),
     publicClient,
     walletClient: burnerWalletClient,

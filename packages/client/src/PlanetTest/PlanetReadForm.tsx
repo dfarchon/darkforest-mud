@@ -1,12 +1,9 @@
+import type { PlanetStructure } from "@mud/createSystemCalls";
 import { useMUD } from "@mud/MUDContext";
 import React, { useState } from "react";
 
-// Define a Planet type based on the Planet structure
-type Planet = {
-  name: string;
-
-  // Add more fields as per your Planet structure
-};
+// Alias planet structure for createSystemCalls to Planet
+type Planet = PlanetStructure;
 
 type ReadPlanetType =
   | "readPlanetWithHash"
@@ -35,21 +32,25 @@ export const PlanetReadForm: React.FC = () => {
     e.preventDefault();
 
     try {
+      // @ts-expect-error unused planet value
       let planet: Planet | undefined;
       switch (readType) {
-        case "readPlanetWithHash":
-          planet = await readPlanetWithHash(planetHash);
+        case "readPlanetWithHash": {
+          planet = await readPlanetWithHash(BigInt(planetHash));
           break;
-        case "readPlanetWithHashPerlinDistance":
+        }
+        case "readPlanetWithHashPerlinDistance": {
           planet = await readPlanetWithHashPerlinDistance(
-            planetHash,
+            BigInt(planetHash),
             BigInt(perlin),
             BigInt(distanceSquare),
           );
           break;
-        case "readPlanetAt":
-          planet = await readPlanetAt(planetHash, BigInt(tickNumber));
+        }
+        case "readPlanetAt": {
+          planet = await readPlanetAt(BigInt(planetHash), Number(tickNumber));
           break;
+        }
         default:
           throw new Error("Invalid read type selected.");
       }

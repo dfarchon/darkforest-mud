@@ -1,11 +1,12 @@
 import { entityToAddress } from "@frontend/Pages/GamePage";
 import { useMUD } from "@mud/MUDContext";
-import React, { useState } from "react";
-import { encodeFunctionData, parseEther } from "viem";
-import { useWalletClient, useAccount } from "wagmi";
+import { useState } from "react";
+import { encodeFunctionData } from "viem";
+import { useAccount, useWalletClient } from "wagmi";
 
 const PlayerForm = () => {
   const {
+    // @ts-expect-error unused registerPlayer and changePlayerName
     systemCalls: { registerPlayer, changePlayerName, changeBurnerWallet },
     network: { playerEntity, worldContract },
   } = useMUD();
@@ -14,10 +15,12 @@ const PlayerForm = () => {
 
   const { data: walletClient } = useWalletClient();
   const [playerName, setPlayerName] = useState("");
+
+  // @ts-expect-error unused account
   const account = useAccount();
   const [newPlayerName, setNewPlayerName] = useState("");
 
-  const handleRegisterSubmit = async (e) => {
+  const handleRegisterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Check if walletClient is available
@@ -72,7 +75,9 @@ const PlayerForm = () => {
     }
   };
 
-  const handleChangeNameSubmit = async (e) => {
+  const handleChangeNameSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
     e.preventDefault();
 
     // Check if walletClient is available
@@ -135,7 +140,7 @@ const PlayerForm = () => {
   //   console.log("Changing player name to:", newPlayerName);
   // };
 
-  const handleChangeBurnerSubmit = (e) => {
+  const handleChangeBurnerSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Handle change burner address logic here
     changeBurnerWallet(entityToAddress(playerEntity) as `0x${string}`);

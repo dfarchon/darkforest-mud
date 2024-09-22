@@ -26,7 +26,12 @@ export const PlanetUpgradeForm: React.FC<PlanetUpgradeProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    planetUpgrade(planetHash, rangeUpgrades, speedUpgrades, defenseUpgrades);
+    planetUpgrade(
+      BigInt(planetHash),
+      rangeUpgrades,
+      speedUpgrades,
+      defenseUpgrades,
+    );
     onSubmit(planetHash, rangeUpgrades, speedUpgrades, defenseUpgrades);
   };
 

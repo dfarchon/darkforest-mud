@@ -86,7 +86,7 @@ export class GameUIManager extends EventEmitter {
   private readonly gameManager: GameManager;
   private modalManager: ModalManager;
 
-  private terminal: React.MutableRefObject<TerminalHandle | undefined>;
+  private terminal: React.MutableRefObject<TerminalHandle | null>;
 
   /**
    * In order to render React on top of the game, we need to insert React nodes into an overlay
@@ -144,7 +144,7 @@ export class GameUIManager extends EventEmitter {
 
   private constructor(
     gameManager: GameManager,
-    terminalHandle: React.MutableRefObject<TerminalHandle | undefined>,
+    terminalHandle: React.MutableRefObject<TerminalHandle | null>,
   ) {
     super();
 
@@ -225,7 +225,7 @@ export class GameUIManager extends EventEmitter {
 
   public static async create(
     gameManager: GameManager,
-    terminalHandle: React.MutableRefObject<TerminalHandle | undefined>,
+    terminalHandle: React.MutableRefObject<TerminalHandle | null>,
   ) {
     listenForKeyboardEvents();
     const uiEmitter = UIEmitter.getInstance();
@@ -1663,7 +1663,7 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getMyArtifactMap();
   }
 
-  public getTerminal(): TerminalHandle | undefined {
+  public getTerminal(): TerminalHandle | null {
     return this.terminal.current;
   }
 
