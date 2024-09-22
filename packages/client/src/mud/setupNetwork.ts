@@ -10,6 +10,7 @@ import {
   transportObserver,
 } from "@latticexyz/common";
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
+import { observer } from "@latticexyz/explorer/observer";
 import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
 import { syncToZustand } from "@latticexyz/store-sync/zustand";
 /*
@@ -41,7 +42,7 @@ export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
   const networkConfig = getNetworkConfig();
-
+  const waitForStateChange = Promise.withResolvers<WaitForStateChange>();
   /*
    * Create a viem public (read only) client
    * (https://viem.sh/docs/clients/public.html)
@@ -59,28 +60,6 @@ export async function setupNetwork() {
    * pass into MUD dev tools for transaction observability.
    */
   const write$ = new Subject<ContractWrite>();
-
-  /*
-   * Create a temporary wallet and a viem client for it
-   * (see https://viem.sh/docs/clients/wallet.html).
-   */
-  const burnerAccount = createBurnerAccount(networkConfig.privateKey as Hex);
-  const burnerWalletClient = createWalletClient({
-    ...clientOptions,
-    account: burnerAccount,
-  })
-    .extend(transactionQueue())
-    .extend(writeObserver({ onWrite: (write) => write$.next(write) }));
-
-  /*
-   * Create an object for communicating with the deployed World.
-   */
-  const worldContract = getContract({
-    address: networkConfig.worldAddress as Hex,
-    abi: IWorldAbi,
-    client: { public: publicClient, wallet: burnerWalletClient },
-  });
-
   /*
    * Sync on-chain state into RECS and keeps our client in sync.
    * Uses the MUD indexer if available, otherwise falls back
@@ -109,6 +88,29 @@ export async function setupNetwork() {
     startBlock: BigInt(networkConfig.initialBlockNumber),
   });
 
+  /*
+   * Create a temporary wallet and a viem client for it
+   * (see https://viem.sh/docs/clients/wallet.html).
+   */
+  const burnerAccount = createBurnerAccount(networkConfig.privateKey as Hex);
+  const burnerWalletClient = createWalletClient({
+    ...clientOptions,
+    account: burnerAccount,
+  })
+    .extend(transactionQueue())
+    .extend(writeObserver({ onWrite: (write) => write$.next(write) }))
+    .extend(observer({ waitForTransaction }));
+
+  /*
+   * Create an object for communicating with the deployed World.
+   */
+  const worldContract = getContract({
+    address: networkConfig.worldAddress as Hex,
+    abi: IWorldAbi,
+    client: { public: publicClient, wallet: burnerWalletClient },
+  });
+
+  waitForStateChange.resolve(waitForTransaction);
   return {
     world,
     components,
