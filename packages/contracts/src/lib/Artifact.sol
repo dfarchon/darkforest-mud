@@ -11,7 +11,6 @@ using ArtifactStorageLib for ArtifactStorage global;
 struct ArtifactStorage {
   uint256 planetHash;
   uint256 number;
-  // uint256[] artifacts;
   uint256 artifacts;
   bool shouldWrite;
   uint256 inArtifacts;
@@ -112,7 +111,7 @@ library ArtifactStorageLib {
         unchecked {
           --number;
           uint256 mod = 1 << (32 * i);
-          _s.artifacts = (artifacts % mod) + ((artifacts / mod) >> 32);
+          _s.artifacts = (_s.artifacts % mod) + ((_s.artifacts / mod) >> 32) * mod;
           _s.outArtifacts = (_s.outArtifacts << 32) + _artifact;
         }
         return;

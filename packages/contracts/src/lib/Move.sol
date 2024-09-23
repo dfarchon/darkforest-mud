@@ -60,7 +60,7 @@ library MoveLib {
     move.departureTime = uint64(present);
     move.arrivalTime = uint64(present + time);
     // check if the target planet is full of artifacts
-    if (to.artifactStorage.isFull() && move.artifact != 0) {
+    if (move.artifact != 0 && !to.hasArtifactSlot()) {
       revert Errors.ArtifactStorageFull();
     }
     // if time == 0, unload immediately
@@ -218,5 +218,22 @@ library PendingMoveQueueLib {
       _q.shouldWrite = true;
       return firstMove;
     }
+  }
+
+  function GetFlyingArtifactsNum(PendingMoveQueue memory _q) internal view returns (uint256) {
+    uint256[] memory indexes = _q.indexes;
+    uint256 count;
+    uint256 head = _q.head;
+    uint256 tail = head + _q.number;
+    for (uint256 i = head; i < tail; ) {
+      MoveData memory move = Move.get(bytes32(_q.planetHash), uint8(indexes[i % MAX_MOVE_QUEUE_SIZE]));
+      unchecked {
+        if (move.artifact != 0) {
+          ++count;
+        }
+        ++i;
+      }
+    }
+    return count;
   }
 }

@@ -13,7 +13,7 @@ import { ProspectedPlanet, ExploredPlanet } from "../codegen/index.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "./Move.sol";
-import { Artifact, ArtifactLib, ArtifactStorage } from "./Artifact.sol";
+import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "./Artifact.sol";
 
 using PlanetLib for Planet global;
 
@@ -102,6 +102,12 @@ library PlanetLib {
 
   function popArrivedMove(Planet memory planet, uint256 untilTick) internal view returns (MoveData memory move) {
     return planet.moveQueue.PopArrivedMove(untilTick);
+  }
+
+  function hasArtifactSlot(Planet memory planet) internal view returns (bool) {
+    return
+      planet.artifactStorage.number + planet.moveQueue.GetFlyingArtifactsNum() <
+      ArtifactStorageLib.MAX_ARTIFACTS_PER_PLANET;
   }
 
   function pushArtifact(Planet memory planet, uint256 artifact) internal pure {

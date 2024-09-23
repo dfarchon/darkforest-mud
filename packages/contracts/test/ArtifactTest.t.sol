@@ -23,7 +23,7 @@ contract ArtifactTest is MudTest {
     vm.prank(admin);
     IWorld(worldAddress).df__unpause();
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
-    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
   }
 
   function testProspect() public {
@@ -112,6 +112,8 @@ contract ArtifactTest is MudTest {
     vm.prank(address(1));
     _move(1, 2, 80, 100000, 1000, 1);
     assertEq(ArtifactTable.getAvailability(1), false);
+    assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
+    assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 0);
 
     // artifact arrives
     vm.roll(3000);
@@ -120,6 +122,52 @@ contract ArtifactTest is MudTest {
     assertEq(ArtifactTable.getAvailability(1), true);
     assertEq(ArtifactOwner.get(1), bytes32(uint256(2)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 1);
+  }
+
+  function testMoveArtifact2() public {
+    // prospect and find artifact
+    vm.roll(1000);
+    vm.prank(address(1));
+    IWorld(worldAddress).df__prospectPlanet(1);
+    Proof memory proof;
+    BiomebaseInput memory input;
+    input.planetHash = 1;
+    vm.prank(address(1));
+    IWorld(worldAddress).df__findingArtifact(proof, input);
+    vm.prank(address(2));
+    IWorld(worldAddress).df__prospectPlanet(2);
+    input.planetHash = 2;
+    vm.prank(address(2));
+    IWorld(worldAddress).df__findingArtifact(proof, input);
+    assertEq(Counter.getArtifact(), 2);
+
+    // move artifact
+    vm.roll(2000);
+    vm.prank(address(1));
+    _move(1, 2, 80, 50000, 1000, 1);
+
+    // artifact arrives
+    vm.roll(3000);
+    vm.prank(address(2));
+    _move(2, 1, 80, 50000, 1000, 0); // to update two planets
+    assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 2 + (uint256(1) << 32));
+
+    // use admin to create more artifacts on planet 2
+    vm.prank(admin);
+    PlanetArtifact.setArtifacts(bytes32(uint256(2)), 2 + (uint256(1) << 32) + (uint256(3) << 64));
+
+    // move artifact
+    vm.prank(address(2));
+    _move(2, 1, 80, 50000, 1000, 1);
+    assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 2 + (uint256(3) << 32));
+
+    // artifact arrives
+    vm.roll(4000);
+    vm.prank(address(1));
+    _move(1, 2, 80, 50000, 1000, 0); // to update two planets
+    assertEq(ArtifactTable.getAvailability(1), true);
+    assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
+    assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 1);
   }
 
   function _move(
