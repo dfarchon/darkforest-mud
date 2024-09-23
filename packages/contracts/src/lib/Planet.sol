@@ -144,7 +144,11 @@ library PlanetLib {
   function findArtifact(Planet memory planet, address executor) internal returns (Artifact memory artifact) {
     _validateFindingArtifact(planet, executor);
     artifact = ArtifactLib.NewArtifact(_createArtifactSeed(planet), planet.planetHash, planet.level);
-    planet.pushArtifact(artifact.id);
+    if (planet.hasArtifactSlot()) {
+      planet.pushArtifact(artifact.id);
+    } else {
+      revert Errors.ArtifactStorageFull();
+    }
     ExploredPlanet.set(bytes32(planet.planetHash), true);
   }
 

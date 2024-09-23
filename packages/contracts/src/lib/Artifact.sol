@@ -72,11 +72,11 @@ library ArtifactStorageLib {
     }
   }
 
-  function isEmpty(ArtifactStorage memory _s) internal pure returns (bool) {
+  function IsEmpty(ArtifactStorage memory _s) internal pure returns (bool) {
     return _s.number == 0;
   }
 
-  function isFull(ArtifactStorage memory _s) internal pure returns (bool) {
+  function IsFull(ArtifactStorage memory _s) internal pure returns (bool) {
     return _s.number == MAX_ARTIFACTS_PER_PLANET;
   }
 
@@ -85,8 +85,10 @@ library ArtifactStorageLib {
   }
 
   function Push(ArtifactStorage memory _s, uint256 _artifact) internal pure {
-    if (_s.isFull()) {
-      revert Errors.ArtifactStorageFull();
+    if (_s.IsFull()) {
+      // revert Errors.ArtifactStorageFull();
+      // in order to get rid of stuck planet updating, we just ignore the new artifact
+      return;
     }
     _s.shouldWrite = true;
     unchecked {
@@ -97,7 +99,7 @@ library ArtifactStorageLib {
   }
 
   function Remove(ArtifactStorage memory _s, uint256 _artifact) internal view {
-    if (_s.isEmpty()) {
+    if (_s.IsEmpty()) {
       revert Errors.ArtifactNotOnPlanet();
     }
     if (ArtifactTable.getAvailability(uint32(_artifact)) == false) {
