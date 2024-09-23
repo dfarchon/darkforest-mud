@@ -86,9 +86,7 @@ library ArtifactStorageLib {
 
   function Push(ArtifactStorage memory _s, uint256 _artifact) internal pure {
     if (_s.IsFull()) {
-      // revert Errors.ArtifactStorageFull();
-      // in order to get rid of stuck planet updating, we just ignore the new artifact
-      return;
+      revert Errors.ArtifactStorageFull();
     }
     _s.shouldWrite = true;
     unchecked {
