@@ -7,7 +7,7 @@ import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../src/codegen/index.sol";
-import { Counter, Artifact as ArtifactTable, ArtifactData } from "../src/codegen/Index.sol";
+import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants } from "../src/codegen/Index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
@@ -32,12 +32,12 @@ contract ArtifactTest is MudTest {
     IWorld(worldAddress).df__prospectPlanet(1);
 
     vm.prank(admin);
-    PlanetTable.setPlanetType(bytes32(uint256(1)), PlanetType.PLANET);
+    PlanetConstants.setPlanetType(bytes32(uint256(1)), PlanetType.PLANET);
     vm.prank(address(1));
     vm.expectRevert(Errors.InvalidProspectTarget.selector);
     IWorld(worldAddress).df__prospectPlanet(1);
     vm.prank(admin);
-    PlanetTable.setPlanetType(bytes32(uint256(1)), PlanetType.FOUNDRY);
+    PlanetConstants.setPlanetType(bytes32(uint256(1)), PlanetType.FOUNDRY);
 
     vm.prank(address(1));
     IWorld(worldAddress).df__prospectPlanet(1);

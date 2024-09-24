@@ -103,7 +103,7 @@ contract PlayerSystem is System {
 
     // new planet instances in memory
     Planet memory planet = world.df__readPlanet(_input.planetHash, _input.perlin, _input.radiusSquare);
-    planet.owner = player;
+    planet.changeOwner(player);
 
     // valid spawn planet
     if (

@@ -249,13 +249,28 @@ export default defineWorld({
     Planet: {
       id: "bytes32",
       lastUpdateTick: "uint64",
-      perlin: "uint8", // not sure if this suffices
-      level: "uint8",
-      planetType: "PlanetType",
-      spaceType: "SpaceType",
       population: "uint64",
       silver: "uint64",
       upgrades: "uint24", // uint8 range | uint8 speed | uint8 defense
+      useProps: "bool",
+    },
+    PlanetConstants: {
+      id: "bytes32",
+      perlin: "uint8",
+      level: "uint8",
+      planetType: "PlanetType",
+      spaceType: "SpaceType",
+    },
+    // upgraded planet properties, replaces the original metadata
+    PlanetProps: {
+      id: "bytes32",
+      range: "uint32",
+      speed: "uint16",
+      defense: "uint16",
+      populationCap: "uint64",
+      populationGrowth: "uint32",
+      silverCap: "uint64",
+      silverGrowth: "uint32",
     },
     PlanetOwner: "address",
     PendingMove: {

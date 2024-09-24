@@ -88,7 +88,7 @@ library MoveLib {
       if (population > (arrivedPopulation * 100) / defense) {
         population -= (arrivedPopulation * 100) / defense;
       } else {
-        to.owner = move.captain;
+        to.changeOwner(move.captain);
         population = arrivedPopulation - ((population * defense) / 100);
         if (population == 0) {
           population = 1;

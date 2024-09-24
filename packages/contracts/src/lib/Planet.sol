@@ -4,9 +4,10 @@ pragma solidity >=0.8.24;
 import { Errors } from "../interfaces/errors.sol";
 import { PlanetType, SpaceType, Biome } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
+import { PlanetOwner, PlanetConstants, PlanetConstantsData, PlanetProps, PlanetPropsData } from "../codegen/index.sol";
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
-import { PlanetInitialResource, PlanetInitialResourceData, Ticker, PlanetOwner } from "../codegen/index.sol";
+import { PlanetInitialResource, PlanetInitialResourceData, Ticker } from "../codegen/index.sol";
 import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../codegen/index.sol";
 import { ProspectedPlanet, ExploredPlanet } from "../codegen/index.sol";
@@ -20,20 +21,26 @@ using PlanetLib for Planet global;
 struct Planet {
   uint256 planetHash;
   uint256 distSquare; // only for toPlanet in a move
-  // properties generated during initialization
-  uint256 perlin;
+  uint256 universeZone; // only for newly initialized toPlanet in a move
+  // Table: PlanetOwner
+  bool ownerChanged;
   address owner;
-  uint256 lastUpdateTick;
+  // Table: PlanetConstants
+  bool isInitialized;
+  uint256 perlin;
   uint256 level;
   PlanetType planetType;
   SpaceType spaceType;
-  uint256 universeZone; // only for newly initialized toPlanet in a move
+  // Table: Planet
+  uint256 lastUpdateTick;
   uint256 population;
   uint256 silver;
   uint256 rangeUpgrades;
   uint256 speedUpgrades;
   uint256 defenseUpgrades;
-  // properties read from planet metadata
+  bool useProps;
+  // Table: PlanetProps / PlanetMetadata
+  bool updateProps;
   uint256 range;
   uint256 speed;
   uint256 defense;
@@ -49,35 +56,58 @@ struct Planet {
 
 library PlanetLib {
   function readFromStore(Planet memory planet) internal view {
-    if (PlanetTable.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
+    if (PlanetConstants.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
       _validateHash(planet);
       _initPlanet(planet);
     } else {
-      _readLatestData(planet);
+      _readPlanetData(planet);
+      _readConstants(planet);
     }
 
     planet.artifactStorage.ReadFromStore(planet.planetHash);
     planet.moveQueue.ReadFromStore(planet.planetHash);
 
-    _readMetadata(planet);
-    _luckilyDouble(planet);
-    _activateUpgrades(planet);
+    _readPropsOrMetadata(planet);
   }
 
   function writeToStore(Planet memory planet) internal {
-    PlanetData memory data = PlanetData({
-      perlin: uint8(planet.perlin),
-      lastUpdateTick: uint64(planet.lastUpdateTick),
-      level: uint8(planet.level),
-      planetType: planet.planetType,
-      spaceType: planet.spaceType,
-      population: uint64(planet.population),
-      silver: uint64(planet.silver),
-      upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades)
-    });
-    PlanetTable.set(bytes32(planet.planetHash), data);
-    if (planet.owner != PlanetOwner.get(bytes32(planet.planetHash))) {
+    if (planet.isInitialized) {
+      PlanetConstants.set(
+        bytes32(planet.planetHash),
+        PlanetConstantsData({
+          perlin: uint8(planet.perlin),
+          level: uint8(planet.level),
+          planetType: planet.planetType,
+          spaceType: planet.spaceType
+        })
+      );
+    }
+    PlanetTable.set(
+      bytes32(planet.planetHash),
+      PlanetData({
+        lastUpdateTick: uint64(planet.lastUpdateTick),
+        population: uint64(planet.population),
+        silver: uint64(planet.silver),
+        upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades),
+        useProps: planet.useProps
+      })
+    );
+    if (planet.ownerChanged) {
       PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
+    }
+    if (planet.updateProps) {
+      PlanetProps.set(
+        bytes32(planet.planetHash),
+        PlanetPropsData({
+          range: uint32(planet.range),
+          speed: uint16(planet.speed),
+          defense: uint16(planet.defense),
+          populationCap: uint64(planet.populationCap),
+          populationGrowth: uint32(planet.populationGrowth),
+          silverCap: uint64(planet.silverCap),
+          silverGrowth: uint32(planet.silverGrowth)
+        })
+      );
     }
     planet.moveQueue.WriteToStore();
     planet.artifactStorage.WriteToStore();
@@ -118,6 +148,11 @@ library PlanetLib {
     planet.artifactStorage.Remove(artifact);
   }
 
+  function changeOwner(Planet memory planet, address newOwner) internal pure {
+    planet.owner = newOwner;
+    planet.ownerChanged = true;
+  }
+
   function upgrade(
     Planet memory planet,
     address executor,
@@ -134,6 +169,7 @@ library PlanetLib {
     planet.speedUpgrades += speedUpgrades;
     planet.defenseUpgrades += defenseUpgrades;
     planet.silver -= silverCost;
+    _activateUpgrades(planet, rangeUpgrades, speedUpgrades, defenseUpgrades);
   }
 
   function prospect(Planet memory planet, address executor) internal {
@@ -162,6 +198,7 @@ library PlanetLib {
   }
 
   function _initPlanet(Planet memory planet) internal view {
+    planet.isInitialized = true;
     _initZone(planet);
     _initSpaceType(planet);
     _initLevel(planet);
@@ -273,23 +310,46 @@ library PlanetLib {
     planet.silver = initialResources.silver;
   }
 
-  function _readLatestData(Planet memory planet) internal view {
-    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
-    if (data.planetType == PlanetType.UNKNOWN) {
-      revert Errors.InvalidPlanetHash();
-    }
-    planet.perlin = data.perlin;
+  function _readPlanetData(Planet memory planet) internal view {
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
+    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
-    planet.level = data.level;
-    planet.planetType = data.planetType;
-    planet.spaceType = data.spaceType;
     planet.population = data.population;
     planet.silver = data.silver;
     uint256 upgrades = data.upgrades;
     planet.rangeUpgrades = uint8(upgrades >> 16);
     planet.speedUpgrades = uint8(upgrades >> 8);
     planet.defenseUpgrades = uint8(upgrades);
+    planet.useProps = data.useProps;
+  }
+
+  function _readConstants(Planet memory planet) internal view {
+    PlanetConstantsData memory constants = PlanetConstants.get(bytes32(planet.planetHash));
+    planet.perlin = constants.perlin;
+    planet.level = constants.level;
+    planet.planetType = constants.planetType;
+    planet.spaceType = constants.spaceType;
+  }
+
+  function _readPropsOrMetadata(Planet memory planet) internal view {
+    if (planet.useProps) {
+      _readProps(planet);
+    } else {
+      _readMetadata(planet);
+      _luckilyDouble(planet);
+      _activateUpgrades(planet, planet.rangeUpgrades, planet.speedUpgrades, planet.defenseUpgrades);
+    }
+  }
+
+  function _readProps(Planet memory planet) internal view {
+    PlanetPropsData memory props = PlanetProps.get(bytes32(planet.planetHash));
+    planet.range = props.range;
+    planet.speed = props.speed;
+    planet.defense = props.defense;
+    planet.populationCap = props.populationCap;
+    planet.populationGrowth = props.populationGrowth;
+    planet.silverCap = props.silverCap;
+    planet.silverGrowth = props.silverGrowth;
   }
 
   function _readMetadata(Planet memory planet) internal view {
@@ -326,8 +386,13 @@ library PlanetLib {
     }
   }
 
-  function _activateUpgrades(Planet memory planet) internal view {
-    uint256 totalLevel = planet.rangeUpgrades + planet.speedUpgrades + planet.defenseUpgrades;
+  function _activateUpgrades(
+    Planet memory planet,
+    uint256 rangeUpgrades,
+    uint256 speedUpgrades,
+    uint256 defenseUpgrades
+  ) internal view {
+    uint256 totalLevel = rangeUpgrades + speedUpgrades + defenseUpgrades;
     if (totalLevel == 0) {
       return;
     }
@@ -338,15 +403,23 @@ library PlanetLib {
     planet.populationGrowth =
       (planet.populationGrowth * uint256(config.populationGrowthMultiplier) ** totalLevel) /
       uint256(100) ** totalLevel;
-    planet.range =
-      (planet.range * uint256(config.rangeMultiplier) ** planet.rangeUpgrades) /
-      uint256(100) ** planet.rangeUpgrades;
-    planet.speed =
-      (planet.speed * uint256(config.speedMultiplier) ** planet.speedUpgrades) /
-      uint256(100) ** planet.speedUpgrades;
-    planet.defense =
-      (planet.defense * uint256(config.defenseMultiplier) ** planet.defenseUpgrades) /
-      uint256(100) ** planet.defenseUpgrades;
+    if (rangeUpgrades > 0) {
+      planet.range =
+        (planet.range * uint256(config.rangeMultiplier) ** rangeUpgrades) /
+        uint256(100) ** planet.rangeUpgrades;
+    }
+    if (speedUpgrades > 0) {
+      planet.speed =
+        (planet.speed * uint256(config.speedMultiplier) ** speedUpgrades) /
+        uint256(100) ** planet.speedUpgrades;
+    }
+    if (defenseUpgrades > 0) {
+      planet.defense =
+        (planet.defense * uint256(config.defenseMultiplier) ** defenseUpgrades) /
+        uint256(100) ** planet.defenseUpgrades;
+    }
+    planet.useProps = true;
+    planet.updateProps = true;
   }
 
   function _populationGrow(Planet memory planet, uint256 tickElapsed) internal pure {

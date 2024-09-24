@@ -130,128 +130,112 @@ a_x = 0
 b_y = 0
 c_hash = "0x0998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b"
 d_owner = "0x0000000000000000000000000000000000000000"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 9
-d_planet_type = 1
-e_space_type = 2
-f_population = 800000000
-g_silver = 200000000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 9
+h_planet_type = 1
+i_space_type = 2
+j_population = 800000000
+k_silver = 200000000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = 0
 b_y = 1000
 c_hash = "0x2f2f570496eba865f0f7e547c58e5f408c59b1a4888738ef05f9ced2334a98cc"
 d_owner = "0x0000000000000000000000000000000000000000"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 7
-d_planet_type = 2
-e_space_type = 3
-f_population = 500000000
-g_silver = 100000000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 7
+h_planet_type = 2
+i_space_type = 3
+j_population = 500000000
+k_silver = 100000000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = 1000
 b_y = 0
 c_hash = "0x0f2a81649e22806f1615bfbb872f588b58160304fa9f6342ceaf0497e9b62f7a"
 d_owner = "0x0000000000000000000000000000000000000000"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 5
-d_planet_type = 3
-e_space_type = 3
-f_population = 100000000
-g_silver = 25000000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 5
+h_planet_type = 3
+i_space_type = 3
+j_population = 100000000
+k_silver = 25000000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = 0
 b_y = -1000
 c_hash = "0x0157da9a7cd70b3252ce6646b096689251290d66bbd57342caaffab0ecf37db2"
 d_owner = "0x0000000000000000000000000000000000000000"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 3
-d_planet_type = 4
-e_space_type = 3
-f_population = 6000000
-g_silver = 1500000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 3
+h_planet_type = 4
+i_space_type = 3
+j_population = 6000000
+k_silver = 1500000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = -1000
 b_y = 0
 c_hash = "0x25ecb2c15cc398a7ddd3d754aed037383a0e2cf7b0a58c41a02d9d57c716ba0b"
 d_owner = "0x0000000000000000000000000000000000000000"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 1
-d_planet_type = 5
-e_space_type = 3
-f_population = 400000
-g_silver = 500000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 1
+h_planet_type = 5
+i_space_type = 3
+j_population = 400000
+k_silver = 500000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = 1000
 b_y = 1000
 c_hash = "0x2b793eaafe86e97e2bf670ba48d5a1c3984ad11e335d87bc9657c7ab6d030caf"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 8
-d_planet_type = 1
-e_space_type = 1
-f_population = 700000000
-g_silver = 100000000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 8
+h_planet_type = 1
+i_space_type = 1
+j_population = 700000000
+k_silver = 100000000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = -1000
 b_y = -1000
 c_hash = "0x1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 6
-d_planet_type = 1
-e_space_type = 2
-f_population = 300000000
-g_silver = 50000000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 6
+h_planet_type = 1
+i_space_type = 2
+j_population = 300000000
+k_silver = 50000000
+l_upgrades = 0
 
 [[test_planets]]
 a_x = -1000
 b_y = 1000
 c_hash = "0x287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-
-[test_planets.e_data]
-a_last_update_tick = 0
-b_perlin = 0
-c_level = 4
-d_planet_type = 1
-e_space_type = 3
-f_population = 25000000
-g_silver = 6000000
-h_upgrades = 0
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 4
+h_planet_type = 1
+i_space_type = 3
+j_population = 25000000
+k_silver = 6000000
+l_upgrades = 0
 
 # implement as default for CreatePlanet form
 # [[test_planets]]
@@ -259,13 +243,11 @@ h_upgrades = 0
 # b_y = -1000
 # c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
 # d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-
-# [test_planets.e_data]
-# a_last_update_tick = 0
-# b_perlin = 0
-# c_level = 2
-# d_planet_type = 1
-# e_space_type = 4
-# f_population = 1600000
-# g_silver = 200000
-# h_upgrades = 0
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 2
+# h_planet_type = 1
+# i_space_type = 4
+# j_population = 1600000
+# k_silver = 200000
+# l_upgrades = 0

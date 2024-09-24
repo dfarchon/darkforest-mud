@@ -4,7 +4,8 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { IWorld } from "../codegen/world/IWorld.sol";
 import { PlanetType, SpaceType } from "../codegen/common.sol";
-import { Planet, PlanetOwner, Ticker } from "../codegen/index.sol";
+import { Planet as PlanetTable, PlanetOwner, PlanetConstants, Ticker } from "../codegen/index.sol";
+import { Planet } from "../lib/Planet.sol";
 
 contract TestOnlySystem is System {
   function createPlanet(
@@ -21,17 +22,10 @@ contract TestOnlySystem is System {
     IWorld world = IWorld(_world());
     world.df__tick();
 
-    Planet.set(
-      bytes32(planetHash),
-      Ticker.getTickNumber(),
-      perlin,
-      level,
-      planetType,
-      spaceType,
-      population,
-      silver,
-      upgrades
-    );
+    PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
+
+    PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
+
     PlanetOwner.set(bytes32(planetHash), owner);
   }
 }
