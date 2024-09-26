@@ -35,7 +35,7 @@ contract MoveTest is MudTest {
   }
 
   function testMove() public {
-    vm.roll(200);
+    vm.roll(1000);
     Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
     Planet memory planet2 = IWorld(worldAddress).df__readPlanet(2);
     assertEq(planet1.population, 300000);

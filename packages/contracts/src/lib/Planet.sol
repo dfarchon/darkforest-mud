@@ -2,35 +2,45 @@
 pragma solidity >=0.8.24;
 
 import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType } from "../codegen/common.sol";
+import { PlanetType, SpaceType, Biome } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
+import { PlanetOwner, PlanetConstants, PlanetConstantsData, PlanetProps, PlanetPropsData } from "../codegen/index.sol";
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
-import { PlanetInitialResource, PlanetInitialResourceData, Ticker, PlanetOwner } from "../codegen/index.sol";
+import { PlanetInitialResource, PlanetInitialResourceData, Ticker } from "../codegen/index.sol";
 import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../codegen/index.sol";
+import { ProspectedPlanet, ExploredPlanet } from "../codegen/index.sol";
+import { PlanetBiomeConfig, PlanetBiomeConfigData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "./Move.sol";
+import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "./Artifact.sol";
 
 using PlanetLib for Planet global;
 
 struct Planet {
   uint256 planetHash;
   uint256 distSquare; // only for toPlanet in a move
-  // properties generated during initialization
-  uint256 perlin;
+  uint256 universeZone; // only for newly initialized toPlanet in a move
+  // Table: PlanetOwner
+  bool ownerChanged;
   address owner;
-  uint256 lastUpdateTick;
+  // Table: PlanetConstants
+  bool isInitialized;
+  uint256 perlin;
   uint256 level;
   PlanetType planetType;
   SpaceType spaceType;
-  uint256 universeZone; // only for newly initialized toPlanet in a move
+  // Table: Planet
+  uint256 lastUpdateTick;
   uint256 population;
   uint256 silver;
   uint256 rangeUpgrades;
   uint256 speedUpgrades;
   uint256 defenseUpgrades;
-  // properties read from planet metadata
+  bool useProps;
+  // Table: PlanetProps / PlanetMetadata
+  bool updateProps;
   uint256 range;
   uint256 speed;
   uint256 defense;
@@ -38,39 +48,69 @@ struct Planet {
   uint256 populationGrowth;
   uint256 silverCap;
   uint256 silverGrowth;
+  // move queue
   PendingMoveQueue moveQueue;
+  // artifact storage
+  ArtifactStorage artifactStorage;
 }
 
 library PlanetLib {
   function readFromStore(Planet memory planet) internal view {
-    if (PlanetTable.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
+    if (PlanetConstants.getPlanetType(bytes32(planet.planetHash)) == PlanetType.UNKNOWN) {
       _validateHash(planet);
       _initPlanet(planet);
     } else {
-      _readLatestData(planet);
+      _readPlanetData(planet);
+      _readConstants(planet);
     }
 
+    planet.artifactStorage.ReadFromStore(planet.planetHash);
     planet.moveQueue.ReadFromStore(planet.planetHash);
 
-    _readMetadata(planet);
-    _luckilyDouble(planet);
-    _activateUpgrades(planet);
+    _readPropsOrMetadata(planet);
   }
 
   function writeToStore(Planet memory planet) internal {
-    PlanetData memory data = PlanetData({
-      perlin: uint8(planet.perlin),
-      lastUpdateTick: uint64(planet.lastUpdateTick),
-      level: uint8(planet.level),
-      planetType: planet.planetType,
-      spaceType: planet.spaceType,
-      population: uint64(planet.population),
-      silver: uint64(planet.silver),
-      upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades)
-    });
-    PlanetTable.set(bytes32(planet.planetHash), data);
-    PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
+    if (planet.isInitialized) {
+      PlanetConstants.set(
+        bytes32(planet.planetHash),
+        PlanetConstantsData({
+          perlin: uint8(planet.perlin),
+          level: uint8(planet.level),
+          planetType: planet.planetType,
+          spaceType: planet.spaceType
+        })
+      );
+    }
+    PlanetTable.set(
+      bytes32(planet.planetHash),
+      PlanetData({
+        lastUpdateTick: uint64(planet.lastUpdateTick),
+        population: uint64(planet.population),
+        silver: uint64(planet.silver),
+        upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades),
+        useProps: planet.useProps
+      })
+    );
+    if (planet.ownerChanged) {
+      PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
+    }
+    if (planet.updateProps) {
+      PlanetProps.set(
+        bytes32(planet.planetHash),
+        PlanetPropsData({
+          range: uint32(planet.range),
+          speed: uint16(planet.speed),
+          defense: uint16(planet.defense),
+          populationCap: uint64(planet.populationCap),
+          populationGrowth: uint32(planet.populationGrowth),
+          silverCap: uint64(planet.silverCap),
+          silverGrowth: uint32(planet.silverGrowth)
+        })
+      );
+    }
     planet.moveQueue.WriteToStore();
+    planet.artifactStorage.WriteToStore();
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
@@ -94,6 +134,52 @@ library PlanetLib {
     return planet.moveQueue.PopArrivedMove(untilTick);
   }
 
+  function hasArtifactSlot(Planet memory planet) internal view returns (bool) {
+    return
+      planet.artifactStorage.GetNumber() + planet.moveQueue.GetFlyingArtifactsNum() <
+      ArtifactStorageLib.MAX_ARTIFACTS_PER_PLANET;
+  }
+
+  function pushArtifact(Planet memory planet, uint256 artifact) internal pure {
+    planet.artifactStorage.Push(artifact);
+  }
+
+  function removeArtifact(Planet memory planet, uint256 artifact) internal view {
+    planet.artifactStorage.Remove(artifact);
+  }
+
+  function chargeArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    _validateChargeArtifact(planet, artifact, executor);
+    artifact.charging(planet.lastUpdateTick);
+    artifact.writeToStore();
+  }
+
+  function activateArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    _validateActivateArtifact(planet, artifact, executor);
+    planet.population -= artifact.reqPopulation;
+    planet.silver -= artifact.reqSilver;
+    artifact.activate(planet.lastUpdateTick);
+    artifact.writeToStore();
+    _applyArtifactEffect(planet, artifact);
+  }
+
+  function deactivateArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    artifact.deactivate(planet.lastUpdateTick);
+    artifact.writeToStore();
+    _removeArtifactEffect(planet, artifact);
+  }
+
+  function changeOwner(Planet memory planet, address newOwner) internal pure {
+    planet.owner = newOwner;
+    planet.ownerChanged = true;
+  }
+
   function upgrade(
     Planet memory planet,
     address executor,
@@ -101,42 +187,42 @@ library PlanetLib {
     uint256 speedUpgrades,
     uint256 defenseUpgrades
   ) internal view {
-    if (planet.owner != executor) {
-      revert Errors.NotPlanetOwner();
+    _validateUpgrade(planet, executor, rangeUpgrades, speedUpgrades, defenseUpgrades);
+    uint256 silverCost = _calUpgradeCost(planet, rangeUpgrades, speedUpgrades, defenseUpgrades);
+    if (planet.silver < silverCost) {
+      revert Errors.NotEnoughSilverToUpgrade();
     }
-    if (planet.planetType != PlanetType.PLANET || planet.level == 0) {
-      revert Errors.InvalidUpgradeTarget();
-    }
-    UpgradeConfigData memory config = UpgradeConfig.get();
-    uint256 totalLevel = planet.rangeUpgrades + planet.speedUpgrades + planet.defenseUpgrades;
     planet.rangeUpgrades += rangeUpgrades;
     planet.speedUpgrades += speedUpgrades;
     planet.defenseUpgrades += defenseUpgrades;
-    uint256 curTotalLevel = totalLevel + rangeUpgrades + speedUpgrades + defenseUpgrades;
-    uint256 maxSingleLevel = config.maxSingleLevel;
-    uint256 maxTotalLevel = uint8(config.maxTotalLevel >> ((uint8(planet.spaceType) - 1) * 8));
-    if (
-      curTotalLevel > maxTotalLevel ||
-      planet.rangeUpgrades > maxSingleLevel ||
-      planet.speedUpgrades > maxSingleLevel ||
-      planet.defenseUpgrades > maxSingleLevel
-    ) {
-      revert Errors.UpgradeExceedMaxLevel();
+    planet.silver -= silverCost;
+    _activateUpgrades(planet, rangeUpgrades, speedUpgrades, defenseUpgrades);
+  }
+
+  function prospect(Planet memory planet, address executor) internal {
+    _validateProspect(planet, executor);
+    ProspectedPlanet.set(bytes32(planet.planetHash), uint64(block.number));
+  }
+
+  function findArtifact(Planet memory planet, address executor) internal returns (Artifact memory artifact) {
+    _validateFindingArtifact(planet, executor);
+    artifact = ArtifactLib.NewArtifact(_createArtifactSeed(planet), planet.planetHash, planet.level);
+    if (planet.hasArtifactSlot()) {
+      planet.pushArtifact(artifact.id);
+    } else {
+      revert Errors.ArtifactStorageFull();
     }
-    uint256 totalCost;
-    uint256 silverCost = config.silverCost >> (totalLevel * 8);
-    for (uint256 i = totalLevel; i < curTotalLevel; ) {
-      totalCost += uint8(silverCost);
-      unchecked {
-        silverCost >>= 8;
-        ++i;
-      }
+    ExploredPlanet.set(bytes32(planet.planetHash), true);
+  }
+
+  function mustGetArtifact(Planet memory planet, uint256 artifactId) internal view returns (Artifact memory artifact) {
+    if (planet.artifactStorage.Has(artifactId)) {
+      artifact.planetHash = planet.planetHash;
+      artifact.id = artifactId;
+      artifact.readFromStore();
+    } else {
+      revert Errors.ArtifactNotOnPlanet();
     }
-    totalCost = (totalCost * planet.silverCap) / 100;
-    if (planet.silver < totalCost) {
-      revert Errors.NotEnoughSilverToUpgrade();
-    }
-    planet.silver -= totalCost;
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -149,6 +235,7 @@ library PlanetLib {
   }
 
   function _initPlanet(Planet memory planet) internal view {
+    planet.isInitialized = true;
     _initZone(planet);
     _initSpaceType(planet);
     _initLevel(planet);
@@ -260,23 +347,46 @@ library PlanetLib {
     planet.silver = initialResources.silver;
   }
 
-  function _readLatestData(Planet memory planet) internal view {
-    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
-    if (data.planetType == PlanetType.UNKNOWN) {
-      revert Errors.InvalidPlanetHash();
-    }
-    planet.perlin = data.perlin;
+  function _readPlanetData(Planet memory planet) internal view {
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
+    PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
-    planet.level = data.level;
-    planet.planetType = data.planetType;
-    planet.spaceType = data.spaceType;
     planet.population = data.population;
     planet.silver = data.silver;
     uint256 upgrades = data.upgrades;
     planet.rangeUpgrades = uint8(upgrades >> 16);
     planet.speedUpgrades = uint8(upgrades >> 8);
     planet.defenseUpgrades = uint8(upgrades);
+    planet.useProps = data.useProps;
+  }
+
+  function _readConstants(Planet memory planet) internal view {
+    PlanetConstantsData memory constants = PlanetConstants.get(bytes32(planet.planetHash));
+    planet.perlin = constants.perlin;
+    planet.level = constants.level;
+    planet.planetType = constants.planetType;
+    planet.spaceType = constants.spaceType;
+  }
+
+  function _readPropsOrMetadata(Planet memory planet) internal view {
+    if (planet.useProps) {
+      _readProps(planet);
+    } else {
+      _readMetadata(planet);
+      _luckilyDouble(planet);
+      _activateUpgrades(planet, planet.rangeUpgrades, planet.speedUpgrades, planet.defenseUpgrades);
+    }
+  }
+
+  function _readProps(Planet memory planet) internal view {
+    PlanetPropsData memory props = PlanetProps.get(bytes32(planet.planetHash));
+    planet.range = props.range;
+    planet.speed = props.speed;
+    planet.defense = props.defense;
+    planet.populationCap = props.populationCap;
+    planet.populationGrowth = props.populationGrowth;
+    planet.silverCap = props.silverCap;
+    planet.silverGrowth = props.silverGrowth;
   }
 
   function _readMetadata(Planet memory planet) internal view {
@@ -313,8 +423,13 @@ library PlanetLib {
     }
   }
 
-  function _activateUpgrades(Planet memory planet) internal view {
-    uint256 totalLevel = planet.rangeUpgrades + planet.speedUpgrades + planet.defenseUpgrades;
+  function _activateUpgrades(
+    Planet memory planet,
+    uint256 rangeUpgrades,
+    uint256 speedUpgrades,
+    uint256 defenseUpgrades
+  ) internal view {
+    uint256 totalLevel = rangeUpgrades + speedUpgrades + defenseUpgrades;
     if (totalLevel == 0) {
       return;
     }
@@ -325,15 +440,23 @@ library PlanetLib {
     planet.populationGrowth =
       (planet.populationGrowth * uint256(config.populationGrowthMultiplier) ** totalLevel) /
       uint256(100) ** totalLevel;
-    planet.range =
-      (planet.range * uint256(config.rangeMultiplier) ** planet.rangeUpgrades) /
-      uint256(100) ** planet.rangeUpgrades;
-    planet.speed =
-      (planet.speed * uint256(config.speedMultiplier) ** planet.speedUpgrades) /
-      uint256(100) ** planet.speedUpgrades;
-    planet.defense =
-      (planet.defense * uint256(config.defenseMultiplier) ** planet.defenseUpgrades) /
-      uint256(100) ** planet.defenseUpgrades;
+    if (rangeUpgrades > 0) {
+      planet.range =
+        (planet.range * uint256(config.rangeMultiplier) ** rangeUpgrades) /
+        uint256(100) ** planet.rangeUpgrades;
+    }
+    if (speedUpgrades > 0) {
+      planet.speed =
+        (planet.speed * uint256(config.speedMultiplier) ** speedUpgrades) /
+        uint256(100) ** planet.speedUpgrades;
+    }
+    if (defenseUpgrades > 0) {
+      planet.defense =
+        (planet.defense * uint256(config.defenseMultiplier) ** defenseUpgrades) /
+        uint256(100) ** planet.defenseUpgrades;
+    }
+    planet.useProps = true;
+    planet.updateProps = true;
   }
 
   function _populationGrow(Planet memory planet, uint256 tickElapsed) internal pure {
@@ -375,5 +498,138 @@ library PlanetLib {
     }
     silver += planet.silverGrowth * tickElapsed;
     planet.silver = silver > cap ? cap : silver;
+  }
+
+  function _validateUpgrade(
+    Planet memory planet,
+    address executor,
+    uint256 rangeUpgrades,
+    uint256 speedUpgrades,
+    uint256 defenseUpgrades
+  ) internal view {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.planetType != PlanetType.PLANET || planet.level == 0) {
+      revert Errors.InvalidUpgradeTarget();
+    }
+
+    uint256 rangeLvl = planet.rangeUpgrades + rangeUpgrades;
+    uint256 speedLvl = planet.speedUpgrades + speedUpgrades;
+    uint256 defenseLvl = planet.defenseUpgrades + defenseUpgrades;
+
+    UpgradeConfigData memory config = UpgradeConfig.get();
+    uint256 maxSingleLevel = config.maxSingleLevel;
+    uint256 maxTotalLevel = uint8(config.maxTotalLevel >> ((uint8(planet.spaceType) - 1) * 8));
+
+    if (
+      rangeLvl + speedLvl + defenseLvl > maxTotalLevel ||
+      rangeLvl > maxSingleLevel ||
+      speedLvl > maxSingleLevel ||
+      defenseLvl > maxSingleLevel
+    ) {
+      revert Errors.UpgradeExceedMaxLevel();
+    }
+  }
+
+  function _calUpgradeCost(
+    Planet memory planet,
+    uint256 rangeUpgrades,
+    uint256 speedUpgrades,
+    uint256 defenseUpgrades
+  ) internal view returns (uint256 cost) {
+    uint256 totalLevel = planet.rangeUpgrades + planet.speedUpgrades + planet.defenseUpgrades;
+    uint256 curTotalLevel = totalLevel + rangeUpgrades + speedUpgrades + defenseUpgrades;
+
+    uint256 silverCost = UpgradeConfig.getSilverCost() >> (totalLevel * 8);
+    for (uint256 i = totalLevel; i < curTotalLevel; ) {
+      cost += uint8(silverCost);
+      unchecked {
+        silverCost >>= 8;
+        ++i;
+      }
+    }
+    cost = (cost * planet.silverCap) / 100;
+  }
+
+  function _validateProspect(Planet memory planet, address executor) internal view {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.planetType != PlanetType.FOUNDRY) {
+      revert Errors.InvalidProspectTarget();
+    }
+    if (ProspectedPlanet.get(bytes32(planet.planetHash)) + 256 >= block.number) {
+      revert Errors.PlanetAlreadyProspected();
+    }
+    if (ExploredPlanet.get(bytes32(planet.planetHash))) {
+      revert Errors.PlanetAlreadyExplored();
+    }
+    // todo check whether the gear spaceship is on this planet
+  }
+
+  function _validateFindingArtifact(Planet memory planet, address executor) internal view {
+    if (ExploredPlanet.get(bytes32(planet.planetHash))) {
+      revert Errors.PlanetAlreadyExplored();
+    }
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (ProspectedPlanet.get(bytes32(planet.planetHash)) + 256 < block.number) {
+      revert Errors.PlanetNotProspected();
+    }
+    // todo check whether the gear spaceship is on this planet
+  }
+
+  function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
+    uint256 res = uint8(planet.spaceType) * 3;
+    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
+    if (biomeBase < config.threshold1) {
+      res -= 2;
+    } else if (biomeBase < config.threshold2) {
+      res -= 1;
+    }
+    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
+  }
+
+  function _createArtifactSeed(Planet memory planet) internal view returns (uint256 seed) {
+    seed = uint256(
+      keccak256(
+        abi.encodePacked(
+          planet.planetHash,
+          block.timestamp,
+          blockhash(ProspectedPlanet.get(bytes32(planet.planetHash)))
+        )
+      )
+    );
+  }
+
+  function _validateChargeArtifact(Planet memory planet, Artifact memory artifact, address executor) internal pure {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.level < artifact.reqLevel) {
+      revert Errors.ArtifactLevelTooLow();
+    }
+  }
+
+  function _validateActivateArtifact(Planet memory planet, Artifact memory artifact, address executor) internal pure {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.level < artifact.reqLevel) {
+      revert Errors.ArtifactLevelTooLow();
+    }
+    if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
+      revert Errors.NotEnoughResourceToActivate();
+    }
+  }
+
+  function _applyArtifactEffect(Planet memory planet, Artifact memory artifact) internal {
+    // todo
+  }
+
+  function _removeArtifactEffect(Planet memory planet, Artifact memory artifact) internal {
+    // todo
   }
 }

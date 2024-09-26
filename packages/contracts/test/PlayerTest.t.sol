@@ -31,7 +31,7 @@ contract PlayerTest is MudTest {
 
     vm.roll(200);
     vm.prank(admin);
-    Counter.set(99);
+    Counter.setPlayer(99);
     vm.prank(address(1));
     vm.expectRevert(Errors.NameAlreadyTaken.selector);
     IWorld(worldAddress).df__registerPlayer("test", address(2));

@@ -22,7 +22,10 @@ interface Errors {
   error NotPlanetOwner(); // 0xab2bcfd3
   error NotEnoughPopulation(); // 0xb4560519
   error NotEnoughSilver(); // 0xb973ef98
+  error NotArtifactOwner(); // 0xa4c7eb90
   error ReachMaxMoveToLimit(uint8 limit); // 0x0edddad6
+  error ArtifactStorageFull(); // 0xb3643b72
+  error ArtifactNotOnPlanet(); // 0x37a29a4e
 
   // tick system
   error Paused(); // 0x9e87fac8
@@ -34,6 +37,21 @@ interface Errors {
   error InvalidUpgradeTarget(); // 0x0ec7b300
   error UpgradeExceedMaxLevel(); // 0x1d245dc9
   error NotEnoughSilverToUpgrade(); // 0x3c1137b2
+
+  // reveal system
   error InvalidRevealProof(); // 0x5d655004
   error RevealTooOften(); // 0xbdbe7784
+
+  // artifact system
+  error InvalidProspectTarget(); // 0x341e4b4d
+  error PlanetAlreadyProspected(); // 0x56887924
+  error InvalidBiomebaseProof(); // 0x128087c4
+  error PlanetNotProspected(); // 0x9b8b75ee
+  error PlanetAlreadyExplored(); // 0x46b8aa3d
+  error UnkonwnArtifactType(); // 0xe5d5eab9
+  error ArtifactNotAvailable(); // 0xc878be8d
+  error ArtifactOnCooldown(); // 0x47e6b7ca
+  error ArtifactNotChargeable(); // 0x342e603f
+  error ArtifactLevelTooLow(); // 0x24c528ed
+  error NotEnoughResourceToActivate(); // 0xe642b7b4
 }

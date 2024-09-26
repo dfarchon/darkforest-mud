@@ -9,8 +9,8 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { SpaceType, PlanetType } from "../src/codegen/common.sol";
-import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData, PlanetOwner } from "../src/codegen/index.sol";
+import { SpaceType, PlanetType, ArtifactRarity } from "../src/codegen/common.sol";
+import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData, PlanetOwner, PlanetConstants } from "../src/codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData } from "../src/codegen/index.sol";
 import { UniverseConfig, UniverseConfigData, TempConfigSet, TempConfigSetData } from "../src/codegen/index.sol";
 import { SpaceTypeConfig, SpaceTypeConfigData } from "../src/codegen/index.sol";
@@ -19,7 +19,7 @@ import { PlanetLevelConfig, PlanetTypeConfig } from "../src/codegen/index.sol";
 import { SnarkConfig, SnarkConfigData, Ticker } from "../src/codegen/index.sol";
 import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
-import { RevealedPlanet } from "../src/codegen/index.sol";
+import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
 
 contract PostDeploy is Script {
   using stdToml for string;
@@ -46,6 +46,7 @@ contract PostDeploy is Script {
     SpaceTypeConfig.set(abi.decode(toml.parseRaw(".space_type"), (SpaceTypeConfigData)));
     UniverseZoneConfig.set(abi.decode(toml.parseRaw(".universe_zone"), (UniverseZoneConfigData)));
     PlanetLevelConfig.set(abi.decode(toml.parseRaw(".planet_level.thresholds"), (uint32[])));
+    PlanetBiomeConfig.set(abi.decode(toml.parseRaw(".planet_biome"), (PlanetBiomeConfigData)));
     for (uint256 i = 1; i <= uint8(type(SpaceType).max); i++) {
       for (uint256 j; j <= PlanetLevelConfig.length(); j++) {
         string memory key = string.concat(".planet_type.thresholds.", i.toString(), ".", j.toString());
@@ -56,6 +57,10 @@ contract PostDeploy is Script {
     Ticker.set(0, uint64(toml.readUint(".ticker.rate")), 0, true);
     InnerCircle.set(abi.decode(toml.parseRaw(".inner_circle"), (InnerCircleData)));
     UpgradeConfig.set(abi.decode(toml.parseRaw(".upgrade_config"), (UpgradeConfigData)));
+    for (uint256 i = 1; i <= uint8(type(ArtifactRarity).max); i++) {
+      string memory key = string.concat(".artifact.", i.toString());
+      ArtifactConfig.set(ArtifactRarity(i), abi.decode(toml.parseRaw(key), (uint16[])));
+    }
 
     // set test planets
     _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
@@ -139,13 +144,34 @@ contract PostDeploy is Script {
     int32 y;
     bytes32 planetHash;
     address owner;
-    PlanetData data;
+    uint64 lastUpdateTick;
+    uint8 perlin;
+    uint8 level;
+    PlanetType planetType;
+    SpaceType spaceType;
+    uint64 population;
+    uint64 silver;
+    uint24 upgrades;
   }
 
   function _setTestPlanets(TestPlanet[] memory planets) internal {
     console.log("Dropping test planets");
     for (uint256 i; i < planets.length; i++) {
-      Planet.set(planets[i].planetHash, planets[i].data);
+      PlanetConstants.set(
+        planets[i].planetHash,
+        planets[i].perlin,
+        planets[i].level,
+        planets[i].planetType,
+        planets[i].spaceType
+      );
+      Planet.set(
+        planets[i].planetHash,
+        planets[i].lastUpdateTick,
+        planets[i].population,
+        planets[i].silver,
+        planets[i].upgrades,
+        false
+      );
       PlanetOwner.set(planets[i].planetHash, planets[i].owner);
       RevealedPlanet.set(planets[i].planetHash, planets[i].x, planets[i].y, planets[i].owner);
     }

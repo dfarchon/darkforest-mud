@@ -11,6 +11,7 @@ import { Planet as PlanetTable } from "../src/codegen/index.sol";
 import { PlanetType, SpaceType } from "../src/codegen/common.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "../src/codegen/index.sol";
+import { PlanetProps, PlanetPropsData } from "../src/codegen/index.sol";
 import { Ticker, TickerData } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 
@@ -29,7 +30,17 @@ contract UpgradeTest is MudTest {
     }
 
     // init 1 planets
-    IWorld(worldAddress).df__createPlanet(planetHash, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 100000, 0);
+    IWorld(worldAddress).df__createPlanet(
+      planetHash,
+      user1,
+      0,
+      1,
+      PlanetType.PLANET,
+      SpaceType.NEBULA,
+      200000,
+      100000,
+      0
+    );
     vm.stopPrank();
   }
 
@@ -43,9 +54,9 @@ contract UpgradeTest is MudTest {
     assertEq(planet.rangeUpgrades, 1);
     assertEq(planet.speedUpgrades, 0);
     assertEq(planet.defenseUpgrades, 0);
-    assertEq(planet.populationCap, metadata.populationCap * upgradeConfig.populationCapMultiplier / 100);
-    assertEq(planet.populationGrowth, metadata.populationGrowth * upgradeConfig.populationGrowthMultiplier / 100);
-    assertEq(planet.range, metadata.range * upgradeConfig.rangeMultiplier / 100);
+    assertEq(planet.populationCap, (metadata.populationCap * upgradeConfig.populationCapMultiplier) / 100);
+    assertEq(planet.populationGrowth, (metadata.populationGrowth * upgradeConfig.populationGrowthMultiplier) / 100);
+    assertEq(planet.range, (metadata.range * upgradeConfig.rangeMultiplier) / 100);
     assertEq(planet.speed, metadata.speed);
     assertEq(planet.defense, metadata.defense);
 
@@ -56,9 +67,15 @@ contract UpgradeTest is MudTest {
     assertEq(planet.rangeUpgrades, 2);
     assertEq(planet.speedUpgrades, 0);
     assertEq(planet.defenseUpgrades, 0);
-    assertEq(planet.populationCap, metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.populationGrowth, metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.range, metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 2 / 100 ** 2);
+    assertEq(
+      planet.populationCap,
+      (metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 2) / 100 ** 2
+    );
+    assertEq(
+      planet.populationGrowth,
+      (metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 2) / 100 ** 2
+    );
+    assertEq(planet.range, (metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 2) / 100 ** 2);
     assertEq(planet.speed, metadata.speed);
     assertEq(planet.defense, metadata.defense);
 
@@ -69,10 +86,16 @@ contract UpgradeTest is MudTest {
     assertEq(planet.rangeUpgrades, 2);
     assertEq(planet.speedUpgrades, 2);
     assertEq(planet.defenseUpgrades, 0);
-    assertEq(planet.populationCap, metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 4 / 100 ** 4);
-    assertEq(planet.populationGrowth, metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 4 / 100 ** 4);
-    assertEq(planet.range, metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.speed, metadata.speed * uint256(upgradeConfig.speedMultiplier) ** 2 / 100 ** 2);
+    assertEq(
+      planet.populationCap,
+      (metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 4) / 100 ** 4
+    );
+    assertEq(
+      planet.populationGrowth,
+      (metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 4) / 100 ** 4
+    );
+    assertEq(planet.range, (metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 2) / 100 ** 2);
+    assertEq(planet.speed, (metadata.speed * uint256(upgradeConfig.speedMultiplier) ** 2) / 100 ** 2);
     assertEq(planet.defense, metadata.defense);
 
     // additionally set defense upgrade to 1
@@ -82,11 +105,17 @@ contract UpgradeTest is MudTest {
     assertEq(planet.rangeUpgrades, 2);
     assertEq(planet.speedUpgrades, 2);
     assertEq(planet.defenseUpgrades, 1);
-    assertEq(planet.populationCap, metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 5 / 100 ** 5);
-    assertEq(planet.populationGrowth, metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 5 / 100 ** 5);
-    assertEq(planet.range, metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.speed, metadata.speed * uint256(upgradeConfig.speedMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.defense, metadata.defense * upgradeConfig.defenseMultiplier / 100);
+    assertEq(
+      planet.populationCap,
+      (metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 5) / 100 ** 5
+    );
+    assertEq(
+      planet.populationGrowth,
+      (metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 5) / 100 ** 5
+    );
+    assertEq(planet.range, (metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 2) / 100 ** 2);
+    assertEq(planet.speed, (metadata.speed * uint256(upgradeConfig.speedMultiplier) ** 2) / 100 ** 2);
+    assertEq(planet.defense, (metadata.defense * upgradeConfig.defenseMultiplier) / 100);
   }
 
   function testUpgrade_cost() public {
@@ -102,16 +131,24 @@ contract UpgradeTest is MudTest {
     PlanetMetadataData memory metadata = PlanetMetadata.get(planet.spaceType, planet.planetType, uint8(planet.level));
     UpgradeConfigData memory upgradeConfig = UpgradeConfig.get();
     uint256 silverCost = uint8(upgradeConfig.silverCost) + uint8(upgradeConfig.silverCost >> 8);
-    silverCost = silverCost * planet.silverCap / 100;
+    silverCost = (silverCost * planet.silverCap) / 100;
     assertEq(planet.silver, 100000 - silverCost);
+    assertEq(planet.useProps, true);
     assertEq(PlanetTable.getUpgrades(bytes32(planetHash)), 0x010100);
     assertEq(planet.rangeUpgrades, 1);
     assertEq(planet.speedUpgrades, 1);
     assertEq(planet.defenseUpgrades, 0);
-    assertEq(planet.populationCap, metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.populationGrowth, metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 2 / 100 ** 2);
-    assertEq(planet.range, metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 1 / 100 ** 1);
-    assertEq(planet.speed, metadata.speed * uint256(upgradeConfig.speedMultiplier) ** 1 / 100 ** 1);
-    assertEq(planet.defense, metadata.defense);
+    PlanetPropsData memory props = PlanetProps.get(bytes32(planet.planetHash));
+    assertEq(
+      props.populationCap,
+      (metadata.populationCap * uint256(upgradeConfig.populationCapMultiplier) ** 2) / 100 ** 2
+    );
+    assertEq(
+      props.populationGrowth,
+      (metadata.populationGrowth * uint256(upgradeConfig.populationGrowthMultiplier) ** 2) / 100 ** 2
+    );
+    assertEq(props.range, (metadata.range * uint256(upgradeConfig.rangeMultiplier) ** 1) / 100 ** 1);
+    assertEq(props.speed, (metadata.speed * uint256(upgradeConfig.speedMultiplier) ** 1) / 100 ** 1);
+    assertEq(props.defense, metadata.defense);
   }
 }

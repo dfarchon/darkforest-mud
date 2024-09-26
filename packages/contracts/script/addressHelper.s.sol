@@ -8,9 +8,9 @@ import { stdJson } from "forge-std/StdJson.sol";
 contract WorldAddressHelper is Script {
   using Strings for uint256;
   using stdJson for string;
-  
+
   string private constant worldJSONPath = "./worlds.json";
-  function getWorldAddress() public returns (address) {
+  function getWorldAddress() public view returns (address) {
     string memory json = vm.readFile(worldJSONPath);
     return json.readAddress(string.concat(".", block.chainid.toString(), ".address"));
   }

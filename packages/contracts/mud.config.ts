@@ -5,6 +5,47 @@ export default defineWorld({
   enums: {
     PlanetType: ["UNKNOWN", "PLANET", "ASTEROID_FIELD", "FOUNDRY", "SPACETIME_RIP", "QUASAR"],
     SpaceType: ["UNKNOWN", "NEBULA", "SPACE", "DEEP_SPACE", "DEAD_SPACE"],
+    Biome: [
+      "UNKNOWN",
+      "OCEAN",
+      "FOREST",
+      "GRASSLAND",
+      "TUNDRA",
+      "SWAMP",
+      "DESERT",
+      "ICE",
+      "WASTELAND",
+      "LAVA",
+      "CORRUPTED",
+    ],
+    ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "ACTIVE", "BROKEN"],
+    ArtifactGenre: ["UNKNOWN", "DEFENSIVE", "OFFENSIVE", "PRODUCTIVE", "GENERAL"],
+    ArtifactRarity: ["UNKNOWN", "COMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC"],
+    ArtifactType: [
+      "UNKNOWN",
+      "WORMHOLE",
+      "PLANETARY_SHIELD",
+      "PHOTOID_CANNON",
+      "BLOOM_FILTER",
+      "BLACK_DOMAIN",
+      "STELLAR_SHIELD",
+      "BOMB",
+      "KARDASHEV",
+      "AVATAR",
+      "MONOLITH",
+      "COLLOSSUS",
+      "SPACESHIP",
+      "PYRAMID",
+      "ICE_LINK",
+      "FIRE_LINK",
+      "BLIND_BOX",
+      "SHIP_MOTHERSHIP",
+      "SHIP_CRESCENT",
+      "SHIP_WHALE",
+      "SHIP_GEAR",
+      "SHIP_TITAN",
+      "SHIP_PINK",
+    ],
   },
   systems: {
     TickSystem: {
@@ -23,7 +64,8 @@ export default defineWorld({
   tables: {
     Counter: {
       schema: {
-        player: "uint64",
+        player: "uint32",
+        artifact: "uint32",
       },
       key: [],
     },
@@ -80,12 +122,65 @@ export default defineWorld({
       },
       key: [],
     },
+    ArtifactConfig: {
+      schema: {
+        rarity: "ArtifactRarity",
+        typeProbabilities: "uint16[]",
+      },
+      key: ["rarity"],
+    },
+    ArtifactMetadata: {
+      schema: {
+        artifactType: "ArtifactType",
+        rarity: "ArtifactRarity",
+        genre: "ArtifactGenre",
+        charge: "uint32",
+        cooldown: "uint32",
+        instant: "bool",
+        oneTime: "bool",
+        reqLevel: "uint8",
+        reqPopulation: "uint64",
+        reqSilver: "uint64",
+      },
+      key: ["artifactType", "rarity"],
+    },
+    Artifact: {
+      schema: {
+        id: "uint32",
+        rarity: "ArtifactRarity",
+        artifactType: "ArtifactType",
+        status: "ArtifactStatus",
+        chargeTime: "uint64",
+        activateTime: "uint64",
+        cooldownTime: "uint64",
+      },
+      key: ["id"],
+    },
+    // planets owns artifacts
+    ArtifactOwner: {
+      schema: {
+        artifact: "uint32",
+        planet: "bytes32",
+      },
+      key: ["artifact"],
+    },
+    PlanetArtifact: {
+      id: "bytes32",
+      artifacts: "uint256", // which means each planet can have at most 8 artifacts
+    },
     PlanetLevelConfig: {
       schema: {
         // default level is 0
         // 9 elements indicates 9 levels, from level 1 to level 9
         // ex: [100, 500, 4000, 8000, 30000, 65520, 262128, 1048561, 4194292]
         thresholds: "uint32[]",
+      },
+      key: [],
+    },
+    PlanetBiomeConfig: {
+      schema: {
+        threshold1: "uint32",
+        threshold2: "uint32",
       },
       key: [],
     },
@@ -166,16 +261,36 @@ export default defineWorld({
       y: "int32",
       revealer: "address",
     },
+    ProspectedPlanet: {
+      id: "bytes32",
+      blockNumber: "uint64",
+    },
+    ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
       lastUpdateTick: "uint64",
-      perlin: "uint8", // not sure if this suffices
-      level: "uint8",
-      planetType: "PlanetType",
-      spaceType: "SpaceType",
       population: "uint64",
       silver: "uint64",
       upgrades: "uint24", // uint8 range | uint8 speed | uint8 defense
+      useProps: "bool",
+    },
+    PlanetConstants: {
+      id: "bytes32",
+      perlin: "uint8",
+      level: "uint8",
+      planetType: "PlanetType",
+      spaceType: "SpaceType",
+    },
+    // upgraded planet properties, replaces the original metadata
+    PlanetProps: {
+      id: "bytes32",
+      range: "uint32",
+      speed: "uint16",
+      defense: "uint16",
+      populationCap: "uint64",
+      populationGrowth: "uint32",
+      silverCap: "uint64",
+      silverGrowth: "uint32",
     },
     PlanetOwner: "address",
     PendingMove: {
