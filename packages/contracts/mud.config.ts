@@ -48,25 +48,25 @@ export default defineWorld({
     },
     TempConfigSet: {
       schema: {
-        biomeCheck: "bool",
-        skipProofCheck: "bool",
-        playerLimit: "uint32",
-        spawnPerlinMin: "uint8",
-        spawnPerlinMax: "uint8",
-        revealCd: "uint32",
+        biomeCheck: "bool", //BIOME_CHECKS
+        skipProofCheck: "bool", //DISABLE_ZK_CHECKS
+        playerLimit: "uint32", //PLAYER_AMOUNT_LIMIT
+        spawnPerlinMin: "uint8", //INIT_PERLIN_MIN
+        spawnPerlinMax: "uint8", //INIT_PERLIN_MAX
+        revealCd: "uint32", //LOCATION_REVEAL_COOLDOWN
       },
       key: [],
     },
     UniverseConfig: {
       schema: {
-        sparsity: "uint64",
-        radius: "uint64",
+        sparsity: "uint64", //PLANET_RARITY
+        radius: "uint64", //WORLD_RADIUS_MIN
       },
       key: [],
     },
     SpaceTypeConfig: {
       schema: {
-        perlinThresholds: "uint32[]",
+        perlinThresholds: "uint32[]", //PERLIN_THRESHOLD_1 _2 _3
         planetLevelLimits: "uint8[]",
         planetLevelBonus: "int8[]",
       },
@@ -74,13 +74,14 @@ export default defineWorld({
     },
     UniverseZoneConfig: {
       schema: {
-        borders: "uint64[]",
-        planetLevelLimits: "uint8[]",
-        planetLevelBonus: "int8[]",
+        borders: "uint64[]", //MAX_LEVEL_DIST
+        planetLevelLimits: "uint8[]", //MAX_LEVEL_LIMIT
+        planetLevelBonus: "int8[]", //MIN_LEVEL_BIAS
       },
       key: [],
     },
     PlanetLevelConfig: {
+      //PLANET_LEVEL_THRESHOLDS
       schema: {
         // default level is 0
         // 9 elements indicates 9 levels, from level 1 to level 9
@@ -90,6 +91,7 @@ export default defineWorld({
       key: [],
     },
     PlanetTypeConfig: {
+      //PLANET_TYPE_WEIGHTS
       schema: {
         spaceType: "SpaceType",
         level: "uint8",
@@ -114,14 +116,14 @@ export default defineWorld({
     },
     SnarkConfig: {
       schema: {
-        planetHashKey: "uint64",
-        biomeBaseKey: "uint64",
-        spaceTypeKey: "uint64",
-        perlinLengthScale: "uint64",
+        planetHashKey: "uint64", //PLANETHASH_KEY
+        biomeBaseKey: "uint64", //BIOMEBASE_KEY
+        spaceTypeKey: "uint64", //SPACETYPE_KEY
+        perlinLengthScale: "uint64", //PERLIN_LENGTH_SCALE
         // use 1 instead of true
-        perlinMirrorX: "uint8",
+        perlinMirrorX: "uint8", //PERLIN_MIRROR_X
         // use 1 instead of true
-        perlinMirrorY: "uint8",
+        perlinMirrorY: "uint8", //PERLIN_MIRROR_Y
       },
       key: [],
     },

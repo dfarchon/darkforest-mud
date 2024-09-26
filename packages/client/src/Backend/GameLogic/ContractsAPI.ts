@@ -1,8 +1,7 @@
-import { EMPTY_LOCATION_ID, TOKEN_NAME } from "@df/constants";
+import { TOKEN_NAME } from "@df/constants";
 import type { EthConnection } from "@df/network";
 import {
   aggregateBulkGetter,
-  ContractCaller,
   ethToWei,
   TxCollection,
   TxExecutor,
@@ -46,7 +45,8 @@ import type {
   VoyageId,
 } from "@df/types";
 import { Setting } from "@df/types";
-import type { ContractFunction, Event, providers } from "ethers";
+
+import type { Event, providers } from "ethers";
 import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import { flatten } from "lodash-es";
@@ -55,15 +55,44 @@ import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPI
 import {
   ContractEvent,
   ContractsAPIEvent,
+  type ContractConfigs,
+  type PlanetTypeWeights,
+  type PlanetTypeWeightsByLevel,
+  type PlanetTypeWeightsBySpaceType,
 } from "../../_types/darkforest/api/ContractsAPITypes";
 import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
+import { setup } from "@mud/setup";
+import { SpaceType, type SystemCalls } from "@mud/createSystemCalls";
+import type { ClientComponents } from "@mud/createClientComponents";
+import type { SetupNetworkResult } from "@mud/setupNetwork";
+
+import { singletonEntity, encodeEntity } from "@latticexyz/store-sync/recs";
+import { zeroAddress, type Hex, type HexToRlpErrorType } from "viem";
+import { useMUD } from "@mud/MUDContext";
+import SpawnPlayer from "@wallet/Components/SpawnPlayerPane";
+import { config } from "rxjs";
+import type { LocationId } from "@df/types";
+import bigInt, { BigInteger } from "big-integer";
+
+import {
+  type Entity,
+  Has,
+  getComponentValue,
+  getComponentValueStrict,
+  runQuery,
+} from "@latticexyz/recs";
+import type { Planet } from "@df/types";
+import type { LocationId } from "@df/types";
+import bigInt from "big-integer";
+import { LOCATION_ID_UB } from "@df/constants";
 
 interface ContractsApiConfig {
   connection: EthConnection;
   contractAddress: EthAddress;
+  components: ClientComponents;
 }
 
 /**
@@ -78,11 +107,6 @@ export class ContractsAPI extends EventEmitter {
    */
   //todo: this should be change for round 3
   private static readonly MIN_BALANCE = ethToWei(0.00001);
-
-  /**
-   * Instrumented {@link ThrottledConcurrentQueue} for blockchain reads.
-   */
-  private readonly contractCaller: ContractCaller;
 
   /**
    * Instrumented {@link ThrottledConcurrentQueue} for blockchain writes.
@@ -100,13 +124,27 @@ export class ContractsAPI extends EventEmitter {
    */
   private contractAddress: EthAddress;
 
+  /**
+   * The components, systemCalls and network is from MUD.
+   */
+
+  private components: ClientComponents;
+
+  // private systemCalls: SystemCalls;
+
+  // private network: SetupNetworkResult;
+
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
   }
 
-  public constructor({ connection, contractAddress }: ContractsApiConfig) {
+  public constructor({
+    connection,
+    contractAddress,
+    components,
+  }: ContractsApiConfig) {
     super();
-    this.contractCaller = new ContractCaller();
+    // this.contractCaller = new ContractCaller();
     this.ethConnection = connection;
     this.contractAddress = contractAddress;
     this.txExecutor = new TxExecutor(
@@ -116,8 +154,8 @@ export class ContractsAPI extends EventEmitter {
       this.beforeTransaction.bind(this),
       this.afterTransaction.bind(this),
     );
-
-    this.setupEventListeners();
+    this.components = components;
+    // this.setupEventListeners();
   }
 
   /**
@@ -210,17 +248,12 @@ export class ContractsAPI extends EventEmitter {
   ) {
     // NOTE: remove /event
     // eventLogger.logEvent(EventType.Transaction, txDiagnosticInfo);
+    console.log("-- afterTransaction --");
+    console.log(txDiagnosticInfo);
   }
 
   public destroy(): void {
     this.removeEventListeners();
-  }
-
-  private makeCall<T>(
-    contractViewFunction: ContractFunction<T>,
-    args: unknown[] = [],
-  ): Promise<T> {
-    return this.contractCaller.makeCall(contractViewFunction, args);
   }
 
   public async setupEventListeners(): Promise<void> {
@@ -291,7 +324,6 @@ export class ContractsAPI extends EventEmitter {
         this.emit(ContractsAPIEvent.PlayerUpdate, address(playerAddr));
         this.emit(ContractsAPIEvent.RadiusUpdated);
       },
-
       [ContractEvent.PlanetUpgraded]: async (
         _playerAddr: string,
         location: EthersBN,
@@ -508,7 +540,6 @@ export class ContractsAPI extends EventEmitter {
       },
 
       //todo: this is cool
-
       [ContractEvent.Kardashev]: async (
         revealerAddr: string,
         location: EthersBN,
@@ -611,1058 +642,7 @@ export class ContractsAPI extends EventEmitter {
     return this.contractAddress;
   }
 
-  public async getEntryFee(): Promise<EthersBN> {
-    const res = await this.makeCall<EthersBN>(this.contract.getEntryFee);
-    return res;
-  }
-  /**
-   * If this player has a claimed planet, their score is the distance between the claimed planet and
-   * the center. If this player does not have a claimed planet, then the score is undefined.
-   */
-  async getScoreV3(
-    address: EthAddress | undefined,
-  ): Promise<number | undefined> {
-    if (address === undefined) {
-      return undefined;
-    }
-
-    const score = await this.makeCall<EthersBN>(this.contract.getScore, [
-      address,
-    ]);
-
-    if (
-      score.eq(
-        EthersBN.from(
-          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        ),
-      )
-    ) {
-      return undefined;
-    }
-
-    return score.toNumber();
-  }
-
-  async getConstants(): Promise<ContractConstants> {
-    const {
-      DISABLE_ZK_CHECKS,
-      PLANETHASH_KEY,
-      SPACETYPE_KEY,
-      BIOMEBASE_KEY,
-      PERLIN_LENGTH_SCALE,
-      PERLIN_MIRROR_X,
-      PERLIN_MIRROR_Y,
-    } = await this.makeCall(this.contract.getSnarkConstants);
-
-    const {
-      ADMIN_CAN_ADD_PLANETS,
-      WORLD_RADIUS_LOCKED,
-      WORLD_RADIUS_MIN,
-      MAX_NATURAL_PLANET_LEVEL,
-      MAX_ARTIFACT_PER_PLANET,
-      MAX_SENDING_PLANET,
-      MAX_RECEIVING_PLANET,
-      TIME_FACTOR_HUNDREDTHS,
-      PERLIN_THRESHOLD_1,
-      PERLIN_THRESHOLD_2,
-      PERLIN_THRESHOLD_3,
-      INIT_PERLIN_MIN,
-      INIT_PERLIN_MAX,
-      SPAWN_RIM_AREA,
-      BIOME_THRESHOLD_1,
-      BIOME_THRESHOLD_2,
-      PLANET_LEVEL_THRESHOLDS,
-      PLANET_RARITY,
-      PLANET_TRANSFER_ENABLED,
-      PHOTOID_ACTIVATION_DELAY,
-      STELLAR_ACTIVATION_DELAY,
-      LOCATION_REVEAL_COOLDOWN,
-      CLAIM_PLANET_COOLDOWN,
-      PLANET_TYPE_WEIGHTS,
-      SILVER_SCORE_VALUE,
-      ARTIFACT_POINT_VALUES,
-      SPACE_JUNK_ENABLED,
-      SPACE_JUNK_LIMIT,
-      PLANET_LEVEL_JUNK,
-      ABANDON_SPEED_CHANGE_PERCENT,
-      ABANDON_RANGE_CHANGE_PERCENT,
-      // Capture Zones
-      GAME_START_BLOCK,
-      CAPTURE_ZONES_ENABLED,
-      CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL,
-      CAPTURE_ZONE_RADIUS,
-      CAPTURE_ZONE_PLANET_LEVEL_SCORE,
-      CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED,
-      CAPTURE_ZONES_PER_5000_WORLD_RADIUS,
-      SPACESHIPS,
-      ROUND_END_REWARDS_BY_RANK,
-      TOKEN_MINT_END_TIMESTAMP,
-      CLAIM_END_TIMESTAMP,
-      BURN_END_TIMESTAMP,
-      BURN_PLANET_COOLDOWN,
-      PINK_PLANET_COOLDOWN,
-      ACTIVATE_ARTIFACT_COOLDOWN,
-      BUY_ARTIFACT_COOLDOWN,
-      BURN_PLANET_LEVEL_EFFECT_RADIUS,
-      BURN_PLANET_REQUIRE_SILVER_AMOUNTS,
-      MAX_LEVEL_DIST,
-      MAX_LEVEL_LIMIT,
-      MIN_LEVEL_BIAS,
-      ENTRY_FEE,
-      KARDASHEV_END_TIMESTAMP,
-      KARDASHEV_PLANET_COOLDOWN,
-      BLUE_PLANET_COOLDOWN,
-      KARDASHEV_EFFECT_RADIUS,
-      KARDASHEV_REQUIRE_SILVER_AMOUNTS,
-      BLUE_PANET_REQUIRE_SILVER_AMOUNTS,
-    } = await this.makeCall(this.contract.getGameConstants);
-
-    // const TOKEN_MINT_END_TIMESTAMP = (
-    //   await this.makeCall(this.contract.TOKEN_MINT_END_TIMESTAMP)
-    // ).toNumber();
-
-    // const CLAIM_END_TIMESTAMP = (await this.makeCall(this.contract.CLAIM_END_TIMESTAMP)).toNumber();
-
-    const adminAddress = address(
-      await this.makeCall(this.contract.adminAddress),
-    );
-
-    const upgrades = decodeUpgradeBranches(
-      await this.makeCall(this.contract.getUpgrades),
-    );
-
-    // const PLANET_TYPE_WEIGHTS: PlanetTypeWeightsBySpaceType =
-    //   await this.makeCall<PlanetTypeWeightsBySpaceType>(this.contract.getTypeWeights);
-
-    // const rawPointValues = await this.makeCall(this.contract.getArtifactPointValues);
-    // const ARTIFACT_POINT_VALUES = decodeArtifactPointValues(rawPointValues);
-
-    const ARTIFACT_POINT_VALUES_decoded = decodeArtifactPointValues(
-      ARTIFACT_POINT_VALUES,
-    );
-
-    const planetDefaults = decodePlanetDefaults(
-      await this.makeCall(this.contract.getDefaultStats),
-    );
-
-    const planetCumulativeRarities = (
-      await this.makeCall<EthersBN[]>(this.contract.getCumulativeRarities)
-    ).map((x: EthersBN) => x.toNumber());
-
-    const constants: ContractConstants = {
-      //SnarkConstants
-      DISABLE_ZK_CHECKS,
-      PLANETHASH_KEY: PLANETHASH_KEY.toNumber(),
-      SPACETYPE_KEY: SPACETYPE_KEY.toNumber(),
-      BIOMEBASE_KEY: BIOMEBASE_KEY.toNumber(),
-      PERLIN_MIRROR_X,
-      PERLIN_MIRROR_Y,
-      PERLIN_LENGTH_SCALE: PERLIN_LENGTH_SCALE.toNumber(),
-
-      //GameConstants
-      ADMIN_CAN_ADD_PLANETS,
-      WORLD_RADIUS_LOCKED,
-      WORLD_RADIUS_MIN: WORLD_RADIUS_MIN.toNumber(),
-      MAX_NATURAL_PLANET_LEVEL: MAX_NATURAL_PLANET_LEVEL.toNumber(),
-      MAX_ARTIFACT_PER_PLANET: MAX_ARTIFACT_PER_PLANET.toNumber(),
-      MAX_SENDING_PLANET: MAX_SENDING_PLANET.toNumber(),
-      MAX_RECEIVING_PLANET: MAX_RECEIVING_PLANET.toNumber(),
-      TIME_FACTOR_HUNDREDTHS: TIME_FACTOR_HUNDREDTHS.toNumber(),
-
-      PERLIN_THRESHOLD_1: PERLIN_THRESHOLD_1.toNumber(),
-      PERLIN_THRESHOLD_2: PERLIN_THRESHOLD_2.toNumber(),
-      PERLIN_THRESHOLD_3: PERLIN_THRESHOLD_3.toNumber(),
-      INIT_PERLIN_MIN: INIT_PERLIN_MIN.toNumber(),
-      INIT_PERLIN_MAX: INIT_PERLIN_MAX.toNumber(),
-      SPAWN_RIM_AREA: SPAWN_RIM_AREA.toNumber(),
-      BIOME_THRESHOLD_1: BIOME_THRESHOLD_1.toNumber(),
-      BIOME_THRESHOLD_2: BIOME_THRESHOLD_2.toNumber(),
-      PLANET_LEVEL_THRESHOLDS: [
-        PLANET_LEVEL_THRESHOLDS[0].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[1].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[2].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[3].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[4].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[5].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[6].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[7].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[8].toNumber(),
-        PLANET_LEVEL_THRESHOLDS[9].toNumber(),
-      ],
-
-      PLANET_RARITY: PLANET_RARITY.toNumber(),
-      PLANET_TRANSFER_ENABLED,
-
-      PHOTOID_ACTIVATION_DELAY: PHOTOID_ACTIVATION_DELAY.toNumber(),
-      STELLAR_ACTIVATION_DELAY: STELLAR_ACTIVATION_DELAY.toNumber(),
-      LOCATION_REVEAL_COOLDOWN: LOCATION_REVEAL_COOLDOWN.toNumber(),
-      CLAIM_PLANET_COOLDOWN: CLAIM_PLANET_COOLDOWN.toNumber(),
-      PLANET_TYPE_WEIGHTS,
-      SILVER_SCORE_VALUE: SILVER_SCORE_VALUE.toNumber(),
-      ARTIFACT_POINT_VALUES: ARTIFACT_POINT_VALUES_decoded,
-      SPACE_JUNK_ENABLED,
-      SPACE_JUNK_LIMIT: SPACE_JUNK_LIMIT.toNumber(),
-      PLANET_LEVEL_JUNK: [
-        PLANET_LEVEL_JUNK[0].toNumber(),
-        PLANET_LEVEL_JUNK[1].toNumber(),
-        PLANET_LEVEL_JUNK[2].toNumber(),
-        PLANET_LEVEL_JUNK[3].toNumber(),
-        PLANET_LEVEL_JUNK[4].toNumber(),
-        PLANET_LEVEL_JUNK[5].toNumber(),
-        PLANET_LEVEL_JUNK[6].toNumber(),
-        PLANET_LEVEL_JUNK[7].toNumber(),
-        PLANET_LEVEL_JUNK[8].toNumber(),
-        PLANET_LEVEL_JUNK[9].toNumber(),
-      ],
-
-      ABANDON_SPEED_CHANGE_PERCENT: ABANDON_RANGE_CHANGE_PERCENT.toNumber(),
-      ABANDON_RANGE_CHANGE_PERCENT: ABANDON_SPEED_CHANGE_PERCENT.toNumber(),
-
-      // Capture Zones
-      GAME_START_BLOCK: GAME_START_BLOCK.toNumber(),
-      CAPTURE_ZONES_ENABLED,
-      CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL:
-        CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL.toNumber(),
-      CAPTURE_ZONE_RADIUS: CAPTURE_ZONE_RADIUS.toNumber(),
-      CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[0].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[1].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[2].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[3].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[4].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[5].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[6].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[7].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[8].toNumber(),
-        CAPTURE_ZONE_PLANET_LEVEL_SCORE[9].toNumber(),
-      ],
-      CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED:
-        CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED.toNumber(),
-      CAPTURE_ZONES_PER_5000_WORLD_RADIUS:
-        CAPTURE_ZONES_PER_5000_WORLD_RADIUS.toNumber(),
-      SPACESHIPS: SPACESHIPS,
-      ROUND_END_REWARDS_BY_RANK: [
-        ROUND_END_REWARDS_BY_RANK[0].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[1].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[2].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[3].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[4].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[5].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[6].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[7].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[8].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[9].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[10].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[11].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[12].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[13].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[14].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[15].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[16].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[17].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[18].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[19].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[20].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[21].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[22].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[23].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[24].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[25].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[26].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[27].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[28].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[29].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[30].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[31].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[32].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[33].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[34].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[35].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[36].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[37].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[38].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[39].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[40].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[41].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[42].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[43].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[44].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[45].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[46].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[47].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[48].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[49].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[50].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[51].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[52].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[53].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[54].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[55].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[56].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[57].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[58].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[59].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[60].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[61].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[62].toNumber(),
-        ROUND_END_REWARDS_BY_RANK[63].toNumber(),
-      ],
-
-      TOKEN_MINT_END_TIMESTAMP: TOKEN_MINT_END_TIMESTAMP.toNumber(),
-      CLAIM_END_TIMESTAMP: CLAIM_END_TIMESTAMP.toNumber(),
-
-      defaultPopulationCap: planetDefaults.populationCap,
-      defaultPopulationGrowth: planetDefaults.populationGrowth,
-      defaultRange: planetDefaults.range,
-      defaultSpeed: planetDefaults.speed,
-      defaultDefense: planetDefaults.defense,
-      defaultSilverGrowth: planetDefaults.silverGrowth,
-      defaultSilverCap: planetDefaults.silverCap,
-      defaultBarbarianPercentage: planetDefaults.barbarianPercentage,
-      planetCumulativeRarities,
-      upgrades,
-      adminAddress,
-
-      BURN_END_TIMESTAMP: BURN_END_TIMESTAMP.toNumber(),
-      BURN_PLANET_COOLDOWN: BURN_PLANET_COOLDOWN.toNumber(),
-      PINK_PLANET_COOLDOWN: PINK_PLANET_COOLDOWN.toNumber(),
-      ACTIVATE_ARTIFACT_COOLDOWN: ACTIVATE_ARTIFACT_COOLDOWN.toNumber(),
-      BUY_ARTIFACT_COOLDOWN: BUY_ARTIFACT_COOLDOWN.toNumber(),
-      BURN_PLANET_LEVEL_EFFECT_RADIUS: [
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[0].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[1].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[2].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[3].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[4].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[5].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[6].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[7].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[8].toNumber(),
-        BURN_PLANET_LEVEL_EFFECT_RADIUS[9].toNumber(),
-      ],
-      BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
-        BURN_PLANET_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
-      ],
-
-      MAX_LEVEL_DIST: [
-        MAX_LEVEL_DIST[0].toNumber(),
-        MAX_LEVEL_DIST[1].toNumber(),
-        MAX_LEVEL_DIST[2].toNumber(),
-        MAX_LEVEL_DIST[3].toNumber(),
-        MAX_LEVEL_DIST[4].toNumber(),
-      ],
-      MAX_LEVEL_LIMIT: [
-        MAX_LEVEL_LIMIT[0].toNumber(),
-        MAX_LEVEL_LIMIT[1].toNumber(),
-        MAX_LEVEL_LIMIT[2].toNumber(),
-        MAX_LEVEL_LIMIT[3].toNumber(),
-        MAX_LEVEL_LIMIT[4].toNumber(),
-        MAX_LEVEL_LIMIT[5].toNumber(),
-      ],
-      MIN_LEVEL_BIAS: [
-        MIN_LEVEL_BIAS[0].toNumber(),
-        MIN_LEVEL_BIAS[1].toNumber(),
-        MIN_LEVEL_BIAS[2].toNumber(),
-        MIN_LEVEL_BIAS[3].toNumber(),
-        MIN_LEVEL_BIAS[4].toNumber(),
-        MIN_LEVEL_BIAS[5].toNumber(),
-      ],
-
-      ENTRY_FEE: ENTRY_FEE.toNumber(),
-      KARDASHEV_END_TIMESTAMP: KARDASHEV_END_TIMESTAMP.toNumber(),
-      KARDASHEV_PLANET_COOLDOWN: KARDASHEV_PLANET_COOLDOWN.toNumber(),
-      BLUE_PLANET_COOLDOWN: BLUE_PLANET_COOLDOWN.toNumber(),
-      KARDASHEV_EFFECT_RADIUS: [
-        KARDASHEV_EFFECT_RADIUS[0].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[1].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[2].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[3].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[4].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[5].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[6].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[7].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[8].toNumber(),
-        KARDASHEV_EFFECT_RADIUS[9].toNumber(),
-      ],
-      KARDASHEV_REQUIRE_SILVER_AMOUNTS: [
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
-        KARDASHEV_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
-      ],
-      BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[0].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[1].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[2].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[3].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[4].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[5].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[6].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[7].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[8].toNumber(),
-        BLUE_PANET_REQUIRE_SILVER_AMOUNTS[9].toNumber(),
-      ],
-    };
-    // console.log(constants);
-    return constants;
-  }
-
-  public async getPlayers(
-    onProgress?: (fractionCompleted: number) => void,
-  ): Promise<Map<string, Player>> {
-    const nPlayers: number = (
-      await this.makeCall<EthersBN>(this.contract.getNPlayers)
-    ).toNumber();
-
-    const players = await aggregateBulkGetter<Player>(
-      nPlayers,
-      200,
-      async (start, end) =>
-        (await this.makeCall(this.contract.bulkGetPlayers, [start, end])).map(
-          decodePlayer,
-        ),
-      onProgress,
-    );
-
-    const lastClaimTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastClaimTimestamp, [start, end]),
-    );
-    const playerLastClaimTimestampMap = lastClaimTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastClaimTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
-
-    const lastBurnTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastBurnTimestamp, [start, end]),
-    );
-
-    const playerLastBurnTimestampMap = lastBurnTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastBurnTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
-
-    const lastKardashevTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastKardashevTimestamp, [
-          start,
-          end,
-        ]),
-    );
-
-    const playerLastKardashevTimestampMap = lastKardashevTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastKardashevTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
-
-    const lastActivateArtifactTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastActivateArtifactTimestamp, [
-          start,
-          end,
-        ]),
-    );
-    const playerLastActivateArtifactTimestampsMap =
-      lastActivateArtifactTimestamps.reduce(
-        (acc, pair): Map<string, EthersBN> => {
-          acc.set(
-            pair.player.toLowerCase(),
-            pair.lastActivateArtifactTimestamp,
-          );
-          return acc;
-        },
-        new Map<string, EthersBN>(),
-      );
-
-    const lastBuyArtifactTimestamps = await aggregateBulkGetter(
-      nPlayers,
-      5,
-      async (start: number, end: number) =>
-        this.makeCall(this.contract.bulkGetLastBuyArtifactTimestamp, [
-          start,
-          end,
-        ]),
-    );
-    const playerLastBuyArtifactTimestampsMap = lastBuyArtifactTimestamps.reduce(
-      (acc, pair): Map<string, EthersBN> => {
-        acc.set(pair.player.toLowerCase(), pair.lastBuyArtifactTimestamp);
-        return acc;
-      },
-      new Map<string, EthersBN>(),
-    );
-
-    const playerMap: Map<EthAddress, Player> = new Map();
-
-    for (const player of players) {
-      player.lastClaimTimestamp =
-        playerLastClaimTimestampMap.get(player.address)?.toNumber() || 0;
-      player.lastBurnTimestamp =
-        playerLastBurnTimestampMap.get(player.address)?.toNumber() || 0;
-      player.lastKardashevTimestamp =
-        playerLastKardashevTimestampMap.get(player.address)?.toNumber() || 0;
-
-      player.lastActivateArtifactTimestamp =
-        playerLastActivateArtifactTimestampsMap
-          .get(player.address)
-          ?.toNumber() || 0;
-      player.lastBuyArtifactTimestamp =
-        playerLastBuyArtifactTimestampsMap.get(player.address)?.toNumber() || 0;
-
-      playerMap.set(player.address, player);
-    }
-
-    return playerMap;
-  }
-
-  public async getPlayerById(
-    playerId: EthAddress,
-  ): Promise<Player | undefined> {
-    const rawPlayer = await this.makeCall(this.contract.players, [playerId]);
-    const lastClaimedTimestamp = await this.makeCall(
-      this.contract.getLastClaimTimestamp,
-      [playerId],
-    );
-
-    const lastBurnTimestamp = await this.makeCall(
-      this.contract.getLastBurnTimestamp,
-      [playerId],
-    );
-    const lastKardashevTimestamp = await this.makeCall(
-      this.contract.getLastKardashevTimestamp,
-      [playerId],
-    );
-    const lastActivateArtifactTimestamp = await this.makeCall(
-      this.contract.getLastActivateArtifactTimestamp,
-      [playerId],
-    );
-
-    const lastBuyArtifactTimestamp = await this.makeCall(
-      this.contract.getLastBuyArtifactTimestamp,
-      [playerId],
-    );
-
-    const scoreFromBlockchain = await this.getScoreV3(playerId);
-    if (!rawPlayer.isInitialized) {
-      return undefined;
-    }
-
-    const player = decodePlayer(rawPlayer);
-    player.lastClaimTimestamp = lastClaimedTimestamp.toNumber();
-    player.lastBurnTimestamp = lastBurnTimestamp.toNumber();
-    player.lastKardashevTimestamp = lastKardashevTimestamp.toNumber();
-    player.lastActivateArtifactTimestamp =
-      lastActivateArtifactTimestamp.toNumber();
-    player.lastBuyArtifactTimestamp = lastBuyArtifactTimestamp.toNumber();
-
-    player.score = scoreFromBlockchain;
-    return player;
-  }
-
-  public async getWorldRadius(): Promise<number> {
-    const radius = (
-      await this.makeCall<EthersBN>(this.contract.worldRadius)
-    ).toNumber();
-    return radius;
-  }
-
-  // timestamp since epoch (in seconds)
-  public async getTokenMintEndTimestamp(): Promise<number> {
-    const timestamp = (
-      await this.makeCall<EthersBN>(this.contract.TOKEN_MINT_END_TIMESTAMP)
-    ).toNumber();
-    return timestamp;
-  }
-
-  public async getArrival(
-    arrivalId: number,
-  ): Promise<QueuedArrival | undefined> {
-    const rawArrival = await this.makeCall(this.contract.planetArrivals, [
-      arrivalId,
-    ]);
-    return decodeArrival(rawArrival);
-  }
-
-  public async getArrivalsForPlanet(
-    planetId: LocationId,
-  ): Promise<QueuedArrival[]> {
-    const events = (
-      await this.makeCall(this.contract.getPlanetArrivals, [
-        locationIdToDecStr(planetId),
-      ])
-    ).map(decodeArrival);
-
-    return events;
-  }
-
-  public async getAllArrivals(
-    planetsToLoad: LocationId[],
-    onProgress?: (fractionCompleted: number) => void,
-  ): Promise<QueuedArrival[]> {
-    const arrivalsUnflattened = await aggregateBulkGetter<QueuedArrival[]>(
-      planetsToLoad.length,
-      200,
-      async (start, end) => {
-        return (
-          await this.makeCall(this.contract.bulkGetPlanetArrivalsByIds, [
-            planetsToLoad.slice(start, end).map(locationIdToDecStr),
-          ])
-        ).map((arrivals) => arrivals.map(decodeArrival));
-      },
-      onProgress,
-    );
-
-    return flatten(arrivalsUnflattened);
-  }
-
-  public async getTouchedPlanetIds(
-    startingAt: number,
-    onProgress?: (fractionCompleted: number) => void,
-  ): Promise<LocationId[]> {
-    const nPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNPlanets)
-    ).toNumber();
-
-    const planetIds = await aggregateBulkGetter<EthersBN>(
-      nPlanets - startingAt,
-      1000,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgress,
-    );
-    return planetIds.map(locationIdFromEthersBN);
-  }
-
-  public async getRevealedCoordsByIdIfExists(
-    planetId: LocationId,
-  ): Promise<RevealedCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawRevealedCoords = await this.makeCall(
-      this.contract.revealedCoords,
-      [decStrId],
-    );
-    const ret = decodeRevealedCoords(rawRevealedCoords);
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
-  }
-
-  public async getIsPaused(): Promise<boolean> {
-    return this.makeCall(this.contract.paused);
-  }
-
-  public async getIsHalfPrice(): Promise<boolean> {
-    return this.makeCall(this.contract.halfPrice);
-  }
-
-  public async getRevealedPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
-  ): Promise<RevealedCoords[]> {
-    const nRevealedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNRevealedPlanets)
-    ).toNumber();
-
-    const rawRevealedPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nRevealedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetRevealedPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawRevealedCoords = await aggregateBulkGetter(
-      rawRevealedPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetRevealedCoordsByIds, [
-          rawRevealedPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawRevealedCoords.map(decodeRevealedCoords);
-  }
-
-  public async getClaimedCoordsByIdIfExists(
-    planetId: LocationId,
-  ): Promise<ClaimedCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawClaimedCoords = await this.makeCall(this.contract.claimedCoords, [
-      decStrId,
-    ]);
-    const ret = decodeClaimedCoords(rawClaimedCoords);
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
-  }
-
-  public async getClaimedPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
-  ): Promise<ClaimedCoords[]> {
-    const nClaimedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNClaimedPlanets)
-    ).toNumber();
-
-    const rawClaimedPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nClaimedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetClaimedPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawClaimedCoords = await aggregateBulkGetter(
-      rawClaimedPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetClaimedCoordsByIds, [
-          rawClaimedPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawClaimedCoords.map(decodeClaimedCoords);
-  }
-
-  public async getBurnedCoordsByIdIfExists(
-    planetId: LocationId,
-  ): Promise<BurnedCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawBurnedCoords = await this.makeCall(this.contract.burnedCoords, [
-      decStrId,
-    ]);
-    const ret = decodeBurnedCoords(rawBurnedCoords);
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
-  }
-
-  public async getBurnedPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
-  ): Promise<BurnedCoords[]> {
-    const nBurnedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNBurnedPlanets)
-    ).toNumber();
-
-    const rawBurnedPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nBurnedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetBurnedPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawBurnedCoords = await aggregateBulkGetter(
-      rawBurnedPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetBurnedCoordsByIds, [
-          rawBurnedPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawBurnedCoords.map(decodeBurnedCoords);
-  }
-
-  public async getKardashevCoordsByIdIfExists(
-    planetId: LocationId,
-  ): Promise<KardashevCoords | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawKardashevCoords = await this.makeCall(
-      this.contract.kardashevCoords,
-      [decStrId],
-    );
-    const ret = decodeKardashevCoords(rawKardashevCoords);
-
-    if (ret.hash === EMPTY_LOCATION_ID) {
-      return undefined;
-    }
-    return ret;
-  }
-
-  public async getKardashevPlanetsCoords(
-    startingAt: number,
-    onProgressIds?: (fractionCompleted: number) => void,
-    onProgressCoords?: (fractionCompleted: number) => void,
-  ): Promise<KardashevCoords[]> {
-    const nBurnedPlanets: number = (
-      await this.makeCall<EthersBN>(this.contract.getNKardashevPlanets)
-    ).toNumber();
-
-    const rawKardashevPlanetIds = await aggregateBulkGetter<EthersBN>(
-      nBurnedPlanets - startingAt,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetKardashevPlanetIds, [
-          start + startingAt,
-          end + startingAt,
-        ]),
-      onProgressIds,
-    );
-
-    const rawKardashevCoords = await aggregateBulkGetter(
-      rawKardashevPlanetIds.length,
-      500,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetKardashevCoordsByIds, [
-          rawKardashevPlanetIds.slice(start, end),
-        ]),
-      onProgressCoords,
-    );
-
-    return rawKardashevCoords.map(decodeKardashevCoords);
-  }
-
-  public async bulkGetPlanets(
-    toLoadPlanets: LocationId[],
-    onProgressPlanet?: (fractionCompleted: number) => void,
-  ): Promise<Map<LocationId, Planet>> {
-    const rawPlanets = await aggregateBulkGetter(
-      toLoadPlanets.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetPlanetsByIds, [
-          toLoadPlanets.slice(start, end).map(locationIdToDecStr),
-        ]),
-      onProgressPlanet,
-    );
-
-    const planets: Map<LocationId, Planet> = new Map();
-
-    for (let i = 0; i < toLoadPlanets.length; i += 1) {
-      if (rawPlanets[i]) {
-        const planet = decodePlanet(
-          locationIdToDecStr(toLoadPlanets[i]),
-          rawPlanets[i],
-        );
-        planet.transactions = new TxCollection();
-        planets.set(planet.locationId, planet);
-      }
-    }
-    return planets;
-  }
-
-  public async getPlanetById(
-    planetId: LocationId,
-  ): Promise<Planet | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawPlanet = await this.makeCall(this.contract.planets, [decStrId]);
-    return decodePlanet(decStrId, rawPlanet);
-  }
-
-  public async getArtifactById(
-    artifactId: ArtifactId,
-  ): Promise<Artifact | undefined> {
-    const exists = await this.makeCall<boolean>(
-      this.contract.doesArtifactExist,
-      [artifactIdToDecStr(artifactId)],
-    );
-    if (!exists) {
-      return undefined;
-    }
-    const rawArtifact = await this.makeCall(this.contract.getArtifactById, [
-      artifactIdToDecStr(artifactId),
-    ]);
-
-    const artifact = decodeArtifact(rawArtifact);
-    artifact.transactions = new TxCollection();
-    return artifact;
-  }
-
-  public async bulkGetArtifactsOnPlanets(
-    locationIds: LocationId[],
-    onProgress?: (fractionCompleted: number) => void,
-  ): Promise<Artifact[][]> {
-    const rawArtifacts = await aggregateBulkGetter(
-      locationIds.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetPlanetArtifacts, [
-          locationIds.slice(start, end).map(locationIdToDecStr),
-        ]),
-      onProgress,
-    );
-
-    return rawArtifacts.map((rawArtifactArray) => {
-      return rawArtifactArray.map(decodeArtifact);
-    });
-  }
-
-  public async bulkGetArtifacts(
-    artifactIds: ArtifactId[],
-    onProgress?: (fractionCompleted: number) => void,
-  ): Promise<Artifact[]> {
-    const rawArtifacts = await aggregateBulkGetter(
-      artifactIds.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetArtifactsByIds, [
-          artifactIds.slice(start, end).map(artifactIdToDecStr),
-        ]),
-      onProgress,
-    );
-
-    const ret: Artifact[] = rawArtifacts.map(decodeArtifact);
-    ret.forEach((a) => (a.transactions = new TxCollection()));
-
-    return ret;
-  }
-
-  public async getPlayerArtifacts(
-    playerId?: EthAddress,
-    onProgress?: (percent: number) => void,
-  ): Promise<Artifact[]> {
-    if (playerId === undefined) {
-      return [];
-    }
-
-    const mySpacespaceIds = (
-      await this.makeCall(this.contract.getPlayerArtifactIds, [playerId])
-    ).map(artifactIdFromEthersBN);
-    return this.bulkGetArtifacts(mySpacespaceIds, onProgress);
-  }
-
-  public async getPlayerSpaceships(
-    playerId?: EthAddress,
-    onProgress?: (percent: number) => void,
-  ): Promise<Artifact[]> {
-    if (playerId === undefined) {
-      return [];
-    }
-
-    const myArtifactIds = (
-      await this.makeCall<EthersBN[]>(this.contract.getMySpaceshipIds, [
-        playerId,
-      ])
-    ).map(artifactIdFromEthersBN);
-    return this.bulkGetArtifacts(myArtifactIds, onProgress);
-  }
-
-  public async getNTargetPlanetArrivalIds(
-    planetId: LocationId,
-  ): Promise<number> {
-    const decStrId = locationIdToDecStr(planetId);
-    const result: number = (
-      await this.makeCall<EthersBN>(this.contract.getNTargetPlanetArrivalIds, [
-        decStrId,
-      ])
-    ).toNumber();
-    return result;
-  }
-
-  public async getTargetPlanetArrivalIdsRangeWithTimestamp(
-    planetId: LocationId,
-    timestamp: number,
-  ): Promise<number[]> {
-    const decStrId = locationIdToDecStr(planetId);
-
-    const result: number[] = (
-      await this.makeCall<EthersBN[]>(
-        this.contract.getTargetPlanetArrivalIdsRangeWithTimestamp,
-        [decStrId, timestamp],
-      )
-    ).map((value) => value.toNumber());
-    return result;
-  }
-
-  public async getTargetPlanetArrivalIdsWithTimestamp(
-    planetId: LocationId,
-    timestamp: number,
-  ): Promise<number[]> {
-    const decStrId = locationIdToDecStr(planetId);
-
-    const result: number[] = (
-      await this.makeCall<EthersBN[]>(
-        this.contract.getTargetPlanetArrivalIdsWithTimestamp,
-        [decStrId, timestamp],
-      )
-    ).map((value) => value.toNumber());
-
-    return result;
-  }
-
-  public async getTargetPlanetAllArrivals(
-    planetId: LocationId,
-    timestamp: number,
-    onProgress?: (fractionCompleted: number) => void,
-  ): Promise<QueuedArrival[]> {
-    const arrivalIds = await this.getTargetPlanetArrivalIdsWithTimestamp(
-      planetId,
-      timestamp,
-    );
-
-    const arrivalsUnflattened = await aggregateBulkGetter(
-      arrivalIds.length,
-      200,
-      async (start, end) => {
-        return (
-          await this.makeCall(this.contract.bulkGetVoyagesByIds, [
-            arrivalIds.slice(start, end),
-          ])
-        ).map(decodeArrival);
-      },
-      onProgress,
-    );
-
-    return _.flatten(arrivalsUnflattened);
-  }
-
   public setDiagnosticUpdater(diagnosticUpdater?: DiagnosticUpdater) {
-    this.contractCaller.setDiagnosticUpdater(diagnosticUpdater);
     this.txExecutor?.setDiagnosticUpdater(diagnosticUpdater);
     this.ethConnection.setDiagnosticUpdater(diagnosticUpdater);
   }
@@ -1729,13 +709,449 @@ export class ContractsAPI extends EventEmitter {
   public getAddress() {
     return this.ethConnection.getAddress();
   }
+
+  // public async getEntryFee(): Promise<EthersBN> {}
+
+  // async getScoreV3(
+  //   address: EthAddress | undefined,
+  // ): Promise<number | undefined> {}
+
+  getConstants(): ContractConfigs | undefined {
+    const {
+      TempConfigSet,
+      UniverseConfig,
+      SpaceTypeConfig,
+      UniverseZoneConfig,
+      PlanetLevelConfig,
+      PlanetTypeConfig,
+      UpgradeConfig,
+      SnarkConfig,
+    } = this.components;
+
+    const tempConfigSet = getComponentValue(TempConfigSet, singletonEntity);
+    const universeConfig = getComponentValue(UniverseConfig, singletonEntity);
+    const spaceTypeConfig = getComponentValue(SpaceTypeConfig, singletonEntity);
+    const universeZoneConfig = getComponentValue(
+      UniverseZoneConfig,
+      singletonEntity,
+    );
+
+    const planetLevelConfig = getComponentValue(
+      PlanetLevelConfig,
+      singletonEntity,
+    );
+
+    const upgradeConfig = getComponentValue(UpgradeConfig, singletonEntity);
+    const snarkConfig = getComponentValue(SnarkConfig, singletonEntity);
+
+    // console.log(tempConfigSet);
+    // console.log(universeConfig);
+    // console.log(spaceTypeConfig);
+    // console.log(universeZoneConfig);
+    // console.log(planetLevelConfig);
+    // console.log(upgradeConfig);
+    // console.log(snarkConfig);
+
+    if (
+      !tempConfigSet ||
+      !universeConfig ||
+      !spaceTypeConfig ||
+      !universeZoneConfig ||
+      !planetLevelConfig ||
+      !upgradeConfig ||
+      !snarkConfig
+    ) {
+      return undefined;
+    }
+
+    const PLANET_TYPE_WEIGHTS = [];
+    for (let i = 1; i <= 4; i++) {
+      const value = [];
+      for (let j = 0; j <= 9; j++) {
+        const key = encodeEntity(PlanetTypeConfig.metadata.keySchema, {
+          spaceType: i,
+          level: j,
+        });
+        const rawResult = getComponentValue(PlanetTypeConfig, key);
+        if (rawResult === undefined) {
+          return undefined;
+        }
+        const planetTypeWeights = [
+          rawResult.thresholds[0],
+          rawResult.thresholds[1],
+          rawResult.thresholds[2],
+          rawResult.thresholds[3],
+          rawResult.thresholds[4],
+        ];
+        value.push(planetTypeWeights);
+      }
+      PLANET_TYPE_WEIGHTS.push(value);
+    }
+
+    const configs: ContractConfigs = {
+      BIOME_CHECKS: tempConfigSet.biomeCheck,
+      DISABLE_ZK_CHECKS: tempConfigSet.skipProofCheck,
+      PLAYER_AMOUNT_LIMIT: tempConfigSet.playerLimit,
+      INIT_PERLIN_MIN: tempConfigSet.spawnPerlinMin,
+      INIT_PERLIN_MAX: tempConfigSet.spawnPerlinMax,
+      LOCATION_REVEAL_COOLDOWN: Number(tempConfigSet.revealCd),
+      PLANET_RARITY: Number(universeConfig.sparsity),
+      WORLD_RADIUS_MIN: Number(universeConfig.radius),
+      PERLIN_THRESHOLD_1: spaceTypeConfig.perlinThresholds[0],
+      PERLIN_THRESHOLD_2: spaceTypeConfig.perlinThresholds[1],
+      PERLIN_THRESHOLD_3: spaceTypeConfig.perlinThresholds[2],
+      MAX_LEVEL_DIST: universeZoneConfig.borders.map((x) => Number(x)),
+      MAX_LEVEL_LIMIT: universeZoneConfig.planetLevelLimits,
+      MIN_LEVEL_BIAS: universeZoneConfig.planetLevelBonus,
+      PLANET_LEVEL_THRESHOLDS: planetLevelConfig.thresholds,
+      PLANET_TYPE_WEIGHTS: PLANET_TYPE_WEIGHTS as PlanetTypeWeightsBySpaceType,
+      PLANETHASH_KEY: Number(snarkConfig.planetHashKey),
+      BIOMEBASE_KEY: Number(snarkConfig.biomeBaseKey),
+      SPACETYPE_KEY: Number(snarkConfig.spaceTypeKey),
+      PERLIN_LENGTH_SCALE: Number(snarkConfig.perlinLengthScale),
+      PERLIN_MIRROR_X: snarkConfig.perlinMirrorX === 1,
+      PERLIN_MIRROR_Y: snarkConfig.perlinMirrorY === 1,
+    };
+
+    return configs;
+  }
+
+  public getPlayers(
+    onProgress?: (fractionCompleted: number) => void,
+  ): Map<string, Player> | undefined {
+    const { Player } = this.components;
+
+    const playerIds = [...runQuery([Has(Player)])];
+    const nPlayers: number = playerIds.length;
+
+    const playerMap: Map<EthAddress, Player> = new Map();
+
+    for (let i = 0; i < nPlayers; i++) {
+      const playerId = "0x" + playerIds[i].slice(-40);
+      const player = this.getPlayerById(playerId as Hex);
+      if (!player) {
+        continue;
+      }
+      playerMap.set(player?.address, player);
+      onProgress && onProgress((i + 1) / nPlayers);
+    }
+
+    return playerMap;
+  }
+
+  public getPlayerById(playerId: Hex): Player | undefined {
+    const { Player, SpawnPlanet, LastReveal } = this.components;
+    const playerKey = encodeEntity(Player.metadata.keySchema, {
+      owner: playerId,
+    });
+    const rawPlayer = getComponentValue(Player, playerKey);
+
+    const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
+      player: playerId,
+    });
+
+    const rawSpawnPlanet = getComponentValue(SpawnPlanet, spawnPlanetKey);
+
+    const lastRevealKey = encodeEntity(LastReveal.metadata.keySchema, {
+      player: playerId,
+    });
+
+    const lastReveal = getComponentValue(LastReveal, lastRevealKey);
+
+    if (!rawPlayer) {
+      return undefined;
+    }
+
+    const player: Player = {
+      address: playerId as EthAddress,
+      burner: rawPlayer.burner as EthAddress,
+      index: rawPlayer.index,
+      createdAt: Number(rawPlayer.createdAt),
+      name: rawPlayer.name,
+      homePlanetId: rawSpawnPlanet
+        ? (rawSpawnPlanet.planet.toString() as LocationId)
+        : undefined,
+      lastRevealTickNumber: lastReveal ? lastReveal.tickNumber : 0n,
+    };
+
+    return player;
+  }
+
+  public getWorldRadius(): number | undefined {
+    const { UniverseConfig } = this.components;
+    const result = getComponentValue(UniverseConfig, singletonEntity);
+    return result === undefined ? undefined : Number(result.radius);
+  }
+
+  // timestamp since epoch (in seconds)
+  // public async getTokenMintEndTimestamp(): Promise<number> {}
+
+  // public async getArrival(
+  //   arrivalId: number,
+  // ): Promise<QueuedArrival | undefined> {}
+
+  public async getArrivalsForPlanet(
+    planetId: LocationId,
+  ): Promise<QueuedArrival[]> {}
+
+  public async getAllArrivals(
+    planetsToLoad: LocationId[],
+    onProgress?: (fractionCompleted: number) => void,
+  ): Promise<QueuedArrival[]> {}
+
+  public async getTouchedPlanetIds(
+    // startingAt: number,
+    onProgress?: (fractionCompleted: number) => void,
+  ): Promise<LocationId[]> {
+    const { Planet } = this.components;
+    const planets = [...runQuery([Has(Planet)])];
+    const nPlanets: number = planets.length;
+    const result = [];
+    for (let i = 0; i < nPlanets; i++) {
+      const locationId = planets[i].toString() as LocationId;
+      result.push(locationId);
+      onProgress && onProgress((i + 1) / nPlanets);
+    }
+    return result;
+  }
+
+  public getRevealedCoordsByIdIfExists(
+    planetId: LocationId,
+  ): RevealedCoords | undefined {
+    const { RevealedPlanet } = this.components;
+    const revealedPlanetId = encodeEntity(RevealedPlanet.metadata.keySchema, {
+      id: locationIdToDecStr(planetId) as Hex,
+    });
+    const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
+    if (!revealedPlanet) {
+      return undefined;
+    }
+
+    const result: RevealedCoords = {
+      x: revealedPlanet.x as number,
+      y: revealedPlanet.y as number,
+      revealer: revealedPlanet.revealer as EthAddress,
+      hash: planetId as LocationId,
+    };
+
+    return result;
+  }
+
+  public getIsPaused(): boolean | undefined {
+    const { Ticker } = this.components;
+    const ticker = getComponentValue(Ticker, singletonEntity);
+    if (!ticker) {
+      return undefined;
+    }
+    return ticker.paused;
+  }
+
+  public getRevealedPlanetsCoords(
+    // startingAt: number,
+    // onProgressIds?: (fractionCompleted: number) => void,
+    onProgressCoords?: (fractionCompleted: number) => void,
+  ): RevealedCoords[] {
+    const { RevealedPlanet } = this.components;
+    const planetIds = [...runQuery([Has(RevealedPlanet)])];
+    const result: RevealedCoords[] = [];
+    const nPlanetIds = planetIds.length;
+
+    for (let i = 0; i < nPlanetIds; i++) {
+      const planetId = planetIds[i].toString() as LocationId;
+      const revealedCroods = this.getRevealedCoordsByIdIfExists(planetId);
+      if (!revealedCroods) {
+        continue;
+      }
+      result.push(revealedCroods);
+      onProgressCoords && onProgressCoords((i + 1) / nPlanetIds);
+    }
+    return result;
+  }
+
+  // public async getClaimedCoordsByIdIfExists(
+  //   planetId: LocationId,
+  // ): Promise<ClaimedCoords | undefined> {}
+
+  // public async getClaimedPlanetsCoords(
+  //   startingAt: number,
+  //   onProgressIds?: (fractionCompleted: number) => void,
+  //   onProgressCoords?: (fractionCompleted: number) => void,
+  // ): Promise<ClaimedCoords[]> {}
+
+  // public async getBurnedCoordsByIdIfExists(
+  //   planetId: LocationId,
+  // ): Promise<BurnedCoords | undefined> {}
+
+  // public async getBurnedPlanetsCoords(
+  //   startingAt: number,
+  //   onProgressIds?: (fractionCompleted: number) => void,
+  //   onProgressCoords?: (fractionCompleted: number) => void,
+  // ): Promise<BurnedCoords[]> {}
+
+  // public async getKardashevCoordsByIdIfExists(
+  //   planetId: LocationId,
+  // ): Promise<KardashevCoords | undefined> {}
+
+  // public async getKardashevPlanetsCoords(
+  //   startingAt: number,
+  //   onProgressIds?: (fractionCompleted: number) => void,
+  //   onProgressCoords?: (fractionCompleted: number) => void,
+  // ): Promise<KardashevCoords[]> {}
+
+  public async bulkGetPlanets(
+    toLoadPlanets: LocationId[],
+    onProgressPlanet?: (fractionCompleted: number) => void,
+  ): Promise<Map<LocationId, Planet>> {}
+
+  public _validateHash(planet: Planet): boolean {
+    const locationBI = bigInt(planet.locationId, 16);
+    if (locationBI.geq(LOCATION_ID_UB)) {
+      return false;
+      // throw new Error("not a valid location");
+    }
+    return true;
+  }
+
+  public _initPlanet(planet: Planet): Planet | undefined {
+    const { Ticker } = this.components;
+
+    const result_1 = this._initZone(planet);
+    if (!result_1) {
+      return undefined;
+    }
+    planet = result_1;
+
+    const result_2 = this._initSpaceType(planet);
+    if (!result_2) {
+      return undefined;
+    }
+    planet = result_2;
+
+    planet = this._initLevel(planet);
+    planet = this._initPlanetType(planet);
+    planet = this._initPopulationAndSilver(planet);
+    const ticker = getComponentValue(Ticker, singletonEntity);
+    planet.lastUpdateTick = ticker ? Number(ticker.tickNumber) : 0;
+    return planet;
+  }
+
+  public _initZone(planet: Planet): Planet | undefined {
+    const { UniverseZoneConfig } = this.components;
+    const universeZoneConfig = getComponentValue(
+      UniverseZoneConfig,
+      singletonEntity,
+    );
+
+    if (!universeZoneConfig) {
+      return undefined;
+    }
+
+    const borders = universeZoneConfig.borders;
+    const distanceSquare = planet.distSquare;
+    const maxZone = borders.length;
+
+    for (let i = 0; i < maxZone; ) {
+      if (distanceSquare < borders[i] * borders[i]) {
+        planet.universeZone = i;
+        return planet;
+      }
+      ++i;
+    }
+    planet.universeZone = maxZone;
+    return planet;
+  }
+
+  public _initSpaceType(planet: Planet): Planet | undefined {
+    const { SpaceTypeConfig, UniverseZoneConfig } = this.components;
+    const spaceTypeConfig = getComponentValue(SpaceTypeConfig, singletonEntity);
+    const universeZoneConfig = getComponentValue(
+      UniverseZoneConfig,
+      singletonEntity,
+    );
+
+    if (!spaceTypeConfig) {
+      return undefined;
+    }
+    if (!universeZoneConfig) {
+      return undefined;
+    }
+
+    const thresholds = spaceTypeConfig.perlinThresholds;
+    const perlin = planet.perlin;
+    const length = thresholds.length;
+    if (planet.universeZone + 1 === universeZoneConfig.borders.length) {
+      // planet.spaceType =
+      return planet;
+    }
+  }
+
+  public _initLevel(planet: Planet): Planet {}
+
+  public _initPlanetType(planet: Planet): Planet {}
+
+  public _initPopulationAndSilver(planet: Planet): Planet {}
+
+  public getPlanetById(planetId: LocationId) {
+    const { Planet } = this.components;
+    const planetKey = encodeEntity(Planet.metadata.keySchema, {
+      id: ("0x" + planetId) as Hex,
+    });
+
+    const planet = getComponentValue(Planet, planetKey);
+    return planet;
+  }
+
+  // public async getArtifactById(
+  //   artifactId: ArtifactId,
+  // ): Promise<Artifact | undefined> {}
+
+  // public async bulkGetArtifactsOnPlanets(
+  //   locationIds: LocationId[],
+  //   onProgress?: (fractionCompleted: number) => void,
+  // ): Promise<Artifact[][]> {}
+
+  // public async bulkGetArtifacts(
+  //   artifactIds: ArtifactId[],
+  //   onProgress?: (fractionCompleted: number) => void,
+  // ): Promise<Artifact[]> {}
+
+  // public async getPlayerArtifacts(
+  //   playerId?: EthAddress,
+  //   onProgress?: (percent: number) => void,
+  // ): Promise<Artifact[]> {}
+
+  // public async getPlayerSpaceships(
+  //   playerId?: EthAddress,
+  //   onProgress?: (percent: number) => void,
+  // ): Promise<Artifact[]> {}
+
+  // public async getNTargetPlanetArrivalIds(
+  //   planetId: LocationId,
+  // ): Promise<number> {}
+
+  // public async getTargetPlanetArrivalIdsRangeWithTimestamp(
+  //   planetId: LocationId,
+  //   timestamp: number,
+  // ): Promise<number[]> {}
+
+  // public async getTargetPlanetArrivalIdsWithTimestamp(
+  //   planetId: LocationId,
+  //   timestamp: number,
+  // ): Promise<number[]> {}
+
+  // public async getTargetPlanetAllArrivals(
+  //   planetId: LocationId,
+  //   timestamp: number,
+  //   onProgress?: (fractionCompleted: number) => void,
+  // ): Promise<QueuedArrival[]> {}
 }
 
 export async function makeContractsAPI({
   connection,
   contractAddress,
+  components,
 }: ContractsApiConfig): Promise<ContractsAPI> {
   await connection.loadContract(contractAddress, loadDiamondContract);
 
-  return new ContractsAPI({ connection, contractAddress });
+  return new ContractsAPI({ connection, contractAddress, components });
 }

@@ -1,7 +1,7 @@
 // import type { GameManager } from "@backend/GameLogic/GameManager";
 // import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 import {
-  // BLOCK_EXPLORER_URL,
+  BLOCK_EXPLORER_URL,
   // BLOCKCHAIN_BRIDGE,
   // HOW_TO_ENABLE_POPUPS,
   // HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
@@ -36,11 +36,19 @@ import WalletButton from "@wallet/WalletButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { zeroAddress } from "viem";
+import type { Hex } from "viem";
 import { useWalletClient } from "wagmi";
 
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import { Terminal, type TerminalHandle } from "../Views/Terminal";
+import {
+  getEthConnection,
+  loadDiamondContract,
+} from "../../Backend/Network/Blockchain";
+import type { EthConnection } from "@df/network";
+import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
+import { address } from "@df/serde";
 
 const enum TerminalPromptStep {
   NONE,
@@ -79,31 +87,39 @@ export function GameLandingPage_v1() {
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
-    components: { SyncProgress },
+    components: components,
   } = useMUD();
 
-  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
-    message: "Connecting",
-    percentage: 0,
-    step: "Initialize",
-    latestBlockNumber: 0n,
-    lastBlockNumberProcessed: 0n,
-  });
+  const syncProgress = useComponentValue(
+    components.SyncProgress,
+    singletonEntity,
+    {
+      message: "Connecting",
+      percentage: 0,
+      step: "Initialize",
+      latestBlockNumber: 0n,
+      lastBlockNumberProcessed: 0n,
+    },
+  );
 
   const syncSign = useMemo(() => {
-    console.log(syncProgress);
+    // console.log(syncProgress);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
 
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
+  const contractAddress = contract ? address(contract) : address(zeroAddress);
 
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const terminalHandle = useRef<TerminalHandle>(null);
   // const miniMapRef = useRef<MiniMapHandle>();
 
-  // const [gameManager, setGameManager] = useState<GameManager | undefined>();
+  // const [gameManager, setGameManager] = useState<GaXmeManager | undefined>();
   // const gameUIManagerRef = useRef<GameUIManager | undefined>();
+  const [ethConnection, setEthConnection] = useState<
+    EthConnection | undefined
+  >();
 
   const [
     terminalVisible,
@@ -120,7 +136,16 @@ export function GameLandingPage_v1() {
 
   const [browserIssues, setBrowserIssues] = useState<Incompatibility[]>([]);
   // const [isMiniMapOn, setMiniMapOn] = useState(false);
-  // const [spectate, setSpectate] = useState(false);
+  const [spectate, setSpectate] = useState(false);
+
+  useEffect(() => {
+    getEthConnection()
+      .then((ethConnection) => setEthConnection(ethConnection))
+      .catch((e) => {
+        alert("error connecting to blockchain");
+        console.log(e);
+      });
+  }, []);
 
   useEffect(() => {
     unsupportedFeatures().then((issues) => {
@@ -233,6 +258,40 @@ export function GameLandingPage_v1() {
     [mainAccount],
   );
 
+  const advanceStateFromSpectating = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
+      try {
+        if (!ethConnection) {
+          throw new Error("not logged in");
+        }
+
+        setSpectate(true);
+        // setMiniMapOn(false);
+        console.log("specatate:", spectate);
+        // console.log("isMiniMapOn:", isMiniMapOn);
+
+        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+      } catch (e) {
+        console.error(e);
+        setStep(TerminalPromptStep.ERROR);
+        terminal.current?.print(
+          "Network under heavy load. Please refresh the page, and check ",
+          TerminalTextStyle.Red,
+        );
+        terminal.current?.printLink(
+          BLOCK_EXPLORER_URL,
+          () => {
+            window.open(BLOCK_EXPLORER_URL);
+          },
+          TerminalTextStyle.Red,
+        );
+        terminal.current?.println("");
+        return;
+      }
+    },
+    [ethConnection, spectate],
+  );
+
   const advanceState = useCallback(
     (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       if (browserCompatibleState !== "supported") {
@@ -242,6 +301,9 @@ export function GameLandingPage_v1() {
       switch (true) {
         case step === TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED:
           advanceStateFromCompatibilityPassed(terminal);
+          return;
+        case step === TerminalPromptStep.SPECTATING:
+          advanceStateFromSpectating(terminal);
           return;
       }
     },
@@ -266,6 +328,52 @@ export function GameLandingPage_v1() {
       advanceState(terminalHandle);
     }
   }, [terminalHandle, topLevelContainer, advanceState]);
+
+  const testContractsAPI = async () => {
+    if (!ethConnection) {
+      throw new Error("not logged in");
+    }
+
+    // TODO: remove NamespaceOwner here
+    const { NamespaceOwner } = components;
+    console.log(NamespaceOwner.values.owner);
+
+    const contractsAPI = await makeContractsAPI({
+      connection: ethConnection,
+      contractAddress,
+      components,
+    });
+
+    console.log(contractsAPI);
+
+    const configs = contractsAPI.getConstants();
+    console.log("Config");
+    console.log(configs);
+
+    const worldRadius = contractsAPI.getWorldRadius();
+    console.log("World Radius:");
+    console.log(worldRadius);
+
+    console.log("Main Account");
+    console.log(mainAccount);
+    const MainPlayer = contractsAPI.getPlayerById(mainAccount);
+    console.log(MainPlayer);
+
+    console.log("Game Account");
+    console.log(gameAccount);
+    const GamePlayer = contractsAPI.getPlayerById(gameAccount);
+    console.log(GamePlayer);
+
+    console.log("Players");
+    const players = contractsAPI.getPlayers();
+    console.log(players);
+
+    console.log("Planet");
+    const planetId =
+      "0x0998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b" as Hex;
+    const planet = contractsAPI.getPlanetById(planetId);
+    console.log(planet);
+  };
 
   return (
     <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
@@ -316,6 +424,10 @@ export function GameLandingPage_v1() {
             <p> Main Account: {mainAccount}</p>
             <p> Game Account: {gameAccount}</p>
             <br />
+          </div>
+
+          <div>
+            <button onClick={testContractsAPI}> Test Contracts API</button>
           </div>
           <Terminal
             ref={terminalHandle}

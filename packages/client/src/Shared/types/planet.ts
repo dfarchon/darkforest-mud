@@ -96,77 +96,108 @@ export type PlanetBonus = [
  * DarkForest contract (or even any collection of objects).
  */
 export type Planet = {
-  locationId: LocationId;
+  locationId: LocationId; // planetHash
+  distSquare: bigint;
   perlin: number;
-  spaceType: SpaceType;
-  owner: EthAddress; // should never be null; all unowned planets should have 0 address
-  hatLevel: number;
-  hatType: number;
-
-  planetLevel: PlanetLevel;
+  owner: EthAddress;
+  lastUpdateTick: number;
+  level: number;
   planetType: PlanetType;
-  isHomePlanet: boolean;
-
-  energyCap: number;
-  energyGrowth: number;
-
-  silverCap: number;
-  silverGrowth: number;
-
-  range: number;
-  defense: number;
-  speed: number;
-
+  spaceType: SpaceType;
+  universeZone: number;
   energy: number;
   silver: number;
-
-  spaceJunk: number;
-
-  lastUpdated: number;
   upgradeState: UpgradeState;
-  hasTriedFindingArtifact: boolean;
-  heldArtifactIds: ArtifactId[];
-  adminProtect: boolean;
-  destroyed: boolean;
-  frozen: boolean;
-  canShow: boolean;
-  prospectedBlockNumber?: number;
-  localPhotoidUpgrade?: Upgrade;
-
+  range: number;
+  speed: number;
+  defense: number;
+  energyCap: number;
+  energyGrowth: number;
+  silverCap: number;
+  silverGrowth: number;
   transactions?: TransactionCollection;
-  unconfirmedAddEmoji: boolean;
-  unconfirmedClearEmoji: boolean;
-  loadingServerState: boolean;
-  needsServerRefresh: boolean;
-  lastLoadedServerState?: number;
-
-  emojiBobAnimation?: DFAnimation;
-  emojiZoopAnimation?: DFAnimation;
-  emojiZoopOutAnimation?: DFStatefulAnimation<string>;
-
-  silverSpent: number;
-
   isInContract: boolean;
   syncedWithContract: boolean;
   coordsRevealed: boolean;
   revealer?: EthAddress;
-  claimer?: EthAddress;
-  burnOperator?: EthAddress; //only record burn/pink operator
-  burnStartTimestamp?: number;
-  pinkOperator?: EthAddress;
-  kardashevOperator?: EthAddress;
-  kardashevTimestamp?: number;
-
-  messages?: PlanetMessage<unknown>[];
-
   bonus: PlanetBonus;
-  pausers: number;
   energyGroDoublers: number;
   silverGroDoublers: number;
-  invader?: EthAddress;
-  capturer?: EthAddress;
-  invadeStartBlock?: number;
+  // PendingMoveQueue
 };
+
+// export type Planet = {
+//   locationId: LocationId; // planetHash
+//   perlin: number;
+//   spaceType: SpaceType;
+//   owner: EthAddress; // should never be null; all unowned planets should have 0 address
+//   // hatLevel: number;
+//   // hatType: number;
+
+//   planetLevel: PlanetLevel;
+//   planetType: PlanetType;
+//   isHomePlanet: boolean;
+
+//   energyCap: number;
+//   energyGrowth: number;
+
+//   silverCap: number;
+//   silverGrowth: number;
+
+//   range: number;
+//   defense: number;
+//   speed: number;
+
+//   energy: number;
+//   silver: number;
+
+//   // spaceJunk: number;
+
+//   lastUpdated: number;
+//   upgradeState: UpgradeState;
+//   // hasTriedFindingArtifact: boolean;
+//   // heldArtifactIds: ArtifactId[];
+//   // adminProtect: boolean;
+//   // destroyed: boolean;
+//   // frozen: boolean;
+//   // canShow: boolean;
+//   // prospectedBlockNumber?: number;
+//   // localPhotoidUpgrade?: Upgrade;
+
+//   transactions?: TransactionCollection;
+//   // unconfirmedAddEmoji: boolean;
+//   // unconfirmedClearEmoji: boolean;
+//   // loadingServerState: boolean;
+//   // needsServerRefresh: boolean;
+//   // lastLoadedServerState?: number;
+
+//   // emojiBobAnimation?: DFAnimation;
+//   // emojiZoopAnimation?: DFAnimation;
+//   // emojiZoopOutAnimation?: DFStatefulAnimation<string>;
+
+//   silverSpent: number;
+
+//   isInContract: boolean;
+//   syncedWithContract: boolean;
+//   coordsRevealed: boolean;
+//   revealer?: EthAddress;
+//   // claimer?: EthAddress;
+//   // burnOperator?: EthAddress; //only record burn/pink operator
+//   // burnStartTimestamp?: number;
+//   // pinkOperator?: EthAddress;
+//   // kardashevOperator?: EthAddress;
+//   // kardashevTimestamp?: number;
+
+//   // messages?: PlanetMessage<unknown>[];
+
+//   bonus: PlanetBonus;
+//   // pausers: number;
+//   energyGroDoublers: number;
+//   silverGroDoublers: number;
+//   // invader?: EthAddress;
+//   // capturer?: EthAddress;
+//   // invadeStartBlock?: number;
+// };
 
 /**
  * A planet whose coordinates are known to the client.

@@ -501,6 +501,109 @@ export interface ContractConstants {
   ];
 }
 
+export interface ContractConfigs {
+  DISABLE_ZK_CHECKS: boolean; //✅
+  BIOME_CHECKS: boolean; // ✅
+  PLANETHASH_KEY: number; //✅
+  SPACETYPE_KEY: number; //✅
+  BIOMEBASE_KEY: number; // ✅
+  PERLIN_MIRROR_X: boolean; //✅
+  PERLIN_MIRROR_Y: boolean; //✅
+  PERLIN_LENGTH_SCALE: number; //✅
+  PLAYER_AMOUNT_LIMIT: number; //✅
+  WORLD_RADIUS_MIN: number; //✅
+  PERLIN_THRESHOLD_1: number; //✅
+  PERLIN_THRESHOLD_2: number; //✅
+  PERLIN_THRESHOLD_3: number; //✅
+  INIT_PERLIN_MIN: number; //✅
+  INIT_PERLIN_MAX: number; //✅
+  PLANET_LEVEL_THRESHOLDS: number[]; //✅ NOTE: newest have 9 numbers
+  PLANET_RARITY: number; //✅
+  LOCATION_REVEAL_COOLDOWN: number; //✅
+  PLANET_TYPE_WEIGHTS: PlanetTypeWeightsBySpaceType; //✅
+  MAX_LEVEL_DIST: number[]; //✅
+  MAX_LEVEL_LIMIT: number[]; //✅
+  MIN_LEVEL_BIAS: number[]; //✅
+
+  // upgrades: UpgradeBranches; // TODO: introduce upgrades later
+  // adminAddress: EthAddress;
+  //
+  // NOTE: use PlanetMetadata to know the default state
+  //
+  // defaultPopulationCap: number[];
+  // defaultPopulationGrowth: number[];
+  // defaultSilverCap: number[];
+  // defaultSilverGrowth: number[];
+  // defaultRange: number[];
+  // defaultSpeed: number[];
+  // defaultDefense: number[];
+  // defaultBarbarianPercentage: number[];
+  // planetCumulativeRarities: number[];
+
+  //GameConstants
+  // ADMIN_CAN_ADD_PLANETS: boolean;
+  // WORLD_RADIUS_LOCKED: boolean;
+  // MAX_NATURAL_PLANET_LEVEL: number;
+  // MAX_ARTIFACT_PER_PLANET: number;
+  // MAX_SENDING_PLANET: number;
+  // MAX_RECEIVING_PLANET: number;
+  // TIME_FACTOR_HUNDREDTHS: number;
+  // BIOME_THRESHOLD_1: number;
+  // BIOME_THRESHOLD_2: number;
+  // PLANET_TRANSFER_ENABLED: boolean;
+  // PHOTOID_ACTIVATION_DELAY: number;
+  // STELLAR_ACTIVATION_DELAY: number;
+  // CLAIM_PLANET_COOLDOWN: number;
+  // ACTIVATE_ARTIFACT_COOLDOWN: number;
+  // BUY_ARTIFACT_COOLDOWN: number;
+  // SILVER_SCORE_VALUE: number;
+  // ARTIFACT_POINT_VALUES: ArtifactPointValues;
+  // Space Junk
+  // SPACE_JUNK_ENABLED: boolean;
+  // SPACE_JUNK_LIMIT: number;
+  // PLANET_LEVEL_JUNK: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
+  // ABANDON_SPEED_CHANGE_PERCENT: number;
+  // ABANDON_RANGE_CHANGE_PERCENT: number;
+  // Capture Zones
+  // GAME_START_BLOCK: number;
+  // CAPTURE_ZONES_ENABLED: boolean;
+  // CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL: number;
+  // CAPTURE_ZONE_RADIUS: number;
+  // CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
+  // CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED: number;
+  // CAPTURE_ZONES_PER_5000_WORLD_RADIUS: number;
+  //SpaceshipConstants
+  // SPACESHIPS: {
+  //   GEAR: boolean;
+  //   MOTHERSHIP: boolean;
+  //   TITAN: boolean;
+  //   CRESCENT: boolean;
+  //   WHALE: boolean;
+  //   PINKSHIP: boolean;
+  // };
+}
 export type ClientMockchainData =
   | null
   | undefined
