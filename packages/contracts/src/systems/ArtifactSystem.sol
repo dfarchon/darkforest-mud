@@ -34,4 +34,34 @@ contract ArtifactSystem is System, Errors {
     artifact.writeToStore();
     planet.writeToStore();
   }
+
+  function chargeArtifact(uint256 planetHash, uint256 artifactId) public {
+    IWorld world = IWorld(_world());
+    world.df__tick();
+
+    Planet memory planet = world.df__readPlanet(planetHash);
+    planet.chargeArtifact(artifactId, _msgSender());
+
+    planet.writeToStore();
+  }
+
+  function activateArtifact(uint256 planetHash, uint256 artifactId) public {
+    IWorld world = IWorld(_world());
+    world.df__tick();
+
+    Planet memory planet = world.df__readPlanet(planetHash);
+    planet.activateArtifact(artifactId, _msgSender());
+
+    planet.writeToStore();
+  }
+
+  function deactivateArtifact(uint256 planetHash, uint256 artifactId) public {
+    IWorld world = IWorld(_world());
+    world.df__tick();
+
+    Planet memory planet = world.df__readPlanet(planetHash);
+    planet.deactivateArtifact(artifactId, _msgSender());
+
+    planet.writeToStore();
+  }
 }

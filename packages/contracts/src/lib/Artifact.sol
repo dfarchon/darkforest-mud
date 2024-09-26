@@ -2,9 +2,9 @@
 pragma solidity >=0.8.24;
 
 import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactType, ArtifactRarity } from "../codegen/common.sol";
-import { Counter, ArtifactConfig, Artifact as ArtifactTable, PlanetArtifact } from "../codegen/index.sol";
-import { PlanetArtifact, ArtifactOwner } from "../codegen/index.sol";
+import { PlanetType, SpaceType, Biome, ArtifactType, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "../codegen/common.sol";
+import { Counter, ArtifactConfig, Artifact as ArtifactTable, ArtifactData, PlanetArtifact } from "../codegen/index.sol";
+import { PlanetArtifact, ArtifactOwner, ArtifactMetadata, ArtifactMetadataData } from "../codegen/index.sol";
 
 using ArtifactStorageLib for ArtifactStorage global;
 
@@ -14,7 +14,6 @@ struct ArtifactStorage {
   uint256 artifacts;
   bool shouldWrite;
   uint256 inArtifacts;
-  uint256 outArtifacts;
 }
 
 library ArtifactStorageLib {
@@ -50,21 +49,7 @@ library ArtifactStorageLib {
       if (artifact == 0) {
         break;
       }
-      ArtifactTable.setAvailability(artifact, true);
       ArtifactOwner.set(artifact, bytes32(_s.planetHash));
-      unchecked {
-        ++i;
-        artifacts >>= 32;
-      }
-    }
-
-    artifacts = _s.outArtifacts;
-    for (uint256 i; i < MAX_ARTIFACTS_PER_PLANET; ) {
-      uint32 artifact = uint32(artifacts);
-      if (artifact == 0) {
-        break;
-      }
-      ArtifactTable.setAvailability(artifact, false);
       unchecked {
         ++i;
         artifacts >>= 32;
@@ -84,6 +69,24 @@ library ArtifactStorageLib {
     artifact = uint32(_s.artifacts >> (32 * _index));
   }
 
+  function Has(ArtifactStorage memory _s, uint256 _artifact) internal pure returns (bool) {
+    uint256 artifacts = _s.artifacts;
+    for (uint256 i; i < _s.number; ) {
+      if (uint32(artifacts) == _artifact) {
+        return true;
+      }
+      unchecked {
+        ++i;
+        artifacts >>= 32;
+      }
+    }
+    return false;
+  }
+
+  function GetNumber(ArtifactStorage memory _s) internal pure returns (uint256) {
+    return _s.number;
+  }
+
   function Push(ArtifactStorage memory _s, uint256 _artifact) internal pure {
     if (_s.IsFull()) {
       revert Errors.ArtifactStorageFull();
@@ -100,8 +103,8 @@ library ArtifactStorageLib {
     if (_s.IsEmpty()) {
       revert Errors.ArtifactNotOnPlanet();
     }
-    if (ArtifactTable.getAvailability(uint32(_artifact)) == false) {
-      revert Errors.ArtifactNotOnPlanet();
+    if (ArtifactTable.getStatus(uint32(_artifact)) > ArtifactStatus.CHARGING) {
+      revert Errors.ArtifactNotAvailable();
     }
     uint256 number = _s.number;
     uint256 artifacts = _s.artifacts;
@@ -112,7 +115,6 @@ library ArtifactStorageLib {
           --number;
           uint256 mod = 1 << (32 * i);
           _s.artifacts = (_s.artifacts % mod) + ((_s.artifacts / mod) >> 32) * mod;
-          _s.outArtifacts = (_s.outArtifacts << 32) + _artifact;
         }
         return;
       }
@@ -130,9 +132,22 @@ using ArtifactLib for Artifact global;
 struct Artifact {
   uint256 id;
   uint256 planetHash;
+  // Table: Artifact
+  ArtifactStatus status;
   ArtifactRarity rarity;
   ArtifactType artifactType;
-  bool available;
+  uint256 chargeTime;
+  uint256 activateTime;
+  uint256 cooldownTime;
+  // Table: ArtifactMetadata
+  ArtifactGenre genre;
+  uint256 charge;
+  uint256 cooldown;
+  bool instant;
+  bool oneTime;
+  uint256 reqLevel;
+  uint256 reqPopulation;
+  uint256 reqSilver;
 }
 
 library ArtifactLib {
@@ -146,11 +161,86 @@ library ArtifactLib {
     artifact.planetHash = planetHash;
     artifact._initRarity(seed, planetLevel);
     artifact._initType(seed);
-    artifact.available = true;
+  }
+
+  // never directly call this function
+  // artifact should be got from planet.mustGetArtifact(artifactId)
+  function readFromStore(Artifact memory artifact) internal view {
+    ArtifactData memory data = ArtifactTable.get(uint32(artifact.id));
+    artifact.rarity = data.rarity;
+    artifact.artifactType = data.artifactType;
+    artifact.status = data.status;
+    artifact.chargeTime = data.chargeTime;
+    artifact.activateTime = data.activateTime;
+    artifact.cooldownTime = data.cooldownTime;
+    ArtifactMetadataData memory metadata = ArtifactMetadata.get(data.artifactType, data.rarity);
+    artifact.genre = metadata.genre;
+    artifact.charge = metadata.charge;
+    artifact.cooldown = metadata.cooldown;
+    artifact.oneTime = metadata.oneTime;
+    artifact.reqLevel = metadata.reqLevel;
+    artifact.reqPopulation = metadata.reqPopulation;
+    artifact.reqSilver = metadata.reqSilver;
   }
 
   function writeToStore(Artifact memory artifact) internal {
-    ArtifactTable.set(uint32(artifact.id), artifact.rarity, artifact.artifactType, artifact.available);
+    ArtifactTable.set(
+      uint32(artifact.id),
+      artifact.rarity,
+      artifact.artifactType,
+      artifact.status,
+      uint64(artifact.chargeTime),
+      uint64(artifact.activateTime),
+      uint64(artifact.cooldownTime)
+    );
+  }
+
+  function charging(Artifact memory artifact, uint256 curTick) internal pure {
+    if (
+      artifact.status >= ArtifactStatus.CHARGING ||
+      (artifact.status == ArtifactStatus.COOLDOWN && artifact.cooldownTime + artifact.cooldown > curTick)
+    ) {
+      revert Errors.ArtifactNotAvailable();
+    }
+    if (artifact.charge > 0) {
+      artifact.chargeTime = curTick;
+      artifact.status = ArtifactStatus.CHARGING;
+    } else {
+      revert Errors.ArtifactNotChargeable();
+    }
+  }
+
+  function activate(Artifact memory artifact, uint256 curTick) internal pure {
+    if (
+      artifact.status >= ArtifactStatus.ACTIVE ||
+      (artifact.status == ArtifactStatus.CHARGING && artifact.chargeTime + artifact.charge > curTick) ||
+      artifact.charge > 0 ||
+      (artifact.status == ArtifactStatus.COOLDOWN && artifact.cooldownTime + artifact.cooldown > curTick)
+    ) {
+      revert Errors.ArtifactNotAvailable();
+    }
+    artifact.activateTime = curTick;
+    if (artifact.instant) {
+      if (artifact.oneTime) {
+        artifact.status = ArtifactStatus.BROKEN;
+      } else {
+        artifact.status = ArtifactStatus.COOLDOWN;
+      }
+    } else {
+      artifact.status = ArtifactStatus.ACTIVE;
+    }
+  }
+
+  function deactivate(Artifact memory artifact, uint256 curTick) internal pure {
+    if (artifact.status != ArtifactStatus.ACTIVE) {
+      revert Errors.ArtifactNotAvailable();
+    }
+    if (artifact.oneTime) {
+      artifact.status = ArtifactStatus.BROKEN;
+    } else {
+      artifact.status = ArtifactStatus.COOLDOWN;
+      artifact.cooldownTime = curTick;
+    }
   }
 
   function _initRarity(Artifact memory artifact, uint256 seed, uint256 planetLevel) internal pure {

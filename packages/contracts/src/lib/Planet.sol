@@ -136,7 +136,7 @@ library PlanetLib {
 
   function hasArtifactSlot(Planet memory planet) internal view returns (bool) {
     return
-      planet.artifactStorage.number + planet.moveQueue.GetFlyingArtifactsNum() <
+      planet.artifactStorage.GetNumber() + planet.moveQueue.GetFlyingArtifactsNum() <
       ArtifactStorageLib.MAX_ARTIFACTS_PER_PLANET;
   }
 
@@ -146,6 +146,33 @@ library PlanetLib {
 
   function removeArtifact(Planet memory planet, uint256 artifact) internal view {
     planet.artifactStorage.Remove(artifact);
+  }
+
+  function chargeArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    _validateChargeArtifact(planet, artifact, executor);
+    artifact.charging(planet.lastUpdateTick);
+    artifact.writeToStore();
+  }
+
+  function activateArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    _validateActivateArtifact(planet, artifact, executor);
+    planet.population -= artifact.reqPopulation;
+    planet.silver -= artifact.reqSilver;
+    artifact.activate(planet.lastUpdateTick);
+    artifact.writeToStore();
+    _applyArtifactEffect(planet, artifact);
+  }
+
+  function deactivateArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    artifact.deactivate(planet.lastUpdateTick);
+    artifact.writeToStore();
+    _removeArtifactEffect(planet, artifact);
   }
 
   function changeOwner(Planet memory planet, address newOwner) internal pure {
@@ -186,6 +213,16 @@ library PlanetLib {
       revert Errors.ArtifactStorageFull();
     }
     ExploredPlanet.set(bytes32(planet.planetHash), true);
+  }
+
+  function mustGetArtifact(Planet memory planet, uint256 artifactId) internal view returns (Artifact memory artifact) {
+    if (planet.artifactStorage.Has(artifactId)) {
+      artifact.planetHash = planet.planetHash;
+      artifact.id = artifactId;
+      artifact.readFromStore();
+    } else {
+      revert Errors.ArtifactNotOnPlanet();
+    }
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -565,5 +602,34 @@ library PlanetLib {
         )
       )
     );
+  }
+
+  function _validateChargeArtifact(Planet memory planet, Artifact memory artifact, address executor) internal pure {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.level < artifact.reqLevel) {
+      revert Errors.ArtifactLevelTooLow();
+    }
+  }
+
+  function _validateActivateArtifact(Planet memory planet, Artifact memory artifact, address executor) internal pure {
+    if (planet.owner != executor) {
+      revert Errors.NotPlanetOwner();
+    }
+    if (planet.level < artifact.reqLevel) {
+      revert Errors.ArtifactLevelTooLow();
+    }
+    if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
+      revert Errors.NotEnoughResourceToActivate();
+    }
+  }
+
+  function _applyArtifactEffect(Planet memory planet, Artifact memory artifact) internal {
+    // todo
+  }
+
+  function _removeArtifactEffect(Planet memory planet, Artifact memory artifact) internal {
+    // todo
   }
 }

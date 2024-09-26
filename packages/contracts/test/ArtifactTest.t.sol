@@ -12,7 +12,7 @@ import { Errors } from "../src/interfaces/errors.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
 import { Planet } from "../src/lib/Planet.sol";
-import { PlanetType, SpaceType } from "../src/codegen/common.sol";
+import { PlanetType, SpaceType, ArtifactStatus } from "../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../src/lib/Artifact.sol";
 
 contract ArtifactTest is MudTest {
@@ -85,7 +85,7 @@ contract ArtifactTest is MudTest {
     Artifact memory tArtifact = ArtifactLib.NewArtifact(seed, 1, 1);
     assertEq(uint8(data.rarity), uint8(tArtifact.rarity));
     assertEq(uint8(data.artifactType), uint8(tArtifact.artifactType));
-    assertEq(data.availability, tArtifact.available);
+    assertEq(uint8(data.status), uint8(ArtifactStatus.DEFAULT));
 
     vm.roll(2000);
     vm.prank(address(1));
@@ -111,7 +111,6 @@ contract ArtifactTest is MudTest {
     vm.roll(2000);
     vm.prank(address(1));
     _move(1, 2, 80, 100000, 1000, 1);
-    assertEq(ArtifactTable.getAvailability(1), false);
     assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 0);
 
@@ -119,7 +118,6 @@ contract ArtifactTest is MudTest {
     vm.roll(3000);
     vm.prank(address(2));
     _move(2, 1, 80, 100000, 1000, 0); // to update two planets
-    assertEq(ArtifactTable.getAvailability(1), true);
     assertEq(ArtifactOwner.get(1), bytes32(uint256(2)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 1);
   }
@@ -165,7 +163,6 @@ contract ArtifactTest is MudTest {
     vm.roll(4000);
     vm.prank(address(1));
     _move(1, 2, 80, 50000, 1000, 0); // to update two planets
-    assertEq(ArtifactTable.getAvailability(1), true);
     assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 1);
   }

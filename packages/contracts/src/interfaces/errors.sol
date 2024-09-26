@@ -42,11 +42,16 @@ interface Errors {
   error InvalidRevealProof(); // 0x5d655004
   error RevealTooOften(); // 0xbdbe7784
 
-  // prospect system
+  // artifact system
   error InvalidProspectTarget(); // 0x341e4b4d
   error PlanetAlreadyProspected(); // 0x56887924
   error InvalidBiomebaseProof(); // 0x128087c4
   error PlanetNotProspected(); // 0x9b8b75ee
   error PlanetAlreadyExplored(); // 0x46b8aa3d
   error UnkonwnArtifactType(); // 0xe5d5eab9
+  error ArtifactNotAvailable(); // 0xc878be8d
+  error ArtifactOnCooldown(); // 0x47e6b7ca
+  error ArtifactNotChargeable(); // 0x342e603f
+  error ArtifactLevelTooLow(); // 0x24c528ed
+  error NotEnoughResourceToActivate(); // 0xe642b7b4
 }
