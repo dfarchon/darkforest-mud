@@ -309,7 +309,6 @@ export default defineWorld({
         index: "uint8",
         id: "uint64",
         captain: "address",
-        from: "bytes32",
         departureTime: "uint64",
         arrivalTime: "uint64",
         population: "uint64",

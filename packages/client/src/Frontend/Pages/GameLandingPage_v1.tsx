@@ -341,6 +341,7 @@ export function GameLandingPage_v1() {
       console.log(entity);
       console.log(hexToResource(entity as `0x${string}`).namespace);
       const res = getComponentValue(NamespaceOwner, entity);
+      console.log(res);
       console.log(res?.owner);
     }
   };
