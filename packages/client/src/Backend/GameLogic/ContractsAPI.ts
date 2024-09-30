@@ -1069,7 +1069,7 @@ export class ContractsAPI extends EventEmitter {
     onProgressCoords?: (fractionCompleted: number) => void,
   ): RevealedCoords[] {
     const { RevealedPlanet } = this.components;
-    const planetIds = [...runQuery(z(RevealedPlanet))];
+    const planetIds = [...runQuery(Has(RevealedPlanet))];
     const result: RevealedCoords[] = [];
     const nPlanetIds = planetIds.length;
 
