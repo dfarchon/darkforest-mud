@@ -308,6 +308,7 @@ export default defineWorld({
         index: "uint8",
         from: "bytes32",
         captain: "address",
+        // voyageId: "uint64",  TODO: introduce voyageId later
         departureTime: "uint64",
         arrivalTime: "uint64",
         population: "uint64",

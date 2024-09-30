@@ -201,24 +201,16 @@ export type PlanetTypeWeightsBySpaceType = [
 ];
 
 export interface ContractConstants {
-  //SnarkConstants
+  BIOME_CHECKS: boolean;
   DISABLE_ZK_CHECKS: boolean;
-  PLANETHASH_KEY: number;
-  SPACETYPE_KEY: number;
-  BIOMEBASE_KEY: number;
-  PERLIN_MIRROR_X: boolean;
-  PERLIN_MIRROR_Y: boolean;
-  PERLIN_LENGTH_SCALE: number;
+  PLAYER_AMOUNT_LIMIT: number;
+  INIT_PERLIN_MIN: number;
+  INIT_PERLIN_MAX: number;
+  LOCATION_REVEAL_COOLDOWN: number;
 
-  //GameConstants
-  ADMIN_CAN_ADD_PLANETS: boolean;
-  WORLD_RADIUS_LOCKED: boolean;
+  PLANET_RARITY: number;
   WORLD_RADIUS_MIN: number;
-  MAX_NATURAL_PLANET_LEVEL: number;
-  MAX_ARTIFACT_PER_PLANET: number;
-  MAX_SENDING_PLANET: number;
-  MAX_RECEIVING_PLANET: number;
-  TIME_FACTOR_HUNDREDTHS: number;
+
   /**
    * The perlin value at each coordinate determines the space type. There are four space
    * types, which means there are four ranges on the number line that correspond to
@@ -228,11 +220,13 @@ export interface ContractConstants {
   PERLIN_THRESHOLD_1: number;
   PERLIN_THRESHOLD_2: number;
   PERLIN_THRESHOLD_3: number;
-  INIT_PERLIN_MIN: number;
-  INIT_PERLIN_MAX: number;
-  SPAWN_RIM_AREA: number;
-  BIOME_THRESHOLD_1: number;
-  BIOME_THRESHOLD_2: number;
+  SPACE_TYPE_PLANET_LEVEL_LIMITS: number[];
+  SPACE_TYPE_PLANET_LEVEL_BONUS: number[];
+
+  MAX_LEVEL_DIST: number[];
+  MAX_LEVEL_LIMIT: number[];
+  MIN_LEVEL_BIAS: number[];
+
   /**
      The chance for a planet to be a specific level.
      Each index corresponds to a planet level (index 5 is level 5 planet).
@@ -240,265 +234,274 @@ export interface ContractConstants {
      Note: This does not control if a planet spawns or not, just the level
      when it spawns.
    */
-  PLANET_LEVEL_THRESHOLDS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  PLANET_LEVEL_THRESHOLDS: number[];
 
-  PLANET_RARITY: number;
-  PLANET_TRANSFER_ENABLED: boolean;
-  PHOTOID_ACTIVATION_DELAY: number;
-  STELLAR_ACTIVATION_DELAY: number;
-  LOCATION_REVEAL_COOLDOWN: number;
-  CLAIM_PLANET_COOLDOWN: number;
-  ACTIVATE_ARTIFACT_COOLDOWN: number;
-  BUY_ARTIFACT_COOLDOWN: number;
+  BIOME_THRESHOLD_1: number;
+  BIOME_THRESHOLD_2: number;
+
+  upgrades: UpgradeBranches;
+
   PLANET_TYPE_WEIGHTS: PlanetTypeWeightsBySpaceType;
+
+  PLANETHASH_KEY: number;
+  BIOMEBASE_KEY: number;
+  SPACETYPE_KEY: number;
+  PERLIN_LENGTH_SCALE: number;
+  PERLIN_MIRROR_X: boolean;
+  PERLIN_MIRROR_Y: boolean;
+
+  adminAddress: EthAddress;
+
+  // TODO: Planet default state
+
+  // defaultPopulationCap: number[];
+  // defaultPopulationGrowth: number[];
+  // defaultSilverCap: number[];
+  // defaultSilverGrowth: number[];
+  // defaultRange: number[];
+  // defaultSpeed: number[];
+  // defaultDefense: number[];
+  // defaultBarbarianPercentage: number[];
+  // planetCumulativeRarities: number[];
+
+  //GameConstants
+  // ADMIN_CAN_ADD_PLANETS: boolean;
+  // WORLD_RADIUS_LOCKED: boolean;
+
+  // MAX_NATURAL_PLANET_LEVEL: number;
+  // MAX_ARTIFACT_PER_PLANET: number;
+
+  // MAX_SENDING_PLANET: number;
+  // MAX_RECEIVING_PLANET: number;
+  // TIME_FACTOR_HUNDREDTHS: number;
+
+  // SPAWN_RIM_AREA: number;
+
+  // PLANET_TRANSFER_ENABLED: boolean;
+  // PHOTOID_ACTIVATION_DELAY: number;
+  // STELLAR_ACTIVATION_DELAY: number;
+
+  // CLAIM_PLANET_COOLDOWN: number;
+  // ACTIVATE_ARTIFACT_COOLDOWN: number;
+  // BUY_ARTIFACT_COOLDOWN: number;
 
   /**
    * How much score silver gives when withdrawing.
    * Expressed as a percentage integer.
    * (100 is 100%)
    */
-  SILVER_SCORE_VALUE: number;
+  // SILVER_SCORE_VALUE: number;
 
-  ARTIFACT_POINT_VALUES: ArtifactPointValues;
+  // ARTIFACT_POINT_VALUES: ArtifactPointValues;
   // Space Junk
-  SPACE_JUNK_ENABLED: boolean;
+  // SPACE_JUNK_ENABLED: boolean;
   /**
      Total amount of space junk a player can take on.
      This can be overridden at runtime by updating
      this value for a specific player in storage.
    */
-  SPACE_JUNK_LIMIT: number;
+  // SPACE_JUNK_LIMIT: number;
 
   /**
      The amount of junk that each level of planet
      gives the player when moving to it for the
      first time.
    */
-  PLANET_LEVEL_JUNK: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  // PLANET_LEVEL_JUNK: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
 
   /**
      The speed boost a movement receives when abandoning
      a planet.
    */
-  ABANDON_SPEED_CHANGE_PERCENT: number;
+  // ABANDON_SPEED_CHANGE_PERCENT: number;
   /**
      The range boost a movement receives when abandoning
      a planet.
    */
-  ABANDON_RANGE_CHANGE_PERCENT: number;
+  // ABANDON_RANGE_CHANGE_PERCENT: number;
 
   // Capture Zones
-  GAME_START_BLOCK: number;
-  CAPTURE_ZONES_ENABLED: boolean;
-  CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL: number;
-  CAPTURE_ZONE_RADIUS: number;
+  // GAME_START_BLOCK: number;
+  // CAPTURE_ZONES_ENABLED: boolean;
+  // CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL: number;
+  // CAPTURE_ZONE_RADIUS: number;
 
-  CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-  CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED: number;
-  CAPTURE_ZONES_PER_5000_WORLD_RADIUS: number;
+  // CAPTURE_ZONE_PLANET_LEVEL_SCORE: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
+  // CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED: number;
+  // CAPTURE_ZONES_PER_5000_WORLD_RADIUS: number;
 
   //SpaceshipConstants
-  SPACESHIPS: {
-    GEAR: boolean;
-    MOTHERSHIP: boolean;
-    TITAN: boolean;
-    CRESCENT: boolean;
-    WHALE: boolean;
-    PINKSHIP: boolean;
-  };
+  // SPACESHIPS: {
+  //   GEAR: boolean;
+  //   MOTHERSHIP: boolean;
+  //   TITAN: boolean;
+  //   CRESCENT: boolean;
+  //   WHALE: boolean;
+  //   PINKSHIP: boolean;
+  // };
 
-  ROUND_END_REWARDS_BY_RANK: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  // ROUND_END_REWARDS_BY_RANK: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
 
-  TOKEN_MINT_END_TIMESTAMP: number;
-  CLAIM_END_TIMESTAMP: number;
+  // TOKEN_MINT_END_TIMESTAMP: number;
+  // CLAIM_END_TIMESTAMP: number;
 
-  defaultPopulationCap: number[];
-  defaultPopulationGrowth: number[];
+  // BURN_END_TIMESTAMP: number;
+  // BURN_PLANET_COOLDOWN: number;
+  // PINK_PLANET_COOLDOWN: number;
 
-  defaultSilverCap: number[];
-  defaultSilverGrowth: number[];
+  // BURN_PLANET_LEVEL_EFFECT_RADIUS: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
 
-  defaultRange: number[];
-  defaultSpeed: number[];
-  defaultDefense: number[];
-  defaultBarbarianPercentage: number[];
+  // BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
 
-  planetCumulativeRarities: number[];
-
-  upgrades: UpgradeBranches;
-  adminAddress: EthAddress;
-
-  BURN_END_TIMESTAMP: number;
-  BURN_PLANET_COOLDOWN: number;
-  PINK_PLANET_COOLDOWN: number;
-
-  BURN_PLANET_LEVEL_EFFECT_RADIUS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-
-  BURN_PLANET_REQUIRE_SILVER_AMOUNTS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-
-  MAX_LEVEL_DIST: number[];
-  MAX_LEVEL_LIMIT: number[];
-  MIN_LEVEL_BIAS: number[];
-  ENTRY_FEE: number;
-  KARDASHEV_END_TIMESTAMP: number;
-  KARDASHEV_PLANET_COOLDOWN: number;
-  BLUE_PLANET_COOLDOWN: number;
-  KARDASHEV_EFFECT_RADIUS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-  KARDASHEV_REQUIRE_SILVER_AMOUNTS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-  BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
+  // ENTRY_FEE: number;
+  // KARDASHEV_END_TIMESTAMP: number;
+  // KARDASHEV_PLANET_COOLDOWN: number;
+  // BLUE_PLANET_COOLDOWN: number;
+  // KARDASHEV_EFFECT_RADIUS: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
+  // KARDASHEV_REQUIRE_SILVER_AMOUNTS: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
+  // BLUE_PANET_REQUIRE_SILVER_AMOUNTS: [
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  //   number,
+  // ];
 }
 
 export type ClientMockchainData =
