@@ -156,6 +156,8 @@ export type Planet = {
   // invader?: EthAddress;
   // capturer?: EthAddress;
   // invadeStartBlock?: number;
+  universeZone: number;
+  distSquare: number;
 };
 
 /**
