@@ -1,0 +1,34 @@
+import type { ClientComponents } from "@mud/createClientComponents";
+import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { getComponentValue } from "@latticexyz/recs";
+
+interface MoveUtilsConfig {
+  components: ClientComponents;
+}
+
+export class TickerUtils {
+  private components: ClientComponents;
+
+  public constructor({ components }: MoveUtilsConfig) {
+    this.components = components;
+  }
+
+  public getTickNumber(): number {
+    const { Ticker } = this.components;
+    const tickerData = getComponentValue(Ticker, singletonEntity);
+    if (!tickerData) {
+      throw new Error("Game not started");
+    }
+    const rate = Number(tickerData.tickRate);
+    const preTickNumber = Number(tickerData.tickNumber);
+    const preTimestamp = Number(tickerData.timestamp);
+    if (tickerData.paused) {
+      return preTickNumber;
+    } else {
+      const currentTimestamp = Date.now();
+      const newTickNumber =
+        preTickNumber + (currentTimestamp - preTimestamp) * rate;
+      return newTickNumber;
+    }
+  }
+}

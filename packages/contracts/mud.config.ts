@@ -322,7 +322,7 @@ export default defineWorld({
       schema: {
         tickNumber: "uint64",
         tickRate: "uint64", // per block
-        blockNumber: "uint64",
+        timestamp: "uint64",
         paused: "bool",
       },
       key: [],

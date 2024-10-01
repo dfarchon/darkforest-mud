@@ -99,6 +99,7 @@ contract ArtifactTest is MudTest {
   function testMoveArtifact() public {
     // prospect and find artifact
     vm.roll(1000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
     IWorld(worldAddress).df__prospectPlanet(1);
     Proof memory proof;
@@ -108,14 +109,14 @@ contract ArtifactTest is MudTest {
     IWorld(worldAddress).df__findingArtifact(proof, input);
 
     // move artifact
-    vm.roll(2000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
     _move(1, 2, 80, 100000, 1000, 1);
     assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 0);
 
     // artifact arrives
-    vm.roll(3000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(2));
     _move(2, 1, 80, 100000, 1000, 0); // to update two planets
     assertEq(ArtifactOwner.get(1), bytes32(uint256(2)));
@@ -125,6 +126,7 @@ contract ArtifactTest is MudTest {
   function testMoveArtifact2() public {
     // prospect and find artifact
     vm.roll(1000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
     IWorld(worldAddress).df__prospectPlanet(1);
     Proof memory proof;
@@ -140,12 +142,12 @@ contract ArtifactTest is MudTest {
     assertEq(Counter.getArtifact(), 2);
 
     // move artifact
-    vm.roll(2000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
     _move(1, 2, 80, 50000, 1000, 1);
 
     // artifact arrives
-    vm.roll(3000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(2));
     _move(2, 1, 80, 50000, 1000, 0); // to update two planets
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 2 + (uint256(1) << 32));
@@ -160,7 +162,7 @@ contract ArtifactTest is MudTest {
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 2 + (uint256(3) << 32));
 
     // artifact arrives
-    vm.roll(4000);
+    vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
     _move(1, 2, 80, 50000, 1000, 0); // to update two planets
     assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
