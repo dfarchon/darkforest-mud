@@ -1,12 +1,14 @@
-import {
-  SpaceType,
-  type EthAddress,
-  type LocationId,
-  type Planet,
-  type PlanetBonus,
-  type PlanetType,
-  type Upgrade,
-  type UpgradeState,
+import { SpaceType, Biome } from "@df/types";
+import type {
+  EthAddress,
+  LocationId,
+  Planet,
+  PlanetBonus,
+  PlanetType,
+  Upgrade,
+  UpgradeState,
+  WorldLocation,
+  LocatablePlanet,
 } from "@df/types";
 import { PlanetLevel } from "@df/types";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -28,6 +30,7 @@ import {
   MAX_PLANET_LEVEL,
   MIN_PLANET_LEVEL,
 } from "@df/constants";
+import { TxCollection } from "@df/network";
 
 interface PlanetUtilsConfig {
   components: ClientComponents;
@@ -43,6 +46,94 @@ export class PlanetUtils {
     this.contractConstants = contractConstants;
   }
 
+  public getPlanetById(planetId: LocationId): Planet | undefined {
+    const { PlanetConstants } = this.components;
+    const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
+      id: planetId as `0x${string}`,
+    });
+    const planetRec = getComponentValue(PlanetConstants, planetEntity);
+
+    if (planetRec) {
+      // If planet is in contract, it is OK to input any value for perlin and distSquare
+      const planet: Planet = this.readPlanet(planetId, 0, 0);
+      return planet;
+    } else {
+      return undefined;
+    }
+  }
+
+  public defaultPlanetFromLocation(location: WorldLocation): LocatablePlanet {
+    const planetId = location.hash;
+    const perlin = location.perlin;
+    const distSquare = location.coords.x ** 2 + location.coords.y ** 2;
+    const planet: Planet = this.readPlanet(planetId, perlin, distSquare);
+    const biome = this.getBiome(location);
+
+    return {
+      location: location,
+      biome: biome,
+      locationId: planet.locationId,
+      perlin: planet.perlin,
+      spaceType: planet.spaceType,
+      owner: planet.owner,
+      planetLevel: planet.planetLevel,
+      planetType: planet.planetType,
+      isHomePlanet: false,
+      energyCap: planet.energyCap,
+      energyGrowth: planet.energyGrowth,
+
+      silverCap: planet.silverCap,
+      silverGrowth: planet.silverGrowth,
+
+      range: planet.range,
+      defense: planet.defense,
+      speed: planet.speed,
+      energy: planet.energy,
+      silver: planet.silver,
+      lastUpdated: planet.lastUpdated,
+      upgradeState: [0, 0, 0],
+      transactions: new TxCollection(),
+      silverSpent: 0,
+      isInContract: planet.isInContract,
+      syncedWithContract: false,
+      coordsRevealed: false,
+      bonus: bonusFromHex(location.hash),
+      energyGroDoublers: planet.energyGroDoublers,
+      silverGroDoublers: planet.silverGroDoublers,
+      universeZone: planet.universeZone,
+      distSquare: planet.distSquare,
+    };
+  }
+
+  public getBiome(loc: WorldLocation): Biome {
+    const { perlin, biomebase, coords } = loc;
+    const distSquare = coords.x ** 2 + coords.y ** 2;
+    const universeZone = this._initZone(distSquare);
+    const spaceType = this._initSpaceType(universeZone, perlin);
+
+    if (spaceType === SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
+
+    let biome = 3 * spaceType;
+    if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) {
+      biome += 1;
+    } else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) {
+      biome += 2;
+    } else {
+      biome += 3;
+    }
+
+    return biome as Biome;
+  }
+
+  /**
+   *
+   * @param planetId
+   * @param perlin
+   * @param distSquare
+   * @returns
+   */
   public readPlanet(
     planetId: LocationId,
     perlin: number,

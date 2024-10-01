@@ -4,13 +4,13 @@ import {
   aggregateBulkGetter,
   ContractCaller,
   ethToWei,
-  TxCollection,
+  // TxCollection,
   TxExecutor,
 } from "@df/network";
 import {
   address,
-  artifactIdFromEthersBN,
-  artifactIdToDecStr,
+  // artifactIdFromEthersBN,
+  // artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
   // decodeArtifactPointValues,
@@ -77,6 +77,7 @@ import {
 import { singletonEntity, encodeEntity } from "@latticexyz/store-sync/recs";
 import type { Hex } from "viem";
 import { hexToResource } from "@latticexyz/common";
+import { PlanetUtils } from "./PlanetUtils";
 
 interface ContractsApiConfig {
   connection: EthConnection;
@@ -128,6 +129,8 @@ export class ContractsAPI extends EventEmitter {
 
   // private network: SetupNetworkResult;
 
+  private contractConstants: ContractConstants;
+
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
   }
@@ -149,6 +152,7 @@ export class ContractsAPI extends EventEmitter {
       this.afterTransaction.bind(this),
     );
     this.components = components;
+    this.contractConstants = this.getConstants();
 
     this.setupEventListeners();
   }
@@ -711,7 +715,7 @@ export class ContractsAPI extends EventEmitter {
     return this.contractAddress;
   }
 
-  public getConstants(): ContractConstants | undefined {
+  public getConstants(): ContractConstants {
     const {
       NamespaceOwner,
       TempConfigSet,
@@ -765,7 +769,7 @@ export class ContractsAPI extends EventEmitter {
       !upgradeConfig ||
       !snarkConfig
     ) {
-      return undefined;
+      throw new Error("not set contracts constants yet");
     }
 
     const PLANET_TYPE_WEIGHTS = [];
@@ -778,7 +782,7 @@ export class ContractsAPI extends EventEmitter {
         });
         const rawResult = getComponentValue(PlanetTypeConfig, key);
         if (rawResult === undefined) {
-          return undefined;
+          throw new Error("not set contracts constants yet");
         }
         const planetTypeWeights = [
           rawResult.thresholds[0],
@@ -984,13 +988,14 @@ export class ContractsAPI extends EventEmitter {
   public async getArrivalsForPlanet(
     planetId: LocationId,
   ): Promise<QueuedArrival[]> {
-    const events = (
-      await this.makeCall(this.contract.getPlanetArrivals, [
-        locationIdToDecStr(planetId),
-      ])
-    ).map(decodeArrival);
-
-    return events;
+    console.log(planetId);
+    return [];
+    // const events = (
+    //   await this.makeCall(this.contract.getPlanetArrivals, [
+    //     locationIdToDecStr(planetId),
+    //   ])
+    // ).map(decodeArrival);
+    // return events;
   }
 
   //TODO: fix getAllArrivals
@@ -998,20 +1003,26 @@ export class ContractsAPI extends EventEmitter {
     planetsToLoad: LocationId[],
     onProgress?: (fractionCompleted: number) => void,
   ): Promise<QueuedArrival[]> {
-    const arrivalsUnflattened = await aggregateBulkGetter<QueuedArrival[]>(
-      planetsToLoad.length,
-      200,
-      async (start, end) => {
-        return (
-          await this.makeCall(this.contract.bulkGetPlanetArrivalsByIds, [
-            planetsToLoad.slice(start, end).map(locationIdToDecStr),
-          ])
-        ).map((arrivals) => arrivals.map(decodeArrival));
-      },
-      onProgress,
-    );
+    console.log(planetsToLoad);
+    for (let i = 1; i <= 10; i++) {
+      onProgress && onProgress(i / 10);
+    }
+    return [];
 
-    return flatten(arrivalsUnflattened);
+    // const arrivalsUnflattened = await aggregateBulkGetter<QueuedArrival[]>(
+    //   planetsToLoad.length,
+    //   200,
+    //   async (start, end) => {
+    //     return (
+    //       await this.makeCall(this.contract.bulkGetPlanetArrivalsByIds, [
+    //         planetsToLoad.slice(start, end).map(locationIdToDecStr),
+    //       ])
+    //     ).map((arrivals) => arrivals.map(decodeArrival));
+    //   },
+    //   onProgress,
+    // );
+
+    // return flatten(arrivalsUnflattened);
   }
 
   public getTouchedPlanetIds(
@@ -1069,7 +1080,7 @@ export class ContractsAPI extends EventEmitter {
     onProgressCoords?: (fractionCompleted: number) => void,
   ): RevealedCoords[] {
     const { RevealedPlanet } = this.components;
-    const planetIds = [...runQuery(Has(RevealedPlanet))];
+    const planetIds = [...runQuery([Has(RevealedPlanet)])];
     const result: RevealedCoords[] = [];
     const nPlanetIds = planetIds.length;
 
@@ -1085,44 +1096,32 @@ export class ContractsAPI extends EventEmitter {
     return result;
   }
 
-  // TODO fix bulkGetPlanets
+  public getPlanetById(planetId: LocationId): Planet | undefined {
+    const planetUtils = new PlanetUtils({
+      components: this.components,
+      contractConstants: this.contractConstants,
+    });
+    return planetUtils.getPlanetById(planetId);
+  }
 
-  public async bulkGetPlanets(
+  public bulkGetPlanets(
     toLoadPlanets: LocationId[],
     onProgressPlanet?: (fractionCompleted: number) => void,
-  ): Promise<Map<LocationId, Planet>> {
-    const rawPlanets = await aggregateBulkGetter(
-      toLoadPlanets.length,
-      200,
-      async (start, end) =>
-        await this.makeCall(this.contract.bulkGetPlanetsByIds, [
-          toLoadPlanets.slice(start, end).map(locationIdToDecStr),
-        ]),
-      onProgressPlanet,
-    );
+  ): Map<LocationId, Planet> {
+    const planetIds = toLoadPlanets;
+    const nPlanetIds: number = planetIds.length;
 
     const planets: Map<LocationId, Planet> = new Map();
 
-    for (let i = 0; i < toLoadPlanets.length; i += 1) {
-      if (rawPlanets[i]) {
-        const planet = decodePlanet(
-          locationIdToDecStr(toLoadPlanets[i]),
-          rawPlanets[i],
-        );
-        planet.transactions = new TxCollection();
+    for (let i = 0; i < nPlanetIds; i += 1) {
+      const planetId = planetIds[i];
+      const planet = this.getPlanetById(planetId);
+      if (planet) {
         planets.set(planet.locationId, planet);
       }
+      onProgressPlanet && onProgressPlanet((i + 1) / nPlanetIds);
     }
     return planets;
-  }
-
-  // TODO fix getPlanetById
-  public async getPlanetById(
-    planetId: LocationId,
-  ): Promise<Planet | undefined> {
-    const decStrId = locationIdToDecStr(planetId);
-    const rawPlanet = await this.makeCall(this.contract.planets, [decStrId]);
-    return decodePlanet(decStrId, rawPlanet);
   }
 
   // public async getEntryFee(): Promise<EthersBN> {
