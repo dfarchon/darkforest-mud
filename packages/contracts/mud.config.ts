@@ -307,7 +307,6 @@ export default defineWorld({
       schema: {
         to: "bytes32",
         index: "uint8",
-        from: "bytes32",
         id: "uint64",
         captain: "address",
         departureTime: "uint64",
