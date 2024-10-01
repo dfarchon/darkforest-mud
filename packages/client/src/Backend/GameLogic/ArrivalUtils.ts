@@ -54,8 +54,8 @@ export const isProspectable = (planet: Planet): boolean => {
 
 const getSilverOverTime = (
   planet: Planet,
-  startTimeMillis: number,
-  endTimeMillis: number,
+  startTick: number,
+  endTick: number,
 ): number => {
   if (!hasOwner(planet)) {
     return planet.silver;
@@ -64,15 +64,15 @@ const getSilverOverTime = (
   if (planet.silver > planet.silverCap) {
     return planet.silverCap;
   }
-  const timeElapsed = endTimeMillis / 1000 - startTimeMillis / 1000;
+  const tickElapsed = startTick - endTick;
 
   return Math.min(
-    timeElapsed * planet.silverGrowth + planet.silver,
+    tickElapsed * planet.silverGrowth + planet.silver,
     planet.silverCap,
   );
 };
 
-const getEnergyAtTime = (planet: Planet, atTimeMillis: number): number => {
+const getEnergyAtTime = (planet: Planet, atTick: number): number => {
   if (planet.energy === 0) {
     return 0;
   }
@@ -86,9 +86,9 @@ const getEnergyAtTime = (planet: Planet, atTimeMillis: number): number => {
     }
   }
 
-  const timeElapsed = atTimeMillis / 1000 - planet.lastUpdated;
+  const tickElapsed = atTick - planet.lastUpdated;
   const denominator =
-    Math.exp((-4 * planet.energyGrowth * timeElapsed) / planet.energyCap) *
+    Math.exp((-4 * planet.energyGrowth * tickElapsed) / planet.energyCap) *
       (planet.energyCap / planet.energy - 1) +
     1;
   return planet.energyCap / denominator;
@@ -97,38 +97,35 @@ const getEnergyAtTime = (planet: Planet, atTimeMillis: number): number => {
 export const updatePlanetToTime = (
   planet: Planet,
   planetArtifacts: Artifact[],
-  atTimeMillis: number,
+  atTick: number,
   contractConstants: ContractConstants,
   setPlanet: (p: Planet) => void = () => {},
 ): void => {
-  if (atTimeMillis < planet.lastUpdated * 1000) {
+  if (atTick < planet.lastUpdated) {
     return;
   }
 
-  if (planet.pausers === 0) {
-    planet.silver = getSilverOverTime(
-      planet,
-      planet.lastUpdated * 1000,
-      atTimeMillis,
-    );
-    planet.energy = getEnergyAtTime(planet, atTimeMillis);
-  }
+  // if (planet.pausers === 0) {
+  planet.silver = getSilverOverTime(planet, planet.lastUpdated, atTick);
+  planet.energy = getEnergyAtTime(planet, atTick);
+  // }
 
-  planet.lastUpdated = atTimeMillis / 1000;
+  planet.lastUpdated = atTick;
 
-  const photoidActivationTime =
-    contractConstants.PHOTOID_ACTIVATION_DELAY * 1000;
-  const activePhotoid = planetArtifacts.find(
-    (a) =>
-      a.artifactType === ArtifactType.PhotoidCannon &&
-      isActivated(a) &&
-      atTimeMillis - a.lastActivated * 1000 >= photoidActivationTime,
-  );
+  // NOTE: please update to tick
+  // const photoidActivationTime =
+  //   contractConstants.PHOTOID_ACTIVATION_DELAY * 1000;
+  // const activePhotoid = planetArtifacts.find(
+  //   (a) =>
+  //     a.artifactType === ArtifactType.PhotoidCannon &&
+  //     isActivated(a) &&
+  //     atTimeMillis - a.lastActivated * 1000 >= photoidActivationTime,
+  // );
 
-  if (activePhotoid && !planet.localPhotoidUpgrade) {
-    planet.localPhotoidUpgrade = activePhotoid.timeDelayedUpgrade;
-    applyUpgrade(planet, activePhotoid.timeDelayedUpgrade);
-  }
+  // if (activePhotoid && !planet.localPhotoidUpgrade) {
+  //   planet.localPhotoidUpgrade = activePhotoid.timeDelayedUpgrade;
+  //   applyUpgrade(planet, activePhotoid.timeDelayedUpgrade);
+  // }
 
   setPlanet(planet);
 };
@@ -182,7 +179,7 @@ export const arrive = (
   updatePlanetToTime(
     toPlanet,
     artifactsOnPlanet,
-    arrival.arrivalTime * 1000,
+    arrival.arrivalTime,
     contractConstants,
   );
 
@@ -207,10 +204,11 @@ export const arrive = (
     // attacking enemy - includes emptyAddress
     else if (
       arrival.arrivalType === ArrivalType.Photoid &&
-      activeArtifact?.artifactType === ArtifactType.StellarShield &&
-      arrivalTime >=
-        activeArtifact.lastActivated +
-          contractConstants.STELLAR_ACTIVATION_DELAY
+      activeArtifact?.artifactType === ArtifactType.StellarShield
+
+      // && arrivalTime >=
+      //   activeArtifact.lastActivated +
+      //     contractConstants.STELLAR_ACTIVATION_DELAY
     ) {
       //stellar shield successfully blocks an attack
       //then deactivated the shield
@@ -253,8 +251,8 @@ export const arrive = (
   }
 
   if (
-    toPlanet.planetType === PlanetType.SILVER_BANK ||
-    toPlanet.pausers !== 0
+    toPlanet.planetType === PlanetType.SILVER_BANK
+    //  || toPlanet.pausers !== 0
   ) {
     if (toPlanet.energy > toPlanet.energyCap) {
       toPlanet.energy = toPlanet.energyCap;
@@ -297,8 +295,8 @@ export const arrive = (
  * @todo ArrivalUtils has become a dumping ground for functions that should just live inside of a
  * `Planet` class.
  */
-export function getEmojiMessage(
-  planet: Planet | undefined,
-): PlanetMessage<EmojiFlagBody> | undefined {
-  return planet?.messages?.find(isEmojiFlagMessage);
-}
+// export function getEmojiMessage(
+//   planet: Planet | undefined,
+// ): PlanetMessage<EmojiFlagBody> | undefined {
+//   return planet?.messages?.find(isEmojiFlagMessage);
+// }

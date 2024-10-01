@@ -73,7 +73,8 @@ import type {
   WorldCoords,
   WorldLocation,
 } from "@df/types";
-import { ArtifactType, PlanetLevel, PlanetType, SpaceType } from "@df/types";
+import { ArtifactType, PlanetType, SpaceType } from "@df/types";
+import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
 import autoBind from "auto-bind";
 import bigInt from "big-integer";
@@ -94,6 +95,7 @@ import { arrive, updatePlanetToTime } from "./ArrivalUtils";
 import { LayeredMap } from "./LayeredMap";
 import type { ClientComponents } from "@mud/createClientComponents";
 import { PlanetUtils } from "./PlanetUtils";
+import { TickerUtils } from "./TickerUtils";
 
 type CoordsString = Abstract<string, "CoordString">;
 
@@ -243,6 +245,7 @@ export class GameObjects {
   public readonly myArtifactsUpdated$: Monomitter<Map<ArtifactId, Artifact>>;
 
   private planetUtils: PlanetUtils;
+  private tickerUtils: TickerUtils;
 
   constructor(
     address: EthAddress | undefined,
@@ -284,6 +287,7 @@ export class GameObjects {
       components: components,
       contractConstants: contractConstants,
     });
+    this.tickerUtils = new TickerUtils({ components });
 
     this.planetUpdated$ = monomitter();
     this.artifactUpdated$ = monomitter();
@@ -369,7 +373,7 @@ export class GameObjects {
           updatePlanetToTime(
             planet,
             this.getPlanetArtifacts(planet.locationId),
-            Date.now(),
+            this.tickerUtils.getTickNumber(),
             this.contractConstants,
           );
         }
@@ -1429,82 +1433,15 @@ export class GameObjects {
   public planetLevelFromHexPerlin(
     hex: LocationId,
     perlin: number,
-    distFromOrigin = -1,
+    distFromOrigin: number,
   ): PlanetLevel {
     const spaceType = this.spaceTypeFromPerlin(perlin, distFromOrigin);
 
-    const levelBigInt = getBytesFromHex(hex, 4, 7);
+    const distSquare = distFromOrigin ** 2;
 
-    let ret = MIN_PLANET_LEVEL;
+    const universeZone = this.planetUtils._initZone(distSquare);
 
-    for (let type = MAX_PLANET_LEVEL; type >= MIN_PLANET_LEVEL; type--) {
-      if (
-        levelBigInt <
-        bigInt(this.contractConstants.PLANET_LEVEL_THRESHOLDS[type])
-      ) {
-        ret = type;
-        break;
-      }
-    }
-
-    if (spaceType === SpaceType.NEBULA && ret > PlanetLevel.FOUR) {
-      ret = PlanetLevel.FOUR;
-    }
-    if (spaceType === SpaceType.SPACE && ret > PlanetLevel.FIVE) {
-      ret = PlanetLevel.FIVE;
-    }
-    if (ret > this.contractConstants.MAX_NATURAL_PLANET_LEVEL) {
-      ret = this.contractConstants.MAX_NATURAL_PLANET_LEVEL as PlanetLevel;
-    }
-
-    //###############
-    //  NEW MAP ALGO
-    //###############
-    // if(distFromOrigin > 0){
-    //   const MAX_LEVEL_DIST = [50000, 45000,40000,35000,30000,25000,20000,15000,10000,5000 ];
-    //   ret = distFromOrigin > MAX_LEVEL_DIST[0] ? PlanetLevel.ZERO : ret;
-    //   for (let i = 0; i < MAX_LEVEL_DIST.length - 1; i++) {
-    //     if(distFromOrigin < MAX_LEVEL_DIST[i] && distFromOrigin > MAX_LEVEL_DIST[i+1]){
-    //       ret = (i + 1) as PlanetLevel > ret ? ret : (i + 1) as PlanetLevel;
-    //       break;
-    //     }
-    //   }
-    // }
-
-    if (distFromOrigin > 0) {
-      const MAX_LEVEL_DIST = this.contractConstants.MAX_LEVEL_DIST; //    [40000, 30000, 20000, 10000, 5000];
-      const MAX_LEVEL_LIMIT = this.contractConstants.MAX_LEVEL_LIMIT.map(
-        (x) => x as PlanetLevel,
-      );
-
-      const MIN_LEVEL_BIAS = this.contractConstants.MIN_LEVEL_BIAS;
-      // [0, 0, 1, 1, 2, 2];
-
-      ret =
-        distFromOrigin >= MAX_LEVEL_DIST[0]
-          ? ret > MAX_LEVEL_LIMIT[0]
-            ? MAX_LEVEL_LIMIT[0]
-            : ret
-          : ret;
-      for (let i = 0; i < MAX_LEVEL_DIST.length - 1; i++) {
-        if (
-          distFromOrigin < MAX_LEVEL_DIST[i] &&
-          distFromOrigin >= MAX_LEVEL_DIST[i + 1]
-        ) {
-          ret = (ret + MIN_LEVEL_BIAS[i + 1]) as PlanetLevel;
-          ret = MAX_LEVEL_LIMIT[i + 1] > ret ? ret : MAX_LEVEL_LIMIT[i + 1];
-          break;
-        }
-      }
-      ret =
-        distFromOrigin < MAX_LEVEL_DIST[4]
-          ? ret + MIN_LEVEL_BIAS[5] > MAX_LEVEL_LIMIT[5]
-            ? MAX_LEVEL_LIMIT[5]
-            : ((ret + MIN_LEVEL_BIAS[5]) as PlanetLevel)
-          : ret;
-    }
-
-    return ret;
+    return this.planetUtils._initLevel(hex, spaceType, universeZone);
   }
 
   public spaceTypeFromPerlin(
@@ -1547,7 +1484,7 @@ export class GameObjects {
   public planetTypeFromHexPerlin(
     hex: LocationId,
     perlin: number,
-    distFromOrigin = -1,
+    distFromOrigin: number,
   ): PlanetType {
     // level must be sufficient - too low level planets have 0 silver growth
 
@@ -1583,12 +1520,12 @@ export class GameObjects {
   }
 
   private updatePlanetIfStale(planet: Planet): void {
-    const now = Date.now();
-    if (now / 1000 - planet.lastUpdated > 1) {
+    const curTick = this.tickerUtils.getTickNumber();
+    if (curTick - planet.lastUpdated > 1) {
       updatePlanetToTime(
         planet,
         this.getPlanetArtifacts(planet.locationId),
-        now,
+        curTick,
         this.contractConstants,
         this.setPlanet,
       );

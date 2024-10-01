@@ -78,6 +78,7 @@ import { singletonEntity, encodeEntity } from "@latticexyz/store-sync/recs";
 import type { Hex } from "viem";
 import { hexToResource } from "@latticexyz/common";
 import { PlanetUtils } from "./PlanetUtils";
+import { MoveUtils } from "./MoveUtils";
 
 interface ContractsApiConfig {
   connection: EthConnection;
@@ -131,6 +132,9 @@ export class ContractsAPI extends EventEmitter {
 
   private contractConstants: ContractConstants;
 
+  private planetUtils: PlanetUtils;
+  private moveUtils: MoveUtils;
+
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
   }
@@ -153,6 +157,11 @@ export class ContractsAPI extends EventEmitter {
     );
     this.components = components;
     this.contractConstants = this.getConstants();
+    this.planetUtils = new PlanetUtils({
+      components: components,
+      contractConstants: this.contractConstants,
+    });
+    this.moveUtils = new MoveUtils({ components });
 
     this.setupEventListeners();
   }
@@ -984,45 +993,15 @@ export class ContractsAPI extends EventEmitter {
   //   return decodeArrival(rawArrival);
   // }
 
-  // TODO: fix getArrivalsForPlanet
-  public async getArrivalsForPlanet(
-    planetId: LocationId,
-  ): Promise<QueuedArrival[]> {
-    console.log(planetId);
-    return [];
-    // const events = (
-    //   await this.makeCall(this.contract.getPlanetArrivals, [
-    //     locationIdToDecStr(planetId),
-    //   ])
-    // ).map(decodeArrival);
-    // return events;
+  public getArrivalsForPlanet(planetId: LocationId): QueuedArrival[] {
+    return this.moveUtils.getArrivalsForPlanet(planetId);
   }
 
-  //TODO: fix getAllArrivals
-  public async getAllArrivals(
+  public getAllArrivals(
     planetsToLoad: LocationId[],
     onProgress?: (fractionCompleted: number) => void,
-  ): Promise<QueuedArrival[]> {
-    console.log(planetsToLoad);
-    for (let i = 1; i <= 10; i++) {
-      onProgress && onProgress(i / 10);
-    }
-    return [];
-
-    // const arrivalsUnflattened = await aggregateBulkGetter<QueuedArrival[]>(
-    //   planetsToLoad.length,
-    //   200,
-    //   async (start, end) => {
-    //     return (
-    //       await this.makeCall(this.contract.bulkGetPlanetArrivalsByIds, [
-    //         planetsToLoad.slice(start, end).map(locationIdToDecStr),
-    //       ])
-    //     ).map((arrivals) => arrivals.map(decodeArrival));
-    //   },
-    //   onProgress,
-    // );
-
-    // return flatten(arrivalsUnflattened);
+  ): QueuedArrival[] {
+    return this.moveUtils.getAllArrivals(planetsToLoad, onProgress);
   }
 
   public getTouchedPlanetIds(
@@ -1097,11 +1076,7 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public getPlanetById(planetId: LocationId): Planet | undefined {
-    const planetUtils = new PlanetUtils({
-      components: this.components,
-      contractConstants: this.contractConstants,
-    });
-    return planetUtils.getPlanetById(planetId);
+    return this.planetUtils.getPlanetById(planetId);
   }
 
   public bulkGetPlanets(

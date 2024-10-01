@@ -114,13 +114,14 @@ export type Planet = {
 
   lastUpdated: number; // NOTE: this is tick
   upgradeState: UpgradeState;
-  // hasTriedFindingArtifact: boolean;
+  hasTriedFindingArtifact: boolean;
+  prospectedBlockNumber?: number;
   heldArtifactIds: ArtifactId[];
   // adminProtect: boolean;
   // destroyed: boolean;
   // frozen: boolean;
   // canShow: boolean;
-  // prospectedBlockNumber?: number;
+
   // localPhotoidUpgrade?: Upgrade;
 
   transactions?: TransactionCollection;
@@ -199,7 +200,7 @@ export type Planet = {
 
 //   lastUpdated: number;
 //   upgradeState: UpgradeState;
-//   hasTriedFindingArtifact: boolean;
+// hasTriedFindingArtifact: boolean;
 //   heldArtifactIds: ArtifactId[];
 //   adminProtect: boolean;
 //   destroyed: boolean;

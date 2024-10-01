@@ -31,6 +31,7 @@ import {
   MIN_PLANET_LEVEL,
 } from "@df/constants";
 import { TxCollection } from "@df/network";
+import { artifactIdFromHexStr } from "@df/serde";
 
 interface PlanetUtilsConfig {
   components: ClientComponents;
@@ -92,7 +93,6 @@ export class PlanetUtils {
       silver: planet.silver,
       lastUpdated: planet.lastUpdated,
       upgradeState: [0, 0, 0],
-      heldArtifactIds: [],
       transactions: new TxCollection(),
       silverSpent: 0,
       isInContract: planet.isInContract,
@@ -103,6 +103,10 @@ export class PlanetUtils {
       silverGroDoublers: planet.silverGroDoublers,
       universeZone: planet.universeZone,
       distSquare: planet.distSquare,
+
+      prospectedBlockNumber: planet.prospectedBlockNumber,
+      hasTriedFindingArtifact: planet.hasTriedFindingArtifact,
+      heldArtifactIds: planet.heldArtifactIds,
     };
   }
 
@@ -150,6 +154,9 @@ export class PlanetUtils {
       PlanetProps,
       PlanetMetadata,
       RevealedPlanet,
+      ProspectedPlanet,
+      ExploredPlanet,
+      PlanetArtifact,
     } = this.components;
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
       id: planetId as `0x${string}`,
@@ -277,6 +284,27 @@ export class PlanetUtils {
       ? true
       : false;
 
+    const prospectedPlanet = getComponentValue(ProspectedPlanet, planetEntity);
+
+    const exploredPlanet = getComponentValue(ExploredPlanet, planetEntity);
+
+    const planetArtifact = getComponentValue(PlanetArtifact, planetEntity);
+
+    const TWO_POW32 = 4294967295n;
+
+    const artifactIds = [];
+    if (planetArtifact) {
+      let val = planetArtifact.artifacts;
+      for (let i = 0; i < 8; i++) {
+        const id = val % TWO_POW32;
+        if (id === 0n) {
+          break;
+        }
+        artifactIds.push(artifactIdFromHexStr(id.toString(16)));
+        val /= TWO_POW32;
+      }
+    }
+
     return {
       locationId: planetId,
       isHomePlanet: false,
@@ -298,7 +326,6 @@ export class PlanetUtils {
       silverCap,
       silverGrowth,
       upgradeState,
-      heldArtifactIds: [],
       lastUpdated: lastUpdateTick,
       isInContract,
       coordsRevealed,
@@ -306,6 +333,9 @@ export class PlanetUtils {
       bonus,
       energyGroDoublers: 0,
       silverGroDoublers: 0,
+      prospectedBlockNumber: Number(prospectedPlanet?.blockNumber),
+      hasTriedFindingArtifact: exploredPlanet ? exploredPlanet.value : false,
+      heldArtifactIds: artifactIds,
     };
   }
 
