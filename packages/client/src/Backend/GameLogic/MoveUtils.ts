@@ -63,12 +63,12 @@ export class MoveUtils {
           distance: 0, // TODO: calculate distance
           arrivalTime: Number(move.arrivalTime),
           arrivalType: ArrivalType.Normal,
-          unionId: 0, // TODO: calculate unionId
-          name: "", // TODO: calculate name
-          leader: move.captain as EthAddress,
-          level: 0, // TODO: calculate level
-          members: [], // TODO: calculate members
-          invitees: [], // TODO: calculate invitees
+          // unionId: 0, // TODO: calculate unionId
+          // name: "", // TODO: calculate name
+          // leader: move.captain as EthAddress,
+          // level: 0, // TODO: calculate level
+          // members: [], // TODO: calculate members
+          // invitees: [], // TODO: calculate invitees
         });
       }
       return res;

@@ -115,7 +115,7 @@ export type Planet = {
   lastUpdated: number; // NOTE: this is tick
   upgradeState: UpgradeState;
   // hasTriedFindingArtifact: boolean;
-  // heldArtifactIds: ArtifactId[];
+  heldArtifactIds: ArtifactId[];
   // adminProtect: boolean;
   // destroyed: boolean;
   // frozen: boolean;
