@@ -307,9 +307,9 @@ export default defineWorld({
       schema: {
         to: "bytes32",
         index: "uint8",
+        from: "bytes32",
         id: "uint64",
         captain: "address",
-        from: "bytes32",
         departureTime: "uint64",
         arrivalTime: "uint64",
         population: "uint64",
@@ -322,7 +322,7 @@ export default defineWorld({
       schema: {
         tickNumber: "uint64",
         tickRate: "uint64", // per block
-        blockNumber: "uint64",
+        timestamp: "uint64",
         paused: "bool",
       },
       key: [],

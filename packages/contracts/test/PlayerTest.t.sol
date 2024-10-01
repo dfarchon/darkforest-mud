@@ -18,19 +18,19 @@ contract PlayerTest is MudTest {
   address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
   function testRegisterPlayer() public {
-    vm.roll(100);
+    uint256 timestamp = block.timestamp;
     IWorld(worldAddress).df__registerPlayer("test", address(1));
     PlayerData memory player = Player.get(address(this));
     assertEq(player.burner, address(1));
     assertEq(player.index, 1);
-    assertEq(player.createdAt, 100);
+    assertEq(player.createdAt, timestamp);
     assertEq(player.name, "test");
 
     vm.expectRevert(Errors.AlreadyRegistered.selector);
     IWorld(worldAddress).df__registerPlayer("test", address(2));
 
-    vm.roll(200);
     vm.prank(admin);
+    vm.warp(timestamp + 1000);
     Counter.setPlayer(99);
     vm.prank(address(1));
     vm.expectRevert(Errors.NameAlreadyTaken.selector);
@@ -46,7 +46,7 @@ contract PlayerTest is MudTest {
     player = Player.get(address(11));
     assertEq(player.burner, address(2));
     assertEq(player.index, 100);
-    assertEq(player.createdAt, 200);
+    assertEq(player.createdAt, timestamp + 1000);
     assertEq(player.name, "test1");
 
     vm.expectRevert(Errors.PlayerLimitReached.selector);

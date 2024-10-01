@@ -48,7 +48,7 @@ contract TickSystem is System, Errors {
 
   function _tick(TickerData memory ticker) internal {
     // it's ok to revert if current block number is smaller than the last tick block number
-    uint256 tickCount = (block.number - ticker.blockNumber) * ticker.tickRate;
+    uint256 tickCount = (block.timestamp - ticker.timestamp) * ticker.tickRate;
     if (tickCount == 0) {
       return;
     }
@@ -57,7 +57,7 @@ contract TickSystem is System, Errors {
     _globalUpdates(tickCount);
 
     // update ticker
-    ticker.blockNumber = uint64(block.number);
+    ticker.timestamp = uint64(block.timestamp);
     ticker.tickNumber += uint64(tickCount);
   }
 
@@ -67,7 +67,7 @@ contract TickSystem is System, Errors {
 
   function _unpause(TickerData memory ticker) internal view {
     ticker.paused = false;
-    ticker.blockNumber = uint64(block.number);
+    ticker.timestamp = uint64(block.timestamp);
   }
 
   function _globalUpdates(uint256 tickCount) internal {

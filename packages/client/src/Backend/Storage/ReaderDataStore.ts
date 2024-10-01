@@ -8,7 +8,7 @@ import type {
   Planet,
   WorldLocation,
 } from "@df/types";
-import { Biome, SpaceType } from "@df/types";
+import type { Biome, SpaceType } from "@df/types";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { AddressTwitterMap } from "../../_types/darkforest/api/UtilityServerAPITypes";
@@ -17,6 +17,9 @@ import type { ContractsAPI } from "../GameLogic/ContractsAPI";
 import { makeContractsAPI } from "../GameLogic/ContractsAPI";
 import { getAllTwitters } from "../Network/UtilityServerAPI";
 import PersistentChunkStore from "./PersistentChunkStore";
+import { TickerUtils } from "@backend/GameLogic/TickerUtils";
+import type { ClientComponents } from "@mud/createClientComponents";
+import { PlanetUtils } from "@backend/GameLogic/PlanetUtils";
 
 export const enum SinglePlanetDataStoreEvent {
   REFRESHED_PLANET = "REFRESHED_PLANET",
@@ -30,6 +33,7 @@ interface ReaderDataStoreConfig {
   contractConstants: ContractConstants;
   contractsAPI: ContractsAPI;
   persistentChunkStore: PersistentChunkStore | undefined;
+  components: ClientComponents;
 }
 
 /**
@@ -43,6 +47,8 @@ class ReaderDataStore {
   private readonly contractConstants: ContractConstants;
   private readonly contractsAPI: ContractsAPI;
   private readonly persistentChunkStore: PersistentChunkStore | undefined;
+  private planetUtils: PlanetUtils;
+  private tickerUtils: TickerUtils;
 
   private constructor({
     viewer,
@@ -50,12 +56,18 @@ class ReaderDataStore {
     contractConstants,
     contractsAPI,
     persistentChunkStore,
+    components,
   }: ReaderDataStoreConfig) {
     this.viewer = viewer;
     this.addressTwitterMap = addressTwitterMap;
     this.contractConstants = contractConstants;
     this.contractsAPI = contractsAPI;
     this.persistentChunkStore = persistentChunkStore;
+    this.planetUtils = new PlanetUtils({
+      components: components,
+      contractConstants: this.contractsAPI.getConstants(),
+    });
+    this.tickerUtils = new TickerUtils({ components });
   }
 
   public destroy(): void {
@@ -67,14 +79,17 @@ class ReaderDataStore {
     connection,
     viewer,
     contractAddress,
+    components,
   }: {
     connection: EthConnection;
     viewer: EthAddress | undefined;
     contractAddress: EthAddress;
+    components: ClientComponents;
   }): Promise<ReaderDataStore> {
     const contractsAPI = await makeContractsAPI({
       connection,
       contractAddress,
+      components,
     });
     const addressTwitterMap = await getAllTwitters();
     const contractConstants = await contractsAPI.getConstants();
@@ -89,6 +104,7 @@ class ReaderDataStore {
       contractConstants,
       contractsAPI,
       persistentChunkStore,
+      components,
     });
 
     return singlePlanetStore;
@@ -138,87 +154,56 @@ class ReaderDataStore {
   public async loadPlanetFromContract(
     planetId: LocationId,
   ): Promise<Planet | LocatablePlanet> {
-    const planet = await this.contractsAPI.getPlanetById(planetId);
-    const contractConstants = await this.contractsAPI.getConstants();
+    const planet = this.contractsAPI.getPlanetById(planetId);
+    const contractConstants = this.contractsAPI.getConstants();
 
     if (!planet) {
       throw new Error(`unable to load planet with id ${planetId}`);
     }
 
-    const arrivals = await this.contractsAPI.getArrivalsForPlanet(planetId);
+    const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
 
+    // NOTE: arrivalTime is arrivalTick
     arrivals.sort((a, b) => a.arrivalTime - b.arrivalTime);
-    const nowInSeconds = Date.now() / 1000;
+
+    const nowInTick = this.tickerUtils.getTickNumber();
 
     for (const arrival of arrivals) {
-      if (nowInSeconds < arrival.arrivalTime) {
+      if (nowInTick < arrival.arrivalTime) {
         break;
       }
       arrive(planet, [], arrival, undefined, contractConstants);
     }
 
-    updatePlanetToTime(planet, [], Date.now(), contractConstants);
+    updatePlanetToTime(planet, [], nowInTick, contractConstants);
     this.setPlanetLocationIfKnown(planet);
 
     return planet;
   }
 
-  public async loadArtifactFromContract(artifactId: ArtifactId) {
-    const artifact = await this.contractsAPI.getArtifactById(artifactId);
-
-    if (!artifact) {
-      throw new Error(`unable to load artifact with id ${artifactId}`);
-    }
-
-    return artifact;
-  }
-
+  // public async loadArtifactFromContract(artifactId: ArtifactId) {
+  //   const artifact = await this.contractsAPI.getArtifactById(artifactId);
+  //   if (!artifact) {
+  //     throw new Error(`unable to load artifact with id ${artifactId}`);
+  //   }
+  //   return artifact;
+  // }
   // copied from GameEntityMemoryStore. needed to determine biome if we know planet location
-  private spaceTypeFromPerlin(
+
+  public spaceTypeFromPerlin(
     perlin: number,
     distFromOrigin: number,
   ): SpaceType {
-    const MAX_LEVEL_DIST = this.contractConstants.MAX_LEVEL_DIST;
+    const distSquare = distFromOrigin ** 2;
+    const universeZone = this.planetUtils._initZone(distSquare);
 
-    if (
-      distFromOrigin > MAX_LEVEL_DIST[1] &&
-      distFromOrigin < MAX_LEVEL_DIST[0]
-    ) {
-      return SpaceType.NEBULA;
-    }
-
-    if (perlin < this.contractConstants.PERLIN_THRESHOLD_1) {
-      return SpaceType.NEBULA;
-    } else if (perlin < this.contractConstants.PERLIN_THRESHOLD_2) {
-      return SpaceType.SPACE;
-    } else if (perlin < this.contractConstants.PERLIN_THRESHOLD_3) {
-      return SpaceType.DEEP_SPACE;
-    } else {
-      return SpaceType.DEAD_SPACE;
-    }
+    const spaceType = this.planetUtils._initSpaceType(universeZone, perlin);
+    return spaceType;
   }
 
   // copied from GameEntityMemoryStore. needed to determine biome if we know planet location
   private getBiome(loc: WorldLocation): Biome {
-    const { perlin, biomebase, coords } = loc;
-    const distFromOrigin = Math.floor(Math.sqrt(coords.x ** 2 + coords.y ** 2));
-
-    const spaceType = this.spaceTypeFromPerlin(perlin, distFromOrigin);
-
-    if (spaceType === SpaceType.DEAD_SPACE) {
-      return Biome.CORRUPTED;
-    }
-
-    let biome = 3 * spaceType;
-    if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) {
-      biome += 1;
-    } else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) {
-      biome += 2;
-    } else {
-      biome += 3;
-    }
-
-    return biome as Biome;
+    return this.planetUtils.getBiome(loc);
   }
 }
 

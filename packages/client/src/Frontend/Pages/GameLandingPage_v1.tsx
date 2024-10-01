@@ -1,7 +1,7 @@
 // import type { GameManager } from "@backend/GameLogic/GameManager";
 // import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 import {
-  // BLOCK_EXPLORER_URL,
+  BLOCK_EXPLORER_URL,
   // BLOCKCHAIN_BRIDGE,
   // HOW_TO_ENABLE_POPUPS,
   // HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
@@ -30,7 +30,7 @@ import {
 import UIEmitter, { UIEmitterEvent } from "@frontend/Utils/UIEmitter";
 // import { GameWindowLayout } from '../Views/GameWindowLayout';
 import { useComponentValue } from "@latticexyz/react";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import WalletButton from "@wallet/WalletButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -41,6 +41,21 @@ import { useWalletClient } from "wagmi";
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import { Terminal, type TerminalHandle } from "../Views/Terminal";
+import {
+  getEthConnection,
+  loadDiamondContract,
+} from "../../Backend/Network/Blockchain";
+import type { EthConnection } from "@df/network";
+import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
+import { address } from "@df/serde";
+import { hexToResource } from "@latticexyz/common";
+import {
+  type Entity,
+  Has,
+  getComponentValue,
+  getComponentValueStrict,
+  runQuery,
+} from "@latticexyz/recs";
 
 const enum TerminalPromptStep {
   NONE,
@@ -79,16 +94,20 @@ export function GameLandingPage_v1() {
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
-    components: { SyncProgress },
+    components: components,
   } = useMUD();
 
-  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
-    message: "Connecting",
-    percentage: 0,
-    step: "Initialize",
-    latestBlockNumber: 0n,
-    lastBlockNumberProcessed: 0n,
-  });
+  const syncProgress = useComponentValue(
+    components.SyncProgress,
+    singletonEntity,
+    {
+      message: "Connecting",
+      percentage: 0,
+      step: "Initialize",
+      latestBlockNumber: 0n,
+      lastBlockNumberProcessed: 0n,
+    },
+  );
 
   const syncSign = useMemo(() => {
     console.log(syncProgress);
@@ -97,6 +116,7 @@ export function GameLandingPage_v1() {
 
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
+  const contractAddress = contract ? address(contract) : address(zeroAddress);
 
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const terminalHandle = useRef<TerminalHandle>(null);
@@ -104,6 +124,9 @@ export function GameLandingPage_v1() {
 
   // const [gameManager, setGameManager] = useState<GameManager | undefined>();
   // const gameUIManagerRef = useRef<GameUIManager | undefined>();
+  const [ethConnection, setEthConnection] = useState<
+    EthConnection | undefined
+  >();
 
   const [
     terminalVisible,
@@ -121,6 +144,16 @@ export function GameLandingPage_v1() {
   const [browserIssues, setBrowserIssues] = useState<Incompatibility[]>([]);
   // const [isMiniMapOn, setMiniMapOn] = useState(false);
   // const [spectate, setSpectate] = useState(false);
+  const [spectate, setSpectate] = useState(false);
+
+  useEffect(() => {
+    getEthConnection()
+      .then((ethConnection) => setEthConnection(ethConnection))
+      .catch((e) => {
+        alert("error connecting to blockchain");
+        console.log(e);
+      });
+  }, []);
 
   useEffect(() => {
     unsupportedFeatures().then((issues) => {
@@ -233,6 +266,40 @@ export function GameLandingPage_v1() {
     [mainAccount],
   );
 
+  const advanceStateFromSpectating = useCallback(
+    async (terminal: React.MutableRefObject<TerminalHandle | null>) => {
+      try {
+        if (!ethConnection) {
+          throw new Error("not logged in");
+        }
+
+        setSpectate(true);
+        // setMiniMapOn(false);
+        console.log("specatate:", spectate);
+        // console.log("isMiniMapOn:", isMiniMapOn);
+
+        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+      } catch (e) {
+        console.error(e);
+        setStep(TerminalPromptStep.ERROR);
+        terminal.current?.print(
+          "Network under heavy load. Please refresh the page, and check ",
+          TerminalTextStyle.Red,
+        );
+        terminal.current?.printLink(
+          BLOCK_EXPLORER_URL,
+          () => {
+            window.open(BLOCK_EXPLORER_URL);
+          },
+          TerminalTextStyle.Red,
+        );
+        terminal.current?.println("");
+        return;
+      }
+    },
+    [ethConnection, spectate],
+  );
+
   const advanceState = useCallback(
     (terminal: React.MutableRefObject<TerminalHandle | null>) => {
       if (browserCompatibleState !== "supported") {
@@ -242,6 +309,9 @@ export function GameLandingPage_v1() {
       switch (true) {
         case step === TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED:
           advanceStateFromCompatibilityPassed(terminal);
+          return;
+        case step === TerminalPromptStep.SPECTATING:
+          advanceStateFromSpectating(terminal);
           return;
       }
     },
@@ -260,6 +330,28 @@ export function GameLandingPage_v1() {
   //     tutorialManager.acceptInput(TutorialState.Terminal);
   //   }
   // }, [terminalVisible]);
+
+  const showNamespace = () => {
+    console.log("--------- [TEST] NamespaceOwner ---------");
+    const { NamespaceOwner } = components;
+    console.log(NamespaceOwner);
+
+    for (const entity of NamespaceOwner.entities()) {
+      console.log("-------------------");
+      console.log(entity);
+      console.log(hexToResource(entity as `0x${string}`).namespace);
+      const res = getComponentValue(NamespaceOwner, entity);
+      console.log(res);
+      console.log(res?.owner);
+    }
+  };
+
+  const testContractsAPI = async () => {
+    if (!ethConnection) {
+      throw new Error("not logged in");
+    }
+    showNamespace();
+  };
 
   useEffect(() => {
     if (terminalHandle.current && topLevelContainer.current) {
@@ -317,6 +409,11 @@ export function GameLandingPage_v1() {
             <p> Game Account: {gameAccount}</p>
             <br />
           </div>
+
+          <div>
+            <button onClick={testContractsAPI}> Test Contracts API</button>
+          </div>
+
           <Terminal
             ref={terminalHandle}
             promptCharacter={">"}

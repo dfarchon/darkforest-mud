@@ -35,7 +35,7 @@ contract MoveTest is MudTest {
   }
 
   function testMove() public {
-    vm.roll(1000);
+    vm.warp(block.timestamp + 1000);
     Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
     Planet memory planet2 = IWorld(worldAddress).df__readPlanet(2);
     assertEq(planet1.population, 300000);
@@ -97,7 +97,7 @@ contract MoveTest is MudTest {
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
 
     input.distance *= 2;
-    vm.roll(_getBlockNumberAtTick(move2.arrivalTime));
+    vm.warp(_getTimestampAtTick(move2.arrivalTime));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
     vm.prank(user1);
     IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
@@ -118,7 +118,7 @@ contract MoveTest is MudTest {
     );
     assertEq(planet2.silver + move2.silver, PlanetTable.getSilver(bytes32(planet2.planetHash)));
 
-    vm.roll(_getBlockNumberAtTick(move1.arrivalTime));
+    vm.warp(_getTimestampAtTick(move1.arrivalTime));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
     planet2.population = 1;
     vm.startPrank(admin);
@@ -133,7 +133,7 @@ contract MoveTest is MudTest {
     );
     assertEq(latestPlanet2.silver, move1.silver + planet2.silver);
 
-    vm.roll(_getBlockNumberAtTick(move3.arrivalTime));
+    vm.warp(_getTimestampAtTick(move3.arrivalTime));
     planet2 = latestPlanet2;
     IWorld(worldAddress).df__tick();
     latestPlanet2 = IWorld(worldAddress).df__readPlanet(2);
@@ -146,9 +146,9 @@ contract MoveTest is MudTest {
     return uint8(pendingMove.indexes >> (8 * (29 - ((pendingMove.head + i) % 30))));
   }
 
-  function _getBlockNumberAtTick(uint256 tick) internal view returns (uint256) {
+  function _getTimestampAtTick(uint256 tick) internal view returns (uint256) {
     TickerData memory ticker = Ticker.get();
-    return ticker.blockNumber + (tick - ticker.tickNumber) / ticker.tickRate;
+    return ticker.timestamp + (tick - ticker.tickNumber) / ticker.tickRate;
   }
 
   function _getPopulationAtTick(Planet memory planet, uint256 tick) internal pure returns (uint256) {
