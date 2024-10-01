@@ -42,7 +42,7 @@ export class MoveUtils {
       ) {
         const moveEntity = encodeEntity(Move.metadata.keySchema, {
           to: planetId as `0x${string}`,
-          index: indexes[i],
+          index: indexes[i % 30],
         });
         const move = getComponentValue(Move, moveEntity);
         if (!move) {
