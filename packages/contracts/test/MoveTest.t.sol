@@ -7,7 +7,7 @@ import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswith
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Ticker, TickerData, PendingMove, PendingMoveData, Move, MoveData } from "../src/codegen/index.sol";
-import { Planet as PlanetTable } from "../src/codegen/index.sol";
+import { Planet as PlanetTable, Counter } from "../src/codegen/index.sol";
 import { PlanetType, SpaceType } from "../src/codegen/common.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
@@ -55,6 +55,7 @@ contract MoveTest is MudTest {
     assertEq(index, 0);
     MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
     assertEq(move1.captain, user1);
+    assertEq(move1.id, 1);
     assertEq(move1.from, bytes32(planet1.planetHash));
     assertEq(move1.departureTime, Ticker.getTickNumber());
     assertEq(move1.arrivalTime, move1.departureTime + (input.distance * 100) / planet1.speed);
@@ -88,6 +89,7 @@ contract MoveTest is MudTest {
     index = _getIndexAt(pendingMove, 0);
     assertEq(index, 1);
     MoveData memory move2 = Move.get(bytes32(planet2.planetHash), uint8(index));
+    assertEq(move2.id, 2);
     assertEq(move2.departureTime, move1.departureTime);
     assertEq(move2.arrivalTime, move2.departureTime + (input.distance * 100) / planet1.speed);
     assertEq(move2.arrivalTime - move2.departureTime, (move1.arrivalTime - move1.departureTime) / 2);
@@ -108,6 +110,8 @@ contract MoveTest is MudTest {
     index = _getIndexAt(pendingMove, 1);
     assertEq(index, 1);
     MoveData memory move3 = Move.get(bytes32(planet2.planetHash), uint8(index));
+    assertEq(Counter.getMove(), 3);
+    assertEq(move3.id, 3);
     assertEq(
       _getPopulationAtTick(planet2, move2.arrivalTime) - (move2.population * 100) / planet2.defense,
       PlanetTable.getPopulation(bytes32(planet2.planetHash))

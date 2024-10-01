@@ -33,13 +33,12 @@ contract PlayerSystem is System {
       revert Errors.AlreadyRegisteredAsBurner();
     }
 
-    uint256 index = Counter.getPlayer();
-    ++index;
+    uint256 index = Counter.getPlayer() + 1;
     if (index > TempConfigSet.getPlayerLimit()) {
       revert Errors.PlayerLimitReached();
     }
-    Counter.setPlayer(uint32(index));
 
+    Counter.setPlayer(uint32(index));
     Player.set(player, burner, uint32(index), uint64(block.number), name);
     NameToPlayer.set(nameHash, player);
     BurnerToPlayer.set(bytes32(uint256(uint160(burner))), player);

@@ -66,6 +66,7 @@ export default defineWorld({
       schema: {
         player: "uint32",
         artifact: "uint32",
+        move: "uint64",
       },
       key: [],
     },
@@ -306,8 +307,9 @@ export default defineWorld({
       schema: {
         to: "bytes32",
         index: "uint8",
-        from: "bytes32",
+        id: "uint64",
         captain: "address",
+        from: "bytes32",
         departureTime: "uint64",
         arrivalTime: "uint64",
         population: "uint64",

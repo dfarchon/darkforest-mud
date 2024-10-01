@@ -2,17 +2,18 @@
 pragma solidity >=0.8.24;
 
 import { Errors } from "../interfaces/errors.sol";
-import { Move, MoveData, Ticker, PendingMove, PendingMoveData } from "../codegen/index.sol";
+import { Move, MoveData, Ticker, PendingMove, PendingMoveData, Counter } from "../codegen/index.sol";
 import { Artifact as ArtifactTable, ArtifactOwner } from "../codegen/index.sol";
 import { PlanetType } from "../codegen/common.sol";
 import { Planet } from "./Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 
 library MoveLib {
-  function NewMove(Planet memory from, address captain) internal pure returns (MoveData memory move) {
+  function NewMove(Planet memory from, address captain) internal view returns (MoveData memory move) {
     if (from.owner != captain) {
       revert Errors.NotPlanetOwner();
     }
+    move.id = Counter.getMove() + 1;
     move.captain = captain;
     move.from = bytes32(from.planetHash);
   }

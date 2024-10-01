@@ -7,7 +7,7 @@ import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput } from "../lib/VerificationInput.sol";
 import { Planet } from "../lib/Planet.sol";
-import { MoveData } from "../codegen/index.sol";
+import { MoveData, Counter } from "../codegen/index.sol";
 import { MoveLib } from "../lib/Move.sol";
 import { UniverseLib } from "../lib/Universe.sol";
 
@@ -49,6 +49,7 @@ contract MoveSystem is System, Errors {
     shipping.headTo(toPlanet, distance, fromPlanet.speed);
 
     // write back to storage
+    Counter.setMove(shipping.id);
     fromPlanet.writeToStore();
     toPlanet.writeToStore();
   }
