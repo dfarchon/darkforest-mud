@@ -39,7 +39,7 @@ contract PlayerSystem is System {
     }
 
     Counter.setPlayer(uint32(index));
-    Player.set(player, burner, uint32(index), uint64(block.number), name);
+    Player.set(player, burner, uint32(index), uint64(block.timestamp), name);
     NameToPlayer.set(nameHash, player);
     BurnerToPlayer.set(bytes32(uint256(uint160(burner))), player);
   }
