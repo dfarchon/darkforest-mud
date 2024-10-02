@@ -104,8 +104,10 @@ export function GameLandingPage() {
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
-    components: { SyncProgress },
+    components: components, //{ SyncProgress },
   } = useMUD();
+
+  const { SyncProgress } = components;
 
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     message: "Connecting",
@@ -124,7 +126,7 @@ export function GameLandingPage() {
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
   const terminalHandle = useRef<TerminalHandle>(null);
-  const gameUIManagerRef = useRef<GameUIManager>(null);
+  const gameUIManagerRef = useRef<GameUIManager | null>(null);
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const miniMapRef = useRef<MiniMapHandle>();
 
@@ -831,6 +833,7 @@ export function GameLandingPage() {
         const contractsAPI = await makeContractsAPI({
           connection: ethConnection,
           contractAddress,
+          components,
         });
 
         const keyBigInt = bigIntFromKey(key);
@@ -1008,6 +1011,7 @@ export function GameLandingPage() {
           connection: ethConnection,
           terminal,
           contractAddress,
+          components,
           spectate,
         });
       } catch (e) {

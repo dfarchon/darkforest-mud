@@ -9,7 +9,7 @@ import {
 } from "@df/network";
 import {
   address,
-  // artifactIdFromEthersBN,
+  artifactIdFromEthersBN,
   // artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
@@ -949,14 +949,14 @@ export class ContractsAPI extends EventEmitter {
       homePlanetId: rawSpawnPlanet
         ? (rawSpawnPlanet.planet.toString() as LocationId)
         : undefined,
-      lastRevealTickNumber: lastReveal ? lastReveal.tickNumber : 0n,
+      lastRevealTimestamp: lastReveal ? Number(lastReveal.tickNumber) : 0,
     };
     return player;
   }
 
   public getPlayers(
     onProgress?: (fractionCompleted: number) => void,
-  ): Map<string, Player> | undefined {
+  ): Map<string, Player> {
     const { Player } = this.components;
     const playerIds = [...runQuery([Has(Player)])];
     const nPlayers: number = playerIds.length;
@@ -975,12 +975,14 @@ export class ContractsAPI extends EventEmitter {
     return playerMap;
   }
 
-  public getWorldRadius(): number | undefined {
+  public getWorldRadius(): number {
     const { UniverseConfig } = this.components;
     const universeConfig = getComponentValue(UniverseConfig, singletonEntity);
-    return universeConfig !== undefined
-      ? Number(universeConfig.radius)
-      : undefined;
+    if (!universeConfig) {
+      throw new Error("need to set universe config");
+    }
+
+    return Number(universeConfig.radius);
   }
 
   //TODO fix getArrival
@@ -1044,11 +1046,11 @@ export class ContractsAPI extends EventEmitter {
     return result;
   }
 
-  public getIsPaused(): boolean | undefined {
+  public getIsPaused(): boolean {
     const { Ticker } = this.components;
     const ticker = getComponentValue(Ticker, singletonEntity);
     if (!ticker) {
-      return undefined;
+      return false;
     }
     return ticker.paused;
   }

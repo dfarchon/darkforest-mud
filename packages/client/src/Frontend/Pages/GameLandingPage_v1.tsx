@@ -351,6 +351,12 @@ export function GameLandingPage_v1() {
       throw new Error("not logged in");
     }
     showNamespace();
+
+    const contractsAPI = await makeContractsAPI({
+      connection: ethConnection,
+      contractAddress,
+      components,
+    });
   };
 
   useEffect(() => {

@@ -365,13 +365,13 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.addAccount(coords);
   }
 
-  public verifyTwitter(twitter: string): Promise<boolean> {
-    return this.gameManager.submitVerifyTwitter(twitter);
-  }
+  // public verifyTwitter(twitter: string): Promise<boolean> {
+  //   return this.gameManager.submitVerifyTwitter(twitter);
+  // }
 
-  public disconnectTwitter(twitter: string) {
-    return this.gameManager.submitDisconnectTwitter(twitter);
-  }
+  // public disconnectTwitter(twitter: string) {
+  //   return this.gameManager.submitDisconnectTwitter(twitter);
+  // }
 
   public getPluginManager(): PluginManager {
     return this.plugins;
@@ -468,17 +468,17 @@ export class GameUIManager extends EventEmitter {
     );
   }
 
-  public buyArtifact(
-    locationId: LocationId,
-    rarity: ArtifactRarity,
-    biome: Biome,
-    type: ArtifactType,
-  ) {
-    this.terminal.current?.printShellLn(
-      `df.buyArtifact('${locationId}','${rarity}','${biome}','${type}')`,
-    );
-    this.gameManager.buyArtifact(locationId, rarity, biome, type);
-  }
+  // public buyArtifact(
+  //   locationId: LocationId,
+  //   rarity: ArtifactRarity,
+  //   biome: Biome,
+  //   type: ArtifactType,
+  // ) {
+  //   this.terminal.current?.printShellLn(
+  //     `df.buyArtifact('${locationId}','${rarity}','${biome}','${type}')`,
+  //   );
+  //   this.gameManager.buyArtifact(locationId, rarity, biome, type);
+  // }
 
   public withdrawSilver(locationId: LocationId, amount: number) {
     const dontShowWarningStorageKey = `${this.getAccount()?.toLowerCase()}-withdrawnWarningAcked`;
@@ -517,33 +517,33 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.revealLocation(locationId);
   }
 
-  public claimLocation(locationId: LocationId) {
-    this.gameManager.claimLocation(locationId);
-  }
+  // public claimLocation(locationId: LocationId) {
+  //   this.gameManager.claimLocation(locationId);
+  // }
 
-  public burnLocation(locationId: LocationId) {
-    this.gameManager.burnLocation(locationId);
-  }
+  // public burnLocation(locationId: LocationId) {
+  //   this.gameManager.burnLocation(locationId);
+  // }
 
-  public checkPlanetCanPink(planetId: LocationId): boolean {
-    return this.gameManager.checkPlanetCanPink(planetId);
-  }
+  // public checkPlanetCanPink(planetId: LocationId): boolean {
+  //   return this.gameManager.checkPlanetCanPink(planetId);
+  // }
 
-  public pinkLocation(locationId: LocationId) {
-    this.gameManager.pinkLocation(locationId);
-  }
+  // public pinkLocation(locationId: LocationId) {
+  //   this.gameManager.pinkLocation(locationId);
+  // }
 
-  public kardashev(locationId: LocationId) {
-    this.gameManager.kardashev(locationId);
-  }
+  // public kardashev(locationId: LocationId) {
+  //   this.gameManager.kardashev(locationId);
+  // }
 
-  public checkPlanetCanBlue(planetId: LocationId): boolean {
-    return this.gameManager.checkPlanetCanBlue(planetId);
-  }
+  // public checkPlanetCanBlue(planetId: LocationId): boolean {
+  //   return this.gameManager.checkPlanetCanBlue(planetId);
+  // }
 
-  public blueLocation(locationId: LocationId) {
-    this.gameManager.blueLocation(locationId);
-  }
+  // public blueLocation(locationId: LocationId) {
+  //   this.gameManager.blueLocation(locationId);
+  // }
 
   public getNextBroadcastAvailableTimestamp() {
     return this.gameManager.getNextBroadcastAvailableTimestamp();
@@ -553,53 +553,53 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.timeUntilNextBroadcastAvailable();
   }
 
-  public getNextClaimAvailableTimestamp() {
-    return this.gameManager.getNextClaimAvailableTimestamp();
-  }
+  // public getNextClaimAvailableTimestamp() {
+  //   return this.gameManager.getNextClaimAvailableTimestamp();
+  // }
 
-  public timeUntilNextClaimAvailable() {
-    return this.gameManager.timeUntilNextClaimAvailable();
-  }
+  // public timeUntilNextClaimAvailable() {
+  //   return this.gameManager.timeUntilNextClaimAvailable();
+  // }
 
-  public getNextBurnAvailableTimestamp() {
-    return this.gameManager.getNextBurnAvailableTimestamp();
-  }
+  // public getNextBurnAvailableTimestamp() {
+  //   return this.gameManager.getNextBurnAvailableTimestamp();
+  // }
 
-  public timeUntilNextBurnAvailable() {
-    return this.gameManager.timeUntilNextBurnAvailable();
-  }
+  // public timeUntilNextBurnAvailable() {
+  //   return this.gameManager.timeUntilNextBurnAvailable();
+  // }
 
-  public getNextPinkAvailableTimestamp(planetId: LocationId) {
-    return this.gameManager.getNextPinkAvailableTimestamp(planetId);
-  }
+  // public getNextPinkAvailableTimestamp(planetId: LocationId) {
+  //   return this.gameManager.getNextPinkAvailableTimestamp(planetId);
+  // }
 
-  public getBlueZoneCenterPlanetId(planetId: LocationId) {
-    return this.gameManager.getBlueZoneCenterPlanetId(planetId);
-  }
+  // public getBlueZoneCenterPlanetId(planetId: LocationId) {
+  //   return this.gameManager.getBlueZoneCenterPlanetId(planetId);
+  // }
 
-  public getNextKardashevAvailableTimestamp() {
-    return this.gameManager.getNextKardashevAvailableTimestamp();
-  }
+  // public getNextKardashevAvailableTimestamp() {
+  //   return this.gameManager.getNextKardashevAvailableTimestamp();
+  // }
 
-  public getNextBlueAvailableTimestamp(planetId: LocationId) {
-    return this.gameManager.getNextBlueAvailableTimestamp(planetId);
-  }
+  // public getNextBlueAvailableTimestamp(planetId: LocationId) {
+  //   return this.gameManager.getNextBlueAvailableTimestamp(planetId);
+  // }
 
-  public getNextActivateArtifactAvailableTimestamp() {
-    return this.gameManager.getNextActivateArtifactAvailableTimestamp();
-  }
+  // public getNextActivateArtifactAvailableTimestamp() {
+  //   return this.gameManager.getNextActivateArtifactAvailableTimestamp();
+  // }
 
-  public timeUntilNextActivateArtifactAvailable() {
-    return this.gameManager.timeUntilNextBuyArtifactAvailable();
-  }
+  // public timeUntilNextActivateArtifactAvailable() {
+  //   return this.gameManager.timeUntilNextBuyArtifactAvailable();
+  // }
 
-  public getNextBuyArtifactAvailableTimestamp() {
-    return this.gameManager.getNextBuyArtifactAvailableTimestamp();
-  }
+  // public getNextBuyArtifactAvailableTimestamp() {
+  //   return this.gameManager.getNextBuyArtifactAvailableTimestamp();
+  // }
 
-  public timeUntilNextBuyArtifactAvailable() {
-    return this.gameManager.timeUntilNextBuyArtifactAvailable();
-  }
+  // public timeUntilNextBuyArtifactAvailable() {
+  //   return this.gameManager.timeUntilNextBuyArtifactAvailable();
+  // }
 
   public getEnergyArrivingForMove(
     from: LocationId,
@@ -835,6 +835,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public setAbandoning(abandoning: boolean): void {
+    return;
     if (!this.gameManager.getContractConstants().SPACE_JUNK_ENABLED) {
       return;
     }
@@ -898,13 +899,13 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.isAdmin();
   }
 
-  public getTwitter(address: EthAddress | undefined): string | undefined {
-    return this.gameManager.getTwitter(address);
-  }
+  // public getTwitter(address: EthAddress | undefined): string | undefined {
+  //   return this.gameManager.getTwitter(address);
+  // }
 
-  public getEndTimeSeconds(): number {
-    return this.gameManager.getEndTimeSeconds();
-  }
+  // public getEndTimeSeconds(): number {
+  //   return this.gameManager.getEndTimeSeconds();
+  // }
 
   public isRoundOver(): boolean {
     return this.gameManager.isRoundOver();
@@ -1310,23 +1311,25 @@ export class GameUIManager extends EventEmitter {
   }
 
   public getAbandonSpeedChangePercent(): number {
-    const { SPACE_JUNK_ENABLED, ABANDON_SPEED_CHANGE_PERCENT } =
-      this.contractConstants;
-    if (SPACE_JUNK_ENABLED) {
-      return ABANDON_SPEED_CHANGE_PERCENT;
-    } else {
-      return 100;
-    }
+    return 100;
+    // const { SPACE_JUNK_ENABLED, ABANDON_SPEED_CHANGE_PERCENT } =
+    //   this.contractConstants;
+    // if (SPACE_JUNK_ENABLED) {
+    //   return ABANDON_SPEED_CHANGE_PERCENT;
+    // } else {
+    //   return 100;
+    // }
   }
 
   public getAbandonRangeChangePercent(): number {
-    const { SPACE_JUNK_ENABLED, ABANDON_RANGE_CHANGE_PERCENT } =
-      this.contractConstants;
-    if (SPACE_JUNK_ENABLED) {
-      return ABANDON_RANGE_CHANGE_PERCENT;
-    } else {
-      return 100;
-    }
+    return 100;
+    // const { SPACE_JUNK_ENABLED, ABANDON_RANGE_CHANGE_PERCENT } =
+    //   this.contractConstants;
+    // if (SPACE_JUNK_ENABLED) {
+    //   return ABANDON_RANGE_CHANGE_PERCENT;
+    // } else {
+    //   return 100;
+    // }
   }
 
   public isSendingShip(planetId?: LocationId): boolean {
@@ -1432,26 +1435,26 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getNextRevealCountdownInfo().currentlyRevealing;
   }
 
-  public isCurrentlyClaiming(): boolean {
-    return this.gameManager.getNextClaimCountdownInfo().currentlyClaiming;
-  }
+  // public isCurrentlyClaiming(): boolean {
+  //   return this.gameManager.getNextClaimCountdownInfo().currentlyClaiming;
+  // }
 
-  public isCurrentlyBurning(): boolean {
-    return this.gameManager.getNextBurnCountdownInfo().currentlyBurning;
-  }
+  // public isCurrentlyBurning(): boolean {
+  //   return this.gameManager.getNextBurnCountdownInfo().currentlyBurning;
+  // }
 
-  public isCurrentlyKardasheving(): boolean {
-    return this.gameManager.getNextKardashevCountdownInfo()
-      .currentlyKardasheving;
-  }
+  // public isCurrentlyKardasheving(): boolean {
+  //   return this.gameManager.getNextKardashevCountdownInfo()
+  //     .currentlyKardasheving;
+  // }
 
-  public isCurrentlyPinking(): boolean {
-    return this.gameManager.isCurrentlyPinking();
-  }
+  // public isCurrentlyPinking(): boolean {
+  //   return this.gameManager.isCurrentlyPinking();
+  // }
 
-  public isCurrentlyBlueing(): boolean {
-    return this.gameManager.isCurrentlyBlueing();
-  }
+  // public isCurrentlyBlueing(): boolean {
+  //   return this.gameManager.isCurrentlyBlueing();
+  // }
 
   public getUnconfirmedLinkActivations(): Transaction<UnconfirmedActivateArtifact>[] {
     return this.gameManager.getUnconfirmedLinkActivations();
@@ -1477,29 +1480,29 @@ export class GameUIManager extends EventEmitter {
     return this.viewportEntities.getPlanetsAndChunks();
   }
 
-  public getCaptureZones() {
-    return this.gameManager.getCaptureZones();
-  }
+  // public getCaptureZones() {
+  //   return this.gameManager.getCaptureZones();
+  // }
 
-  public getPinkZones() {
-    return this.gameManager.getPinkZones();
-  }
+  // public getPinkZones() {
+  //   return this.gameManager.getPinkZones();
+  // }
 
-  public getMyPinkZones() {
-    return this.gameManager.getMyPinkZones();
-  }
+  // public getMyPinkZones() {
+  //   return this.gameManager.getMyPinkZones();
+  // }
 
-  public getBlueZones() {
-    return this.gameManager.getBlueZones();
-  }
+  // public getBlueZones() {
+  //   return this.gameManager.getBlueZones();
+  // }
 
-  public getMyBlueZones() {
-    return this.gameManager.getMyBlueZones();
-  }
+  // public getMyBlueZones() {
+  //   return this.gameManager.getMyBlueZones();
+  // }
 
-  public getCaptureZoneGenerator() {
-    return this.gameManager.getCaptureZoneGenerator();
-  }
+  // public getCaptureZoneGenerator() {
+  //   return this.gameManager.getCaptureZoneGenerator();
+  // }
 
   public getIsHighPerfMode(): boolean {
     const account = this.getAccount();
@@ -1541,18 +1544,18 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getPlayerScore(player);
   }
 
-  public getPlayerActivateArtifactAmount(
-    player: EthAddress,
-  ): number | undefined {
-    return this.gameManager.getPlayerActivateArtifactAmount(player);
-  }
-  public getPlayerBuyArtifactAmount(player: EthAddress): number | undefined {
-    return this.gameManager.getPlayerBuyArtifactAmount(player);
-  }
+  // public getPlayerActivateArtifactAmount(
+  //   player: EthAddress,
+  // ): number | undefined {
+  //   return this.gameManager.getPlayerActivateArtifactAmount(player);
+  // }
+  // public getPlayerBuyArtifactAmount(player: EthAddress): number | undefined {
+  //   return this.gameManager.getPlayerBuyArtifactAmount(player);
+  // }
 
-  public getPlayerSilver(player: EthAddress): number | undefined {
-    return this.gameManager.getPlayerSilver(player);
-  }
+  // public getPlayerSilver(player: EthAddress): number | undefined {
+  //   return this.gameManager.getPlayerSilver(player);
+  // }
 
   public upgrade(planet: Planet, branch: number): void {
     // TODO: do something like JSON.stringify(args) so we know formatting is correct
@@ -1570,25 +1573,25 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.refreshPlanet(planet.locationId);
   }
 
-  public buySkin(planet: Planet, hatType: number): void {
-    // TODO: do something like JSON.stringify(args) so we know formatting is correct
-    this.terminal.current?.printShellLn(
-      `df.buySkin('${planet.locationId}','${hatType}')`,
-    );
-    this.gameManager.buySkin(planet.locationId, hatType);
-  }
+  // public buySkin(planet: Planet, hatType: number): void {
+  //   // TODO: do something like JSON.stringify(args) so we know formatting is correct
+  //   this.terminal.current?.printShellLn(
+  //     `df.buySkin('${planet.locationId}','${hatType}')`,
+  //   );
+  //   this.gameManager.buySkin(planet.locationId, hatType);
+  // }
 
-  public buyPlanet(planet: Planet): void {
-    this.terminal.current?.printShellLn(`df.buyPlanet('${planet.locationId}')`);
-    this.gameManager.buyPlanet(planet.locationId);
-  }
+  // public buyPlanet(planet: Planet): void {
+  //   this.terminal.current?.printShellLn(`df.buyPlanet('${planet.locationId}')`);
+  //   this.gameManager.buyPlanet(planet.locationId);
+  // }
 
-  public buySpaceship(planet: Planet): void {
-    this.terminal.current?.printShellLn(
-      `df.buySpaceship('${planet.locationId}')`,
-    );
-    this.gameManager.buySpaceship(planet.locationId);
-  }
+  // public buySpaceship(planet: Planet): void {
+  //   this.terminal.current?.printShellLn(
+  //     `df.buySpaceship('${planet.locationId}')`,
+  //   );
+  //   this.gameManager.buySpaceship(planet.locationId);
+  // }
 
   public donate(amount: number): void {
     // this.terminal.current?.printShellLn(`df.donate('${amount}')`);
@@ -1671,51 +1674,51 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getContractConstants();
   }
 
-  public getSpaceJunkEnabled(): boolean {
-    return this.contractConstants.SPACE_JUNK_ENABLED;
-  }
+  // public getSpaceJunkEnabled(): boolean {
+  //   return this.contractConstants.SPACE_JUNK_ENABLED;
+  // }
 
-  public get captureZonesEnabled(): boolean {
-    return this.contractConstants.CAPTURE_ZONES_ENABLED;
-  }
+  // public get captureZonesEnabled(): boolean {
+  //   return this.contractConstants.CAPTURE_ZONES_ENABLED;
+  // }
 
-  public potentialCaptureScore(planetLevel: number): number {
-    return this.contractConstants.CAPTURE_ZONE_PLANET_LEVEL_SCORE[planetLevel];
-  }
+  // public potentialCaptureScore(planetLevel: number): number {
+  //   return this.contractConstants.CAPTURE_ZONE_PLANET_LEVEL_SCORE[planetLevel];
+  // }
 
-  public getRadiusOfPinkCircle(planetLevel: number): number {
-    return this.contractConstants.BURN_PLANET_LEVEL_EFFECT_RADIUS[planetLevel];
-  }
+  // public getRadiusOfPinkCircle(planetLevel: number): number {
+  //   return this.contractConstants.BURN_PLANET_LEVEL_EFFECT_RADIUS[planetLevel];
+  // }
 
-  public getSilverOfBurnPlanet(
-    account: EthAddress,
-    planetLevel: number,
-  ): number | undefined {
-    // const silverAmount = 10 ** this.player.dropBombAmount;
-    const player = this.getPlayer(account);
-    if (!player) {
-      return undefined;
-    }
-    const silverAmount =
-      this.contractConstants.BURN_PLANET_REQUIRE_SILVER_AMOUNTS[planetLevel] *
-      10 ** player.dropBombAmount;
+  // public getSilverOfBurnPlanet(
+  //   account: EthAddress,
+  //   planetLevel: number,
+  // ): number | undefined {
+  //   // const silverAmount = 10 ** this.player.dropBombAmount;
+  //   const player = this.getPlayer(account);
+  //   if (!player) {
+  //     return undefined;
+  //   }
+  //   const silverAmount =
+  //     this.contractConstants.BURN_PLANET_REQUIRE_SILVER_AMOUNTS[planetLevel] *
+  //     10 ** player.dropBombAmount;
 
-    return silverAmount;
-  }
+  //   return silverAmount;
+  // }
 
-  public getKardashevRequireSilverAmount(planetLevel: number): number {
-    return this.contractConstants.KARDASHEV_REQUIRE_SILVER_AMOUNTS[planetLevel];
-  }
+  // public getKardashevRequireSilverAmount(planetLevel: number): number {
+  //   return this.contractConstants.KARDASHEV_REQUIRE_SILVER_AMOUNTS[planetLevel];
+  // }
 
-  public getBlueRequireSilverAmount(planetLevel: number): number {
-    return this.contractConstants.BLUE_PANET_REQUIRE_SILVER_AMOUNTS[
-      planetLevel
-    ];
-  }
+  // public getBlueRequireSilverAmount(planetLevel: number): number {
+  //   return this.contractConstants.BLUE_PANET_REQUIRE_SILVER_AMOUNTS[
+  //     planetLevel
+  //   ];
+  // }
 
-  public getDefaultSpaceJunkForPlanetLevel(level: number): number {
-    return this.contractConstants.PLANET_LEVEL_JUNK[level];
-  }
+  // public getDefaultSpaceJunkForPlanetLevel(level: number): number {
+  //   return this.contractConstants.PLANET_LEVEL_JUNK[level];
+  // }
 
   public getPerlinConfig(isBiome = false): PerlinConfig {
     const hashConfig = this.gameManager.getHashConfig();
@@ -1817,25 +1820,25 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getPaused$();
   }
 
-  getHalfPrice(): boolean {
-    return this.gameManager.getHalfPrice();
-  }
+  // getHalfPrice(): boolean {
+  //   return this.gameManager.getHalfPrice();
+  // }
 
-  getHalfPrice$(): Monomitter<boolean> {
-    return this.gameManager.getHalfPrice$();
-  }
+  // getHalfPrice$(): Monomitter<boolean> {
+  //   return this.gameManager.getHalfPrice$();
+  // }
 
-  public getSilverScoreValue(): number {
-    return this.contractConstants.SILVER_SCORE_VALUE;
-  }
+  // public getSilverScoreValue(): number {
+  //   return this.contractConstants.SILVER_SCORE_VALUE;
+  // }
 
-  public getArtifactPointValues() {
-    return this.contractConstants.ARTIFACT_POINT_VALUES;
-  }
+  // public getArtifactPointValues() {
+  //   return this.contractConstants.ARTIFACT_POINT_VALUES;
+  // }
 
-  public getCaptureZonePointValues() {
-    return this.contractConstants.CAPTURE_ZONE_PLANET_LEVEL_SCORE;
-  }
+  // public getCaptureZonePointValues() {
+  //   return this.contractConstants.CAPTURE_ZONE_PLANET_LEVEL_SCORE;
+  // }
 
   public getArtifactUpdated$() {
     return this.gameManager.getArtifactUpdated$();
