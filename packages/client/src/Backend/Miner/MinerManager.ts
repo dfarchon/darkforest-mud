@@ -9,7 +9,6 @@ import type {
 } from "../../_types/global/GlobalTypes";
 import { getChunkKey } from "./ChunkUtils";
 import type { MiningPattern } from "./MiningPatterns";
-import MinerWorker from "./miner.worker.ts?worker";
 
 export const enum MinerManagerEvent {
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -18,9 +17,9 @@ export const enum MinerManagerEvent {
 export type workerFactory = () => Worker;
 
 function defaultWorker() {
-  return new MinerWorker();
-
-  // return new Worker(new URL("./miner.worker.ts", import.meta.url));
+  return new Worker(new URL("./miner.worker.ts", import.meta.url), {
+    type: "module",
+  });
 }
 
 const range = (size: number) => [...new Array(size)].map((_, index) => index);
@@ -167,8 +166,11 @@ class MinerManager extends EventEmitter {
   }
 
   private initWorker(index: number): void {
+    console.log("TEST: init worker");
+    console.log("index: ", index);
     this.workers[index] = this.workerFactory();
     this.workers[index].onmessage = (e: MessageEvent) => {
+      console.log("TEST: on message");
       // worker explored a slice of a chunk
       const [exploredChunk, jobId] = JSON.parse(e.data) as [Chunk, number];
       const chunkKey = this.chunkLocationToKey(
@@ -184,6 +186,7 @@ class MinerManager extends EventEmitter {
         this.onDiscovered(this.exploringChunk[chunkKey], jobId);
       }
     };
+    console.log("TEST: end of init worker");
   }
 
   private async onDiscovered(

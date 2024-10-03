@@ -44,10 +44,10 @@ export class ViewportEntities {
   public getPlanetsAndChunks() {
     this.updateLocationsAndChunks();
 
-    for (const p of this.cachedPlanets.values()) {
-      p.planet.emojiBobAnimation?.update();
-      p.planet.emojiZoopAnimation?.update();
-    }
+    //for (const p of this.cachedPlanets.values()) {
+    // p.planet.emojiBobAnimation?.update();
+    // p.planet.emojiZoopAnimation?.update();
+    //  }
 
     return {
       chunks: this.cachedExploredChunks,
@@ -135,11 +135,11 @@ export class ViewportEntities {
         radii: radii.get(planet.planetLevel) as Radii,
       };
 
-      if (!planet.emojiBobAnimation) {
-        planet.emojiBobAnimation = sinusoidalAnimation(
-          planetLevelToAnimationSpeed(planet.planetLevel),
-        );
-      }
+      // if (!planet.emojiBobAnimation) {
+      //   planet.emojiBobAnimation = sinusoidalAnimation(
+      //     planetLevelToAnimationSpeed(planet.planetLevel),
+      //   );
+      // }
 
       this.cachedPlanets.set(planet.locationId, newPlanetInfo);
     });
@@ -148,7 +148,7 @@ export class ViewportEntities {
       this.cachedPlanets.delete(toRemove);
       const planet = this.cachedPlanets.get(toRemove);
       if (planet) {
-        planet.planet.emojiBobAnimation = undefined;
+        // planet.planet.emojiBobAnimation = undefined;
       }
     }
   }
