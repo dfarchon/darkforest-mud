@@ -78,7 +78,7 @@ class MinerManager extends EventEmitter {
   private miningPattern: MiningPattern;
   private workers: Worker[];
   private worldRadius: number;
-  private innerRadius: number;
+  // private innerRadius: number;
   private cores = 1;
   // chunks we're exploring
   private exploringChunk: { [chunkKey: string]: Chunk } = {};
@@ -211,8 +211,11 @@ class MinerManager extends EventEmitter {
   }
 
   private exploreNext(fromChunk: Rectangle, jobId: number) {
+    console.log("TEST explorerNext");
     this.nextValidExploreTarget(fromChunk, jobId).then(
       (nextChunk: Rectangle | undefined) => {
+        console.log("nextChunk");
+        console.log(nextChunk);
         if (nextChunk) {
           const nextChunkKey = this.chunkLocationToKey(nextChunk, jobId);
           const center = {
@@ -256,11 +259,17 @@ class MinerManager extends EventEmitter {
   }
 
   public startExplore(): void {
+    console.log("TEST start Explorer");
+    console.log(this.isExploring);
+
     // increments the current job ID
     if (!this.isExploring) {
       this.isExploring = true;
       this.currentJobId += 1;
       const jobId = this.currentJobId;
+      console.log("TEST start EXPLORE");
+      console.log(this.miningPattern.fromChunk);
+
       this.exploreNext(this.miningPattern.fromChunk, jobId);
     }
   }
@@ -294,13 +303,14 @@ class MinerManager extends EventEmitter {
     this.worldRadius = radius;
   }
 
-  public setInnerRadius(radius: number): void {
-    this.innerRadius = radius;
-  }
+  // public setInnerRadius(radius: number): void {
+  //   this.innerRadius = radius;
+  // }
   private async nextValidExploreTarget(
     chunkLocation: Rectangle,
     jobId: number,
   ): Promise<Rectangle | undefined> {
+    console.log("TEST nextValidExploreTarget");
     // returns the first valid chunk equal to or after `chunk` (in the explore order of mining pattern) that hasn't been explored
     // async because it may take indefinitely long to find the next target. this will block UI if done sync
     // we use this trick to promisify:
@@ -342,7 +352,7 @@ class MinerManager extends EventEmitter {
     // should be inbounds, and unexplored
     return (
       squareDist < this.worldRadius ** 2 &&
-      squareDist >= this.innerRadius ** 2 &&
+      // squareDist >= this.innerRadius ** 2 &&
       !this.minedChunksStore.hasMinedChunk(chunkLocation)
     );
   }
@@ -361,6 +371,9 @@ class MinerManager extends EventEmitter {
         useMockHash: this.useMockHash,
         ...this.hashConfig,
       };
+      console.log("TEST");
+      console.log(msg);
+
       this.workers[workerIndex].postMessage(JSON.stringify(msg));
     }
   }

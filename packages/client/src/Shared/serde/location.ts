@@ -93,5 +93,5 @@ export function locationIdToDecStr(locationId: LocationId): string {
 }
 
 export function locationIdToHexStr(locationId: LocationId): string {
-  return "0x" + bigInt(locationId, 16).toString(16);
+  return "0x" + locationId;
 }

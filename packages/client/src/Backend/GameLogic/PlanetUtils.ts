@@ -31,7 +31,7 @@ import {
   MIN_PLANET_LEVEL,
 } from "@df/constants";
 import { TxCollection } from "@df/network";
-import { artifactIdFromHexStr } from "@df/serde";
+import { artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 
 interface PlanetUtilsConfig {
   components: ClientComponents;
@@ -162,7 +162,7 @@ export class PlanetUtils {
     console.log("read planet");
     console.log(planetId);
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
-      id: planetId as `0x${string}`,
+      id: locationIdToHexStr(planetId),
     });
     const planetRec = getComponentValue(PlanetConstants, planetEntity);
 
@@ -460,10 +460,14 @@ export class PlanetUtils {
   ): [number, number] {
     const { PlanetInitialResource } = this.components;
     const key = encodeEntity(PlanetInitialResource.metadata.keySchema, {
-      spaceType: Number(spaceType) + 1,
+      spaceType: spaceType as number,
       planetType: planetType as number,
       level: planetLevel as number,
     });
+
+    console.log(spaceType);
+    console.log(planetType);
+    console.log(planetLevel);
 
     const planetInitialResource = getComponentValue(PlanetInitialResource, key);
 

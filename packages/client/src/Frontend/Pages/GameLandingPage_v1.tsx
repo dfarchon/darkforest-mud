@@ -361,6 +361,18 @@ export function GameLandingPage_v1() {
     console.log(playerMap);
   };
 
+  const testWorker = () => {
+    const worker = new Worker(new URL("./test.work.ts", import.meta.url), {
+      type: "module",
+    });
+
+    worker.postMessage(34);
+
+    worker.onmessage = (event) => {
+      console.log("Worker return data:", event.data);
+    };
+  };
+
   useEffect(() => {
     if (terminalHandle.current && topLevelContainer.current) {
       advanceState(terminalHandle);
@@ -420,6 +432,10 @@ export function GameLandingPage_v1() {
 
           <div>
             <button onClick={testContractsAPI}> Test Contracts API</button>
+          </div>
+
+          <div>
+            <button onClick={testWorker}> Test Worker</button>
           </div>
 
           <Terminal
