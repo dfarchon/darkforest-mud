@@ -24,6 +24,8 @@ import {
   // decodeUpgradeBranches,
   locationIdFromEthersBN,
   locationIdToDecStr,
+  locationIdFromHexStr,
+  locationIdToHexStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -272,6 +274,7 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public async setupEventListeners(): Promise<void> {
+    return;
     const { contract } = this;
 
     const filter = {
@@ -1027,8 +1030,10 @@ export class ContractsAPI extends EventEmitter {
     planetId: LocationId,
   ): RevealedCoords | undefined {
     const { RevealedPlanet } = this.components;
+    console.log("revlead coords by Id if exists");
+    console.log(locationIdToHexStr(planetId));
     const revealedPlanetId = encodeEntity(RevealedPlanet.metadata.keySchema, {
-      id: locationIdToDecStr(planetId) as Hex,
+      id: locationIdToHexStr(planetId),
     });
     const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
 
@@ -1066,7 +1071,8 @@ export class ContractsAPI extends EventEmitter {
     const nPlanetIds = planetIds.length;
 
     for (let i = 0; i < nPlanetIds; i++) {
-      const planetId = planetIds[i].toString() as LocationId;
+      const planetId = locationIdFromHexStr(planetIds[i].toString());
+
       const revealedCoords = this.getRevealedCoordsByIdIfExists(planetId);
       if (!revealedCoords) {
         continue;
@@ -1074,6 +1080,9 @@ export class ContractsAPI extends EventEmitter {
       result.push(revealedCoords);
       onProgressCoords && onProgressCoords((i + 1) / nPlanetIds);
     }
+
+    onProgressCoords && onProgressCoords(1);
+
     return result;
   }
 

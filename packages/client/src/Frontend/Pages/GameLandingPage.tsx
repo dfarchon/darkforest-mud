@@ -691,40 +691,40 @@ export function GameLandingPage() {
           return;
         }
 
-        const whitelist = await ethConnection.loadContract(
-          contractAddress,
-          loadDiamondContract,
-        );
-        const isWhitelisted = await whitelist.isWhitelisted(playerAddress);
-        // TODO(#2329): isWhitelisted should just check the contractOwner
-        const adminAddress = address(await whitelist.adminAddress());
+        // const whitelist = await ethConnection.loadContract(
+        //   contractAddress,
+        //   loadDiamondContract,
+        // );
+        // const isWhitelisted = await whitelist.isWhitelisted(playerAddress);
+        // // TODO(#2329): isWhitelisted should just check the contractOwner
+        // const adminAddress = address(await whitelist.adminAddress());
 
-        if (isWhitelisted === false && playerAddress !== adminAddress) {
-          terminal.current?.println("");
-          terminal.current?.println(
-            "Registered players can enter in advance. The Game will be open to everyone soon.",
-            TerminalTextStyle.Pink,
-          );
-        }
+        // if (isWhitelisted === false && playerAddress !== adminAddress) {
+        //   terminal.current?.println("");
+        //   terminal.current?.println(
+        //     "Registered players can enter in advance. The Game will be open to everyone soon.",
+        //     TerminalTextStyle.Pink,
+        //   );
+        // }
         terminal.current?.println("");
 
         terminal.current?.print("Checking if whitelisted... ");
 
         // TODO(#2329): isWhitelisted should just check the contractOwner
-        if (isWhitelisted || playerAddress === adminAddress) {
-          terminal.current?.println("Player whitelisted.");
-          terminal.current?.println("");
-          terminal.current?.println(`Welcome, player ${playerAddress}.`);
-          // TODO: Provide own env variable for this feature
-          if (!isProd) {
-            // in development, automatically get some ether from faucet
-            const balance = weiToEth(
-              await ethConnection?.loadBalance(playerAddress),
-            );
-            if (balance === 0) {
-              await requestDevFaucet(playerAddress);
-            }
+        // if (isWhitelisted || playerAddress === adminAddress) {
+        terminal.current?.println("Player whitelisted.");
+        terminal.current?.println("");
+        terminal.current?.println(`Welcome, player ${playerAddress}.`);
+        // TODO: Provide own env variable for this feature
+        if (!isProd) {
+          // in development, automatically get some ether from faucet
+          const balance = weiToEth(
+            await ethConnection?.loadBalance(playerAddress),
+          );
+          if (balance === 0) {
+            await requestDevFaucet(playerAddress);
           }
+          // }
           setStep(TerminalPromptStep.FETCHING_ETH_DATA);
         } else {
           setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);

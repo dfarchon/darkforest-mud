@@ -9,6 +9,7 @@ import type {
 } from "../../_types/global/GlobalTypes";
 import { getChunkKey } from "./ChunkUtils";
 import type { MiningPattern } from "./MiningPatterns";
+import MinerWorker from "./miner.worker.ts?worker";
 
 export const enum MinerManagerEvent {
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -17,7 +18,9 @@ export const enum MinerManagerEvent {
 export type workerFactory = () => Worker;
 
 function defaultWorker() {
-  return new Worker(new URL("./miner.worker.ts", import.meta.url));
+  return new MinerWorker();
+
+  // return new Worker(new URL("./miner.worker.ts", import.meta.url));
 }
 
 const range = (size: number) => [...new Array(size)].map((_, index) => index);

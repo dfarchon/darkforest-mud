@@ -158,6 +158,9 @@ export class PlanetUtils {
       ExploredPlanet,
       PlanetArtifact,
     } = this.components;
+
+    console.log("read planet");
+    console.log(planetId);
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
       id: planetId as `0x${string}`,
     });
@@ -340,7 +343,7 @@ export class PlanetUtils {
   }
 
   public _validateHash(locationId: LocationId): boolean {
-    const locationBI = bigInt(locationId, 16);
+    const locationBI = bigInt(locationId.slice(2), 16);
     if (locationBI.geq(LOCATION_ID_UB)) {
       return false;
       // throw new Error("not a valid location");

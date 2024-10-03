@@ -14,6 +14,7 @@ import type { BigNumber as EthersBN } from "ethers";
  * location ID.
  */
 export function locationIdFromHexStr(location: string) {
+  location = location.slice(2);
   const locationBI = bigInt(location, 16);
   if (locationBI.geq(LOCATION_ID_UB)) {
     throw new Error("not a valid location");
@@ -89,4 +90,8 @@ export function locationIdFromEthersBN(location: EthersBN): LocationId {
  */
 export function locationIdToDecStr(locationId: LocationId): string {
   return bigInt(locationId, 16).toString(10);
+}
+
+export function locationIdToHexStr(locationId: LocationId): string {
+  return "0x" + bigInt(locationId, 16).toString(16);
 }

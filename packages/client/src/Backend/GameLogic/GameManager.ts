@@ -883,7 +883,7 @@ export class GameManager extends EventEmitter {
     await persistentChunkStore.saveRevealedCoords(
       initialState.allRevealedCoords,
     );
-    await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
+    // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
     const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
 
@@ -896,20 +896,20 @@ export class GameManager extends EventEmitter {
         continue;
       }
 
-      planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
+      // planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
 
-      for (const heldArtifact of initialState.heldArtifacts[i]) {
-        knownArtifacts.set(heldArtifact.id, heldArtifact);
-      }
+      // for (const heldArtifact of initialState.heldArtifacts[i]) {
+      //   knownArtifacts.set(heldArtifact.id, heldArtifact);
+      // }
     }
 
-    for (const myArtifact of initialState.myArtifacts) {
-      knownArtifacts.set(myArtifact.id, myArtifact);
-    }
+    // for (const myArtifact of initialState.myArtifacts) {
+    //   knownArtifacts.set(myArtifact.id, myArtifact);
+    // }
 
-    for (const artifact of initialState.artifactsOnVoyages) {
-      knownArtifacts.set(artifact.id, artifact);
-    }
+    // for (const artifact of initialState.artifactsOnVoyages) {
+    //   knownArtifacts.set(artifact.id, artifact);
+    // }
 
     // figure out what's my home planet
     let homeLocation: WorldLocation | undefined = undefined;
@@ -984,6 +984,7 @@ export class GameManager extends EventEmitter {
     // important that this happens AFTER we load the game state from the blockchain. Otherwise our
     // 'loading game state' contract calls will be competing with events from the blockchain that
     // are happening now, which makes no sense.
+
     contractsAPI.setupEventListeners();
 
     // get twitter handles
@@ -994,7 +995,7 @@ export class GameManager extends EventEmitter {
     // set up listeners: whenever ContractsAPI reports some game state update, do some logic
     gameManager.contractsAPI
       .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
-        await gameManager.hardRefreshArtifact(artifactId);
+        // await gameManager.hardRefreshArtifact(artifactId);
         gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
       })
       .on(

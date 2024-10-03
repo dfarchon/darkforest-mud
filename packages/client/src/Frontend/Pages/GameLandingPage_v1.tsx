@@ -357,6 +357,8 @@ export function GameLandingPage_v1() {
       contractAddress,
       components,
     });
+    const playerMap = contractsAPI.getPlayers();
+    console.log(playerMap);
   };
 
   useEffect(() => {
