@@ -1905,8 +1905,6 @@ export class GameManager extends EventEmitter {
   // }
 
   private initMiningManager(homeCoords: WorldCoords, cores?: number): void {
-    console.log("TEST initMiningManager");
-
     if (this.minerManager) {
       return;
     }
@@ -3934,8 +3932,6 @@ export class GameManager extends EventEmitter {
    * initialized the player on the contract.
    */
   async addAccount(coords: WorldCoords): Promise<boolean> {
-    console.log("TEST addAccount in GameManager");
-
     const loc: WorldLocation = this.locationFromCoords(coords);
     await this.persistentChunkStore.addHomeLocation(loc);
     this.initMiningManager(coords);
@@ -4026,8 +4022,6 @@ export class GameManager extends EventEmitter {
         this.hashConfig,
         this.useMockHash,
       );
-      console.log("TEST homePlanetFinder");
-      console.log(homePlanetFinder);
 
       this.terminal.current?.println(``);
       this.terminal.current?.println(`Chunked explorer: start!`);
@@ -4158,9 +4152,6 @@ export class GameManager extends EventEmitter {
           }
         },
       );
-      console.log("TEST ");
-      console.log("homePlanetFinder");
-      console.log("startExplore");
       homePlanetFinder.startExplore();
     });
   }

@@ -159,10 +159,8 @@ export class PlanetUtils {
       PlanetArtifact,
     } = this.components;
 
-    console.log("read planet");
-    console.log(planetId);
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
-      id: locationIdToHexStr(planetId),
+      id: locationIdToHexStr(planetId) as `0x${string}`,
     });
     const planetRec = getComponentValue(PlanetConstants, planetEntity);
 
@@ -200,9 +198,13 @@ export class PlanetUtils {
       }
     } else {
       universeZone = this._initZone(distSquare);
+
       spaceType = this._initSpaceType(universeZone, perlin);
+
       planetLevel = this._initLevel(planetId, spaceType, universeZone);
+
       planetType = this._initPlanetType(planetId, spaceType, planetLevel);
+
       [population, silver] = this._initPopulationAndSilver(
         spaceType,
         planetType,
@@ -241,7 +243,13 @@ export class PlanetUtils {
         throw new Error("planet props not found");
       }
     } else {
-      const planetMetadata = getComponentValue(PlanetMetadata, planetEntity);
+      const planetMedataKey = encodeEntity(PlanetMetadata.metadata.keySchema, {
+        spaceType: spaceType,
+        planetType: planetType,
+        level: planetLevel,
+      });
+
+      const planetMetadata = getComponentValue(PlanetMetadata, planetMedataKey);
       if (planetMetadata) {
         range = Number(planetMetadata.range);
         speed = Number(planetMetadata.speed);
@@ -387,7 +395,7 @@ export class PlanetUtils {
     if (universeZone + 1 === bordersLength) {
       return SpaceType.NEBULA;
     }
-    for (let i = 0; i < length; i++) {
+    for (let i = 1; i <= length; i++) {
       if (perlin < thresholds[i]) {
         return i as SpaceType;
       }
@@ -447,10 +455,10 @@ export class PlanetUtils {
     for (let i = 0; i < length; i++) {
       cumulativeThreshold += thresholds[i];
       if (levelBigInt < bigInt(cumulativeThreshold)) {
-        return i as PlanetType;
+        return (i + 1) as PlanetType;
       }
     }
-    return 0 as PlanetType;
+    return 1 as PlanetType;
   }
 
   public _initPopulationAndSilver(
@@ -464,10 +472,6 @@ export class PlanetUtils {
       planetType: planetType as number,
       level: planetLevel as number,
     });
-
-    console.log(spaceType);
-    console.log(planetType);
-    console.log(planetLevel);
 
     const planetInitialResource = getComponentValue(PlanetInitialResource, key);
 

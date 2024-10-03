@@ -26,18 +26,6 @@ const exploreChunk = (
   perlinMirrorX: boolean,
   perlinMirrorY: boolean,
 ) => {
-  console.log("TEST");
-  console.log("workerIndex", workerIndex);
-  console.log("totalWorkers:", totalWorkers);
-  console.log("planetRarity:", planetRarity);
-  console.log("jobId", jobId);
-  console.log("useFakeHash", useFakeHash);
-  console.log("planetHashKey", planetHashKey);
-  console.log("biomebaseKey", biomebaseKey);
-  console.log("perlinLengthScale", perlinLengthScale);
-  console.log("perlinMirrorX", perlinMirrorX);
-  console.log("perlinMirrorY", perlinMirrorY);
-
   const planetHashFn = mimcHash(planetHashKey);
   const spaceTypePerlinOpts: PerlinConfig = {
     key: spaceTypeKey,
@@ -101,8 +89,6 @@ const exploreChunk = (
 };
 
 ctx.addEventListener("message", (e: MessageEvent) => {
-  console.log("message", e);
-
   const exploreMessage: MinerWorkerMessage = JSON.parse(
     e.data,
   ) as MinerWorkerMessage;
