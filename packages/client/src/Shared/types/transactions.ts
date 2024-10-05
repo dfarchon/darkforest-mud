@@ -89,7 +89,7 @@ export type UnconfirmedInit = TxIntent & {
  * @hidden
  */
 export type UnconfirmedMove = TxIntent & {
-  methodName: "move";
+  methodName: "df__classic_move";
   from: LocationId;
   to: LocationId;
   forces: number;

@@ -419,6 +419,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinLengthScale),
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
+      bigInt(x2 ** 2 + y2 ** 2),
     ];
     return fakeProof(
       publicSignals.map((x) => modPBigIntNative(x).toString(10)),

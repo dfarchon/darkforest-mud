@@ -5144,12 +5144,13 @@ export class GameManager extends EventEmitter {
         if (artifactMoved) {
           args[6] = artifactIdToDecStr(artifactMoved);
         }
-
+        console.log("move args");
+        console.log(args);
         return args;
       };
 
       const txIntent: UnconfirmedMove = {
-        methodName: "move",
+        methodName: "df__classic_move",
         contract: this.contractsAPI.contract,
         args: getArgs(),
         from: oldLocation.hash,
