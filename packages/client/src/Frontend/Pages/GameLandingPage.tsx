@@ -1747,7 +1747,7 @@ export function GameLandingPage() {
       <div ref={topLevelContainer}></div>
       <div>
         {isMiniMapOn && (
-          <div style={{ position: "absolute", right: "100px", top: "100px" }}>
+          <div style={{ position: "fixed", right: "100px", top: "100px" }}>
             <MiniMap ref={miniMapRef} />
           </div>
         )}

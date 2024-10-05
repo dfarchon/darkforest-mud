@@ -31,7 +31,7 @@ export function ReadMore({
           fontSize: "80%",
           display: "block",
           textAlign: "right",
-          marginTop: collapsed ? toggleButtonMargin ?? "-0.6em" : undefined,
+          marginTop: collapsed ? (toggleButtonMargin ?? "-0.6em") : undefined,
         }}
         onClick={toggle}
       >

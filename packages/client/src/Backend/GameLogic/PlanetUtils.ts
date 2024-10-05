@@ -7,7 +7,7 @@ import {
 } from "@df/constants";
 import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
-import { artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 import type {
   EthAddress,
   LocatablePlanet,
@@ -183,8 +183,10 @@ export class PlanetUtils {
       planetType = planetRec.planetType as PlanetType;
       planetLevel = planetRec.level as PlanetLevel;
       universeZone = this._initZone(distSquare);
-      owner = getComponentValueStrict(PlanetOwner, planetEntity)
-        ?.value as EthAddress;
+      owner = address(
+        getComponentValueStrict(PlanetOwner, planetEntity)?.value,
+      );
+
       const planetData = getComponentValue(Planet, planetEntity);
       if (planetData) {
         population = Number(planetData.population);

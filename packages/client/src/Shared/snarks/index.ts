@@ -81,7 +81,7 @@ export type InitSnarkContractCallArgs = [
     [string, string],
   ],
   [string, string], // proofC
-  [string, string, string, string, string, string, string, string, string], // locationId (BigInt), perlin, radius, planetHashKey, spaceTypeKey, perlin lengthscale, perlin xmirror, perlin ymirror
+  [string, string, string, string, string, string, string, string, string], // locationId (BigInt), perlin, radius, planetHashKey, spaceTypeKey, perlin lengthscale, perlin xmirror, perlin ymirror,
 ];
 
 /**

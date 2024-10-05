@@ -9,7 +9,9 @@ import {
 } from "@df/network";
 import {
   address,
+  addressToHex,
   artifactIdFromEthersBN,
+  hexToEthAddress,
   // artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
@@ -727,6 +729,26 @@ export class ContractsAPI extends EventEmitter {
     return this.contractAddress;
   }
 
+  public hasJoinedGame(playerId: EthAddress): boolean {
+    const { SpawnPlanet } = this.components;
+
+    const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
+      player: addressToHex(playerId),
+    });
+
+    const result = getComponentValue(SpawnPlanet, spawnPlanetKey);
+
+    console.log(addressToHex(playerId));
+    console.log(result);
+    console.log(SpawnPlanet);
+
+    console.log("show spawnplanet");
+    for (const entity of SpawnPlanet.entities()) {
+      console.log(entity);
+    }
+    return result !== undefined;
+  }
+
   public getConstants(): ContractConstants {
     const {
       NamespaceOwner,
@@ -929,23 +951,24 @@ export class ContractsAPI extends EventEmitter {
   public getPlayerById(playerId: EthAddress): Player | undefined {
     const { Player, SpawnPlanet, LastReveal } = this.components;
     const playerKey = encodeEntity(Player.metadata.keySchema, {
-      owner: playerId as Hex,
+      owner: addressToHex(playerId),
     });
     const rawPlayer = getComponentValue(Player, playerKey);
     const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
-      player: playerId as Hex,
+      player: addressToHex(playerId),
     });
     const rawSpawnPlanet = getComponentValue(SpawnPlanet, spawnPlanetKey);
     const lastRevealKey = encodeEntity(LastReveal.metadata.keySchema, {
-      player: playerId as Hex,
+      player: addressToHex(playerId),
     });
     const lastReveal = getComponentValue(LastReveal, lastRevealKey);
     if (!rawPlayer) {
       return undefined;
     }
+
     const player: Player = {
       address: playerId,
-      burner: rawPlayer.burner as EthAddress,
+      burner: address(rawPlayer.burner),
       index: rawPlayer.index,
       createdAt: Number(rawPlayer.createdAt),
       name: rawPlayer.name,
@@ -967,12 +990,17 @@ export class ContractsAPI extends EventEmitter {
     const playerMap: Map<EthAddress, Player> = new Map();
 
     for (let i = 0; i < nPlayers; i++) {
-      const playerId = "0x" + playerIds[i].slice(-40);
-      const player = this.getPlayerById(playerId as EthAddress);
+      console.log(i, playerIds[i]);
+      const playerId = hexToEthAddress(playerIds[i].toString());
+      console.log(i, playerId);
+
+      const player = this.getPlayerById(playerId);
       if (!player) {
         continue;
       }
-      playerMap.set(player.address, player);
+      // playerMap.set(player.address, player);
+      playerMap.set(player.burner, player);
+
       onProgress && onProgress((i + 1) / nPlayers);
     }
     return playerMap;

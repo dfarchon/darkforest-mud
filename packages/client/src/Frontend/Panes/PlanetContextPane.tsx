@@ -353,30 +353,18 @@ export function PlanetContextPane({
     doSend();
   }, [uiManager, doSend, planet]);
 
-  useOnUp(
-    TOGGLE_SEND,
-    () => {
-      toggleSendingForces();
-    },
-    [toggleSendingForces],
-  );
+  useOnUp(TOGGLE_SEND, () => {
+    toggleSendingForces();
+  }, [toggleSendingForces]);
 
-  useOnUp(
-    TOGGLE_ABANDON,
-    () => {
-      toggleAbandoning();
-    },
-    [toggleAbandoning],
-  );
+  useOnUp(TOGGLE_ABANDON, () => {
+    toggleAbandoning();
+  }, [toggleAbandoning]);
 
-  useOnUp(
-    EXIT_PANE,
-    () => {
-      // If we clear the selectedPlanetId, the below hook will cancel and cleanup the sending
-      uiManager.setSelectedPlanet(undefined);
-    },
-    [uiManager],
-  );
+  useOnUp(EXIT_PANE, () => {
+    // If we clear the selectedPlanetId, the below hook will cancel and cleanup the sending
+    uiManager.setSelectedPlanet(undefined);
+  }, [uiManager]);
 
   // If the locationId changes, cancel any sending
   useEmitterSubscribe(

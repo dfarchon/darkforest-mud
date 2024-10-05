@@ -93,9 +93,12 @@ contract PlayerSystem is System {
     }
 
     address player = _msgSender();
-    if (Player.getIndex(player) == 0) {
-      revert Errors.NotRegistered();
-    }
+
+    // PUNK
+    // if (Player.getIndex(player) == 0) {
+    //   revert Errors.NotRegistered();
+    // }
+
     if (SpawnPlanet.get(player) != 0) {
       revert Errors.AlreadySpawned();
     }
@@ -133,5 +136,9 @@ contract PlayerSystem is System {
     SpawnInput memory input;
     input.genFrom(_input);
     return spawnPlayer(proof, input);
+  }
+
+  function getMsgSender() public view returns (address) {
+    return _msgSender();
   }
 }

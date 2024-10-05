@@ -30,7 +30,7 @@ export const TOKEN_NAME = "ETH";
 export const BLOCKCHAIN_NAME = "Redstone";
 export const HOST_TEAM_NAME = "DF Archon";
 
-export const GAS_ADJUST_DELTA = "0.00000001"; // '0.000000001'; //'1'; //'0.00000005';
+export const GAS_ADJUST_DELTA = "10"; // '0.000000001'; //'1'; //'0.00000005';
 
 export const FIXED_DIGIT_NUMBER = 9;
 

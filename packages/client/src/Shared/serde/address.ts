@@ -1,5 +1,6 @@
 import type { EthAddress } from "@df/types";
 import bigInt from "big-integer";
+import type { Hex } from "viem";
 
 /**
  * Converts a string to an `EthAddress`: a 0x-prefixed all lowercase hex string
@@ -14,6 +15,7 @@ export function address(str: string): EthAddress {
   if (ret.slice(0, 2) === "0x") {
     ret = ret.slice(2);
   }
+
   for (const c of ret) {
     if ("0123456789abcdef".indexOf(c) === -1) {
       throw new Error("not a valid address");
@@ -23,6 +25,15 @@ export function address(str: string): EthAddress {
     throw new Error("not a valid address");
   }
   return `0x${ret}` as EthAddress;
+}
+
+export function hexToEthAddress(hex: Hex): EthAddress {
+  const res = "0x" + hex.toLocaleLowerCase().slice(-40);
+  return res as EthAddress;
+}
+
+export function addressToHex(addr: EthAddress): Hex {
+  return addr as Hex;
 }
 
 export function hashToInt(hash: string): number {

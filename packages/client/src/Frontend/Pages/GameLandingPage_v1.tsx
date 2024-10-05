@@ -93,6 +93,7 @@ export function GameLandingPage_v1() {
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
+    systemCalls: { getMsgSender },
     network: { walletClient: burnerWalletClient },
     components: components,
   } = useMUD();
@@ -373,6 +374,15 @@ export function GameLandingPage_v1() {
     };
   };
 
+  const testPlayer = async () => {
+    const { Player } = components;
+    console.log(Player);
+
+    const msgSender = await getMsgSender();
+    console.log("msg sender");
+    console.log(msgSender);
+  };
+
   useEffect(() => {
     if (terminalHandle.current && topLevelContainer.current) {
       advanceState(terminalHandle);
@@ -438,6 +448,9 @@ export function GameLandingPage_v1() {
             <button onClick={testWorker}> Test Worker</button>
           </div>
 
+          <div>
+            <button onClick={testPlayer}> Test Player</button>
+          </div>
           <Terminal
             ref={terminalHandle}
             promptCharacter={">"}

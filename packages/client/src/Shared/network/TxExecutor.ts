@@ -1,6 +1,6 @@
 import { FIXED_DIGIT_NUMBER } from "@df/constants";
+import type { AutoGasSetting } from "@df/types";
 import type {
-  AutoGasSetting,
   DiagnosticUpdater,
   NetworkEvent,
   PersistedTransaction,
@@ -16,8 +16,10 @@ import timeout from "p-timeout";
 
 import type { EthConnection } from "./EthConnection";
 import { waitForTransaction } from "./Network";
-import type { ConcurrentQueueConfiguration } from "./ThrottledConcurrentQueue";
-import { ThrottledConcurrentQueue } from "./ThrottledConcurrentQueue";
+import {
+  type ConcurrentQueueConfiguration,
+  ThrottledConcurrentQueue,
+} from "./ThrottledConcurrentQueue";
 /**
  * Returns either a string that represents the gas price we should use by default for transactions,
  * or a string that represents the fact that we should be using one of the automatic gas prices.
@@ -377,13 +379,15 @@ export class TxExecutor {
       time_called = Date.now();
 
       const args = await tx.intent.args;
+
       const submitted = await timeout<providers.TransactionResponse>(
         tx.intent.contract[tx.intent.methodName](...args, {
           ...requestWithDefaults,
           nonce,
         }),
         TxExecutor.TX_SUBMIT_TIMEOUT,
-        `tx request ${tx.id} failed to submit: timed out}`,
+        `tx request failed to submit: timed out}`,
+        // `tx request ${tx.id} failed to submit: timed out}`,
       );
 
       releaseMutex();
@@ -456,14 +460,16 @@ export class TxExecutor {
       logEvent.wait_error = time_errored - time_exec_called;
 
       try {
-        if ("body" in error) {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        if ((error as any).body) {
           logEvent.parsed_error = String.fromCharCode.apply(
             null,
-            Array.isArray(error.body) ? error.body : [],
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+            (error as any).body || [],
           );
         }
       } catch (e) {
-        /* empty */
+        // EMPTY
       }
     }
 

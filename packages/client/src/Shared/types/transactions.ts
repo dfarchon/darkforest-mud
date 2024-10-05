@@ -80,7 +80,7 @@ export type TxIntent = {
  * @hidden
  */
 export type UnconfirmedInit = TxIntent & {
-  methodName: "initializePlayer";
+  methodName: "df__initializePlayer";
   locationId: LocationId;
   location: WorldLocation;
 };

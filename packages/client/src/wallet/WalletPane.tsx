@@ -10,7 +10,7 @@ import {
   zeroAddress,
 } from "@wallet/utils";
 import { useEffect, useState } from "react";
-import { formatEther, type Hex, parseEther } from "viem";
+import { formatEther, type Hex, parseEther, parseUnits } from "viem";
 import { useWalletClient } from "wagmi";
 
 export const WalletPane = ({ onClose }: { onClose: () => void }) => {
@@ -85,7 +85,7 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
     if (!burnerWalletClient || !walletClient) {
       return;
     }
-    const value = burnerBalance; // Draining all funds
+    const value = burnerBalance;
     try {
       await burnerWalletClient.sendTransaction({
         to: walletClient.account?.address,
