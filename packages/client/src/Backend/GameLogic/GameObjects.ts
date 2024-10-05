@@ -73,9 +73,10 @@ import type {
   WorldCoords,
   WorldLocation,
 } from "@df/types";
-import { ArtifactType, PlanetType, SpaceType } from "@df/types";
 import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
+import { ArtifactType, PlanetType, SpaceType } from "@df/types";
+import type { ClientComponents } from "@mud/createClientComponents";
 import autoBind from "auto-bind";
 import bigInt from "big-integer";
 import { ethers } from "ethers";
@@ -93,7 +94,6 @@ import {
 import type { PlanetDiff } from "./ArrivalUtils";
 import { arrive, updatePlanetToTime } from "./ArrivalUtils";
 import { LayeredMap } from "./LayeredMap";
-import type { ClientComponents } from "@mud/createClientComponents";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
 

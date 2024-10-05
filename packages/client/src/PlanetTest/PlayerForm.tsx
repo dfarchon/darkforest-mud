@@ -2,7 +2,7 @@ import { entityToAddress } from "@frontend/Pages/GamePage";
 import { useMUD } from "@mud/MUDContext";
 import React, { useState } from "react";
 import { encodeFunctionData, parseEther } from "viem";
-import { useWalletClient, useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 
 const PlayerForm = () => {
   const {

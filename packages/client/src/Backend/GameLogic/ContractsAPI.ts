@@ -23,8 +23,8 @@ import {
   // decodeRevealedCoords,
   // decodeUpgradeBranches,
   locationIdFromEthersBN,
-  locationIdToDecStr,
   locationIdFromHexStr,
+  locationIdToDecStr,
   locationIdToHexStr,
 } from "@df/serde";
 import type {
@@ -46,15 +46,26 @@ import type {
   TransactionId,
   TxIntent,
   Upgrade,
-  UpgradeLevels,
   UpgradeBranches,
+  UpgradeLevels,
   VoyageId,
 } from "@df/types";
 import { Setting } from "@df/types";
+import { hexToResource } from "@latticexyz/common";
+import {
+  type Entity,
+  getComponentValue,
+  getComponentValueStrict,
+  Has,
+  runQuery,
+} from "@latticexyz/recs";
+import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractFunction, Event, providers } from "ethers";
 import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import { flatten } from "lodash-es";
+import type { Hex } from "viem";
 
 import type {
   ContractConstants,
@@ -68,19 +79,8 @@ import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
-import type { ClientComponents } from "@mud/createClientComponents";
-import {
-  type Entity,
-  Has,
-  getComponentValue,
-  getComponentValueStrict,
-  runQuery,
-} from "@latticexyz/recs";
-import { singletonEntity, encodeEntity } from "@latticexyz/store-sync/recs";
-import type { Hex } from "viem";
-import { hexToResource } from "@latticexyz/common";
-import { PlanetUtils } from "./PlanetUtils";
 import { MoveUtils } from "./MoveUtils";
+import { PlanetUtils } from "./PlanetUtils";
 
 interface ContractsApiConfig {
   connection: EthConnection;
@@ -1019,7 +1019,9 @@ export class ContractsAPI extends EventEmitter {
     const result = [];
     for (let i = 0; i < nPlanets; i++) {
       // NOTE: may need serde function here
-      const locationId = planets[i].toString() as LocationId;
+      const locationId = locationIdFromHexStr(
+        planets[i].toString(),
+      ) as LocationId;
       result.push(locationId);
       onProgress && onProgress((i + 1) / nPlanets);
     }

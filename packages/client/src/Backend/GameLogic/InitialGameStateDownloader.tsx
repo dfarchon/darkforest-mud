@@ -146,6 +146,9 @@ export class InitialGameStateDownloader {
       planetIdsLoadingBar,
     );
 
+    console.log("loadedTochedPlanetIds");
+    console.log(loadedTouchedPlanetIds);
+
     const loadedRevealedCoords = contractsAPI.getRevealedPlanetsCoords(
       // storedRevealedCoords.length,
       // revealedPlanetsLoadingBar,
@@ -180,6 +183,11 @@ export class InitialGameStateDownloader {
     // );
     const allRevealedCoords = loadedRevealedCoords;
 
+    console.log("All Revealed Coords");
+    for (let i = 0; i < allRevealedCoords.length; i++) {
+      console.log(i, allRevealedCoords[i]);
+    }
+
     // const allClaimedCoords = storedClaimedCoords.concat(
     //   await loadedClaimedCoords,
     // );
@@ -192,6 +200,7 @@ export class InitialGameStateDownloader {
     // );
 
     const revealedCoordsMap = new Map<LocationId, RevealedCoords>();
+
     for (const revealedCoords of allRevealedCoords) {
       revealedCoordsMap.set(revealedCoords.hash, revealedCoords);
     }

@@ -1,6 +1,16 @@
-import { SpaceType, Biome } from "@df/types";
+import { LOCATION_ID_UB } from "@df/constants";
+import {
+  CONTRACT_PRECISION,
+  EMPTY_ADDRESS,
+  MAX_PLANET_LEVEL,
+  MIN_PLANET_LEVEL,
+} from "@df/constants";
+import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
+import { TxCollection } from "@df/network";
+import { artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 import type {
   EthAddress,
+  LocatablePlanet,
   LocationId,
   Planet,
   PlanetBonus,
@@ -8,30 +18,21 @@ import type {
   Upgrade,
   UpgradeState,
   WorldLocation,
-  LocatablePlanet,
 } from "@df/types";
+import { Biome, SpaceType } from "@df/types";
 import { PlanetLevel } from "@df/types";
-import type { ClientComponents } from "@mud/createClientComponents";
-import bigInt, { type BigInteger } from "big-integer";
-import { LOCATION_ID_UB } from "@df/constants";
-import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
-import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
-import { singletonEntity, encodeEntity } from "@latticexyz/store-sync/recs";
 import {
   type Entity,
-  Has,
   getComponentValue,
   getComponentValueStrict,
+  Has,
   runQuery,
 } from "@latticexyz/recs";
-import {
-  CONTRACT_PRECISION,
-  EMPTY_ADDRESS,
-  MAX_PLANET_LEVEL,
-  MIN_PLANET_LEVEL,
-} from "@df/constants";
-import { TxCollection } from "@df/network";
-import { artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
+import bigInt, { type BigInteger } from "big-integer";
+
+import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 
 interface PlanetUtilsConfig {
   components: ClientComponents;
@@ -50,7 +51,7 @@ export class PlanetUtils {
   public getPlanetById(planetId: LocationId): Planet | undefined {
     const { PlanetConstants } = this.components;
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
-      id: planetId as `0x${string}`,
+      id: locationIdToHexStr(planetId) as `0x${string}`,
     });
     const planetRec = getComponentValue(PlanetConstants, planetEntity);
 
@@ -120,7 +121,7 @@ export class PlanetUtils {
       return Biome.CORRUPTED;
     }
 
-    let biome = 3 * spaceType;
+    let biome = 3 * (spaceType - 1);
     if (biomebase < this.contractConstants.BIOME_THRESHOLD_1) {
       biome += 1;
     } else if (biomebase < this.contractConstants.BIOME_THRESHOLD_2) {

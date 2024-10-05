@@ -6,10 +6,11 @@ import { BigNumber } from "ethers";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import styled, { css, keyframes } from "styled-components";
+
 import { ONE_DAY } from "../../Backend/Utils/Utils";
 import Button from "../Components/Button";
-import { Checkbox } from "../Components/Input";
 import type { DarkForestCheckbox } from "../Components/Input";
+import { Checkbox } from "../Components/Input";
 import { Row } from "../Components/Row";
 import dfstyles from "../Styles/dfstyles";
 import { getSetting, setBooleanSetting } from "../Utils/SettingsHooks";

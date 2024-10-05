@@ -468,17 +468,19 @@ export class GameUIManager extends EventEmitter {
     );
   }
 
-  // public buyArtifact(
-  //   locationId: LocationId,
-  //   rarity: ArtifactRarity,
-  //   biome: Biome,
-  //   type: ArtifactType,
-  // ) {
-  //   this.terminal.current?.printShellLn(
-  //     `df.buyArtifact('${locationId}','${rarity}','${biome}','${type}')`,
-  //   );
-  //   this.gameManager.buyArtifact(locationId, rarity, biome, type);
-  // }
+  public buyArtifact(
+    locationId: LocationId,
+    rarity: ArtifactRarity,
+    biome: Biome,
+    type: ArtifactType,
+  ) {
+    //TODO: fix here
+    return;
+    this.terminal.current?.printShellLn(
+      `df.buyArtifact('${locationId}','${rarity}','${biome}','${type}')`,
+    );
+    this.gameManager.buyArtifact(locationId, rarity, biome, type);
+  }
 
   public withdrawSilver(locationId: LocationId, amount: number) {
     const dontShowWarningStorageKey = `${this.getAccount()?.toLowerCase()}-withdrawnWarningAcked`;
@@ -517,33 +519,47 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.revealLocation(locationId);
   }
 
-  // public claimLocation(locationId: LocationId) {
-  //   this.gameManager.claimLocation(locationId);
-  // }
+  public claimLocation(locationId: LocationId) {
+    //TODO: fix here
+    return;
+    this.gameManager.claimLocation(locationId);
+  }
 
-  // public burnLocation(locationId: LocationId) {
-  //   this.gameManager.burnLocation(locationId);
-  // }
+  public burnLocation(locationId: LocationId) {
+    //TODO: fix here
+    return;
+    // this.gameManager.burnLocation(locationId);
+  }
 
-  // public checkPlanetCanPink(planetId: LocationId): boolean {
-  //   return this.gameManager.checkPlanetCanPink(planetId);
-  // }
+  public checkPlanetCanPink(planetId: LocationId): boolean {
+    return false;
+    //TODO: fix here
+    return this.gameManager.checkPlanetCanPink(planetId);
+  }
 
-  // public pinkLocation(locationId: LocationId) {
-  //   this.gameManager.pinkLocation(locationId);
-  // }
+  public pinkLocation(locationId: LocationId) {
+    // TODO: fix here
+    return;
+    // this.gameManager.pinkLocation(locationId);
+  }
 
-  // public kardashev(locationId: LocationId) {
-  //   this.gameManager.kardashev(locationId);
-  // }
+  public kardashev(locationId: LocationId) {
+    //TODO: fix here
+    return;
+    this.gameManager.kardashev(locationId);
+  }
 
-  // public checkPlanetCanBlue(planetId: LocationId): boolean {
-  //   return this.gameManager.checkPlanetCanBlue(planetId);
-  // }
+  public checkPlanetCanBlue(planetId: LocationId): boolean {
+    //TODO: fix here
+    return false;
+    // return this.gameManager.checkPlanetCanBlue(planetId);
+  }
 
-  // public blueLocation(locationId: LocationId) {
-  //   this.gameManager.blueLocation(locationId);
-  // }
+  public blueLocation(locationId: LocationId) {
+    //TODO: fix here
+    return;
+    // this.gameManager.blueLocation(locationId);
+  }
 
   public getNextBroadcastAvailableTimestamp() {
     return this.gameManager.getNextBroadcastAvailableTimestamp();
@@ -836,23 +852,23 @@ export class GameUIManager extends EventEmitter {
 
   public setAbandoning(abandoning: boolean): void {
     return;
-    if (!this.gameManager.getContractConstants().SPACE_JUNK_ENABLED) {
-      return;
-    }
+    // if (!this.gameManager.getContractConstants().SPACE_JUNK_ENABLED) {
+    //   return;
+    // }
 
-    const planet = this.getSelectedPlanet();
-    if (planet?.isHomePlanet) {
-      return;
-    }
-    if (this.isSendingShip(planet?.locationId)) {
-      return;
-    }
+    // const planet = this.getSelectedPlanet();
+    // if (planet?.isHomePlanet) {
+    //   return;
+    // }
+    // if (this.isSendingShip(planet?.locationId)) {
+    //   return;
+    // }
 
-    // An abandon is always a send
-    this.isSending = abandoning;
-    this.abandoning = abandoning;
-    this.isSending$.publish(abandoning);
-    this.isAbandoning$.publish(abandoning);
+    // // An abandon is always a send
+    // this.isSending = abandoning;
+    // this.abandoning = abandoning;
+    // this.isSending$.publish(abandoning);
+    // this.isAbandoning$.publish(abandoning);
   }
 
   public setArtifactSending(planetId: LocationId, artifact?: Artifact) {
@@ -1480,25 +1496,30 @@ export class GameUIManager extends EventEmitter {
     return this.viewportEntities.getPlanetsAndChunks();
   }
 
-  // public getCaptureZones() {
-  //   return this.gameManager.getCaptureZones();
-  // }
+  public getCaptureZones() {
+    return [];
+    // return this.gameManager.getCaptureZones();
+  }
 
-  // public getPinkZones() {
-  //   return this.gameManager.getPinkZones();
-  // }
+  public getPinkZones() {
+    return [];
+    // return this.gameManager.getPinkZones();
+  }
 
-  // public getMyPinkZones() {
-  //   return this.gameManager.getMyPinkZones();
-  // }
+  public getMyPinkZones() {
+    return [];
+    // return this.gameManager.getMyPinkZones();
+  }
 
-  // public getBlueZones() {
-  //   return this.gameManager.getBlueZones();
-  // }
+  public getBlueZones() {
+    return [];
+    // return this.gameManager.getBlueZones();
+  }
 
-  // public getMyBlueZones() {
-  //   return this.gameManager.getMyBlueZones();
-  // }
+  public getMyBlueZones() {
+    return [];
+    // return this.gameManager.getMyBlueZones();
+  }
 
   // public getCaptureZoneGenerator() {
   //   return this.gameManager.getCaptureZoneGenerator();
@@ -1674,9 +1695,10 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getContractConstants();
   }
 
-  // public getSpaceJunkEnabled(): boolean {
-  //   return this.contractConstants.SPACE_JUNK_ENABLED;
-  // }
+  public getSpaceJunkEnabled(): boolean {
+    return false;
+    return this.contractConstants.SPACE_JUNK_ENABLED;
+  }
 
   // public get captureZonesEnabled(): boolean {
   //   return this.contractConstants.CAPTURE_ZONES_ENABLED;

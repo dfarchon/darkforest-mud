@@ -102,7 +102,7 @@ export class PluginManager {
     this.pluginLibrary = await this.gameManager.loadPlugins();
 
     this.onNewEmbeddedPlugins(
-      getEmbeddedPlugins(isAdmin),
+      await getEmbeddedPlugins(isAdmin),
       overwriteEmbeddedPlugins,
     );
 

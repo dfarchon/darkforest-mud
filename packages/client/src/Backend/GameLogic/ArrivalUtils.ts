@@ -295,8 +295,8 @@ export const arrive = (
  * @todo ArrivalUtils has become a dumping ground for functions that should just live inside of a
  * `Planet` class.
  */
-// export function getEmojiMessage(
-//   planet: Planet | undefined,
-// ): PlanetMessage<EmojiFlagBody> | undefined {
-//   return planet?.messages?.find(isEmojiFlagMessage);
-// }
+export function getEmojiMessage(
+  planet: Planet | undefined,
+): PlanetMessage<EmojiFlagBody> | undefined {
+  return planet?.messages?.find(isEmojiFlagMessage);
+}

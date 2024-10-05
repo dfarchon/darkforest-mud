@@ -123,6 +123,7 @@ import {
   Setting,
   SpaceType,
 } from "@df/types";
+import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
 import delay from "delay";
@@ -197,7 +198,6 @@ import type { ContractsAPI } from "./ContractsAPI";
 import { makeContractsAPI } from "./ContractsAPI";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
-import type { ClientComponents } from "@mud/createClientComponents";
 
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",

@@ -1,6 +1,6 @@
-import type { ClientComponents } from "@mud/createClientComponents";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { getComponentValue } from "@latticexyz/recs";
+import { singletonEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
 
 interface MoveUtilsConfig {
   components: ClientComponents;

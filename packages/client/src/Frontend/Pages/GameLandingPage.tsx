@@ -64,7 +64,7 @@ import type { Incompatibility } from "../Utils/BrowserChecks";
 import { unsupportedFeatures } from "../Utils/BrowserChecks";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
-// import { GameWindowLayout } from "../Views/GameWindowLayout";
+import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
 
@@ -1705,10 +1705,10 @@ export function GameLandingPage() {
           gameManager && (
             <TopLevelDivProvider value={topLevelContainer.current}>
               <UIManagerProvider value={gameUIManagerRef.current}>
-                {/* <GameWindowLayout
+                <GameWindowLayout
                   terminalVisible={terminalVisible}
                   setTerminalVisible={setTerminalVisible}
-                /> */}
+                />
               </UIManagerProvider>
             </TopLevelDivProvider>
           )}
