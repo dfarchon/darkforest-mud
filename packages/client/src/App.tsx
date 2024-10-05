@@ -21,6 +21,7 @@ import { HelloPage } from "./Frontend/Pages/HelloPage";
 import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
 import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
 import { SandboxPage } from "./Frontend/Pages/SandboxPage";
+import { TxConfirmPopup } from "./Frontend/Pages/TxConfirmPopup";
 import { WelcomePage } from "./Frontend/Pages/WelcomePage";
 import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
@@ -64,6 +65,10 @@ export const App = () => {
             <Route path="/test" element={<PlanetTestPage />} />
             <Route path="/" element={<HelloPage />} />
             <Route path="*" element={<NotFoundPage />} />
+            <Route
+              path="/wallet/:contract/:addr/:actionId/:balance/:method"
+              element={<TxConfirmPopup />}
+            />
           </Routes>
         </Router>
       </Theme>

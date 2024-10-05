@@ -9,16 +9,18 @@ export type SpaceType = Abstract<number, "SpaceType">;
  * Enumeration of the types of space in the game. NEBULA = 0, DEAD_SPACE = 3
  */
 export const SpaceType = {
-  NEBULA: 0 as SpaceType,
-  SPACE: 1 as SpaceType,
-  DEEP_SPACE: 2 as SpaceType,
-  DEAD_SPACE: 3 as SpaceType,
+  UNKNOWN: 0 as SpaceType,
+  NEBULA: 1 as SpaceType,
+  SPACE: 2 as SpaceType,
+  DEEP_SPACE: 3 as SpaceType,
+  DEAD_SPACE: 4 as SpaceType,
 } as const;
 
 /**
  * Mapping from SpaceType to pretty-printed names.
  */
 export const SpaceTypeNames = {
+  [SpaceType.UNKNOWN]: "Unknown",
   [SpaceType.NEBULA]: "Nebula",
   [SpaceType.SPACE]: "Space",
   [SpaceType.DEEP_SPACE]: "Deep Space",

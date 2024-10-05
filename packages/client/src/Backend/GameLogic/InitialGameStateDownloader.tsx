@@ -30,24 +30,24 @@ export interface InitialGameState {
   worldRadius: number;
   allTouchedPlanetIds: LocationId[];
   allRevealedCoords: RevealedCoords[];
-  allClaimedCoords: ClaimedCoords[];
-  allBurnedCoords: BurnedCoords[];
-  allKardashevCoords: KardashevCoords[];
+  // allClaimedCoords: ClaimedCoords[];
+  // allBurnedCoords: BurnedCoords[];
+  // allKardashevCoords: KardashevCoords[];
   pendingMoves: QueuedArrival[];
   touchedAndLocatedPlanets: Map<LocationId, Planet>;
-  artifactsOnVoyages: Artifact[];
-  myArtifacts: Artifact[];
-  heldArtifacts: Artifact[][];
+  // artifactsOnVoyages: Artifact[];
+  // myArtifacts: Artifact[];
+  // heldArtifacts: Artifact[][];
   loadedPlanets: LocationId[];
   revealedCoordsMap: Map<LocationId, RevealedCoords>;
-  claimedCoordsMap: Map<LocationId, ClaimedCoords>;
-  burnedCoordsMap: Map<LocationId, BurnedCoords>;
-  kardashevCoordsMap: Map<LocationId, KardashevCoords>;
+  // claimedCoordsMap: Map<LocationId, ClaimedCoords>;
+  // burnedCoordsMap: Map<LocationId, BurnedCoords>;
+  // kardashevCoordsMap: Map<LocationId, KardashevCoords>;
   planetVoyageIdMap: Map<LocationId, VoyageId[]>;
   arrivals: Map<VoyageId, QueuedArrival>;
-  twitters: AddressTwitterMap;
+  // twitters: AddressTwitterMap;
   paused: boolean;
-  halfPrice: boolean;
+  // halfPrice: boolean;
 }
 
 export class InitialGameStateDownloader {
@@ -77,17 +77,17 @@ export class InitialGameStateDownloader {
      * In development we use the same contract address every time we deploy,
      * so storage is polluted with the IDs of old universes.
      */
-    const storedTouchedPlanetIds = isDev
-      ? []
-      : await persistentChunkStore.getSavedTouchedPlanetIds();
-    const storedRevealedCoords = isDev
-      ? []
-      : await persistentChunkStore.getSavedRevealedCoords();
-    const storedClaimedCoords =
-      await persistentChunkStore.getSavedClaimedCoords();
-    const storedBurnedCoords =
-      await persistentChunkStore.getSavedBurnedCoords();
-    const storedKardashevCoords: KardashevCoords[] = [];
+    // const storedTouchedPlanetIds = isDev
+    //   ? []
+    //   : await persistentChunkStore.getSavedTouchedPlanetIds();
+    // const storedRevealedCoords = isDev
+    //   ? []
+    //   : await persistentChunkStore.getSavedRevealedCoords();
+    // const storedClaimedCoords =
+    //   await persistentChunkStore.getSavedClaimedCoords();
+    // const storedBurnedCoords =
+    //   await persistentChunkStore.getSavedBurnedCoords();
+    // const storedKardashevCoords: KardashevCoords[] = [];
     //TODO: fix this
     // await persistentChunkStore.getSavedKardashevCoords();
 
@@ -96,37 +96,37 @@ export class InitialGameStateDownloader {
 
     const planetIdsLoadingBar = this.makeProgressListener("Planet IDs");
     const playersLoadingBar = this.makeProgressListener("Players");
-    const revealedPlanetsLoadingBar = this.makeProgressListener(
-      "Revealed Planet IDs",
-    );
+    // const revealedPlanetsLoadingBar = this.makeProgressListener(
+    //   "Revealed Planet IDs",
+    // );
     const revealedPlanetsCoordsLoadingBar = this.makeProgressListener(
       "Revealed Planet Coordinates",
     );
-    const claimedPlanetsLoadingBar =
-      this.makeProgressListener("Claimed Planet IDs");
-    const claimedPlanetsCoordsLoadingBar = this.makeProgressListener(
-      "Claimed Planet Coordinates",
-    );
-    const burnedPlanetsLoadingBar =
-      this.makeProgressListener("Burned Planet IDs");
-    const burnedPlanetsCoordsLoadingBar = this.makeProgressListener(
-      "Burned Planet Coordinates",
-    );
-    const kardashevPlanetsLoadingBar = this.makeProgressListener(
-      "Kardashev Planet IDs",
-    );
-    const kardashevPlanetsCoordsLoadingBar = this.makeProgressListener(
-      "Kardashev Planet Coordinates",
-    );
+    // const claimedPlanetsLoadingBar =
+    //   this.makeProgressListener("Claimed Planet IDs");
+    // const claimedPlanetsCoordsLoadingBar = this.makeProgressListener(
+    //   "Claimed Planet Coordinates",
+    // );
+    // const burnedPlanetsLoadingBar =
+    //   this.makeProgressListener("Burned Planet IDs");
+    // const burnedPlanetsCoordsLoadingBar = this.makeProgressListener(
+    //   "Burned Planet Coordinates",
+    // );
+    // const kardashevPlanetsLoadingBar = this.makeProgressListener(
+    //   "Kardashev Planet IDs",
+    // );
+    // const kardashevPlanetsCoordsLoadingBar = this.makeProgressListener(
+    //   "Kardashev Planet Coordinates",
+    // );
 
     const pendingMovesLoadingBar = this.makeProgressListener("Pending Moves");
     const planetsLoadingBar = this.makeProgressListener("Planets");
-    const artifactsOnPlanetsLoadingBar = this.makeProgressListener(
-      "Artifacts On Planets",
-    );
-    const artifactsInFlightLoadingBar =
-      this.makeProgressListener("Artifacts On Moves");
-    const yourArtifactsLoadingBar = this.makeProgressListener("Your Artifacts");
+    // const artifactsOnPlanetsLoadingBar = this.makeProgressListener(
+    //   "Artifacts On Planets",
+    // );
+    // const artifactsInFlightLoadingBar =
+    //   this.makeProgressListener("Artifacts On Moves");
+    // const yourArtifactsLoadingBar = this.makeProgressListener("Your Artifacts");
 
     const contractConstants = contractsAPI.getConstants();
     const worldRadius = contractsAPI.getWorldRadius();
@@ -142,75 +142,92 @@ export class InitialGameStateDownloader {
     );
 
     const loadedTouchedPlanetIds = contractsAPI.getTouchedPlanetIds(
-      storedTouchedPlanetIds.length,
+      // storedTouchedPlanetIds.length,
       planetIdsLoadingBar,
     );
 
+    console.log("loadedTochedPlanetIds");
+    console.log(loadedTouchedPlanetIds);
+
     const loadedRevealedCoords = contractsAPI.getRevealedPlanetsCoords(
-      storedRevealedCoords.length,
-      revealedPlanetsLoadingBar,
+      // storedRevealedCoords.length,
+      // revealedPlanetsLoadingBar,
       revealedPlanetsCoordsLoadingBar,
     );
-    const loadedClaimedCoords = contractsAPI.getClaimedPlanetsCoords(
-      0,
-      claimedPlanetsLoadingBar,
-      claimedPlanetsCoordsLoadingBar,
-    );
+    // const loadedClaimedCoords = contractsAPI.getClaimedPlanetsCoords(
+    //   0,
+    //   claimedPlanetsLoadingBar,
+    //   claimedPlanetsCoordsLoadingBar,
+    // );
 
-    const loadedBurnedCoords = contractsAPI.getBurnedPlanetsCoords(
-      0,
-      burnedPlanetsLoadingBar,
-      burnedPlanetsCoordsLoadingBar,
-    );
+    // const loadedBurnedCoords = contractsAPI.getBurnedPlanetsCoords(
+    //   0,
+    //   burnedPlanetsLoadingBar,
+    //   burnedPlanetsCoordsLoadingBar,
+    // );
 
-    const loadedKardashevCoords = contractsAPI.getKardashevPlanetsCoords(
-      0,
-      kardashevPlanetsLoadingBar,
-      kardashevPlanetsCoordsLoadingBar,
-    );
-    const allTouchedPlanetIds = storedTouchedPlanetIds.concat(
-      await loadedTouchedPlanetIds,
-    );
-    const allRevealedCoords = storedRevealedCoords.concat(
-      await loadedRevealedCoords,
-    );
-    const allClaimedCoords = storedClaimedCoords.concat(
-      await loadedClaimedCoords,
-    );
-    const allBurnedCoords = storedBurnedCoords.concat(await loadedBurnedCoords);
-    const allKardashevCoords = storedKardashevCoords.concat(
-      await loadedKardashevCoords,
-    );
+    // const loadedKardashevCoords = contractsAPI.getKardashevPlanetsCoords(
+    //   0,
+    //   kardashevPlanetsLoadingBar,
+    //   kardashevPlanetsCoordsLoadingBar,
+    // );
+
+    // const allTouchedPlanetIds = storedTouchedPlanetIds.concat(
+    //   await loadedTouchedPlanetIds,
+    // );
+
+    const allTouchedPlanetIds = loadedTouchedPlanetIds;
+
+    // const allRevealedCoords = storedRevealedCoords.concat(
+    //   await loadedRevealedCoords,
+    // );
+    const allRevealedCoords = loadedRevealedCoords;
+
+    console.log("All Revealed Coords");
+    for (let i = 0; i < allRevealedCoords.length; i++) {
+      console.log(i, allRevealedCoords[i]);
+    }
+
+    // const allClaimedCoords = storedClaimedCoords.concat(
+    //   await loadedClaimedCoords,
+    // );
+
+    // const allClaimedCoords = loadedClaimedCoords;
+
+    // const allBurnedCoords = storedBurnedCoords.concat(await loadedBurnedCoords);
+    // const allKardashevCoords = storedKardashevCoords.concat(
+    //   await loadedKardashevCoords,
+    // );
 
     const revealedCoordsMap = new Map<LocationId, RevealedCoords>();
+
     for (const revealedCoords of allRevealedCoords) {
       revealedCoordsMap.set(revealedCoords.hash, revealedCoords);
     }
 
-    const claimedCoordsMap = new Map<LocationId, ClaimedCoords>();
-    for (const claimedCoords of allClaimedCoords) {
-      claimedCoordsMap.set(claimedCoords.hash, claimedCoords);
-    }
+    // const claimedCoordsMap = new Map<LocationId, ClaimedCoords>();
+    // for (const claimedCoords of allClaimedCoords) {
+    //   claimedCoordsMap.set(claimedCoords.hash, claimedCoords);
+    // }
 
-    const burnedCoordsMap = new Map<LocationId, BurnedCoords>();
-    for (const burnedCoords of allBurnedCoords) {
-      burnedCoordsMap.set(burnedCoords.hash, burnedCoords);
-    }
+    // const burnedCoordsMap = new Map<LocationId, BurnedCoords>();
+    // for (const burnedCoords of allBurnedCoords) {
+    //   burnedCoordsMap.set(burnedCoords.hash, burnedCoords);
+    // }
 
-    const kardashevCoordsMap = new Map<LocationId, KardashevCoords>();
-    for (const kardashevCoords of allKardashevCoords) {
-      kardashevCoordsMap.set(kardashevCoords.hash, kardashevCoords);
-    }
+    // const kardashevCoordsMap = new Map<LocationId, KardashevCoords>();
+    // for (const kardashevCoords of allKardashevCoords) {
+    //   kardashevCoordsMap.set(kardashevCoords.hash, kardashevCoords);
+    // }
+
     let planetsToLoad = allTouchedPlanetIds.filter(
-      (id) =>
-        minedPlanetIds.has(id) ||
-        revealedCoordsMap.has(id) ||
-        claimedCoordsMap.has(id) ||
-        burnedCoordsMap.has(id) ||
-        kardashevCoordsMap.has(id),
+      (id) => minedPlanetIds.has(id) || revealedCoordsMap.has(id), //||
+      // claimedCoordsMap.has(id) ||
+      // burnedCoordsMap.has(id) ||
+      // kardashevCoordsMap.has(id),
     );
 
-    const pendingMoves = await contractsAPI.getAllArrivals(
+    const pendingMoves = contractsAPI.getAllArrivals(
       planetsToLoad,
       pendingMovesLoadingBar,
     );
@@ -222,7 +239,7 @@ export class InitialGameStateDownloader {
     }
     planetsToLoad = [...new Set(planetsToLoad)];
 
-    const touchedAndLocatedPlanets = await contractsAPI.bulkGetPlanets(
+    const touchedAndLocatedPlanets = contractsAPI.bulkGetPlanets(
       planetsToLoad,
       planetsLoadingBar,
     );
@@ -249,48 +266,48 @@ export class InitialGameStateDownloader {
       }
     }
 
-    const artifactsOnVoyages = await contractsAPI.bulkGetArtifacts(
-      artifactIdsOnVoyages,
-      artifactsInFlightLoadingBar,
-    );
+    // const artifactsOnVoyages = await contractsAPI.bulkGetArtifacts(
+    //   artifactIdsOnVoyages,
+    //   artifactsInFlightLoadingBar,
+    // );
 
-    const heldArtifacts = contractsAPI.bulkGetArtifactsOnPlanets(
-      planetsToLoad,
-      artifactsOnPlanetsLoadingBar,
-    );
-    const myArtifacts = contractsAPI.getPlayerArtifacts(
-      contractsAPI.getAddress(),
-      yourArtifactsLoadingBar,
-    );
+    // const heldArtifacts = contractsAPI.bulkGetArtifactsOnPlanets(
+    //   planetsToLoad,
+    //   artifactsOnPlanetsLoadingBar,
+    // );
+    // const myArtifacts = contractsAPI.getPlayerArtifacts(
+    //   contractsAPI.getAddress(),
+    //   yourArtifactsLoadingBar,
+    // );
 
-    const twitters = await tryGetAllTwitters();
+    // const twitters = await tryGetAllTwitters();
     const paused = contractsAPI.getIsPaused();
-    const halfPrice = contractsAPI.getIsHalfPrice();
+    // const halfPrice = contractsAPI.getIsHalfPrice();
 
     const initialState: InitialGameState = {
-      contractConstants: await contractConstants,
-      players: await players,
+      contractConstants: contractConstants,
+      players: players,
       worldRadius: await worldRadius,
       allTouchedPlanetIds,
       allRevealedCoords,
-      allClaimedCoords,
-      allBurnedCoords,
-      allKardashevCoords,
+      // allClaimedCoords,
+      // allBurnedCoords,
+      // allKardashevCoords,
       pendingMoves,
       touchedAndLocatedPlanets,
-      artifactsOnVoyages,
-      myArtifacts: await myArtifacts,
-      heldArtifacts: await heldArtifacts,
+      // artifactsOnVoyages,
+      // myArtifacts: await myArtifacts,
+      // heldArtifacts: await heldArtifacts,
       loadedPlanets: planetsToLoad,
       revealedCoordsMap,
-      claimedCoordsMap,
-      burnedCoordsMap,
-      kardashevCoordsMap,
+      // claimedCoordsMap,
+      // burnedCoordsMap,
+      // kardashevCoordsMap,
       planetVoyageIdMap,
       arrivals,
-      twitters,
-      paused: await paused,
-      halfPrice: await halfPrice,
+      // twitters,
+      paused: paused,
+      // halfPrice: await halfPrice,
     };
 
     return initialState;

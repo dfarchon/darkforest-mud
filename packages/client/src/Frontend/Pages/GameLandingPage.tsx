@@ -64,7 +64,7 @@ import type { Incompatibility } from "../Utils/BrowserChecks";
 import { unsupportedFeatures } from "../Utils/BrowserChecks";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
-// import { GameWindowLayout } from "../Views/GameWindowLayout";
+import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
 
@@ -104,8 +104,10 @@ export function GameLandingPage() {
   const { data: walletClient } = useWalletClient();
   const {
     network: { walletClient: burnerWalletClient },
-    components: { SyncProgress },
+    components: components, //{ SyncProgress },
   } = useMUD();
+
+  const { SyncProgress } = components;
 
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     message: "Connecting",
@@ -124,7 +126,7 @@ export function GameLandingPage() {
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
   const terminalHandle = useRef<TerminalHandle>(null);
-  const gameUIManagerRef = useRef<GameUIManager>(null);
+  const gameUIManagerRef = useRef<GameUIManager | null>(null);
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const miniMapRef = useRef<MiniMapHandle>();
 
@@ -689,40 +691,40 @@ export function GameLandingPage() {
           return;
         }
 
-        const whitelist = await ethConnection.loadContract(
-          contractAddress,
-          loadDiamondContract,
-        );
-        const isWhitelisted = await whitelist.isWhitelisted(playerAddress);
-        // TODO(#2329): isWhitelisted should just check the contractOwner
-        const adminAddress = address(await whitelist.adminAddress());
+        // const whitelist = await ethConnection.loadContract(
+        //   contractAddress,
+        //   loadDiamondContract,
+        // );
+        // const isWhitelisted = await whitelist.isWhitelisted(playerAddress);
+        // // TODO(#2329): isWhitelisted should just check the contractOwner
+        // const adminAddress = address(await whitelist.adminAddress());
 
-        if (isWhitelisted === false && playerAddress !== adminAddress) {
-          terminal.current?.println("");
-          terminal.current?.println(
-            "Registered players can enter in advance. The Game will be open to everyone soon.",
-            TerminalTextStyle.Pink,
-          );
-        }
+        // if (isWhitelisted === false && playerAddress !== adminAddress) {
+        //   terminal.current?.println("");
+        //   terminal.current?.println(
+        //     "Registered players can enter in advance. The Game will be open to everyone soon.",
+        //     TerminalTextStyle.Pink,
+        //   );
+        // }
         terminal.current?.println("");
 
         terminal.current?.print("Checking if whitelisted... ");
 
         // TODO(#2329): isWhitelisted should just check the contractOwner
-        if (isWhitelisted || playerAddress === adminAddress) {
-          terminal.current?.println("Player whitelisted.");
-          terminal.current?.println("");
-          terminal.current?.println(`Welcome, player ${playerAddress}.`);
-          // TODO: Provide own env variable for this feature
-          if (!isProd) {
-            // in development, automatically get some ether from faucet
-            const balance = weiToEth(
-              await ethConnection?.loadBalance(playerAddress),
-            );
-            if (balance === 0) {
-              await requestDevFaucet(playerAddress);
-            }
+        // if (isWhitelisted || playerAddress === adminAddress) {
+        terminal.current?.println("Player whitelisted.");
+        terminal.current?.println("");
+        terminal.current?.println(`Welcome, player ${playerAddress}.`);
+        // TODO: Provide own env variable for this feature
+        if (!isProd) {
+          // in development, automatically get some ether from faucet
+          const balance = weiToEth(
+            await ethConnection?.loadBalance(playerAddress),
+          );
+          if (balance === 0) {
+            await requestDevFaucet(playerAddress);
           }
+          // }
           setStep(TerminalPromptStep.FETCHING_ETH_DATA);
         } else {
           setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);
@@ -831,6 +833,7 @@ export function GameLandingPage() {
         const contractsAPI = await makeContractsAPI({
           connection: ethConnection,
           contractAddress,
+          components,
         });
 
         const keyBigInt = bigIntFromKey(key);
@@ -1008,6 +1011,7 @@ export function GameLandingPage() {
           connection: ethConnection,
           terminal,
           contractAddress,
+          components,
           spectate,
         });
       } catch (e) {
@@ -1701,10 +1705,10 @@ export function GameLandingPage() {
           gameManager && (
             <TopLevelDivProvider value={topLevelContainer.current}>
               <UIManagerProvider value={gameUIManagerRef.current}>
-                {/* <GameWindowLayout
+                <GameWindowLayout
                   terminalVisible={terminalVisible}
                   setTerminalVisible={setTerminalVisible}
-                /> */}
+                />
               </UIManagerProvider>
             </TopLevelDivProvider>
           )}

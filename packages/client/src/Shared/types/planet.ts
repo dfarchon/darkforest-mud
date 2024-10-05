@@ -53,17 +53,19 @@ export type PlanetType = Abstract<number, "PlanetType">;
  * Enumeration of the planet types. (PLANET = 0, SILVER_BANK = 4)
  */
 export const PlanetType = {
-  PLANET: 0 as PlanetType,
-  SILVER_MINE: 1 as PlanetType,
-  RUINS: 2 as PlanetType,
-  TRADING_POST: 3 as PlanetType,
-  SILVER_BANK: 4 as PlanetType,
+  UNKNOWN: 0 as PlanetType,
+  PLANET: 1 as PlanetType,
+  SILVER_MINE: 2 as PlanetType,
+  RUINS: 3 as PlanetType,
+  TRADING_POST: 4 as PlanetType,
+  SILVER_BANK: 5 as PlanetType,
 } as const;
 
 /**
  * Mapping from PlanetType to pretty-printed names.
  */
 export const PlanetTypeNames = {
+  [PlanetType.UNKNOWN]: "UNKNOWN",
   [PlanetType.PLANET]: "Planet",
   [PlanetType.SILVER_MINE]: "Asteroid Field",
   [PlanetType.RUINS]: "Foundry",

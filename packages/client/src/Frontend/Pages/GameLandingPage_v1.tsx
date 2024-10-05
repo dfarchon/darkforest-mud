@@ -8,6 +8,8 @@ import {
   PLAYER_GUIDE,
   // TOKEN_NAME,
 } from "@df/constants";
+import type { EthConnection } from "@df/network";
+import { address } from "@df/serde";
 import {
   type BrowserCompatibleState,
   BrowserIssues,
@@ -28,8 +30,16 @@ import {
   unsupportedFeatures,
 } from "@frontend/Utils/BrowserChecks";
 import UIEmitter, { UIEmitterEvent } from "@frontend/Utils/UIEmitter";
+import { hexToResource } from "@latticexyz/common";
 // import { GameWindowLayout } from '../Views/GameWindowLayout';
 import { useComponentValue } from "@latticexyz/react";
+import {
+  type Entity,
+  getComponentValue,
+  getComponentValueStrict,
+  Has,
+  runQuery,
+} from "@latticexyz/recs";
 import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import WalletButton from "@wallet/WalletButton";
@@ -38,24 +48,14 @@ import { useLocation, useParams } from "react-router-dom";
 import { zeroAddress } from "viem";
 import { useWalletClient } from "wagmi";
 
-import { MythicLabelText } from "../Components/Labels/MythicLabel";
-import { TerminalTextStyle } from "../Utils/TerminalTypes";
-import { Terminal, type TerminalHandle } from "../Views/Terminal";
+import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
 import {
   getEthConnection,
   loadDiamondContract,
 } from "../../Backend/Network/Blockchain";
-import type { EthConnection } from "@df/network";
-import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
-import { address } from "@df/serde";
-import { hexToResource } from "@latticexyz/common";
-import {
-  type Entity,
-  Has,
-  getComponentValue,
-  getComponentValueStrict,
-  runQuery,
-} from "@latticexyz/recs";
+import { MythicLabelText } from "../Components/Labels/MythicLabel";
+import { TerminalTextStyle } from "../Utils/TerminalTypes";
+import { Terminal, type TerminalHandle } from "../Views/Terminal";
 
 const enum TerminalPromptStep {
   NONE,
@@ -351,6 +351,26 @@ export function GameLandingPage_v1() {
       throw new Error("not logged in");
     }
     showNamespace();
+
+    const contractsAPI = await makeContractsAPI({
+      connection: ethConnection,
+      contractAddress,
+      components,
+    });
+    const playerMap = contractsAPI.getPlayers();
+    console.log(playerMap);
+  };
+
+  const testWorker = () => {
+    const worker = new Worker(new URL("./test.work.ts", import.meta.url), {
+      type: "module",
+    });
+
+    worker.postMessage(34);
+
+    worker.onmessage = (event) => {
+      console.log("Worker return data:", event.data);
+    };
   };
 
   useEffect(() => {
@@ -412,6 +432,10 @@ export function GameLandingPage_v1() {
 
           <div>
             <button onClick={testContractsAPI}> Test Contracts API</button>
+          </div>
+
+          <div>
+            <button onClick={testWorker}> Test Worker</button>
           </div>
 
           <Terminal

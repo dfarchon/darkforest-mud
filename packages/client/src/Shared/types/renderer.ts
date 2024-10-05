@@ -145,7 +145,7 @@ export interface PlanetCosmeticInfo {
 
   seed: number;
 
-  hatType: HatType;
+  // hatType: HatType;
 
   spacetime1: RGBVec;
   spacetime2: RGBVec;

@@ -3,7 +3,7 @@ import { EventEmitter } from "events";
 
 import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { setBooleanSetting } from "../../Frontend/Utils/SettingsHooks";
-import type GameUIManager from "./GameUIManager";
+import type { GameUIManager } from "./GameUIManager";
 
 export const enum TutorialManagerEvent {
   StateChanged = "StateChanged",

@@ -17,7 +17,9 @@ export const enum MinerManagerEvent {
 export type workerFactory = () => Worker;
 
 function defaultWorker() {
-  return new Worker(new URL("./miner.worker.ts", import.meta.url));
+  return new Worker(new URL("./miner.worker.ts", import.meta.url), {
+    type: "module",
+  });
 }
 
 const range = (size: number) => [...new Array(size)].map((_, index) => index);
@@ -76,7 +78,7 @@ class MinerManager extends EventEmitter {
   private miningPattern: MiningPattern;
   private workers: Worker[];
   private worldRadius: number;
-  private innerRadius: number;
+  // private innerRadius: number;
   private cores = 1;
   // chunks we're exploring
   private exploringChunk: { [chunkKey: string]: Chunk } = {};
@@ -255,6 +257,7 @@ class MinerManager extends EventEmitter {
       this.isExploring = true;
       this.currentJobId += 1;
       const jobId = this.currentJobId;
+
       this.exploreNext(this.miningPattern.fromChunk, jobId);
     }
   }
@@ -288,9 +291,9 @@ class MinerManager extends EventEmitter {
     this.worldRadius = radius;
   }
 
-  public setInnerRadius(radius: number): void {
-    this.innerRadius = radius;
-  }
+  // public setInnerRadius(radius: number): void {
+  //   this.innerRadius = radius;
+  // }
   private async nextValidExploreTarget(
     chunkLocation: Rectangle,
     jobId: number,
@@ -336,7 +339,7 @@ class MinerManager extends EventEmitter {
     // should be inbounds, and unexplored
     return (
       squareDist < this.worldRadius ** 2 &&
-      squareDist >= this.innerRadius ** 2 &&
+      // squareDist >= this.innerRadius ** 2 &&
       !this.minedChunksStore.hasMinedChunk(chunkLocation)
     );
   }
@@ -355,6 +358,7 @@ class MinerManager extends EventEmitter {
         useMockHash: this.useMockHash,
         ...this.hashConfig,
       };
+
       this.workers[workerIndex].postMessage(JSON.stringify(msg));
     }
   }

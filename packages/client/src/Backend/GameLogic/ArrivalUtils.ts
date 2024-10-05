@@ -271,22 +271,22 @@ export const arrive = (
     toPlanet.heldArtifactIds.push(arrival.artifactId);
   }
 
-  if (arrivingArtifact) {
-    if (arrivingArtifact.artifactType === ArtifactType.ShipMothership) {
-      if (toPlanet.energyGroDoublers === 0) {
-        toPlanet.energyGrowth *= 2;
-      }
-      toPlanet.energyGroDoublers++;
-    } else if (arrivingArtifact.artifactType === ArtifactType.ShipWhale) {
-      if (toPlanet.silverGroDoublers === 0) {
-        toPlanet.silverGrowth *= 2;
-      }
-      toPlanet.silverGroDoublers++;
-    } else if (arrivingArtifact.artifactType === ArtifactType.ShipTitan) {
-      toPlanet.pausers++;
-    }
-    arrivingArtifact.onPlanetId = toPlanet.locationId;
-  }
+  // if (arrivingArtifact) {
+  //   if (arrivingArtifact.artifactType === ArtifactType.ShipMothership) {
+  //     if (toPlanet.energyGroDoublers === 0) {
+  //       toPlanet.energyGrowth *= 2;
+  //     }
+  //     toPlanet.energyGroDoublers++;
+  //   } else if (arrivingArtifact.artifactType === ArtifactType.ShipWhale) {
+  //     if (toPlanet.silverGroDoublers === 0) {
+  //       toPlanet.silverGrowth *= 2;
+  //     }
+  //     toPlanet.silverGroDoublers++;
+  //   } else if (arrivingArtifact.artifactType === ArtifactType.ShipTitan) {
+  //     toPlanet.pausers++;
+  //   }
+  //   arrivingArtifact.onPlanetId = toPlanet.locationId;
+  // }
 
   return { arrival, current: toPlanet, previous: prevPlanet };
 };
@@ -295,8 +295,8 @@ export const arrive = (
  * @todo ArrivalUtils has become a dumping ground for functions that should just live inside of a
  * `Planet` class.
  */
-// export function getEmojiMessage(
-//   planet: Planet | undefined,
-// ): PlanetMessage<EmojiFlagBody> | undefined {
-//   return planet?.messages?.find(isEmojiFlagMessage);
-// }
+export function getEmojiMessage(
+  planet: Planet | undefined,
+): PlanetMessage<EmojiFlagBody> | undefined {
+  return planet?.messages?.find(isEmojiFlagMessage);
+}

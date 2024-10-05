@@ -9,7 +9,7 @@ import {
 } from "@df/network";
 import {
   address,
-  // artifactIdFromEthersBN,
+  artifactIdFromEthersBN,
   // artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
@@ -23,7 +23,9 @@ import {
   // decodeRevealedCoords,
   // decodeUpgradeBranches,
   locationIdFromEthersBN,
+  locationIdFromHexStr,
   locationIdToDecStr,
+  locationIdToHexStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -44,15 +46,26 @@ import type {
   TransactionId,
   TxIntent,
   Upgrade,
-  UpgradeLevels,
   UpgradeBranches,
+  UpgradeLevels,
   VoyageId,
 } from "@df/types";
 import { Setting } from "@df/types";
+import { hexToResource } from "@latticexyz/common";
+import {
+  type Entity,
+  getComponentValue,
+  getComponentValueStrict,
+  Has,
+  runQuery,
+} from "@latticexyz/recs";
+import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractFunction, Event, providers } from "ethers";
 import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import { flatten } from "lodash-es";
+import type { Hex } from "viem";
 
 import type {
   ContractConstants,
@@ -66,19 +79,8 @@ import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
-import type { ClientComponents } from "@mud/createClientComponents";
-import {
-  type Entity,
-  Has,
-  getComponentValue,
-  getComponentValueStrict,
-  runQuery,
-} from "@latticexyz/recs";
-import { singletonEntity, encodeEntity } from "@latticexyz/store-sync/recs";
-import type { Hex } from "viem";
-import { hexToResource } from "@latticexyz/common";
-import { PlanetUtils } from "./PlanetUtils";
 import { MoveUtils } from "./MoveUtils";
+import { PlanetUtils } from "./PlanetUtils";
 
 interface ContractsApiConfig {
   connection: EthConnection;
@@ -272,6 +274,7 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public async setupEventListeners(): Promise<void> {
+    return;
     const { contract } = this;
 
     const filter = {
@@ -949,14 +952,14 @@ export class ContractsAPI extends EventEmitter {
       homePlanetId: rawSpawnPlanet
         ? (rawSpawnPlanet.planet.toString() as LocationId)
         : undefined,
-      lastRevealTickNumber: lastReveal ? lastReveal.tickNumber : 0n,
+      lastRevealTimestamp: lastReveal ? Number(lastReveal.tickNumber) : 0,
     };
     return player;
   }
 
   public getPlayers(
     onProgress?: (fractionCompleted: number) => void,
-  ): Map<string, Player> | undefined {
+  ): Map<string, Player> {
     const { Player } = this.components;
     const playerIds = [...runQuery([Has(Player)])];
     const nPlayers: number = playerIds.length;
@@ -975,12 +978,14 @@ export class ContractsAPI extends EventEmitter {
     return playerMap;
   }
 
-  public getWorldRadius(): number | undefined {
+  public getWorldRadius(): number {
     const { UniverseConfig } = this.components;
     const universeConfig = getComponentValue(UniverseConfig, singletonEntity);
-    return universeConfig !== undefined
-      ? Number(universeConfig.radius)
-      : undefined;
+    if (!universeConfig) {
+      throw new Error("need to set universe config");
+    }
+
+    return Number(universeConfig.radius);
   }
 
   //TODO fix getArrival
@@ -1014,7 +1019,9 @@ export class ContractsAPI extends EventEmitter {
     const result = [];
     for (let i = 0; i < nPlanets; i++) {
       // NOTE: may need serde function here
-      const locationId = planets[i].toString() as LocationId;
+      const locationId = locationIdFromHexStr(
+        planets[i].toString(),
+      ) as LocationId;
       result.push(locationId);
       onProgress && onProgress((i + 1) / nPlanets);
     }
@@ -1025,8 +1032,10 @@ export class ContractsAPI extends EventEmitter {
     planetId: LocationId,
   ): RevealedCoords | undefined {
     const { RevealedPlanet } = this.components;
+    console.log("revlead coords by Id if exists");
+    console.log(locationIdToHexStr(planetId));
     const revealedPlanetId = encodeEntity(RevealedPlanet.metadata.keySchema, {
-      id: locationIdToDecStr(planetId) as Hex,
+      id: locationIdToHexStr(planetId),
     });
     const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
 
@@ -1044,11 +1053,11 @@ export class ContractsAPI extends EventEmitter {
     return result;
   }
 
-  public getIsPaused(): boolean | undefined {
+  public getIsPaused(): boolean {
     const { Ticker } = this.components;
     const ticker = getComponentValue(Ticker, singletonEntity);
     if (!ticker) {
-      return undefined;
+      return false;
     }
     return ticker.paused;
   }
@@ -1064,7 +1073,8 @@ export class ContractsAPI extends EventEmitter {
     const nPlanetIds = planetIds.length;
 
     for (let i = 0; i < nPlanetIds; i++) {
-      const planetId = planetIds[i].toString() as LocationId;
+      const planetId = locationIdFromHexStr(planetIds[i].toString());
+
       const revealedCoords = this.getRevealedCoordsByIdIfExists(planetId);
       if (!revealedCoords) {
         continue;
@@ -1072,6 +1082,9 @@ export class ContractsAPI extends EventEmitter {
       result.push(revealedCoords);
       onProgressCoords && onProgressCoords((i + 1) / nPlanetIds);
     }
+
+    onProgressCoords && onProgressCoords(1);
+
     return result;
   }
 

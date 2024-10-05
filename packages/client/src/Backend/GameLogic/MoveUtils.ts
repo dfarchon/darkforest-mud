@@ -1,14 +1,15 @@
+import { locationIdToHexStr } from "@df/serde";
 import type {
+  ArtifactId,
   EthAddress,
   LocationId,
   QueuedArrival,
   VoyageId,
-  ArtifactId,
 } from "@df/types";
 import { ArrivalType } from "@df/types";
-import type { ClientComponents } from "@mud/createClientComponents";
-import { encodeEntity } from "@latticexyz/store-sync/recs";
 import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
 
 interface MoveUtilsConfig {
   components: ClientComponents;
@@ -24,7 +25,7 @@ export class MoveUtils {
   public getArrivalsForPlanet(planetId: LocationId): QueuedArrival[] {
     const { Move, PendingMove } = this.components;
     const pendingMoveEntity = encodeEntity(PendingMove.metadata.keySchema, {
-      to: planetId as `0x${string}`,
+      to: locationIdToHexStr(planetId) as `0x${string}`,
     });
     const pendingMove = getComponentValue(PendingMove, pendingMoveEntity);
     const indexes = Array(30).fill(0);

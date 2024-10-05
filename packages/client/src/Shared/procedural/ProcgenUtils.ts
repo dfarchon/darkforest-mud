@@ -140,7 +140,7 @@ export const grayColors: PlanetCosmeticInfo = {
   spacetime3: [0, 0, 0],
   ruins: undefined,
   // ultra ultra hacky, but we're doing this since it's cached in the renderer
-  hatType: HatType.GraduationCap,
+  // hatType: HatType.GraduationCap,
 };
 const namesById = new Map<LocationId, string>();
 const taglinesById = new Map<LocationId, string>();
@@ -505,9 +505,13 @@ export function getRuinsInfo(loc: LocationId): RuinsInfo {
 export function getPlanetCosmetic(
   planet: Planet | undefined,
 ): PlanetCosmeticInfo {
+  // //TODO: fix here
+  // return grayColors;
+
   if (!planet) {
     return grayColors;
   }
+
   if (cosmeticByLocId.has(planet.locationId)) {
     return cosmeticByLocId.get(planet.locationId) || grayColors;
   }
@@ -576,7 +580,7 @@ export function getPlanetCosmetic(
 
     seed,
 
-    hatType: planet.hatType as HatType, //hatTypeFromHash(planet.locationId, planet.hatType, planet.hatLevel),
+    // hatType: planet.hatType as HatType, //hatTypeFromHash(planet.locationId, planet.hatType, planet.hatLevel),
 
     ruins: getRuinsInfo(planet.locationId),
   };
@@ -614,15 +618,15 @@ export function getPlanetName(planet: Planet | undefined): string {
   if (!planet) {
     return "Unknown";
   }
-  if (planet.hatLevel > 0 && isMeme(planet.hatType)) {
-    return MemeTypeNames[numToMemeType(planet.hatType)];
-  }
-  if (planet.hatLevel > 0 && isLogo(planet.hatType)) {
-    return LogoTypeNames[numToLogoType(planet.hatType)];
-  }
-  if (planet.hatLevel > 0 && isAvatar(planet.hatType)) {
-    return AvatarTypeNames[numToAvatarType(planet.hatType)];
-  }
+  // if (planet.hatLevel > 0 && isMeme(planet.hatType)) {
+  //   return MemeTypeNames[numToMemeType(planet.hatType)];
+  // }
+  // if (planet.hatLevel > 0 && isLogo(planet.hatType)) {
+  //   return LogoTypeNames[numToLogoType(planet.hatType)];
+  // }
+  // if (planet.hatLevel > 0 && isAvatar(planet.hatType)) {
+  //   return AvatarTypeNames[numToAvatarType(planet.hatType)];
+  // }
 
   return getPlanetNameHash(planet.locationId);
 }
@@ -743,7 +747,9 @@ export function getPlanetBlurb2(planet: Planet | undefined): string {
 
 export function getHatSizeName(planet: Planet) {
   const maxHat = HAT_SIZES.length;
-  const lv = planet.hatLevel;
+  //TODO: fix here
+  const lv = 3;
+  // const lv = planet.hatLevel;
 
   if (lv < maxHat) {
     return HAT_SIZES[lv];

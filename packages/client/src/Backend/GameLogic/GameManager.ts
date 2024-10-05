@@ -123,6 +123,7 @@ import {
   Setting,
   SpaceType,
 } from "@df/types";
+import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
 import delay from "delay";
@@ -190,7 +191,7 @@ import PersistentChunkStore from "../Storage/PersistentChunkStore";
 import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
 import SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
-import { getEmojiMessage } from "./ArrivalUtils";
+// import { getEmojiMessage } from "./ArrivalUtils";
 import type { CaptureZonesGeneratedEvent } from "./CaptureZoneGenerator";
 import { CaptureZoneGenerator } from "./CaptureZoneGenerator";
 import type { ContractsAPI } from "./ContractsAPI";
@@ -286,7 +287,7 @@ export class GameManager extends EventEmitter {
 
   private paused: boolean;
 
-  private halfPrice: boolean;
+  // private halfPrice: boolean;
 
   /**
    * @todo change this to the correct timestamp each round.
@@ -337,7 +338,7 @@ export class GameManager extends EventEmitter {
   /**
    * Handle to an interval that periodically refreshes the scoreboard from our webserver.
    */
-  private scoreboardInterval: ReturnType<typeof setInterval>;
+  // private scoreboardInterval: ReturnType<typeof setInterval>;
 
   /**
    * Handle to an interval that periodically refreshes the network's health from our webserver.
@@ -347,12 +348,12 @@ export class GameManager extends EventEmitter {
   /**
    * Handle to an interval that periodically refreshes pinkZones.
    */
-  private pinkZoneInterval: ReturnType<typeof setInterval>;
+  // private pinkZoneInterval: ReturnType<typeof setInterval>;
 
   /**
    * Handle to an interval that periodically refreshes blueZones.
    */
-  private blueZoneInterval: ReturnType<typeof setInterval>;
+  // private blueZoneInterval: ReturnType<typeof setInterval>;
 
   /**
    * Manages the process of mining new space territory.
@@ -391,11 +392,11 @@ export class GameManager extends EventEmitter {
    * Emits whenever we load the network health summary from the webserver, which is derived from
    * diagnostics that the client sends up to the webserver as well.
    */
-  public networkHealth$: Monomitter<NetworkHealthSummary>;
+  // public networkHealth$: Monomitter<NetworkHealthSummary>;
 
   public paused$: Monomitter<boolean>;
 
-  public halfPrice$: Monomitter<boolean>;
+  // public halfPrice$: Monomitter<boolean>;
 
   /**
    * Diagnostic information about the game.
@@ -421,7 +422,7 @@ export class GameManager extends EventEmitter {
   /**
    * Generates capture zones.
    */
-  private captureZoneGenerator: CaptureZoneGenerator | undefined;
+  // private captureZoneGenerator: CaptureZoneGenerator | undefined;
 
   private constructor(
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
@@ -430,9 +431,9 @@ export class GameManager extends EventEmitter {
     touchedPlanets: Map<LocationId, Planet>,
     allTouchedPlanetIds: Set<LocationId>,
     revealedCoords: Map<LocationId, RevealedCoords>,
-    claimedCoords: Map<LocationId, ClaimedCoords>,
-    burnedCoords: Map<LocationId, BurnedCoords>,
-    kardashevCoords: Map<LocationId, KardashevCoords>,
+    // claimedCoords: Map<LocationId, ClaimedCoords>,
+    // burnedCoords: Map<LocationId, BurnedCoords>,
+    // kardashevCoords: Map<LocationId, KardashevCoords>,
     worldRadius: number,
     unprocessedArrivals: Map<VoyageId, QueuedArrival>,
     unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>,
@@ -445,7 +446,8 @@ export class GameManager extends EventEmitter {
     artifacts: Map<ArtifactId, Artifact>,
     ethConnection: EthConnection,
     paused: boolean,
-    halfPrice: boolean,
+    // halfPrice: boolean,
+    components: ClientComponents,
   ) {
     super();
 
@@ -468,18 +470,18 @@ export class GameManager extends EventEmitter {
     this.account = account;
     this.players = players;
     this.worldRadius = worldRadius;
-    this.networkHealth$ = monomitter(true);
+    // this.networkHealth$ = monomitter(true);
     this.paused$ = monomitter(true);
-    this.halfPrice$ = monomitter(true);
+    // this.halfPrice$ = monomitter(true);
     this.playersUpdated$ = monomitter();
 
-    if (contractConstants.CAPTURE_ZONES_ENABLED) {
-      this.captureZoneGenerator = new CaptureZoneGenerator(
-        this,
-        contractConstants.GAME_START_BLOCK,
-        contractConstants.CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL,
-      );
-    }
+    // if (contractConstants.CAPTURE_ZONES_ENABLED) {
+    //   this.captureZoneGenerator = new CaptureZoneGenerator(
+    //     this,
+    //     contractConstants.GAME_START_BLOCK,
+    //     contractConstants.CAPTURE_ZONE_CHANGE_BLOCK_INTERVAL,
+    //   );
+    // }
 
     this.hashConfig = {
       planetHashKey: contractConstants.PLANETHASH_KEY,
@@ -514,93 +516,94 @@ export class GameManager extends EventEmitter {
       }
     }
 
-    const claimedLocations = new Map<LocationId, ClaimedLocation>();
+    // const claimedLocations = new Map<LocationId, ClaimedLocation>();
 
-    for (const [locationId, coords] of claimedCoords) {
-      const planet = touchedPlanets.get(locationId);
+    // for (const [locationId, coords] of claimedCoords) {
+    //   const planet = touchedPlanets.get(locationId);
 
-      if (planet) {
-        const location: WorldLocation = {
-          hash: locationId,
-          coords,
-          perlin: planet.perlin,
-          biomebase: this.biomebasePerlin(coords, true),
-        };
+    //   if (planet) {
+    //     const location: WorldLocation = {
+    //       hash: locationId,
+    //       coords,
+    //       perlin: planet.perlin,
+    //       biomebase: this.biomebasePerlin(coords, true),
+    //     };
 
-        const revealedLocation = { ...location, revealer: coords.claimer };
+    //     const revealedLocation = { ...location, revealer: coords.claimer };
 
-        revealedLocations.set(locationId, revealedLocation);
-        const claimedLocation = { ...location, claimer: coords.claimer };
-        claimedLocations.set(locationId, claimedLocation);
-      }
-    }
+    //     revealedLocations.set(locationId, revealedLocation);
+    //     const claimedLocation = { ...location, claimer: coords.claimer };
+    //     claimedLocations.set(locationId, claimedLocation);
+    //   }
+    // }
 
-    const burnedLocations = new Map<LocationId, BurnedLocation>();
+    // const burnedLocations = new Map<LocationId, BurnedLocation>();
 
-    for (const [locationId, coords] of burnedCoords) {
-      const planet = touchedPlanets.get(locationId);
+    // for (const [locationId, coords] of burnedCoords) {
+    //   const planet = touchedPlanets.get(locationId);
 
-      if (planet) {
-        const location: WorldLocation = {
-          hash: locationId,
-          coords,
-          perlin: planet.perlin,
-          biomebase: this.biomebasePerlin(coords, true),
-        };
+    //   if (planet) {
+    //     const location: WorldLocation = {
+    //       hash: locationId,
+    //       coords,
+    //       perlin: planet.perlin,
+    //       biomebase: this.biomebasePerlin(coords, true),
+    //     };
 
-        const revealedLocation = { ...location, revealer: coords.operator };
-        revealedLocations.set(locationId, revealedLocation);
-        const burnedLocation = {
-          ...location,
-          operator: coords.operator,
-          radius:
-            this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-              planet.planetLevel
-            ],
-        };
-        burnedLocations.set(locationId, burnedLocation);
-      }
-    }
+    //     const revealedLocation = { ...location, revealer: coords.operator };
+    //     revealedLocations.set(locationId, revealedLocation);
+    //     const burnedLocation = {
+    //       ...location,
+    //       operator: coords.operator,
+    //       radius:
+    //         this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+    //           planet.planetLevel
+    //         ],
+    //     };
+    //     burnedLocations.set(locationId, burnedLocation);
+    //   }
+    // }
 
-    const kardashevLocations = new Map<LocationId, KardashevLocation>();
-    for (const [locationId, coords] of kardashevCoords) {
-      const planet = touchedPlanets.get(locationId);
-      if (planet) {
-        const location: WorldLocation = {
-          hash: locationId,
-          coords,
-          perlin: planet.perlin,
-          biomebase: this.biomebasePerlin(coords, true),
-        };
-        const revealedLocation = { ...location, revealer: coords.operator };
-        revealedLocations.set(locationId, revealedLocation);
+    // const kardashevLocations = new Map<LocationId, KardashevLocation>();
+    // for (const [locationId, coords] of kardashevCoords) {
+    //   const planet = touchedPlanets.get(locationId);
+    //   if (planet) {
+    //     const location: WorldLocation = {
+    //       hash: locationId,
+    //       coords,
+    //       perlin: planet.perlin,
+    //       biomebase: this.biomebasePerlin(coords, true),
+    //     };
+    //     const revealedLocation = { ...location, revealer: coords.operator };
+    //     revealedLocations.set(locationId, revealedLocation);
 
-        const kardashevLocation = {
-          ...location,
-          operator: coords.operator,
-          radius:
-            this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
-              planet.planetLevel
-            ],
-        };
-        kardashevLocations.set(locationId, kardashevLocation);
-      }
-    }
+    //     const kardashevLocation = {
+    //       ...location,
+    //       operator: coords.operator,
+    //       radius:
+    //         this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
+    //           planet.planetLevel
+    //         ],
+    //     };
+    //     kardashevLocations.set(locationId, kardashevLocation);
+    //   }
+    // }
 
     this.entityStore = new GameObjects(
       account,
       touchedPlanets,
       allTouchedPlanetIds,
       revealedLocations,
-      claimedLocations,
-      burnedLocations,
-      kardashevLocations,
+      // claimedLocations,
+      // burnedLocations,
+      // kardashevLocations,
       artifacts,
       persistentChunkStore.allChunks(),
       unprocessedArrivals,
       unprocessedPlanetArrivalIds,
       contractConstants,
       worldRadius,
+      components,
     );
 
     this.contractsAPI = contractsAPI;
@@ -608,30 +611,30 @@ export class GameManager extends EventEmitter {
     this.snarkHelper = snarkHelper;
     this.useMockHash = useMockHash;
     this.paused = paused;
-    this.halfPrice = halfPrice;
+    // this.halfPrice = halfPrice;
 
     this.ethConnection = ethConnection;
     // NOTE: event
     // this.diagnosticsInterval = setInterval(this.uploadDiagnostics.bind(this), 10_000);
-    this.scoreboardInterval = setInterval(
-      this.refreshScoreboard.bind(this),
-      10_000,
-    );
+    // this.scoreboardInterval = setInterval(
+    //   this.refreshScoreboard.bind(this),
+    //   10_000,
+    // );
 
     //NOTE: network health
     // this.networkHealthInterval = setInterval(this.refreshNetworkHealth.bind(this), 10_000);
-    this.pinkZoneInterval = setInterval(
-      this.hardRefreshPinkZones.bind(this),
-      10_000,
-    );
-    this.blueZoneInterval = setInterval(
-      this.hardRefreshBlueZones.bind(this),
-      10_000,
-    );
+    // this.pinkZoneInterval = setInterval(
+    //   this.hardRefreshPinkZones.bind(this),
+    //   10_000,
+    // );
+    // this.blueZoneInterval = setInterval(
+    //   this.hardRefreshBlueZones.bind(this),
+    //   10_000,
+    // );
     this.playerInterval = setInterval(() => {
       if (this.account) {
         this.hardRefreshPlayer(this.account);
-        this.hardRefreshPlayerSpaceships(this.account);
+        // this.hardRefreshPlayerSpaceships(this.account);
       }
     }, 10_000);
 
@@ -652,12 +655,12 @@ export class GameManager extends EventEmitter {
       },
     );
 
-    this.refreshScoreboard();
+    // this.refreshScoreboard();
     // NOTE: network health
     // this.refreshNetworkHealth();
-    this.hardRefreshPinkZones();
-    this.hardRefreshBlueZones();
-    this.getSpaceships();
+    // this.hardRefreshPinkZones();
+    // this.hardRefreshBlueZones();
+    // this.getSpaceships();
 
     this.safeMode = false;
   }
@@ -675,122 +678,122 @@ export class GameManager extends EventEmitter {
   //   }
   // }
 
-  private async refreshScoreboard() {
-    if (process.env.LEADER_BOARD_URL) {
-      // try {
-      //   const leaderboard = await loadLeaderboard();
-      //   for (const entry of leaderboard.entries) {
-      //     const player = this.players.get(entry.ethAddress);
-      //     if (player) {
-      //       // current player's score is updated via `this.playerInterval`
-      //       if (player.address !== this.account && entry.score !== undefined) {
-      //         player.score = entry.score;
-      //       }
-      //     }
-      //   }
-      //   this.playersUpdated$.publish();
-      // } catch (e) {
-      //   // @todo - what do we do if we can't connect to the webserver? in general this should be a
-      //   // valid state of affairs because arenas is a thing.
-      // }
-    } else {
-      try {
-        //myTodo: use claimedLocations
-        // const claimedLocations = this.getClaimedLocations();
-        // const cntMap = new Map<string, number>();
-        // for (const claimedLocation of claimedLocations) {
-        //   const claimer = claimedLocation.claimer;
-        //   const score = claimedLocation.score;
-        //   const player = this.players.get(claimer);
-        //   if (player === undefined) continue;
-        //   let cnt = cntMap.get(claimer);
-        //   if (cnt === undefined) cnt = 0;
-        //   if (cnt === 0) player.score = score;
-        // }
+  // private async refreshScoreboard() {
+  //   if (process.env.LEADER_BOARD_URL) {
+  //     // try {
+  //     //   const leaderboard = await loadLeaderboard();
+  //     //   for (const entry of leaderboard.entries) {
+  //     //     const player = this.players.get(entry.ethAddress);
+  //     //     if (player) {
+  //     //       // current player's score is updated via `this.playerInterval`
+  //     //       if (player.address !== this.account && entry.score !== undefined) {
+  //     //         player.score = entry.score;
+  //     //       }
+  //     //     }
+  //     //   }
+  //     //   this.playersUpdated$.publish();
+  //     // } catch (e) {
+  //     //   // @todo - what do we do if we can't connect to the webserver? in general this should be a
+  //     //   // valid state of affairs because arenas is a thing.
+  //     // }
+  //   } else {
+  //     try {
+  //       //myTodo: use claimedLocations
+  //       // const claimedLocations = this.getClaimedLocations();
+  //       // const cntMap = new Map<string, number>();
+  //       // for (const claimedLocation of claimedLocations) {
+  //       //   const claimer = claimedLocation.claimer;
+  //       //   const score = claimedLocation.score;
+  //       //   const player = this.players.get(claimer);
+  //       //   if (player === undefined) continue;
+  //       //   let cnt = cntMap.get(claimer);
+  //       //   if (cnt === undefined) cnt = 0;
+  //       //   if (cnt === 0) player.score = score;
+  //       // }
 
-        const knownScoringPlanets = [];
-        for (const planet of this.getAllPlanets()) {
-          if (!isLocatable(planet)) {
-            continue;
-          }
-          if (planet.destroyed || planet.frozen) {
-            continue;
-          }
-          if (planet.planetLevel < 3) {
-            continue;
-          }
-          if (!planet?.location?.coords) {
-            continue;
-          }
-          if (planet.claimer === EMPTY_ADDRESS) {
-            continue;
-          }
-          if (planet.claimer === undefined) {
-            continue;
-          }
-          knownScoringPlanets.push({
-            locationId: planet.locationId,
-            claimer: planet.claimer,
-            score: Math.floor(
-              this.getDistCoords(planet.location.coords, { x: 0, y: 0 }),
-            ),
-          });
-        }
+  //       const knownScoringPlanets = [];
+  //       for (const planet of this.getAllPlanets()) {
+  //         if (!isLocatable(planet)) {
+  //           continue;
+  //         }
+  //         if (planet.destroyed || planet.frozen) {
+  //           continue;
+  //         }
+  //         if (planet.planetLevel < 3) {
+  //           continue;
+  //         }
+  //         if (!planet?.location?.coords) {
+  //           continue;
+  //         }
+  //         if (planet.claimer === EMPTY_ADDRESS) {
+  //           continue;
+  //         }
+  //         if (planet.claimer === undefined) {
+  //           continue;
+  //         }
+  //         knownScoringPlanets.push({
+  //           locationId: planet.locationId,
+  //           claimer: planet.claimer,
+  //           score: Math.floor(
+  //             this.getDistCoords(planet.location.coords, { x: 0, y: 0 }),
+  //           ),
+  //         });
+  //       }
 
-        // console.log('knownScoringPlanets');
-        // console.log(knownScoringPlanets);
+  //       // console.log('knownScoringPlanets');
+  //       // console.log(knownScoringPlanets);
 
-        const cntMap = new Map<string, number>();
-        const haveScorePlayersMap = new Map<string, boolean>();
+  //       const cntMap = new Map<string, number>();
+  //       const haveScorePlayersMap = new Map<string, boolean>();
 
-        for (const planet of knownScoringPlanets) {
-          const claimer = planet.claimer;
-          if (claimer === undefined) {
-            continue;
-          }
-          const player = this.players.get(claimer);
-          if (player === undefined) {
-            continue;
-          }
+  //       for (const planet of knownScoringPlanets) {
+  //         const claimer = planet.claimer;
+  //         if (claimer === undefined) {
+  //           continue;
+  //         }
+  //         const player = this.players.get(claimer);
+  //         if (player === undefined) {
+  //           continue;
+  //         }
 
-          const cnt = cntMap.get(claimer);
-          let cntNextValue = undefined;
+  //         const cnt = cntMap.get(claimer);
+  //         let cntNextValue = undefined;
 
-          if (cnt === undefined || cnt === 0) {
-            cntNextValue = 1;
-          } else {
-            cntNextValue = cnt + 1;
-          }
-          cntMap.set(claimer, cntNextValue);
+  //         if (cnt === undefined || cnt === 0) {
+  //           cntNextValue = 1;
+  //         } else {
+  //           cntNextValue = cnt + 1;
+  //         }
+  //         cntMap.set(claimer, cntNextValue);
 
-          if (player.score === undefined || cntNextValue === 1) {
-            player.score = planet.score;
-            haveScorePlayersMap.set(claimer, true);
-          } else {
-            player.score = Math.min(player.score, planet.score);
-            haveScorePlayersMap.set(claimer, true);
-          }
-        }
-        for (const playerItem of this.getAllPlayers()) {
-          const result = haveScorePlayersMap.get(playerItem.address);
+  //         if (player.score === undefined || cntNextValue === 1) {
+  //           player.score = planet.score;
+  //           haveScorePlayersMap.set(claimer, true);
+  //         } else {
+  //           player.score = Math.min(player.score, planet.score);
+  //           haveScorePlayersMap.set(claimer, true);
+  //         }
+  //       }
+  //       for (const playerItem of this.getAllPlayers()) {
+  //         const result = haveScorePlayersMap.get(playerItem.address);
 
-          const player = this.players.get(playerItem.address);
-          if (player === undefined) {
-            continue;
-          }
+  //         const player = this.players.get(playerItem.address);
+  //         if (player === undefined) {
+  //           continue;
+  //         }
 
-          if (result === false || result === undefined) {
-            player.score = undefined;
-          }
-        }
+  //         if (result === false || result === undefined) {
+  //           player.score = undefined;
+  //         }
+  //       }
 
-        this.playersUpdated$.publish();
-      } catch (e) {
-        // @todo - what do we do if we can't connect to the webserver? in general this should be a
-        // valid state of affairs because arenas is a thing.
-      }
-    }
-  }
+  //       this.playersUpdated$.publish();
+  //     } catch (e) {
+  //       // @todo - what do we do if we can't connect to the webserver? in general this should be a
+  //       // valid state of affairs because arenas is a thing.
+  //     }
+  //   }
+  // }
 
   public getEthConnection() {
     return this.ethConnection;
@@ -809,11 +812,11 @@ export class GameManager extends EventEmitter {
     clearInterval(this.playerInterval);
     // NOTE: event
     // clearInterval(this.diagnosticsInterval);
-    clearInterval(this.scoreboardInterval);
+    // clearInterval(this.scoreboardInterval);
     // NOTE: network health
     // clearInterval(this.networkHealthInterval);
-    clearInterval(this.pinkZoneInterval);
-    clearInterval(this.blueZoneInterval);
+    // clearInterval(this.pinkZoneInterval);
+    // clearInterval(this.blueZoneInterval);
     this.settingsSubscription?.unsubscribe();
   }
 
@@ -821,11 +824,13 @@ export class GameManager extends EventEmitter {
     connection,
     terminal,
     contractAddress,
+    components,
     spectate = false,
   }: {
     connection: EthConnection;
     terminal: React.MutableRefObject<TerminalHandle | undefined>;
     contractAddress: EthAddress;
+    components: ClientComponents;
     spectate: boolean;
   }): Promise<GameManager> {
     if (!terminal.current) {
@@ -846,6 +851,7 @@ export class GameManager extends EventEmitter {
     const contractsAPI = await makeContractsAPI({
       connection,
       contractAddress,
+      components,
     });
 
     terminal.current?.println("Loading game data from disk...");
@@ -877,7 +883,7 @@ export class GameManager extends EventEmitter {
     await persistentChunkStore.saveRevealedCoords(
       initialState.allRevealedCoords,
     );
-    await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
+    // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
     const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
 
@@ -890,20 +896,20 @@ export class GameManager extends EventEmitter {
         continue;
       }
 
-      planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
+      // planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
 
-      for (const heldArtifact of initialState.heldArtifacts[i]) {
-        knownArtifacts.set(heldArtifact.id, heldArtifact);
-      }
+      // for (const heldArtifact of initialState.heldArtifacts[i]) {
+      //   knownArtifacts.set(heldArtifact.id, heldArtifact);
+      // }
     }
 
-    for (const myArtifact of initialState.myArtifacts) {
-      knownArtifacts.set(myArtifact.id, myArtifact);
-    }
+    // for (const myArtifact of initialState.myArtifacts) {
+    //   knownArtifacts.set(myArtifact.id, myArtifact);
+    // }
 
-    for (const artifact of initialState.artifactsOnVoyages) {
-      knownArtifacts.set(artifact.id, artifact);
-    }
+    // for (const artifact of initialState.artifactsOnVoyages) {
+    //   knownArtifacts.set(artifact.id, artifact);
+    // }
 
     // figure out what's my home planet
     let homeLocation: WorldLocation | undefined = undefined;
@@ -939,17 +945,15 @@ export class GameManager extends EventEmitter {
       initialState.touchedAndLocatedPlanets,
       new Set(Array.from(initialState.allTouchedPlanetIds)),
       initialState.revealedCoordsMap,
-      initialState.claimedCoordsMap
-        ? initialState.claimedCoordsMap
-        : new Map<LocationId, ClaimedCoords>(),
-      initialState.burnedCoordsMap
-        ? initialState.burnedCoordsMap
-        : new Map<LocationId, BurnedCoords>(),
-
-      initialState.kardashevCoordsMap
-        ? initialState.kardashevCoordsMap
-        : new Map<LocationId, KardashevCoords>(),
-
+      // initialState.claimedCoordsMap
+      //   ? initialState.claimedCoordsMap
+      //   : new Map<LocationId, ClaimedCoords>(),
+      // initialState.burnedCoordsMap
+      //   ? initialState.burnedCoordsMap
+      //   : new Map<LocationId, BurnedCoords>(),
+      // initialState.kardashevCoordsMap
+      //   ? initialState.kardashevCoordsMap
+      //   : new Map<LocationId, KardashevCoords>(),
       initialState.worldRadius,
       initialState.arrivals,
       initialState.planetVoyageIdMap,
@@ -962,10 +966,11 @@ export class GameManager extends EventEmitter {
       knownArtifacts,
       connection,
       initialState.paused,
-      initialState.halfPrice,
+      // initialState.halfPrice,
+      components,
     );
 
-    gameManager.setPlayerTwitters(initialState.twitters);
+    // gameManager.setPlayerTwitters(initialState.twitters);
 
     const config = {
       contractAddress,
@@ -979,17 +984,18 @@ export class GameManager extends EventEmitter {
     // important that this happens AFTER we load the game state from the blockchain. Otherwise our
     // 'loading game state' contract calls will be competing with events from the blockchain that
     // are happening now, which makes no sense.
+
     contractsAPI.setupEventListeners();
 
     // get twitter handles
-    gameManager.refreshTwitters();
+    // gameManager.refreshTwitters();
 
-    gameManager.listenForNewBlock();
+    // gameManager.listenForNewBlock();
 
     // set up listeners: whenever ContractsAPI reports some game state update, do some logic
     gameManager.contractsAPI
       .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
-        await gameManager.hardRefreshArtifact(artifactId);
+        // await gameManager.hardRefreshArtifact(artifactId);
         gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
       })
       .on(
@@ -1010,10 +1016,10 @@ export class GameManager extends EventEmitter {
         gameManager.paused = paused;
         gameManager.paused$.publish(paused);
       })
-      .on(ContractsAPIEvent.HalfPriceChanged, async (halfPrice: boolean) => {
-        gameManager.halfPrice = halfPrice;
-        gameManager.halfPrice$.publish(halfPrice);
-      })
+      // .on(ContractsAPIEvent.HalfPriceChanged, async (halfPrice: boolean) => {
+      //   gameManager.halfPrice = halfPrice;
+      //   gameManager.halfPrice$.publish(halfPrice);
+      // })
       .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
         // don't reload planets that you don't have in your map. once a planet
         // is in your map it will be loaded from the contract.
@@ -1052,7 +1058,6 @@ export class GameManager extends EventEmitter {
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         },
       )
-
       .on(ContractsAPIEvent.TxQueued, (tx: Transaction) => {
         gameManager.entityStore.onTxIntent(tx);
       })
@@ -1070,28 +1075,30 @@ export class GameManager extends EventEmitter {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);
         } else if (isUnconfirmedBurnTx(tx)) {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);
-          await gameManager.hardRefreshPinkZones();
+          // await gameManager.hardRefreshPinkZones();
         } else if (isUnconfirmedPinkTx(tx)) {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedKardashevTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-          await gameManager.hardRefreshBlueZones();
-        } else if (isUnconfirmedBlueTx(tx)) {
-          const centerPlanetId = gameManager.getBlueZoneCenterPlanetId(
-            tx.intent.locationId,
-          );
-          if (centerPlanetId) {
-            await gameManager.bulkHardRefreshPlanets([
-              tx.intent.locationId,
-              centerPlanetId,
-            ]);
-          } else {
-            // notice: this should never happen
-            await gameManager.bulkHardRefreshPlanets([tx.intent.locationId]);
-          }
+        }
+        //  else if (isUnconfirmedKardashevTx(tx)) {
+        //   await gameManager.hardRefreshPlanet(tx.intent.locationId);
+        //   // await gameManager.hardRefreshBlueZones();
+        // } else if (isUnconfirmedBlueTx(tx)) {
+        //   const centerPlanetId = gameManager.getBlueZoneCenterPlanetId(
+        //     tx.intent.locationId,
+        //   );
+        //   if (centerPlanetId) {
+        //     await gameManager.bulkHardRefreshPlanets([
+        //       tx.intent.locationId,
+        //       centerPlanetId,
+        //     ]);
+        //   } else {
+        //     // notice: this should never happen
+        //     await gameManager.bulkHardRefreshPlanets([tx.intent.locationId]);
+        //   }
 
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        } else if (isUnconfirmedInitTx(tx)) {
+        //   gameManager.emit(GameManagerEvent.PlanetUpdate);
+        // }
+        else if (isUnconfirmedInitTx(tx)) {
           terminal.current?.println("Loading Home Planet from Blockchain...");
           const retries = 5;
           for (let i = 0; i < retries; i++) {
@@ -1114,7 +1121,7 @@ export class GameManager extends EventEmitter {
             gameManager.bulkHardRefreshPlanets([tx.intent.from, tx.intent.to]),
           ];
           if (tx.intent.artifact) {
-            promises.push(gameManager.hardRefreshArtifact(tx.intent.artifact));
+            // promises.push(gameManager.hardRefreshArtifact(tx.intent.artifact));
           }
           await Promise.all(promises);
         } else if (isUnconfirmedUpgradeTx(tx)) {
@@ -1133,12 +1140,12 @@ export class GameManager extends EventEmitter {
         } else if (isUnconfirmedDepositArtifactTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlanet(tx.intent.locationId),
-            gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawArtifactTx(tx)) {
           await Promise.all([
             await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            await gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedProspectPlanetTx(tx)) {
           await gameManager.softRefreshPlanet(tx.intent.planetId);
@@ -1175,7 +1182,7 @@ export class GameManager extends EventEmitter {
                         toPlanet.locationId,
                         toLinkPlanet.locationId,
                       ]),
-                      gameManager.hardRefreshArtifact(tx.intent.artifactId),
+                      // gameManager.hardRefreshArtifact(tx.intent.artifactId),
                     ]);
                     refreshFlag = false;
                   }
@@ -1191,12 +1198,12 @@ export class GameManager extends EventEmitter {
                   tx.intent.locationId,
                   tx.intent.linkTo,
                 ]),
-                gameManager.hardRefreshArtifact(tx.intent.artifactId),
+                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
               ]);
             } else {
               await Promise.all([
                 gameManager.hardRefreshPlanet(tx.intent.locationId),
-                gameManager.hardRefreshArtifact(tx.intent.artifactId),
+                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
               ]);
             }
           }
@@ -1208,23 +1215,23 @@ export class GameManager extends EventEmitter {
                 tx.intent.locationId,
                 tx.intent.linkTo,
               ]),
-              gameManager.hardRefreshArtifact(tx.intent.artifactId),
+              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
             ]);
           } else {
             await Promise.all([
               gameManager.hardRefreshPlanet(tx.intent.locationId),
-              gameManager.hardRefreshArtifact(tx.intent.artifactId),
+              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
             ]);
           }
         } else if (isUnconfirmedChangeArtifactImageTypeTx(tx)) {
           await Promise.all([
             await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            await gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedBuyArtifactTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlanet(tx.intent.locationId),
-            gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawSilverTx(tx)) {
           await gameManager.softRefreshPlanet(tx.intent.locationId);
@@ -1239,10 +1246,10 @@ export class GameManager extends EventEmitter {
             gameManager.hardRefreshPlanet(tx.intent.locationId),
           ]);
         } else if (isUnconfirmedClaimTx(tx)) {
-          gameManager.entityStore.updatePlanet(
-            tx.intent.locationId,
-            (p) => (p.claimer = gameManager.getAccount()),
-          );
+          // gameManager.entityStore.updatePlanet(
+          //   tx.intent.locationId,
+          //   (p) => (p.claimer = gameManager.getAccount()),
+          // );
         }
         gameManager.entityStore.clearUnconfirmedTxIntent(tx);
         gameManager.onTxConfirmed(tx);
@@ -1258,7 +1265,7 @@ export class GameManager extends EventEmitter {
         gameManager.onTxCancelled(tx);
       })
       .on(ContractsAPIEvent.RadiusUpdated, async () => {
-        const newRadius = await gameManager.contractsAPI.getWorldRadius();
+        const newRadius = gameManager.contractsAPI.getWorldRadius();
         gameManager.setRadius(newRadius);
       });
 
@@ -1297,183 +1304,191 @@ export class GameManager extends EventEmitter {
       return;
     }
 
-    const localPlayer = this.getPlayer(address);
-
-    if (localPlayer?.twitter) {
-      playerFromBlockchain.twitter = localPlayer.twitter;
-    }
+    // const localPlayer = this.getPlayer(address);
+    // if (localPlayer?.twitter) {
+    //   playerFromBlockchain.twitter = localPlayer.twitter;
+    // }
 
     this.players.set(address, playerFromBlockchain);
     this.playersUpdated$.publish();
   }
 
-  private async hardRefreshPlayerSpaceships(
-    address?: EthAddress,
-    show?: boolean,
-  ): Promise<void> {
-    if (!address) {
-      return;
-    }
-    const spaceships = await this.contractsAPI.getPlayerSpaceships(address);
-    if (show) {
-      console.log(spaceships.length);
-    }
-    for (let i = 0; i < spaceships.length; i++) {
-      if (show) {
-        console.log("--- spaceship ", i, " ---");
-        console.log("ship id:", spaceships[i].id);
-        console.log("onPlanet: ", spaceships[i].onPlanetId);
-      }
+  // private async hardRefreshPlayerSpaceships(
+  //   address?: EthAddress,
+  //   show?: boolean,
+  // ): Promise<void> {
+  //   if (!address) {
+  //     return;
+  //   }
+  //   const spaceships = await this.contractsAPI.getPlayerSpaceships(address);
+  //   if (show) {
+  //     console.log(spaceships.length);
+  //   }
+  //   for (let i = 0; i < spaceships.length; i++) {
+  //     if (show) {
+  //       console.log("--- spaceship ", i, " ---");
+  //       console.log("ship id:", spaceships[i].id);
+  //       console.log("onPlanet: ", spaceships[i].onPlanetId);
+  //     }
 
-      await this.hardRefreshArtifact(spaceships[i].id);
-      const voyageId = spaceships[i].onVoyageId;
+  //     await this.hardRefreshArtifact(spaceships[i].id);
+  //     const voyageId = spaceships[i].onVoyageId;
 
-      if (voyageId !== undefined) {
-        const arrival = await this.contractsAPI.getArrival(Number(voyageId));
-        if (show) {
-          console.log("voyageId:", voyageId);
-        }
-        // console.log(arrival);
-        if (arrival) {
-          const fromPlanet = arrival.fromPlanet;
-          const toPlanet = arrival.toPlanet;
-          if (show) {
-            console.log("Source Planet :", fromPlanet);
-            console.log("Target Planet :", toPlanet);
-          }
-          await Promise.all([
-            this.hardRefreshPlanet(fromPlanet),
-            this.hardRefreshPlanet(toPlanet),
-          ]);
-          if (show) {
-            console.log("[OK] finish hard refresh from & to planets");
-          }
-        }
-      }
-    }
-  }
+  //     if (voyageId !== undefined) {
+  //       const arrival = await this.contractsAPI.getArrival(Number(voyageId));
+  //       if (show) {
+  //         console.log("voyageId:", voyageId);
+  //       }
+  //       // console.log(arrival);
+  //       if (arrival) {
+  //         const fromPlanet = arrival.fromPlanet;
+  //         const toPlanet = arrival.toPlanet;
+  //         if (show) {
+  //           console.log("Source Planet :", fromPlanet);
+  //           console.log("Target Planet :", toPlanet);
+  //         }
+  //         await Promise.all([
+  //           this.hardRefreshPlanet(fromPlanet),
+  //           this.hardRefreshPlanet(toPlanet),
+  //         ]);
+  //         if (show) {
+  //           console.log("[OK] finish hard refresh from & to planets");
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
-  public async getArrival(arrivalId: number): Promise<void> {
-    const arrival = await this.contractsAPI.getArrival(arrivalId);
-    console.log(arrival);
-  }
+  // public async getArrival(arrivalId: number): Promise<void> {
+  //   const arrival = this.contractsAPI.getArrival(arrivalId);
+  //   console.log(arrival);
+  // }
 
-  public async getArrivalsForPlanet(planetId: LocationId): Promise<void> {
-    const events = await this.contractsAPI.getArrivalsForPlanet(planetId);
+  public getArrivalsForPlanet(planetId: LocationId): void {
+    const events = this.contractsAPI.getArrivalsForPlanet(planetId);
     console.log(events);
   }
 
   // Dirty hack for only refreshing properties on a planet and nothing else
-  public async softRefreshPlanet(planetId: LocationId): Promise<void> {
-    const planet = await this.contractsAPI.getPlanetById(planetId);
+  public softRefreshPlanet(planetId: LocationId): void {
+    const planet = this.contractsAPI.getPlanetById(planetId);
     if (!planet) {
       return;
     }
     this.entityStore.replacePlanetFromContractData(planet);
   }
 
-  public async hardRefreshPlanet(planetId: LocationId): Promise<void> {
-    const planet = await this.contractsAPI.getPlanetById(planetId);
+  public hardRefreshPlanet(planetId: LocationId): void {
+    const planet = this.contractsAPI.getPlanetById(planetId);
     if (!planet) {
       return;
     }
-    const arrivals = await this.contractsAPI.getArrivalsForPlanet(planetId);
+    const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
 
-    const artifactsOnPlanets =
-      await this.contractsAPI.bulkGetArtifactsOnPlanets([planetId]);
-    const artifactsOnPlanet = artifactsOnPlanets[0];
+    // const artifactsOnPlanets =
+    //   await this.contractsAPI.bulkGetArtifactsOnPlanets([planetId]);
+    // const artifactsOnPlanet = artifactsOnPlanets[0];
 
     const revealedCoords =
-      await this.contractsAPI.getRevealedCoordsByIdIfExists(planetId);
-    const claimedCoords =
-      await this.contractsAPI.getClaimedCoordsByIdIfExists(planetId);
-    const burnedCoords =
-      await this.contractsAPI.getBurnedCoordsByIdIfExists(planetId);
-    const kardashevCoords =
-      await this.contractsAPI.getKardashevCoordsByIdIfExists(planetId);
+      this.contractsAPI.getRevealedCoordsByIdIfExists(planetId);
+
+    // const claimedCoords =
+    //   await this.contractsAPI.getClaimedCoordsByIdIfExists(planetId);
+    // const burnedCoords =
+    //   await this.contractsAPI.getBurnedCoordsByIdIfExists(planetId);
+    // const kardashevCoords =
+    //   await this.contractsAPI.getKardashevCoordsByIdIfExists(planetId);
 
     let revealedLocation: RevealedLocation | undefined;
-    let claimedLocation: ClaimedLocation | undefined;
-    let burnedLocation: BurnedLocation | undefined;
-    let kardashevLocation: KardashevLocation | undefined;
-    if (claimedCoords) {
-      claimedLocation = {
-        ...this.locationFromCoords(claimedCoords),
-        claimer: claimedCoords.claimer,
-      };
-      this.getGameObjects().setClaimedLocation(claimedLocation);
+    // let claimedLocation: ClaimedLocation | undefined;
+    // let burnedLocation: BurnedLocation | undefined;
+    // let kardashevLocation: KardashevLocation | undefined;
 
-      //to show planet in map
-      revealedLocation = {
-        ...this.locationFromCoords(claimedCoords),
-        revealer: claimedCoords.claimer,
-      };
-    } else if (revealedCoords) {
+    if (revealedCoords) {
       revealedLocation = {
         ...this.locationFromCoords(revealedCoords),
         revealer: revealedCoords.revealer,
       };
-    } else if (burnedCoords) {
-      burnedLocation = {
-        ...this.locationFromCoords(burnedCoords),
-        operator: burnedCoords.operator,
-        radius:
-          this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-            planet.planetLevel
-          ],
-      };
-
-      //to show planet in map
-      revealedLocation = {
-        ...this.locationFromCoords(burnedCoords),
-        revealer: burnedCoords.operator,
-      };
-      this.getGameObjects().setBurnedLocation(burnedLocation);
-    } else if (kardashevCoords) {
-      kardashevLocation = {
-        ...this.locationFromCoords(kardashevCoords),
-        operator: kardashevCoords.operator,
-        radius:
-          this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
-            planet.planetLevel
-          ],
-      };
-
-      //to show planet in map
-      revealedLocation = {
-        ...this.locationFromCoords(kardashevCoords),
-        revealer: kardashevCoords.operator,
-      };
-      this.getGameObjects().setKardashevLocation(kardashevLocation);
     }
+
+    // if (claimedCoords) {
+    //   claimedLocation = {
+    //     ...this.locationFromCoords(claimedCoords),
+    //     claimer: claimedCoords.claimer,
+    //   };
+    //   this.getGameObjects().setClaimedLocation(claimedLocation);
+
+    //   //to show planet in map
+    //   revealedLocation = {
+    //     ...this.locationFromCoords(claimedCoords),
+    //     revealer: claimedCoords.claimer,
+    //   };
+    // } else if (revealedCoords) {
+    //   revealedLocation = {
+    //     ...this.locationFromCoords(revealedCoords),
+    //     revealer: revealedCoords.revealer,
+    //   };
+    // } else if (burnedCoords) {
+    //   burnedLocation = {
+    //     ...this.locationFromCoords(burnedCoords),
+    //     operator: burnedCoords.operator,
+    //     radius:
+    //       this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+    //         planet.planetLevel
+    //       ],
+    //   };
+
+    //   //to show planet in map
+    //   revealedLocation = {
+    //     ...this.locationFromCoords(burnedCoords),
+    //     revealer: burnedCoords.operator,
+    //   };
+    //   this.getGameObjects().setBurnedLocation(burnedLocation);
+    // } else if (kardashevCoords) {
+    //   kardashevLocation = {
+    //     ...this.locationFromCoords(kardashevCoords),
+    //     operator: kardashevCoords.operator,
+    //     radius:
+    //       this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
+    //         planet.planetLevel
+    //       ],
+    //   };
+
+    //   //to show planet in map
+    //   revealedLocation = {
+    //     ...this.locationFromCoords(kardashevCoords),
+    //     revealer: kardashevCoords.operator,
+    //   };
+    //   this.getGameObjects().setKardashevLocation(kardashevLocation);
+    // }
 
     this.entityStore.replacePlanetFromContractData(
       planet,
       arrivals,
-      artifactsOnPlanet.map((a) => a.id),
+      undefined, // artifactsOnPlanet.map((a) => a.id),
       revealedLocation,
-      claimedCoords?.claimer,
-      burnedCoords?.operator,
-      kardashevCoords?.operator,
+      // claimedCoords?.claimer,
+      // burnedCoords?.operator,
+      // kardashevCoords?.operator,
     );
 
     // it's important that we reload the artifacts that are on the planet after the move
     // completes because this move could have been a photoid canon move. one of the side
     // effects of this type of move is that the active photoid canon deactivates upon a move
     // meaning we need to reload its data from the blockchain.
-    artifactsOnPlanet.forEach((a) =>
-      this.entityStore.replaceArtifactFromContractData(a),
-    );
+
+    // artifactsOnPlanet.forEach((a) =>
+    //   this.entityStore.replaceArtifactFromContractData(a),
+    // );
   }
 
   private async bulkHardRefreshPlanets(planetIds: LocationId[]): Promise<void> {
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
-    const allVoyages = await this.contractsAPI.getAllArrivals(planetIds);
-    const planetsToUpdateMap =
-      await this.contractsAPI.bulkGetPlanets(planetIds);
-    const artifactsOnPlanets =
-      await this.contractsAPI.bulkGetArtifactsOnPlanets(planetIds);
+    const allVoyages = this.contractsAPI.getAllArrivals(planetIds);
+    const planetsToUpdateMap = this.contractsAPI.bulkGetPlanets(planetIds);
+    // const artifactsOnPlanets =
+    //   await this.contractsAPI.bulkGetArtifactsOnPlanets(planetIds);
     planetsToUpdateMap.forEach((planet, locId) => {
       if (planetsToUpdateMap.has(locId)) {
         planetVoyageMap.set(locId, []);
@@ -1502,73 +1517,73 @@ export class GameManager extends EventEmitter {
         this.entityStore.replacePlanetFromContractData(
           planet,
           voyagesForPlanet,
-          artifactsOnPlanets[i].map((a) => a.id),
+          undefined, //  artifactsOnPlanets[i].map((a) => a.id),
         );
       }
     }
 
-    for (const artifacts of artifactsOnPlanets) {
-      this.entityStore.replaceArtifactsFromContractData(artifacts);
-    }
+    // for (const artifacts of artifactsOnPlanets) {
+    //   this.entityStore.replaceArtifactsFromContractData(artifacts);
+    // }
   }
 
-  public async hardRefreshArtifact(artifactId: ArtifactId): Promise<void> {
-    const artifact = await this.contractsAPI.getArtifactById(artifactId);
-    if (!artifact) {
-      return;
-    }
-    this.entityStore.replaceArtifactFromContractData(artifact);
-  }
+  // public async hardRefreshArtifact(artifactId: ArtifactId): Promise<void> {
+  //   const artifact = await this.contractsAPI.getArtifactById(artifactId);
+  //   if (!artifact) {
+  //     return;
+  //   }
+  //   this.entityStore.replaceArtifactFromContractData(artifact);
+  // }
 
   //mytodo: test more
-  public async hardRefreshPinkZones(): Promise<void> {
-    const loadedBurnedCoords =
-      await this.contractsAPI.getBurnedPlanetsCoords(0);
+  // public async hardRefreshPinkZones(): Promise<void> {
+  //   const loadedBurnedCoords =
+  //     await this.contractsAPI.getBurnedPlanetsCoords(0);
 
-    for (const item of loadedBurnedCoords) {
-      const locationId = item.hash;
-      const planet = this.getPlanetWithId(locationId);
-      if (planet === undefined) {
-        continue;
-      }
+  //   for (const item of loadedBurnedCoords) {
+  //     const locationId = item.hash;
+  //     const planet = this.getPlanetWithId(locationId);
+  //     if (planet === undefined) {
+  //       continue;
+  //     }
 
-      const burnedLocation = {
-        ...this.locationFromCoords(item),
-        operator: item.operator,
-        radius:
-          this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-            planet.planetLevel
-          ],
-      };
+  //     const burnedLocation = {
+  //       ...this.locationFromCoords(item),
+  //       operator: item.operator,
+  //       radius:
+  //         this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+  //           planet.planetLevel
+  //         ],
+  //     };
 
-      this.getGameObjects().setBurnedLocation(burnedLocation);
-    }
-  }
+  //     this.getGameObjects().setBurnedLocation(burnedLocation);
+  //   }
+  // }
 
   //mytodo: test more
-  public async hardRefreshBlueZones(): Promise<void> {
-    const loadedKardashevCoords =
-      await this.contractsAPI.getKardashevPlanetsCoords(0);
+  // public async hardRefreshBlueZones(): Promise<void> {
+  //   const loadedKardashevCoords =
+  //     await this.contractsAPI.getKardashevPlanetsCoords(0);
 
-    for (const item of loadedKardashevCoords) {
-      const locationId = item.hash;
-      const planet = this.getPlanetWithId(locationId);
-      if (planet === undefined) {
-        continue;
-      }
+  //   for (const item of loadedKardashevCoords) {
+  //     const locationId = item.hash;
+  //     const planet = this.getPlanetWithId(locationId);
+  //     if (planet === undefined) {
+  //       continue;
+  //     }
 
-      const kardashevLocation = {
-        ...this.locationFromCoords(item),
-        operator: item.operator,
-        radius:
-          this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
-            planet.planetLevel
-          ],
-      };
+  //     const kardashevLocation = {
+  //       ...this.locationFromCoords(item),
+  //       operator: item.operator,
+  //       radius:
+  //         this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
+  //           planet.planetLevel
+  //         ],
+  //     };
 
-      this.getGameObjects().setKardashevLocation(kardashevLocation);
-    }
-  }
+  //     this.getGameObjects().setKardashevLocation(kardashevLocation);
+  //   }
+  // }
 
   private onTxSubmit(tx: Transaction): void {
     this.terminal.current?.print(
@@ -1658,42 +1673,42 @@ export class GameManager extends EventEmitter {
    * Gets the twitter handle of the given ethereum account which is associated
    * with Dark Forest.
    */
-  public getTwitter(address: EthAddress | undefined): string | undefined {
-    let myAddress;
-    if (!address) {
-      myAddress = this.getAccount();
-    } else {
-      myAddress = address;
-    }
+  // public getTwitter(address: EthAddress | undefined): string | undefined {
+  //   let myAddress;
+  //   if (!address) {
+  //     myAddress = this.getAccount();
+  //   } else {
+  //     myAddress = address;
+  //   }
 
-    if (!myAddress) {
-      return undefined;
-    }
-    const twitter = this.players.get(myAddress)?.twitter;
-    return twitter;
-  }
+  //   if (!myAddress) {
+  //     return undefined;
+  //   }
+  //   const twitter = this.players.get(myAddress)?.twitter;
+  //   return twitter;
+  // }
 
   /**
    * The game ends at a particular time in the future - get this time measured
    * in seconds from the epoch.
    */
-  public getEndTimeSeconds(): number {
-    return this.endTimeSeconds;
-  }
+  // public getEndTimeSeconds(): number {
+  //   return this.endTimeSeconds;
+  // }
 
   /**
    * Dark Forest tokens can only be minted up to a certain time - get this time measured in seconds from epoch.
    */
-  public getTokenMintEndTimeSeconds(): number {
-    return this.contractConstants.TOKEN_MINT_END_TIMESTAMP;
-  }
+  // public getTokenMintEndTimeSeconds(): number {
+  //   return this.contractConstants.TOKEN_MINT_END_TIMESTAMP;
+  // }
 
   /**
    * Dark Forest planets can only be claimed to a certain time - get this time measured in seconds from epoch.
    */
-  public getClaimEndTimeSeconds(): number {
-    return this.contractConstants.CLAIM_END_TIMESTAMP;
-  }
+  // public getClaimEndTimeSeconds(): number {
+  //   return this.contractConstants.CLAIM_END_TIMESTAMP;
+  // }
 
   /**
    * Gets the rarity of planets in the universe
@@ -1788,7 +1803,8 @@ export class GameManager extends EventEmitter {
    * Returns whether or not the current round has ended.
    */
   public isRoundOver(): boolean {
-    return Date.now() / 1000 > this.getTokenMintEndTimeSeconds();
+    return false;
+    // return Date.now() / 1000 > this.getTokenMintEndTimeSeconds();
   }
 
   /**
@@ -1847,43 +1863,46 @@ export class GameManager extends EventEmitter {
   }
 
   public getPlayerScore(addr: EthAddress): number | undefined {
-    const player = this.players.get(addr);
-    if (!player) {
-      return undefined;
-    }
-    if (player.lastClaimTimestamp === 0) {
-      return undefined;
-    }
-    return player?.score;
+    console.log(addr);
+    return undefined;
+    // const player = this.players.get(addr);
+    // if (!player) {
+    //   return undefined;
+    // }
+    // if (player.lastClaimTimestamp === 0) {
+    //   return undefined;
+    // }
+    // return player?.score;
   }
 
-  public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
-    const player = this.players.get(addr);
-    return player?.spaceJunk;
-  }
+  // public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
+  //   const player = this.players.get(addr);
+  //   return player?.spaceJunk;
+  // }
 
-  public getPlayerSpaceJunkLimit(addr: EthAddress): number | undefined {
-    const player = this.players.get(addr);
-    return player?.spaceJunkLimit;
-  }
+  // public getPlayerSpaceJunkLimit(addr: EthAddress): number | undefined {
+  //   const player = this.players.get(addr);
+  //   return player?.spaceJunkLimit;
+  // }
 
-  public getPlayerActivateArtifactAmount(addr: EthAddress): number | undefined {
-    const player = this.players.get(addr);
-    return player?.activateArtifactAmount;
-  }
+  // public getPlayerActivateArtifactAmount(addr: EthAddress): number | undefined {
+  //   const player = this.players.get(addr);
+  //   return player?.activateArtifactAmount;
+  // }
 
-  public getPlayerBuyArtifactAmount(addr: EthAddress): number | undefined {
-    const player = this.players.get(addr);
-    return player?.buyArtifactAmount;
-  }
+  // public getPlayerBuyArtifactAmount(addr: EthAddress): number | undefined {
+  //   const player = this.players.get(addr);
+  //   return player?.buyArtifactAmount;
+  // }
 
-  public getPlayerSilver(addr: EthAddress): number | undefined {
-    const player = this.players.get(addr);
-    return player?.silver;
-  }
-  public getDefaultSpaceJunkForPlanetLevel(level: number) {
-    return this.contractConstants.PLANET_LEVEL_JUNK[level];
-  }
+  // public getPlayerSilver(addr: EthAddress): number | undefined {
+  //   const player = this.players.get(addr);
+  //   return player?.silver;
+  // }
+
+  // public getDefaultSpaceJunkForPlanetLevel(level: number) {
+  //   return this.contractConstants.PLANET_LEVEL_JUNK[level];
+  // }
 
   private initMiningManager(homeCoords: WorldCoords, cores?: number): void {
     if (this.minerManager) {
@@ -2014,57 +2033,57 @@ export class GameManager extends EventEmitter {
   /**
    * Returns info about the next time you can claim a Planet
    */
-  getNextClaimCountdownInfo(): ClaimCountdownInfo {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
-    const myLastClaimTimestamp = this.players.get(
-      this.account,
-    )?.lastClaimTimestamp;
-    return {
-      myLastClaimTimestamp: myLastClaimTimestamp || undefined,
-      currentlyClaiming:
-        !!this.entityStore.transactions.hasTransaction(isUnconfirmedClaimTx),
-      claimCooldownTime: this.contractConstants.CLAIM_PLANET_COOLDOWN,
-    };
-  }
+  // getNextClaimCountdownInfo(): ClaimCountdownInfo {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
+  //   const myLastClaimTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastClaimTimestamp;
+  //   return {
+  //     myLastClaimTimestamp: myLastClaimTimestamp || undefined,
+  //     currentlyClaiming:
+  //       !!this.entityStore.transactions.hasTransaction(isUnconfirmedClaimTx),
+  //     claimCooldownTime: this.contractConstants.CLAIM_PLANET_COOLDOWN,
+  //   };
+  // }
 
   /**
    * Returns info about the next time you can burn a Planet
    */
-  getNextBurnCountdownInfo(): BurnCountdownInfo {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
-    const myLastBurnTimestamp = this.players.get(
-      this.account,
-    )?.lastBurnTimestamp;
-    return {
-      myLastBurnTimestamp: myLastBurnTimestamp || undefined,
-      currentlyBurning:
-        !!this.entityStore.transactions.hasTransaction(isUnconfirmedBurnTx),
-      burnCooldownTime: this.contractConstants.BURN_PLANET_COOLDOWN,
-    };
-  }
+  // getNextBurnCountdownInfo(): BurnCountdownInfo {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
+  //   const myLastBurnTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastBurnTimestamp;
+  //   return {
+  //     myLastBurnTimestamp: myLastBurnTimestamp || undefined,
+  //     currentlyBurning:
+  //       !!this.entityStore.transactions.hasTransaction(isUnconfirmedBurnTx),
+  //     burnCooldownTime: this.contractConstants.BURN_PLANET_COOLDOWN,
+  //   };
+  // }
 
   /**
    * Returns info about the next time you can burn a Planet
    */
-  getNextKardashevCountdownInfo(): KardashevCountdownInfo {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
-    const myLastKardashevTimestamp = this.players.get(
-      this.account,
-    )?.lastKardashevTimestamp;
-    return {
-      myLastKardashevTimestamp: myLastKardashevTimestamp || undefined,
-      currentlyKardasheving: !!this.entityStore.transactions.hasTransaction(
-        isUnconfirmedKardashevTx,
-      ),
-      kardashevCooldownTime: this.contractConstants.KARDASHEV_PLANET_COOLDOWN,
-    };
-  }
+  // getNextKardashevCountdownInfo(): KardashevCountdownInfo {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
+  //   const myLastKardashevTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastKardashevTimestamp;
+  //   return {
+  //     myLastKardashevTimestamp: myLastKardashevTimestamp || undefined,
+  //     currentlyKardasheving: !!this.entityStore.transactions.hasTransaction(
+  //       isUnconfirmedKardashevTx,
+  //     ),
+  //     kardashevCooldownTime: this.contractConstants.KARDASHEV_PLANET_COOLDOWN,
+  //   };
+  // }
 
   /**
    * gets both deposited artifacts that are on planets i own as well as artifacts i own
@@ -2119,11 +2138,12 @@ export class GameManager extends EventEmitter {
    * Get the score of the currently logged-in account.
    */
   getMyScore(): number | undefined {
-    if (!this.account) {
-      return undefined;
-    }
-    const player = this.players.get(this.account);
-    return player?.score;
+    return undefined;
+    // if (!this.account) {
+    //   return undefined;
+    // }
+    // const player = this.players.get(this.account);
+    // return player?.score;
   }
 
   /**
@@ -2202,20 +2222,20 @@ export class GameManager extends EventEmitter {
   /**
    * Gets a map of all location IDs which have been claimed.
    */
-  getClaimedLocations(): Map<LocationId, ClaimedLocation> {
-    return this.entityStore.getClaimedLocations();
-  }
+  // getClaimedLocations(): Map<LocationId, ClaimedLocation> {
+  //   return this.entityStore.getClaimedLocations();
+  // }
 
   /**
    * Gets a map of all location IDs which have been claimed.
    */
-  getBurnedLocations(): Map<LocationId, BurnedLocation> {
-    return this.entityStore.getBurnedLocations();
-  }
+  // getBurnedLocations(): Map<LocationId, BurnedLocation> {
+  //   return this.entityStore.getBurnedLocations();
+  // }
 
-  getKardashevLocations(): Map<LocationId, BurnedLocation> {
-    return this.entityStore.getKardashevLocations();
-  }
+  // getKardashevLocations(): Map<LocationId, BurnedLocation> {
+  //   return this.entityStore.getKardashevLocations();
+  // }
 
   /**
    * Each coordinate lives in a particular type of space, determined by a smooth random
@@ -2395,33 +2415,33 @@ export class GameManager extends EventEmitter {
     }
   }
 
-  private async refreshTwitters(): Promise<void> {
-    const addressTwitters = await getAllTwitters();
-    this.setPlayerTwitters(addressTwitters);
-  }
+  // private async refreshTwitters(): Promise<void> {
+  //   const addressTwitters = await getAllTwitters();
+  //   this.setPlayerTwitters(addressTwitters);
+  // }
 
-  private setPlayerTwitters(twitters: AddressTwitterMap): void {
-    for (const [address, player] of this.players.entries()) {
-      const newPlayerTwitter = twitters[address];
-      player.twitter = newPlayerTwitter;
-    }
-    this.playersUpdated$.publish();
-  }
+  // private setPlayerTwitters(twitters: AddressTwitterMap): void {
+  //   for (const [address, player] of this.players.entries()) {
+  //     const newPlayerTwitter = twitters[address];
+  //     // player.twitter = newPlayerTwitter;
+  //   }
+  //   this.playersUpdated$.publish();
+  // }
 
   /**
    * Once you have posted the verification tweet - complete the twitter-account-linking
    * process by telling the Dark Forest webserver to look at that tweet.
    */
-  async submitVerifyTwitter(twitter: string): Promise<boolean> {
-    if (!this.account) {
-      return Promise.resolve(false);
-    }
-    const success = await verifyTwitterHandle(
-      await this.ethConnection.signMessageObject({ twitter }),
-    );
-    await this.refreshTwitters();
-    return success;
-  }
+  // async submitVerifyTwitter(twitter: string): Promise<boolean> {
+  //   if (!this.account) {
+  //     return Promise.resolve(false);
+  //   }
+  //   const success = await verifyTwitterHandle(
+  //     await this.ethConnection.signMessageObject({ twitter }),
+  //   );
+  //   await this.refreshTwitters();
+  //   return success;
+  // }
 
   private checkGameHasEnded(): boolean {
     if (Date.now() / 1000 > this.endTimeSeconds) {
@@ -2459,382 +2479,382 @@ export class GameManager extends EventEmitter {
   /**
    * Gets the timestamp (ms) of the next time that we can claim a planet.
    */
-  public getNextClaimAvailableTimestamp() {
-    // both the variables in the next line are denominated in seconds
-    return Date.now() + this.timeUntilNextClaimAvailable();
-  }
+  // public getNextClaimAvailableTimestamp() {
+  //   // both the variables in the next line are denominated in seconds
+  //   return Date.now() + this.timeUntilNextClaimAvailable();
+  // }
 
   /**
    * Gets the amount of time (ms) until the next time the current player can claim a planet.
    */
-  public timeUntilNextClaimAvailable() {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
+  // public timeUntilNextClaimAvailable() {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
 
-    const myLastClaimTimestamp = this.players.get(
-      this.account,
-    )?.lastClaimTimestamp;
+  //   const myLastClaimTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastClaimTimestamp;
 
-    // Calculation formula is the same
-    return timeUntilNextBroadcastAvailable(
-      myLastClaimTimestamp,
-      this.contractConstants.CLAIM_PLANET_COOLDOWN,
-    );
-  }
+  //   // Calculation formula is the same
+  //   return timeUntilNextBroadcastAvailable(
+  //     myLastClaimTimestamp,
+  //     this.contractConstants.CLAIM_PLANET_COOLDOWN,
+  //   );
+  // }
 
   /**
    * Gets the timestamp (ms) of the next time that we can burn a planet.
    */
-  public getNextBurnAvailableTimestamp() {
-    return Date.now() + this.timeUntilNextBurnAvailable();
-  }
+  // public getNextBurnAvailableTimestamp() {
+  //   return Date.now() + this.timeUntilNextBurnAvailable();
+  // }
 
   /**
    * Gets the amount of time (ms) until the next time the current player can burn a planet.
    */
-  public timeUntilNextBurnAvailable() {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
+  // public timeUntilNextBurnAvailable() {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
 
-    const myLastBurnTimestamp = this.players.get(
-      this.account,
-    )?.lastBurnTimestamp;
+  //   const myLastBurnTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastBurnTimestamp;
 
-    // Calculation formula is the same
-    return timeUntilNextBroadcastAvailable(
-      myLastBurnTimestamp,
-      this.contractConstants.BURN_PLANET_COOLDOWN,
-    );
-  }
+  //   // Calculation formula is the same
+  //   return timeUntilNextBroadcastAvailable(
+  //     myLastBurnTimestamp,
+  //     this.contractConstants.BURN_PLANET_COOLDOWN,
+  //   );
+  // }
 
   /**
    * Gets the timestamp (ms) of the next time that we can pink a planet.
    */
-  public getNextPinkAvailableTimestamp(planetId: LocationId) {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
-    const planet = this.getPlanetWithId(planetId);
-    if (!isLocatable(planet)) {
-      return 0;
-    }
-    const myPinkZones = this.getMyPinkZones();
-    let result = -1;
-    for (const pinkZone of myPinkZones) {
-      const burnPlanetId = pinkZone.locationId;
-      const coords = pinkZone.coords;
-      const radius = pinkZone.radius;
-      const burnPlanet = this.getPlanetWithId(burnPlanetId);
-      if (!burnPlanet) {
-        continue;
-      }
-      if (!burnPlanet.burnStartTimestamp) {
-        continue;
-      }
+  // public getNextPinkAvailableTimestamp(planetId: LocationId) {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
+  //   const planet = this.getPlanetWithId(planetId);
+  //   if (!isLocatable(planet)) {
+  //     return 0;
+  //   }
+  //   const myPinkZones = this.getMyPinkZones();
+  //   let result = -1;
+  //   for (const pinkZone of myPinkZones) {
+  //     const burnPlanetId = pinkZone.locationId;
+  //     const coords = pinkZone.coords;
+  //     const radius = pinkZone.radius;
+  //     const burnPlanet = this.getPlanetWithId(burnPlanetId);
+  //     if (!burnPlanet) {
+  //       continue;
+  //     }
+  //     if (!burnPlanet.burnStartTimestamp) {
+  //       continue;
+  //     }
 
-      const dis = this.getDistCoords(coords, planet.location.coords);
+  //     const dis = this.getDistCoords(coords, planet.location.coords);
 
-      if (dis <= radius) {
-        if (result === -1) {
-          result = burnPlanet.burnStartTimestamp;
-        } else {
-          result = result = Math.min(result, burnPlanet.burnStartTimestamp);
-        }
-      }
-    }
+  //     if (dis <= radius) {
+  //       if (result === -1) {
+  //         result = burnPlanet.burnStartTimestamp;
+  //       } else {
+  //         result = result = Math.min(result, burnPlanet.burnStartTimestamp);
+  //       }
+  //     }
+  //   }
 
-    if (result === 1) {
-      return 0;
-    } else {
-      return (result + this.contractConstants.PINK_PLANET_COOLDOWN) * 1000;
-    }
-  }
+  //   if (result === 1) {
+  //     return 0;
+  //   } else {
+  //     return (result + this.contractConstants.PINK_PLANET_COOLDOWN) * 1000;
+  //   }
+  // }
 
   /**
    * Gets the center planet for blueLocation
    */
-  public getBlueZoneCenterPlanetId(planetId: LocationId) {
-    let centerPlanetId = undefined;
-    let dis = undefined;
-    if (!this.account) {
-      throw new Error("no account set");
-    }
-    const planet = this.getPlanetWithId(planetId);
-    if (!isLocatable(planet)) {
-      return undefined;
-    }
-    const myBlueZones = this.getMyBlueZones();
+  // public getBlueZoneCenterPlanetId(planetId: LocationId) {
+  //   let centerPlanetId = undefined;
+  //   let dis = undefined;
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
+  //   const planet = this.getPlanetWithId(planetId);
+  //   if (!isLocatable(planet)) {
+  //     return undefined;
+  //   }
+  //   const myBlueZones = this.getMyBlueZones();
 
-    for (const blueZone of myBlueZones) {
-      const blueZoneCenterPlanetId = blueZone.locationId;
-      const coords = blueZone.coords;
+  //   for (const blueZone of myBlueZones) {
+  //     const blueZoneCenterPlanetId = blueZone.locationId;
+  //     const coords = blueZone.coords;
 
-      const centerPlanet = this.getPlanetWithId(blueZoneCenterPlanetId);
-      if (!centerPlanet) {
-        continue;
-      }
-      if (!centerPlanet.kardashevTimestamp) {
-        continue;
-      }
-      const distanceToZone = this.getDistCoords(coords, planet.location.coords);
-      if (
-        distanceToZone <=
-        this.contractConstants.KARDASHEV_EFFECT_RADIUS[centerPlanet.planetLevel]
-      ) {
-        if (centerPlanetId === undefined || dis === undefined) {
-          centerPlanetId = centerPlanet.locationId;
-          dis = distanceToZone;
-        } else if (distanceToZone < dis) {
-          centerPlanetId = centerPlanet.locationId;
-          dis = distanceToZone;
-        } else if (distanceToZone === dis) {
-          const tmp = this.getPlanetWithId(centerPlanetId);
-          if (!tmp) {
-            continue;
-          }
-          if (!tmp.kardashevTimestamp) {
-            continue;
-          }
-          if (!centerPlanet.kardashevTimestamp) {
-            continue;
-          }
-          if (tmp.kardashevTimestamp > centerPlanet.kardashevTimestamp) {
-            centerPlanetId = centerPlanet.locationId;
-            dis = distanceToZone;
-          }
-        }
-      }
-    }
-    return centerPlanetId;
-  }
+  //     const centerPlanet = this.getPlanetWithId(blueZoneCenterPlanetId);
+  //     if (!centerPlanet) {
+  //       continue;
+  //     }
+  //     if (!centerPlanet.kardashevTimestamp) {
+  //       continue;
+  //     }
+  //     const distanceToZone = this.getDistCoords(coords, planet.location.coords);
+  //     if (
+  //       distanceToZone <=
+  //       this.contractConstants.KARDASHEV_EFFECT_RADIUS[centerPlanet.planetLevel]
+  //     ) {
+  //       if (centerPlanetId === undefined || dis === undefined) {
+  //         centerPlanetId = centerPlanet.locationId;
+  //         dis = distanceToZone;
+  //       } else if (distanceToZone < dis) {
+  //         centerPlanetId = centerPlanet.locationId;
+  //         dis = distanceToZone;
+  //       } else if (distanceToZone === dis) {
+  //         const tmp = this.getPlanetWithId(centerPlanetId);
+  //         if (!tmp) {
+  //           continue;
+  //         }
+  //         if (!tmp.kardashevTimestamp) {
+  //           continue;
+  //         }
+  //         if (!centerPlanet.kardashevTimestamp) {
+  //           continue;
+  //         }
+  //         if (tmp.kardashevTimestamp > centerPlanet.kardashevTimestamp) {
+  //           centerPlanetId = centerPlanet.locationId;
+  //           dis = distanceToZone;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return centerPlanetId;
+  // }
 
-  public getNextKardashevAvailableTimestamp() {
-    return Date.now() + this.timeUntilNextKardashevAvailable();
-  }
+  // public getNextKardashevAvailableTimestamp() {
+  //   return Date.now() + this.timeUntilNextKardashevAvailable();
+  // }
 
   /**
    * Gets the amount of time (ms) until the next time the current player can kardashv a planet.
    */
-  public timeUntilNextKardashevAvailable() {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
+  // public timeUntilNextKardashevAvailable() {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
 
-    const myLastKardashevTimestamp = this.players.get(
-      this.account,
-    )?.lastKardashevTimestamp;
+  //   const myLastKardashevTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastKardashevTimestamp;
 
-    // Calculation formula is the same
-    return timeUntilNextBroadcastAvailable(
-      myLastKardashevTimestamp,
-      this.contractConstants.KARDASHEV_PLANET_COOLDOWN,
-    );
-  }
+  //   // Calculation formula is the same
+  //   return timeUntilNextBroadcastAvailable(
+  //     myLastKardashevTimestamp,
+  //     this.contractConstants.KARDASHEV_PLANET_COOLDOWN,
+  //   );
+  // }
 
-  public getNextBlueAvailableTimestamp(planetId: LocationId) {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
-    const planet = this.getPlanetWithId(planetId);
-    if (!isLocatable(planet)) {
-      return 0;
-    }
+  // public getNextBlueAvailableTimestamp(planetId: LocationId) {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
+  //   const planet = this.getPlanetWithId(planetId);
+  //   if (!isLocatable(planet)) {
+  //     return 0;
+  //   }
 
-    const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
-    if (centerPlanetId === undefined) {
-      return 0;
-    }
-    const centerPlanet = this.getPlanetWithId(centerPlanetId);
-    if (!centerPlanet) {
-      return 0;
-    }
-    if (!centerPlanet.kardashevTimestamp) {
-      return 0;
-    }
-    return (
-      (centerPlanet.kardashevTimestamp +
-        this.contractConstants.BLUE_PLANET_COOLDOWN) *
-      1000
-    );
-  }
+  //   const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
+  //   if (centerPlanetId === undefined) {
+  //     return 0;
+  //   }
+  //   const centerPlanet = this.getPlanetWithId(centerPlanetId);
+  //   if (!centerPlanet) {
+  //     return 0;
+  //   }
+  //   if (!centerPlanet.kardashevTimestamp) {
+  //     return 0;
+  //   }
+  //   return (
+  //     (centerPlanet.kardashevTimestamp +
+  //       this.contractConstants.BLUE_PLANET_COOLDOWN) *
+  //     1000
+  //   );
+  // }
   /**
   /**
    * Gets the timestamp (ms) of the next time that we can activate artifact.
    */
-  public getNextActivateArtifactAvailableTimestamp() {
-    return Date.now() + this.timeUntilNextActivateArtifactAvailable();
-  }
+  // public getNextActivateArtifactAvailableTimestamp() {
+  //   return Date.now() + this.timeUntilNextActivateArtifactAvailable();
+  // }
 
   /**
    * Gets the amount of time (ms) until the next time the current player can activate artifact.
    */
-  public timeUntilNextActivateArtifactAvailable() {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
+  // public timeUntilNextActivateArtifactAvailable() {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
 
-    const myLastActivateArtifactTimestamp = this.players.get(
-      this.account,
-    )?.lastActivateArtifactTimestamp;
+  //   const myLastActivateArtifactTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastActivateArtifactTimestamp;
 
-    // Calculation formula is the same
-    return timeUntilNextBroadcastAvailable(
-      myLastActivateArtifactTimestamp,
-      this.contractConstants.ACTIVATE_ARTIFACT_COOLDOWN,
-    );
-  }
+  //   // Calculation formula is the same
+  //   return timeUntilNextBroadcastAvailable(
+  //     myLastActivateArtifactTimestamp,
+  //     this.contractConstants.ACTIVATE_ARTIFACT_COOLDOWN,
+  //   );
+  // }
 
   /**
    * Gets the timestamp (ms) of the next time that we can activate artifact.
    */
-  public getNextBuyArtifactAvailableTimestamp() {
-    return Date.now() + this.timeUntilNextBuyArtifactAvailable();
-  }
+  // public getNextBuyArtifactAvailableTimestamp() {
+  //   return Date.now() + this.timeUntilNextBuyArtifactAvailable();
+  // }
 
   /**
    * Gets the amount of time (ms) until the next time the current player can activate artifact.
    */
-  public timeUntilNextBuyArtifactAvailable() {
-    if (!this.account) {
-      throw new Error("no account set");
-    }
+  // public timeUntilNextBuyArtifactAvailable() {
+  //   if (!this.account) {
+  //     throw new Error("no account set");
+  //   }
 
-    const myLastBuyArtifactTimestamp = this.players.get(
-      this.account,
-    )?.lastBuyArtifactTimestamp;
+  //   const myLastBuyArtifactTimestamp = this.players.get(
+  //     this.account,
+  //   )?.lastBuyArtifactTimestamp;
 
-    // Calculation formula is the same
-    return timeUntilNextBroadcastAvailable(
-      myLastBuyArtifactTimestamp,
-      this.contractConstants.BUY_ARTIFACT_COOLDOWN,
-    );
-  }
+  //   // Calculation formula is the same
+  //   return timeUntilNextBroadcastAvailable(
+  //     myLastBuyArtifactTimestamp,
+  //     this.contractConstants.BUY_ARTIFACT_COOLDOWN,
+  //   );
+  // }
 
-  public getCaptureZones(): Set<CaptureZone> {
-    return this.captureZoneGenerator?.getZones() || new Set();
-  }
+  // public getCaptureZones(): Set<CaptureZone> {
+  //   return this.captureZoneGenerator?.getZones() || new Set();
+  // }
 
-  public getPinkZones(): Set<PinkZone> {
-    const pinkZones = new Set<PinkZone>();
-    const burnedLocations = this.getBurnedLocations();
-    const allBurnedLocationsValues = Array.from(burnedLocations.values());
+  // public getPinkZones(): Set<PinkZone> {
+  //   const pinkZones = new Set<PinkZone>();
+  //   const burnedLocations = this.getBurnedLocations();
+  //   const allBurnedLocationsValues = Array.from(burnedLocations.values());
 
-    for (const item of allBurnedLocationsValues) {
-      const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) {
-        continue;
-      }
-      const locationId = planet.locationId;
-      const coords = { x: item.coords.x, y: item.coords.y };
-      const operator = item.operator;
-      const radius =
-        this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-          planet.planetLevel
-        ];
+  //   for (const item of allBurnedLocationsValues) {
+  //     const planet = this.getPlanetWithId(item.hash);
+  //     if (planet === undefined) {
+  //       continue;
+  //     }
+  //     const locationId = planet.locationId;
+  //     const coords = { x: item.coords.x, y: item.coords.y };
+  //     const operator = item.operator;
+  //     const radius =
+  //       this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+  //         planet.planetLevel
+  //       ];
 
-      pinkZones.add({
-        locationId: locationId,
-        coords: coords,
-        operator: operator,
-        radius: radius,
-      });
-    }
+  //     pinkZones.add({
+  //       locationId: locationId,
+  //       coords: coords,
+  //       operator: operator,
+  //       radius: radius,
+  //     });
+  //   }
 
-    return pinkZones || new Set();
-  }
+  //   return pinkZones || new Set();
+  // }
 
-  public getMyPinkZones(): Set<PinkZone> {
-    const pinkZones = new Set<PinkZone>();
-    const burnedLocations = this.getBurnedLocations();
-    const allBurnedLocationsValues = Array.from(burnedLocations.values());
+  // public getMyPinkZones(): Set<PinkZone> {
+  //   const pinkZones = new Set<PinkZone>();
+  //   const burnedLocations = this.getBurnedLocations();
+  //   const allBurnedLocationsValues = Array.from(burnedLocations.values());
 
-    for (const item of allBurnedLocationsValues) {
-      const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) {
-        continue;
-      }
-      if (planet.burnOperator !== this.account) {
-        continue;
-      }
-      const locationId = planet.locationId;
-      const coords = { x: item.coords.x, y: item.coords.y };
-      const operator = item.operator;
-      const radius =
-        this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-          planet.planetLevel
-        ];
+  //   for (const item of allBurnedLocationsValues) {
+  //     const planet = this.getPlanetWithId(item.hash);
+  //     if (planet === undefined) {
+  //       continue;
+  //     }
+  //     if (planet.burnOperator !== this.account) {
+  //       continue;
+  //     }
+  //     const locationId = planet.locationId;
+  //     const coords = { x: item.coords.x, y: item.coords.y };
+  //     const operator = item.operator;
+  //     const radius =
+  //       this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+  //         planet.planetLevel
+  //       ];
 
-      pinkZones.add({
-        locationId: locationId,
-        coords: coords,
-        operator: operator,
-        radius: radius,
-      });
-    }
+  //     pinkZones.add({
+  //       locationId: locationId,
+  //       coords: coords,
+  //       operator: operator,
+  //       radius: radius,
+  //     });
+  //   }
 
-    return pinkZones || new Set();
-  }
+  //   return pinkZones || new Set();
+  // }
 
-  public getBlueZones(): Set<PinkZone> {
-    const blueZones = new Set<PinkZone>();
-    const kardashevLocations = this.getKardashevLocations();
-    const allKardashevLocationsValues = Array.from(kardashevLocations.values());
+  // public getBlueZones(): Set<PinkZone> {
+  //   const blueZones = new Set<PinkZone>();
+  //   const kardashevLocations = this.getKardashevLocations();
+  //   const allKardashevLocationsValues = Array.from(kardashevLocations.values());
 
-    for (const item of allKardashevLocationsValues) {
-      const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) {
-        continue;
-      }
-      const locationId = planet.locationId;
-      const coords = { x: item.coords.x, y: item.coords.y };
-      const operator = item.operator;
-      const radius =
-        this.getContractConstants().KARDASHEV_EFFECT_RADIUS[planet.planetLevel];
+  //   for (const item of allKardashevLocationsValues) {
+  //     const planet = this.getPlanetWithId(item.hash);
+  //     if (planet === undefined) {
+  //       continue;
+  //     }
+  //     const locationId = planet.locationId;
+  //     const coords = { x: item.coords.x, y: item.coords.y };
+  //     const operator = item.operator;
+  //     const radius =
+  //       this.getContractConstants().KARDASHEV_EFFECT_RADIUS[planet.planetLevel];
 
-      blueZones.add({
-        locationId: locationId,
-        coords: coords,
-        operator: operator,
-        radius: radius,
-      });
-    }
+  //     blueZones.add({
+  //       locationId: locationId,
+  //       coords: coords,
+  //       operator: operator,
+  //       radius: radius,
+  //     });
+  //   }
 
-    return blueZones || new Set();
-  }
+  //   return blueZones || new Set();
+  // }
 
-  public getMyBlueZones(): Set<PinkZone> {
-    const blueZones = new Set<PinkZone>();
-    const kardashevLocations = this.getKardashevLocations();
-    const allKardashevLocationsValues = Array.from(kardashevLocations.values());
+  // public getMyBlueZones(): Set<PinkZone> {
+  //   const blueZones = new Set<PinkZone>();
+  //   const kardashevLocations = this.getKardashevLocations();
+  //   const allKardashevLocationsValues = Array.from(kardashevLocations.values());
 
-    for (const item of allKardashevLocationsValues) {
-      const planet = this.getPlanetWithId(item.hash);
-      if (planet === undefined) {
-        continue;
-      }
-      if (planet.kardashevOperator !== this.account) {
-        continue;
-      }
-      const locationId = planet.locationId;
-      const coords = { x: item.coords.x, y: item.coords.y };
-      const operator = item.operator;
-      const radius =
-        this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-          planet.planetLevel
-        ];
+  //   for (const item of allKardashevLocationsValues) {
+  //     const planet = this.getPlanetWithId(item.hash);
+  //     if (planet === undefined) {
+  //       continue;
+  //     }
+  //     if (planet.kardashevOperator !== this.account) {
+  //       continue;
+  //     }
+  //     const locationId = planet.locationId;
+  //     const coords = { x: item.coords.x, y: item.coords.y };
+  //     const operator = item.operator;
+  //     const radius =
+  //       this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+  //         planet.planetLevel
+  //       ];
 
-      blueZones.add({
-        locationId: locationId,
-        coords: coords,
-        operator: operator,
-        radius: radius,
-      });
-    }
+  //     blueZones.add({
+  //       locationId: locationId,
+  //       coords: coords,
+  //       operator: operator,
+  //       radius: radius,
+  //     });
+  //   }
 
-    return blueZones || new Set();
-  }
+  //   return blueZones || new Set();
+  // }
 
   /**
    * Reveals a planet's location on-chain.
@@ -2932,780 +2952,780 @@ export class GameManager extends EventEmitter {
   /**
    * claimLocation reveals a planet's location on-chain.
    */
-  public async claimLocation(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedClaim>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
+  // public async claimLocation(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedClaim>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
 
-      if (this.checkGameHasEnded()) {
-        throw new Error("game has ended");
-      }
+  //     if (this.checkGameHasEnded()) {
+  //       throw new Error("game has ended");
+  //     }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      if (!planet) {
-        throw new Error("you can't claim a planet you haven't discovered");
-      }
+  //     if (!planet) {
+  //       throw new Error("you can't claim a planet you haven't discovered");
+  //     }
 
-      if (planet.owner !== this.account) {
-        throw new Error("you can't claim a planet you down't own");
-      }
+  //     if (planet.owner !== this.account) {
+  //       throw new Error("you can't claim a planet you down't own");
+  //     }
 
-      if (planet.claimer === this.account) {
-        throw new Error("you've already claimed this planet");
-      }
+  //     if (planet.claimer === this.account) {
+  //       throw new Error("you've already claimed this planet");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error(
-          "you can't reveal a planet whose coordinates you don't know",
-        );
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error(
+  //         "you can't reveal a planet whose coordinates you don't know",
+  //       );
+  //     }
 
-      if (planet.transactions?.hasTransaction(isUnconfirmedClaimTx)) {
-        throw new Error("you're already claiming this planet's location");
-      }
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedClaimTx)) {
+  //       throw new Error("you're already claiming this planet's location");
+  //     }
 
-      if (planet.planetLevel < PLANET_CLAIM_MIN_LEVEL) {
-        throw new Error(
-          `you can't claim a planet whose level is less than ${PLANET_CLAIM_MIN_LEVEL}`,
-        );
-      }
+  //     if (planet.planetLevel < PLANET_CLAIM_MIN_LEVEL) {
+  //       throw new Error(
+  //         `you can't claim a planet whose level is less than ${PLANET_CLAIM_MIN_LEVEL}`,
+  //       );
+  //     }
 
-      if (this.entityStore.transactions.hasTransaction(isUnconfirmedClaimTx)) {
-        throw new Error("you're already broadcasting coordinates");
-      }
+  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedClaimTx)) {
+  //       throw new Error("you're already broadcasting coordinates");
+  //     }
 
-      const myLastClaimTimestamp = this.players.get(
-        this.account,
-      )?.lastClaimTimestamp;
-      if (
-        myLastClaimTimestamp &&
-        Date.now() < this.getNextClaimAvailableTimestamp()
-      ) {
-        throw new Error("still on cooldown for claiming");
-      }
+  //     const myLastClaimTimestamp = this.players.get(
+  //       this.account,
+  //     )?.lastClaimTimestamp;
+  //     if (
+  //       myLastClaimTimestamp &&
+  //       Date.now() < this.getNextClaimAvailableTimestamp()
+  //     ) {
+  //       throw new Error("still on cooldown for claiming");
+  //     }
 
-      // this is shitty. used for the popup window
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-claimLocationId`,
-        planetId,
-      );
+  //     // this is shitty. used for the popup window
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-claimLocationId`,
+  //       planetId,
+  //     );
 
-      const getArgs = async () => {
-        const revealArgs = await this.snarkHelper.getRevealArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-        );
-        this.terminal.current?.println(
-          "REVEAL: calculated SNARK with args:",
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.newline();
+  //     const getArgs = async () => {
+  //       const revealArgs = await this.snarkHelper.getRevealArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //       );
+  //       this.terminal.current?.println(
+  //         "REVEAL: calculated SNARK with args:",
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.println(
+  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.newline();
 
-        return revealArgs;
-      };
+  //       return revealArgs;
+  //     };
 
-      const txIntent: UnconfirmedClaim = {
-        methodName: "claimLocation",
-        locationId: planetId,
-        location: planet.location,
-        contract: this.contractsAPI.contract,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedClaim = {
+  //       methodName: "claimLocation",
+  //       locationId: planetId,
+  //       location: planet.location,
+  //       contract: this.contractsAPI.contract,
+  //       args: getArgs(),
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     // Always await the submitTransaction so we can catch rejections
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "claimLocation",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "claimLocation",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
   /**
    * burnLocation reveals a planet's location on-chain.
    */
 
-  public async burnLocation(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedBurn>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
+  // public async burnLocation(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedBurn>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
 
-      if (this.checkGameHasEnded()) {
-        throw new Error("game has ended");
-      }
+  //     if (this.checkGameHasEnded()) {
+  //       throw new Error("game has ended");
+  //     }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      if (!planet) {
-        throw new Error("you can't burn a planet you haven't discovered");
-      }
+  //     if (!planet) {
+  //       throw new Error("you can't burn a planet you haven't discovered");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error(
-          "you can't reveal a planet whose coordinates you don't know",
-        );
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error(
+  //         "you can't reveal a planet whose coordinates you don't know",
+  //       );
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't burn destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't burn destroyed/frozen planets");
+  //     }
 
-      if (planet.planetLevel <= 2) {
-        throw new Error("require planetLevel>=3");
-      }
+  //     if (planet.planetLevel <= 2) {
+  //       throw new Error("require planetLevel>=3");
+  //     }
 
-      if (planet.owner !== this.account) {
-        throw new Error("you don't own this planet");
-      }
+  //     if (planet.owner !== this.account) {
+  //       throw new Error("you don't own this planet");
+  //     }
 
-      if (
-        planet.burnOperator !== undefined &&
-        planet.burnOperator !== EMPTY_ADDRESS
-      ) {
-        throw new Error("someone already burn this planet");
-      }
+  //     if (
+  //       planet.burnOperator !== undefined &&
+  //       planet.burnOperator !== EMPTY_ADDRESS
+  //     ) {
+  //       throw new Error("someone already burn this planet");
+  //     }
 
-      if (planet.transactions?.hasTransaction(isUnconfirmedBurnTx)) {
-        throw new Error("you're already burning this planet's location");
-      }
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedBurnTx)) {
+  //       throw new Error("you're already burning this planet's location");
+  //     }
 
-      if (this.entityStore.transactions.hasTransaction(isUnconfirmedBurnTx)) {
-        throw new Error("you're already burning this planet's location");
-      }
+  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedBurnTx)) {
+  //       throw new Error("you're already burning this planet's location");
+  //     }
 
-      const myLastBurnTimestamp = this.players.get(
-        this.account,
-      )?.lastBurnTimestamp;
+  //     const myLastBurnTimestamp = this.players.get(
+  //       this.account,
+  //     )?.lastBurnTimestamp;
 
-      if (
-        myLastBurnTimestamp &&
-        Date.now() < this.getNextBurnAvailableTimestamp()
-      ) {
-        throw new Error("still on cooldown for burning");
-      }
+  //     if (
+  //       myLastBurnTimestamp &&
+  //       Date.now() < this.getNextBurnAvailableTimestamp()
+  //     ) {
+  //       throw new Error("still on cooldown for burning");
+  //     }
 
-      const playerSilver = this.players.get(this.account)?.silver;
-      if (
-        playerSilver &&
-        playerSilver <
-          this.contractConstants.BURN_PLANET_REQUIRE_SILVER_AMOUNTS[
-            planet.planetLevel
-          ]
-      ) {
-        throw new Error("player silver is not enough");
-      }
+  //     const playerSilver = this.players.get(this.account)?.silver;
+  //     if (
+  //       playerSilver &&
+  //       playerSilver <
+  //         this.contractConstants.BURN_PLANET_REQUIRE_SILVER_AMOUNTS[
+  //           planet.planetLevel
+  //         ]
+  //     ) {
+  //       throw new Error("player silver is not enough");
+  //     }
 
-      const activeArtifact = this.getActiveArtifact(planet);
-      if (
-        !activeArtifact ||
-        activeArtifact.artifactType !== ArtifactType.Bomb
-      ) {
-        throw new Error("no active bomb on this planet");
-      }
+  //     const activeArtifact = this.getActiveArtifact(planet);
+  //     if (
+  //       !activeArtifact ||
+  //       activeArtifact.artifactType !== ArtifactType.Bomb
+  //     ) {
+  //       throw new Error("no active bomb on this planet");
+  //     }
 
-      // this is shitty. used for the popup window
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-burnLocationId`,
-        planetId,
-      );
+  //     // this is shitty. used for the popup window
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-burnLocationId`,
+  //       planetId,
+  //     );
 
-      const getArgs = async () => {
-        const revealArgs = await this.snarkHelper.getRevealArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-        );
-        this.terminal.current?.println(
-          "REVEAL: calculated SNARK with args:",
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.newline();
+  //     const getArgs = async () => {
+  //       const revealArgs = await this.snarkHelper.getRevealArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //       );
+  //       this.terminal.current?.println(
+  //         "REVEAL: calculated SNARK with args:",
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.println(
+  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.newline();
 
-        return revealArgs;
-      };
+  //       return revealArgs;
+  //     };
 
-      const txIntent: UnconfirmedBurn = {
-        methodName: "burnLocation",
-        locationId: planetId,
-        location: planet.location,
-        contract: this.contractsAPI.contract,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedBurn = {
+  //       methodName: "burnLocation",
+  //       locationId: planetId,
+  //       location: planet.location,
+  //       contract: this.contractsAPI.contract,
+  //       args: getArgs(),
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     // Always await the submitTransaction so we can catch rejections
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "burnLocation",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "burnLocation",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
-  public checkPlanetCanPink(planetId: LocationId): boolean {
-    if (!this.account) {
-      return false;
-    }
-    const planet = this.getPlanetWithId(planetId);
-    if (!planet) {
-      return false;
-    }
-    if (!isLocatable(planet)) {
-      return false;
-    }
-    const myPinkZones = this.getMyPinkZones();
-    for (const pinkZone of myPinkZones) {
-      const coords = pinkZone.coords;
-      const radius = pinkZone.radius;
+  // public checkPlanetCanPink(planetId: LocationId): boolean {
+  //   if (!this.account) {
+  //     return false;
+  //   }
+  //   const planet = this.getPlanetWithId(planetId);
+  //   if (!planet) {
+  //     return false;
+  //   }
+  //   if (!isLocatable(planet)) {
+  //     return false;
+  //   }
+  //   const myPinkZones = this.getMyPinkZones();
+  //   for (const pinkZone of myPinkZones) {
+  //     const coords = pinkZone.coords;
+  //     const radius = pinkZone.radius;
 
-      const dis = this.getDistCoords(coords, planet.location.coords);
+  //     const dis = this.getDistCoords(coords, planet.location.coords);
 
-      if (dis <= radius) {
-        return true;
-      }
-    }
-    return false;
-  }
+  //     if (dis <= radius) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 
   /**
    * return isCurrentlyPinking
    */
-  public isCurrentlyPinking(): boolean {
-    return !!this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx);
-  }
+  // public isCurrentlyPinking(): boolean {
+  //   return !!this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx);
+  // }
   /**
    * pinkLocation reveals a planet's location on-chain.
    */
 
-  public async pinkLocation(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedPink>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
+  // public async pinkLocation(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedPink>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
 
-      if (this.checkGameHasEnded()) {
-        throw new Error("game has ended");
-      }
+  //     if (this.checkGameHasEnded()) {
+  //       throw new Error("game has ended");
+  //     }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      if (!planet) {
-        throw new Error("you can't pink a planet you haven't discovered");
-      }
+  //     if (!planet) {
+  //       throw new Error("you can't pink a planet you haven't discovered");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error(
-          "you can't pink a planet whose coordinates you don't know",
-        );
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error(
+  //         "you can't pink a planet whose coordinates you don't know",
+  //       );
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't pink destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't pink destroyed/frozen planets");
+  //     }
 
-      // if (planet.operator !== undefined && planet.operator !== EMPTY_ADDRESS) {
-      //   throw new Error('someone already burn this planet');
-      // }
+  //     // if (planet.operator !== undefined && planet.operator !== EMPTY_ADDRESS) {
+  //     //   throw new Error('someone already burn this planet');
+  //     // }
 
-      if (planet.transactions?.hasTransaction(isUnconfirmedPinkTx)) {
-        throw new Error("you're already pinking this planet's location 1");
-      }
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedPinkTx)) {
+  //       throw new Error("you're already pinking this planet's location 1");
+  //     }
 
-      if (this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx)) {
-        throw new Error("you're already pinking this planet's location 2");
-      }
+  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx)) {
+  //       throw new Error("you're already pinking this planet's location 2");
+  //     }
 
-      // const myLastBurnTimestamp = this.players.get(this.account)?.lastBurnTimestamp;
+  //     // const myLastBurnTimestamp = this.players.get(this.account)?.lastBurnTimestamp;
 
-      // if (myLastBurnTimestamp && Date.now() < this.getNextBurnAvailableTimestamp()) {
-      //   throw new Error('still on cooldown for burning');
-      // }
-      if (!this.checkPlanetCanPink(planet.locationId)) {
-        throw new Error("this planet don't in your pink zones");
-      }
+  //     // if (myLastBurnTimestamp && Date.now() < this.getNextBurnAvailableTimestamp()) {
+  //     //   throw new Error('still on cooldown for burning');
+  //     // }
+  //     if (!this.checkPlanetCanPink(planet.locationId)) {
+  //       throw new Error("this planet don't in your pink zones");
+  //     }
 
-      // this is shitty. used for the popup window
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
-        planetId,
-      );
+  //     // this is shitty. used for the popup window
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
+  //       planetId,
+  //     );
 
-      const getArgs = async () => {
-        const revealArgs = await this.snarkHelper.getRevealArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-        );
-        this.terminal.current?.println(
-          "REVEAL: calculated SNARK with args:",
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.newline();
+  //     const getArgs = async () => {
+  //       const revealArgs = await this.snarkHelper.getRevealArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //       );
+  //       this.terminal.current?.println(
+  //         "REVEAL: calculated SNARK with args:",
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.println(
+  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.newline();
 
-        return revealArgs;
-      };
+  //       return revealArgs;
+  //     };
 
-      const txIntent: UnconfirmedPink = {
-        methodName: "pinkLocation",
-        locationId: planetId,
-        location: planet.location,
-        contract: this.contractsAPI.contract,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedPink = {
+  //       methodName: "pinkLocation",
+  //       locationId: planetId,
+  //       location: planet.location,
+  //       contract: this.contractsAPI.contract,
+  //       args: getArgs(),
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     // Always await the submitTransaction so we can catch rejections
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "pinkLocation",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "pinkLocation",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
-  public async kardashev(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedKardashev>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
+  // public async kardashev(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedKardashev>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
 
-      if (this.checkGameHasEnded()) {
-        throw new Error("game has ended");
-      }
+  //     if (this.checkGameHasEnded()) {
+  //       throw new Error("game has ended");
+  //     }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      if (!planet) {
-        throw new Error("you can't kardashev a planet you haven't discovered");
-      }
+  //     if (!planet) {
+  //       throw new Error("you can't kardashev a planet you haven't discovered");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error(
-          "you can't reveal a planet whose coordinates you don't know",
-        );
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error(
+  //         "you can't reveal a planet whose coordinates you don't know",
+  //       );
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't kardashev destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't kardashev destroyed/frozen planets");
+  //     }
 
-      if (planet.planetLevel <= 2) {
-        throw new Error("require planet level>=3");
-      }
+  //     if (planet.planetLevel <= 2) {
+  //       throw new Error("require planet level>=3");
+  //     }
 
-      if (
-        planet.kardashevOperator !== undefined &&
-        planet.kardashevOperator !== EMPTY_ADDRESS
-      ) {
-        throw new Error("someone already kardashev this planet");
-      }
+  //     if (
+  //       planet.kardashevOperator !== undefined &&
+  //       planet.kardashevOperator !== EMPTY_ADDRESS
+  //     ) {
+  //       throw new Error("someone already kardashev this planet");
+  //     }
 
-      if (planet.transactions?.hasTransaction(isUnconfirmedKardashevTx)) {
-        throw new Error("you're already kardasheving this planet's location");
-      }
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedKardashevTx)) {
+  //       throw new Error("you're already kardasheving this planet's location");
+  //     }
 
-      if (
-        this.entityStore.transactions.hasTransaction(isUnconfirmedKardashevTx)
-      ) {
-        throw new Error("you're already kardasheving coordinates");
-      }
+  //     if (
+  //       this.entityStore.transactions.hasTransaction(isUnconfirmedKardashevTx)
+  //     ) {
+  //       throw new Error("you're already kardasheving coordinates");
+  //     }
 
-      const myLastKardashevTimestamp = this.players.get(
-        this.account,
-      )?.lastKardashevTimestamp;
+  //     const myLastKardashevTimestamp = this.players.get(
+  //       this.account,
+  //     )?.lastKardashevTimestamp;
 
-      if (
-        myLastKardashevTimestamp &&
-        Date.now() < this.getNextKardashevAvailableTimestamp()
-      ) {
-        throw new Error("still on cooldown for kardasheving");
-      }
+  //     if (
+  //       myLastKardashevTimestamp &&
+  //       Date.now() < this.getNextKardashevAvailableTimestamp()
+  //     ) {
+  //       throw new Error("still on cooldown for kardasheving");
+  //     }
 
-      const playerSilver = this.players.get(this.account)?.silver;
-      if (
-        playerSilver &&
-        playerSilver <
-          this.contractConstants.KARDASHEV_REQUIRE_SILVER_AMOUNTS[
-            planet.planetLevel
-          ]
-      ) {
-        throw new Error("player silver is not enough");
-      }
+  //     const playerSilver = this.players.get(this.account)?.silver;
+  //     if (
+  //       playerSilver &&
+  //       playerSilver <
+  //         this.contractConstants.KARDASHEV_REQUIRE_SILVER_AMOUNTS[
+  //           planet.planetLevel
+  //         ]
+  //     ) {
+  //       throw new Error("player silver is not enough");
+  //     }
 
-      const activeArtifact = this.getActiveArtifact(planet);
-      if (
-        !activeArtifact ||
-        activeArtifact.artifactType !== ArtifactType.Kardashev
-      ) {
-        throw new Error("no active kardashev on this planet");
-      }
+  //     const activeArtifact = this.getActiveArtifact(planet);
+  //     if (
+  //       !activeArtifact ||
+  //       activeArtifact.artifactType !== ArtifactType.Kardashev
+  //     ) {
+  //       throw new Error("no active kardashev on this planet");
+  //     }
 
-      if (
-        Date.now() - 1000 * activeArtifact.lastActivated <=
-        1000 * this.contractConstants.KARDASHEV_PLANET_COOLDOWN
-      ) {
-        throw new Error("still on cooldown for kardasheving");
-      }
+  //     if (
+  //       Date.now() - 1000 * activeArtifact.lastActivated <=
+  //       1000 * this.contractConstants.KARDASHEV_PLANET_COOLDOWN
+  //     ) {
+  //       throw new Error("still on cooldown for kardasheving");
+  //     }
 
-      // this is shitty. used for the popup window
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-kardashevLocationId`,
-        planetId,
-      );
+  //     // this is shitty. used for the popup window
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-kardashevLocationId`,
+  //       planetId,
+  //     );
 
-      const getArgs = async () => {
-        const revealArgs = await this.snarkHelper.getRevealArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-        );
-        this.terminal.current?.println(
-          "REVEAL: calculated SNARK with args:",
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.newline();
+  //     const getArgs = async () => {
+  //       const revealArgs = await this.snarkHelper.getRevealArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //       );
+  //       this.terminal.current?.println(
+  //         "REVEAL: calculated SNARK with args:",
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.println(
+  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.newline();
 
-        return revealArgs;
-      };
+  //       return revealArgs;
+  //     };
 
-      const txIntent: UnconfirmedKardashev = {
-        methodName: "kardashev",
-        locationId: planetId,
-        location: planet.location,
-        contract: this.contractsAPI.contract,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedKardashev = {
+  //       methodName: "kardashev",
+  //       locationId: planetId,
+  //       location: planet.location,
+  //       contract: this.contractsAPI.contract,
+  //       args: getArgs(),
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     // Always await the submitTransaction so we can catch rejections
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "kardashev",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "kardashev",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
-  public checkPlanetCanBlue(planetId: LocationId): boolean {
-    if (!this.account) {
-      return false;
-    }
-    const planet = this.getPlanetWithId(planetId);
-    if (!planet) {
-      return false;
-    }
-    if (!isLocatable(planet)) {
-      return false;
-    }
-    const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
+  // public checkPlanetCanBlue(planetId: LocationId): boolean {
+  //   if (!this.account) {
+  //     return false;
+  //   }
+  //   const planet = this.getPlanetWithId(planetId);
+  //   if (!planet) {
+  //     return false;
+  //   }
+  //   if (!isLocatable(planet)) {
+  //     return false;
+  //   }
+  //   const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
 
-    if (!centerPlanetId) {
-      return false;
-    }
-    if (centerPlanetId === planetId) {
-      return false;
-    }
-    return true;
-  }
+  //   if (!centerPlanetId) {
+  //     return false;
+  //   }
+  //   if (centerPlanetId === planetId) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   /**
    * return isCurrentlyBlueing
    */
-  public isCurrentlyBlueing(): boolean {
-    return !!this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx);
-  }
+  // public isCurrentlyBlueing(): boolean {
+  //   return !!this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx);
+  // }
 
   /**
    * blueLocation reveals a planet's location on-chain.
    */
 
-  public async blueLocation(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedBlue>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
+  // public async blueLocation(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedBlue>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
 
-      if (this.checkGameHasEnded()) {
-        throw new Error("game has ended");
-      }
+  //     if (this.checkGameHasEnded()) {
+  //       throw new Error("game has ended");
+  //     }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      if (!planet) {
-        throw new Error("you can't blue a planet you haven't discovered");
-      }
+  //     if (!planet) {
+  //       throw new Error("you can't blue a planet you haven't discovered");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error(
-          "you can't blue a planet whose coordinates you don't know",
-        );
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error(
+  //         "you can't blue a planet whose coordinates you don't know",
+  //       );
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't blue destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't blue destroyed/frozen planets");
+  //     }
 
-      if (planet.planetLevel < 3) {
-        throw new Error("planet level requires >= 3");
-      }
+  //     if (planet.planetLevel < 3) {
+  //       throw new Error("planet level requires >= 3");
+  //     }
 
-      const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
-      if (centerPlanetId === undefined) {
-        throw new Error("this planet is not in your blue zones");
-      }
+  //     const centerPlanetId = this.getBlueZoneCenterPlanetId(planetId);
+  //     if (centerPlanetId === undefined) {
+  //       throw new Error("this planet is not in your blue zones");
+  //     }
 
-      const centerPlanet = this.getPlanetWithId(centerPlanetId);
+  //     const centerPlanet = this.getPlanetWithId(centerPlanetId);
 
-      if (
-        centerPlanet === undefined ||
-        centerPlanet.kardashevTimestamp === undefined
-      ) {
-        throw new Error("can't blue this planet");
-      }
+  //     if (
+  //       centerPlanet === undefined ||
+  //       centerPlanet.kardashevTimestamp === undefined
+  //     ) {
+  //       throw new Error("can't blue this planet");
+  //     }
 
-      if (centerPlanetId === planetId) {
-        throw new Error("can't blue center planet");
-      }
+  //     if (centerPlanetId === planetId) {
+  //       throw new Error("can't blue center planet");
+  //     }
 
-      const timeCheckPassed =
-        this.getNextBlueAvailableTimestamp(planetId) <= Date.now();
+  //     const timeCheckPassed =
+  //       this.getNextBlueAvailableTimestamp(planetId) <= Date.now();
 
-      if (!timeCheckPassed) {
-        throw new Error("still in cooldown time");
-      }
+  //     if (!timeCheckPassed) {
+  //       throw new Error("still in cooldown time");
+  //     }
 
-      if (
-        centerPlanet.owner !== planet.owner ||
-        centerPlanet.owner !== this.account
-      ) {
-        throw new Error("center planet need to be yours");
-      }
+  //     if (
+  //       centerPlanet.owner !== planet.owner ||
+  //       centerPlanet.owner !== this.account
+  //     ) {
+  //       throw new Error("center planet need to be yours");
+  //     }
 
-      if (planet.transactions?.hasTransaction(isUnconfirmedBlueTx)) {
-        throw new Error("you're already blueing this planet's location 1");
-      }
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedBlueTx)) {
+  //       throw new Error("you're already blueing this planet's location 1");
+  //     }
 
-      if (this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx)) {
-        throw new Error("you're already blueing this planet's location 2");
-      }
+  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx)) {
+  //       throw new Error("you're already blueing this planet's location 2");
+  //     }
 
-      // this is shitty. used for the popup window
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-blueLocationId`,
-        planetId,
-      );
+  //     // this is shitty. used for the popup window
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-blueLocationId`,
+  //       planetId,
+  //     );
 
-      const getArgs = async () => {
-        const revealArgs = await this.snarkHelper.getRevealArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-        );
-        this.terminal.current?.println(
-          "REVEAL: calculated SNARK with args:",
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.newline();
+  //     const getArgs = async () => {
+  //       const revealArgs = await this.snarkHelper.getRevealArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //       );
+  //       this.terminal.current?.println(
+  //         "REVEAL: calculated SNARK with args:",
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.println(
+  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.newline();
 
-        return revealArgs;
-      };
+  //       return revealArgs;
+  //     };
 
-      const txIntent: UnconfirmedBlue = {
-        methodName: "blueLocation",
-        locationId: planetId,
-        location: planet.location,
-        contract: this.contractsAPI.contract,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedBlue = {
+  //       methodName: "blueLocation",
+  //       locationId: planetId,
+  //       location: planet.location,
+  //       contract: this.contractsAPI.contract,
+  //       args: getArgs(),
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     // Always await the submitTransaction so we can catch rejections
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "blueLocation",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "blueLocation",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
-  public async invadePlanet(locationId: LocationId) {
-    try {
-      if (!this.captureZoneGenerator) {
-        throw new Error("Capture zones are not enabled in this game");
-      }
+  // public async invadePlanet(locationId: LocationId) {
+  //   try {
+  //     if (!this.captureZoneGenerator) {
+  //       throw new Error("Capture zones are not enabled in this game");
+  //     }
 
-      const planet = this.entityStore.getPlanetWithId(locationId);
+  //     const planet = this.entityStore.getPlanetWithId(locationId);
 
-      if (!planet || !isLocatable(planet)) {
-        throw new Error("you can't invade a planet you haven't discovered");
-      }
+  //     if (!planet || !isLocatable(planet)) {
+  //       throw new Error("you can't invade a planet you haven't discovered");
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't invade destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't invade destroyed/frozen planets");
+  //     }
 
-      if (planet.invader !== EMPTY_ADDRESS) {
-        throw new Error(
-          "you can't invade planets that have already been invaded",
-        );
-      }
+  //     if (planet.invader !== EMPTY_ADDRESS) {
+  //       throw new Error(
+  //         "you can't invade planets that have already been invaded",
+  //       );
+  //     }
 
-      if (planet.owner !== this.account) {
-        throw new Error("you can only invade planets you own");
-      }
+  //     if (planet.owner !== this.account) {
+  //       throw new Error("you can only invade planets you own");
+  //     }
 
-      if (!this.captureZoneGenerator.isInZone(planet.locationId)) {
-        throw new Error(
-          "you can't invade planets that are not in a capture zone",
-        );
-      }
+  //     if (!this.captureZoneGenerator.isInZone(planet.locationId)) {
+  //       throw new Error(
+  //         "you can't invade planets that are not in a capture zone",
+  //       );
+  //     }
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-invadePlanet`,
-        locationId,
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-invadePlanet`,
+  //       locationId,
+  //     );
 
-      const getArgs = async () => {
-        const revealArgs = await this.snarkHelper.getRevealArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-        );
+  //     const getArgs = async () => {
+  //       const revealArgs = await this.snarkHelper.getRevealArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //       );
 
-        this.terminal.current?.println(
-          "REVEAL: calculated SNARK with args:",
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-          TerminalTextStyle.Sub,
-        );
-        this.terminal.current?.newline();
+  //       this.terminal.current?.println(
+  //         "REVEAL: calculated SNARK with args:",
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.println(
+  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+  //         TerminalTextStyle.Sub,
+  //       );
+  //       this.terminal.current?.newline();
 
-        return revealArgs;
-      };
+  //       return revealArgs;
+  //     };
 
-      const txIntent: UnconfirmedInvadePlanet = {
-        methodName: "invadePlanet",
-        contract: this.contractsAPI.contract,
-        locationId,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedInvadePlanet = {
+  //       methodName: "invadePlanet",
+  //       contract: this.contractsAPI.contract,
+  //       locationId,
+  //       args: getArgs(),
+  //     };
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "invadePlanet",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "invadePlanet",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
-  public async capturePlanet(locationId: LocationId) {
-    try {
-      const planet = this.entityStore.getPlanetWithId(locationId);
+  // public async capturePlanet(locationId: LocationId) {
+  //   try {
+  //     const planet = this.entityStore.getPlanetWithId(locationId);
 
-      if (!planet) {
-        throw new Error("planet is not loaded");
-      }
+  //     if (!planet) {
+  //       throw new Error("planet is not loaded");
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't capture destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't capture destroyed/frozen planets");
+  //     }
 
-      if (planet.capturer !== EMPTY_ADDRESS) {
-        throw new Error(
-          "you can't capture planets that have already been captured",
-        );
-      }
+  //     if (planet.capturer !== EMPTY_ADDRESS) {
+  //       throw new Error(
+  //         "you can't capture planets that have already been captured",
+  //       );
+  //     }
 
-      if (planet.owner !== this.account) {
-        throw new Error("you can only capture planets you own");
-      }
+  //     if (planet.owner !== this.account) {
+  //       throw new Error("you can only capture planets you own");
+  //     }
 
-      if (planet.energy < planet.energyCap * 0.8) {
-        throw new Error("the planet needs >80% energy before capturing");
-      }
+  //     if (planet.energy < planet.energyCap * 0.8) {
+  //       throw new Error("the planet needs >80% energy before capturing");
+  //     }
 
-      if (
-        !planet.invadeStartBlock ||
-        this.ethConnection.getCurrentBlockNumber() <
-          planet.invadeStartBlock +
-            this.contractConstants.CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED
-      ) {
-        throw new Error(
-          `you need to hold a planet for ${this.contractConstants.CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED} blocks before capturing`,
-        );
-      }
+  //     if (
+  //       !planet.invadeStartBlock ||
+  //       this.ethConnection.getCurrentBlockNumber() <
+  //         planet.invadeStartBlock +
+  //           this.contractConstants.CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED
+  //     ) {
+  //       throw new Error(
+  //         `you need to hold a planet for ${this.contractConstants.CAPTURE_ZONE_HOLD_BLOCKS_REQUIRED} blocks before capturing`,
+  //       );
+  //     }
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-capturePlanet`,
-        locationId,
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-capturePlanet`,
+  //       locationId,
+  //     );
 
-      const txIntent: UnconfirmedCapturePlanet = {
-        methodName: "capturePlanet",
-        contract: this.contractsAPI.contract,
-        locationId,
-        args: Promise.resolve([locationIdToDecStr(locationId)]),
-      };
+  //     const txIntent: UnconfirmedCapturePlanet = {
+  //       methodName: "capturePlanet",
+  //       contract: this.contractsAPI.contract,
+  //       locationId,
+  //       args: Promise.resolve([locationIdToDecStr(locationId)]),
+  //     };
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "capturePlanet",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "capturePlanet",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
   /**
    * Attempts to join the game. Should not be called once you've already joined.
@@ -3788,7 +3808,7 @@ export class GameManager extends EventEmitter {
       // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
-          const entryFee = await this.contractsAPI.getEntryFee();
+          const entryFee = 0; //await this.contractsAPI.getEntryFee();
           console.log("entry fee: ", entryFee.toString());
           localStorage.setItem(
             `${this.getAccount()?.toLowerCase()}-entryFee`,
@@ -3807,7 +3827,7 @@ export class GameManager extends EventEmitter {
               await sleep(100);
             }
 
-            if (await beforeRetry(e)) {
+            if (await beforeRetry(e as Error)) {
               continue;
             }
           } else {
@@ -3816,7 +3836,7 @@ export class GameManager extends EventEmitter {
         }
       }
 
-      await this.getSpaceships();
+      // await this.getSpaceships();
       await this.hardRefreshPlanet(planet.locationId);
 
       this.emit(GameManagerEvent.InitializedPlayer);
@@ -3829,43 +3849,44 @@ export class GameManager extends EventEmitter {
     }
   }
   // mytodo: some player can't get spaceships, the homeLocation.hash is not right
-  private async getSpaceships() {
-    if (!this.account) {
-      return;
-    }
-    if (
-      !Object.values(this.contractConstants.SPACESHIPS).some((a) => a === true)
-    ) {
-      console.log("all spaceships disabled, not calling the tx");
-      return;
-    }
+  // private async getSpaceships() {
+  //   if (!this.account) {
+  //     return;
+  //   }
+  //   if (
+  //     !Object.values(this.contractConstants.SPACESHIPS).some((a) => a === true)
+  //   ) {
+  //     console.log("all spaceships disabled, not calling the tx");
+  //     return;
+  //   }
 
-    const player = await this.contractsAPI.getPlayerById(this.account);
-    if (!player) {
-      return;
-    }
-    if (player?.claimedShips) {
-      return;
-    }
+  //   const player = await this.contractsAPI.getPlayerById(this.account);
+  //   if (!player) {
+  //     return;
+  //   }
+  //   if (player?.claimedShips) {
+  //     return;
+  //   }
 
-    if (this.getGameObjects().isGettingSpaceships()) {
-      return;
-    }
+  //   if (this.getGameObjects().isGettingSpaceships()) {
+  //     return;
+  //   }
 
-    const homePlanetLocationId = "0x" + player.homePlanetId;
+  //   const homePlanetLocationId = "0x" + player.homePlanetId;
 
-    console.log("fix: getSpaceships");
-    console.log("  homeLocation.hash :", "0x" + this.homeLocation?.hash);
-    console.log("player.homePlanetId :", homePlanetLocationId);
+  //   console.log("fix: getSpaceships");
+  //   console.log("  homeLocation.hash :", "0x" + this.homeLocation?.hash);
+  //   console.log("player.homePlanetId :", homePlanetLocationId);
 
-    const tx = await this.contractsAPI.submitTransaction({
-      methodName: "giveSpaceShips",
-      contract: this.contractsAPI.contract,
-      args: Promise.resolve([homePlanetLocationId]),
-    });
-    await tx.confirmedPromise;
-    this.hardRefreshPlanet(player.homePlanetId);
-  }
+  //   const tx = await this.contractsAPI.submitTransaction({
+  //     methodName: "giveSpaceShips",
+  //     contract: this.contractsAPI.contract,
+  //     args: Promise.resolve([homePlanetLocationId]),
+  //   });
+  //   await tx.confirmedPromise;
+  //   this.hardRefreshPlanet(player.homePlanetId);
+  // }
+
   // private async getSpaceships() {
   //   if (!this.account || !this.homeLocation?.hash) return;
   //   if (!Object.values(this.contractConstants.SPACESHIPS).some((a) => a === true)) {
@@ -3896,6 +3917,7 @@ export class GameManager extends EventEmitter {
    * computes the WorldLocation object corresponding to a set of coordinates
    * very slow since it actually calculates the hash; do not use in render loop
    */
+
   private locationFromCoords(coords: WorldCoords): WorldLocation {
     return {
       coords,
@@ -4280,7 +4302,8 @@ export class GameManager extends EventEmitter {
               return current.heldArtifactIds
                 .map(this.getArtifactWithId.bind(this))
                 .find(
-                  (a: Artifact) => a?.planetDiscoveredOn === planet.locationId,
+                  (a: Artifact | undefined) =>
+                    a?.planetDiscoveredOn === planet.locationId,
                 ) as Artifact;
             },
           ).then((foundArtifact) => {
@@ -4607,153 +4630,153 @@ export class GameManager extends EventEmitter {
     }
   }
 
-  public async buyArtifact(
-    locationId: LocationId,
-    rarity: ArtifactRarity,
-    biome: Biome,
-    type: ArtifactType,
-    bypassChecks = false,
-  ): Promise<Transaction<UnconfirmedBuyArtifact>> {
-    try {
-      if (!bypassChecks) {
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to buy artifact on an unknown planet");
-        }
-      }
+  // public async buyArtifact(
+  //   locationId: LocationId,
+  //   rarity: ArtifactRarity,
+  //   biome: Biome,
+  //   type: ArtifactType,
+  //   bypassChecks = false,
+  // ): Promise<Transaction<UnconfirmedBuyArtifact>> {
+  //   try {
+  //     if (!bypassChecks) {
+  //       const planet = this.entityStore.getPlanetWithId(locationId);
+  //       if (!planet) {
+  //         throw new Error("tried to buy artifact on an unknown planet");
+  //       }
+  //     }
 
-      const halfPrice = this.getHalfPrice();
+  //     const halfPrice = this.getHalfPrice();
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-buyArtifactOnPlanet`,
-        locationId,
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-buyArtifactOnPlanet`,
+  //       locationId,
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-buyArtifactType`,
-        Number(type).toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-buyArtifactType`,
+  //       Number(type).toString(),
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-buyArtifactRarity`,
-        Number(rarity).toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-buyArtifactRarity`,
+  //       Number(rarity).toString(),
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-halfPrice`,
-        halfPrice.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       halfPrice.toString(),
+  //     );
 
-      // localStorage.setItem(`${this.getAccount()?.toLowerCase()}-buyArtifact`, artifactId);
+  //     // localStorage.setItem(`${this.getAccount()?.toLowerCase()}-buyArtifact`, artifactId);
 
-      // eslint-disable-next-line no-inner-declarations
-      function random256Id() {
-        const alphabet = "0123456789ABCDEF".split("");
-        let result = "0x";
-        for (let i = 0; i < 256 / 4; i++) {
-          result += alphabet[Math.floor(Math.random() * alphabet.length)];
-        }
-        result = result.toLowerCase();
-        return result;
-      }
+  //     // eslint-disable-next-line no-inner-declarations
+  //     function random256Id() {
+  //       const alphabet = "0123456789ABCDEF".split("");
+  //       let result = "0x";
+  //       for (let i = 0; i < 256 / 4; i++) {
+  //         result += alphabet[Math.floor(Math.random() * alphabet.length)];
+  //       }
+  //       result = result.toLowerCase();
+  //       return result;
+  //     }
 
-      // eslint-disable-next-line no-inner-declarations
-      function isTypeOK() {
-        const val = Number(type);
-        if (val === Number(ArtifactType.Wormhole)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.PlanetaryShield)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.BloomFilter)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.FireLink)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.StellarShield)) {
-          return true;
-        }
-        if (val === Number(ArtifactType.Avatar)) {
-          return true;
-        }
+  //     // eslint-disable-next-line no-inner-declarations
+  //     function isTypeOK() {
+  //       const val = Number(type);
+  //       if (val === Number(ArtifactType.Wormhole)) {
+  //         return true;
+  //       }
+  //       if (val === Number(ArtifactType.PlanetaryShield)) {
+  //         return true;
+  //       }
+  //       if (val === Number(ArtifactType.BloomFilter)) {
+  //         return true;
+  //       }
+  //       if (val === Number(ArtifactType.FireLink)) {
+  //         return true;
+  //       }
+  //       if (val === Number(ArtifactType.StellarShield)) {
+  //         return true;
+  //       }
+  //       if (val === Number(ArtifactType.Avatar)) {
+  //         return true;
+  //       }
 
-        return false;
-      }
+  //       return false;
+  //     }
 
-      // eslint-disable-next-line no-inner-declarations
-      function price() {
-        return 50;
-        const rarityVal = parseInt(rarity.toString());
-        const typeVal = parseInt(type.toString());
+  //     // eslint-disable-next-line no-inner-declarations
+  //     function price() {
+  //       return 50;
+  //       const rarityVal = parseInt(rarity.toString());
+  //       const typeVal = parseInt(type.toString());
 
-        if (rarityVal === 0 || rarityVal >= 5) {
-          return 0;
-        }
-        if (isTypeOK() === false) {
-          return 0;
-        }
-        if (
-          typeVal === Number(ArtifactType.Wormhole) ||
-          typeVal === Number(ArtifactType.PlanetaryShield) ||
-          typeVal === Number(ArtifactType.BloomFilter) ||
-          typeVal === Number(ArtifactType.FireLink)
-        ) {
-          return 2 ** (parseInt(rarity.toString()) - 1);
-        } else if (typeVal === Number(ArtifactType.Avatar)) {
-          return 1;
-        } else if (typeVal === Number(ArtifactType.StellarShield)) {
-          return 8;
-        } else {
-          return 0;
-        }
-      }
+  //       if (rarityVal === 0 || rarityVal >= 5) {
+  //         return 0;
+  //       }
+  //       if (isTypeOK() === false) {
+  //         return 0;
+  //       }
+  //       if (
+  //         typeVal === Number(ArtifactType.Wormhole) ||
+  //         typeVal === Number(ArtifactType.PlanetaryShield) ||
+  //         typeVal === Number(ArtifactType.BloomFilter) ||
+  //         typeVal === Number(ArtifactType.FireLink)
+  //       ) {
+  //         return 2 ** (parseInt(rarity.toString()) - 1);
+  //       } else if (typeVal === Number(ArtifactType.Avatar)) {
+  //         return 1;
+  //       } else if (typeVal === Number(ArtifactType.StellarShield)) {
+  //         return 8;
+  //       } else {
+  //         return 0;
+  //       }
+  //     }
 
-      //NOTE: this will not be the true artifactId
-      const artifactId: ArtifactId = random256Id() as ArtifactId;
+  //     //NOTE: this will not be the true artifactId
+  //     const artifactId: ArtifactId = random256Id() as ArtifactId;
 
-      const args = Promise.resolve([
-        {
-          tokenId: artifactId,
-          discoverer: this.account,
-          planetId: locationIdToDecStr(locationId),
-          rarity,
-          biome,
-          artifactType: type,
-          owner: this.account,
-          controller: "0x0000000000000000000000000000000000000000",
-          imageType: 0,
-        },
-      ]);
+  //     const args = Promise.resolve([
+  //       {
+  //         tokenId: artifactId,
+  //         discoverer: this.account,
+  //         planetId: locationIdToDecStr(locationId),
+  //         rarity,
+  //         biome,
+  //         artifactType: type,
+  //         owner: this.account,
+  //         controller: "0x0000000000000000000000000000000000000000",
+  //         imageType: 0,
+  //       },
+  //     ]);
 
-      const txIntent: UnconfirmedBuyArtifact = {
-        methodName: "buyArtifact",
-        contract: this.contractsAPI.contract,
-        args: args,
-        locationId,
-        artifactId,
-      };
+  //     const txIntent: UnconfirmedBuyArtifact = {
+  //       methodName: "buyArtifact",
+  //       contract: this.contractsAPI.contract,
+  //       args: args,
+  //       locationId,
+  //       artifactId,
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
+  //     // Always await the submitTransaction so we can catch rejections
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent, {
-        // NOTE: when change gasLimit, need change the value in TxConfirmPopup.tsx
-        gasLimit: 2000000,
-        value: halfPrice
-          ? bigInt(500_000_000_000_000).toString()
-          : bigInt(1_000_000_000_000_000).toString(), //0.001eth
-      });
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent, {
+  //       // NOTE: when change gasLimit, need change the value in TxConfirmPopup.tsx
+  //       gasLimit: 2000000,
+  //       value: halfPrice
+  //         ? bigInt(500_000_000_000_000).toString()
+  //         : bigInt(1_000_000_000_000_000).toString(), //0.001eth
+  //     });
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "buyArtifact",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "buyArtifact",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
   public async withdrawSilver(
     locationId: LocationId,
@@ -4797,11 +4820,11 @@ export class GameManager extends EventEmitter {
           throw new Error("must withdraw more than 0 silver!");
         }
 
-        if (planet.destroyed || planet.frozen) {
-          throw new Error(
-            "can't withdraw silver from a destroyed/frozen planet",
-          );
-        }
+        // if (planet.destroyed || planet.frozen) {
+        //   throw new Error(
+        //     "can't withdraw silver from a destroyed/frozen planet",
+        //   );
+        // }
       }
 
       localStorage.setItem(
@@ -4841,45 +4864,45 @@ export class GameManager extends EventEmitter {
    * This function loads the planet states which live on the server. Plays nicely with our
    * notifications system and sets the appropriate loading state values on the planet.
    */
-  public async refreshServerPlanetStates(planetIds: LocationId[]) {
-    const planets = this.getPlanetsWithIds(planetIds);
+  // public async refreshServerPlanetStates(planetIds: LocationId[]) {
+  //   const planets = this.getPlanetsWithIds(planetIds);
 
-    planetIds.forEach((id) =>
-      this.getGameObjects().updatePlanet(id, (p) => {
-        p.loadingServerState = true;
-      }),
-    );
+  //   planetIds.forEach((id) =>
+  //     this.getGameObjects().updatePlanet(id, (p) => {
+  //       p.loadingServerState = true;
+  //     }),
+  //   );
 
-    const messages = await getMessagesOnPlanets({ planets: planetIds });
+  //   const messages = await getMessagesOnPlanets({ planets: planetIds });
 
-    planets.forEach((planet) => {
-      const previousPlanetEmoji = getEmojiMessage(planet);
-      planet.messages = messages[planet.locationId];
-      const nowPlanetEmoji = getEmojiMessage(planet);
+  //   planets.forEach((planet) => {
+  //     const previousPlanetEmoji = getEmojiMessage(planet);
+  //     planet.messages = messages[planet.locationId];
+  //     const nowPlanetEmoji = getEmojiMessage(planet);
 
-      // an emoji was added
-      if (previousPlanetEmoji === undefined && nowPlanetEmoji !== undefined) {
-        planet.emojiZoopAnimation = easeInAnimation(2000);
-        // an emoji was removed
-      } else if (
-        nowPlanetEmoji === undefined &&
-        previousPlanetEmoji !== undefined
-      ) {
-        planet.emojiZoopAnimation = undefined;
-        planet.emojiZoopOutAnimation = emojiEaseOutAnimation(
-          3000,
-          previousPlanetEmoji.body.emoji,
-        );
-      }
-    });
+  //     // an emoji was added
+  //     if (previousPlanetEmoji === undefined && nowPlanetEmoji !== undefined) {
+  //       planet.emojiZoopAnimation = easeInAnimation(2000);
+  //       // an emoji was removed
+  //     } else if (
+  //       nowPlanetEmoji === undefined &&
+  //       previousPlanetEmoji !== undefined
+  //     ) {
+  //       planet.emojiZoopAnimation = undefined;
+  //       planet.emojiZoopOutAnimation = emojiEaseOutAnimation(
+  //         3000,
+  //         previousPlanetEmoji.body.emoji,
+  //       );
+  //     }
+  //   });
 
-    planetIds.forEach((id) =>
-      this.getGameObjects().updatePlanet(id, (p) => {
-        p.loadingServerState = false;
-        p.needsServerRefresh = false;
-      }),
-    );
-  }
+  //   planetIds.forEach((id) =>
+  //     this.getGameObjects().updatePlanet(id, (p) => {
+  //       p.loadingServerState = false;
+  //       p.needsServerRefresh = false;
+  //     }),
+  //   );
+  // }
 
   /**
    * If you are the owner of this planet, you can set an 'emoji' to hover above the planet.
@@ -4890,122 +4913,122 @@ export class GameManager extends EventEmitter {
    * call from the webserver, and by verifying that the request to add (or remove) an emoji from a
    * planet was signed by the owner.
    */
-  public async setPlanetEmoji(locationId: LocationId, emojiStr: string) {
-    const res = await this.submitPlanetMessage(
-      locationId,
-      PlanetMessageType.EmojiFlag,
-      {
-        emoji: emojiStr,
-      },
-    );
-    return res;
-  }
+  // public async setPlanetEmoji(locationId: LocationId, emojiStr: string) {
+  //   const res = await this.submitPlanetMessage(
+  //     locationId,
+  //     PlanetMessageType.EmojiFlag,
+  //     {
+  //       emoji: emojiStr,
+  //     },
+  //   );
+  //   return res;
+  // }
 
   /**
    * If you are the owner of this planet, you can delete the emoji that is hovering above the
    * planet.
    */
-  public async clearEmoji(locationId: LocationId) {
-    if (this.account === undefined) {
-      throw new Error("can't clear emoji: not logged in");
-    }
+  // public async clearEmoji(locationId: LocationId) {
+  //   if (this.account === undefined) {
+  //     throw new Error("can't clear emoji: not logged in");
+  //   }
 
-    if (this.getPlanetWithId(locationId)?.unconfirmedClearEmoji) {
-      throw new Error(
-        `can't clear emoji: alreading clearing emoji from ${locationId}`,
-      );
-    }
+  //   if (this.getPlanetWithId(locationId)?.unconfirmedClearEmoji) {
+  //     throw new Error(
+  //       `can't clear emoji: alreading clearing emoji from ${locationId}`,
+  //     );
+  //   }
 
-    this.getGameObjects().updatePlanet(locationId, (p) => {
-      p.unconfirmedClearEmoji = true;
-    });
+  //   this.getGameObjects().updatePlanet(locationId, (p) => {
+  //     p.unconfirmedClearEmoji = true;
+  //   });
 
-    const request = await this.ethConnection.signMessageObject({
-      locationId,
-      ids: this.getPlanetWithId(locationId)?.messages?.map((m) => m.id) || [],
-    });
+  //   const request = await this.ethConnection.signMessageObject({
+  //     locationId,
+  //     ids: this.getPlanetWithId(locationId)?.messages?.map((m) => m.id) || [],
+  //   });
 
-    try {
-      await deleteMessages(request);
-    } catch (e) {
-      throw e as Error;
-    } finally {
-      this.getGameObjects().updatePlanet(locationId, (p) => {
-        p.needsServerRefresh = true;
-        p.unconfirmedClearEmoji = false;
-      });
-    }
+  //   try {
+  //     await deleteMessages(request);
+  //   } catch (e) {
+  //     throw e as Error;
+  //   } finally {
+  //     this.getGameObjects().updatePlanet(locationId, (p) => {
+  //       p.needsServerRefresh = true;
+  //       p.unconfirmedClearEmoji = false;
+  //     });
+  //   }
 
-    await this.refreshServerPlanetStates([locationId]);
-  }
+  //   await this.refreshServerPlanetStates([locationId]);
+  // }
 
-  public async submitDisconnectTwitter(twitter: string) {
-    await disconnectTwitter(
-      await this.ethConnection.signMessageObject({ twitter }),
-    );
-    await this.refreshTwitters();
-  }
+  // public async submitDisconnectTwitter(twitter: string) {
+  //   await disconnectTwitter(
+  //     await this.ethConnection.signMessageObject({ twitter }),
+  //   );
+  //   await this.refreshTwitters();
+  // }
 
   /**
    * The planet emoji feature is built on top of a more general 'Planet Message' system, which
    * allows players to upload pieces of data called 'Message's to planets that they own. Emojis are
    * just one type of message. Their implementation leaves the door open to more off-chain data.
    */
-  private async submitPlanetMessage(
-    locationId: LocationId,
-    type: PlanetMessageType,
-    body: unknown,
-  ) {
-    if (this.account === undefined) {
-      throw new Error("can't submit planet message not logged in");
-    }
+  // private async submitPlanetMessage(
+  //   locationId: LocationId,
+  //   type: PlanetMessageType,
+  //   body: unknown,
+  // ) {
+  //   if (this.account === undefined) {
+  //     throw new Error("can't submit planet message not logged in");
+  //   }
 
-    if (this.getPlanetWithId(locationId)?.unconfirmedAddEmoji) {
-      throw new Error(
-        `can't submit planet message: already submitting for planet ${locationId}`,
-      );
-    }
+  //   if (this.getPlanetWithId(locationId)?.unconfirmedAddEmoji) {
+  //     throw new Error(
+  //       `can't submit planet message: already submitting for planet ${locationId}`,
+  //     );
+  //   }
 
-    this.getGameObjects().updatePlanet(locationId, (p) => {
-      p.unconfirmedAddEmoji = true;
-    });
+  //   this.getGameObjects().updatePlanet(locationId, (p) => {
+  //     p.unconfirmedAddEmoji = true;
+  //   });
 
-    const request = await this.ethConnection.signMessageObject({
-      locationId,
-      sender: this.account,
-      type,
-      body,
-    });
+  //   const request = await this.ethConnection.signMessageObject({
+  //     locationId,
+  //     sender: this.account,
+  //     type,
+  //     body,
+  //   });
 
-    try {
-      await addMessage(request);
-    } catch (e) {
-      throw e as Error;
-    } finally {
-      this.getGameObjects().updatePlanet(locationId, (p) => {
-        p.unconfirmedAddEmoji = false;
-        p.needsServerRefresh = true;
-      });
-    }
+  //   try {
+  //     await addMessage(request);
+  //   } catch (e) {
+  //     throw e as Error;
+  //   } finally {
+  //     this.getGameObjects().updatePlanet(locationId, (p) => {
+  //       p.unconfirmedAddEmoji = false;
+  //       p.needsServerRefresh = true;
+  //     });
+  //   }
 
-    await this.refreshServerPlanetStates([locationId]);
-  }
+  //   await this.refreshServerPlanetStates([locationId]);
+  // }
 
   /**
    * Checks that a message signed by {@link GameManager#signMessage} was signed by the address that
    * it claims it was signed by.
    */
-  private async verifyMessage(
-    message: SignedMessage<unknown>,
-  ): Promise<boolean> {
-    const preSigned = JSON.stringify(messag(e as Error).message);
+  // private async verifyMessage(
+  //   message: SignedMessage<unknown>,
+  // ): Promise<boolean> {
+  //   const preSigned = JSON.stringify(messag(e as Error).message);
 
-    return verifySignature(
-      preSigned,
-      message.signature as string,
-      message.sender,
-    );
-  }
+  //   return verifySignature(
+  //     preSigned,
+  //     message.signature as string,
+  //     message.sender,
+  //   );
+  // }
 
   /**
    * Submits a transaction to the blockchain to move the given amount of resources from
@@ -5123,7 +5146,7 @@ export class GameManager extends EventEmitter {
         methodName: "move",
         contract: this.contractsAPI.contract,
         args: getArgs(),
-        from: oldLocation.hash, //以下的东西没屁用
+        from: oldLocation.hash,
         to: newLocation.hash,
         forces: shipsMoved,
         silver: silverMoved,
@@ -5242,343 +5265,343 @@ export class GameManager extends EventEmitter {
    * cosmetic and a great way to BM your opponents or just look your best. Just like in the real
    * world, more money means more hat.
    */
-  public async buySkin(
-    planetId: LocationId,
-    hatType: number,
-    _bypassChecks = false,
-  ): Promise<Transaction<UnconfirmedBuyHat>> {
-    const planetLoc = this.entityStore.getLocationOfPlanet(planetId);
-    const planet = this.entityStore.getPlanetWithLocation(planetLoc);
-    const halfPrice = this.getHalfPrice();
+  // public async buySkin(
+  //   planetId: LocationId,
+  //   hatType: number,
+  //   _bypassChecks = false,
+  // ): Promise<Transaction<UnconfirmedBuyHat>> {
+  //   const planetLoc = this.entityStore.getLocationOfPlanet(planetId);
+  //   const planet = this.entityStore.getPlanetWithLocation(planetLoc);
+  //   const halfPrice = this.getHalfPrice();
 
-    try {
-      if (!planetLoc) {
-        console.error("planet not found");
-        throw new Error("[TX ERROR] Planet not found");
-      }
-      if (!planet) {
-        console.error("planet not found");
-        throw new Error("[TX ERROR] Planet not found");
-      }
+  //   try {
+  //     if (!planetLoc) {
+  //       console.error("planet not found");
+  //       throw new Error("[TX ERROR] Planet not found");
+  //     }
+  //     if (!planet) {
+  //       console.error("planet not found");
+  //       throw new Error("[TX ERROR] Planet not found");
+  //     }
 
-      if (hatType === HatType.Unknown) {
-        console.error("hatTpye === 0");
-        throw new Error("[TX ERROR] hatType Error");
-      }
+  //     if (hatType === HatType.Unknown) {
+  //       console.error("hatTpye === 0");
+  //       throw new Error("[TX ERROR] hatType Error");
+  //     }
 
-      // price requirements
-      const balanceEth = this.getMyBalanceEth();
-      let hatCostEth = planet.hatLevel === 0 ? 0.002 : 0;
-      if (halfPrice) {
-        hatCostEth *= 0.5;
-      }
+  //     // price requirements
+  //     const balanceEth = this.getMyBalanceEth();
+  //     let hatCostEth = planet.hatLevel === 0 ? 0.002 : 0;
+  //     if (halfPrice) {
+  //       hatCostEth *= 0.5;
+  //     }
 
-      if (balanceEth < hatCostEth) {
-        throw new Error("you don't have enough ETH");
-      }
+  //     if (balanceEth < hatCostEth) {
+  //       throw new Error("you don't have enough ETH");
+  //     }
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-hatPlanet`,
-        planetId,
-      );
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-hatLevel`,
-        planet.hatLevel.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-hatPlanet`,
+  //       planetId,
+  //     );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-hatLevel`,
+  //       planet.hatLevel.toString(),
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-hatType`,
-        planet.hatType.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-hatType`,
+  //       planet.hatType.toString(),
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-halfPrice`,
-        halfPrice.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       halfPrice.toString(),
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-hatCostEth`,
-        hatCostEth.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-hatCostEth`,
+  //       hatCostEth.toString(),
+  //     );
 
-      const txIntent: UnconfirmedBuyHat = {
-        methodName: "buySkin",
-        contract: this.contractsAPI.contract,
-        args: Promise.resolve([locationIdToDecStr(planetId), hatType]),
-        locationId: planetId,
-        hatType: hatType,
-      };
+  //     const txIntent: UnconfirmedBuyHat = {
+  //       methodName: "buySkin",
+  //       contract: this.contractsAPI.contract,
+  //       args: Promise.resolve([locationIdToDecStr(planetId), hatType]),
+  //       locationId: planetId,
+  //       hatType: hatType,
+  //     };
 
-      // Always await the submitTransaction so we can catch rejections
+  //     // Always await the submitTransaction so we can catch rejections
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent, {
-        value:
-          planet.hatLevel === 0
-            ? halfPrice
-              ? bigInt(1_000_000_000_000_000).toString()
-              : bigInt(2_000_000_000_000_000).toString()
-            : "0", //0.001eth
-      });
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent, {
+  //       value:
+  //         planet.hatLevel === 0
+  //           ? halfPrice
+  //             ? bigInt(1_000_000_000_000_000).toString()
+  //             : bigInt(2_000_000_000_000_000).toString()
+  //           : "0", //0.001eth
+  //     });
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "buySkin",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "buySkin",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
   /**
    * Submits a transaction to the blockchain to buy a planet.
    * Warning costs real token.
    */
-  public async buyPlanet(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedBuyPlanet>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
-      // if (this.checkGameHasEnded()) {
-      //   throw new Error('game has ended');
-      // }
+  // public async buyPlanet(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedBuyPlanet>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
+  //     // if (this.checkGameHasEnded()) {
+  //     //   throw new Error('game has ended');
+  //     // }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      // planet requirements
-      if (!planet) {
-        throw new Error("you can't buy a planet you haven't discovered");
-      }
+  //     // planet requirements
+  //     if (!planet) {
+  //       throw new Error("you can't buy a planet you haven't discovered");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error(
-          "you can't buy a planet whose coordinates you don't know",
-        );
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error(
+  //         "you can't buy a planet whose coordinates you don't know",
+  //       );
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("you can't buy destroyed/frozen planets");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("you can't buy destroyed/frozen planets");
+  //     }
 
-      if (planet.planetLevel !== 0) {
-        throw new Error("only level 0");
-      }
+  //     if (planet.planetLevel !== 0) {
+  //       throw new Error("only level 0");
+  //     }
 
-      if (planet.owner !== EMPTY_ADDRESS) {
-        throw new Error("you can only buy planet without owner");
-      }
+  //     if (planet.owner !== EMPTY_ADDRESS) {
+  //       throw new Error("you can only buy planet without owner");
+  //     }
 
-      const x: number = planet.location.coords.x;
-      const y: number = planet.location.coords.y;
-      const radius: number = Math.sqrt(x ** 2 + y ** 2);
+  //     const x: number = planet.location.coords.x;
+  //     const y: number = planet.location.coords.y;
+  //     const radius: number = Math.sqrt(x ** 2 + y ** 2);
 
-      const MAX_LEVEL_DIST = this.contractConstants.MAX_LEVEL_DIST;
-      if (!(radius > MAX_LEVEL_DIST[1])) {
-        throw new Error("Player can only spawn at the edge of universe");
-      }
-      const spaceType = this.spaceTypeFromPerlin(
-        planet.perlin,
-        Math.floor(Math.sqrt(x * x + y * y)),
-      );
+  //     const MAX_LEVEL_DIST = this.contractConstants.MAX_LEVEL_DIST;
+  //     if (!(radius > MAX_LEVEL_DIST[1])) {
+  //       throw new Error("Player can only spawn at the edge of universe");
+  //     }
+  //     const spaceType = this.spaceTypeFromPerlin(
+  //       planet.perlin,
+  //       Math.floor(Math.sqrt(x * x + y * y)),
+  //     );
 
-      if (spaceType !== SpaceType.NEBULA) {
-        throw new Error("Only NEBULA");
-      }
+  //     if (spaceType !== SpaceType.NEBULA) {
+  //       throw new Error("Only NEBULA");
+  //     }
 
-      // const INIT_PERLIN_MIN = this.contractConstants.INIT_PERLIN_MIN;
+  //     // const INIT_PERLIN_MIN = this.contractConstants.INIT_PERLIN_MIN;
 
-      // if (planet.perlin >= INIT_PERLIN_MIN) {
-      //   throw new Error('Init not allowed in perlin value less than INIT_PERLIN_MIN');
-      // }
+  //     // if (planet.perlin >= INIT_PERLIN_MIN) {
+  //     //   throw new Error('Init not allowed in perlin value less than INIT_PERLIN_MIN');
+  //     // }
 
-      //player requirements
-      const player = this.players.get(this.account);
-      if (!player) {
-        throw new Error("no player");
-      }
-      const MAX_BUY_PLANET_AMOUNT = 6;
-      if (player.buyPlanetAmount >= MAX_BUY_PLANET_AMOUNT) {
-        throw new Error("buy planet amount limit");
-      }
+  //     //player requirements
+  //     const player = this.players.get(this.account);
+  //     if (!player) {
+  //       throw new Error("no player");
+  //     }
+  //     const MAX_BUY_PLANET_AMOUNT = 6;
+  //     if (player.buyPlanetAmount >= MAX_BUY_PLANET_AMOUNT) {
+  //       throw new Error("buy planet amount limit");
+  //     }
 
-      // price requirements
-      const balanceEth = this.getMyBalanceEth();
-      const halfPrice = this.getHalfPrice();
-      const planetCostEth = halfPrice
-        ? 0.5 * 0.003 * 2 ** player.buyPlanetAmount
-        : 0.003 * 2 ** player.buyPlanetAmount;
-      if (balanceEth < planetCostEth) {
-        throw new Error("you don't have enough ETH");
-      }
+  //     // price requirements
+  //     const balanceEth = this.getMyBalanceEth();
+  //     const halfPrice = this.getHalfPrice();
+  //     const planetCostEth = halfPrice
+  //       ? 0.5 * 0.003 * 2 ** player.buyPlanetAmount
+  //       : 0.003 * 2 ** player.buyPlanetAmount;
+  //     if (balanceEth < planetCostEth) {
+  //       throw new Error("you don't have enough ETH");
+  //     }
 
-      if (planet.transactions?.hasTransaction(isUnconfirmedBuyPlanetTx)) {
-        // transaction requirements
-        throw new Error("you're already buying this planet");
-      }
-      if (
-        this.entityStore.transactions.hasTransaction(isUnconfirmedBuyPlanetTx)
-      ) {
-        throw new Error("you're already buying this planet");
-      }
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedBuyPlanetTx)) {
+  //       // transaction requirements
+  //       throw new Error("you're already buying this planet");
+  //     }
+  //     if (
+  //       this.entityStore.transactions.hasTransaction(isUnconfirmedBuyPlanetTx)
+  //     ) {
+  //       throw new Error("you're already buying this planet");
+  //     }
 
-      const getArgs = async () => {
-        const args = await this.snarkHelper.getInitArgs(
-          planet.location.coords.x,
-          planet.location.coords.y,
-          Math.floor(
-            Math.sqrt(
-              planet.location.coords.x ** 2 + planet.location.coords.y ** 2,
-            ),
-          ) + 1,
-        );
+  //     const getArgs = async () => {
+  //       const args = await this.snarkHelper.getInitArgs(
+  //         planet.location.coords.x,
+  //         planet.location.coords.y,
+  //         Math.floor(
+  //           Math.sqrt(
+  //             planet.location.coords.x ** 2 + planet.location.coords.y ** 2,
+  //           ),
+  //         ) + 1,
+  //       );
 
-        return args;
-      };
+  //       return args;
+  //     };
 
-      const txIntent: UnconfirmedBuyPlanet = {
-        methodName: "buyPlanet",
-        contract: this.contractsAPI.contract,
-        locationId: planet.location.hash,
-        location: planet.location,
-        args: getArgs(),
-      };
+  //     const txIntent: UnconfirmedBuyPlanet = {
+  //       methodName: "buyPlanet",
+  //       contract: this.contractsAPI.contract,
+  //       locationId: planet.location.hash,
+  //       location: planet.location,
+  //       args: getArgs(),
+  //     };
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-buyPlanet`,
-        planetId,
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-buyPlanet`,
+  //       planetId,
+  //     );
 
-      // localStorage.setItem(
-      //   `${this.getAccount()?.toLowerCase()}-buyPlanetAmountBefore`,
-      //   player.buyPlanetAmount.toString()
-      // );
+  //     // localStorage.setItem(
+  //     //   `${this.getAccount()?.toLowerCase()}-buyPlanetAmountBefore`,
+  //     //   player.buyPlanetAmount.toString()
+  //     // );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-halfPrice`,
-        halfPrice.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       halfPrice.toString(),
+  //     );
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLocaleLowerCase()}-planetCostEth`,
-        planetCostEth.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLocaleLowerCase()}-planetCostEth`,
+  //       planetCostEth.toString(),
+  //     );
 
-      const fee_delete = 2 ** player.buyPlanetAmount;
+  //     const fee_delete = 2 ** player.buyPlanetAmount;
 
-      // 0.003 *(2**(num-1)) eth
-      let fee = bigInt(3_000_000_000_000_000).multiply(fee_delete);
-      if (halfPrice) {
-        fee = bigInt(1_500_000_000_000_000).multiply(fee_delete);
-      }
+  //     // 0.003 *(2**(num-1)) eth
+  //     let fee = bigInt(3_000_000_000_000_000).multiply(fee_delete);
+  //     if (halfPrice) {
+  //       fee = bigInt(1_500_000_000_000_000).multiply(fee_delete);
+  //     }
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent, {
-        value: fee.toString(),
-      });
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent, {
+  //       value: fee.toString(),
+  //     });
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "buyPlanet",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "buyPlanet",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
-  public async buySpaceship(
-    planetId: LocationId,
-  ): Promise<Transaction<UnconfirmedBuySpaceship>> {
-    try {
-      if (!this.account) {
-        throw new Error("no account set");
-      }
-      // if (this.checkGameHasEnded()) {
-      //   throw new Error('game has ended');
-      // }
+  // public async buySpaceship(
+  //   planetId: LocationId,
+  // ): Promise<Transaction<UnconfirmedBuySpaceship>> {
+  //   try {
+  //     if (!this.account) {
+  //       throw new Error("no account set");
+  //     }
+  //     // if (this.checkGameHasEnded()) {
+  //     //   throw new Error('game has ended');
+  //     // }
 
-      const planet = this.entityStore.getPlanetWithId(planetId);
+  //     const planet = this.entityStore.getPlanetWithId(planetId);
 
-      // planet requirements
-      if (!planet) {
-        throw new Error("you should know this planet");
-      }
+  //     // planet requirements
+  //     if (!planet) {
+  //       throw new Error("you should know this planet");
+  //     }
 
-      if (!isLocatable(planet)) {
-        throw new Error("planet is not Locatable");
-      }
+  //     if (!isLocatable(planet)) {
+  //       throw new Error("planet is not Locatable");
+  //     }
 
-      if (planet.destroyed || planet.frozen) {
-        throw new Error("planet destoryed / frozen");
-      }
+  //     if (planet.destroyed || planet.frozen) {
+  //       throw new Error("planet destoryed / frozen");
+  //     }
 
-      //player requirements
-      const player = this.players.get(this.account);
-      if (!player) {
-        throw new Error("no player");
-      }
+  //     //player requirements
+  //     const player = this.players.get(this.account);
+  //     if (!player) {
+  //       throw new Error("no player");
+  //     }
 
-      const halfPrice = this.getHalfPrice();
-      // price requirements
-      const balanceEth = this.getMyBalanceEth();
-      const spaceshipCostEth = halfPrice ? 0.0005 : 0.001;
-      if (balanceEth < spaceshipCostEth) {
-        throw new Error("you don't have enough ETH");
-      }
+  //     const halfPrice = this.getHalfPrice();
+  //     // price requirements
+  //     const balanceEth = this.getMyBalanceEth();
+  //     const spaceshipCostEth = halfPrice ? 0.0005 : 0.001;
+  //     if (balanceEth < spaceshipCostEth) {
+  //       throw new Error("you don't have enough ETH");
+  //     }
 
-      if (player.buySpaceshipAmount >= 3) {
-        throw new Error(" you can only buy 3 spaceships");
-      }
+  //     if (player.buySpaceshipAmount >= 3) {
+  //       throw new Error(" you can only buy 3 spaceships");
+  //     }
 
-      // transaction requirements
-      if (planet.transactions?.hasTransaction(isUnconfirmedBuySpaceshipTx)) {
-        throw new Error("you're already buying this planet");
-      }
-      if (
-        this.entityStore.transactions.hasTransaction(
-          isUnconfirmedBuySpaceshipTx,
-        )
-      ) {
-        throw new Error("you're already buying this planet");
-      }
+  //     // transaction requirements
+  //     if (planet.transactions?.hasTransaction(isUnconfirmedBuySpaceshipTx)) {
+  //       throw new Error("you're already buying this planet");
+  //     }
+  //     if (
+  //       this.entityStore.transactions.hasTransaction(
+  //         isUnconfirmedBuySpaceshipTx,
+  //       )
+  //     ) {
+  //       throw new Error("you're already buying this planet");
+  //     }
 
-      const spaceshipType = ArtifactType.ShipWhale;
+  //     const spaceshipType = ArtifactType.ShipWhale;
 
-      const txIntent: UnconfirmedBuySpaceship = {
-        methodName: "buySpaceship",
-        contract: this.contractsAPI.contract,
-        locationId: planet.location.hash,
-        location: planet.location,
-        args: Promise.resolve([locationIdToDecStr(planetId), spaceshipType]),
-      };
+  //     const txIntent: UnconfirmedBuySpaceship = {
+  //       methodName: "buySpaceship",
+  //       contract: this.contractsAPI.contract,
+  //       locationId: planet.location.hash,
+  //       location: planet.location,
+  //       args: Promise.resolve([locationIdToDecStr(planetId), spaceshipType]),
+  //     };
 
-      let fee = bigInt(1_000_000_000_000_000).toString(); //0.001 eth
-      if (halfPrice) {
-        fee = bigInt(500_000_000_000_000).toString();
-      }
+  //     let fee = bigInt(1_000_000_000_000_000).toString(); //0.001 eth
+  //     if (halfPrice) {
+  //       fee = bigInt(500_000_000_000_000).toString();
+  //     }
 
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-buySpaceshipOnPlanetId`,
-        planetId,
-      );
-      localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-halfPrice`,
-        halfPrice.toString(),
-      );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-buySpaceshipOnPlanetId`,
+  //       planetId,
+  //     );
+  //     localStorage.setItem(
+  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       halfPrice.toString(),
+  //     );
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent, {
-        value: fee, //0.001 eth
-      });
+  //     const tx = await this.contractsAPI.submitTransaction(txIntent, {
+  //       value: fee, //0.001 eth
+  //     });
 
-      return tx;
-    } catch (e) {
-      this.getNotificationsManager().txInitError(
-        "buySpaceship",
-        (e as Error).message,
-      );
-      throw e;
-    }
-  }
+  //     return tx;
+  //   } catch (e) {
+  //     this.getNotificationsManager().txInitError(
+  //       "buySpaceship",
+  //       (e as Error).message,
+  //     );
+  //     throw e;
+  //   }
+  // }
 
   public async donate(amount: number): Promise<Transaction<UnconfirmedDonate>> {
     try {
@@ -5738,13 +5761,13 @@ export class GameManager extends EventEmitter {
     return this;
   }
 
-  listenForNewBlock() {
-    this.getEthConnection().blockNumber$.subscribe((blockNumber) => {
-      if (this.captureZoneGenerator) {
-        this.captureZoneGenerator.generate(blockNumber);
-      }
-    });
-  }
+  // listenForNewBlock() {
+  //   this.getEthConnection().blockNumber$.subscribe((blockNumber) => {
+  //     if (this.captureZoneGenerator) {
+  //       this.captureZoneGenerator.generate(blockNumber);
+  //     }
+  //   });
+  // }
 
   /**
    * To add multiple chunks at once, use this function rather than `addNewChunk`, in order
@@ -6126,18 +6149,18 @@ export class GameManager extends EventEmitter {
     return UIEmitter.getInstance();
   }
 
-  public getCaptureZoneGenerator() {
-    return this.captureZoneGenerator;
-  }
+  // public getCaptureZoneGenerator() {
+  //   return this.captureZoneGenerator;
+  // }
 
   /**
    * Emits when new capture zones are generated.
    */
-  public get captureZoneGeneratedEmitter():
-    | Monomitter<CaptureZonesGeneratedEvent>
-    | undefined {
-    return this.captureZoneGenerator?.generated$;
-  }
+  // public get captureZoneGeneratedEmitter():
+  //   | Monomitter<CaptureZonesGeneratedEvent>
+  //   | undefined {
+  //   return this.captureZoneGenerator?.generated$;
+  // }
 
   public getNotificationsManager() {
     return NotificationManager.getInstance();
@@ -6256,14 +6279,19 @@ export class GameManager extends EventEmitter {
       this.getPlanetUpdated$(),
     );
     const diffEmitter = generateDiffEmitter(disposableEmitter);
+
     return new Promise((resolve, reject) => {
-      diffEmitter.subscribe(({ current, previous }: Diff<Planet>) => {
+      diffEmitter.subscribe((data: Diff<Planet> | undefined) => {
         try {
-          const predicateResults = predicate({ current, previous });
-          if (predicateResults) {
-            disposableEmitter.clear();
-            diffEmitter.clear();
-            resolve(predicateResults);
+          if (data) {
+            // check if data is undefined
+            const { current, previous } = data;
+            const predicateResults = predicate({ current, previous });
+            if (predicateResults) {
+              disposableEmitter.clear();
+              diffEmitter.clear();
+              resolve(predicateResults);
+            }
           }
         } catch (err) {
           disposableEmitter.clear();
@@ -6272,6 +6300,23 @@ export class GameManager extends EventEmitter {
         }
       });
     });
+
+    // return new Promise((resolve, reject) => {
+    //   diffEmitter.subscribe(({ current, previous }: Diff<Planet>) => {
+    //     try {
+    //       const predicateResults = predicate({ current, previous });
+    //       if (predicateResults) {
+    //         disposableEmitter.clear();
+    //         diffEmitter.clear();
+    //         resolve(predicateResults);
+    //       }
+    //     } catch (err) {
+    //       disposableEmitter.clear();
+    //       diffEmitter.clear();
+    //       reject(err);
+    //     }
+    //   });
+    // });
   }
 
   public getSafeMode() {
@@ -6298,21 +6343,21 @@ export class GameManager extends EventEmitter {
    * this function programmatically.
    */
   public getSpeedBuff(abandoning: boolean): number {
-    const { SPACE_JUNK_ENABLED, ABANDON_SPEED_CHANGE_PERCENT } =
-      this.contractConstants;
-    if (SPACE_JUNK_ENABLED && abandoning) {
-      return ABANDON_SPEED_CHANGE_PERCENT / 100;
-    }
+    // const { SPACE_JUNK_ENABLED, ABANDON_SPEED_CHANGE_PERCENT } =
+    //   this.contractConstants;
+    // if (SPACE_JUNK_ENABLED && abandoning) {
+    //   return ABANDON_SPEED_CHANGE_PERCENT / 100;
+    // }
 
     return 1;
   }
 
   public getRangeBuff(abandoning: boolean): number {
-    const { SPACE_JUNK_ENABLED, ABANDON_RANGE_CHANGE_PERCENT } =
-      this.contractConstants;
-    if (SPACE_JUNK_ENABLED && abandoning) {
-      return ABANDON_RANGE_CHANGE_PERCENT / 100;
-    }
+    // const { SPACE_JUNK_ENABLED, ABANDON_RANGE_CHANGE_PERCENT } =
+    //   this.contractConstants;
+    // if (SPACE_JUNK_ENABLED && abandoning) {
+    //   return ABANDON_RANGE_CHANGE_PERCENT / 100;
+    // }
 
     return 1;
   }
@@ -6340,11 +6385,11 @@ export class GameManager extends EventEmitter {
     return this.paused$;
   }
 
-  public getHalfPrice(): boolean {
-    return this.halfPrice;
-  }
+  // public getHalfPrice(): boolean {
+  //   return this.halfPrice;
+  // }
 
-  public getHalfPrice$(): Monomitter<boolean> {
-    return this.halfPrice$;
-  }
+  // public getHalfPrice$(): Monomitter<boolean> {
+  //   return this.halfPrice$;
+  // }
 }

@@ -217,14 +217,16 @@ function getBlueZones(options: {
   scaleFactor: number;
   radius: number;
 }): Zone[] {
-  return Array.from(df.getBlueZones()).map((zone) => mapZone(zone, options));
+  return [];
+  // return Array.from(df.getBlueZones()).map((zone) => mapZone(zone, options));
 }
 
 function getPinkZones(options: {
   scaleFactor: number;
   radius: number;
 }): Zone[] {
-  return Array.from(df.getPinkZones()).map((zone) => mapZone(zone, options));
+  return [];
+  // return Array.from(df.getPinkZones()).map((zone) => mapZone(zone, options));
 }
 
 function updateSpawnAreas({
@@ -350,6 +352,12 @@ function draw(
 function DFARESLogo({ rimRadius }: { rimRadius: number }) {
   const size = rimRadius * 0.75; // adjust size as needed
   const offset = (canvasSize + canvasBorderSize * 2 - size) / 2;
+  //   <img
+  //   src="../../../../public/DFARESLogo-v3.svg"
+  //   width={size}
+  //   height={size}
+  // />
+
   return (
     <div
       style={{
@@ -359,13 +367,7 @@ function DFARESLogo({ rimRadius }: { rimRadius: number }) {
         width: `${size}px`,
         height: `${size}px`,
       }}
-    >
-      <img
-        src="../../../../public/DFARESLogo-v3.svg"
-        width={size}
-        height={size}
-      />
-    </div>
+    ></div>
   );
 }
 
