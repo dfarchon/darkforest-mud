@@ -226,7 +226,7 @@ l_upgrades = 0
 [[test_planets]]
 a_x = 1039
 b_y = 1644
-c_hash = "0x000bdd0db70b93586f31baf2fa1e47006a371927a8bfa32d1686d9c0c8e9c3"
+c_hash = "0x00000bdd0db70b93586f31baf2fa1e47006a371927a8bfa32d1686d9c0c8e9c3"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 e_last_update_tick = 0
 f_perlin = 0
