@@ -9,7 +9,9 @@ import {
 } from "@df/network";
 import {
   address,
+  addressToHex,
   artifactIdFromEthersBN,
+  hexToEthAddress,
   // artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
@@ -66,6 +68,7 @@ import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import { flatten } from "lodash-es";
 import type { Hex } from "viem";
+import type { Subscription } from "rxjs";
 
 import type {
   ContractConstants,
@@ -136,6 +139,8 @@ export class ContractsAPI extends EventEmitter {
 
   private planetUtils: PlanetUtils;
   private moveUtils: MoveUtils;
+
+  private pausedStateSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -274,6 +279,18 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public async setupEventListeners(): Promise<void> {
+    this.pausedStateSubscription = this.components.Ticker.update$.subscribe(
+      (update) => {
+        const [nextValue, prevValue] = update.value;
+        console.log("PUNK");
+        console.log("nextValue");
+        console.log(nextValue);
+        console.log("preValue");
+        console.log(prevValue);
+        this.emit(ContractsAPIEvent.PauseStateChanged, nextValue?.paused);
+      },
+    );
+
     return;
     const { contract } = this;
 
@@ -637,6 +654,8 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public removeEventListeners(): void {
+    this.pausedStateSubscription.unsubscribe();
+    return;
     const { contract } = this;
 
     contract.removeAllListeners(ContractEvent.PlayerInitialized);
@@ -725,6 +744,26 @@ export class ContractsAPI extends EventEmitter {
 
   public getContractAddress(): EthAddress {
     return this.contractAddress;
+  }
+
+  public hasJoinedGame(playerId: EthAddress): boolean {
+    const { SpawnPlanet } = this.components;
+
+    const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
+      player: addressToHex(playerId),
+    });
+
+    const result = getComponentValue(SpawnPlanet, spawnPlanetKey);
+
+    console.log(addressToHex(playerId));
+    console.log(result);
+    console.log(SpawnPlanet);
+
+    console.log("show spawnplanet");
+    for (const entity of SpawnPlanet.entities()) {
+      console.log(entity);
+    }
+    return result !== undefined;
   }
 
   public getConstants(): ContractConstants {
@@ -929,23 +968,24 @@ export class ContractsAPI extends EventEmitter {
   public getPlayerById(playerId: EthAddress): Player | undefined {
     const { Player, SpawnPlanet, LastReveal } = this.components;
     const playerKey = encodeEntity(Player.metadata.keySchema, {
-      owner: playerId as Hex,
+      owner: addressToHex(playerId),
     });
     const rawPlayer = getComponentValue(Player, playerKey);
     const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
-      player: playerId as Hex,
+      player: addressToHex(playerId),
     });
     const rawSpawnPlanet = getComponentValue(SpawnPlanet, spawnPlanetKey);
     const lastRevealKey = encodeEntity(LastReveal.metadata.keySchema, {
-      player: playerId as Hex,
+      player: addressToHex(playerId),
     });
     const lastReveal = getComponentValue(LastReveal, lastRevealKey);
     if (!rawPlayer) {
       return undefined;
     }
+
     const player: Player = {
       address: playerId,
-      burner: rawPlayer.burner as EthAddress,
+      burner: address(rawPlayer.burner),
       index: rawPlayer.index,
       createdAt: Number(rawPlayer.createdAt),
       name: rawPlayer.name,
@@ -967,12 +1007,17 @@ export class ContractsAPI extends EventEmitter {
     const playerMap: Map<EthAddress, Player> = new Map();
 
     for (let i = 0; i < nPlayers; i++) {
-      const playerId = "0x" + playerIds[i].slice(-40);
-      const player = this.getPlayerById(playerId as EthAddress);
+      console.log(i, playerIds[i]);
+      const playerId = hexToEthAddress(playerIds[i].toString());
+      console.log(i, playerId);
+
+      const player = this.getPlayerById(playerId);
       if (!player) {
         continue;
       }
-      playerMap.set(player.address, player);
+      // playerMap.set(player.address, player);
+      playerMap.set(player.burner, player);
+
       onProgress && onProgress((i + 1) / nPlayers);
     }
     return playerMap;

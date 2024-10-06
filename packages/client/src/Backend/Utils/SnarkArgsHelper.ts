@@ -129,9 +129,11 @@ class SnarkArgsHelper {
     this.terminal = terminal;
     this.snarkProverQueue = new SnarkProverQueue();
     this.hashConfig = hashConfig;
+
     this.planetHashMimc = useMockHash
       ? fakeHash(hashConfig.planetRarity)
       : mimcHash(hashConfig.planetHashKey);
+
     this.spaceTypePerlinOpts = {
       key: hashConfig.spaceTypeKey,
       scale: hashConfig.perlinLengthScale,
@@ -371,6 +373,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinLengthScale),
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
+      bigInt(x ** 2 + y ** 2),
     ];
     return fakeProof(
       publicSignals.map((x) => modPBigIntNative(x).toString(10)),
@@ -389,6 +392,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinLengthScale),
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
+      bigInt(x ** 2 + y ** 2),
     ];
     return fakeProof(
       publicSignals.map((x) => modPBigIntNative(x).toString(10)),
@@ -404,7 +408,17 @@ class SnarkArgsHelper {
     distMax: number,
   ) {
     const hash1 = this.planetHashMimc(x1, y1);
+    //PUNK
+    console.log("hash 1");
+    console.log(x1, y1);
+    console.log(hash1);
+
     const hash2 = this.planetHashMimc(x2, y2);
+
+    console.log("hash 2");
+    console.log(x2, y2);
+    console.log(hash2);
+
     const perl2 = perlin({ x: x2, y: y2 }, this.spaceTypePerlinOpts);
     const publicSignals: BigInteger[] = [
       hash1,
@@ -417,6 +431,7 @@ class SnarkArgsHelper {
       bigInt(this.hashConfig.perlinLengthScale),
       bigInt(this.hashConfig.perlinMirrorX ? 1 : 0),
       bigInt(this.hashConfig.perlinMirrorY ? 1 : 0),
+      bigInt(x2 ** 2 + y2 ** 2),
     ];
     return fakeProof(
       publicSignals.map((x) => modPBigIntNative(x).toString(10)),

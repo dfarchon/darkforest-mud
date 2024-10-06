@@ -7,7 +7,7 @@ import {
 } from "@df/constants";
 import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
-import { artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 import type {
   EthAddress,
   LocatablePlanet,
@@ -183,8 +183,10 @@ export class PlanetUtils {
       planetType = planetRec.planetType as PlanetType;
       planetLevel = planetRec.level as PlanetLevel;
       universeZone = this._initZone(distSquare);
-      owner = getComponentValueStrict(PlanetOwner, planetEntity)
-        ?.value as EthAddress;
+      owner = address(
+        getComponentValueStrict(PlanetOwner, planetEntity)?.value,
+      );
+
       const planetData = getComponentValue(Planet, planetEntity);
       if (planetData) {
         population = Number(planetData.population);
@@ -331,12 +333,12 @@ export class PlanetUtils {
       range,
       speed,
       defense,
-      energy: population,
-      energyCap: populationCap,
-      energyGrowth: populationGrowth,
-      silver,
-      silverCap,
-      silverGrowth,
+      energy: Math.floor(population / CONTRACT_PRECISION),
+      energyCap: Math.floor(populationCap / CONTRACT_PRECISION),
+      energyGrowth: Math.floor(populationGrowth / CONTRACT_PRECISION),
+      silver: Math.floor(silver / CONTRACT_PRECISION),
+      silverCap: Math.floor(silverCap / CONTRACT_PRECISION),
+      silverGrowth: Math.floor(silverGrowth / CONTRACT_PRECISION),
       upgradeState,
       lastUpdated: lastUpdateTick,
       isInContract,
@@ -481,8 +483,8 @@ export class PlanetUtils {
     }
 
     return [
-      Math.floor(Number(planetInitialResource.population) / CONTRACT_PRECISION),
-      Math.floor(Number(planetInitialResource.silver) / CONTRACT_PRECISION),
+      Math.floor(Number(planetInitialResource.population)),
+      Math.floor(Number(planetInitialResource.silver)),
     ];
   }
 

@@ -1295,11 +1295,11 @@ export class GameManager extends EventEmitter {
     return gameManager;
   }
 
-  private async hardRefreshPlayer(address?: EthAddress): Promise<void> {
+  private hardRefreshPlayer(address?: EthAddress): void {
     if (!address) {
       return;
     }
-    const playerFromBlockchain = await this.contractsAPI.getPlayerById(address);
+    const playerFromBlockchain = this.contractsAPI.getPlayerById(address);
     if (!playerFromBlockchain) {
       return;
     }
@@ -2008,7 +2008,12 @@ export class GameManager extends EventEmitter {
    * Whether or not this client has successfully found and landed on a home planet.
    */
   hasJoinedGame(): boolean {
-    return this.players.has(this.account as string);
+    const player = this.players.get(this.account as string);
+    if (!player) {
+      return false;
+    }
+
+    return this.contractsAPI.hasJoinedGame(player.burner);
   }
 
   /**
@@ -3782,12 +3787,13 @@ export class GameManager extends EventEmitter {
         this.terminal.current?.newline();
 
         txIntentCompleted = true;
+
         return args;
         // return [...args, distFromOriginSquare];
       };
 
       const txIntent: UnconfirmedInit = {
-        methodName: "initializePlayer",
+        methodName: "df__initializePlayer",
         contract: this.contractsAPI.contract,
         locationId: planet.location.hash,
         location: planet.location,
@@ -5138,12 +5144,13 @@ export class GameManager extends EventEmitter {
         if (artifactMoved) {
           args[6] = artifactIdToDecStr(artifactMoved);
         }
-
+        console.log("move args");
+        console.log(args);
         return args;
       };
 
       const txIntent: UnconfirmedMove = {
-        methodName: "move",
+        methodName: "df__classic_move",
         contract: this.contractsAPI.contract,
         args: getArgs(),
         from: oldLocation.hash,

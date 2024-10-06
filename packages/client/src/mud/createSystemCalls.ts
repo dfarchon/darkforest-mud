@@ -665,6 +665,18 @@ export function createSystemCalls(
       throw error;
     }
   };
+
+  const getMsgSender = async (): Promise<Address> => {
+    try {
+      const result = await worldContract.read.df__getMsgSender();
+
+      // Assuming the contract returns a boolean value
+      return result;
+    } catch (error) {
+      console.error("Error in df__getMsgSender:", error);
+      throw error;
+    }
+  };
   // do not forget init function calls to be accessable in MUD systems calls
   return {
     registerPlayer,
@@ -690,5 +702,6 @@ export function createSystemCalls(
     readPlanetWithHash,
     readPlanetWithHashPerlinDistance,
     readPlanetAt,
+    getMsgSender,
   };
 }

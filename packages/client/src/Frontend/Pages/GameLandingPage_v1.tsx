@@ -56,6 +56,7 @@ import {
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import { Terminal, type TerminalHandle } from "../Views/Terminal";
+import { fakeHash } from "@df/hashing";
 
 const enum TerminalPromptStep {
   NONE,
@@ -93,6 +94,7 @@ export function GameLandingPage_v1() {
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
+    systemCalls: { getMsgSender },
     network: { walletClient: burnerWalletClient },
     components: components,
   } = useMUD();
@@ -373,6 +375,19 @@ export function GameLandingPage_v1() {
     };
   };
 
+  const testPlayer = async () => {
+    const { Player } = components;
+    console.log(Player);
+
+    const msgSender = await getMsgSender();
+    console.log("msg sender");
+    console.log(msgSender);
+
+    console.log(fakeHash(16384)(10000, 10000).toString(16));
+
+    console.log(fakeHash(16384)(10000, 11000).toString(16));
+  };
+
   useEffect(() => {
     if (terminalHandle.current && topLevelContainer.current) {
       advanceState(terminalHandle);
@@ -438,6 +453,9 @@ export function GameLandingPage_v1() {
             <button onClick={testWorker}> Test Worker</button>
           </div>
 
+          <div>
+            <button onClick={testPlayer}> Test Player</button>
+          </div>
           <Terminal
             ref={terminalHandle}
             promptCharacter={">"}

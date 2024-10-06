@@ -80,7 +80,7 @@ export type TxIntent = {
  * @hidden
  */
 export type UnconfirmedInit = TxIntent & {
-  methodName: "initializePlayer";
+  methodName: "df__initializePlayer";
   locationId: LocationId;
   location: WorldLocation;
 };
@@ -89,7 +89,7 @@ export type UnconfirmedInit = TxIntent & {
  * @hidden
  */
 export type UnconfirmedMove = TxIntent & {
-  methodName: "move";
+  methodName: "df__classic_move";
   from: LocationId;
   to: LocationId;
   forces: number;

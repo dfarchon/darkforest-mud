@@ -120,7 +120,7 @@ export function getNetworkConfig() {
    */
   const initialBlockNumber = params.has("initialBlockNumber")
     ? Number(params.get("initialBlockNumber"))
-    : world?.blockNumber ?? -1; // -1 will attempt to find the block number from RPC
+    : (world?.blockNumber ?? -1); // -1 will attempt to find the block number from RPC
 
   const useBurner =
     (import.meta.env.DEV && !params.has("useExternalWallet")) ||

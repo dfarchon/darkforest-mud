@@ -57,7 +57,7 @@ contract MoveSystem is System, Errors {
   /**
    * @notice For backward compatibility, we keep the old move function signature.
    */
-  function move(
+  function classic_move(
     uint256[2] memory _a,
     uint256[2][2] memory _b,
     uint256[2] memory _c,
@@ -65,7 +65,7 @@ contract MoveSystem is System, Errors {
     uint256 popMoved,
     uint256 silverMoved,
     uint256 movedArtifactId,
-    uint256 // isAbandoning
+    uint256 //isAbandoning
   ) public {
     Proof memory proof;
     proof.genFrom(_a, _b, _c);
