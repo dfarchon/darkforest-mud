@@ -23,6 +23,8 @@ export function locationIdFromHexStr(location: string) {
   while (ret.length < 64) {
     ret = "0" + ret;
   }
+
+  ret = ret.toLowerCase();
   return ret as LocationId;
 }
 

@@ -1,4 +1,4 @@
-import { locationIdToHexStr } from "@df/serde";
+import { locationIdToHexStr, locationIdFromHexStr } from "@df/serde";
 import type {
   ArtifactId,
   EthAddress,
@@ -42,7 +42,7 @@ export class MoveUtils {
         i++
       ) {
         const moveEntity = encodeEntity(Move.metadata.keySchema, {
-          to: planetId as `0x${string}`,
+          to: locationIdToHexStr(planetId) as `0x${string}`,
           index: indexes[i % 30],
         });
         const move = getComponentValue(Move, moveEntity);
@@ -84,7 +84,8 @@ export class MoveUtils {
   ): QueuedArrival[] {
     const res: QueuedArrival[] = [];
     for (let i = 0; i < planetsToLoad.length; i++) {
-      const planetId = planetsToLoad[i];
+      const planetId = locationIdFromHexStr(planetsToLoad[i]);
+
       res.push(...this.getArrivalsForPlanet(planetId));
       if (onProgress) {
         onProgress((i + 1) / planetsToLoad.length);

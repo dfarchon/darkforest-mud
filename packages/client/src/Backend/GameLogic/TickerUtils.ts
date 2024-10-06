@@ -25,7 +25,7 @@ export class TickerUtils {
     if (tickerData.paused) {
       return preTickNumber;
     } else {
-      const currentTimestamp = Date.now();
+      const currentTimestamp = Math.floor(Date.now() / 1000);
       const newTickNumber =
         preTickNumber + (currentTimestamp - preTimestamp) * rate;
       return newTickNumber;

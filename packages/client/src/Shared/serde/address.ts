@@ -24,6 +24,7 @@ export function address(str: string): EthAddress {
   if (ret.length !== 40) {
     throw new Error("not a valid address");
   }
+
   return `0x${ret}` as EthAddress;
 }
 

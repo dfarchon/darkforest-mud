@@ -428,12 +428,14 @@ export class GameObjects {
       if (updateIfStale) {
         this.updatePlanetIfStale(planet);
       }
+      planet.owner = planet.owner.toLowerCase() as EthAddress;
       return planet;
     }
     const loc = this.getLocationOfPlanet(planetId);
     if (!loc) {
       return undefined;
     }
+
     return this.getPlanetWithLocation(loc);
   }
 
