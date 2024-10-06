@@ -52,6 +52,7 @@ import {
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdToDecStr,
+  address,
 } from "@df/serde";
 import type {
   Artifact,
@@ -1383,6 +1384,9 @@ export class GameManager extends EventEmitter {
     if (!planet) {
       return;
     }
+
+    console.log(planet);
+
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
 
     // const artifactsOnPlanets =
@@ -1652,7 +1656,7 @@ export class GameManager extends EventEmitter {
    * Gets the address of the player logged into this game manager.
    */
   public getAccount(): EthAddress | undefined {
-    return this.account;
+    return address(this.account);
   }
 
   /**

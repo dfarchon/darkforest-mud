@@ -77,7 +77,7 @@ export class PlanetUtils {
       locationId: planet.locationId,
       perlin: planet.perlin,
       spaceType: planet.spaceType,
-      owner: planet.owner,
+      owner: planet.owner.toLowerCase() as EthAddress,
       planetLevel: planet.planetLevel,
       planetType: planet.planetType,
       isHomePlanet: false,
@@ -183,9 +183,11 @@ export class PlanetUtils {
       planetType = planetRec.planetType as PlanetType;
       planetLevel = planetRec.level as PlanetLevel;
       universeZone = this._initZone(distSquare);
-      owner = address(
-        getComponentValueStrict(PlanetOwner, planetEntity)?.value,
-      );
+
+      const ownerInContract = getComponentValue(PlanetOwner, planetEntity);
+
+      owner = ownerInContract ? address(ownerInContract.value) : EMPTY_ADDRESS;
+      owner = owner.toLowerCase();
 
       const planetData = getComponentValue(Planet, planetEntity);
       if (planetData) {
@@ -347,7 +349,9 @@ export class PlanetUtils {
       bonus,
       energyGroDoublers: 0,
       silverGroDoublers: 0,
-      prospectedBlockNumber: Number(prospectedPlanet?.blockNumber),
+      prospectedBlockNumber: prospectedPlanet
+        ? Number(prospectedPlanet.blockNumber)
+        : undefined,
       hasTriedFindingArtifact: exploredPlanet ? exploredPlanet.value : false,
       heldArtifactIds: artifactIds,
     };

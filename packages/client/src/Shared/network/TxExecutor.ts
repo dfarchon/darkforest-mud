@@ -20,6 +20,7 @@ import {
   type ConcurrentQueueConfiguration,
   ThrottledConcurrentQueue,
 } from "./ThrottledConcurrentQueue";
+
 /**
  * Returns either a string that represents the gas price we should use by default for transactions,
  * or a string that represents the fact that we should be using one of the automatic gas prices.
@@ -386,8 +387,7 @@ export class TxExecutor {
           nonce,
         }),
         TxExecutor.TX_SUBMIT_TIMEOUT,
-        `tx request failed to submit: timed out}`,
-        // `tx request ${tx.id} failed to submit: timed out}`,
+        `tx request ${tx.id} failed to submit: timed out`,
       );
 
       releaseMutex();
@@ -404,6 +404,7 @@ export class TxExecutor {
       const confirmed = await this.ethConnection.waitForTransaction(
         submitted.hash,
       );
+
       if (confirmed.status !== 1) {
         time_errored = Date.now();
         tx.lastUpdatedAt = time_errored;
