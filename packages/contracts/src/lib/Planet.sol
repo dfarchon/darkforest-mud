@@ -299,7 +299,7 @@ library PlanetLib {
 
   function _bounceAndBoundLevel(Planet memory planet) internal view {
     // bounce level
-    int256 level = int256(planet.level) + SpaceTypeConfig.getPlanetLevelBonus()[uint8(planet.spaceType)];
+    int256 level = int256(planet.level) + SpaceTypeConfig.getPlanetLevelBonus()[uint8(planet.spaceType) - 1];
     level += UniverseZoneConfig.getPlanetLevelBonus()[uint8(planet.universeZone)];
 
     // bound level
@@ -308,7 +308,7 @@ library PlanetLib {
       return;
     }
     uint256 posLevel = uint256(level);
-    uint256 limit = SpaceTypeConfig.getPlanetLevelLimits()[uint8(planet.spaceType)];
+    uint256 limit = SpaceTypeConfig.getPlanetLevelLimits()[uint8(planet.spaceType) - 1];
     if (posLevel > limit) {
       posLevel = limit;
     }
