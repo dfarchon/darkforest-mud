@@ -95,9 +95,9 @@ contract PlayerSystem is System {
     address player = _msgSender();
 
     // PUNK
-    // if (Player.getIndex(player) == 0) {
-    //   revert Errors.NotRegistered();
-    // }
+    if (Player.getIndex(player) == 0) {
+      revert Errors.NotRegistered();
+    }
 
     if (SpawnPlanet.get(player) != 0) {
       revert Errors.AlreadySpawned();
