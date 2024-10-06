@@ -126,9 +126,9 @@ b_speed = 0
 # -2000 0 287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64
 
 [[test_planets]]
-a_x = 0
-b_y = 0
-c_hash = "0x0998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b"
+a_x = 5
+b_y = 1467
+c_hash = "0x0000558417c74218f4dd6c5d2efc08b26e85de2cb44967137a82c83422a46383"
 d_owner = "0x0000000000000000000000000000000000000000"
 e_last_update_tick = 0
 f_perlin = 0
@@ -140,9 +140,9 @@ k_silver = 200000000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = 0
-b_y = 1000
-c_hash = "0x2f2f570496eba865f0f7e547c58e5f408c59b1a4888738ef05f9ced2334a98cc"
+a_x = 21
+b_y = 66
+c_hash = "0x00001a6f368a18eb4bf7e14f513752d2a64ebb0ea946214730c08f0103fb3e0f"
 d_owner = "0x0000000000000000000000000000000000000000"
 e_last_update_tick = 0
 f_perlin = 0
@@ -154,9 +154,9 @@ k_silver = 100000000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = 1000
-b_y = 0
-c_hash = "0x0f2a81649e22806f1615bfbb872f588b58160304fa9f6342ceaf0497e9b62f7a"
+a_x = 40
+b_y = 946
+c_hash = "0x00004878935de58b28a236aa410b644fc9e6c64500fbaf1591ffa099cd8a35fe"
 d_owner = "0x0000000000000000000000000000000000000000"
 e_last_update_tick = 0
 f_perlin = 0
@@ -168,9 +168,9 @@ k_silver = 25000000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = 0
-b_y = -1000
-c_hash = "0x0157da9a7cd70b3252ce6646b096689251290d66bbd57342caaffab0ecf37db2"
+a_x = 523
+b_y = 300
+c_hash = "0x00005eefee0cb9641164e3710943913fa843454b815d0091b34c0617b2be59b4"
 d_owner = "0x0000000000000000000000000000000000000000"
 e_last_update_tick = 0
 f_perlin = 0
@@ -182,9 +182,9 @@ k_silver = 1500000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = -1000
-b_y = 0
-c_hash = "0x25ecb2c15cc398a7ddd3d754aed037383a0e2cf7b0a58c41a02d9d57c716ba0b"
+a_x = 518
+b_y = 1874
+c_hash = "0x00002a32854a173e807b1dff928d8cccd3a0e46dc5fd04347e399134d8f9b365"
 d_owner = "0x0000000000000000000000000000000000000000"
 e_last_update_tick = 0
 f_perlin = 0
@@ -196,9 +196,9 @@ k_silver = 500000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = 1000
-b_y = 1000
-c_hash = "0x2b793eaafe86e97e2bf670ba48d5a1c3984ad11e335d87bc9657c7ab6d030caf"
+a_x = 560
+b_y = 1552
+c_hash = "0x0000654dfd969969eb7eaa2cfa19068901fbad6a35ee918587ab96ed9c9369ff"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 e_last_update_tick = 0
 f_perlin = 0
@@ -210,9 +210,9 @@ k_silver = 100000000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = -1000
-b_y = -1000
-c_hash = "0x1024e3a1608958b9b33baa3a9ee72d3b23a2d1a7ba9ad22ff36c287d8ad78ce0"
+a_x = 1031
+b_y = 793
+c_hash = "0x00008c071c4014d5c6839995fa4b328a1a5fe21186cbf68cb6625fefcf0af530"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 e_last_update_tick = 0
 f_perlin = 0
@@ -224,9 +224,9 @@ k_silver = 50000000
 l_upgrades = 0
 
 [[test_planets]]
-a_x = -1000
-b_y = 1000
-c_hash = "0x287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64"
+a_x = 1039
+b_y = 1644
+c_hash = "0x000bdd0db70b93586f31baf2fa1e47006a371927a8bfa32d1686d9c0c8e9c3"
 d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 e_last_update_tick = 0
 f_perlin = 0
@@ -239,9 +239,9 @@ l_upgrades = 0
 
 # implement as default for CreatePlanet form
 # [[test_planets]]
-# a_x = 1000
-# b_y = -1000
-# c_hash = "0x29d4c60e4be1baaf93a4ea7d747553119d9aa6103dd7d6a83f70d7ae7e96e963"
+# a_x = 1507
+# b_y = 273
+# c_hash = "0x00004e95b5b09116388a36e32129ab5d798e50dfd8f79c39ad6849ab5cf47aad"
 # d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 # e_last_update_tick = 0
 # f_perlin = 0
