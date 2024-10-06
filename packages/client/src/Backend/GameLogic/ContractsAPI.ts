@@ -68,6 +68,7 @@ import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import { flatten } from "lodash-es";
 import type { Hex } from "viem";
+import type { Subscription } from "rxjs";
 
 import type {
   ContractConstants,
@@ -138,6 +139,8 @@ export class ContractsAPI extends EventEmitter {
 
   private planetUtils: PlanetUtils;
   private moveUtils: MoveUtils;
+
+  private pausedStateSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -276,6 +279,18 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public async setupEventListeners(): Promise<void> {
+    this.pausedStateSubscription = this.components.Ticker.update$.subscribe(
+      (update) => {
+        const [nextValue, prevValue] = update.value;
+        console.log("PUNK");
+        console.log("nextValue");
+        console.log(nextValue);
+        console.log("preValue");
+        console.log(prevValue);
+        this.emit(ContractsAPIEvent.PauseStateChanged, nextValue?.paused);
+      },
+    );
+
     return;
     const { contract } = this;
 
@@ -639,6 +654,8 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public removeEventListeners(): void {
+    this.pausedStateSubscription.unsubscribe();
+    return;
     const { contract } = this;
 
     contract.removeAllListeners(ContractEvent.PlayerInitialized);
