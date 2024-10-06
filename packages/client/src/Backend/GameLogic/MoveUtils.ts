@@ -1,4 +1,4 @@
-import { locationIdToHexStr, locationIdFromHexStr } from "@df/serde";
+import { locationIdToHexStr, locationIdFromHexStr, address } from "@df/serde";
 import type {
   ArtifactId,
   EthAddress,
@@ -51,8 +51,8 @@ export class MoveUtils {
         }
         res.push({
           eventId: move.id.toString() as VoyageId,
-          player: move.captain as EthAddress,
-          fromPlanet: move.from as LocationId,
+          player: address(move.captain),
+          fromPlanet: locationIdFromHexStr(move.from),
           toPlanet: planetId,
           energyArriving: Number(move.population),
           silverMoved: Number(move.silver),

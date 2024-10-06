@@ -89,6 +89,7 @@ import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
+import { TickerUtils } from "./TickerUtils";
 
 interface ContractsApiConfig {
   connection: EthConnection;
@@ -144,6 +145,7 @@ export class ContractsAPI extends EventEmitter {
 
   private planetUtils: PlanetUtils;
   private moveUtils: MoveUtils;
+  private tickerUtils: TickerUtils;
 
   private pausedStateSubscription: Subscription;
   private spawnPlayerSubscription: Subscription;
@@ -176,6 +178,7 @@ export class ContractsAPI extends EventEmitter {
       contractConstants: this.contractConstants,
     });
     this.moveUtils = new MoveUtils({ components });
+    this.tickerUtils = new TickerUtils({ components });
 
     this.setupEventListeners();
   }
@@ -783,6 +786,10 @@ export class ContractsAPI extends EventEmitter {
 
   public getContractAddress(): EthAddress {
     return this.contractAddress;
+  }
+
+  public getCurrentTick(): number {
+    return this.tickerUtils.getTickNumber();
   }
 
   public hasJoinedGame(playerId: EthAddress): boolean {

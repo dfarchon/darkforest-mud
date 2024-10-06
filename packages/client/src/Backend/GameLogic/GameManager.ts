@@ -199,6 +199,7 @@ import type { ContractsAPI } from "./ContractsAPI";
 import { makeContractsAPI } from "./ContractsAPI";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
+import type { NumberType } from "@latticexyz/recs";
 
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
@@ -1385,9 +1386,11 @@ export class GameManager extends EventEmitter {
       return;
     }
 
-    console.log(planet);
-
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
+
+    console.log("hardRefreshPlanet");
+    console.log(planet);
+    console.log(arrivals);
 
     // const artifactsOnPlanets =
     //   await this.contractsAPI.bulkGetArtifactsOnPlanets([planetId]);
@@ -1656,7 +1659,7 @@ export class GameManager extends EventEmitter {
    * Gets the address of the player logged into this game manager.
    */
   public getAccount(): EthAddress | undefined {
-    return address(this.account);
+    return this.account;
   }
 
   /**
@@ -1671,6 +1674,10 @@ export class GameManager extends EventEmitter {
    */
   public getContractAddress(): EthAddress {
     return this.contractsAPI.getContractAddress();
+  }
+
+  public getCurrentTick(): number {
+    return this.contractsAPI.getCurrentTick();
   }
 
   /**
