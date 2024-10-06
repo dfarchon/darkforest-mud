@@ -353,6 +353,10 @@ export class GameUIManager extends EventEmitter {
     }
   }
 
+  public getCurrentTick(): number {
+    return this.gameManager.getCurrentTick();
+  }
+
   public joinGame(
     beforeRetry: (e: Error) => Promise<boolean>,
     _selectedCoords: { x: number; y: number },

@@ -24,16 +24,17 @@ const { white, gold } = engineConsts.colors;
 const { enemyA, mineA, shipA, supportA } = engineConsts.colors.voyage;
 
 function getIsSupportVoyage(voyage: QueuedArrival, toPlanet: Planet) {
-  let supportMove = false;
+  return false;
+  // let supportMove = false;
 
-  for (let i = 0; i < voyage.members.length; i++) {
-    if (toPlanet.owner === voyage.members[i]) {
-      supportMove = true;
-      break;
-    }
-  }
-  const result = supportMove && voyage.player !== toPlanet.owner;
-  return result;
+  // for (let i = 0; i < voyage.members.length; i++) {
+  //   if (toPlanet.owner === voyage.members[i]) {
+  //     supportMove = true;
+  //     break;
+  //   }
+  // }
+  // const result = supportMove && voyage.player !== toPlanet.owner;
+  // return result;
 }
 
 function getVoyageColor(
@@ -237,7 +238,8 @@ export class VoyageRenderer implements VoyageRendererType {
     const { context: gameUIManager, now } = this.renderer;
     const voyages = gameUIManager.getAllVoyages();
     for (const voyage of voyages) {
-      const nowS = now / 1000;
+      const nowS = now;
+
       if (nowS < voyage.arrivalTime) {
         const isMyVoyage =
           voyage.player === gameUIManager.getAccount() ||
@@ -297,6 +299,7 @@ export class VoyageRenderer implements VoyageRendererType {
     const fromPlanet = gameUIManager.getPlanetWithId(from);
     const toLoc = gameUIManager.getLocationOfPlanet(to);
     const toPlanet = gameUIManager.getPlanetWithId(to);
+
     if (!fromPlanet || !fromLoc || !toLoc || !toPlanet) {
       return;
     }

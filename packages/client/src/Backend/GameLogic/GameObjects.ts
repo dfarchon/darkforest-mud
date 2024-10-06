@@ -299,6 +299,7 @@ export class GameObjects {
         this.addPlanetLocation(planetLocation);
       }
     }
+
     for (const location of revealedLocations.values()) {
       this.markLocationRevealed(location);
       this.addPlanetLocation(location);
@@ -331,7 +332,6 @@ export class GameObjects {
         );
         for (const arrivalWithTimer of arrivalsWithTimers) {
           const arrivalId = arrivalWithTimer.arrivalData.eventId;
-          arrivals.set(arrivalId, arrivalWithTimer);
         }
         const planetLocation = this.planetLocationMap.get(planetId);
         if (planet && planetLocation) {
@@ -1362,7 +1362,8 @@ export class GameObjects {
 
     // sort arrivals by timestamp
     arrivals.sort((a, b) => a.arrivalTime - b.arrivalTime);
-    const nowInSeconds = Date.now() / 1000;
+
+    const nowInSeconds = this.tickerUtils.getTickNumber();
     for (const arrival of arrivals) {
       try {
         if (nowInSeconds - arrival.arrivalTime > 0) {
@@ -1393,7 +1394,7 @@ export class GameObjects {
               this.removeArrival(planetId, update.arrival.eventId);
               this.emitArrivalNotifications(update);
             },
-            arrival.arrivalTime * 1000 - Date.now(),
+            1000 * (arrival.arrivalTime - this.tickerUtils.getTickNumber()),
           );
 
           const arrivalWithTimer = {
