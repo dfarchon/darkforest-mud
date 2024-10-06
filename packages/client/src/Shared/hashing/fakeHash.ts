@@ -74,7 +74,9 @@ export const fakeHash = (planetRarity: number) => (x: number, y: number) => {
   const [xPrime, yPrime] = sigma(...cyc(mPrime, nPrime)(...sigma(r, s)));
   const validPlanet = xPrime * 256 + yPrime < (256 * 256) / planetRarity;
   // first four bytes
-  let hash = validPlanet ? "00000000" : "1eadbeef";
+  // let hash = validPlanet ? "00000000" : "1eadbeef";
+  // PUNK
+  let hash = "00000000";
   // next 28 bytes, generated 4 at a time. deterministically generated from x, y
   const seed = 8 * (10000000 * x + y);
   for (let i = 0; i < 7; i += 1) {

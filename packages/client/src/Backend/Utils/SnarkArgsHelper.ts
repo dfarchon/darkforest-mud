@@ -129,9 +129,11 @@ class SnarkArgsHelper {
     this.terminal = terminal;
     this.snarkProverQueue = new SnarkProverQueue();
     this.hashConfig = hashConfig;
+
     this.planetHashMimc = useMockHash
       ? fakeHash(hashConfig.planetRarity)
       : mimcHash(hashConfig.planetHashKey);
+
     this.spaceTypePerlinOpts = {
       key: hashConfig.spaceTypeKey,
       scale: hashConfig.perlinLengthScale,
@@ -406,7 +408,17 @@ class SnarkArgsHelper {
     distMax: number,
   ) {
     const hash1 = this.planetHashMimc(x1, y1);
+    //PUNK
+    console.log("hash 1");
+    console.log(x1, y1);
+    console.log(hash1);
+
     const hash2 = this.planetHashMimc(x2, y2);
+
+    console.log("hash 2");
+    console.log(x2, y2);
+    console.log(hash2);
+
     const perl2 = perlin({ x: x2, y: y2 }, this.spaceTypePerlinOpts);
     const publicSignals: BigInteger[] = [
       hash1,

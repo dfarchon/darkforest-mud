@@ -56,6 +56,7 @@ import {
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import { Terminal, type TerminalHandle } from "../Views/Terminal";
+import { fakeHash } from "@df/hashing";
 
 const enum TerminalPromptStep {
   NONE,
@@ -381,6 +382,10 @@ export function GameLandingPage_v1() {
     const msgSender = await getMsgSender();
     console.log("msg sender");
     console.log(msgSender);
+
+    console.log(fakeHash(16384)(10000, 10000).toString(16));
+
+    console.log(fakeHash(16384)(10000, 11000).toString(16));
   };
 
   useEffect(() => {

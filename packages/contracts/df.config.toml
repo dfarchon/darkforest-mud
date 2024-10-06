@@ -251,3 +251,33 @@ l_upgrades = 0
 # j_population = 1600000
 # k_silver = 200000
 # l_upgrades = 0
+
+
+# fashhash
+[[test_planets]]
+a_x = 10000
+b_y = 10000
+c_hash = "0x00000000132f1fa93dea0beb59b886a7d0b264a172a55f7d948fb47aaacbdf70"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 9
+h_planet_type = 1
+i_space_type = 2
+j_population = 800000000
+k_silver = 200000000
+l_upgrades = 0
+
+[[test_planets]]
+a_x = 10000
+b_y = 11000
+c_hash = "0x0000000079b5cf911e8b7f724f23977d5d0e657fe8c7c15c390df58fff0b7bc3"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 9
+h_planet_type = 1
+i_space_type = 2
+j_population = 800000000
+k_silver = 200000000
+l_upgrades = 0
