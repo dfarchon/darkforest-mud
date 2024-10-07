@@ -830,6 +830,7 @@ export class ContractsAPI extends EventEmitter {
     this.planetPropsSubscription.unsubscribe();
     this.planetOwnerSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
+    this.pendingMoveSubscription.unsubscribe();
     return;
     const { contract } = this;
 
