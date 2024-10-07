@@ -1034,10 +1034,21 @@ export class GameManager extends EventEmitter {
       .on(
         ContractsAPIEvent.ArrivalQueued,
         async (_arrivalId: VoyageId, fromId: LocationId, toId: LocationId) => {
+          // PUNK
+          // add await sleep(1), it can work right
+          // why this can work?
+          await sleep(1);
+
+          // PUNK
+          console.log("handle ContractsAPIEvent.ArrivalQueued");
+          console.log("arrivalId", _arrivalId);
+          console.log("fromId", fromId);
+          console.log("toId", toId);
+
           // only reload planets if the toPlanet is in the map
           const localToPlanet = gameManager.entityStore.getPlanetWithId(toId);
           if (localToPlanet && isLocatable(localToPlanet)) {
-            await gameManager.bulkHardRefreshPlanets([fromId, toId]);
+            gameManager.bulkHardRefreshPlanets([fromId, toId]);
             gameManager.emit(GameManagerEvent.PlanetUpdate);
           }
         },
@@ -1490,10 +1501,17 @@ export class GameManager extends EventEmitter {
   }
 
   private async bulkHardRefreshPlanets(planetIds: LocationId[]): Promise<void> {
+    // PUNK
+    console.log("bulkHardRefreshPlanets");
+    console.log("planetIds");
+    console.log(planetIds);
+
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
     const allVoyages = this.contractsAPI.getAllArrivals(planetIds);
+
     const planetsToUpdateMap = this.contractsAPI.bulkGetPlanets(planetIds);
+
     // const artifactsOnPlanets =
     //   await this.contractsAPI.bulkGetArtifactsOnPlanets(planetIds);
     planetsToUpdateMap.forEach((planet, locId) => {
