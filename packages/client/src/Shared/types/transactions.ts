@@ -136,7 +136,7 @@ export type UnconfirmedClaimReward = TxIntent & {
  * @hidden
  */
 export type UnconfirmedUpgrade = TxIntent & {
-  methodName: "upgradePlanet";
+  methodName: "df__upgradePlanet(uint256,uint256)";
   locationId: LocationId;
   upgradeBranch: number; // 0, 1, or 2
 };
