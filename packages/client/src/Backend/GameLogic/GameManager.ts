@@ -1031,7 +1031,7 @@ export class GameManager extends EventEmitter {
         // is in your map it will be loaded from the contract.
         const localPlanet = gameManager.entityStore.getPlanetWithId(planetId);
         if (localPlanet && isLocatable(localPlanet)) {
-          await gameManager.hardRefreshPlanet(planetId);
+          gameManager.hardRefreshPlanet(planetId);
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         }
       })
@@ -1397,10 +1397,6 @@ export class GameManager extends EventEmitter {
     }
 
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
-
-    console.log("hardRefreshPlanet");
-    console.log(planet);
-    console.log(arrivals);
 
     // const artifactsOnPlanets =
     //   await this.contractsAPI.bulkGetArtifactsOnPlanets([planetId]);
