@@ -82,16 +82,6 @@ library PlanetLib {
         })
       );
     }
-    PlanetTable.set(
-      bytes32(planet.planetHash),
-      PlanetData({
-        lastUpdateTick: uint64(planet.lastUpdateTick),
-        population: uint64(planet.population),
-        silver: uint64(planet.silver),
-        upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades),
-        useProps: planet.useProps
-      })
-    );
     if (planet.ownerChanged) {
       PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
     }
@@ -111,6 +101,16 @@ library PlanetLib {
     }
     planet.moveQueue.WriteToStore();
     planet.artifactStorage.WriteToStore();
+    PlanetTable.set(
+      bytes32(planet.planetHash),
+      PlanetData({
+        lastUpdateTick: uint64(planet.lastUpdateTick),
+        population: uint64(planet.population),
+        silver: uint64(planet.silver),
+        upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades),
+        useProps: planet.useProps
+      })
+    );
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {

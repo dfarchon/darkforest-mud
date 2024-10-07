@@ -380,6 +380,7 @@ export class TxExecutor {
       time_called = Date.now();
 
       const args = await tx.intent.args;
+      console.log(tx.intent.contract);
 
       const submitted = await timeout<providers.TransactionResponse>(
         tx.intent.contract[tx.intent.methodName](...args, {

@@ -5228,7 +5228,7 @@ export class GameManager extends EventEmitter {
       );
 
       const txIntent: UnconfirmedUpgrade = {
-        methodName: "upgradePlanet",
+        methodName: "df__upgradePlanet(uint256,uint256)",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([
           locationIdToDecStr(planetId),
@@ -5240,7 +5240,6 @@ export class GameManager extends EventEmitter {
 
       // Always await the submitTransaction so we can catch rejections
       const tx = await this.contractsAPI.submitTransaction(txIntent);
-
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(

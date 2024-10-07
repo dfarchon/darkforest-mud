@@ -187,7 +187,7 @@ export class PlanetUtils {
       const ownerInContract = getComponentValue(PlanetOwner, planetEntity);
 
       owner = ownerInContract ? address(ownerInContract.value) : EMPTY_ADDRESS;
-      owner = owner.toLowerCase();
+      owner = owner.toLowerCase() as EthAddress;
 
       const planetData = getComponentValue(Planet, planetEntity);
       if (planetData) {
