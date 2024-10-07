@@ -150,6 +150,7 @@ export class ContractsAPI extends EventEmitter {
   private pausedStateSubscription: Subscription;
   private spawnPlayerSubscription: Subscription;
   private moveSubscription: Subscription;
+  private planetSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -325,13 +326,46 @@ export class ContractsAPI extends EventEmitter {
         const arrivalId = nextValue.id.toString() as VoyageId;
         const playerAddr = address(nextValue.captain);
 
+        //PUNK
+        // const { Planet } = this.components;
+        // const planetKey = encodeEntity(Planet.metadata.keySchema, {
+        //   id: "0x0000000079b5cf911e8b7f724f23977d5d0e657fe8c7c15c390df58fff0b7bc3",
+        // });
+        // const planet = getComponentValue(Planet, planetKey);
+        // console.log("Source Planet");
+        // console.log(planet);
+        // const targetPlanetKey = encodeEntity(Planet.metadata.keySchema, {
+        //   id: "0x0000000067708b3055e39901573131d62ef285e171e6d2716052efa25702e18d",
+        // });
+        // const targetPlanet = getComponentValue(Planet, targetPlanetKey);
+        // console.log("Target Planet");
+        // console.log(targetPlanet);
+        // console.log("ArrivalId", arrivalId);
+        // console.log("fromId", fromId);
+        // console.log("toId", toId);
+
         this.emit(ContractsAPIEvent.ArrivalQueued, arrivalId, fromId, toId);
         this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
         this.emit(ContractsAPIEvent.RadiusUpdated);
       }
     });
 
+    this.planetSubscription = this.components.Planet.update$.subscribe(
+      (update) => {
+        const entity = update.entity;
+        const keyTuple = decodeEntity(
+          this.components.Planet.metadata.keySchema,
+          entity,
+        );
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(keyTuple.id),
+        );
+      },
+    );
+
     return;
+
     const { contract } = this;
 
     const filter = {
@@ -697,6 +731,7 @@ export class ContractsAPI extends EventEmitter {
     this.pausedStateSubscription.unsubscribe();
     this.spawnPlayerSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
+    this.planetSubscription.unsubscribe();
     return;
     const { contract } = this;
 
@@ -1116,7 +1151,7 @@ export class ContractsAPI extends EventEmitter {
     // console.log("revlead coords by Id if exists");
     // console.log(locationIdToHexStr(planetId));
     const revealedPlanetId = encodeEntity(RevealedPlanet.metadata.keySchema, {
-      id: locationIdToHexStr(planetId),
+      id: locationIdToHexStr(planetId) as Hex,
     });
     const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
 

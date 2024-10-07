@@ -1023,6 +1023,10 @@ export class GameManager extends EventEmitter {
       //   gameManager.halfPrice$.publish(halfPrice);
       // })
       .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
+        // PUNK
+        console.log("handle ContractsAPI.PlanetUpdate");
+        console.log(planetId);
+
         // don't reload planets that you don't have in your map. once a planet
         // is in your map it will be loaded from the contract.
         const localPlanet = gameManager.entityStore.getPlanetWithId(planetId);
@@ -1034,11 +1038,6 @@ export class GameManager extends EventEmitter {
       .on(
         ContractsAPIEvent.ArrivalQueued,
         async (_arrivalId: VoyageId, fromId: LocationId, toId: LocationId) => {
-          // PUNK
-          // add await sleep(1), it can work right
-          // why this can work?
-          await sleep(1);
-
           // PUNK
           console.log("handle ContractsAPIEvent.ArrivalQueued");
           console.log("arrivalId", _arrivalId);
@@ -1115,7 +1114,7 @@ export class GameManager extends EventEmitter {
           terminal.current?.println("Loading Home Planet from Blockchain...");
           const retries = 5;
           for (let i = 0; i < retries; i++) {
-            const planet = await gameManager.contractsAPI.getPlanetById(
+            const planet = gameManager.contractsAPI.getPlanetById(
               tx.intent.locationId,
             );
             if (planet) {
@@ -1126,7 +1125,7 @@ export class GameManager extends EventEmitter {
               await delay(2000);
             }
           }
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
+          gameManager.hardRefreshPlanet(tx.intent.locationId);
           // mining manager should be initialized already via joinGame, but just in case...
           gameManager.initMiningManager(tx.intent.location.coords, 4);
         } else if (isUnconfirmedMoveTx(tx)) {
@@ -1500,12 +1499,7 @@ export class GameManager extends EventEmitter {
     // );
   }
 
-  private async bulkHardRefreshPlanets(planetIds: LocationId[]): Promise<void> {
-    // PUNK
-    console.log("bulkHardRefreshPlanets");
-    console.log("planetIds");
-    console.log(planetIds);
-
+  private bulkHardRefreshPlanets(planetIds: LocationId[]): void {
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
     const allVoyages = this.contractsAPI.getAllArrivals(planetIds);

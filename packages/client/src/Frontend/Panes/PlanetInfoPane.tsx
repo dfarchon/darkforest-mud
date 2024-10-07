@@ -72,7 +72,7 @@ export function PlanetInfoPane({
         <Text>Claim </Text>
         <br />
 
-        <ClaimPlanetPane modal={modal} initialPlanetId={planetId} />
+        {/* <ClaimPlanetPane modal={modal} initialPlanetId={planetId} /> */}
       </>
     );
   }
