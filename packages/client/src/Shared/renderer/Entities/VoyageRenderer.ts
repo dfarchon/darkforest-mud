@@ -104,8 +104,9 @@ export class VoyageRenderer implements VoyageRendererType {
       const shipMove = voyage.player === EMPTY_ADDRESS;
       const supportMove = getIsSupportVoyage(voyage, toPlanet);
 
-      const now = nowMs / 1000;
+      const now = nowMs; //nowMs / 1000;
       const timeLeft = voyage.arrivalTime - now;
+
       const radius = (timeLeft * fromPlanet.speed) / 100;
 
       const color = getVoyageColor(
@@ -130,7 +131,7 @@ export class VoyageRenderer implements VoyageRendererType {
     } else if (fromLoc && fromPlanet && toLoc && toPlanet) {
       // know source and destination locations
 
-      const now = nowMs / 1000;
+      const now = nowMs; // nowMs / 1000;
       let proportion =
         (now - voyage.departureTime) /
         (voyage.arrivalTime - voyage.departureTime);
@@ -261,6 +262,7 @@ export class VoyageRenderer implements VoyageRendererType {
           isShipVoyage,
           isSupportVoyage,
         );
+
         this.drawFleet(
           voyage,
           sender,

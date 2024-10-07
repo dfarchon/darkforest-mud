@@ -332,6 +332,7 @@ export class GameObjects {
         );
         for (const arrivalWithTimer of arrivalsWithTimers) {
           const arrivalId = arrivalWithTimer.arrivalData.eventId;
+          arrivals.set(arrivalId, arrivalWithTimer);
         }
         const planetLocation = this.planetLocationMap.get(planetId);
         if (planet && planetLocation) {
@@ -345,6 +346,7 @@ export class GameObjects {
     });
 
     this.arrivals = arrivals;
+
     this.planetArrivalIds = planetArrivalIds;
 
     // for (const [_locId, claimedLoc] of claimedLocations) {

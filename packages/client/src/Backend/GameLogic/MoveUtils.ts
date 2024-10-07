@@ -1,3 +1,4 @@
+import { CONTRACT_PRECISION } from "@df/constants";
 import { locationIdToHexStr, locationIdFromHexStr, address } from "@df/serde";
 import type {
   ArtifactId,
@@ -54,8 +55,10 @@ export class MoveUtils {
           player: address(move.captain),
           fromPlanet: locationIdFromHexStr(move.from),
           toPlanet: planetId,
-          energyArriving: Number(move.population),
-          silverMoved: Number(move.silver),
+          energyArriving: Math.floor(
+            Number(move.population) / CONTRACT_PRECISION,
+          ),
+          silverMoved: Math.floor(Number(move.silver) / CONTRACT_PRECISION),
           artifactId:
             move.artifact === 0n
               ? undefined
