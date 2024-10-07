@@ -1132,6 +1132,8 @@ export class ContractsAPI extends EventEmitter {
       // defaultDefense: number[];
       // defaultBarbarianPercentage: number[];
       // planetCumulativeRarities: number[];
+
+      SPACESHIPS: { GEAR: false },
     };
 
     return constants;

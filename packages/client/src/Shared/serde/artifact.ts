@@ -23,7 +23,7 @@ import type { BigNumber as EthersBN } from "ethers";
  * representation of an artifact's ID.
  */
 export function artifactIdFromHexStr(artifactId: string): ArtifactId {
-  const artifactIdBI = bigInt(artifactId, 16);
+  const artifactIdBI = BigInt(artifactId);
   let ret = artifactIdBI.toString(16);
   if (ret.length > 64) {
     throw new Error("not a valid artifact id");
