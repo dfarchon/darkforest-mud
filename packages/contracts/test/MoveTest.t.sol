@@ -31,6 +31,9 @@ contract MoveTest is MudTest {
     // init 2 planets
     IWorld(worldAddress).df__createPlanet(1, user1, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(2, user2, 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 200000, 10000, 0);
+
+    // set tick rate to 1
+    Ticker.setTickRate(1);
     vm.stopPrank();
   }
 
@@ -75,6 +78,23 @@ contract MoveTest is MudTest {
       PlanetTable.getPopulation(bytes32(planet1.planetHash))
     );
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
+  }
+
+  function testPendingMove() public {
+    vm.warp(block.timestamp + 1000);
+    Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
+    Planet memory planet2 = IWorld(worldAddress).df__readPlanet(2);
+
+    Proof memory proof;
+    MoveInput memory input;
+    input.fromPlanetHash = planet1.planetHash;
+    input.toPlanetHash = planet2.planetHash;
+    input.distance = 320;
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
+    uint256 index = _getIndexAt(pendingMove, 0);
+    MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
 
     input.distance /= 2;
     planet1 = IWorld(worldAddress).df__readPlanet(1);
@@ -117,6 +137,29 @@ contract MoveTest is MudTest {
       PlanetTable.getPopulation(bytes32(planet2.planetHash))
     );
     assertEq(planet2.silver + move2.silver, PlanetTable.getSilver(bytes32(planet2.planetHash)));
+  }
+
+  function testCapturePlanet() public {
+    vm.warp(block.timestamp + 1000);
+    Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
+    Planet memory planet2 = IWorld(worldAddress).df__readPlanet(2);
+
+    Proof memory proof;
+    MoveInput memory input;
+    input.fromPlanetHash = planet1.planetHash;
+    input.toPlanetHash = planet2.planetHash;
+    input.distance = 320;
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
+    uint256 index = _getIndexAt(pendingMove, 0);
+    MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
+    input.distance *= 2;
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 200000, 1000, 0);
+    pendingMove = PendingMove.get(bytes32(planet2.planetHash));
+    index = _getIndexAt(pendingMove, 1);
+    MoveData memory move2 = Move.get(bytes32(planet2.planetHash), uint8(index));
 
     vm.warp(_getTimestampAtTick(move1.arrivalTime));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
@@ -133,13 +176,13 @@ contract MoveTest is MudTest {
     );
     assertEq(latestPlanet2.silver, move1.silver + planet2.silver);
 
-    vm.warp(_getTimestampAtTick(move3.arrivalTime));
+    vm.warp(_getTimestampAtTick(move2.arrivalTime));
     planet2 = latestPlanet2;
     IWorld(worldAddress).df__tick();
     latestPlanet2 = IWorld(worldAddress).df__readPlanet(2);
     assertEq(latestPlanet2.owner, user1);
-    assertEq(latestPlanet2.population, move3.population + _getPopulationAtTick(planet2, move3.arrivalTime));
-    assertEq(latestPlanet2.silver, move3.silver + planet2.silver);
+    assertEq(latestPlanet2.population, move2.population + _getPopulationAtTick(planet2, move2.arrivalTime));
+    assertEq(latestPlanet2.silver, move2.silver + planet2.silver);
   }
 
   function _getIndexAt(PendingMoveData memory pendingMove, uint8 i) internal pure returns (uint8) {

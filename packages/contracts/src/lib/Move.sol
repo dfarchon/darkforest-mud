@@ -33,7 +33,7 @@ library MoveLib {
       ABDKMath64x64.exp_2(ABDKMath64x64.divu(distance, from.range))
     );
     if (alive <= constantLoss) {
-      revert Errors.NotEnoughPopulation();
+      revert Errors.NotEnoughPopulationToReach();
     }
     move.population += ABDKMath64x64.toUInt(int128(alive - constantLoss));
     from.population -= population;
