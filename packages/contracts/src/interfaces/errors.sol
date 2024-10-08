@@ -54,4 +54,9 @@ interface Errors {
   error ArtifactNotChargeable(); // 0x342e603f
   error ArtifactLevelTooLow(); // 0x24c528ed
   error NotEnoughResourceToActivate(); // 0xe642b7b4
+
+  // planet withdraw silver system
+  error InvalidPlanetType(); // 0xcfb7f825
+  error InsufficientSilverOnPlanet(); // 0xfe845fce
+  error WithdrawAmountTooLow(); // 0xba43ea37
 }

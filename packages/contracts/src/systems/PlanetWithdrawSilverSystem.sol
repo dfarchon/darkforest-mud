@@ -23,10 +23,10 @@ contract PlanetWithdrawSilverSystem is System, Errors {
     address executor = _msgSender();
     uint256 playerWithdrawSilverAmount = PlayerWithdrawSilver.get(executor);
 
-    require(planet.owner == executor, "you must own this planet");
-    require(planet.planetType == PlanetType.SPACETIME_RIP, "can only withdraw silver from Spacetime RIP");
-    require(planet.silver >= silverToWithdraw, "tried to withdraw more silver than exists on planet");
-    require(planet.silverCap <= silverToWithdraw * 5, "amount >= 0.2 * silverCap");
+    if (planet.owner != executor) revert Errors.NotPlanetOwner();
+    if (planet.planetType != PlanetType.SPACETIME_RIP) revert Errors.InvalidPlanetType();
+    if (planet.silver < silverToWithdraw) revert Errors.InsufficientSilverOnPlanet();
+    if (planet.silverCap > silverToWithdraw * 5) revert Errors.WithdrawAmountTooLow();
 
     planet.silver -= silverToWithdraw;
     playerWithdrawSilverAmount += silverToWithdraw;
