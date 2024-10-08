@@ -11,7 +11,9 @@ import {
   address,
   addressToHex,
   artifactIdFromEthersBN,
+  artifactIdFromHexStr,
   hexToEthAddress,
+  locationIdFromDecStr,
   // artifactIdToDecStr,
   // decodeArrival,
   // decodeArtifact,
@@ -27,9 +29,7 @@ import {
   locationIdFromEthersBN,
   locationIdFromHexStr,
   locationIdToDecStr,
-  locationIdFromDecStr,
   locationIdToHexStr,
-  artifactIdFromHexStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -64,17 +64,17 @@ import {
   runQuery,
 } from "@latticexyz/recs";
 import {
+  decodeEntity,
   encodeEntity,
   singletonEntity,
-  decodeEntity,
 } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractFunction, Event, providers } from "ethers";
 import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import { flatten } from "lodash-es";
-import type { Hex } from "viem";
 import type { Subscription } from "rxjs";
+import type { Hex } from "viem";
 
 import type {
   ContractConstants,
@@ -162,6 +162,7 @@ export class ContractsAPI extends EventEmitter {
   private planetOwnerSubscription: Subscription;
   private moveSubscription: Subscription;
   private pendingMoveSubscription: Subscription;
+  private playerWithdrawSilverSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -450,6 +451,17 @@ export class ContractsAPI extends EventEmitter {
 
         if (nextValue) {
           this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
+        }
+      });
+
+    this.playerWithdrawSilverSubscription =
+      this.components.PlayerWithdrawSilver.update$.subscribe((update) => {
+        const entity = update.entity;
+        const [nextValue] = update.value;
+        const playerAddr = hexToEthAddress(entity.toString() as Hex);
+
+        if (nextValue) {
+          this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
         }
       });
 
@@ -831,6 +843,7 @@ export class ContractsAPI extends EventEmitter {
     this.planetOwnerSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
     this.pendingMoveSubscription.unsubscribe();
+    this.playerWithdrawSilverSubscription.unsubscribe();
     return;
     const { contract } = this;
 
@@ -1144,7 +1157,8 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public getPlayerById(playerId: EthAddress): Player | undefined {
-    const { Player, SpawnPlanet, LastReveal } = this.components;
+    const { Player, SpawnPlanet, LastReveal, PlayerWithdrawSilver } =
+      this.components;
     const playerKey = encodeEntity(Player.metadata.keySchema, {
       owner: addressToHex(playerId),
     });
@@ -1157,6 +1171,16 @@ export class ContractsAPI extends EventEmitter {
       player: addressToHex(playerId),
     });
     const lastReveal = getComponentValue(LastReveal, lastRevealKey);
+
+    const playerWithdrawSilverKey = encodeEntity(
+      PlayerWithdrawSilver.metadata.keySchema,
+      { player: addressToHex(playerId) },
+    );
+    const playerWithdrawSilver = getComponentValue(
+      PlayerWithdrawSilver,
+      playerWithdrawSilverKey,
+    );
+
     if (!rawPlayer) {
       return undefined;
     }
@@ -1171,6 +1195,7 @@ export class ContractsAPI extends EventEmitter {
         ? (rawSpawnPlanet.planet.toString() as LocationId)
         : undefined,
       lastRevealTimestamp: lastReveal ? Number(lastReveal.tickNumber) : 0,
+      silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
     };
     return player;
   }
