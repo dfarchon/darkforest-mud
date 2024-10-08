@@ -13,7 +13,7 @@ import { Planet } from "../src/lib/Planet.sol";
 import { Ticker, TickerData } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 
-contract UpgradeTest is MudTest {
+contract WithdrawSilverTest is MudTest {
   address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
   address user1 = address(1);
   uint256 planetHash = type(uint256).max;
