@@ -353,14 +353,14 @@ export interface ContractConstants {
   // CAPTURE_ZONES_PER_5000_WORLD_RADIUS: number;
 
   //SpaceshipConstants
-  // SPACESHIPS: {
-  //   GEAR: boolean;
-  //   MOTHERSHIP: boolean;
-  //   TITAN: boolean;
-  //   CRESCENT: boolean;
-  //   WHALE: boolean;
-  //   PINKSHIP: boolean;
-  // };
+  SPACESHIPS: {
+    GEAR: boolean;
+    // MOTHERSHIP: boolean;
+    // TITAN: boolean;
+    // CRESCENT: boolean;
+    // WHALE: boolean;
+    // PINKSHIP: boolean;
+  };
 
   // ROUND_END_REWARDS_BY_RANK: [
   //   number,

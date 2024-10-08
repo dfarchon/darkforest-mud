@@ -559,7 +559,8 @@ library PlanetLib {
     if (planet.planetType != PlanetType.FOUNDRY) {
       revert Errors.InvalidProspectTarget();
     }
-    if (ProspectedPlanet.get(bytes32(planet.planetHash)) + 256 >= block.number) {
+    uint256 prospectedAt = ProspectedPlanet.get(bytes32(planet.planetHash));
+    if (prospectedAt != 0 && prospectedAt + 256 >= block.number) {
       revert Errors.PlanetAlreadyProspected();
     }
     if (ExploredPlanet.get(bytes32(planet.planetHash))) {

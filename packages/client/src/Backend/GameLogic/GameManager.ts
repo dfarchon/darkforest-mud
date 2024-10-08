@@ -294,7 +294,7 @@ export class GameManager extends EventEmitter {
   /**
    * @todo change this to the correct timestamp each round.
    */
-  private readonly endTimeSeconds: number = 1715526000;
+  private readonly endTimeSeconds: number = 1800000000;
   //1948939200; // new Date("2031-10-05T04:00:00.000Z").getTime() / 1000
 
   /**
@@ -4230,7 +4230,7 @@ export class GameManager extends EventEmitter {
       );
 
       const txIntent: UnconfirmedProspectPlanet = {
-        methodName: "prospectPlanet",
+        methodName: "df__prospectPlanet",
         contract: this.contractsAPI.contract,
         planetId: planetId,
         args: Promise.resolve([locationIdToDecStr(planetId)]),
@@ -4305,7 +4305,7 @@ export class GameManager extends EventEmitter {
       );
 
       const txIntent: UnconfirmedFindArtifact = {
-        methodName: "findArtifact",
+        methodName: "df__findArtifact",
         contract: this.contractsAPI.contract,
         planetId: planet.locationId,
         args: this.snarkHelper.getFindArtifactArgs(

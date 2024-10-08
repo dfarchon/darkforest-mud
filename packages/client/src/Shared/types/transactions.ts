@@ -102,7 +102,7 @@ export type UnconfirmedMove = TxIntent & {
  * @hidden
  */
 export type UnconfirmedFindArtifact = TxIntent & {
-  methodName: "findArtifact";
+  methodName: "df__findArtifact";
   planetId: LocationId;
 };
 
@@ -110,7 +110,7 @@ export type UnconfirmedFindArtifact = TxIntent & {
  * @hidden
  */
 export type UnconfirmedProspectPlanet = TxIntent & {
-  methodName: "prospectPlanet";
+  methodName: "df__prospectPlanet";
   planetId: LocationId;
 };
 

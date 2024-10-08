@@ -64,4 +64,20 @@ contract ArtifactSystem is System, Errors {
 
     planet.writeToStore();
   }
+
+  /**
+   * @notice For backward compatibility, we keep the old findArtifact function signature.
+   */
+  function findArtifact(
+    uint256[2] memory _a,
+    uint256[2][2] memory _b,
+    uint256[2] memory _c,
+    uint256[7] memory _input
+  ) public {
+    Proof memory proof;
+    proof.genFrom(_a, _b, _c);
+    BiomebaseInput memory input;
+    input.genFrom(_input);
+    return findingArtifact(proof, input);
+  }
 }
