@@ -1688,6 +1688,10 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getCurrentTick();
   }
 
+  public tickerRangeToTime(left: number, right: number): number {
+    return this.contractsAPI.tickerRangeToTime(left, right);
+  }
+
   /**
    * Gets the twitter handle of the given ethereum account which is associated
    * with Dark Forest.

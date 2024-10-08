@@ -1396,7 +1396,11 @@ export class GameObjects {
               this.removeArrival(planetId, update.arrival.eventId);
               this.emitArrivalNotifications(update);
             },
-            1000 * (arrival.arrivalTime - this.tickerUtils.getTickNumber()),
+            1000 *
+              this.tickerUtils.tickerRangeToTime(
+                this.tickerUtils.getTickNumber(),
+                arrival.arrivalTime,
+              ),
           );
 
           const arrivalWithTimer = {

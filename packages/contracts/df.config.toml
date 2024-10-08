@@ -105,7 +105,7 @@ e_perlin_mirror_x = 0
 f_perlin_mirror_y = 0
 
 [ticker]
-rate = 1
+rate = 5
 
 [inner_circle]
 a_radius = 0

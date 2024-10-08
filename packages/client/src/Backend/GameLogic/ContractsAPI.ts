@@ -926,6 +926,10 @@ export class ContractsAPI extends EventEmitter {
     return this.tickerUtils.getTickNumber();
   }
 
+  public tickerRangeToTime(left: number, right: number): number {
+    return this.tickerUtils.tickerRangeToTime(left, right);
+  }
+
   public hasJoinedGame(playerId: EthAddress): boolean {
     const { SpawnPlanet } = this.components;
 
