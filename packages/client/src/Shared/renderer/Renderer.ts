@@ -136,6 +136,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getPlanetWithId(planetId: LocationId | undefined): Planet | undefined;
   getAccount(): EthAddress | undefined;
   getCurrentTick(): number;
+  tickerRangeToTime(left: number, right: number): number;
   getAllVoyages(): QueuedArrival[];
   getPlayer(address?: EthAddress): Player | undefined;
   getUnconfirmedMoves(): Transaction<UnconfirmedMove>[];

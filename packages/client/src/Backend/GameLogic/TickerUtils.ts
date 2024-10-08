@@ -31,4 +31,19 @@ export class TickerUtils {
       return newTickNumber;
     }
   }
+
+  public tickerRangeToTime(left: number, right: number): number {
+    const { Ticker } = this.components;
+    const tickerData = getComponentValue(Ticker, singletonEntity);
+    if (!tickerData) {
+      throw new Error("Game not started");
+    }
+    const rate = Number(tickerData.tickRate);
+
+    const tickerRange = Math.abs(right - left);
+
+    const timeRange = Math.floor(tickerRange / rate);
+
+    return timeRange;
+  }
 }
