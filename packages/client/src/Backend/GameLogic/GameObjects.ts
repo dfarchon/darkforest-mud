@@ -1362,13 +1362,13 @@ export class GameObjects {
     // process the QueuedArrival[] for a single planet
     const arrivalsWithTimers: ArrivalWithTimer[] = [];
 
-    // sort arrivals by timestamp
+    // sort arrivals by tick number
     arrivals.sort((a, b) => a.arrivalTime - b.arrivalTime);
 
-    const nowInSeconds = this.tickerUtils.getTickNumber();
+    const curTick = this.tickerUtils.getTickNumber();
     for (const arrival of arrivals) {
       try {
-        if (nowInSeconds - arrival.arrivalTime > 0) {
+        if (curTick > arrival.arrivalTime) {
           // if arrival happened in the past, run this arrival
           const update = arrive(
             planet,

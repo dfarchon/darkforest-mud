@@ -155,9 +155,10 @@ export class VoyageRenderer implements VoyageRendererType {
         (1 - proportion) * fromLoc.coords.y + proportion * toLoc.coords.y;
       const shipsLocation = { x: shipsLocationX, y: shipsLocationY };
 
-      const timeLeftSeconds =
+      const timeLeftSeconds = Math.floor(
         gameUIManager.convertTickToTimeMilliSeconds(voyage.arrivalTime) / 1000 -
-        now;
+          now,
+      );
 
       const voyageColor = getVoyageColor(
         fromPlanet,
@@ -252,9 +253,9 @@ export class VoyageRenderer implements VoyageRendererType {
     const { context: gameUIManager, now } = this.renderer;
     const voyages = gameUIManager.getAllVoyages();
     for (const voyage of voyages) {
-      const nowS = now;
-
-      if (nowS < voyage.arrivalTime) {
+      if (
+        now < gameUIManager.convertTickToTimeMilliSeconds(voyage.arrivalTime)
+      ) {
         const isMyVoyage =
           voyage.player === gameUIManager.getAccount() ||
           gameUIManager.getArtifactWithId(voyage.artifactId)?.controller ===
