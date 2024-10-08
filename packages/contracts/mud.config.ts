@@ -82,6 +82,13 @@ export default defineWorld({
     },
     BurnerToPlayer: "address",
     NameToPlayer: "address",
+    PlayerWithdrawSilver: {
+      schema: {
+        player: "address",
+        silver: "uint256",
+      },
+      key: ["player"],
+    },
     SpawnPlanet: {
       schema: {
         player: "address",

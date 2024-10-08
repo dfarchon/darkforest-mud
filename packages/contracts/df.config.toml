@@ -262,10 +262,10 @@ d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 e_last_update_tick = 0
 f_perlin = 0
 g_level = 9
-h_planet_type = 1
+h_planet_type = 4
 i_space_type = 2
 j_population = 800000000
-k_silver = 200000000
+k_silver = 800000000
 l_upgrades = 0
 
 [[test_planets]]

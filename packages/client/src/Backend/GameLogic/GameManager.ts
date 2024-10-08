@@ -4862,7 +4862,7 @@ export class GameManager extends EventEmitter {
       );
 
       const txIntent: UnconfirmedWithdrawSilver = {
-        methodName: "withdrawSilver",
+        methodName: "df__withdrawSilver",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([
           locationIdToDecStr(locationId),

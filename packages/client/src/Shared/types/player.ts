@@ -9,6 +9,7 @@ export type Player = {
   homePlanetId?: LocationId; // SpawnPlanet
   lastRevealTimestamp: number;
   // lastRevealTickNumber: bigint;
+  silver: number;
 };
 
 /**

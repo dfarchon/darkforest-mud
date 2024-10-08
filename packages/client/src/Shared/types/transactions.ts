@@ -219,7 +219,7 @@ export type UnconfirmedBuyArtifact = TxIntent & {
  * @hidden
  */
 export type UnconfirmedWithdrawSilver = TxIntent & {
-  methodName: "withdrawSilver";
+  methodName: "df__withdrawSilver";
   locationId: LocationId;
   amount: number;
 };
