@@ -357,8 +357,8 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getCurrentTick();
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
-    return this.gameManager.tickerRangeToTime(left, right);
+  public tickerRangeToTimeSeconds(left: number, right: number): number {
+    return this.gameManager.tickerRangeToTimeSeconds(left, right);
   }
 
   public joinGame(

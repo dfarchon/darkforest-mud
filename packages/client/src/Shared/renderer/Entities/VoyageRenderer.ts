@@ -105,7 +105,10 @@ export class VoyageRenderer implements VoyageRendererType {
       const supportMove = getIsSupportVoyage(voyage, toPlanet);
 
       const now = nowMs; //nowMs / 1000;
-      const timeLeft = gameUIManager.tickerRangeToTime(now, voyage.arrivalTime);
+      const timeLeft = gameUIManager.tickerRangeToTimeSeconds(
+        now,
+        voyage.arrivalTime,
+      );
 
       const radius = (timeLeft * fromPlanet.speed) / 100;
 
@@ -144,7 +147,7 @@ export class VoyageRenderer implements VoyageRendererType {
         (1 - proportion) * fromLoc.coords.y + proportion * toLoc.coords.y;
       const shipsLocation = { x: shipsLocationX, y: shipsLocationY };
 
-      const timeLeftSeconds = gameUIManager.tickerRangeToTime(
+      const timeLeftSeconds = gameUIManager.tickerRangeToTimeSeconds(
         now,
         voyage.arrivalTime,
       );

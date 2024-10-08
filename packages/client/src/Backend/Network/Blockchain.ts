@@ -31,6 +31,9 @@ export function getEthConnection(): Promise<EthConnection> {
     url = "http://localhost:8545";
   }
 
+  //PUNK
+  url = "https://rpc.garnetchain.com";
+
   console.log(`GAME METADATA:`);
   console.log(`rpc url: ${url}`);
   console.log(`is production: ${isProd}`);

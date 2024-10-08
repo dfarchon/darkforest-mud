@@ -1397,7 +1397,7 @@ export class GameObjects {
               this.emitArrivalNotifications(update);
             },
             1000 *
-              this.tickerUtils.tickerRangeToTime(
+              this.tickerUtils.tickerRangeToTimeSeconds(
                 this.tickerUtils.getTickNumber(),
                 arrival.arrivalTime,
               ),

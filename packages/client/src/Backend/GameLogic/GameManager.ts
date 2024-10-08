@@ -1688,8 +1688,8 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getCurrentTick();
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
-    return this.contractsAPI.tickerRangeToTime(left, right);
+  public tickerRangeToTimeSeconds(left: number, right: number): number {
+    return this.contractsAPI.tickerRangeToTimeSeconds(left, right);
   }
 
   /**
@@ -2032,9 +2032,17 @@ export class GameManager extends EventEmitter {
    */
   hasJoinedGame(): boolean {
     const player = this.players.get(this.account as string);
+    // PUNK
+    console.log("hasJoinedGame");
+    console.log(this.players);
+
     if (!player) {
       return false;
     }
+
+    // PUNK
+    console.log("hasJoinedGame");
+    console.log(player);
 
     return this.contractsAPI.hasJoinedGame(player.burner);
   }

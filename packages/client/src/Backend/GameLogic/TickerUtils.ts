@@ -9,40 +9,51 @@ interface MoveUtilsConfig {
 export class TickerUtils {
   private components: ClientComponents;
 
+  private paused: boolean;
+  private syncTick: number;
+  private tickerRate: number;
+  private syncTimestamp: number;
+
   public constructor({ components }: MoveUtilsConfig) {
     this.components = components;
+    this.sync();
   }
 
-  public getTickNumber(): number {
+  public sync(): void {
     const { Ticker } = this.components;
     const tickerData = getComponentValue(Ticker, singletonEntity);
     if (!tickerData) {
       throw new Error("Game not started");
     }
-    const rate = Number(tickerData.tickRate);
-    const preTickNumber = Number(tickerData.tickNumber);
-    const preTimestamp = Number(tickerData.timestamp);
-    if (tickerData.paused) {
+
+    this.paused = tickerData.paused;
+    this.syncTick = Number(1000n * tickerData.tickNumber);
+    this.tickerRate = Number(tickerData.tickRate);
+    this.syncTimestamp = Date.now();
+  }
+
+  public getTickNumber(): number {
+    const rate = Number(this.tickerRate);
+    const preTickNumber = Number(this.syncTick);
+    const preTimestamp = Number(this.syncTimestamp);
+    if (this.paused) {
       return preTickNumber;
     } else {
-      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const currentTimestamp = Date.now();
       const newTickNumber =
         preTickNumber + (currentTimestamp - preTimestamp) * rate;
       return newTickNumber;
     }
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
-    const { Ticker } = this.components;
-    const tickerData = getComponentValue(Ticker, singletonEntity);
-    if (!tickerData) {
-      throw new Error("Game not started");
-    }
-    const rate = Number(tickerData.tickRate);
-
+  public tickerRangeToTimeSeconds(left: number, right: number): number {
+    const rate = Number(this.tickerRate);
     const tickerRange = Math.abs(right - left);
 
-    const timeRange = Math.floor(tickerRange / rate);
+    const timeRange = Math.floor(tickerRange / (rate * 1000));
+    //PUNK
+    console.log("time range");
+    console.log(timeRange);
 
     return timeRange;
   }
