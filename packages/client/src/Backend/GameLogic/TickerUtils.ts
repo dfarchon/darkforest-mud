@@ -27,7 +27,7 @@ export class TickerUtils {
     }
 
     this.paused = tickerData.paused;
-    this.syncTick = Number(1000n * tickerData.tickNumber);
+    this.syncTick = Number(tickerData.tickNumber);
     this.tickerRate = Number(tickerData.tickRate);
     this.syncTimestamp = Date.now();
   }
@@ -41,20 +41,26 @@ export class TickerUtils {
     } else {
       const currentTimestamp = Date.now();
       const newTickNumber =
-        preTickNumber + (currentTimestamp - preTimestamp) * rate;
+        preTickNumber +
+        Math.floor((currentTimestamp - preTimestamp) / 1000) * rate;
       return newTickNumber;
     }
+  }
+
+  public convertTickToTimeMilliSeconds(tick: number): number {
+    if (this.paused && tick > this.syncTick) {
+      return Number.MAX_VALUE;
+    }
+
+    return (
+      (1000 * (tick - this.syncTick)) / this.tickerRate + this.syncTimestamp
+    );
   }
 
   public tickerRangeToTimeSeconds(left: number, right: number): number {
     const rate = Number(this.tickerRate);
     const tickerRange = Math.abs(right - left);
-
-    const timeRange = Math.floor(tickerRange / (rate * 1000));
-    //PUNK
-    console.log("time range");
-    console.log(timeRange);
-
+    const timeRange = Math.floor(tickerRange / rate);
     return timeRange;
   }
 }

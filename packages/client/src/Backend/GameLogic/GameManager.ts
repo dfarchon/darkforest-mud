@@ -1688,8 +1688,8 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getCurrentTick();
   }
 
-  public tickerRangeToTimeSeconds(left: number, right: number): number {
-    return this.contractsAPI.tickerRangeToTimeSeconds(left, right);
+  public convertTickToTimeMilliSeconds(tick: number): number {
+    return this.contractsAPI.convertTickToTimeMilliSeconds(tick);
   }
 
   /**

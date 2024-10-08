@@ -104,11 +104,10 @@ export class VoyageRenderer implements VoyageRendererType {
       const shipMove = voyage.player === EMPTY_ADDRESS;
       const supportMove = getIsSupportVoyage(voyage, toPlanet);
 
-      const now = nowMs; //nowMs / 1000;
-      const timeLeft = gameUIManager.tickerRangeToTimeSeconds(
-        now,
-        voyage.arrivalTime,
-      );
+      const now = nowMs / 1000;
+      const timeLeft =
+        gameUIManager.convertTickToTimeMilliSeconds(voyage.arrivalTime) / 1000 -
+        now;
 
       const radius = (timeLeft * fromPlanet.speed) / 100;
 
@@ -134,10 +133,19 @@ export class VoyageRenderer implements VoyageRendererType {
     } else if (fromLoc && fromPlanet && toLoc && toPlanet) {
       // know source and destination locations
 
-      const now = nowMs; // nowMs / 1000;
+      const now = nowMs / 1000;
+
+      const departureTimeSeconds =
+        gameUIManager.convertTickToTimeMilliSeconds(voyage.departureTime) /
+        1000;
+
+      const arrivalTimeSeconds =
+        gameUIManager.convertTickToTimeMilliSeconds(voyage.arrivalTime) / 1000;
+
       let proportion =
-        (now - voyage.departureTime) /
-        (voyage.arrivalTime - voyage.departureTime);
+        (now - departureTimeSeconds) /
+        (arrivalTimeSeconds - departureTimeSeconds);
+
       proportion = Math.max(proportion, 0.01);
       proportion = Math.min(proportion, 0.99);
 
@@ -147,10 +155,9 @@ export class VoyageRenderer implements VoyageRendererType {
         (1 - proportion) * fromLoc.coords.y + proportion * toLoc.coords.y;
       const shipsLocation = { x: shipsLocationX, y: shipsLocationY };
 
-      const timeLeftSeconds = gameUIManager.tickerRangeToTimeSeconds(
-        now,
-        voyage.arrivalTime,
-      );
+      const timeLeftSeconds =
+        gameUIManager.convertTickToTimeMilliSeconds(voyage.arrivalTime) / 1000 -
+        now;
 
       const voyageColor = getVoyageColor(
         fromPlanet,

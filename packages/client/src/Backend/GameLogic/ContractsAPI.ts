@@ -939,8 +939,8 @@ export class ContractsAPI extends EventEmitter {
     return this.tickerUtils.getTickNumber();
   }
 
-  public tickerRangeToTimeSeconds(left: number, right: number): number {
-    return this.tickerUtils.tickerRangeToTimeSeconds(left, right);
+  public convertTickToTimeMilliSeconds(tick: number): number {
+    return this.tickerUtils.convertTickToTimeMilliSeconds(tick);
   }
 
   public hasJoinedGame(playerId: EthAddress): boolean {

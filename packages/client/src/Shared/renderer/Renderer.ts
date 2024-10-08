@@ -135,8 +135,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getActiveArtifact(planet: Planet): Artifact | undefined;
   getPlanetWithId(planetId: LocationId | undefined): Planet | undefined;
   getAccount(): EthAddress | undefined;
-  getCurrentTick(): number;
-  tickerRangeToTimeSeconds(left: number, right: number): number;
+  convertTickToTimeMilliSeconds(tick: number): number;
   getAllVoyages(): QueuedArrival[];
   getPlayer(address?: EthAddress): Player | undefined;
   getUnconfirmedMoves(): Transaction<UnconfirmedMove>[];
@@ -256,12 +255,12 @@ export class Renderer {
 
     this.glManager = new GameGLManager(this, this.glCanvas);
     this.overlay2dRenderer = new Overlay2DRenderer(this, this.canvas);
-    this.previousRenderTimestamp = this.context.getCurrentTick(); //Date.now();
+    this.previousRenderTimestamp = Date.now();
 
     this.viewport = viewport;
 
     this.frameCount = 0;
-    this.now = this.context.getCurrentTick(); // Date.now();
+    this.now = Date.now();
     this.config = config;
     autoBind(this);
 
@@ -350,9 +349,9 @@ export class Renderer {
 
   private loop() {
     this.frameCount++;
-    this.now = this.context.getCurrentTick(); //Date.now();
+    this.now = Date.now();
     this.draw();
-    this.recordRender(this.context.getCurrentTick());
+    this.recordRender(Date.now());
 
     this.frameRequestId = window.requestAnimationFrame(() => this.loop());
   }
