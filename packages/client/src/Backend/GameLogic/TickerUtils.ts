@@ -64,7 +64,7 @@ export class TickerUtils {
 
     if (tickerData.paused) {
       return (
-        Math.floor(((timestampMs - Date.now()) * rate) / 1000) + preTickNumber
+        Math.floor(((timestampMs - Date.now()) / 1000) * rate) + preTickNumber
       );
     } else {
       return (
