@@ -62,13 +62,15 @@ export class TickerUtils {
     const preTickNumber = Number(tickerData.tickNumber);
     const preTimestamp = Number(tickerData.timestamp);
 
-    if (timestampMs > 1000 * preTimestamp && tickerData.paused) {
-      //PUNK not sure if this is right
-      return preTickNumber + 1;
+    if (tickerData.paused) {
+      return (
+        Math.floor(((timestampMs - Date.now()) * rate) / 1000) + preTickNumber
+      );
+    } else {
+      return (
+        Math.floor((timestampMs / 1000 - preTimestamp) * rate) + preTickNumber
+      );
     }
-    return (
-      Math.floor((timestampMs / 1000 - preTimestamp) * rate) + preTickNumber
-    );
   }
 
   // PUNK
