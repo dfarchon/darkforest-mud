@@ -8,6 +8,7 @@ import {
   PLAYER_GUIDE,
   // TOKEN_NAME,
 } from "@df/constants";
+import { fakeHash } from "@df/hashing";
 import type { EthConnection } from "@df/network";
 import { address } from "@df/serde";
 import {
@@ -56,7 +57,6 @@ import {
 import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import { TerminalTextStyle } from "../Utils/TerminalTypes";
 import { Terminal, type TerminalHandle } from "../Views/Terminal";
-import { fakeHash } from "@df/hashing";
 
 const enum TerminalPromptStep {
   NONE,

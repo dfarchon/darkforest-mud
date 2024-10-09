@@ -1,3 +1,4 @@
+import { useStore } from "@hooks/useStore";
 import { useComponentValue } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
@@ -5,9 +6,14 @@ import { useEffect, useState } from "react";
 
 export const PlayPauseTickButton = () => {
   const {
+    network: { waitForTransaction },
     components: { Ticker },
     systemCalls: { unPause, pause, tick },
   } = useMUD();
+
+  const externalWorldContract = useStore(
+    (state) => state.externalWorldContract,
+  );
 
   const [isPaused, setIsPaused] = useState<boolean | null>(null);
   const tickerValue = useComponentValue(Ticker, singletonEntity);
@@ -20,12 +26,21 @@ export const PlayPauseTickButton = () => {
   }, [tickerValue]);
 
   const handleToggle = async () => {
+    if (!externalWorldContract) {
+      console.error("No wallet client available");
+      return;
+    }
+
     try {
       if (isPaused) {
-        await unPause(); // Call the unPause system call
+        const tx = await externalWorldContract.write.df__unpause();
+        const receipt = await waitForTransaction(tx as `0x${string}`);
+        console.log("UnPaused:", receipt);
         setIsPaused(false);
       } else {
-        await pause(); // Call the pause system call
+        const tx = await externalWorldContract.write.df__pause();
+        const receipt = await waitForTransaction(tx as `0x${string}`);
+        console.log("Paused:", receipt);
         setIsPaused(true);
       }
     } catch (error) {

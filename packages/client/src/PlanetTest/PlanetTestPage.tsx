@@ -1,3 +1,5 @@
+import WalletButton from "@wallet/WalletButton";
+
 import { CreateMoveForm } from "./CreateMoveFormTest";
 import { CreatePlanetForm } from "./CreatePlanetFormTest";
 import { PlanetReadForm } from "./PlanetReadForm";
@@ -93,9 +95,13 @@ export const PlanetTestPage = () => {
 
   return (
     <div className="p-6">
+      <WalletButton />
+
+      <div className="mt-6 flex p-6">
+        <PlayPauseTickButton />
+      </div>
       <div className="flex items-start gap-4">
         <div className="flex flex-col">
-          {" "}
           <PlayerForm />
           {/* <SpawnPlayer/> */}
         </div>
@@ -115,7 +121,6 @@ export const PlanetTestPage = () => {
           <RevealPlanetForm />
         </div>
       </div>
-
       <div className="flex items-start gap-4 pt-4">
         <div className="flex">
           <ProofVerificationForm />
@@ -123,9 +128,6 @@ export const PlanetTestPage = () => {
         <div className="flex">
           <CreateMoveForm />
         </div>
-      </div>
-      <div className="mt-6">
-        <PlayPauseTickButton />
       </div>
     </div>
   );

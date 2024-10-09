@@ -1,3 +1,4 @@
+import { locationIdFromHexStr } from "@df/serde";
 import type {
   Artifact,
   ArtifactId,
@@ -23,7 +24,6 @@ import type { TerminalHandle } from "../../Frontend/Views/Terminal";
 import { tryGetAllTwitters } from "../Network/UtilityServerAPI";
 import type PersistentChunkStore from "../Storage/PersistentChunkStore";
 import type { ContractsAPI } from "./ContractsAPI";
-import { locationIdFromHexStr } from "@df/serde";
 
 export interface InitialGameState {
   contractConstants: ContractConstants;

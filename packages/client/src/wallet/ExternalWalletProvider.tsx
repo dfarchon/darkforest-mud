@@ -22,10 +22,12 @@ export type Props = {
 
 export function ExternalWalletProvider({ networkConfig, children }: Props) {
   const { data: externalWalletClient } = useWalletClient();
+
   useEffect(() => {
-    if (networkConfig.useBurner) {
-      return;
-    }
+    // PUNK
+    // if (networkConfig.useBurner) {
+    //   return;
+    // }
 
     if (!externalWalletClient) {
       useStore.setState({
