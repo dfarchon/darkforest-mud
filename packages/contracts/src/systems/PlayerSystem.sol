@@ -105,6 +105,7 @@ contract PlayerSystem is System {
     // new planet instances in memory
     Planet memory planet = world.df__readPlanet(_input.planetHash, _input.perlin, _input.radiusSquare);
     planet.changeOwner(player);
+    planet.population = 50000; // initial population for player's home planet
 
     // valid spawn planet
     if (
