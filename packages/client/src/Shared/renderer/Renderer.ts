@@ -134,8 +134,10 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getLocationOfPlanet(planetId: LocationId): WorldLocation | undefined;
   getActiveArtifact(planet: Planet): Artifact | undefined;
   getPlanetWithId(planetId: LocationId | undefined): Planet | undefined;
+  updateArrival(planetId: LocationId, arrival: QueuedArrival): void;
   getAccount(): EthAddress | undefined;
   getCurrentTick(): number;
+  convertTickToMs(tick: number): number;
   tickerRangeToTime(left: number, right: number): number;
   getAllVoyages(): QueuedArrival[];
   getPlayer(address?: EthAddress): Player | undefined;
@@ -194,6 +196,7 @@ export class Renderer {
 
   frameCount: number;
   now: number; // so that we only need to compute Date.now() once per frame
+  currentTick: number;
 
   // render engines
   public glManager: GameGLManager;
@@ -256,12 +259,13 @@ export class Renderer {
 
     this.glManager = new GameGLManager(this, this.glCanvas);
     this.overlay2dRenderer = new Overlay2DRenderer(this, this.canvas);
-    this.previousRenderTimestamp = this.context.getCurrentTick(); //Date.now();
+    this.previousRenderTimestamp = Date.now();
 
     this.viewport = viewport;
 
     this.frameCount = 0;
-    this.now = this.context.getCurrentTick(); // Date.now();
+    this.now = Date.now();
+    this.currentTick = this.context.getCurrentTick();
     this.config = config;
     autoBind(this);
 
@@ -350,9 +354,10 @@ export class Renderer {
 
   private loop() {
     this.frameCount++;
-    this.now = this.context.getCurrentTick(); //Date.now();
+    this.now = Date.now();
+    this.currentTick = this.context.getCurrentTick();
     this.draw();
-    this.recordRender(this.context.getCurrentTick());
+    this.recordRender(Date.now());
 
     this.frameRequestId = window.requestAnimationFrame(() => this.loop());
   }

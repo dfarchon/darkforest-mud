@@ -63,9 +63,9 @@ export class MoveUtils {
             move.artifact === 0n
               ? undefined
               : (move.artifact.toString() as ArtifactId),
-          departureTime: Number(move.departureTime),
+          departureTick: Number(move.departureTick),
           distance: 0, // TODO: calculate distance
-          arrivalTime: Number(move.arrivalTime),
+          arrivalTick: Number(move.arrivalTick),
           arrivalType: ArrivalType.Normal,
           // unionId: 0, // TODO: calculate unionId
           // name: "", // TODO: calculate name

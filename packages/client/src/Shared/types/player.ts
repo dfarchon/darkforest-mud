@@ -7,8 +7,7 @@ export type Player = {
   createdAt: number; //createdAt: block.number
   name: string;
   homePlanetId?: LocationId; // SpawnPlanet
-  lastRevealTimestamp: number;
-  // lastRevealTickNumber: bigint;
+  lastRevealTick: number;
   silver: number;
 };
 

@@ -60,8 +60,8 @@ contract MoveTest is MudTest {
     assertEq(move1.captain, user1);
     assertEq(move1.id, 1);
     assertEq(move1.from, bytes32(planet1.planetHash));
-    assertEq(move1.departureTime, Ticker.getTickNumber());
-    assertEq(move1.arrivalTime, move1.departureTime + (input.distance * 100) / planet1.speed);
+    assertEq(move1.departureTick, Ticker.getTickNumber());
+    assertEq(move1.arrivalTick, move1.departureTick + (input.distance * 100) / planet1.speed);
     assertEq(
       move1.population,
       ABDKMath64x64.toUInt(
@@ -74,7 +74,7 @@ contract MoveTest is MudTest {
     assertEq(move1.silver, 1000);
     assertEq(move1.artifact, 0);
     assertEq(
-      _getPopulationAtTick(planet1, move1.departureTime) - 100000,
+      _getPopulationAtTick(planet1, move1.departureTick) - 100000,
       PlanetTable.getPopulation(bytes32(planet1.planetHash))
     );
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
@@ -110,14 +110,14 @@ contract MoveTest is MudTest {
     assertEq(index, 1);
     MoveData memory move2 = Move.get(bytes32(planet2.planetHash), uint8(index));
     assertEq(move2.id, 2);
-    assertEq(move2.departureTime, move1.departureTime);
-    assertEq(move2.arrivalTime, move2.departureTime + (input.distance * 100) / planet1.speed);
-    assertEq(move2.arrivalTime - move2.departureTime, (move1.arrivalTime - move1.departureTime) / 2);
+    assertEq(move2.departureTick, move1.departureTick);
+    assertEq(move2.arrivalTick, move2.departureTick + (input.distance * 100) / planet1.speed);
+    assertEq(move2.arrivalTick - move2.departureTick, (move1.arrivalTick - move1.departureTick) / 2);
     assertEq(planet1.population - 110000, PlanetTable.getPopulation(bytes32(planet1.planetHash)));
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
 
     input.distance *= 2;
-    vm.warp(_getTimestampAtTick(move2.arrivalTime));
+    vm.warp(_getTimestampAtTick(move2.arrivalTick));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
     vm.prank(user1);
     IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
@@ -133,7 +133,7 @@ contract MoveTest is MudTest {
     assertEq(Counter.getMove(), 3);
     assertEq(move3.id, 3);
     assertEq(
-      _getPopulationAtTick(planet2, move2.arrivalTime) - (move2.population * 100) / planet2.defense,
+      _getPopulationAtTick(planet2, move2.arrivalTick) - (move2.population * 100) / planet2.defense,
       PlanetTable.getPopulation(bytes32(planet2.planetHash))
     );
     assertEq(planet2.silver + move2.silver, PlanetTable.getSilver(bytes32(planet2.planetHash)));
@@ -161,7 +161,7 @@ contract MoveTest is MudTest {
     index = _getIndexAt(pendingMove, 1);
     MoveData memory move2 = Move.get(bytes32(planet2.planetHash), uint8(index));
 
-    vm.warp(_getTimestampAtTick(move1.arrivalTime));
+    vm.warp(_getTimestampAtTick(move1.arrivalTick));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
     planet2.population = 1;
     vm.startPrank(admin);
@@ -172,16 +172,16 @@ contract MoveTest is MudTest {
     assertEq(latestPlanet2.owner, user1);
     assertEq(
       latestPlanet2.population,
-      move1.population - ((_getPopulationAtTick(planet2, move1.arrivalTime) * planet2.defense) / 100)
+      move1.population - ((_getPopulationAtTick(planet2, move1.arrivalTick) * planet2.defense) / 100)
     );
     assertEq(latestPlanet2.silver, move1.silver + planet2.silver);
 
-    vm.warp(_getTimestampAtTick(move2.arrivalTime));
+    vm.warp(_getTimestampAtTick(move2.arrivalTick));
     planet2 = latestPlanet2;
     IWorld(worldAddress).df__tick();
     latestPlanet2 = IWorld(worldAddress).df__readPlanet(2);
     assertEq(latestPlanet2.owner, user1);
-    assertEq(latestPlanet2.population, move2.population + _getPopulationAtTick(planet2, move2.arrivalTime));
+    assertEq(latestPlanet2.population, move2.population + _getPopulationAtTick(planet2, move2.arrivalTick));
     assertEq(latestPlanet2.silver, move2.silver + planet2.silver);
   }
 

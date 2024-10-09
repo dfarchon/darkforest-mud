@@ -13,7 +13,7 @@ export class TickerUtils {
     this.components = components;
   }
 
-  public getTickNumber(): number {
+  public getCurrentTick(): number {
     const { Ticker } = this.components;
     const tickerData = getComponentValue(Ticker, singletonEntity);
     if (!tickerData) {
@@ -22,6 +22,7 @@ export class TickerUtils {
     const rate = Number(tickerData.tickRate);
     const preTickNumber = Number(tickerData.tickNumber);
     const preTimestamp = Number(tickerData.timestamp);
+
     if (tickerData.paused) {
       return preTickNumber;
     } else {
@@ -32,18 +33,56 @@ export class TickerUtils {
     }
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
+  public convertTickToMs(tick: number): number {
     const { Ticker } = this.components;
     const tickerData = getComponentValue(Ticker, singletonEntity);
     if (!tickerData) {
       throw new Error("Game not started");
     }
+
     const rate = Number(tickerData.tickRate);
+    const preTickNumber = Number(tickerData.tickNumber);
+    const preTimestamp = Number(tickerData.timestamp);
 
-    const tickerRange = Math.abs(right - left);
-
-    const timeRange = Math.floor(tickerRange / rate);
-
-    return timeRange;
+    if (tickerData.paused) {
+      return Date.now() + 1000 * ((tick - preTickNumber) / rate);
+    } else {
+      return Math.floor(1000 * ((tick - preTickNumber) / rate + preTimestamp));
+    }
   }
+
+  public convertMsToTick(timestampMs: number): number {
+    const { Ticker } = this.components;
+    const tickerData = getComponentValue(Ticker, singletonEntity);
+    if (!tickerData) {
+      throw new Error("Game not started");
+    }
+
+    const rate = Number(tickerData.tickRate);
+    const preTickNumber = Number(tickerData.tickNumber);
+    const preTimestamp = Number(tickerData.timestamp);
+
+    if (tickerData.paused) {
+      return (
+        Math.floor(((timestampMs - Date.now()) / 1000) * rate) + preTickNumber
+      );
+    } else {
+      return (
+        Math.floor((timestampMs / 1000 - preTimestamp) * rate) + preTickNumber
+      );
+    }
+  }
+
+  // PUNK
+  // public tickerRangeToTime(left: number, right: number): number {
+  //   const { Ticker } = this.components;
+  //   const tickerData = getComponentValue(Ticker, singletonEntity);
+  //   if (!tickerData) {
+  //     throw new Error("Game not started");
+  //   }
+  //   const rate = Number(tickerData.tickRate);
+  //   const tickerRange = Math.abs(right - left);
+  //   const timeRange = Math.floor(tickerRange / rate);
+  //   return timeRange;
+  // }
 }

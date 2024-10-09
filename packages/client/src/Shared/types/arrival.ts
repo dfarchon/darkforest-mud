@@ -17,9 +17,9 @@ export interface QueuedArrival {
   energyArriving: number;
   silverMoved: number;
   artifactId?: ArtifactId;
-  departureTime: number;
+  departureTick: number;
   distance: number;
-  arrivalTime: number;
+  arrivalTick: number;
   arrivalType: ArrivalType;
   // unionId: number;
   // name: string;
@@ -53,5 +53,5 @@ export interface ArrivalWithTimer {
    * TODO: rename to `arrival` or 'voyage'.
    */
   arrivalData: QueuedArrival;
-  timer: ReturnType<typeof setTimeout>;
+  // timer: ReturnType<typeof setTimeout>;
 }

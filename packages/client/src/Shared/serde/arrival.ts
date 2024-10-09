@@ -22,8 +22,8 @@
 //     toPlanet: locationIdFromDecStr(rawArrival.toPlanet.toString()),
 //     energyArriving: rawArrival.popArriving.toNumber() / CONTRACT_PRECISION,
 //     silverMoved: rawArrival.silverMoved.toNumber() / CONTRACT_PRECISION,
-//     departureTime: rawArrival.departureTime.toNumber(),
-//     arrivalTime: rawArrival.arrivalTime.toNumber(),
+//     departureTick: rawArrival.departureTick.toNumber(),
+//     arrivalTick: rawArrival.arrivalTick.toNumber(),
 //     distance: rawArrival.distance.toNumber(),
 //     artifactId: rawArrival.carriedArtifactId.eq(0)
 //       ? undefined

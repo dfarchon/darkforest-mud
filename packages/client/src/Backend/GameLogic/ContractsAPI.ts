@@ -936,11 +936,11 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public getCurrentTick(): number {
-    return this.tickerUtils.getTickNumber();
+    return this.tickerUtils.getCurrentTick();
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
-    return this.tickerUtils.tickerRangeToTime(left, right);
+  public convertTickToMs(tick: number): number {
+    return this.tickerUtils.convertTickToMs(tick);
   }
 
   public hasJoinedGame(playerId: EthAddress): boolean {
@@ -1194,7 +1194,7 @@ export class ContractsAPI extends EventEmitter {
       homePlanetId: rawSpawnPlanet
         ? (rawSpawnPlanet.planet.toString() as LocationId)
         : undefined,
-      lastRevealTimestamp: lastReveal ? Number(lastReveal.tickNumber) : 0,
+      lastRevealTick: lastReveal ? Number(lastReveal.tickNumber) : 0,
       silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
     };
     return player;

@@ -15,7 +15,7 @@ import type { ClientComponents } from "@mud/createClientComponents";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { AddressTwitterMap } from "../../_types/darkforest/api/UtilityServerAPITypes";
-import { arrive, updatePlanetToTime } from "../GameLogic/ArrivalUtils";
+import { arrive, updatePlanetToTick } from "../GameLogic/ArrivalUtils";
 import type { ContractsAPI } from "../GameLogic/ContractsAPI";
 import { makeContractsAPI } from "../GameLogic/ContractsAPI";
 import { getAllTwitters } from "../Network/UtilityServerAPI";
@@ -163,19 +163,18 @@ class ReaderDataStore {
 
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
 
-    // NOTE: arrivalTime is arrivalTick
-    arrivals.sort((a, b) => a.arrivalTime - b.arrivalTime);
+    arrivals.sort((a, b) => a.arrivalTick - b.arrivalTick);
 
-    const nowInTick = this.tickerUtils.getTickNumber();
+    const currentTick = this.tickerUtils.getCurrentTick();
 
     for (const arrival of arrivals) {
-      if (nowInTick < arrival.arrivalTime) {
+      if (currentTick < arrival.arrivalTick) {
         break;
       }
       arrive(planet, [], arrival, undefined, contractConstants);
     }
 
-    updatePlanetToTime(planet, [], nowInTick, contractConstants);
+    updatePlanetToTick(planet, [], currentTick, contractConstants);
     this.setPlanetLocationIfKnown(planet);
 
     return planet;
