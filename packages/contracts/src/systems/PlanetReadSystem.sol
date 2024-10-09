@@ -62,7 +62,7 @@ contract PlanetReadSystem is System, Errors {
   function _syncTo(Planet memory planet, uint256 untilTick) internal view {
     MoveData memory move = planet.popArrivedMove(untilTick);
     while (uint256(move.from) != 0) {
-      planet.naturalGrowth(move.arrivalTime);
+      planet.naturalGrowth(move.arrivalTick);
       move.arrivedAt(planet);
       move = planet.popArrivedMove(untilTick);
     }

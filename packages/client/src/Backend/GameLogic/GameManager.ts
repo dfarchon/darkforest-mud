@@ -1381,6 +1381,10 @@ export class GameManager extends EventEmitter {
     console.log(events);
   }
 
+  public updateArrival(planetId: LocationId, arrival: QueuedArrival): void {
+    this.entityStore.updateArrival(planetId, arrival);
+  }
+
   // Dirty hack for only refreshing properties on a planet and nothing else
   public softRefreshPlanet(planetId: LocationId): void {
     const planet = this.contractsAPI.getPlanetById(planetId);
@@ -1688,8 +1692,8 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getCurrentTick();
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
-    return this.contractsAPI.tickerRangeToTime(left, right);
+  public convertTickToMs(tick: number): number {
+    return this.contractsAPI.convertTickToMs(tick);
   }
 
   /**

@@ -58,8 +58,8 @@ library MoveLib {
   function headTo(MoveData memory move, Planet memory to, uint256 distance, uint256 speed) internal {
     uint256 time = (distance * 100) / speed;
     uint256 present = to.lastUpdateTick;
-    move.departureTime = uint64(present);
-    move.arrivalTime = uint64(present + time);
+    move.departureTick = uint64(present);
+    move.arrivalTick = uint64(present + time);
     // check if the target planet is full of artifacts
     if (move.artifact != 0 && !to.hasArtifactSlot()) {
       revert Errors.ArtifactStorageFull();
@@ -73,7 +73,7 @@ library MoveLib {
   }
 
   function arrivedAt(MoveData memory move, Planet memory planet) internal pure {
-    assert(move.arrivalTime == planet.lastUpdateTick);
+    assert(move.arrivalTick == planet.lastUpdateTick);
     unloadPopulation(move, planet);
     unloadSilver(move, planet);
     unloadArtifact(move, planet);
@@ -187,7 +187,7 @@ library PendingMoveQueueLib {
     while (i > 0) {
       uint256 curIndex = indexes[(i - 1) % MAX_MOVE_QUEUE_SIZE];
       MoveData memory move = Move.get(bytes32(_q.planetHash), uint8(curIndex));
-      if (move.arrivalTime <= _move.arrivalTime) {
+      if (move.arrivalTick <= _move.arrivalTick) {
         break;
       }
       indexes[i % MAX_MOVE_QUEUE_SIZE] = curIndex;
@@ -206,7 +206,7 @@ library PendingMoveQueueLib {
     uint256[] memory indexes = _q.indexes;
     uint256 head = _q.head;
     MoveData memory firstMove = Move.get(bytes32(_q.planetHash), uint8(indexes[head]));
-    if (firstMove.arrivalTime <= until) {
+    if (firstMove.arrivalTick <= until) {
       // move the index at head to the tail
       uint256 tail = (head + _q.number) % MAX_MOVE_QUEUE_SIZE;
       uint256 temp = indexes[head];

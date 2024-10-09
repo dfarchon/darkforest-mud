@@ -357,8 +357,8 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getCurrentTick();
   }
 
-  public tickerRangeToTime(left: number, right: number): number {
-    return this.gameManager.tickerRangeToTime(left, right);
+  public convertTickToMs(tick: number): number {
+    return this.gameManager.convertTickToMs(tick);
   }
 
   public joinGame(
@@ -1382,6 +1382,10 @@ export class GameUIManager extends EventEmitter {
 
   public getPlanetWithId(planetId: LocationId | undefined): Planet | undefined {
     return this.gameManager.getPlanetWithId(planetId);
+  }
+
+  public updateArrival(planetId: LocationId, arrival: QueuedArrival): void {
+    return this.gameManager.updateArrival(planetId, arrival);
   }
 
   public getMyScore(): number | undefined {

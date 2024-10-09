@@ -82,6 +82,7 @@ export class VoyageRenderer implements VoyageRendererType {
     isSupportVoyage: boolean,
   ) {
     const {
+      currentTick,
       now: nowMs,
       context: gameUIManager,
       circleRenderer: cR,
@@ -104,8 +105,11 @@ export class VoyageRenderer implements VoyageRendererType {
       const shipMove = voyage.player === EMPTY_ADDRESS;
       const supportMove = getIsSupportVoyage(voyage, toPlanet);
 
-      const now = nowMs; //nowMs / 1000;
-      const timeLeft = gameUIManager.tickerRangeToTime(now, voyage.arrivalTime);
+      const now = nowMs / 1000;
+
+      const timeLeft = Math.floor(
+        gameUIManager.convertTickToMs(voyage.arrivalTick) / 1000 - now,
+      );
 
       const radius = (timeLeft * fromPlanet.speed) / 100;
 
@@ -131,10 +135,11 @@ export class VoyageRenderer implements VoyageRendererType {
     } else if (fromLoc && fromPlanet && toLoc && toPlanet) {
       // know source and destination locations
 
-      const now = nowMs; // nowMs / 1000;
-      let proportion =
-        (now - voyage.departureTime) /
-        (voyage.arrivalTime - voyage.departureTime);
+      const departureTime = gameUIManager.convertTickToMs(voyage.departureTick);
+      const arrivalTime = gameUIManager.convertTickToMs(voyage.arrivalTick);
+
+      let proportion = (nowMs - departureTime) / (arrivalTime - departureTime);
+
       proportion = Math.max(proportion, 0.01);
       proportion = Math.min(proportion, 0.99);
 
@@ -144,10 +149,7 @@ export class VoyageRenderer implements VoyageRendererType {
         (1 - proportion) * fromLoc.coords.y + proportion * toLoc.coords.y;
       const shipsLocation = { x: shipsLocationX, y: shipsLocationY };
 
-      const timeLeftSeconds = gameUIManager.tickerRangeToTime(
-        now,
-        voyage.arrivalTime,
-      );
+      const timeLeftSeconds = Math.floor((arrivalTime - nowMs) / 1000);
 
       const voyageColor = getVoyageColor(
         fromPlanet,
@@ -239,12 +241,10 @@ export class VoyageRenderer implements VoyageRendererType {
   }
 
   queueVoyages(): void {
-    const { context: gameUIManager, now } = this.renderer;
+    const { context: gameUIManager, now, currentTick } = this.renderer;
     const voyages = gameUIManager.getAllVoyages();
     for (const voyage of voyages) {
-      const nowS = now;
-
-      if (nowS < voyage.arrivalTime) {
+      if (currentTick < voyage.arrivalTick) {
         const isMyVoyage =
           voyage.player === gameUIManager.getAccount() ||
           gameUIManager.getArtifactWithId(voyage.artifactId)?.controller ===
@@ -273,6 +273,9 @@ export class VoyageRenderer implements VoyageRendererType {
           isShipVoyage,
           isSupportVoyage,
         );
+      } else {
+        // this move arrived, apply it to target planet and remove it
+        gameUIManager.updateArrival(voyage.toPlanet, voyage);
       }
     }
 

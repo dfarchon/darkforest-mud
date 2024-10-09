@@ -92,7 +92,7 @@ import {
   setObjectSyncState,
 } from "../../Frontend/Utils/EmitterUtils";
 import type { PlanetDiff } from "./ArrivalUtils";
-import { arrive, updatePlanetToTime } from "./ArrivalUtils";
+import { arrive, updatePlanetToTick } from "./ArrivalUtils";
 import { LayeredMap } from "./LayeredMap";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
@@ -326,6 +326,7 @@ export class GameObjects {
           planet.locationId,
           arrivalsForPlanet,
         );
+
         planetArrivalIds.set(
           planetId,
           arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
@@ -369,18 +370,20 @@ export class GameObjects {
 
     // TODO: do this better...
     // set interval to update all planets every 120s
-    setInterval(() => {
-      this.planets.forEach((planet) => {
-        if (planet && hasOwner(planet)) {
-          updatePlanetToTime(
-            planet,
-            this.getPlanetArtifacts(planet.locationId),
-            this.tickerUtils.getTickNumber(),
-            this.contractConstants,
-          );
-        }
-      });
-    }, 120 * 1000);
+    //
+    // PUNK
+    // setInterval(() => {
+    //   this.planets.forEach((planet) => {
+    //     if (planet && hasOwner(planet)) {
+    //       updatePlanetToTick(
+    //         planet,
+    //         this.getPlanetArtifacts(planet.locationId),
+    //         this.tickerUtils.getCurrentTick(),
+    //         this.contractConstants,
+    //       );
+    //     }
+    //   });
+    // }, 120 * 1000);
   }
 
   public getLinks(): Iterable<Link> {
@@ -1348,6 +1351,26 @@ export class GameObjects {
     remove(planetArrivalIds, (id) => id === arrivalId);
   }
 
+  public updateArrival(planetId: LocationId, arrival: QueuedArrival): void {
+    const planet = this.planets.get(planetId);
+    if (!planet) {
+      console.error(
+        `attempted to process arrivals for planet not in memory: ${planetId}`,
+      );
+      return;
+    }
+    const update = arrive(
+      planet,
+      this.getPlanetArtifacts(planet.locationId),
+      arrival,
+      this.getArtifactById(arrival.artifactId),
+      this.contractConstants,
+    );
+
+    this.removeArrival(planetId, update.arrival.eventId);
+    this.emitArrivalNotifications(update);
+  }
+
   private processArrivalsForPlanet(
     planetId: LocationId,
     arrivals: QueuedArrival[],
@@ -1363,12 +1386,12 @@ export class GameObjects {
     const arrivalsWithTimers: ArrivalWithTimer[] = [];
 
     // sort arrivals by timestamp
-    arrivals.sort((a, b) => a.arrivalTime - b.arrivalTime);
+    arrivals.sort((a, b) => a.arrivalTick - b.arrivalTick);
 
-    const nowInSeconds = this.tickerUtils.getTickNumber();
+    const nowTick = this.tickerUtils.getCurrentTick();
     for (const arrival of arrivals) {
       try {
-        if (nowInSeconds - arrival.arrivalTime > 0) {
+        if (nowTick - arrival.arrivalTick > 0) {
           // if arrival happened in the past, run this arrival
           const update = arrive(
             planet,
@@ -1383,30 +1406,29 @@ export class GameObjects {
         } else {
           // otherwise, set a timer to do this arrival in the future
           // and append it to arrivalsWithTimers
-          const applyFutureArrival = setTimeout(
-            () => {
-              const update = arrive(
-                planet,
-                this.getPlanetArtifacts(planet.locationId),
-                arrival,
-                this.getArtifactById(arrival.artifactId),
-                this.contractConstants,
-              );
 
-              this.removeArrival(planetId, update.arrival.eventId);
-              this.emitArrivalNotifications(update);
-            },
-            1000 *
-              this.tickerUtils.tickerRangeToTime(
-                this.tickerUtils.getTickNumber(),
-                arrival.arrivalTime,
-              ),
-          );
+          // PUNK
+          // const applyFutureArrival = setTimeout(
+          //   () => {
+          //     const update = arrive(
+          //       planet,
+          //       this.getPlanetArtifacts(planet.locationId),
+          //       arrival,
+          //       this.getArtifactById(arrival.artifactId),
+          //       this.contractConstants,
+          //     );
+
+          //     this.removeArrival(planetId, update.arrival.eventId);
+          //     this.emitArrivalNotifications(update);
+          //   },
+          //   this.tickerUtils.convertTickToMs(arrival.arrivalTick) - Date.now(),
+          // );
 
           const arrivalWithTimer = {
             arrivalData: arrival,
-            timer: applyFutureArrival,
+            // timer: applyFutureArrival,
           };
+
           arrivalsWithTimers.push(arrivalWithTimer);
         }
       } catch (e) {
@@ -1428,9 +1450,7 @@ export class GameObjects {
       // clear if the planet already had stored arrivals
       for (const arrivalId of arrivalIds) {
         const arrivalWithTimer = this.arrivals.get(arrivalId);
-        if (arrivalWithTimer) {
-          clearTimeout(arrivalWithTimer.timer);
-        } else {
+        if (!arrivalWithTimer) {
           console.error(`arrival with id ${arrivalId} wasn't found`);
         }
         this.arrivals.delete(arrivalId);
@@ -1529,9 +1549,9 @@ export class GameObjects {
   }
 
   private updatePlanetIfStale(planet: Planet): void {
-    const curTick = this.tickerUtils.getTickNumber();
+    const curTick = this.tickerUtils.getCurrentTick();
     if (curTick - planet.lastUpdated > 1) {
-      updatePlanetToTime(
+      updatePlanetToTick(
         planet,
         this.getPlanetArtifacts(planet.locationId),
         curTick,

@@ -114,7 +114,7 @@ export type Planet = {
 
   // spaceJunk: number;
 
-  lastUpdated: number; // NOTE: this is tick
+  lastUpdated: number;
   upgradeState: UpgradeState;
   hasTriedFindingArtifact: boolean;
   prospectedBlockNumber?: number;

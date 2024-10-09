@@ -52,7 +52,7 @@ export const isProspectable = (planet: Planet): boolean => {
   );
 };
 
-const getSilverOverTime = (
+const getSilverOverTick = (
   planet: Planet,
   startTick: number,
   endTick: number,
@@ -72,7 +72,7 @@ const getSilverOverTime = (
   );
 };
 
-const getEnergyAtTime = (planet: Planet, atTick: number): number => {
+const getEnergyAtTick = (planet: Planet, atTick: number): number => {
   if (planet.energy === 0) {
     return 0;
   }
@@ -94,7 +94,7 @@ const getEnergyAtTime = (planet: Planet, atTick: number): number => {
   return planet.energyCap / denominator;
 };
 
-export const updatePlanetToTime = (
+export const updatePlanetToTick = (
   planet: Planet,
   planetArtifacts: Artifact[],
   atTick: number,
@@ -106,8 +106,8 @@ export const updatePlanetToTime = (
   }
 
   // if (planet.pausers === 0) {
-  planet.silver = getSilverOverTime(planet, planet.lastUpdated, atTick);
-  planet.energy = getEnergyAtTime(planet, atTick);
+  planet.silver = getSilverOverTick(planet, planet.lastUpdated, atTick);
+  planet.energy = getEnergyAtTick(planet, atTick);
   // }
 
   planet.lastUpdated = atTick;
@@ -176,10 +176,10 @@ export const arrive = (
   }
 
   // update toPlanet energy and silver right before arrival
-  updatePlanetToTime(
+  updatePlanetToTick(
     toPlanet,
     artifactsOnPlanet,
-    arrival.arrivalTime,
+    arrival.arrivalTick,
     contractConstants,
   );
 
@@ -190,7 +190,7 @@ export const arrive = (
   // }
 
   // apply energy
-  const { energyArriving, arrivalTime } = arrival;
+  const { energyArriving, arrivalTick } = arrival;
 
   const activeArtifact = artifactsOnPlanet.find(
     (a) => a.lastActivated > a.lastDeactivated,
@@ -206,7 +206,7 @@ export const arrive = (
       arrival.arrivalType === ArrivalType.Photoid &&
       activeArtifact?.artifactType === ArtifactType.StellarShield
 
-      // && arrivalTime >=
+      // && arrivalTick >=
       //   activeArtifact.lastActivated +
       //     contractConstants.STELLAR_ACTIVATION_DELAY
     ) {
