@@ -46,6 +46,15 @@ contract TickSystem is System, Errors {
     Ticker.set(ticker);
   }
 
+  function updateTickRate(uint256 tickRate) public {
+    TickerData memory ticker = Ticker.get();
+    if (!ticker.paused) {
+      _tick(ticker);
+    }
+    ticker.tickRate = uint64(tickRate);
+    Ticker.set(ticker);
+  }
+
   function _tick(TickerData memory ticker) internal {
     // it's ok to revert if current block number is smaller than the last tick block number
     uint256 tickCount = (block.timestamp - ticker.timestamp) * ticker.tickRate;

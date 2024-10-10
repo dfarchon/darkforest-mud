@@ -71,4 +71,25 @@ contract MoveTest is MudTest {
     innerCircle = InnerCircle.get();
     assertEq(innerCircle.radius, radius - speed * 200 * rate);
   }
+
+  function testTickRate() public {
+    vm.startPrank(admin);
+    IWorld(worldAddress).df__unpause();
+    vm.warp(block.timestamp + 1000);
+    uint256 rate = 3;
+    IWorld(worldAddress).df__updateTickRate(rate);
+    TickerData memory ticker = Ticker.get();
+
+    vm.warp(block.timestamp + 1000);
+    IWorld(worldAddress).df__pause();
+    assertEq(Ticker.getTickRate(), rate);
+    assertEq(Ticker.getTickNumber(), ticker.tickNumber + 1000 * rate);
+    ticker = Ticker.get();
+
+    vm.warp(block.timestamp + 1000);
+    rate = 10;
+    IWorld(worldAddress).df__updateTickRate(rate);
+    assertEq(Ticker.getTickRate(), rate);
+    assertEq(Ticker.getTickNumber(), ticker.tickNumber);
+  }
 }
