@@ -639,11 +639,12 @@ export function GameLandingPage() {
           terminal.current?.println("");
 
           terminal.current?.println(
-            "After your account get ETH on Redstone Mainet, press [enter] to continue.",
+            "After your account get ETH on Redstone Mainet write your PLAYER NAME, press [enter] to continue.",
             TerminalTextStyle.Pink,
           );
-
+          // todo read playername
           const userInput = (await terminal.current?.getInput())?.trim() ?? "";
+          // todo call register function from wagmi connector to register a burned wallet with ethConnection.getPrivateKey()
           let showHelp = true;
 
           // continue waiting for user input
@@ -705,6 +706,8 @@ export function GameLandingPage() {
         terminal.current?.println("Player whitelisted.");
         terminal.current?.println("");
         terminal.current?.println(`Welcome, player ${playerAddress}.`);
+        const storageKey = "mud:burnerWallet";
+        localStorage.setItem(storageKey, ethConnection.getPrivateKey());
         // TODO: Provide own env variable for this feature
         if (!isProd) {
           // in development, automatically get some ether from faucet
