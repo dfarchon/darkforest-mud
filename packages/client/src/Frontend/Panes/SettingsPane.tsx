@@ -403,7 +403,7 @@ export function SettingsPane({
         <Section>
           <SectionHeader>Burner Wallet Info (Private)</SectionHeader>
           Your private key, together with your home planet&apos;s coordinates,
-          grant you access to your Dark Forest Ares account on different
+          grant you access to your Dark Forest MUD account on different
           browsers. You should save this info somewhere on your computer.
           <Spacer height={16} />
           <Red>WARNING:</Red> Never ever send this to anyone!

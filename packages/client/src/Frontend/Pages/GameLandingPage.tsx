@@ -212,7 +212,7 @@ export function GameLandingPage() {
           terminal.current?.newline();
           terminal.current?.printElement(
             <MythicLabelText
-              text={`You are joining a Dark Forest Ares lobby`}
+              text={`You are joining a Dark Forest MUD lobby`}
             />,
           );
           terminal.current?.newline();
@@ -1049,10 +1049,10 @@ export function GameLandingPage() {
       window.ui = newGameUIManager;
 
       terminal.current?.newline();
-      terminal.current?.println("Connected to Dark Forest Ares Contract");
+      terminal.current?.println("Connected to Dark Forest MUD Contract");
 
       terminal.current?.newline();
-      terminal.current?.println("Welcome to DARK FOREST ARES.");
+      terminal.current?.println("Welcome to DARK FOREST MUD.");
       terminal.current?.newline();
       //NOTE: round 3 don't collect those information
       // terminal.current?.println('We collect a minimal set of statistics such as SNARK proving');
@@ -1517,7 +1517,7 @@ export function GameLandingPage() {
       terminal.current?.clear();
 
       terminal.current?.println(
-        "Welcome to the Dark Forest Ares.",
+        "Welcome to the Dark Forest MUD.",
         TerminalTextStyle.Green,
       );
       terminal.current?.println("");
@@ -1723,7 +1723,7 @@ export function GameLandingPage() {
         terminalEnabled={terminalVisible}
       >
         <MythicLabelText
-          text={`Welcome To Dark Forest Ares v0.1.3: Kardashev`}
+          text={`Welcome To Dark Forest MUD v0.1.1`}
           style={{
             fontFamily: "'Start Press 2P', sans-serif",
             display:

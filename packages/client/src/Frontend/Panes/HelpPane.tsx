@@ -114,10 +114,10 @@ export function HelpPane({
       <HelpContent>
         {uiManager.isRoundOver() && (
           <Section>
-            <SectionHeader>Round 3: Kardashev Complete</SectionHeader>
-            Dark Forest Ares v0.1 Round 3 is now complete! Scores are being
-            compiled and winners will be announced shortly. Also, Artifacts will
-            no longer be mintable. Thanks for playing!
+            <SectionHeader>Dark Forest MUD Complete</SectionHeader>
+            Dark Forest MUD v0.1 is now complete! Scores are being compiled and
+            winners will be announced shortly. Also, Artifacts will no longer be
+            mintable. Thanks for playing!
           </Section>
         )}
         <Section>
@@ -126,9 +126,7 @@ export function HelpPane({
         </Section>
 
         <Section>
-          <SectionHeader>
-            Dark Forest Ares v0.1 Round 3: Kardashev🔷
-          </SectionHeader>
+          <SectionHeader>Dark Forest MUD v0.1 🦑</SectionHeader>
           {/* The game is a vast universe, obfuscated by zero-knowledge cryptography. Your{' '}
           <White>explorer</White> (bottom left) explores the universe, searching for{' '}
           <White>Planets</White> and other players.
@@ -148,7 +146,7 @@ export function HelpPane({
               to="https://dfares.notion.site/DFAres-Round-3-Guide-for-New-Players-3980998d8f65440085c116ba0df0d99a?pvs=74"
               color="pink"
             >
-              DFAres Round 3 Guide
+              Dark Forest MUD guide
             </Link>{" "}
             to know how to play.
           </div>
@@ -160,18 +158,18 @@ export function HelpPane({
             >
               DFArchon team
             </Link>{" "}
-            host <Pink>Dark Forest Ares</Pink> Round 3 on{" "}
+            host <Pink>Dark Forest MUD</Pink> on{" "}
             <Link to={BLOCK_EXPLORER_URL} color={"rgb(243,66,66)"}>
               Redstone
             </Link>
             .
           </div>
           <div>
-            <Pink>Dark Forest Ares</Pink> is a community-run deployment of{" "}
+            <Pink>Dark Forest MUD</Pink> is community-driven deployment of{" "}
             <Link to="https://zkga.me" color={dfstyles.colors.dfgreen}>
               Dark Forest
-            </Link>
-            .
+            </Link>{" "}
+            based on MUD engine.
           </div>
         </Section>
 

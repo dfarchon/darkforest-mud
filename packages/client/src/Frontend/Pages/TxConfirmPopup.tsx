@@ -667,7 +667,7 @@ export function TxConfirmPopup() {
       <div className="section">
         <Row className="network">
           <div>
-            <ConfirmIcon /> DFAres connected to Blockchain
+            <ConfirmIcon /> Dark Forest MUD connected to Blockchain
           </div>
         </Row>
         <Row className="mtop">

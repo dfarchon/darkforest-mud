@@ -56,7 +56,7 @@ function OnboardMoney({ advance }: { advance: () => void }) {
   return (
     <StyledOnboardingContent>
       <p>
-        Welcome to <Green>Dark Forest Ares</Green>!
+        Welcome to <Green>Dark Forest MUD</Green>!
       </p>
       <p>
         <Red>There is real money being transacted in-game!</Red> Game client
@@ -78,7 +78,7 @@ function OnboardMoney({ advance }: { advance: () => void }) {
         </White>
       </p>
       <p>
-        This means that when you make moves on Dark Forest Ares,{" "}
+        This means that when you make moves on Dark Forest MUD,{" "}
         <White>
           {" "}
           you are authorizing the client to pay gas fees on your behalf
@@ -118,7 +118,7 @@ function OnboardStorage({ advance }: { advance: () => void }) {
       </p>
       <p>
         Your <White>private key and home coordinates</White> act as your
-        password. You can use them to access your Dark Forest Ares account on
+        password. You can use them to access your Dark Forest MUD account on
         other browsers, or to continue playing if you accidentally clear local
         storage. But this also means{" "}
         <Red>they should never be viewed by anyone else!</Red>
@@ -213,7 +213,7 @@ function OnboardFinished({ advance }: { advance: () => void }) {
       <p>That&apos;s all! You&apos;re now ready to play the game!</p>
       <p>
         We invite you to log into the universe. Click <White>Proceed</White> to
-        join the world of <White>DARK FOREST ARES...</White>
+        join the world of <White>DARK FOREST MUD...</White>
       </p>
       <div>
         <span></span>
@@ -247,7 +247,7 @@ export default function OnboardingPane({
   return (
     <ModalPane
       id={ModalName.Onboarding}
-      title={"Welcome to Dark Forest Ares"}
+      title={"Welcome to Dark Forest MUD"}
       hideClose
       visible={visible}
       onClose={onClose}
