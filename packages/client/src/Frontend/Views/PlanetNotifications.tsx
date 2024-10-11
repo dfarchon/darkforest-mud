@@ -107,22 +107,23 @@ function renderNotification(
   switch (notif) {
     case PlanetNotifType.PlanetCanUpgrade:
       return <PlanetCanUpgradeRow />;
-    case PlanetNotifType.CanAddEmoji:
-      return (
-        <EmojiRow
-          wrapper={planet}
-          key={notif + (planet.value?.locationId + "")}
-        />
-      );
-    case PlanetNotifType.Claimed:
-      return (
-        <PlanetClaimedRow
-          key={notif + (planet.value?.locationId + "")}
-          planet={planet}
-        />
-      );
-    case PlanetNotifType.DistanceFromCenter:
-      return <DistanceFromCenterRow planet={planet} />;
+    // PUNK
+    // case PlanetNotifType.CanAddEmoji:
+    //   return (
+    //     <EmojiRow
+    //       wrapper={planet}
+    //       key={notif + (planet.value?.locationId + "")}
+    //     />
+    //   );
+    // case PlanetNotifType.Claimed:
+    //   return (
+    //     <PlanetClaimedRow
+    //       key={notif + (planet.value?.locationId + "")}
+    //       planet={planet}
+    //     />
+    //   );
+    // case PlanetNotifType.DistanceFromCenter:
+    //   return <DistanceFromCenterRow planet={planet} />;
     default:
       return null;
   }

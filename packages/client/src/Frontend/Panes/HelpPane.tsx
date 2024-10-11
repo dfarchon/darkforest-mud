@@ -73,7 +73,7 @@ export function HelpPane({
     { hotkey: "n", intro: "toggle terminal" },
     { hotkey: "m", intro: "toggle around-screen panes" },
     { hotkey: ",", intro: "toggle bottom hotkey pane" },
-    { hotkey: "g", intro: "you can buy planet & spaceship here" },
+    // { hotkey: "g", intro: "you can buy planet & spaceship here" }, // PUNK
     { hotkey: "h", intro: "help pane" },
     { hotkey: "j", intro: "settings pane" },
     { hotkey: "k", intro: "plugins pane" },

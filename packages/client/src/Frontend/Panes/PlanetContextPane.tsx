@@ -3,7 +3,7 @@ import type { Planet } from "@df/types";
 import { ModalName, PlanetType } from "@df/types";
 import React, { useCallback, useEffect, useMemo } from "react";
 
-import type GameUIManager from "../../Backend/GameLogic/GameUIManager";
+import type { GameUIManager } from "../../Backend/GameLogic/GameUIManager";
 import type { Wrapper } from "../../Backend/Utils/Wrapper";
 import { CapturePlanetButton } from "../Components/CapturePlanetButton";
 import { VerticalSplit } from "../Components/CoreUI";
@@ -236,21 +236,22 @@ function PlanetContextPaneContent({
   if (artifactsRow) {
     rows.push(artifactsRow);
   }
-  if (dropBombRow) {
-    rows.push(dropBombRow);
-  }
-  if (pinkRow) {
-    rows.push(pinkRow);
-  }
-  if (kardashevRow) {
-    rows.push(kardashevRow);
-  }
-  if (blueRow) {
-    rows.push(blueRow);
-  }
-  if (hatRow) {
-    rows.push(hatRow);
-  }
+
+  // if (dropBombRow) {
+  //   rows.push(dropBombRow);
+  // }
+  // if (pinkRow) {
+  //   rows.push(pinkRow);
+  // }
+  // if (kardashevRow) {
+  //   rows.push(kardashevRow);
+  // }
+  // if (blueRow) {
+  //   rows.push(blueRow);
+  // }
+  // if (hatRow) {
+  //   rows.push(hatRow);
+  // }
 
   const mid = Math.ceil(0.5 * rows.length);
 
@@ -271,7 +272,9 @@ function PlanetContextPaneContent({
         onToggleSendForces={onToggleSendForces}
         onToggleAbandon={onToggleAbandon}
       />
-      <MineArtifactButton planetWrapper={planet} />
+
+      {/* PUNK */}
+      {/* <MineArtifactButton planetWrapper={planet} /> */}
       {captureRow}
 
       <VerticalSplit>
@@ -280,7 +283,6 @@ function PlanetContextPaneContent({
       </VerticalSplit>
 
       {withdrawRow}
-
       {notifRow}
     </>
   );

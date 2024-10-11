@@ -334,11 +334,11 @@ export function GameWindowLayout({
           visible={twitterVerifyVisible}
           onClose={() => setTwitterVerifyVisible(false)}
         />
-
-        <TradePane
+        {/* PUNK */}
+        {/* <TradePane
           visible={tradeVisible}
           onClose={() => setTradeVisible(false)}
-        />
+        /> */}
         <SettingsPane
           ethConnection={uiManager.getEthConnection()}
           visible={settingsVisible}
@@ -353,7 +353,6 @@ export function GameWindowLayout({
           visible={playerArtifactsVisible}
           onClose={() => setPlayerArtifactsVisible(false)}
         />
-
         <PlanetContextPane
           visible={selectedPlanetVisible}
           onClose={() => setSelectedPlanetVisible(false)}

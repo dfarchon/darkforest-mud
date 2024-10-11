@@ -43,7 +43,8 @@ export function SidebarPane({
       <BorderlessPane
         style={{ zIndex: sidebarHovered ? DFZIndex.Tooltip : undefined }}
       >
-        <ModalToggleButton
+        {/* PUNK  */}
+        {/* <ModalToggleButton
           modal={ModalName.Trade}
           hook={tradeHook}
           text={sidebarHovered ? "Trade" : undefined}
@@ -51,7 +52,7 @@ export function SidebarPane({
           shortcutKey={TOGGLE_TRADE_PANE}
           shortcutText={sidebarHovered ? TOGGLE_TRADE_PANE : undefined}
         />
-        <EmSpacer height={0.5} />
+        <EmSpacer height={0.5} /> */}
 
         <ModalToggleButton
           modal={ModalName.Help}
