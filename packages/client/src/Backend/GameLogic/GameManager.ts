@@ -24,6 +24,7 @@ import {
 } from "@df/network";
 import { getPlanetName } from "@df/procedural";
 import {
+  address,
   artifactIdToDecStr,
   isUnconfirmedActivateArtifactTx,
   isUnconfirmedBlueTx,
@@ -52,7 +53,6 @@ import {
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdToDecStr,
-  address,
 } from "@df/serde";
 import type {
   Artifact,
@@ -124,6 +124,7 @@ import {
   Setting,
   SpaceType,
 } from "@df/types";
+import type { NumberType } from "@latticexyz/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
@@ -199,7 +200,6 @@ import type { ContractsAPI } from "./ContractsAPI";
 import { makeContractsAPI } from "./ContractsAPI";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
-import type { NumberType } from "@latticexyz/recs";
 
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",

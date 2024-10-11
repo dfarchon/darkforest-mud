@@ -43,7 +43,9 @@ export function TwitterVerifyPane({
       );
       // const str = `Verify my @dfares v0.6 account (https://zkga.me):
       // ${tweetText}`;
-      const str = `Verifying my DF ARES v0.1 Round 3 account (https://dfares.xyz/)🩷\n @darkforest_eth Community Round hosted by @DFArchon: ${tweetText}`;
+
+      // PUNK need to change later
+      const str = `Verifying my DF ARES v0.1  account (https://dfares.xyz/)🩷\n @darkforest_eth Community Round hosted by @DFArchon: ${tweetText}`;
 
       // const str = `Verifying my DFAres v0.1 Round 3 account (https://dfares.xyz/)🩷\n @darkforest_eth community round hosted by @DFArchon \n ${tweetText}`;
       window.open(
