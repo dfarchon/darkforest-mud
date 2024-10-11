@@ -1052,7 +1052,6 @@ export function GameLandingPage() {
       // terminal.current?.newline();
 
       gameUIManagerRef.current = newGameUIManager;
-
       if (!newGameManager.hasJoinedGame() && spectate === false) {
         setStep(TerminalPromptStep.NO_HOME_PLANET);
       } else {
