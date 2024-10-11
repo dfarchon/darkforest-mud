@@ -8,8 +8,6 @@ import { neverResolves, weiToEth } from "@df/network";
 import { address } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
-import { useComponentValue } from "@latticexyz/react";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import { utils, Wallet } from "ethers";
 import { reverse } from "lodash-es";
@@ -103,19 +101,11 @@ export function GameLandingPage() {
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
-    network: { walletClient: burnerWalletClient },
+    network: { walletClient: burnerWalletClient, useStore },
     components: components, //{ SyncProgress },
   } = useMUD();
 
-  const { SyncProgress } = components;
-
-  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
-    message: "Connecting",
-    percentage: 0,
-    step: "Initialize",
-    latestBlockNumber: 0n,
-    lastBlockNumberProcessed: 0n,
-  });
+  const syncProgress = useStore((state) => state.syncProgress); // Access sync progress
 
   const syncSign = useMemo(() => {
     console.log(syncProgress);
