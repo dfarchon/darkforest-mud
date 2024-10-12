@@ -206,7 +206,7 @@ export class ContractsAPI extends EventEmitter {
     };
 
     if (
-      (tx.intent.methodName === "initializePlayer" ||
+      (tx.intent.methodName === "df__initializePlayer" ||
         tx.intent.methodName === "giveSpaceShips") &&
       tx.intent.contract.address === this.contract.address
     ) {

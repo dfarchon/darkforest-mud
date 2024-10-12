@@ -57,7 +57,7 @@ contract MoveSystem is System, Errors {
   /**
    * @notice For backward compatibility, we keep the old move function signature.
    */
-  function classic_move(
+  function legacyMove(
     uint256[2] memory _a,
     uint256[2][2] memory _b,
     uint256[2] memory _c,

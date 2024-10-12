@@ -3875,7 +3875,7 @@ export class GameManager extends EventEmitter {
       this.emit(GameManagerEvent.InitializedPlayer);
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "initializePlayer",
+        "df__initializePlayer",
         (e as Error).message,
       );
       throw e;
@@ -4255,7 +4255,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "prospectPlanet",
+        "df__prospectPlanet",
         (e as Error).message,
       );
       throw e;
@@ -4356,7 +4356,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "findArtifact",
+        "df__findArtifact",
         (e as Error).message,
       );
       throw e;
@@ -4882,7 +4882,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "withdrawSilver",
+        "df__withdrawSilver",
         (e as Error).message,
       );
       throw e;
@@ -5177,7 +5177,7 @@ export class GameManager extends EventEmitter {
       };
 
       const txIntent: UnconfirmedMove = {
-        methodName: "df__classic_move",
+        methodName: "df__legacyMove",
         contract: this.contractsAPI.contract,
         args: getArgs(),
         from: oldLocation.hash,
@@ -5209,7 +5209,10 @@ export class GameManager extends EventEmitter {
 
       return tx;
     } catch (e) {
-      this.getNotificationsManager().txInitError("move", (e as Error).message);
+      this.getNotificationsManager().txInitError(
+        "df__legacyMove",
+        (e as Error).message,
+      );
       throw e;
     }
   }
@@ -5236,7 +5239,7 @@ export class GameManager extends EventEmitter {
       );
 
       const txIntent: UnconfirmedUpgrade = {
-        methodName: "df__upgradePlanet(uint256,uint256)",
+        methodName: "df__legacyUpgradePlanet",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([
           locationIdToDecStr(planetId),
@@ -5251,7 +5254,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "upgradePlanet",
+        "df__legacyUpgradePlanet",
         (e as Error).message,
       );
       throw e;

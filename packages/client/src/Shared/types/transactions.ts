@@ -8,22 +8,22 @@ import type { WorldLocation } from "./world";
 type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>);
 
 export type ContractMethodName =
-  | "revealLocation"
+  | "df__legacyRevealLocation"
   | "claimLocation"
-  | "initializePlayer"
-  | "move"
-  | "upgradePlanet"
+  | "df__initializePlayer"
+  | "df__legacyMove"
+  | "df__legacyUpgradePlanet"
   | "buySkin"
   | "transferPlanet"
-  | "findArtifact"
-  | "prospectPlanet"
+  | "df__findArtifact"
+  | "df__prospectPlanet"
   | "depositArtifact"
   | "withdrawArtifact"
   | "activateArtifact"
   | "deactivateArtifact"
   | "changeArtifactImageType"
   | "buyArtifact"
-  | "withdrawSilver"
+  | "df__withdrawSilver"
   | "useKey"
   | "adminUseKey"
   | "addKeys"
@@ -89,7 +89,7 @@ export type UnconfirmedInit = TxIntent & {
  * @hidden
  */
 export type UnconfirmedMove = TxIntent & {
-  methodName: "df__classic_move";
+  methodName: "df__legacyMove";
   from: LocationId;
   to: LocationId;
   forces: number;
@@ -136,7 +136,7 @@ export type UnconfirmedClaimReward = TxIntent & {
  * @hidden
  */
 export type UnconfirmedUpgrade = TxIntent & {
-  methodName: "df__upgradePlanet(uint256,uint256)";
+  methodName: "df__legacyUpgradePlanet";
   locationId: LocationId;
   upgradeBranch: number; // 0, 1, or 2
 };
@@ -228,7 +228,7 @@ export type UnconfirmedWithdrawSilver = TxIntent & {
  * @hidden
  */
 export type UnconfirmedReveal = TxIntent & {
-  methodName: "revealLocation";
+  methodName: "df__legacyRevealLocation";
   locationId: LocationId;
   location: WorldLocation;
 };
