@@ -359,7 +359,7 @@ export function GameLandingPage_v1() {
       contractAddress,
       components,
     });
-    const playerMap = contractsAPI.getPlayers();
+    const playerMap = await contractsAPI.getPlayers();
     console.log(playerMap);
   };
 
