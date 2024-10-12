@@ -34,7 +34,7 @@ contract PlanetUpgradeSystem is System {
    * @param _location Planet location
    * @param _branch Branch to upgrade. 0 for defense, 1 for range, 2 for speed
    */
-  function upgradePlanet(uint256 _location, uint256 _branch) public {
+  function legacyUpgradePlanet(uint256 _location, uint256 _branch) public {
     assert(_branch < 3);
     if (_branch == 0) {
       upgradePlanet(_location, 0, 0, 1);

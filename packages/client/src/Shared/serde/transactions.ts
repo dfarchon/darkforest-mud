@@ -66,7 +66,7 @@ export function isUnconfirmedClaim(
 export function isUnconfirmedInit(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedInit {
-  return txIntent.methodName === "initializePlayer";
+  return txIntent.methodName === "df__initializePlayer";
 }
 
 export function isUnconfirmedMove(

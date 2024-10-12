@@ -34,7 +34,7 @@ contract PlanetRevealSystem is System, Errors {
     planet.writeToStore();
   }
 
-  function revealLocation(
+  function legacyRevealLocation(
     uint256[2] memory _a,
     uint256[2][2] memory _b,
     uint256[2] memory _c,
