@@ -174,7 +174,7 @@ export function TxConfirmPopup() {
   // ethConnection.getAutoGasPriceGwei(ethConnection.getAutoGasPrices(), autoGasPriceSetting);
 
   const wrapGasFee = () => {
-    if (method === "initializePlayer" || method === "giveSpaceShips") {
+    if (method === "df__initializePlayer" || method === "giveSpaceShips") {
       const settingValue = getSetting(config, Setting.GasFeeGwei);
       return Number(parseFloat(settingValue) * parseInt("10"))
         .toFixed(FIXED_DIGIT_NUMBER)
@@ -316,7 +316,7 @@ export function TxConfirmPopup() {
   const entryFee = localStorage.getItem(`${account}-entryFee`);
 
   const joinGameCost: number =
-    method === "initializePlayer" && entryFee
+    method === "df__initializePlayer" && entryFee
       ? weiToEth(BigNumber.from(entryFee))
       : 0;
 
@@ -600,7 +600,7 @@ export function TxConfirmPopup() {
           </Row>
         )}
 
-        {method === "initializePlayer" && (
+        {method === "df__initializePlayer" && (
           <>
             <Row>
               <b>Half Price</b>

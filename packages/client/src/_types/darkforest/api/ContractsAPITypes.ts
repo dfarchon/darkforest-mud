@@ -92,6 +92,7 @@ export const enum ContractsAPIEvent {
   ArtifactUpdate = "ArtifactUpdate",
   RadiusUpdated = "RadiusUpdated",
   LocationRevealed = "LocationRevealed",
+  TickRateUpdate = "TickRateUpdate",
   /**
    * The transaction has been queued for future execution.
    */

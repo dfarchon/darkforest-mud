@@ -18,10 +18,10 @@
   "devDependencies": {
     "@commitlint/cli": "19.5.0",
     "@commitlint/config-conventional": "19.5.0",
-    "@latticexyz/cli": "2.2.10",
-    "@latticexyz/common": "2.2.10",
-    "@latticexyz/explorer": "2.2.10",
-    "@latticexyz/store-indexer": "2.2.10",
+    "@latticexyz/cli": "2.2.11",
+    "@latticexyz/common": "2.2.11",
+    "@latticexyz/explorer": "2.2.11",
+    "@latticexyz/store-indexer": "2.2.11",
     "@types/debug": "4.1.12",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
@@ -36,7 +36,7 @@
     "mprocs": "0.7.1",
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json}": [

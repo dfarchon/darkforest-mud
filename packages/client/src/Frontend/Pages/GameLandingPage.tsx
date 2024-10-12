@@ -1730,7 +1730,6 @@ export function GameLandingPage() {
               initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
           }}
         />
-
         <div>
           step: {syncProgress.step} percent: {syncProgress.percentage} %
         </div>

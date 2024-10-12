@@ -132,7 +132,7 @@ export class InitialGameStateDownloader {
     const contractConstants = contractsAPI.getConstants();
     const worldRadius = contractsAPI.getWorldRadius();
 
-    const players = contractsAPI.getPlayers(playersLoadingBar);
+    const players = await contractsAPI.getPlayers(playersLoadingBar);
 
     const arrivals: Map<VoyageId, QueuedArrival> = new Map();
     const planetVoyageIdMap: Map<LocationId, VoyageId[]> = new Map();
@@ -142,7 +142,7 @@ export class InitialGameStateDownloader {
       flatMap(minedChunks, (c) => c.planetLocations).map((l) => l.hash),
     );
 
-    const loadedTouchedPlanetIds = contractsAPI.getTouchedPlanetIds(
+    const loadedTouchedPlanetIds = await contractsAPI.getTouchedPlanetIds(
       // storedTouchedPlanetIds.length,
       planetIdsLoadingBar,
     );

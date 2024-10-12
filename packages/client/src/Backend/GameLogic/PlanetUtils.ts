@@ -93,13 +93,13 @@ export class PlanetUtils {
       energy: planet.energy,
       silver: planet.silver,
       lastUpdated: planet.lastUpdated,
-      upgradeState: [0, 0, 0],
+      upgradeState: planet.upgradeState,
       transactions: new TxCollection(),
-      silverSpent: 0,
+      silverSpent: planet.silverSpent,
       isInContract: planet.isInContract,
-      syncedWithContract: false,
-      coordsRevealed: false,
-      bonus: bonusFromHex(location.hash),
+      syncedWithContract: planet.syncedWithContract,
+      coordsRevealed: planet.coordsRevealed,
+      bonus: planet.bonus,
       energyGroDoublers: planet.energyGroDoublers,
       silverGroDoublers: planet.silverGroDoublers,
       universeZone: planet.universeZone,
@@ -193,7 +193,9 @@ export class PlanetUtils {
       if (planetData) {
         population = Number(planetData.population);
         silver = Number(planetData.silver);
+
         lastUpdateTick = Number(planetData.lastUpdateTick);
+
         upgradeState[1] = (planetData.upgrades & 0xff0000) >> 16; // range
         upgradeState[2] = (planetData.upgrades & 0x00ff00) >> 8; // speed
         upgradeState[0] = planetData.upgrades & 0x0000ff; // defense
@@ -335,12 +337,12 @@ export class PlanetUtils {
       range,
       speed,
       defense,
-      energy: Math.floor(population / CONTRACT_PRECISION),
-      energyCap: Math.floor(populationCap / CONTRACT_PRECISION),
-      energyGrowth: Math.floor(populationGrowth / CONTRACT_PRECISION),
-      silver: Math.floor(silver / CONTRACT_PRECISION),
-      silverCap: Math.floor(silverCap / CONTRACT_PRECISION),
-      silverGrowth: Math.floor(silverGrowth / CONTRACT_PRECISION),
+      energy: population / CONTRACT_PRECISION,
+      energyCap: populationCap / CONTRACT_PRECISION,
+      energyGrowth: populationGrowth / CONTRACT_PRECISION,
+      silver: silver / CONTRACT_PRECISION,
+      silverCap: silverCap / CONTRACT_PRECISION,
+      silverGrowth: silverGrowth / CONTRACT_PRECISION,
       upgradeState,
       lastUpdated: lastUpdateTick,
       isInContract,
@@ -402,12 +404,12 @@ export class PlanetUtils {
     if (universeZone + 1 === bordersLength) {
       return SpaceType.NEBULA;
     }
-    for (let i = 1; i <= length; i++) {
+    for (let i = 0; i <= length; i++) {
       if (perlin < thresholds[i]) {
-        return i as SpaceType;
+        return (i + 1) as SpaceType;
       }
     }
-    return length as SpaceType;
+    return (length + 1) as SpaceType;
   }
 
   public _initLevel(
@@ -429,7 +431,9 @@ export class PlanetUtils {
     // _bounceAndBoundLevel
     let level =
       x +
-      this.contractConstants.SPACE_TYPE_PLANET_LEVEL_BONUS[Number(spaceType)];
+      this.contractConstants.SPACE_TYPE_PLANET_LEVEL_BONUS[
+        Number(spaceType) - 1
+      ];
 
     level += this.contractConstants.MIN_LEVEL_BIAS[universeZone];
     if (level < 0) {
@@ -439,7 +443,9 @@ export class PlanetUtils {
     let posLevel = level;
 
     const limit = Math.min(
-      this.contractConstants.SPACE_TYPE_PLANET_LEVEL_LIMITS[Number(spaceType)],
+      this.contractConstants.SPACE_TYPE_PLANET_LEVEL_LIMITS[
+        Number(spaceType) - 1
+      ],
       this.contractConstants.MAX_LEVEL_LIMIT[universeZone],
     );
 
@@ -453,8 +459,11 @@ export class PlanetUtils {
     planetLevel: PlanetLevel,
   ): PlanetType {
     const levelBigInt = getBytesFromHex(locationId, 28, 29);
+    if (spaceType === SpaceType.UNKNOWN) {
+      throw new Error("spaceType is unknown");
+    }
     const thresholds =
-      this.contractConstants.PLANET_TYPE_WEIGHTS[Number(spaceType)][
+      this.contractConstants.PLANET_TYPE_WEIGHTS[Number(spaceType) - 1][
         Number(planetLevel)
       ];
     const length = thresholds.length;
@@ -465,7 +474,7 @@ export class PlanetUtils {
         return (i + 1) as PlanetType;
       }
     }
-    return 1 as PlanetType;
+    throw new Error("planetType is unknown");
   }
 
   public _initPopulationAndSilver(
