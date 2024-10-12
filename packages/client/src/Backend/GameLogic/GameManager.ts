@@ -1396,6 +1396,7 @@ export class GameManager extends EventEmitter {
 
   public hardRefreshPlanet(planetId: LocationId): void {
     const planet = this.contractsAPI.getPlanetById(planetId);
+
     if (!planet) {
       return;
     }

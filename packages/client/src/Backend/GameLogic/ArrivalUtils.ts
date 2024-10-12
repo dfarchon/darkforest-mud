@@ -87,11 +87,13 @@ const getEnergyAtTick = (planet: Planet, atTick: number): number => {
   }
 
   const tickElapsed = atTick - planet.lastUpdated;
+
   const denominator =
     Math.exp((-4 * planet.energyGrowth * tickElapsed) / planet.energyCap) *
       (planet.energyCap / planet.energy - 1) +
     1;
-  return planet.energyCap / denominator;
+
+  return Math.floor(planet.energyCap / denominator);
 };
 
 export const updatePlanetToTick = (
@@ -107,6 +109,7 @@ export const updatePlanetToTick = (
 
   // if (planet.pausers === 0) {
   planet.silver = getSilverOverTick(planet, planet.lastUpdated, atTick);
+
   planet.energy = getEnergyAtTick(planet, atTick);
   // }
 
