@@ -163,6 +163,7 @@ export class ContractsAPI extends EventEmitter {
   private moveSubscription: Subscription;
   private pendingMoveSubscription: Subscription;
   private playerWithdrawSilverSubscription: Subscription;
+  private tickerRateSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -464,6 +465,22 @@ export class ContractsAPI extends EventEmitter {
           this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
         }
       });
+
+    this.tickerRateSubscription = this.components.Ticker.update$.subscribe(
+      (update) => {
+        const [nextValue, preValue] = update.value;
+
+        if (nextValue && !preValue) {
+          this.emit(ContractsAPIEvent.TickRateUpdate, nextValue.tickRate);
+        } else if (
+          nextValue &&
+          preValue &&
+          nextValue.tickRate !== preValue.tickRate
+        ) {
+          this.emit(ContractsAPIEvent.TickRateUpdate, nextValue.tickRate);
+        }
+      },
+    );
 
     return;
 
@@ -967,6 +984,7 @@ export class ContractsAPI extends EventEmitter {
       PlanetTypeConfig,
       UpgradeConfig,
       SnarkConfig,
+      Ticker,
     } = this.components;
 
     const namespaceId =
@@ -998,6 +1016,7 @@ export class ContractsAPI extends EventEmitter {
     // const planetTypeConfig = getComponentValue(PlanetTypeConfig,singletoneEntity);
     const upgradeConfig = getComponentValue(UpgradeConfig, singletonEntity);
     const snarkConfig = getComponentValue(SnarkConfig, singletonEntity);
+    const ticker = getComponentValue(Ticker, singletonEntity);
     if (
       !adminAddress ||
       !tempConfigSet ||
@@ -1007,7 +1026,8 @@ export class ContractsAPI extends EventEmitter {
       !planetLevelConfig ||
       !planetBiomeConfig ||
       !upgradeConfig ||
-      !snarkConfig
+      !snarkConfig ||
+      !ticker
     ) {
       throw new Error("not set contracts constants yet");
     }
@@ -1093,7 +1113,9 @@ export class ContractsAPI extends EventEmitter {
       PLAYER_AMOUNT_LIMIT: tempConfigSet.playerLimit,
       INIT_PERLIN_MIN: tempConfigSet.spawnPerlinMin,
       INIT_PERLIN_MAX: tempConfigSet.spawnPerlinMax,
-      LOCATION_REVEAL_COOLDOWN: tempConfigSet.revealCd,
+      LOCATION_REVEAL_COOLDOWN: Math.ceil(
+        Number(tempConfigSet.revealCd) / Number(ticker.tickRate),
+      ),
 
       PLANET_RARITY: Number(universeConfig.sparsity),
       WORLD_RADIUS_MIN: Number(universeConfig.radius),

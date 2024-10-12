@@ -285,7 +285,7 @@ export class GameManager extends EventEmitter {
    *
    * @todo move this into a separate `GameConfiguration` class.
    */
-  private readonly contractConstants: ContractConstants;
+  private contractConstants: ContractConstants;
 
   private paused: boolean;
 
@@ -822,6 +822,17 @@ export class GameManager extends EventEmitter {
     this.settingsSubscription?.unsubscribe();
   }
 
+  public updateContractConstants(contractConstants: ContractConstants) {
+    // PUNK
+    console.log("update contract constants");
+    console.log(
+      "new cooldown time:",
+      contractConstants.LOCATION_REVEAL_COOLDOWN,
+    );
+
+    this.contractConstants = contractConstants;
+  }
+
   static async create({
     connection,
     terminal,
@@ -996,6 +1007,10 @@ export class GameManager extends EventEmitter {
 
     // set up listeners: whenever ContractsAPI reports some game state update, do some logic
     gameManager.contractsAPI
+      .on(ContractsAPIEvent.TickRateUpdate, async (newtickRate: number) => {
+        const contractConstants = contractsAPI.getConstants();
+        gameManager.updateContractConstants(contractConstants);
+      })
       .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
         // await gameManager.hardRefreshArtifact(artifactId);
         gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
@@ -2050,9 +2065,13 @@ export class GameManager extends EventEmitter {
     if (!this.account) {
       throw new Error("no account set");
     }
-    const myLastRevealTimestamp = this.players.get(
-      this.account,
-    )?.lastRevealTimestamp;
+
+    const myLastRevealTick = this.players.get(this.account)?.lastRevealTick;
+
+    const myLastRevealTimestamp = myLastRevealTick
+      ? Math.floor(this.convertTickToMs(myLastRevealTick) / 1000)
+      : undefined;
+
     return {
       myLastRevealTimestamp: myLastRevealTimestamp || undefined,
       currentlyRevealing: this.entityStore.transactions.hasTransaction(
@@ -2498,9 +2517,11 @@ export class GameManager extends EventEmitter {
       throw new Error("no account set");
     }
 
-    const myLastRevealTimestamp = this.players.get(
-      this.account,
-    )?.lastRevealTimestamp;
+    const myLastRevealTick = this.players.get(this.account)?.lastRevealTick;
+
+    const myLastRevealTimestamp = myLastRevealTick
+      ? Math.floor(this.convertTickToMs(myLastRevealTick) / 1000)
+      : undefined;
 
     return timeUntilNextBroadcastAvailable(
       myLastRevealTimestamp,
@@ -2923,11 +2944,9 @@ export class GameManager extends EventEmitter {
         throw new Error("you're already broadcasting coordinates");
       }
 
-      const myLastRevealTimestamp = this.players.get(
-        this.account,
-      )?.lastRevealTimestamp;
+      const myLastRevealTick = this.players.get(this.account)?.lastRevealTick;
       if (
-        myLastRevealTimestamp &&
+        myLastRevealTick &&
         Date.now() < this.getNextBroadcastAvailableTimestamp()
       ) {
         throw new Error("still on cooldown for broadcasting");
@@ -2959,7 +2978,7 @@ export class GameManager extends EventEmitter {
       };
 
       const txIntent: UnconfirmedReveal = {
-        methodName: "revealLocation",
+        methodName: "df__legacyRevealLocation",
         contract: this.contractsAPI.contract,
         locationId: planetId,
         location: planet.location,
@@ -2974,7 +2993,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "revealLocation",
+        "df__legacyRevealLocation",
         (e as Error).message,
       );
       throw e;
