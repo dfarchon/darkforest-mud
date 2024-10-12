@@ -1218,29 +1218,32 @@ export class ContractsAPI extends EventEmitter {
         : undefined,
       lastRevealTick: lastReveal ? Number(lastReveal.tickNumber) : 0,
       silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
+      score: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
     };
     return player;
   }
 
-  public getPlayers(
+  public async getPlayers(
     onProgress?: (fractionCompleted: number) => void,
-  ): Map<string, Player> {
+  ): Promise<Map<string, Player>> {
     const { Player } = this.components;
     const playerIds = [...runQuery([Has(Player)])];
     const nPlayers: number = playerIds.length;
 
     const playerMap: Map<EthAddress, Player> = new Map();
 
+    const sleep = async (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+    await sleep(1);
+
     for (let i = 0; i < nPlayers; i++) {
       const playerId = hexToEthAddress(playerIds[i].toString() as Hex);
-
       const player = this.getPlayerById(playerId);
       if (!player) {
         continue;
       }
       // playerMap.set(player.address, player);
       playerMap.set(player.burner, player);
-
       onProgress && onProgress((i + 1) / nPlayers);
     }
     return playerMap;
@@ -1277,14 +1280,20 @@ export class ContractsAPI extends EventEmitter {
     return this.moveUtils.getAllArrivals(planetsToLoad, onProgress);
   }
 
-  public getTouchedPlanetIds(
+  public async getTouchedPlanetIds(
     // startingAt: number,
     onProgress?: (fractionCompleted: number) => void,
-  ): LocationId[] {
+  ): Promise<LocationId[]> {
     const { Planet } = this.components;
     const planets = [...runQuery([Has(Planet)])];
     const nPlanets: number = planets.length;
     const result = [];
+
+    const sleep = async (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
+    await sleep(1);
+
     for (let i = 0; i < nPlanets; i++) {
       // NOTE: may need serde function here
       const locationId = locationIdFromHexStr(

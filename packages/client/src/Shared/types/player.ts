@@ -9,6 +9,7 @@ export type Player = {
   homePlanetId?: LocationId; // SpawnPlanet
   lastRevealTick: number;
   silver: number;
+  score: number;
 };
 
 /**
