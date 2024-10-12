@@ -193,7 +193,9 @@ export class PlanetUtils {
       if (planetData) {
         population = Number(planetData.population);
         silver = Number(planetData.silver);
+
         lastUpdateTick = Number(planetData.lastUpdateTick);
+
         upgradeState[1] = (planetData.upgrades & 0xff0000) >> 16; // range
         upgradeState[2] = (planetData.upgrades & 0x00ff00) >> 8; // speed
         upgradeState[0] = planetData.upgrades & 0x0000ff; // defense
@@ -335,12 +337,12 @@ export class PlanetUtils {
       range,
       speed,
       defense,
-      energy: Math.floor(population / CONTRACT_PRECISION),
-      energyCap: Math.floor(populationCap / CONTRACT_PRECISION),
-      energyGrowth: Math.floor(populationGrowth / CONTRACT_PRECISION),
-      silver: Math.floor(silver / CONTRACT_PRECISION),
-      silverCap: Math.floor(silverCap / CONTRACT_PRECISION),
-      silverGrowth: Math.floor(silverGrowth / CONTRACT_PRECISION),
+      energy: population / CONTRACT_PRECISION,
+      energyCap: populationCap / CONTRACT_PRECISION,
+      energyGrowth: populationGrowth / CONTRACT_PRECISION,
+      silver: silver / CONTRACT_PRECISION,
+      silverCap: silverCap / CONTRACT_PRECISION,
+      silverGrowth: silverGrowth / CONTRACT_PRECISION,
       upgradeState,
       lastUpdated: lastUpdateTick,
       isInContract,
