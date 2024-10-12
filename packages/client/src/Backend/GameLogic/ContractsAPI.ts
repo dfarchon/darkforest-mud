@@ -1218,6 +1218,7 @@ export class ContractsAPI extends EventEmitter {
         : undefined,
       lastRevealTick: lastReveal ? Number(lastReveal.tickNumber) : 0,
       silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
+      score: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
     };
     return player;
   }
