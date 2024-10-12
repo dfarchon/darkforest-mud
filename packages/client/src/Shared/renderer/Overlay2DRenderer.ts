@@ -364,21 +364,23 @@ export class Overlay2DRenderer {
     const radiusPixels = viewport.worldToCanvasDist(radiusWorld);
     const text = message.body.emoji;
 
-    let size = radiusPixels;
+    const size = radiusPixels;
     let offsetY = -2;
 
-    if (renderInfo.planet.emojiZoopAnimation !== undefined) {
-      size *= renderInfo.planet.emojiZoopAnimation.value();
-    }
+    // TODO: fix emojiZoopAnimation does not exist on planet yet
+    // if (renderInfo.planet.emojiZoopAnimation !== undefined) {
+    //   size *= renderInfo.planet.emojiZoopAnimation.value();
+    // }
 
     if (size < 2) {
       return;
     }
 
-    if (renderInfo.planet.emojiBobAnimation !== undefined) {
-      offsetY +=
-        renderInfo.planet.emojiBobAnimation.value() * (radiusPixels * 0.1);
-    }
+    // TODO: fix emojiBobAnimation does not exist on planet yet
+    // if (renderInfo.planet.emojiBobAnimation !== undefined) {
+    //   offsetY +=
+    //     renderInfo.planet.emojiBobAnimation.value() * (radiusPixels * 0.1);
+    // }
 
     // don't want to obscure the silver text
     if (renderInfo.planet.silver !== 0) {

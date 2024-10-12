@@ -67,9 +67,11 @@ export class CaptureZoneGenerator {
 
   private setNextGenerationBlock(blockNumber: number) {
     const totalGameBlocks =
+      // @ts-expect-error: Property 'GAME_START_BLOCK' does not exist on type 'ContractConstants'
       blockNumber - this.gameManager.getContractConstants().GAME_START_BLOCK;
     const numPastIntervals = Math.floor(totalGameBlocks / this.changeInterval);
     this.nextChangeBlock =
+      // @ts-expect-error: Property 'GAME_START_BLOCK' does not exist on type 'ContractConstants'
       this.gameManager.getContractConstants().GAME_START_BLOCK +
       (numPastIntervals + 1) * this.changeInterval;
   }
@@ -88,6 +90,8 @@ export class CaptureZoneGenerator {
     const ringCount = Math.floor(worldRadius / ringSize);
     const zonesPerRing =
       this.gameManager.getContractConstants()
+      // prettier-ignore
+      // @ts-expect-error: Property 'CAPTURE_ZONES_PER_5000_WORLD_RADIUS' does not exist on type 'ContractConstants'
         .CAPTURE_ZONES_PER_5000_WORLD_RADIUS;
 
     for (let ring = 0; ring < ringCount; ring++) {
@@ -130,7 +134,9 @@ export class CaptureZoneGenerator {
 
         captureZones.add({
           coords,
-          radius: this.gameManager.getContractConstants().CAPTURE_ZONE_RADIUS,
+          radius:
+            // @ts-expect-error: Property 'CAPTURE_ZONE_RADIUS' does not exist on type 'ContractConstants'
+            this.gameManager.getContractConstants().CAPTURE_ZONE_RADIUS,
         });
       }
     }

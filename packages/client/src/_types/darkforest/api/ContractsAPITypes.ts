@@ -1,8 +1,4 @@
-import type {
-  ArtifactPointValues,
-  EthAddress,
-  UpgradeBranches,
-} from "@df/types";
+import type { EthAddress, UpgradeBranches } from "@df/types";
 import type { BigNumber as EthersBN } from "ethers";
 
 export const enum ZKArgIdx {

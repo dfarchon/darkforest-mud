@@ -6,7 +6,7 @@ import type { EmbeddedPlugin } from "../Plugins/EmbeddedPluginLoader";
 import { getEmbeddedPlugins } from "../Plugins/EmbeddedPluginLoader";
 import type { PluginProcess } from "../Plugins/PluginProcess";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
-import type GameManager from "./GameManager";
+import type { GameManager } from "./GameManager";
 
 /**
  * Represents book-keeping information about a running process. We keep it

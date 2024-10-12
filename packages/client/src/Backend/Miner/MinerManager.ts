@@ -71,7 +71,6 @@ export class HomePlanetMinerChunkStore implements ChunkStore {
 class MinerManager extends EventEmitter {
   private readonly minedChunksStore: ChunkStore;
 
-  // @ts-expect-error `planetRarity` property seems to be unused, double check and remove if redundant
   private readonly planetRarity: number;
 
   private isExploring = false;

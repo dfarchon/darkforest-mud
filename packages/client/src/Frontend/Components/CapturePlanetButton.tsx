@@ -5,7 +5,7 @@ import {
 } from "@df/serde";
 import type { Planet } from "@df/types";
 import { TooltipName } from "@df/types";
-import React, { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import styled from "styled-components";
 
 import type { Wrapper } from "../../Backend/Utils/Wrapper";

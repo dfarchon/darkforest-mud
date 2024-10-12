@@ -484,10 +484,10 @@ export class GameUIManager extends EventEmitter {
   ) {
     //TODO: fix here
     return;
-    this.terminal.current?.printShellLn(
-      `df.buyArtifact('${locationId}','${rarity}','${biome}','${type}')`,
-    );
-    this.gameManager.buyArtifact(locationId, rarity, biome, type);
+    // this.terminal.current?.printShellLn(
+    //   `df.buyArtifact('${locationId}','${rarity}','${biome}','${type}')`,
+    // );
+    // this.gameManager.buyArtifact(locationId, rarity, biome, type);
   }
 
   public withdrawSilver(locationId: LocationId, amount: number) {
@@ -530,7 +530,7 @@ export class GameUIManager extends EventEmitter {
   public claimLocation(locationId: LocationId) {
     //TODO: fix here
     return;
-    this.gameManager.claimLocation(locationId);
+    // this.gameManager.claimLocation(locationId);
   }
 
   public burnLocation(locationId: LocationId) {
@@ -542,7 +542,7 @@ export class GameUIManager extends EventEmitter {
   public checkPlanetCanPink(planetId: LocationId): boolean {
     return false;
     //TODO: fix here
-    return this.gameManager.checkPlanetCanPink(planetId);
+    // return this.gameManager.checkPlanetCanPink(planetId);
   }
 
   public pinkLocation(locationId: LocationId) {
@@ -554,7 +554,7 @@ export class GameUIManager extends EventEmitter {
   public kardashev(locationId: LocationId) {
     //TODO: fix here
     return;
-    this.gameManager.kardashev(locationId);
+    // this.gameManager.kardashev(locationId);
   }
 
   public checkPlanetCanBlue(planetId: LocationId): boolean {
@@ -1709,7 +1709,7 @@ export class GameUIManager extends EventEmitter {
 
   public getSpaceJunkEnabled(): boolean {
     return false;
-    return this.contractConstants.SPACE_JUNK_ENABLED;
+    // return this.contractConstants.SPACE_JUNK_ENABLED;
   }
 
   // public get captureZonesEnabled(): boolean {

@@ -1,14 +1,16 @@
 import type { mat3, mat4 } from "gl-matrix";
 
 import type { Artifact, RenderedArtifact } from "./artifact";
-import type { HatType } from "./hat";
 import type { LocationId } from "./identifier";
 import type { LocatablePlanet, Planet } from "./planet";
+import type { EmojiFlagBody, PlanetMessage } from "./planetmessage";
 import type { Abstract } from "./utility";
 import type { Chunk, WorldCoords } from "./world";
 
 export interface PlanetRenderInfo {
-  planet: LocatablePlanet;
+  planet: LocatablePlanet & {
+    messages?: PlanetMessage<EmojiFlagBody>[];
+  };
   radii: Radii;
 }
 

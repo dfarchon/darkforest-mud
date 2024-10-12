@@ -1,5 +1,5 @@
 import { CONTRACT_PRECISION } from "@df/constants";
-import { hasOwner, isActivated, isEmojiFlagMessage } from "@df/gamelogic";
+import { hasOwner, isEmojiFlagMessage } from "@df/gamelogic";
 import type {
   Artifact,
   EmojiFlagBody,
@@ -96,9 +96,9 @@ const getEnergyAtTick = (planet: Planet, atTick: number): number => {
 
 export const updatePlanetToTick = (
   planet: Planet,
-  planetArtifacts: Artifact[],
+  _planetArtifacts: Artifact[],
   atTick: number,
-  contractConstants: ContractConstants,
+  _contractConstants: ContractConstants,
   setPlanet: (p: Planet) => void = () => {},
 ): void => {
   if (atTick < planet.lastUpdated) {
@@ -165,7 +165,7 @@ export const arrive = (
   toPlanet: Planet,
   artifactsOnPlanet: Artifact[],
   arrival: QueuedArrival,
-  arrivingArtifact: Artifact | undefined,
+  _arrivingArtifact: Artifact | undefined,
   contractConstants: ContractConstants,
 ): PlanetDiff => {
   // this function optimistically simulates an arrival
@@ -296,7 +296,7 @@ export const arrive = (
  * `Planet` class.
  */
 export function getEmojiMessage(
-  planet: Planet | undefined,
+  planet: (Planet & { messages?: PlanetMessage<EmojiFlagBody>[] }) | undefined,
 ): PlanetMessage<EmojiFlagBody> | undefined {
   return planet?.messages?.find(isEmojiFlagMessage);
 }

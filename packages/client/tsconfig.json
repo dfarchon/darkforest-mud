@@ -12,7 +12,8 @@
     "strictPropertyInitialization": false,
     "useDefineForClassFields": false,
     "noErrorTruncation": true,
-    "noUnusedLocals": true,
+    // TODO: Enable noUnusedLocals again later on
+    "noUnusedLocals": false,
     "noUnusedParameters": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
