@@ -8,6 +8,7 @@ import { neverResolves, weiToEth } from "@df/network";
 import { address } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
+import { useStore as useStoreHook } from "@hooks/useStore";
 import { useMUD } from "@mud/MUDContext";
 import { utils, Wallet } from "ethers";
 import { reverse } from "lodash-es";
@@ -101,7 +102,7 @@ export function GameLandingPage() {
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
-    network: { walletClient: burnerWalletClient, useStore },
+    network: { walletClient: burnerWalletClient, useStore, waitForTransaction },
     components: components, //{ SyncProgress },
   } = useMUD();
 
@@ -140,6 +141,10 @@ export function GameLandingPage() {
   const selectedAddress = params.get("account");
   const contractAddress = contract ? address(contract) : address(zeroAddress);
   const isLobby = false; // NOTE: contractAddress !== address(CONTRACT_ADDRESS);
+
+  const externalWorldContract = useStoreHook(
+    (state) => state.externalWorldContract,
+  );
 
   useEffect(() => {
     getEthConnection()
@@ -639,12 +644,10 @@ export function GameLandingPage() {
           terminal.current?.println("");
 
           terminal.current?.println(
-            "After your account get ETH on Redstone Mainet write your PLAYER NAME, press [enter] to continue.",
+            "After your account get ETH on Redstone Mainet, press [enter] to continue.",
             TerminalTextStyle.Pink,
           );
-          // todo read playername
           const userInput = (await terminal.current?.getInput())?.trim() ?? "";
-          // todo call register function from wagmi connector to register a burned wallet with ethConnection.getPrivateKey()
           let showHelp = true;
 
           // continue waiting for user input
@@ -1188,6 +1191,61 @@ export function GameLandingPage() {
       //   return;
       // }
 
+      const playerAddress = ethConnection?.getAddress();
+      if (!playerAddress || !ethConnection) {
+        throw new Error("not logged in");
+      }
+      const { NameToPlayer } = components;
+
+      // Find the player using the map's entries
+      const playerSpawned = Array.from(
+        NameToPlayer.values.value.entries(),
+      ).find(
+        ([key, value]) => value.toLowerCase() === playerAddress.toLowerCase(),
+      );
+      if (!playerSpawned) {
+        // Get the player's input for the name
+        terminal.current?.println(
+          "After your account gets ETH on Redstone Mainet write your PLAYER NAME, press [enter] to continue.",
+          TerminalTextStyle.Pink,
+        );
+        const userInput = (await terminal.current?.getInput())?.trim() ?? "";
+
+        // Register the player using the `df__registerPlayer` function
+        if (userInput.length > 2) {
+          terminal.current?.println(`Registering player: ${userInput}`);
+
+          const tx = await externalWorldContract?.write.df__registerPlayer([
+            userInput,
+            playerAddress as `0x${string}`,
+          ]);
+          // Wait for the transaction receipt
+          const receipt = await waitForTransaction(tx);
+          terminal.current?.println(
+            "Player successfully registered.",
+            TerminalTextStyle.Green,
+          );
+
+          if (receipt.status === "success") {
+            terminal.current?.println(
+              `Transaction hash: ${tx}`,
+              TerminalTextStyle.Green,
+            );
+          } else {
+            terminal.current?.println(
+              "Transaction failed.",
+              TerminalTextStyle.Red,
+            );
+          }
+        } else {
+          terminal.current?.println(
+            "No player name entered or to short min 3 letters, please try again.",
+            TerminalTextStyle.Red,
+          );
+          return advanceStateFromAccountSet(terminal); // Retry to get player name
+        }
+      }
+
       let setX = undefined;
       let setY = undefined;
 
@@ -1353,6 +1411,7 @@ export function GameLandingPage() {
             "Please select a spawn area, then press [enter]",
             TerminalTextStyle.Red,
           );
+
           advanceStateFromNoHomePlanet(terminal, { showHelp: false });
           return;
         }
