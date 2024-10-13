@@ -2051,12 +2051,16 @@ export class GameManager extends EventEmitter {
    * Whether or not this client has successfully found and landed on a home planet.
    */
   hasJoinedGame(): boolean {
-    const player = this.players.get(this.account as string);
+    const player = Array.from(this.players.values()).find(
+      (p) => p.address === this.account,
+    );
+
+    // const player = this.players.get(this.account as string);
     if (!player) {
       return false;
     }
 
-    return this.contractsAPI.hasJoinedGame(player.burner);
+    return this.contractsAPI.hasJoinedGame(player.address);
   }
 
   /**
