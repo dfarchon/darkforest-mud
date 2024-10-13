@@ -6,7 +6,7 @@ import type { EmbeddedPlugin } from "../Plugins/EmbeddedPluginLoader";
 import { getEmbeddedPlugins } from "../Plugins/EmbeddedPluginLoader";
 import type { PluginProcess } from "../Plugins/PluginProcess";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
-import type GameManager from "./GameManager";
+import type { GameManager } from "./GameManager";
 
 /**
  * Represents book-keeping information about a running process. We keep it
@@ -221,11 +221,11 @@ export class PluginManager {
     });
     const moduleUrl = URL.createObjectURL(moduleFile);
     try {
-      // The `webpackIgnore` "magic comment" is almost undocumented, but it makes
-      // webpack skip over this dynamic `import` call so it won't be transformed into
-      // a weird _webpack_require_dynamic_ call
+      // The `@vite-ignore` makes vite webpack skip over this dynamic `import` call
+      // so it won't be transformed directly by vite since these are dynamic plugins
+      // @see https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitations
       const { default: Plugin } = await import(
-        /* webpackIgnore: true */ moduleUrl
+        /* @vite-ignore: true */ moduleUrl
       );
       if (this.pluginProcesses[id] === undefined) {
         // instantiate the plugin and attach it to the process list
