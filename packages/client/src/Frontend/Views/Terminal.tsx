@@ -390,6 +390,7 @@ const InputTextArea = styled.textarea`
 const TerminalContainer = styled.div`
   height: 100%;
   width: 100%;
+  max-height: 100vh; /* Limit terminal height to the viewport */
   margin: 0 auto;
   overflow: scroll;
   white-space: pre-wrap;
