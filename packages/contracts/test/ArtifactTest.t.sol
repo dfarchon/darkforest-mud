@@ -7,7 +7,7 @@ import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../src/codegen/index.sol";
-import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants } from "../src/codegen/Index.sol";
+import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";

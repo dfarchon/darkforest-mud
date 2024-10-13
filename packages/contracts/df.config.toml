@@ -237,24 +237,21 @@ j_population = 25000000
 k_silver = 6000000
 l_upgrades = 0
 
-# implement as default for CreatePlanet form
-# [[test_planets]]
-# a_x = 1507
-# b_y = 273
-# c_hash = "0x00004e95b5b09116388a36e32129ab5d798e50dfd8f79c39ad6849ab5cf47aad"
-# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-# e_last_update_tick = 0
-# f_perlin = 0
-# g_level = 2
-# h_planet_type = 1
-# i_space_type = 4
-# j_population = 1600000
-# k_silver = 200000
-# l_upgrades = 0
-
-
-# fashhash
 [[test_planets]]
+a_x = 1507
+b_y = 273
+c_hash = "0x00004e95b5b09116388a36e32129ab5d798e50dfd8f79c39ad6849ab5cf47aad"
+d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+e_last_update_tick = 0
+f_perlin = 0
+g_level = 2
+h_planet_type = 1
+i_space_type = 4
+j_population = 1600000
+k_silver = 200000
+l_upgrades = 0
+
+[[test_planets_fake]]
 a_x = 10000
 b_y = 10000
 c_hash = "0x00000000132f1fa93dea0beb59b886a7d0b264a172a55f7d948fb47aaacbdf70"
@@ -268,7 +265,7 @@ j_population = 800000000
 k_silver = 800000000
 l_upgrades = 0
 
-[[test_planets]]
+[[test_planets_fake]]
 a_x = 10000
 b_y = 11000
 c_hash = "0x0000000079b5cf911e8b7f724f23977d5d0e657fe8c7c15c390df58fff0b7bc3"
