@@ -1,0 +1,71 @@
+name: Contracts Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  paths-filter:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs:
+      client: ${{ steps.filter.outputs.client }}
+      contracts: ${{ steps.filter.outputs.contracts }}
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            contracts:
+              - 'packages/contracts/**'
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    # Wait for dependent jobs to be completed before starting next-job
+    needs: paths-filter
+    if: needs.paths-filter.outputs.contracts == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: git submodule update --init --recursive
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run contract tests
+        working-directory: packages/contracts
+        run: cp .env.example .env && pnpm mud test
