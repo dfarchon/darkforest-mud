@@ -94,6 +94,9 @@ export const PlanetTestPage = () => {
   return (
     <div className="p-6">
       <div className="flex items-start gap-4">
+        <div className="mt-6">
+          <PlayPauseTickButton />
+        </div>
         <div className="flex flex-col">
           {" "}
           <PlayerForm />
@@ -123,9 +126,6 @@ export const PlanetTestPage = () => {
         <div className="flex">
           <CreateMoveForm />
         </div>
-      </div>
-      <div className="mt-6">
-        <PlayPauseTickButton />
       </div>
     </div>
   );
