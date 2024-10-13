@@ -64,11 +64,14 @@ const getSilverOverTick = (
   if (planet.silver > planet.silverCap) {
     return planet.silverCap;
   }
-  const tickElapsed = startTick - endTick;
+  const tickElapsed = endTick - startTick;
 
-  return Math.min(
-    tickElapsed * planet.silverGrowth + planet.silver,
-    planet.silverCap,
+  return Math.max(
+    Math.min(
+      tickElapsed * planet.silverGrowth + planet.silver,
+      planet.silverCap,
+    ),
+    0,
   );
 };
 
