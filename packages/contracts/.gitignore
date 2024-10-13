@@ -14,3 +14,5 @@ deploys/**/*.json
 indexer.db
 
 .mud/
+
+script/test.s.sol
