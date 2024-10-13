@@ -8,8 +8,6 @@ import { neverResolves, weiToEth } from "@df/network";
 import { address } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
-import { useComponentValue } from "@latticexyz/react";
-import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import { utils, Wallet } from "ethers";
 import { reverse } from "lodash-es";
@@ -103,19 +101,11 @@ export function GameLandingPage() {
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
-    network: { walletClient: burnerWalletClient },
+    network: { walletClient: burnerWalletClient, useStore },
     components: components, //{ SyncProgress },
   } = useMUD();
 
-  const { SyncProgress } = components;
-
-  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
-    message: "Connecting",
-    percentage: 0,
-    step: "Initialize",
-    latestBlockNumber: 0n,
-    lastBlockNumberProcessed: 0n,
-  });
+  const syncProgress = useStore((state) => state.syncProgress); // Access sync progress
 
   const syncSign = useMemo(() => {
     console.log(syncProgress);
@@ -649,11 +639,12 @@ export function GameLandingPage() {
           terminal.current?.println("");
 
           terminal.current?.println(
-            "After your account get ETH on Redstone Mainet, press [enter] to continue.",
+            "After your account get ETH on Redstone Mainet write your PLAYER NAME, press [enter] to continue.",
             TerminalTextStyle.Pink,
           );
-
+          // todo read playername
           const userInput = (await terminal.current?.getInput())?.trim() ?? "";
+          // todo call register function from wagmi connector to register a burned wallet with ethConnection.getPrivateKey()
           let showHelp = true;
 
           // continue waiting for user input
@@ -715,6 +706,8 @@ export function GameLandingPage() {
         terminal.current?.println("Player whitelisted.");
         terminal.current?.println("");
         terminal.current?.println(`Welcome, player ${playerAddress}.`);
+        const storageKey = "mud:burnerWallet";
+        localStorage.setItem(storageKey, ethConnection.getPrivateKey());
         // TODO: Provide own env variable for this feature
         if (!isProd) {
           // in development, automatically get some ether from faucet
@@ -1062,7 +1055,6 @@ export function GameLandingPage() {
       // terminal.current?.newline();
 
       gameUIManagerRef.current = newGameUIManager;
-
       if (!newGameManager.hasJoinedGame() && spectate === false) {
         setStep(TerminalPromptStep.NO_HOME_PLANET);
       } else {
