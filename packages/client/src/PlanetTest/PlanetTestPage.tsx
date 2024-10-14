@@ -7,6 +7,7 @@ import PlayerForm from "./PlayerForm";
 import { PlayPauseTickButton } from "./PlayPauseTickButton";
 import { ProofVerificationForm } from "./ProofVerificationForm";
 import { RevealPlanetForm } from "./RevealPlanetForm";
+import WalletButton from "@wallet/WalletButton";
 
 export const PlanetTestPage = () => {
   // Function to handle planet creation
@@ -93,6 +94,9 @@ export const PlanetTestPage = () => {
 
   return (
     <div className="p-6">
+      <div className="p-6">
+        <WalletButton />
+      </div>
       <div className="flex items-start gap-4">
         <div className="mt-6">
           <PlayPauseTickButton />
