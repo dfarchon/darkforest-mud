@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
-import { useMUD } from "@mud/MUDContext";
+import { useStore } from "@hooks/useStore";
 import { useComponentValue } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { useMUD } from "@mud/MUDContext";
+import { useEffect, useState } from "react";
 import { encodeFunctionData } from "viem";
 import { useWalletClient } from "wagmi";
 
 export const PlayPauseTickButton = () => {
   const {
-    network: { waitForTransaction, worldContract },
+    network: { waitForTransaction },
     components: { Ticker },
     systemCalls: { tick },
   } = useMUD();
@@ -15,6 +16,9 @@ export const PlayPauseTickButton = () => {
   const [tickerNewValue, setTickerNewValue] = useState(10n);
   const [isPaused, setIsPaused] = useState<boolean | null>(null);
   const tickerValue = useComponentValue(Ticker, singletonEntity);
+  const externalWorldContract = useStore(
+    (state) => state.externalWorldContract,
+  );
 
   const { data: walletClient } = useWalletClient();
 
@@ -31,29 +35,14 @@ export const PlayPauseTickButton = () => {
     }
 
     try {
-      const pauseFunctionAbi = [
-        {
-          name: isPaused ? "df__unpause" : "df__pause",
-          type: "function",
-          stateMutability: "nonpayable",
-          inputs: [],
-        },
-      ];
-
-      const data = encodeFunctionData({
-        abi: pauseFunctionAbi,
-        functionName: isPaused ? "df__unpause" : "df__pause",
-        args: [],
-      });
-
-      const txData = {
-        to: worldContract.address,
-        data,
-      };
-
-      const tx = await walletClient.sendTransaction(txData);
-      const receipt = await waitForTransaction(tx.hash);
-
+      let receipt;
+      if (isPaused) {
+        const tx = await externalWorldContract.write.df__unpause([]);
+        receipt = await waitForTransaction(tx);
+      } else {
+        const tx = await externalWorldContract.write.df__pause([]);
+        receipt = await waitForTransaction(tx);
+      }
       console.log(isPaused ? "Unpaused" : "Paused", receipt);
       setIsPaused(!isPaused);
     } catch (error) {
@@ -68,31 +57,10 @@ export const PlayPauseTickButton = () => {
     }
 
     try {
-      const tickRateFunctionAbi = [
-        {
-          inputs: [
-            { internalType: "uint256", name: "tickRate", type: "uint256" },
-          ],
-          name: "df__updateTickRate",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ];
-
-      const data = encodeFunctionData({
-        abi: tickRateFunctionAbi,
-        functionName: "df__updateTickRate",
-        args: [tickerNewValue],
-      });
-
-      const txData = {
-        to: worldContract.address,
-        data,
-      };
-
-      const tx = await walletClient.sendTransaction(txData);
-      const receipt = await waitForTransaction(tx.hash);
+      const tx = await externalWorldContract.write.df__updateTickRate([
+        tickerNewValue,
+      ]);
+      const receipt = await waitForTransaction(tx);
 
       console.log("Tick rate updated:", receipt);
     } catch (error) {
