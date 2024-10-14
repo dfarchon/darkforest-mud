@@ -29,6 +29,7 @@ export const TOGGLE_PLUGINS_PANE = "k";
 export const TOGGLE_YOUR_ARTIFACTS_PANE = "l";
 export const TOGGLE_YOUR_PLANETS_DEX_PANE = ";";
 export const TOGGLE_TRANSACTIONS_PANE = "'";
+export const TOGGLE_AI_CHAT_PANE = "o";
 
 // global shortcuts
 export const TOGGLE_DIAGNOSTICS_PANE = "i";

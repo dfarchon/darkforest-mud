@@ -12,6 +12,7 @@ import {
   WindowWrapper,
 } from "../Components/GameWindowComponents";
 import ControllableCanvas from "../Game/ControllableCanvas";
+import { AIChatPane } from "../Panes/AIChatPane";
 import { ArtifactHoverPane } from "../Panes/ArtifactHoverPane";
 import { CoordsPane } from "../Panes/CoordsPane";
 import { DiagnosticsPane } from "../Panes/DiagnosticsPane";
@@ -35,6 +36,7 @@ import { useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
 import { useBooleanSetting } from "../Utils/SettingsHooks";
 import {
+  TOGGLE_AI_CHAT_PANE,
   TOGGLE_DIAGNOSTICS_PANE,
   TOGGLE_HELP_PANE,
   TOGGLE_HOTKEY_VISIBLE,
@@ -96,6 +98,10 @@ export function GameWindowLayout({
   );
   const [twitterVerifyVisible, setTwitterVerifyVisible] = useState<boolean>(
     isModalOpen(ModalName.TwitterVerify),
+  );
+
+  const [aiChatVisible, setAIChatVisible] = useState<boolean>(
+    isModalOpen(ModalName.AIChat),
   );
 
   const [tradeVisible, setTradeVisible] = useState<boolean>(
@@ -235,6 +241,16 @@ export function GameWindowLayout({
   );
 
   useOnUp(
+    TOGGLE_AI_CHAT_PANE,
+    useCallback(() => {
+      if (paneVisible) {
+        return;
+      }
+      setTradeVisible(!aiChatVisible);
+    }, [paneVisible, aiChatVisible, setAIChatVisible]),
+  );
+
+  useOnUp(
     TOGGLE_TRADE_PANE,
     useCallback(() => {
       if (paneVisible) {
@@ -334,6 +350,12 @@ export function GameWindowLayout({
           visible={twitterVerifyVisible}
           onClose={() => setTwitterVerifyVisible(false)}
         />
+
+        <AIChatPane
+          visible={aiChatVisible}
+          onClose={() => setTradeVisible(false)}
+        />
+
         {/* PUNK */}
         {/* <TradePane
           visible={tradeVisible}
@@ -386,6 +408,7 @@ export function GameWindowLayout({
 
           {paneVisible && (
             <SidebarPane
+              aiChatHook={[aiChatVisible, setAIChatVisible]}
               tradeHook={[tradeVisible, setTradeVisible]}
               transactionLogHook={[
                 transactionLogVisible,

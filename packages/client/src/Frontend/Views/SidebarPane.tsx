@@ -6,6 +6,7 @@ import type { Hook } from "../../_types/global/GlobalTypes";
 import { BorderlessPane, EmSpacer } from "../Components/CoreUI";
 import { DFZIndex } from "../Utils/constants";
 import {
+  TOGGLE_AI_CHAT_PANE,
   TOGGLE_HELP_PANE,
   TOGGLE_PLUGINS_PANE,
   TOGGLE_SETTINGS_PANE,
@@ -17,6 +18,7 @@ import {
 import { ModalToggleButton } from "./ModalIcon";
 
 export function SidebarPane({
+  aiChatHook,
   tradeHook,
   settingsHook,
   helpHook,
@@ -25,6 +27,7 @@ export function SidebarPane({
   planetdexHook,
   transactionLogHook,
 }: {
+  aiChatHook: Hook<boolean>;
   tradeHook: Hook<boolean>;
   settingsHook: Hook<boolean>;
   helpHook: Hook<boolean>;
@@ -43,6 +46,15 @@ export function SidebarPane({
       <BorderlessPane
         style={{ zIndex: sidebarHovered ? DFZIndex.Tooltip : undefined }}
       >
+        <ModalToggleButton
+          modal={ModalName.AIChat}
+          hook={aiChatHook}
+          text={sidebarHovered ? "AI Chat" : undefined}
+          size="stretch"
+          shortcutKey={TOGGLE_AI_CHAT_PANE}
+          shortcutText={sidebarHovered ? TOGGLE_AI_CHAT_PANE : undefined}
+        />
+        <EmSpacer height={0.5} />
         {/* PUNK  */}
         {/* <ModalToggleButton
           modal={ModalName.Trade}
