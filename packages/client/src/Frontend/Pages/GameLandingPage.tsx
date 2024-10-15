@@ -6,9 +6,18 @@ import {
 import type { EthConnection } from "@df/network";
 import { neverResolves, weiToEth } from "@df/network";
 import { address } from "@df/serde";
+import { addressToHex } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
+import { RegisterPlayerPane } from "@frontend/Panes/RegisterPlayerPane";
+import { WalletPane } from "@frontend/Panes/WalletPane";
 import { useStore as useStoreHook } from "@hooks/useStore";
+import { getComponentValue } from "@latticexyz/recs";
+import {
+  decodeEntity,
+  encodeEntity,
+  singletonEntity,
+} from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import { utils, Wallet } from "ethers";
 import { reverse } from "lodash-es";
@@ -102,14 +111,21 @@ export function GameLandingPage() {
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
   const {
-    network: { walletClient: burnerWalletClient, useStore, waitForTransaction },
+    network: {
+      walletClient: burnerWalletClient,
+      useStore,
+      playerEntity,
+      waitForTransaction,
+    },
     components: components, //{ SyncProgress },
   } = useMUD();
+
+  const { Player } = components;
 
   const syncProgress = useStore((state) => state.syncProgress); // Access sync progress
 
   const syncSign = useMemo(() => {
-    console.log(syncProgress);
+    // console.log(syncProgress);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
 
@@ -145,6 +161,23 @@ export function GameLandingPage() {
   const externalWorldContract = useStoreHook(
     (state) => state.externalWorldContract,
   );
+
+  const [isPlayerRegistered, setIsPlayerRegistered] = useState(false);
+
+  useEffect(() => {
+    const checkPlayerRegistration = async () => {
+      if (playerEntity && walletClient?.account) {
+        const mainAccount = address(walletClient.account.address);
+        const playerKey = encodeEntity(Player.metadata.keySchema, {
+          owner: addressToHex(mainAccount),
+        });
+        const rawPlayer = getComponentValue(Player, playerKey);
+        setIsPlayerRegistered(!!rawPlayer);
+      }
+    };
+
+    checkPlayerRegistration();
+  }, [playerEntity, Player, walletClient]);
 
   useEffect(() => {
     getEthConnection()
@@ -1191,61 +1224,6 @@ export function GameLandingPage() {
       //   return;
       // }
 
-      const playerAddress = ethConnection?.getAddress();
-      if (!playerAddress || !ethConnection) {
-        throw new Error("not logged in");
-      }
-      const { NameToPlayer } = components;
-
-      // Find the player using the map's entries
-      const playerSpawned = Array.from(
-        NameToPlayer.values.value.entries(),
-      ).find(
-        ([key, value]) => value.toLowerCase() === playerAddress.toLowerCase(),
-      );
-      if (!playerSpawned) {
-        // Get the player's input for the name
-        terminal.current?.println(
-          "After your account gets ETH on Redstone Mainet write your PLAYER NAME, press [enter] to continue.",
-          TerminalTextStyle.Pink,
-        );
-        const userInput = (await terminal.current?.getInput())?.trim() ?? "";
-
-        // Register the player using the `df__registerPlayer` function
-        if (userInput.length > 2) {
-          terminal.current?.println(`Registering player: ${userInput}`);
-
-          const tx = await externalWorldContract?.write.df__registerPlayer([
-            userInput,
-            playerAddress as `0x${string}`,
-          ]);
-          // Wait for the transaction receipt
-          const receipt = await waitForTransaction(tx);
-          terminal.current?.println(
-            "Player successfully registered.",
-            TerminalTextStyle.Green,
-          );
-
-          if (receipt.status === "success") {
-            terminal.current?.println(
-              `Transaction hash: ${tx}`,
-              TerminalTextStyle.Green,
-            );
-          } else {
-            terminal.current?.println(
-              "Transaction failed.",
-              TerminalTextStyle.Red,
-            );
-          }
-        } else {
-          terminal.current?.println(
-            "No player name entered or to short min 3 letters, please try again.",
-            TerminalTextStyle.Red,
-          );
-          return advanceStateFromAccountSet(terminal); // Retry to get player name
-        }
-      }
-
       let setX = undefined;
       let setY = undefined;
 
@@ -1768,6 +1746,10 @@ export function GameLandingPage() {
           setTerminalEnabled={setTerminalVisible}
         />
       </GameWindowWrapper>
+
+      {/* {!isPlayerRegistered && <RegisterPlayerPane />} */}
+
+      <WalletPane />
 
       <TerminalWrapper
         initRender={initRenderState}

@@ -1,3 +1,5 @@
+import WalletButton from "@wallet/WalletButton";
+
 import { CreateMoveForm } from "./CreateMoveFormTest";
 import { CreatePlanetForm } from "./CreatePlanetFormTest";
 import { PlanetReadForm } from "./PlanetReadForm";
@@ -7,7 +9,6 @@ import PlayerForm from "./PlayerForm";
 import { PlayPauseTickButton } from "./PlayPauseTickButton";
 import { ProofVerificationForm } from "./ProofVerificationForm";
 import { RevealPlanetForm } from "./RevealPlanetForm";
-import WalletButton from "@wallet/WalletButton";
 
 export const PlanetTestPage = () => {
   // Function to handle planet creation

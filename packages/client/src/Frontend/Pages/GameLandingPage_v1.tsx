@@ -112,7 +112,7 @@ export function GameLandingPage_v1() {
   );
 
   const syncSign = useMemo(() => {
-    console.log(syncProgress);
+    // console.log(syncProgress);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
 

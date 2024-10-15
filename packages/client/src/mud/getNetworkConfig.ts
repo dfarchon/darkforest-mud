@@ -21,11 +21,12 @@
  * The supported chains.
  * By default, there are only two chains here:
  */
+// import { Entity } from "@latticexyz/recs";
+import { addAccount } from "@backend/Network/AccountManager";
 import worldsJson from "contracts/worlds.json";
 import { Wallet } from "ethers";
 
 import { supportedChains } from "./supportedChains";
-// import { Entity } from "@latticexyz/recs";
 
 export type NetworkConfig = Awaited<ReturnType<typeof getNetworkConfig>>;
 
@@ -51,12 +52,12 @@ export const getChain = (chainId: number) => {
 export const getBurnerWallet = () => {
   const params = new URLSearchParams(window.location.search);
 
-  const manualPrivateKey = params.get("privateKey");
-  if (manualPrivateKey) {
-    return new Wallet(manualPrivateKey).privateKey;
-  }
+  // const manualPrivateKey = params.get("privateKey");
+  // if (manualPrivateKey) {
+  //   return new Wallet(manualPrivateKey).privateKey;
+  // }
 
-  const useAnvilAdminKey = import.meta.env.DEV && !params.has("asPlayer");
+  const useAnvilAdminKey = import.meta.env.DEV && params.has("asAdmin");
   if (useAnvilAdminKey) {
     // default anvil admin key
     return "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
@@ -71,6 +72,7 @@ export const getBurnerWallet = () => {
 
   const burnerWallet = Wallet.createRandom();
   localStorage.setItem(storageKey, burnerWallet.privateKey);
+  addAccount(burnerWallet.privateKey);
   return burnerWallet.privateKey;
 };
 
