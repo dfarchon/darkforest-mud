@@ -27,6 +27,7 @@ import { PluginLibraryPane } from "../Panes/PluginLibraryPane";
 import { PrivatePane } from "../Panes/PrivatePane";
 import { SettingsPane } from "../Panes/SettingsPane";
 import { TradePane } from "../Panes/TradePane";
+import { WalletPane } from "../Panes/WalletPane";
 import { TransactionLogPane } from "../Panes/TransactionLogPane";
 import { TutorialPane } from "../Panes/TutorialPane";
 import { TwitterVerifyPane } from "../Panes/TwitterVerifyPane";
@@ -96,6 +97,10 @@ export function GameWindowLayout({
   );
   const [twitterVerifyVisible, setTwitterVerifyVisible] = useState<boolean>(
     isModalOpen(ModalName.TwitterVerify),
+  );
+
+  const [walletVisible, setWalletVisible] = useState<boolean>(
+    isModalOpen(ModalName.Wallet),
   );
 
   const [tradeVisible, setTradeVisible] = useState<boolean>(
@@ -334,6 +339,11 @@ export function GameWindowLayout({
           visible={twitterVerifyVisible}
           onClose={() => setTwitterVerifyVisible(false)}
         />
+
+        <WalletPane
+          visible={walletVisible}
+          onClose={() => setWalletVisible(false)}
+        />
         {/* PUNK */}
         {/* <TradePane
           visible={tradeVisible}
@@ -386,6 +396,7 @@ export function GameWindowLayout({
 
           {paneVisible && (
             <SidebarPane
+              walletHook={[walletVisible, setWalletVisible]}
               tradeHook={[tradeVisible, setTradeVisible]}
               transactionLogHook={[
                 transactionLogVisible,

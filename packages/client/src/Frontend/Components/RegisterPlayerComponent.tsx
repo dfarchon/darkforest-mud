@@ -1,16 +1,15 @@
-import { addressToHex } from "@df/serde";
+import { addressToHex, address as toEthAddress } from "@df/serde";
 import { Btn } from "@frontend/Components/Btn";
 import { Spacer, Title } from "@frontend/Components/CoreUI";
-import { Modal } from "@frontend/Components/Modal";
 import { Green, Red } from "@frontend/Components/Text";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { encodeFunctionData } from "viem";
 import { useWalletClient } from "wagmi";
 
-export const RegisterPlayerPane = () => {
+export const RegisterPlayerComponent = () => {
   const {
     network: { walletClient: burnerWalletClient, playerEntity, worldContract },
     components: { Player },
@@ -28,7 +27,7 @@ export const RegisterPlayerPane = () => {
   useEffect(() => {
     const checkPlayerRegistration = async () => {
       if (playerEntity && walletClient?.account) {
-        const mainAccount = walletClient.account.address;
+        const mainAccount = toEthAddress(walletClient.account.address);
         const playerKey = encodeEntity(Player.metadata.keySchema, {
           owner: addressToHex(mainAccount),
         });
@@ -36,13 +35,23 @@ export const RegisterPlayerPane = () => {
         setState((prev) => ({
           ...prev,
           isPlayerRegistered: !!rawPlayer,
-          playerName: rawPlayer?.name,
+          playerName: rawPlayer?.name || "",
         }));
       }
     };
 
     checkPlayerRegistration();
   }, [playerEntity, Player, walletClient]);
+
+  const handlePlayerNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setState((prev) => ({
+        ...prev,
+        playerName: e.target.value.slice(0, 8),
+      }));
+    },
+    [],
+  );
 
   const registerPlayerAction = async () => {
     if (!walletClient) {
@@ -139,12 +148,7 @@ export const RegisterPlayerPane = () => {
               type="text"
               placeholder="Player name (max 8)"
               value={state.playerName}
-              onChange={(e) =>
-                setState((prev) => ({
-                  ...prev,
-                  playerName: e.target.value.slice(0, 8),
-                }))
-              }
+              onChange={handlePlayerNameChange}
               className="h-8 w-48 rounded border border-gray-300 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="text-sm">
