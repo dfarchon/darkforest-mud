@@ -2,6 +2,7 @@ import type { Contract } from "ethers";
 
 import type { ArtifactId, EthAddress, LocationId, UnionId } from "./identifier";
 import type { WorldLocation } from "./world";
+import type { Hex } from "viem";
 
 // import type { LiteralUnion } from "type-fest";
 //
@@ -73,7 +74,8 @@ export type EthTxStatus =
 export type TxIntent = {
   contract: Contract;
   methodName: LiteralUnion<ContractMethodName, string>;
-  systemId: string;
+  from: EthAddress;
+  systemId: Hex;
   args: Promise<unknown[]>;
 };
 

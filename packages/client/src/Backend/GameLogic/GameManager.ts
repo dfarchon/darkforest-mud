@@ -132,6 +132,7 @@ import delay from "delay";
 import type { Contract, ContractInterface, providers } from "ethers";
 import { BigNumber } from "ethers";
 import { EventEmitter } from "events";
+import { PLAYER_SYSTEM_ID } from "@df/constants";
 
 import type {
   ContractConstants,
@@ -3846,6 +3847,9 @@ export class GameManager extends EventEmitter {
 
       const txIntent: UnconfirmedInit = {
         methodName: "df__initializePlayer",
+        // PUNK fix here
+        from: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" as EthAddress,
+        systemId: PLAYER_SYSTEM_ID,
         contract: this.contractsAPI.contract,
         locationId: planet.location.hash,
         location: planet.location,

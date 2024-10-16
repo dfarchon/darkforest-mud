@@ -13,13 +13,15 @@ import type { providers } from "ethers";
 import { utils } from "ethers";
 import deferred from "p-defer";
 import timeout from "p-timeout";
-
 import type { EthConnection } from "./EthConnection";
 import { waitForTransaction } from "./Network";
 import {
   type ConcurrentQueueConfiguration,
   ThrottledConcurrentQueue,
 } from "./ThrottledConcurrentQueue";
+import { encodeSystemCallFrom } from "@latticexyz/world/internal";
+import type { Hex } from "viem";
+import PlayerSystemAbi from "contracts/out/PlayerSystem.sol/PlayerSystem.abi.json";
 
 /**
  * Returns either a string that represents the gas price we should use by default for transactions,
@@ -381,12 +383,31 @@ export class TxExecutor {
 
       const args = await tx.intent.args;
 
-      // PUNK todo
+      // const submitted = await timeout<providers.TransactionResponse>(
+      //   tx.intent.contract[tx.intent.methodName](...args, {
+      //     ...requestWithDefaults,
+      //     nonce,
+      //   }),
+      //   TxExecutor.TX_SUBMIT_TIMEOUT,
+      //   `tx request ${tx.id} failed to submit: timed out`,
+      // )
 
-      // update to use callFrom here
+      console.log("args");
+      console.log(args);
+
+      const callFromArgs = encodeSystemCallFrom({
+        abi: PlayerSystemAbi,
+        from: tx.intent.from as Hex,
+        systemId: tx.intent.systemId,
+        functionName: "initializePlayer",
+        args: args,
+      });
+      //PUNK
+
+      console.log(callFromArgs);
 
       const submitted = await timeout<providers.TransactionResponse>(
-        tx.intent.contract[tx.intent.methodName](...args, {
+        tx.intent.contract["callFrom"](...callFromArgs, {
           ...requestWithDefaults,
           nonce,
         }),
