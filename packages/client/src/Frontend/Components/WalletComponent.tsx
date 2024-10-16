@@ -21,7 +21,13 @@ import { useAccount, useDisconnect, useWalletClient } from "wagmi";
 
 import { RegisterPlayerComponent } from "./RegisterPlayerComponent";
 
-export const WalletComponent = () => {
+interface WalletComponentProps {
+  showRegisterPlayer: boolean;
+}
+
+export const WalletComponent: React.FC<WalletComponentProps> = ({
+  showRegisterPlayer = false,
+}) => {
   const {
     network: { walletClient: burnerWalletClient, playerEntity },
     components: { Player },
@@ -38,6 +44,7 @@ export const WalletComponent = () => {
     txSuccessful: false,
     pkCopied: false,
     isPlayerRegistered: false,
+    isDataLoaded: false, // New state to track if data has been loaded
   });
 
   const { value: burnerBalanceValue, refetch: refetchBurnerBalance } =
@@ -49,6 +56,7 @@ export const WalletComponent = () => {
     const fetchBalances = async () => {
       await refetchBurnerBalance();
       await refetchMainWalletBalance();
+      setState((prev) => ({ ...prev, isDataLoaded: true }));
     };
 
     fetchBalances();
@@ -238,37 +246,42 @@ export const WalletComponent = () => {
     </div>
   );
 
-  const renderStatusMessages = () => (
-    <div>
-      {burnerWalletClient.account && state.burnerBalance === 0n && (
-        <div>
-          <Red>
-            Warning: Your burner wallet needs funds to register and play.
-          </Red>
-        </div>
-      )}
-      {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
-        <div>
-          <Red>Warning: Low session wallet balance!</Red>
-        </div>
-      )}
+  const renderStatusMessages = () => {
+    if (!state.isDataLoaded) {
+      return null; // Don't render anything if data hasn't loaded
+    }
 
-      {state.txSuccessful && (
-        <div>
-          <Green>Transaction successful!</Green>
-        </div>
-      )}
-      {state.pkCopied && (
-        <div>
-          <Green>Private key copied!</Green>
-        </div>
-      )}
-    </div>
-  );
+    return (
+      <div>
+        {burnerWalletClient.account && state.burnerBalance === 0n && (
+          <div>
+            <Red>
+              Warning: Your burner wallet needs funds to register and play.
+            </Red>
+          </div>
+        )}
+        {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
+          <div>
+            <Red>Warning: Low session wallet balance!</Red>
+          </div>
+        )}
+
+        {state.txSuccessful && (
+          <div>
+            <Green>Transaction successful!</Green>
+          </div>
+        )}
+        {state.pkCopied && (
+          <div>
+            <Green>Private key copied!</Green>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <Modal id="wallet-modal" width="50em">
-      <Title slot="title">Wallet Management</Title>
+    <div>
       <div slot="title" style={{ marginLeft: "8px", flexShrink: 0 }}>
         <Spacer width={4} />
       </div>
@@ -279,8 +292,8 @@ export const WalletComponent = () => {
         {renderBurnerWalletControls()}
         {renderTransferControls()}
         {renderStatusMessages()}
-        <RegisterPlayerComponent />
+        {showRegisterPlayer && <RegisterPlayerComponent />}
       </div>
-    </Modal>
+    </div>
   );
 };

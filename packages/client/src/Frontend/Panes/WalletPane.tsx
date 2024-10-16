@@ -5,19 +5,10 @@ import styled from "styled-components";
 
 import { Link, Section, SectionHeader } from "../Components/CoreUI";
 import { Pink } from "../Components/Text";
+import { WalletComponent } from "../Components/WalletComponent";
 import dfstyles from "../Styles/dfstyles";
 import { useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
-
-const WalletContent = styled.div`
-  width: 500px;
-  height: 700px;
-  max-height: 700px;
-  max-width: 500px;
-  overflow-y: scroll;
-  text-align: justify;
-  color: ${dfstyles.colors.text};
-`;
 
 export function WalletPane({
   visible,
@@ -29,11 +20,12 @@ export function WalletPane({
   return (
     <ModalPane
       id={ModalName.Wallet}
-      title="Help"
+      title="Wallet Management"
       visible={visible}
       onClose={onClose}
+      width="50em"
     >
-      <WalletContent>Wallet Component</WalletContent>
+      <WalletComponent showRegisterPlayer={false} />
     </ModalPane>
   );
 }

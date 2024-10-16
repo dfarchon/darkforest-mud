@@ -10,7 +10,7 @@ import { addressToHex } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
 import { RegisterPlayerComponent } from "@frontend/Components/RegisterPlayerComponent";
-import { WalletComponent } from "@frontend/Components/WalletComponent";
+import { WalletModal } from "@frontend/Components/WalletModal";
 import { useStore as useStoreHook } from "@hooks/useStore";
 import { getComponentValue } from "@latticexyz/recs";
 import {
@@ -1747,7 +1747,7 @@ export function GameLandingPage() {
         />
       </GameWindowWrapper>
 
-      <WalletComponent />
+      <WalletModal />
 
       <TerminalWrapper
         initRender={initRenderState}

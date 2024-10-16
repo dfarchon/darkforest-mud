@@ -1,11 +1,11 @@
-import { addressToHex, address as toEthAddress } from "@df/serde";
+import { address as toEthAddress, addressToHex } from "@df/serde";
 import { Btn } from "@frontend/Components/Btn";
 import { Spacer, Title } from "@frontend/Components/CoreUI";
 import { Green, Red } from "@frontend/Components/Text";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { encodeFunctionData } from "viem";
 import { useWalletClient } from "wagmi";
 
@@ -23,7 +23,8 @@ export const RegisterPlayerComponent = () => {
     registrationStatus: "",
   });
 
-  // PUNK update functions has issues here
+  const [registrationMessage, setRegistrationMessage] = useState("");
+
   useEffect(() => {
     const checkPlayerRegistration = async () => {
       if (playerEntity && walletClient?.account) {
@@ -40,7 +41,14 @@ export const RegisterPlayerComponent = () => {
       }
     };
 
+    // Initial check
     checkPlayerRegistration();
+
+    // Set up interval to check every 5 seconds
+    const intervalId = setInterval(checkPlayerRegistration, 5000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
   }, [playerEntity, Player, walletClient]);
 
   const handlePlayerNameChange = useCallback(
@@ -94,16 +102,20 @@ export const RegisterPlayerComponent = () => {
 
       const txResponse = await walletClient.sendTransaction(txData);
       console.log("Transaction sent:", txResponse);
-      setState((prev) => ({
-        ...prev,
-        registrationStatus: "Player registered successfully!",
-      }));
+      setRegistrationMessage("Player registered successfully!");
+
+      // Set a timer to clear the message after 5 seconds
+      setTimeout(() => {
+        setRegistrationMessage("");
+      }, 5000);
     } catch (error) {
       console.error("Transaction failed:", error);
-      setState((prev) => ({
-        ...prev,
-        registrationStatus: "Failed to register player. Please try again.",
-      }));
+      setRegistrationMessage("Failed to register player. Please try again.");
+
+      // Also clear error message after 5 seconds
+      setTimeout(() => {
+        setRegistrationMessage("");
+      }, 5000);
     }
   };
 
@@ -174,12 +186,12 @@ export const RegisterPlayerComponent = () => {
 
   const renderStatusMessages = () => (
     <div>
-      {state.registrationStatus && (
+      {registrationMessage && (
         <div>
-          {state.registrationStatus.includes("successfully") ? (
-            <Green>{state.registrationStatus}</Green>
+          {registrationMessage.includes("successfully") ? (
+            <Green>{registrationMessage}</Green>
           ) : (
-            <Red>{state.registrationStatus}</Red>
+            <Red>{registrationMessage}</Red>
           )}
         </div>
       )}

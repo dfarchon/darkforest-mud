@@ -6,12 +6,12 @@ import type { Hook } from "../../_types/global/GlobalTypes";
 import { BorderlessPane, EmSpacer } from "../Components/CoreUI";
 import { DFZIndex } from "../Utils/constants";
 import {
-  TOGGLE_WALLET_PANE,
   TOGGLE_HELP_PANE,
   TOGGLE_PLUGINS_PANE,
   TOGGLE_SETTINGS_PANE,
   TOGGLE_TRADE_PANE,
   TOGGLE_TRANSACTIONS_PANE,
+  TOGGLE_WALLET_PANE,
   TOGGLE_YOUR_ARTIFACTS_PANE,
   TOGGLE_YOUR_PLANETS_DEX_PANE,
 } from "../Utils/ShortcutConstants";
