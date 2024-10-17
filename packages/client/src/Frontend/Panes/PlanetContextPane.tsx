@@ -71,6 +71,7 @@ function PlanetContextPaneContent({
     () => getNotifsForPlanet(planet.value, account),
     [planet, account],
   );
+
   const owned = planet.value?.owner === account;
 
   useEffect(() => {

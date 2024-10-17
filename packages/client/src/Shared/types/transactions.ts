@@ -1,4 +1,5 @@
 import type { Contract } from "ethers";
+import type { Abi, Hex } from "viem";
 
 import type { ArtifactId, EthAddress, LocationId, UnionId } from "./identifier";
 import type { WorldLocation } from "./world";
@@ -74,6 +75,9 @@ export type TxIntent = {
   contract: Contract;
   methodName: LiteralUnion<ContractMethodName, string>;
   args: Promise<unknown[]>;
+  delegator: EthAddress;
+  systemId: Hex;
+  abi: Abi;
 };
 
 /**

@@ -218,7 +218,7 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
         value={state.transferAmount ?? "0"}
         onChange={(e) => {
           const value = parseFloat(e.target.value);
-          if (value >= 0 && value <= 1) {
+          if (value >= 0 && value <= 5) {
             setState((prev) => ({ ...prev, transferAmount: value }));
           }
         }}
