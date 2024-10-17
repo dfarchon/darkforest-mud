@@ -66,15 +66,13 @@ function PlanetContextPaneContent({
   onToggleSendForces: () => void;
   onToggleAbandon: () => void;
 }) {
-  const mainAccount = useAccount(uiManager);
   const account = useAccount(uiManager);
   const notifs = useMemo(
     () => getNotifsForPlanet(planet.value, account),
     [planet, account],
   );
 
-  const owned =
-    planet.value?.owner === account || planet.value?.owner === mainAccount;
+  const owned = planet.value?.owner === account;
 
   useEffect(() => {
     if (!planet.value) {
