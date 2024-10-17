@@ -10,6 +10,7 @@ import { Planet } from "../lib/Planet.sol";
 import { MoveData, Counter } from "../codegen/index.sol";
 import { MoveLib } from "../lib/Move.sol";
 import { UniverseLib } from "../lib/Universe.sol";
+import { EffectLib } from "../lib/Effect.sol";
 
 contract MoveSystem is System, Errors {
   using MoveLib for MoveData;
@@ -40,6 +41,10 @@ contract MoveSystem is System, Errors {
     // new planet instances in memory
     Planet memory fromPlanet = world.df__readPlanet(_input.fromPlanetHash);
     Planet memory toPlanet = world.df__readPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
+
+    // trigger before move effects
+    EffectLib.beforeMove(fromPlanet);
+
     // create a new move and load all resources
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
     uint256 distance = UniverseLib.distance(fromPlanet, toPlanet, _input.distance);
@@ -47,6 +52,9 @@ contract MoveSystem is System, Errors {
     shipping.loadSilver(fromPlanet, _silver);
     shipping.loadArtifact(fromPlanet, _artifact);
     shipping.headTo(toPlanet, distance, fromPlanet.speed);
+
+    // trigger after move effects
+    EffectLib.afterMove(fromPlanet);
 
     // write back to storage
     Counter.setMove(shipping.id);

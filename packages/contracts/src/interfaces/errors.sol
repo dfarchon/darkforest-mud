@@ -55,6 +55,8 @@ interface Errors {
   error ArtifactNotChargeable(); // 0x342e603f
   error ArtifactLevelTooLow(); // 0x24c528ed
   error NotEnoughResourceToActivate(); // 0xe642b7b4
+  error ExistingArtifact(); // 0x11f0e4e4
+  error OnlyCallableByArtifactInstallModule(); // 0xbf9f6704
 
   // planet withdraw silver system
   error InvalidPlanetType(); // 0xcfb7f825

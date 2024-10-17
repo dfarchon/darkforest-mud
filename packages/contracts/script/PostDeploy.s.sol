@@ -19,7 +19,10 @@ import { PlanetLevelConfig, PlanetTypeConfig } from "../src/codegen/index.sol";
 import { SnarkConfig, SnarkConfigData, Ticker } from "../src/codegen/index.sol";
 import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
+import { AtfInstallModule } from "../src/codegen/index.sol";
 import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
+import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
+import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLibrary.sol";
 
 contract PostDeploy is Script {
   using stdToml for string;
@@ -57,10 +60,18 @@ contract PostDeploy is Script {
     Ticker.set(0, uint64(toml.readUint(".ticker.rate")), 0, true);
     InnerCircle.set(abi.decode(toml.parseRaw(".inner_circle"), (InnerCircleData)));
     UpgradeConfig.set(abi.decode(toml.parseRaw(".upgrade_config"), (UpgradeConfigData)));
+    uint8[] memory indexes = abi.decode(toml.parseRaw(".artifact.indexes"), (uint8[]));
     for (uint256 i = 1; i <= uint8(type(ArtifactRarity).max); i++) {
       string memory key = string.concat(".artifact.", i.toString());
-      ArtifactConfig.set(ArtifactRarity(i), abi.decode(toml.parseRaw(key), (uint16[])));
+      ArtifactConfig.set(ArtifactRarity(i), indexes, abi.decode(toml.parseRaw(key), (uint16[])));
     }
+
+    // deploy artifact install module
+    ArtifactInstallModule artifactInstallModule = new ArtifactInstallModule();
+    AtfInstallModule.set(address(artifactInstallModule));
+
+    // install artifacts
+    _installArtifacts(worldAddress);
 
     // set test planets
     if (toml.readBool(".temp.b_skip_proof_check")) {
@@ -155,5 +166,11 @@ contract PostDeploy is Script {
       PlanetOwner.set(planets[i].planetHash, planets[i].owner);
       RevealedPlanet.set(planets[i].planetHash, planets[i].x, planets[i].y, planets[i].owner);
     }
+  }
+
+  function _installArtifacts(address worldAddress) internal {
+    console.log("Installing artifacts");
+    uint256 index = installCannon(worldAddress);
+    console.log("Installed cannon with index", index);
   }
 }

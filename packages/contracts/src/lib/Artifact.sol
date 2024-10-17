@@ -2,9 +2,11 @@
 pragma solidity >=0.8.24;
 
 import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactType, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "../codegen/common.sol";
-import { Counter, ArtifactConfig, Artifact as ArtifactTable, ArtifactData, PlanetArtifact } from "../codegen/index.sol";
+import { PlanetType, SpaceType, Biome, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "../codegen/common.sol";
+import { Counter, Ticker, Artifact as ArtifactTable, ArtifactData, PlanetArtifact } from "../codegen/index.sol";
+import { ArtifactConfig, ArtifactConfigData } from "../codegen/index.sol";
 import { PlanetArtifact, ArtifactOwner, ArtifactMetadata, ArtifactMetadataData } from "../codegen/index.sol";
+import { _artifactMetadataTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
 
 using ArtifactStorageLib for ArtifactStorage global;
 
@@ -135,16 +137,16 @@ struct Artifact {
   // Table: Artifact
   ArtifactStatus status;
   ArtifactRarity rarity;
-  ArtifactType artifactType;
-  uint256 chargeTime;
-  uint256 activateTime;
-  uint256 cooldownTime;
+  uint256 artifactIndex;
+  uint256 chargeTick;
+  uint256 activateTick;
+  uint256 cooldownTick;
   // Table: ArtifactMetadata
   ArtifactGenre genre;
   uint256 charge;
   uint256 cooldown;
-  bool instant;
-  bool oneTime;
+  bool durable;
+  bool reusable;
   uint256 reqLevel;
   uint256 reqPopulation;
   uint256 reqSilver;
@@ -165,81 +167,52 @@ library ArtifactLib {
 
   // never directly call this function
   // artifact should be got from planet.mustGetArtifact(artifactId)
-  function readFromStore(Artifact memory artifact) internal view {
+  function readFromStore(Artifact memory artifact, uint256 curTick) internal view {
     ArtifactData memory data = ArtifactTable.get(uint32(artifact.id));
     artifact.rarity = data.rarity;
-    artifact.artifactType = data.artifactType;
+    artifact.artifactIndex = data.artifactIndex;
     artifact.status = data.status;
-    artifact.chargeTime = data.chargeTime;
-    artifact.activateTime = data.activateTime;
-    artifact.cooldownTime = data.cooldownTime;
-    ArtifactMetadataData memory metadata = ArtifactMetadata.get(data.artifactType, data.rarity);
+    artifact.chargeTick = data.chargeTick;
+    artifact.activateTick = data.activateTick;
+    artifact.cooldownTick = data.cooldownTick;
+    ArtifactMetadataData memory metadata = _getMetadata(artifact);
     artifact.genre = metadata.genre;
     artifact.charge = metadata.charge;
     artifact.cooldown = metadata.cooldown;
-    artifact.oneTime = metadata.oneTime;
+    artifact.durable = metadata.durable;
+    artifact.reusable = metadata.reusable;
     artifact.reqLevel = metadata.reqLevel;
     artifact.reqPopulation = metadata.reqPopulation;
     artifact.reqSilver = metadata.reqSilver;
+    _updateArtifactStatus(artifact, curTick);
   }
 
   function writeToStore(Artifact memory artifact) internal {
     ArtifactTable.set(
       uint32(artifact.id),
+      uint8(artifact.artifactIndex),
       artifact.rarity,
-      artifact.artifactType,
       artifact.status,
-      uint64(artifact.chargeTime),
-      uint64(artifact.activateTime),
-      uint64(artifact.cooldownTime)
+      uint64(artifact.chargeTick),
+      uint64(artifact.activateTick),
+      uint64(artifact.cooldownTick)
     );
   }
 
-  function charging(Artifact memory artifact, uint256 curTick) internal pure {
-    if (
-      artifact.status >= ArtifactStatus.CHARGING ||
-      (artifact.status == ArtifactStatus.COOLDOWN && artifact.cooldownTime + artifact.cooldown > curTick)
-    ) {
-      revert Errors.ArtifactNotAvailable();
-    }
-    if (artifact.charge > 0) {
-      artifact.chargeTime = curTick;
-      artifact.status = ArtifactStatus.CHARGING;
-    } else {
-      revert Errors.ArtifactNotChargeable();
-    }
+  function _getMetadata(Artifact memory artifact) internal view returns (ArtifactMetadataData memory) {
+    return
+      ArtifactMetadata.get(
+        _artifactMetadataTableId(_artifactIndexToNamespace(artifact.id)),
+        uint8(artifact.id),
+        artifact.rarity
+      );
   }
 
-  function activate(Artifact memory artifact, uint256 curTick) internal pure {
-    if (
-      artifact.status >= ArtifactStatus.ACTIVE ||
-      (artifact.status == ArtifactStatus.CHARGING && artifact.chargeTime + artifact.charge > curTick) ||
-      artifact.charge > 0 ||
-      (artifact.status == ArtifactStatus.COOLDOWN && artifact.cooldownTime + artifact.cooldown > curTick)
-    ) {
-      revert Errors.ArtifactNotAvailable();
-    }
-    artifact.activateTime = curTick;
-    if (artifact.instant) {
-      if (artifact.oneTime) {
-        artifact.status = ArtifactStatus.BROKEN;
-      } else {
-        artifact.status = ArtifactStatus.COOLDOWN;
-      }
-    } else {
-      artifact.status = ArtifactStatus.ACTIVE;
-    }
-  }
-
-  function deactivate(Artifact memory artifact, uint256 curTick) internal pure {
-    if (artifact.status != ArtifactStatus.ACTIVE) {
-      revert Errors.ArtifactNotAvailable();
-    }
-    if (artifact.oneTime) {
-      artifact.status = ArtifactStatus.BROKEN;
-    } else {
-      artifact.status = ArtifactStatus.COOLDOWN;
-      artifact.cooldownTime = curTick;
+  function _updateArtifactStatus(Artifact memory artifact, uint256 curTick) internal pure {
+    if (artifact.status == ArtifactStatus.CHARGING && curTick >= artifact.chargeTick + artifact.charge) {
+      artifact.status = ArtifactStatus.READY;
+    } else if (artifact.status == ArtifactStatus.COOLDOWN && curTick >= artifact.cooldownTick + artifact.cooldown) {
+      artifact.status = ArtifactStatus.READY;
     }
   }
 
@@ -267,13 +240,13 @@ library ArtifactLib {
 
   function _initType(Artifact memory artifact, uint256 seed) internal view {
     uint256 typeSeed = seed % 0x1000;
-    uint16[] memory thresholds = ArtifactConfig.get(artifact.rarity);
+    uint16[] memory thresholds = ArtifactConfig.getProbabilities(artifact.rarity);
     uint256 length = thresholds.length;
     uint256 cumulativeThreshold;
     for (uint256 i; i < length; ) {
       cumulativeThreshold += thresholds[i];
       if (typeSeed < cumulativeThreshold) {
-        artifact.artifactType = ArtifactType(i + 1);
+        artifact.artifactIndex = ArtifactConfig.getItemIndexes(artifact.rarity, i);
         return;
       }
       unchecked {

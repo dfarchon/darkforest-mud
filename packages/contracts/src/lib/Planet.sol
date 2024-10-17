@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
+import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome } from "../codegen/common.sol";
+import { PlanetType, SpaceType, Biome, ArtifactStatus } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
 import { PlanetOwner, PlanetConstants, PlanetConstantsData, PlanetProps, PlanetPropsData } from "../codegen/index.sol";
+import { PlanetEffects, PlanetEffectsData } from "../codegen/index.sol";
 import { UniverseConfig, UniverseZoneConfig, PlanetLevelConfig } from "../codegen/index.sol";
 import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData, Ticker } from "../codegen/index.sol";
@@ -12,9 +14,13 @@ import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../codegen/index.sol";
 import { ProspectedPlanet, ExploredPlanet } from "../codegen/index.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "../codegen/index.sol";
+import { ArtifactMetadataData } from "../codegen/index.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "./Move.sol";
 import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "./Artifact.sol";
+import { Effect, EffectLib } from "./Effect.sol";
+import { _artifactProxySystemId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
+import { IArtifactProxySystem } from "../modules/atfs/IArtifactProxySystem.sol";
 
 using PlanetLib for Planet global;
 
@@ -52,6 +58,9 @@ struct Planet {
   PendingMoveQueue moveQueue;
   // artifact storage
   ArtifactStorage artifactStorage;
+  // effects
+  uint256 effectNumber;
+  Effect[] effects;
 }
 
 library PlanetLib {
@@ -62,6 +71,7 @@ library PlanetLib {
     } else {
       _readPlanetData(planet);
       _readConstants(planet);
+      _readEffects(planet);
     }
 
     planet.artifactStorage.ReadFromStore(planet.planetHash);
@@ -111,6 +121,20 @@ library PlanetLib {
         useProps: planet.useProps
       })
     );
+    uint256 effectsData;
+    for (uint256 i; i < planet.effectNumber; ) {
+      effectsData <<= 24;
+      effectsData += uint24(planet.effects[i].id);
+      unchecked {
+        ++i;
+      }
+    }
+    if (effectsData != PlanetEffects.getEffects(bytes32(planet.planetHash))) {
+      PlanetEffects.set(
+        bytes32(planet.planetHash),
+        PlanetEffectsData(uint8(planet.effectNumber), uint248(effectsData))
+      );
+    }
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
@@ -148,31 +172,48 @@ library PlanetLib {
     planet.artifactStorage.Remove(artifact);
   }
 
-  function chargeArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
-    Artifact memory artifact = planet.mustGetArtifact(artifactId);
-    _validateChargeArtifact(planet, artifact, executor);
-    artifact.charging(planet.lastUpdateTick);
-    artifact.writeToStore();
+  function chargeArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+    _validateChargeArtifact(planet, artifact);
+    bytes memory data = IBaseWorld(world).call(
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      abi.encodeCall(IArtifactProxySystem.charge, (planet, artifact))
+    );
+    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
+    planet = newPlanet;
+    artifact = newArtifact;
   }
 
-  function activateArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
-    Artifact memory artifact = planet.mustGetArtifact(artifactId);
-    _validateActivateArtifact(planet, artifact, executor);
-    planet.population -= artifact.reqPopulation;
-    planet.silver -= artifact.reqSilver;
-    artifact.activate(planet.lastUpdateTick);
-    artifact.writeToStore();
-    _applyArtifactEffect(planet, artifact);
+  function shutdownArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+    _validateDeactivateArtifact(planet, artifact);
+    bytes memory data = IBaseWorld(world).call(
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      abi.encodeCall(IArtifactProxySystem.shutdown, (planet, artifact))
+    );
+    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
+    planet = newPlanet;
+    artifact = newArtifact;
   }
 
-  function deactivateArtifact(Planet memory planet, uint256 artifactId, address executor) internal {
-    if (planet.owner != executor) {
-      revert Errors.NotPlanetOwner();
-    }
-    Artifact memory artifact = planet.mustGetArtifact(artifactId);
-    artifact.deactivate(planet.lastUpdateTick);
-    artifact.writeToStore();
-    _removeArtifactEffect(planet, artifact);
+  function activateArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+    _validateActivateArtifact(planet, artifact);
+    bytes memory data = IBaseWorld(world).call(
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      abi.encodeCall(IArtifactProxySystem.activate, (planet, artifact))
+    );
+    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
+    planet = newPlanet;
+    artifact = newArtifact;
+  }
+
+  function deactivateArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+    _validateDeactivateArtifact(planet, artifact);
+    bytes memory data = IBaseWorld(world).call(
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      abi.encodeCall(IArtifactProxySystem.deactivate, (planet, artifact))
+    );
+    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
+    planet = newPlanet;
+    artifact = newArtifact;
   }
 
   function changeOwner(Planet memory planet, address newOwner) internal pure {
@@ -219,7 +260,7 @@ library PlanetLib {
     if (planet.artifactStorage.Has(artifactId)) {
       artifact.planetHash = planet.planetHash;
       artifact.id = artifactId;
-      artifact.readFromStore();
+      artifact.readFromStore(planet.lastUpdateTick);
     } else {
       revert Errors.ArtifactNotOnPlanet();
     }
@@ -366,6 +407,21 @@ library PlanetLib {
     planet.level = constants.level;
     planet.planetType = constants.planetType;
     planet.spaceType = constants.spaceType;
+  }
+
+  function _readEffects(Planet memory planet) internal view {
+    PlanetEffectsData memory effectsData = PlanetEffects.get(bytes32(planet.planetHash));
+    planet.effectNumber = effectsData.num;
+    Effect[] memory effects = new Effect[](planet.effectNumber);
+    uint256 effectsArray = effectsData.effects;
+    for (uint256 i; i < planet.effectNumber; ) {
+      effects[i] = EffectLib.parseEffect(uint24(effectsArray));
+      unchecked {
+        effectsArray >>= 24;
+        ++i;
+      }
+    }
+    planet.effects = effects;
   }
 
   function _readPropsOrMetadata(Planet memory planet) internal view {
@@ -578,6 +634,42 @@ library PlanetLib {
     // todo check whether the gear spaceship is on this planet
   }
 
+  function _validateShutdownArtifact(Planet memory, Artifact memory artifact) internal pure {
+    if (artifact.status < ArtifactStatus.CHARGING || artifact.status > ArtifactStatus.ACTIVE) {
+      revert Errors.ArtifactNotAvailable();
+    }
+  }
+
+  function _validateChargeArtifact(Planet memory planet, Artifact memory artifact) internal pure {
+    if (planet.level < artifact.reqLevel) {
+      revert Errors.ArtifactLevelTooLow();
+    }
+    if (artifact.status != ArtifactStatus.DEFAULT) {
+      revert Errors.ArtifactNotAvailable();
+    }
+    if (artifact.charge == 0) {
+      revert Errors.ArtifactNotChargeable();
+    }
+  }
+
+  function _validateActivateArtifact(Planet memory planet, Artifact memory artifact) internal pure {
+    if (planet.level < artifact.reqLevel) {
+      revert Errors.ArtifactLevelTooLow();
+    }
+    if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
+      revert Errors.NotEnoughResourceToActivate();
+    }
+    if (artifact.status != ArtifactStatus.READY) {
+      revert Errors.ArtifactNotAvailable();
+    }
+  }
+
+  function _validateDeactivateArtifact(Planet memory, Artifact memory artifact) internal pure {
+    if (artifact.status != ArtifactStatus.ACTIVE) {
+      revert Errors.ArtifactNotAvailable();
+    }
+  }
+
   function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
     uint256 res = uint8(planet.spaceType) * 3;
     PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
@@ -599,34 +691,5 @@ library PlanetLib {
         )
       )
     );
-  }
-
-  function _validateChargeArtifact(Planet memory planet, Artifact memory artifact, address executor) internal pure {
-    if (planet.owner != executor) {
-      revert Errors.NotPlanetOwner();
-    }
-    if (planet.level < artifact.reqLevel) {
-      revert Errors.ArtifactLevelTooLow();
-    }
-  }
-
-  function _validateActivateArtifact(Planet memory planet, Artifact memory artifact, address executor) internal pure {
-    if (planet.owner != executor) {
-      revert Errors.NotPlanetOwner();
-    }
-    if (planet.level < artifact.reqLevel) {
-      revert Errors.ArtifactLevelTooLow();
-    }
-    if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
-      revert Errors.NotEnoughResourceToActivate();
-    }
-  }
-
-  function _applyArtifactEffect(Planet memory planet, Artifact memory artifact) internal {
-    // todo
-  }
-
-  function _removeArtifactEffect(Planet memory planet, Artifact memory artifact) internal {
-    // todo
   }
 }
