@@ -96,6 +96,7 @@ library PlanetLib {
       PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
     }
     if (planet.updateProps) {
+      planet.useProps = true;
       PlanetProps.set(
         bytes32(planet.planetHash),
         PlanetPropsData({
@@ -172,48 +173,56 @@ library PlanetLib {
     planet.artifactStorage.Remove(artifact);
   }
 
-  function chargeArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+  function chargeArtifact(
+    Planet memory planet,
+    Artifact memory artifact,
+    address world
+  ) internal returns (Planet memory, Artifact memory) {
     _validateChargeArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
-      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
       abi.encodeCall(IArtifactProxySystem.charge, (planet, artifact))
     );
-    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
-    planet = newPlanet;
-    artifact = newArtifact;
+    return abi.decode(data, (Planet, Artifact));
   }
 
-  function shutdownArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+  function shutdownArtifact(
+    Planet memory planet,
+    Artifact memory artifact,
+    address world
+  ) internal returns (Planet memory, Artifact memory) {
     _validateDeactivateArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
-      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
       abi.encodeCall(IArtifactProxySystem.shutdown, (planet, artifact))
     );
-    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
-    planet = newPlanet;
-    artifact = newArtifact;
+    return abi.decode(data, (Planet, Artifact));
   }
 
-  function activateArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+  function activateArtifact(
+    Planet memory planet,
+    Artifact memory artifact,
+    address world
+  ) internal returns (Planet memory, Artifact memory) {
     _validateActivateArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
-      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
       abi.encodeCall(IArtifactProxySystem.activate, (planet, artifact))
     );
-    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
-    planet = newPlanet;
-    artifact = newArtifact;
+    return abi.decode(data, (Planet, Artifact));
   }
 
-  function deactivateArtifact(Planet memory planet, Artifact memory artifact, address world) internal {
+  function deactivateArtifact(
+    Planet memory planet,
+    Artifact memory artifact,
+    address world
+  ) internal returns (Planet memory, Artifact memory) {
     _validateDeactivateArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
-      _artifactProxySystemId(_artifactIndexToNamespace(artifact.id)),
+      _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
       abi.encodeCall(IArtifactProxySystem.deactivate, (planet, artifact))
     );
-    (Planet memory newPlanet, Artifact memory newArtifact) = abi.decode(data, (Planet, Artifact));
-    planet = newPlanet;
-    artifact = newArtifact;
+    return abi.decode(data, (Planet, Artifact));
   }
 
   function changeOwner(Planet memory planet, address newOwner) internal pure {
@@ -507,7 +516,6 @@ library PlanetLib {
         (planet.defense * uint256(config.defenseMultiplier) ** defenseUpgrades) /
         uint256(100) ** defenseUpgrades;
     }
-    planet.useProps = true;
     planet.updateProps = true;
   }
 

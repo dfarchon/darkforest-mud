@@ -36,7 +36,8 @@ abstract contract BaseInstallLibrary is IInstallLibrary {
     _install(world, namespace);
 
     // Register artifact proxy system
-    world.registerSystem(_artifactProxySystemId(namespace), artifactProxySystem, false);
+    world.registerSystem(_artifactProxySystemId(namespace), artifactProxySystem, true);
+
     return _artifactIndex();
   }
 
