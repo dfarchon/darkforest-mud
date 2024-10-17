@@ -22,6 +22,7 @@ contract CannonSystem is ArtifactProxySystem {
 
   function _shutdown(Planet memory planet, Artifact memory artifact) internal view virtual override {
     super._shutdown(planet, artifact);
+
     if (artifact.rarity == ArtifactRarity.COMMON) {
       planet.removeEffect(COMMON_CHARGE);
       planet.removeEffect(COMMON_ACTIVATE);
@@ -62,6 +63,8 @@ contract CannonSystem is ArtifactProxySystem {
   }
 
   function _activate(Planet memory planet, Artifact memory artifact) internal view virtual override {
+    super._activate(planet, artifact);
+
     if (artifact.rarity == ArtifactRarity.COMMON) {
       planet.applyEffect(COMMON_ACTIVATE);
       planet.applyEffect(COMMON_ACTIVATE_AFTER_MOVE);
