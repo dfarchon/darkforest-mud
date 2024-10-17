@@ -73,7 +73,6 @@ export type EthTxStatus =
 export type TxIntent = {
   contract: Contract;
   methodName: LiteralUnion<ContractMethodName, string>;
-  systemId: string;
   args: Promise<unknown[]>;
 };
 

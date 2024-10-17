@@ -96,7 +96,7 @@ const getEnergyAtTick = (planet: Planet, atTick: number): number => {
       (planet.energyCap / planet.energy - 1) +
     1;
 
-  return Math.floor(planet.energyCap / denominator);
+  return planet.energyCap / denominator;
 };
 
 export const updatePlanetToTick = (
