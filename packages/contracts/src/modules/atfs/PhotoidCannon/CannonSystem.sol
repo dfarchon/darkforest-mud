@@ -13,7 +13,6 @@ import { EffectLib } from "../../../lib/Effect.sol";
 import { ARTIFACT_INDEX, COMMON_CHARGE, RARE_CHARGE, EPIC_CHARGE, LEGENDARY_CHARGE, MYTHIC_CHARGE } from "./constant.sol";
 import { COMMON_ACTIVATE, RARE_ACTIVATE, EPIC_ACTIVATE, LEGENDARY_ACTIVATE, MYTHIC_ACTIVATE } from "./constant.sol";
 import { COMMON_ACTIVATE_AFTER_MOVE, RARE_ACTIVATE_AFTER_MOVE, EPIC_ACTIVATE_AFTER_MOVE, LEGENDARY_ACTIVATE_AFTER_MOVE, MYTHIC_ACTIVATE_AFTER_MOVE } from "./constant.sol";
-
 contract CannonSystem is ArtifactProxySystem {
   using EffectLib for Planet;
   function getArtifactIndex() public pure override returns (uint8) {

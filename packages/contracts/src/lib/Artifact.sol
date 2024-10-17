@@ -202,8 +202,7 @@ library ArtifactLib {
   function _getMetadata(Artifact memory artifact) internal view returns (ArtifactMetadataData memory) {
     return
       ArtifactMetadata.get(
-        _artifactMetadataTableId(_artifactIndexToNamespace(artifact.id)),
-        uint8(artifact.id),
+        _artifactMetadataTableId(_artifactIndexToNamespace(artifact.artifactIndex)),
         artifact.rarity
       );
   }

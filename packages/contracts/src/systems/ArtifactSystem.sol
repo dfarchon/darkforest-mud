@@ -31,7 +31,7 @@ contract ArtifactSystem is System, Errors {
     if (planet.owner != _msgSender()) {
       revert Errors.NotPlanetOwner();
     }
-    planet.chargeArtifact(artifact, _world());
+    (planet, artifact) = planet.chargeArtifact(artifact, _world());
 
     artifact.writeToStore();
     planet.writeToStore();
@@ -46,7 +46,7 @@ contract ArtifactSystem is System, Errors {
     if (planet.owner != _msgSender()) {
       revert Errors.NotPlanetOwner();
     }
-    planet.shutdownArtifact(artifact, _world());
+    (planet, artifact) = planet.shutdownArtifact(artifact, _world());
 
     artifact.writeToStore();
     planet.writeToStore();
@@ -61,7 +61,7 @@ contract ArtifactSystem is System, Errors {
     if (planet.owner != _msgSender()) {
       revert Errors.NotPlanetOwner();
     }
-    planet.activateArtifact(artifact, _world());
+    (planet, artifact) = planet.activateArtifact(artifact, _world());
 
     artifact.writeToStore();
     planet.writeToStore();
@@ -76,7 +76,7 @@ contract ArtifactSystem is System, Errors {
     if (planet.owner != _msgSender()) {
       revert Errors.NotPlanetOwner();
     }
-    planet.deactivateArtifact(artifact, _world());
+    (planet, artifact) = planet.deactivateArtifact(artifact, _world());
 
     artifact.writeToStore();
     planet.writeToStore();

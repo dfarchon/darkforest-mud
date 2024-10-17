@@ -64,11 +64,11 @@ contract CannonInstallLibrary is BaseInstallLibrary {
       reqPopulation: 0,
       reqSilver: 0
     });
-    ArtifactMetadata.set(metadataTableId, _artifactIndex(), ArtifactRarity.COMMON, metadata);
-    ArtifactMetadata.set(metadataTableId, _artifactIndex(), ArtifactRarity.RARE, metadata);
-    ArtifactMetadata.set(metadataTableId, _artifactIndex(), ArtifactRarity.EPIC, metadata);
-    ArtifactMetadata.set(metadataTableId, _artifactIndex(), ArtifactRarity.LEGENDARY, metadata);
-    ArtifactMetadata.set(metadataTableId, _artifactIndex(), ArtifactRarity.MYTHIC, metadata);
+    ArtifactMetadata.set(metadataTableId, ArtifactRarity.COMMON, metadata);
+    ArtifactMetadata.set(metadataTableId, ArtifactRarity.RARE, metadata);
+    ArtifactMetadata.set(metadataTableId, ArtifactRarity.EPIC, metadata);
+    ArtifactMetadata.set(metadataTableId, ArtifactRarity.LEGENDARY, metadata);
+    ArtifactMetadata.set(metadataTableId, ArtifactRarity.MYTHIC, metadata);
   }
 
   function _setUpEffects(bytes14 namespace) internal {

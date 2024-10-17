@@ -175,7 +175,6 @@ export default defineWorld({
     },
     ArtifactMetadata: {
       schema: {
-        id: "uint256",
         rarity: "ArtifactRarity",
         genre: "ArtifactGenre",
         charge: "uint32",
@@ -186,7 +185,7 @@ export default defineWorld({
         reqPopulation: "uint64",
         reqSilver: "uint64",
       },
-      key: ["id", "rarity"],
+      key: ["rarity"],
       codegen: {
         outputDirectory: "../modules/atfs/tables",
         tableIdArgument: true,

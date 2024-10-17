@@ -189,7 +189,7 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
   // }
 
   function _getMetadata(Artifact memory artifact) internal view returns (ArtifactMetadataData memory) {
-    return ArtifactMetadata.get(_artifactMetadataTableId(_namespace()), getArtifactIndex(), artifact.rarity);
+    return ArtifactMetadata.get(_artifactMetadataTableId(_namespace()), artifact.rarity);
   }
 
   function _namespace() internal pure returns (bytes14 namespace) {

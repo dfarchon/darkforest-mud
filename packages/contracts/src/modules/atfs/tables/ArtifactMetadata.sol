@@ -34,8 +34,8 @@ library ArtifactMetadata {
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x001c080001040401010108080000000000000000000000000000000000000000);
 
-  // Hex-encoded key schema of (uint256, uint8)
-  Schema constant _keySchema = Schema.wrap(0x002102001f000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded key schema of (uint8)
+  Schema constant _keySchema = Schema.wrap(0x0001010000000000000000000000000000000000000000000000000000000000);
   // Hex-encoded value schema of (uint8, uint32, uint32, bool, bool, uint8, uint64, uint64)
   Schema constant _valueSchema = Schema.wrap(0x001c080000030360600007070000000000000000000000000000000000000000);
 
@@ -44,9 +44,8 @@ library ArtifactMetadata {
    * @return keyNames An array of strings with the names of key fields.
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
-    keyNames = new string[](2);
-    keyNames[0] = "id";
-    keyNames[1] = "rarity";
+    keyNames = new string[](1);
+    keyNames[0] = "rarity";
   }
 
   /**
@@ -82,14 +81,9 @@ library ArtifactMetadata {
   /**
    * @notice Get genre.
    */
-  function getGenre(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (ArtifactGenre genre) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getGenre(ResourceId _tableId, ArtifactRarity rarity) internal view returns (ArtifactGenre genre) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return ArtifactGenre(uint8(bytes1(_blob)));
@@ -98,14 +92,9 @@ library ArtifactMetadata {
   /**
    * @notice Get genre.
    */
-  function _getGenre(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (ArtifactGenre genre) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getGenre(ResourceId _tableId, ArtifactRarity rarity) internal view returns (ArtifactGenre genre) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return ArtifactGenre(uint8(bytes1(_blob)));
@@ -114,10 +103,9 @@ library ArtifactMetadata {
   /**
    * @notice Set genre.
    */
-  function setGenre(ResourceId _tableId, uint256 id, ArtifactRarity rarity, ArtifactGenre genre) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setGenre(ResourceId _tableId, ArtifactRarity rarity, ArtifactGenre genre) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(uint8(genre)), _fieldLayout);
   }
@@ -125,10 +113,9 @@ library ArtifactMetadata {
   /**
    * @notice Set genre.
    */
-  function _setGenre(ResourceId _tableId, uint256 id, ArtifactRarity rarity, ArtifactGenre genre) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setGenre(ResourceId _tableId, ArtifactRarity rarity, ArtifactGenre genre) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(uint8(genre)), _fieldLayout);
   }
@@ -136,10 +123,9 @@ library ArtifactMetadata {
   /**
    * @notice Get charge.
    */
-  function getCharge(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (uint32 charge) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getCharge(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint32 charge) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
     return (uint32(bytes4(_blob)));
@@ -148,10 +134,9 @@ library ArtifactMetadata {
   /**
    * @notice Get charge.
    */
-  function _getCharge(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (uint32 charge) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getCharge(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint32 charge) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
     return (uint32(bytes4(_blob)));
@@ -160,10 +145,9 @@ library ArtifactMetadata {
   /**
    * @notice Set charge.
    */
-  function setCharge(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint32 charge) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setCharge(ResourceId _tableId, ArtifactRarity rarity, uint32 charge) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((charge)), _fieldLayout);
   }
@@ -171,10 +155,9 @@ library ArtifactMetadata {
   /**
    * @notice Set charge.
    */
-  function _setCharge(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint32 charge) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setCharge(ResourceId _tableId, ArtifactRarity rarity, uint32 charge) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((charge)), _fieldLayout);
   }
@@ -182,10 +165,9 @@ library ArtifactMetadata {
   /**
    * @notice Get cooldown.
    */
-  function getCooldown(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (uint32 cooldown) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getCooldown(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint32 cooldown) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
     return (uint32(bytes4(_blob)));
@@ -194,14 +176,9 @@ library ArtifactMetadata {
   /**
    * @notice Get cooldown.
    */
-  function _getCooldown(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (uint32 cooldown) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getCooldown(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint32 cooldown) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
     return (uint32(bytes4(_blob)));
@@ -210,10 +187,9 @@ library ArtifactMetadata {
   /**
    * @notice Set cooldown.
    */
-  function setCooldown(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint32 cooldown) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setCooldown(ResourceId _tableId, ArtifactRarity rarity, uint32 cooldown) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((cooldown)), _fieldLayout);
   }
@@ -221,10 +197,9 @@ library ArtifactMetadata {
   /**
    * @notice Set cooldown.
    */
-  function _setCooldown(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint32 cooldown) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setCooldown(ResourceId _tableId, ArtifactRarity rarity, uint32 cooldown) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((cooldown)), _fieldLayout);
   }
@@ -232,10 +207,9 @@ library ArtifactMetadata {
   /**
    * @notice Get durable.
    */
-  function getDurable(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (bool durable) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getDurable(ResourceId _tableId, ArtifactRarity rarity) internal view returns (bool durable) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -244,10 +218,9 @@ library ArtifactMetadata {
   /**
    * @notice Get durable.
    */
-  function _getDurable(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (bool durable) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getDurable(ResourceId _tableId, ArtifactRarity rarity) internal view returns (bool durable) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -256,10 +229,9 @@ library ArtifactMetadata {
   /**
    * @notice Set durable.
    */
-  function setDurable(ResourceId _tableId, uint256 id, ArtifactRarity rarity, bool durable) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setDurable(ResourceId _tableId, ArtifactRarity rarity, bool durable) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((durable)), _fieldLayout);
   }
@@ -267,10 +239,9 @@ library ArtifactMetadata {
   /**
    * @notice Set durable.
    */
-  function _setDurable(ResourceId _tableId, uint256 id, ArtifactRarity rarity, bool durable) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setDurable(ResourceId _tableId, ArtifactRarity rarity, bool durable) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((durable)), _fieldLayout);
   }
@@ -278,10 +249,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reusable.
    */
-  function getReusable(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (bool reusable) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getReusable(ResourceId _tableId, ArtifactRarity rarity) internal view returns (bool reusable) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 4, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -290,10 +260,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reusable.
    */
-  function _getReusable(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (bool reusable) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getReusable(ResourceId _tableId, ArtifactRarity rarity) internal view returns (bool reusable) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 4, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -302,10 +271,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reusable.
    */
-  function setReusable(ResourceId _tableId, uint256 id, ArtifactRarity rarity, bool reusable) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setReusable(ResourceId _tableId, ArtifactRarity rarity, bool reusable) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 4, abi.encodePacked((reusable)), _fieldLayout);
   }
@@ -313,10 +281,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reusable.
    */
-  function _setReusable(ResourceId _tableId, uint256 id, ArtifactRarity rarity, bool reusable) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setReusable(ResourceId _tableId, ArtifactRarity rarity, bool reusable) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 4, abi.encodePacked((reusable)), _fieldLayout);
   }
@@ -324,10 +291,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reqLevel.
    */
-  function getReqLevel(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (uint8 reqLevel) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getReqLevel(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint8 reqLevel) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 5, _fieldLayout);
     return (uint8(bytes1(_blob)));
@@ -336,10 +302,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reqLevel.
    */
-  function _getReqLevel(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal view returns (uint8 reqLevel) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getReqLevel(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint8 reqLevel) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 5, _fieldLayout);
     return (uint8(bytes1(_blob)));
@@ -348,10 +313,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reqLevel.
    */
-  function setReqLevel(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint8 reqLevel) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setReqLevel(ResourceId _tableId, ArtifactRarity rarity, uint8 reqLevel) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 5, abi.encodePacked((reqLevel)), _fieldLayout);
   }
@@ -359,10 +323,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reqLevel.
    */
-  function _setReqLevel(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint8 reqLevel) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setReqLevel(ResourceId _tableId, ArtifactRarity rarity, uint8 reqLevel) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 5, abi.encodePacked((reqLevel)), _fieldLayout);
   }
@@ -370,14 +333,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reqPopulation.
    */
-  function getReqPopulation(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (uint64 reqPopulation) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getReqPopulation(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint64 reqPopulation) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 6, _fieldLayout);
     return (uint64(bytes8(_blob)));
@@ -386,14 +344,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reqPopulation.
    */
-  function _getReqPopulation(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (uint64 reqPopulation) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getReqPopulation(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint64 reqPopulation) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 6, _fieldLayout);
     return (uint64(bytes8(_blob)));
@@ -402,10 +355,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reqPopulation.
    */
-  function setReqPopulation(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint64 reqPopulation) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setReqPopulation(ResourceId _tableId, ArtifactRarity rarity, uint64 reqPopulation) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 6, abi.encodePacked((reqPopulation)), _fieldLayout);
   }
@@ -413,10 +365,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reqPopulation.
    */
-  function _setReqPopulation(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint64 reqPopulation) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setReqPopulation(ResourceId _tableId, ArtifactRarity rarity, uint64 reqPopulation) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 6, abi.encodePacked((reqPopulation)), _fieldLayout);
   }
@@ -424,14 +375,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reqSilver.
    */
-  function getReqSilver(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (uint64 reqSilver) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function getReqSilver(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint64 reqSilver) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 7, _fieldLayout);
     return (uint64(bytes8(_blob)));
@@ -440,14 +386,9 @@ library ArtifactMetadata {
   /**
    * @notice Get reqSilver.
    */
-  function _getReqSilver(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (uint64 reqSilver) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _getReqSilver(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint64 reqSilver) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 7, _fieldLayout);
     return (uint64(bytes8(_blob)));
@@ -456,10 +397,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reqSilver.
    */
-  function setReqSilver(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint64 reqSilver) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function setReqSilver(ResourceId _tableId, ArtifactRarity rarity, uint64 reqSilver) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 7, abi.encodePacked((reqSilver)), _fieldLayout);
   }
@@ -467,10 +407,9 @@ library ArtifactMetadata {
   /**
    * @notice Set reqSilver.
    */
-  function _setReqSilver(ResourceId _tableId, uint256 id, ArtifactRarity rarity, uint64 reqSilver) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _setReqSilver(ResourceId _tableId, ArtifactRarity rarity, uint64 reqSilver) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 7, abi.encodePacked((reqSilver)), _fieldLayout);
   }
@@ -478,14 +417,9 @@ library ArtifactMetadata {
   /**
    * @notice Get the full data.
    */
-  function get(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (ArtifactMetadataData memory _table) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function get(ResourceId _tableId, ArtifactRarity rarity) internal view returns (ArtifactMetadataData memory _table) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     (bytes memory _staticData, EncodedLengths _encodedLengths, bytes memory _dynamicData) = StoreSwitch.getRecord(
       _tableId,
@@ -498,14 +432,9 @@ library ArtifactMetadata {
   /**
    * @notice Get the full data.
    */
-  function _get(
-    ResourceId _tableId,
-    uint256 id,
-    ArtifactRarity rarity
-  ) internal view returns (ArtifactMetadataData memory _table) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _get(ResourceId _tableId, ArtifactRarity rarity) internal view returns (ArtifactMetadataData memory _table) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     (bytes memory _staticData, EncodedLengths _encodedLengths, bytes memory _dynamicData) = StoreCore.getRecord(
       _tableId,
@@ -520,7 +449,6 @@ library ArtifactMetadata {
    */
   function set(
     ResourceId _tableId,
-    uint256 id,
     ArtifactRarity rarity,
     ArtifactGenre genre,
     uint32 charge,
@@ -545,9 +473,8 @@ library ArtifactMetadata {
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
   }
@@ -557,7 +484,6 @@ library ArtifactMetadata {
    */
   function _set(
     ResourceId _tableId,
-    uint256 id,
     ArtifactRarity rarity,
     ArtifactGenre genre,
     uint32 charge,
@@ -582,9 +508,8 @@ library ArtifactMetadata {
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
   }
@@ -592,7 +517,7 @@ library ArtifactMetadata {
   /**
    * @notice Set the full data using the data struct.
    */
-  function set(ResourceId _tableId, uint256 id, ArtifactRarity rarity, ArtifactMetadataData memory _table) internal {
+  function set(ResourceId _tableId, ArtifactRarity rarity, ArtifactMetadataData memory _table) internal {
     bytes memory _staticData = encodeStatic(
       _table.genre,
       _table.charge,
@@ -607,9 +532,8 @@ library ArtifactMetadata {
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
   }
@@ -617,7 +541,7 @@ library ArtifactMetadata {
   /**
    * @notice Set the full data using the data struct.
    */
-  function _set(ResourceId _tableId, uint256 id, ArtifactRarity rarity, ArtifactMetadataData memory _table) internal {
+  function _set(ResourceId _tableId, ArtifactRarity rarity, ArtifactMetadataData memory _table) internal {
     bytes memory _staticData = encodeStatic(
       _table.genre,
       _table.charge,
@@ -632,9 +556,8 @@ library ArtifactMetadata {
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
   }
@@ -701,10 +624,9 @@ library ArtifactMetadata {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function deleteRecord(ResourceId _tableId, ArtifactRarity rarity) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -712,10 +634,9 @@ library ArtifactMetadata {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(ResourceId _tableId, uint256 id, ArtifactRarity rarity) internal {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function _deleteRecord(ResourceId _tableId, ArtifactRarity rarity) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -773,10 +694,9 @@ library ArtifactMetadata {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(uint256 id, ArtifactRarity rarity) internal pure returns (bytes32[] memory) {
-    bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = bytes32(uint256(id));
-    _keyTuple[1] = bytes32(uint256(uint8(rarity)));
+  function encodeKeyTuple(ArtifactRarity rarity) internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     return _keyTuple;
   }
