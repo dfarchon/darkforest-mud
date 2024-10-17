@@ -11,12 +11,14 @@ import {
   TOGGLE_SETTINGS_PANE,
   TOGGLE_TRADE_PANE,
   TOGGLE_TRANSACTIONS_PANE,
+  TOGGLE_WALLET_PANE,
   TOGGLE_YOUR_ARTIFACTS_PANE,
   TOGGLE_YOUR_PLANETS_DEX_PANE,
 } from "../Utils/ShortcutConstants";
 import { ModalToggleButton } from "./ModalIcon";
 
 export function SidebarPane({
+  walletHook,
   tradeHook,
   settingsHook,
   helpHook,
@@ -25,6 +27,7 @@ export function SidebarPane({
   planetdexHook,
   transactionLogHook,
 }: {
+  walletHook: Hook<boolean>;
   tradeHook: Hook<boolean>;
   settingsHook: Hook<boolean>;
   helpHook: Hook<boolean>;
@@ -43,6 +46,16 @@ export function SidebarPane({
       <BorderlessPane
         style={{ zIndex: sidebarHovered ? DFZIndex.Tooltip : undefined }}
       >
+        <ModalToggleButton
+          modal={ModalName.Wallet}
+          hook={walletHook}
+          text={sidebarHovered ? "Wallet" : undefined}
+          size="stretch"
+          shortcutKey={TOGGLE_WALLET_PANE}
+          shortcutText={sidebarHovered ? TOGGLE_WALLET_PANE : undefined}
+        />
+        <EmSpacer height={0.5} />
+
         {/* PUNK  */}
         {/* <ModalToggleButton
           modal={ModalName.Trade}

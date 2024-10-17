@@ -2051,6 +2051,7 @@ export class GameManager extends EventEmitter {
    * Whether or not this client has successfully found and landed on a home planet.
    */
   hasJoinedGame(): boolean {
+    //PUNK todo fix here later
     const player = Array.from(this.players.values()).find(
       (p) => p.address === this.account,
     );

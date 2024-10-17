@@ -38,3 +38,5 @@ export const TOGGLE_TARGETTING = "`";
 export const TOGGLE_TERMINAL = "n";
 export const TOGGLE_PANE_VISIBLE = "m";
 export const TOGGLE_HOTKEY_VISIBLE = ",";
+
+export const TOGGLE_WALLET_PANE = "p";
