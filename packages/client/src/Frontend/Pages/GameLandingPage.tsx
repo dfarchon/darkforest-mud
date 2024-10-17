@@ -1036,7 +1036,12 @@ export function GameLandingPage() {
           throw new Error("no eth connection");
         }
 
+        if (!mainAccount || mainAccount === zeroAddress) {
+          throw new Error("no main account");
+        }
+
         newGameManager = await GameManager.create({
+          mainAccount: address(mainAccount),
           connection: ethConnection,
           terminal,
           contractAddress,
@@ -1113,12 +1118,11 @@ export function GameLandingPage() {
           setStep(TerminalPromptStep.ASK_ADD_ACCOUNT);
           return;
         }
-
         terminal.current?.println("Validated Local Data...");
         setStep(TerminalPromptStep.ALL_CHECKS_PASS);
       }
     },
-    [ethConnection, contractAddress, spectate],
+    [ethConnection, contractAddress, mainAccount, spectate],
   );
 
   const advanceStateFromAskAddAccount = useCallback(

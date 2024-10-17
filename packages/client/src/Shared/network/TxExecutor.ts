@@ -1,4 +1,5 @@
 import { FIXED_DIGIT_NUMBER } from "@df/constants";
+import { addressToHex } from "@df/serde";
 import type { AutoGasSetting } from "@df/types";
 import type {
   DiagnosticUpdater,
@@ -8,6 +9,7 @@ import type {
   TransactionId,
   TxIntent,
 } from "@df/types";
+import { encodeSystemCallFrom } from "@latticexyz/world/internal";
 import { Mutex } from "async-mutex";
 import type { providers } from "ethers";
 import { utils } from "ethers";
@@ -20,7 +22,6 @@ import {
   type ConcurrentQueueConfiguration,
   ThrottledConcurrentQueue,
 } from "./ThrottledConcurrentQueue";
-
 /**
  * Returns either a string that represents the gas price we should use by default for transactions,
  * or a string that represents the fact that we should be using one of the automatic gas prices.
@@ -380,13 +381,23 @@ export class TxExecutor {
       time_called = Date.now();
 
       const args = await tx.intent.args;
+      const methodName = tx.intent.methodName;
 
-      // PUNK todo
+      const functionName =
+        methodName.slice(0, 4) === "df__"
+          ? methodName.substring(4)
+          : methodName;
 
-      // update to use callFrom here
+      const callFromArgs = encodeSystemCallFrom({
+        abi: tx.intent.abi,
+        from: addressToHex(tx.intent.delegator),
+        systemId: tx.intent.systemId,
+        functionName: functionName,
+        args: args,
+      });
 
       const submitted = await timeout<providers.TransactionResponse>(
-        tx.intent.contract[tx.intent.methodName](...args, {
+        tx.intent.contract["callFrom"](...callFromArgs, {
           ...requestWithDefaults,
           nonce,
         }),
