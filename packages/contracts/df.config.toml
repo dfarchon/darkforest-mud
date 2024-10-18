@@ -4,7 +4,7 @@ b_radius = 150000
 
 [temp]
 a_biome_check = false
-b_skip_proof_check = true
+b_skip_proof_check = false
 c_player_limit = 100
 d_spawn_perlin_min = 1
 e_spawn_perlin_max = 31
