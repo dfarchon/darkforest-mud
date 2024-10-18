@@ -1,3 +1,13 @@
+import {
+  biomebaseSnarkWasmPath,
+  biomebaseSnarkZkeyPath,
+  initSnarkWasmPath,
+  initSnarkZkeyPath,
+  moveSnarkWasmPath,
+  moveSnarkZkeyPath,
+  revealSnarkWasmPath,
+  revealSnarkZkeyPath,
+} from "@df/snarks";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
 import FastQueue from "fastq";
@@ -25,14 +35,6 @@ import type {
   SnarkJSProofAndSignals,
 } from "../../Shared/snarks";
 import { buildContractCallArgs, fakeProof } from "../../Shared/snarks";
-import biomebaseCircuitPath from "../../Shared/snarks/biomebase.wasm";
-import biomebaseZkeyPath from "../../Shared/snarks/biomebase.zkey";
-import initCircuitPath from "../../Shared/snarks/init.wasm";
-import initZkeyPath from "../../Shared/snarks/init.zkey";
-import moveCircuitPath from "../../Shared/snarks/move.wasm";
-import moveZkeyPath from "../../Shared/snarks/move.zkey";
-import revealCircuitPath from "../../Shared/snarks/reveal.wasm";
-import revealZkeyPath from "../../Shared/snarks/reveal.zkey";
 import type { PerlinConfig } from "../../Shared/types";
 
 type ZKPTask = {
@@ -208,8 +210,8 @@ class SnarkArgsHelper {
       ? this.fakeRevealProof(x, y)
       : await this.snarkProverQueue.doProof(
           input,
-          revealCircuitPath,
-          revealZkeyPath,
+          revealSnarkWasmPath,
+          revealSnarkZkeyPath,
         );
     const ret = buildContractCallArgs(
       proof,
@@ -234,6 +236,7 @@ class SnarkArgsHelper {
       "INIT: calculating witness and proof",
       TerminalTextStyle.Sub,
     );
+
     const input: InitSnarkInput = {
       x: modPBigInt(x).toString(),
       y: modPBigInt(y).toString(),
@@ -250,9 +253,10 @@ class SnarkArgsHelper {
       ? this.fakeInitProof(x, y, r)
       : await this.snarkProverQueue.doProof(
           input,
-          initCircuitPath,
-          initZkeyPath,
+          initSnarkWasmPath,
+          initSnarkZkeyPath,
         );
+
     const ret = buildContractCallArgs(
       proof,
       publicSignals,
@@ -305,8 +309,8 @@ class SnarkArgsHelper {
       ? this.fakeMoveProof(x1, y1, x2, y2, r, distMax)
       : await this.snarkProverQueue.doProof(
           input,
-          moveCircuitPath,
-          moveZkeyPath,
+          moveSnarkWasmPath,
+          moveSnarkZkeyPath,
         );
 
     const proofArgs = buildContractCallArgs(
@@ -346,8 +350,8 @@ class SnarkArgsHelper {
       ? this.fakeBiomebaseProof(x, y)
       : await this.snarkProverQueue.doProof(
           input,
-          biomebaseCircuitPath,
-          biomebaseZkeyPath,
+          biomebaseSnarkWasmPath,
+          biomebaseSnarkZkeyPath,
         );
 
     const proofArgs = buildContractCallArgs(proof, publicSignals);
