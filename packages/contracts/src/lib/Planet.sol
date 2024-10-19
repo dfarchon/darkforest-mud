@@ -441,19 +441,15 @@ library PlanetLib {
       (planet.populationGrowth * uint256(config.populationGrowthMultiplier) ** totalLevel) /
       uint256(100) ** totalLevel;
     if (rangeUpgrades > 0) {
-      planet.range =
-        (planet.range * uint256(config.rangeMultiplier) ** rangeUpgrades) /
-        uint256(100) ** planet.rangeUpgrades;
+      planet.range = (planet.range * uint256(config.rangeMultiplier) ** rangeUpgrades) / uint256(100) ** rangeUpgrades;
     }
     if (speedUpgrades > 0) {
-      planet.speed =
-        (planet.speed * uint256(config.speedMultiplier) ** speedUpgrades) /
-        uint256(100) ** planet.speedUpgrades;
+      planet.speed = (planet.speed * uint256(config.speedMultiplier) ** speedUpgrades) / uint256(100) ** speedUpgrades;
     }
     if (defenseUpgrades > 0) {
       planet.defense =
         (planet.defense * uint256(config.defenseMultiplier) ** defenseUpgrades) /
-        uint256(100) ** planet.defenseUpgrades;
+        uint256(100) ** defenseUpgrades;
     }
     planet.useProps = true;
     planet.updateProps = true;
