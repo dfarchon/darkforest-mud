@@ -7,7 +7,7 @@ import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../src/codegen/index.sol";
-import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants } from "../src/codegen/index.sol";
+import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
@@ -39,12 +39,29 @@ contract CannonTest is MudTest {
   function testChargeCannon() public {
     Planet memory planet = IWorld(worldAddress).df__readPlanet(1);
     Artifact memory artifact = planet.mustGetArtifact(1);
+    assertTrue(artifact.status == ArtifactStatus.DEFAULT);
     vm.prank(address(1));
     IWorld(worldAddress).df__chargeArtifact(1, 1);
     Planet memory planetAfter = IWorld(worldAddress).df__readPlanet(1);
-    console.log("planet defense", planet.defense);
-    console.log("planetAfter defense", planetAfter.defense);
-    console.log("planet effect number", planet.effectNumber);
-    console.log("planetAfter effect number", planetAfter.effectNumber);
+    Artifact memory artifactAfter = planetAfter.mustGetArtifact(1);
+    assertEq(planetAfter.effectNumber, 1);
+    assertTrue(planetAfter.defense < planet.defense);
+    assertTrue(artifactAfter.status == ArtifactStatus.CHARGING);
+    assertTrue(artifactAfter.chargeTick == Ticker.getTickNumber());
+  }
+
+  function testShutdownCannon() public {
+    Planet memory originalPlanet = IWorld(worldAddress).df__readPlanet(1);
+    vm.prank(address(1));
+    IWorld(worldAddress).df__chargeArtifact(1, 1);
+    vm.warp(block.timestamp + 100);
+    vm.roll(block.number + 100);
+    vm.prank(address(1));
+    IWorld(worldAddress).df__shutdownArtifact(1, 1);
+    Planet memory planet = IWorld(worldAddress).df__readPlanet(1);
+    Artifact memory artifact = planet.mustGetArtifact(1);
+    assertEq(planet.effectNumber, 0);
+    assertTrue(artifact.status == ArtifactStatus.DEFAULT);
+    assertEq(originalPlanet.defense, planet.defense);
   }
 }
