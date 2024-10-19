@@ -23,6 +23,8 @@ contract RevealTest is MudTest {
     vm.startPrank(admin);
     IWorld(worldAddress).df__unpause();
     TempConfigSet.setRevealCd(uint32(revealCd));
+    // skip snark check
+    TempConfigSet.setSkipProofCheck(true);
     vm.stopPrank();
   }
 
