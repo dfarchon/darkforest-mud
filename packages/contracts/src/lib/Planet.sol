@@ -191,7 +191,7 @@ library PlanetLib {
     Artifact memory artifact,
     address world
   ) internal returns (Planet memory, Artifact memory) {
-    _validateDeactivateArtifact(planet, artifact);
+    _validateShutdownArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
       _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
       abi.encodeCall(IArtifactProxySystem.shutdown, (planet, artifact))
