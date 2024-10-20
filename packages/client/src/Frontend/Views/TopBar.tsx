@@ -281,7 +281,7 @@ export function TopBar({
             </TooltipTrigger>
           </>
         )}
-        <BoardPlacement account={account} />
+        {/* <BoardPlacement account={account} /> */}
         <PlayerSilver account={account} />
       </AlignCenterHorizontally>
       <AlignCenterHorizontally

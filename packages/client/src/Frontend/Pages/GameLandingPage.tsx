@@ -1728,64 +1728,69 @@ export function GameLandingPage() {
   }, [terminalHandle, topLevelContainer, advanceState]);
 
   return (
-    <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
-      <GameWindowWrapper
-        initRender={initRenderState}
-        terminalEnabled={terminalVisible}
-      >
-        {gameUIManagerRef.current &&
-          topLevelContainer.current &&
-          gameManager && (
-            <TopLevelDivProvider value={topLevelContainer.current}>
-              <UIManagerProvider value={gameUIManagerRef.current}>
-                <GameWindowLayout
-                  terminalVisible={terminalVisible}
-                  setTerminalVisible={setTerminalVisible}
-                />
-              </UIManagerProvider>
-            </TopLevelDivProvider>
-          )}
-        <TerminalToggler
-          terminalEnabled={terminalVisible}
-          setTerminalEnabled={setTerminalVisible}
-        />
-      </GameWindowWrapper>
-
+    <>
       <WalletModal />
 
-      <TerminalWrapper
-        initRender={initRenderState}
-        terminalEnabled={terminalVisible}
-      >
-        <MythicLabelText
-          text={`Welcome To Dark Forest MUD v0.1.1`}
-          style={{
-            fontFamily: "'Start Press 2P', sans-serif",
-            display:
-              initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
-          }}
-        />
-        <div>
-          step: {syncProgress.step} percent: {syncProgress.percentage} %
-        </div>
+      <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
+        <GameWindowWrapper
+          initRender={initRenderState}
+          terminalEnabled={terminalVisible}
+        >
+          {gameUIManagerRef.current &&
+            topLevelContainer.current &&
+            gameManager && (
+              <TopLevelDivProvider value={topLevelContainer.current}>
+                <UIManagerProvider value={gameUIManagerRef.current}>
+                  <GameWindowLayout
+                    terminalVisible={terminalVisible}
+                    setTerminalVisible={setTerminalVisible}
+                  />
+                </UIManagerProvider>
+              </TopLevelDivProvider>
+            )}
+          <TerminalToggler
+            terminalEnabled={terminalVisible}
+            setTerminalEnabled={setTerminalVisible}
+          />
+        </GameWindowWrapper>
 
-        <BrowserIssues issues={browserIssues} state={browserCompatibleState} />
-        <Terminal
-          ref={terminalHandle}
-          promptCharacter={">"}
-          visible={browserCompatibleState === "supported"}
-          useCaretElement={initRenderState !== InitRenderState.COMPLETE}
-        />
-      </TerminalWrapper>
-
-      <div ref={topLevelContainer}></div>
-      <div>
-        {isMiniMapOn && (
-          <div style={{ position: "fixed", right: "100px", top: "100px" }}>
-            <MiniMap ref={miniMapRef} />
+        <TerminalWrapper
+          initRender={initRenderState}
+          terminalEnabled={terminalVisible}
+        >
+          <MythicLabelText
+            text={`Welcome To Dark Forest MUD v0.1.1`}
+            style={{
+              fontFamily: "'Start Press 2P', sans-serif",
+              display:
+                initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
+            }}
+          />
+          <div>
+            step: {syncProgress.step} percent: {syncProgress.percentage} %
           </div>
-        )}
-      </div>
-    </Wrapper>
+
+          <BrowserIssues
+            issues={browserIssues}
+            state={browserCompatibleState}
+          />
+          <Terminal
+            ref={terminalHandle}
+            promptCharacter={">"}
+            visible={browserCompatibleState === "supported"}
+            useCaretElement={initRenderState !== InitRenderState.COMPLETE}
+          />
+        </TerminalWrapper>
+
+        <div ref={topLevelContainer}></div>
+        <div>
+          {isMiniMapOn && (
+            <div style={{ position: "fixed", right: "100px", top: "100px" }}>
+              <MiniMap ref={miniMapRef} />
+            </div>
+          )}
+        </div>
+      </Wrapper>
+    </>
   );
 }

@@ -356,6 +356,8 @@ export class PlanetUtils {
         : undefined,
       hasTriedFindingArtifact: exploredPlanet ? exploredPlanet.value : false,
       heldArtifactIds: artifactIds,
+      destroyed: false,
+      frozen: false,
     };
   }
 

@@ -234,9 +234,9 @@ function PlanetContextPaneContent({
     rows.push(infoRow);
   }
   // if (buyArtifactRow) rows.push(buyArtifactRow);
-  if (artifactsRow) {
-    rows.push(artifactsRow);
-  }
+  // if (artifactsRow) {
+  //   rows.push(artifactsRow);
+  // }
 
   // if (dropBombRow) {
   //   rows.push(dropBombRow);
