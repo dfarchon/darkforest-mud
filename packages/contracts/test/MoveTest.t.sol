@@ -7,7 +7,7 @@ import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswith
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Ticker, TickerData, PendingMove, PendingMoveData, Move, MoveData } from "../src/codegen/index.sol";
-import { Planet as PlanetTable, Counter } from "../src/codegen/index.sol";
+import { Planet as PlanetTable, Counter, TempConfigSet } from "../src/codegen/index.sol";
 import { PlanetType, SpaceType } from "../src/codegen/common.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
@@ -23,6 +23,9 @@ contract MoveTest is MudTest {
     super.setUp();
 
     vm.startPrank(admin);
+    // skip snark check
+    TempConfigSet.setSkipProofCheck(true);
+
     // unpause the universe if needed
     if (Ticker.getPaused()) {
       IWorld(worldAddress).df__unpause();

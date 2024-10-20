@@ -6,7 +6,7 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { Player, PlayerData, Counter } from "../src/codegen/index.sol";
+import { Player, PlayerData, Counter, TempConfigSet } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { SpawnInput } from "../src/lib/VerificationInput.sol";
@@ -16,6 +16,16 @@ import { PlanetType, SpaceType } from "../src/codegen/common.sol";
 
 contract PlayerTest is MudTest {
   address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+
+  function setUp() public override {
+    super.setUp();
+
+    vm.startPrank(admin);
+    // skip snark check
+    TempConfigSet.setSkipProofCheck(true);
+
+    vm.stopPrank();
+  }
 
   function testRegisterPlayer() public {
     uint256 timestamp = block.timestamp;
