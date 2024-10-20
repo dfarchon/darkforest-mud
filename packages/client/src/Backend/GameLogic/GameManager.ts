@@ -235,9 +235,6 @@ export class GameManager extends EventEmitter {
    */
   private readonly terminal: React.MutableRefObject<TerminalHandle | undefined>;
 
-  // PUNK may have issues here, because users may change the wallet account
-  private readonly mainAccount: EthAddress | undefined;
-
   /**
    * The ethereum address of the player who is currently logged in. We support 'no account',
    * represented by `undefined` in the case when you want to simply load the game state from the
@@ -442,7 +439,6 @@ export class GameManager extends EventEmitter {
   private constructor(
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
     mainAccount: EthAddress | undefined,
-    account: EthAddress | undefined,
     players: Map<string, Player>,
     touchedPlanets: Map<LocationId, Planet>,
     allTouchedPlanetIds: Set<LocationId>,
@@ -483,8 +479,7 @@ export class GameManager extends EventEmitter {
       height: 0,
     };
     this.terminal = terminal;
-    this.mainAccount = mainAccount;
-    this.account = account;
+    this.account = mainAccount;
     this.players = players;
     this.worldRadius = worldRadius;
     // this.networkHealth$ = monomitter(true);
@@ -607,7 +602,7 @@ export class GameManager extends EventEmitter {
     // }
 
     this.entityStore = new GameObjects(
-      account,
+      mainAccount,
       touchedPlanets,
       allTouchedPlanetIds,
       revealedLocations,
@@ -666,6 +661,9 @@ export class GameManager extends EventEmitter {
               account: this.account,
             };
             const cores = getNumberSetting(config, Setting.MiningCores);
+            // PUNK
+            console.log("minerManager");
+            console.log("setcores", cores);
             this.minerManager.setCores(cores);
           }
         }
@@ -869,7 +867,7 @@ export class GameManager extends EventEmitter {
 
     const account = spectate
       ? <EthAddress>"0x0000000000000000000000000000000000000001"
-      : connection.getAddress();
+      : mainAccount; // connection.getAddress();
 
     if (!account) {
       throw new Error("no account on eth connection");
@@ -971,7 +969,6 @@ export class GameManager extends EventEmitter {
     const gameManager = new GameManager(
       terminal,
       mainAccount,
-      account,
       initialState.players,
       initialState.touchedAndLocatedPlanets,
       new Set(Array.from(initialState.allTouchedPlanetIds)),
@@ -1705,7 +1702,7 @@ export class GameManager extends EventEmitter {
    * Gets the address of the player logged into this game manager.
    */
   public getAccount(): EthAddress | undefined {
-    return this.mainAccount;
+    return this.account;
   }
 
   public isOwnedByMe(planet: Planet): boolean {
@@ -2039,7 +2036,7 @@ export class GameManager extends EventEmitter {
   setMinerCores(nCores: number): void {
     const config = {
       contractAddress: this.getContractAddress(),
-      account: this.account,
+      account: this.getAccount(),
     };
     setSetting(config, Setting.MiningCores, nCores + "");
   }
@@ -2073,7 +2070,12 @@ export class GameManager extends EventEmitter {
    * Whether or not this client has successfully found and landed on a home planet.
    */
   hasJoinedGame(): boolean {
-    const player = this.players.get(this.account);
+    const account = this.getAccount();
+    if (!account) {
+      return false;
+    }
+
+    const player = this.players.get(account);
     if (!player) {
       return false;
     }
@@ -4877,7 +4879,7 @@ export class GameManager extends EventEmitter {
   ): Promise<Transaction<UnconfirmedWithdrawSilver>> {
     try {
       if (!bypassChecks) {
-        if (!this.mainAccount || !this.account) {
+        if (!this.account) {
           throw new Error("no account");
         }
         // if (this.checkGameHasEnded()) {

@@ -1243,7 +1243,7 @@ export class ContractsAPI extends EventEmitter {
         continue;
       }
       // playerMap.set(player.address, player);
-      playerMap.set(player.burner, player);
+      playerMap.set(player.address, player);
       onProgress && onProgress((i + 1) / nPlayers);
     }
     return playerMap;
