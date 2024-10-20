@@ -661,6 +661,9 @@ export class GameManager extends EventEmitter {
               account: this.account,
             };
             const cores = getNumberSetting(config, Setting.MiningCores);
+            // PUNK
+            console.log("minerManager");
+            console.log("setcores", cores);
             this.minerManager.setCores(cores);
           }
         }
