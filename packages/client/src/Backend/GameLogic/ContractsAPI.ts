@@ -1005,6 +1005,7 @@ export class ContractsAPI extends EventEmitter {
       UniverseZoneConfig,
       singletonEntity,
     );
+
     const planetLevelConfig = getComponentValue(
       PlanetLevelConfig,
       singletonEntity,
@@ -1132,9 +1133,11 @@ export class ContractsAPI extends EventEmitter {
       SPACE_TYPE_PLANET_LEVEL_LIMITS: spaceTypeConfig.planetLevelLimits,
       SPACE_TYPE_PLANET_LEVEL_BONUS: spaceTypeConfig.planetLevelBonus,
 
-      MAX_LEVEL_DIST: universeZoneConfig.borders.map((val) => Number(val)),
-      MAX_LEVEL_LIMIT: universeZoneConfig.planetLevelLimits,
-      MIN_LEVEL_BIAS: universeZoneConfig.planetLevelBonus,
+      MAX_LEVEL_DIST: [
+        ...universeZoneConfig.borders.map((val) => Number(val)),
+      ].reverse(),
+      MAX_LEVEL_LIMIT: [...universeZoneConfig.planetLevelLimits].reverse(),
+      MIN_LEVEL_BIAS: [...universeZoneConfig.planetLevelBonus].reverse(),
 
       /**
          The chance for a planet to be a specific level.

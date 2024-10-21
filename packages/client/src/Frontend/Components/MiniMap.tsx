@@ -179,6 +179,7 @@ function getSpawnAreas({
     const distFromOrigin = Math.floor(
       Math.sqrt(worldPoint.x ** 2 + worldPoint.y ** 2),
     );
+
     const spaceType = df.spaceTypeFromPerlin(
       df.spaceTypePerlin(worldPoint, false),
       distFromOrigin,
