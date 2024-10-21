@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Spacer } from "../Components/CoreUI";
 import { useAccount, usePlayer, useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
+
 // Styled component for the main content area
 const AIChatContent = styled.div`
   width: 500px;
