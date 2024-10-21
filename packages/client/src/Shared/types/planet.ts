@@ -120,8 +120,8 @@ export type Planet = {
   prospectedBlockNumber?: number;
   heldArtifactIds: ArtifactId[];
   // adminProtect: boolean;
-  // destroyed: boolean;
-  // frozen: boolean;
+  destroyed: boolean;
+  frozen: boolean;
   // canShow: boolean;
 
   // localPhotoidUpgrade?: Upgrade;

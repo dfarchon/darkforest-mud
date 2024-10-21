@@ -279,15 +279,15 @@ export function GameWindowLayout({
     }, [paneVisible, pluginsVisible, setPluginsVisible]),
   );
 
-  useOnUp(
-    TOGGLE_YOUR_ARTIFACTS_PANE,
-    useCallback(() => {
-      if (paneVisible) {
-        return;
-      }
-      setPlayerArtifactsVisible(!playerArtifactsVisible);
-    }, [paneVisible, playerArtifactsVisible, setPlayerArtifactsVisible]),
-  );
+  // useOnUp(
+  //   TOGGLE_YOUR_ARTIFACTS_PANE,
+  //   useCallback(() => {
+  //     if (paneVisible) {
+  //       return;
+  //     }
+  //     setPlayerArtifactsVisible(!playerArtifactsVisible);
+  //   }, [paneVisible, playerArtifactsVisible, setPlayerArtifactsVisible]),
+  // );
 
   useOnUp(
     TOGGLE_YOUR_PLANETS_DEX_PANE,

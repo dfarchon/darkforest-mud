@@ -67,10 +67,10 @@ export function PlanetInfoPane({
             includeAddressIfHasTwitter
           />
         </TooltipTrigger>
-        <br />
+        {/* <br />
         <br />
         <Text>Claim </Text>
-        <br />
+        <br /> */}
 
         {/* <ClaimPlanetPane modal={modal} initialPlanetId={planetId} /> */}
       </>

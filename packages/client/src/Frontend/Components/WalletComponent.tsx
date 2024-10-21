@@ -1,4 +1,4 @@
-import { addressToHex } from "@df/serde";
+import { addressToHex, address as toEthAddress } from "@df/serde";
 import { Btn } from "@frontend/Components/Btn";
 import { Spacer, Title } from "@frontend/Components/CoreUI";
 import { Modal } from "@frontend/Components/Modal";
@@ -75,7 +75,7 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
   useEffect(() => {
     const checkPlayerRegistration = async () => {
       if (playerEntity && walletClient?.account) {
-        const mainAccount = walletClient.account.address;
+        const mainAccount = toEthAddress(walletClient.account.address);
         const playerKey = encodeEntity(Player.metadata.keySchema, {
           owner: addressToHex(mainAccount),
         });
