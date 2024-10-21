@@ -1,6 +1,5 @@
 import { address as toEthAddress, addressToHex } from "@df/serde";
 import { Btn } from "@frontend/Components/Btn";
-import { Spacer, Title } from "@frontend/Components/CoreUI";
 import { Green, Red } from "@frontend/Components/Text";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
@@ -36,7 +35,7 @@ export const RegisterPlayerComponent = () => {
         setState((prev) => ({
           ...prev,
           isPlayerRegistered: !!rawPlayer,
-          playerName: rawPlayer?.name || "",
+          // playerName: rawPlayer?.name || "",
         }));
       }
     };
@@ -55,7 +54,7 @@ export const RegisterPlayerComponent = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setState((prev) => ({
         ...prev,
-        playerName: e.target.value.slice(0, 8),
+        playerName: e.target.value.replace(/\s+/g, "").slice(0, 16),
       }));
     },
     [],
@@ -136,8 +135,7 @@ export const RegisterPlayerComponent = () => {
           </div>
           {state.playerName && (
             <div className="text-sm">
-              Player Name:{" "}
-              <span className="font-semibold">{state.playerName}</span>
+              Player Name: <Green>{state.playerName}</Green>
             </div>
           )}
         </div>
@@ -158,24 +156,34 @@ export const RegisterPlayerComponent = () => {
           <div className="flex items-center gap-2">
             <input
               type="text"
-              placeholder="Player name (max 8)"
+              placeholder="Input Player Name (MAX 16)"
               value={state.playerName}
               onChange={handlePlayerNameChange}
-              className="h-8 w-48 rounded border border-gray-300 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                width: "200px",
+                padding: "8px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                outline: "none",
+              }}
             />
             <div className="text-sm">
               Player Name:{" "}
               <span className="font-semibold">
-                {state.playerName || "Not set"}
+                {state.playerName ? (
+                  <Green> {state.playerName} </Green>
+                ) : (
+                  "Not Set Yet"
+                )}
               </span>
             </div>
           </div>
         </div>
         {burnerWalletClient.account && (
           <Btn
+            size="medium"
             onClick={registerPlayerAction}
             disabled={!state.playerName}
-            className="h-8 w-48 px-3 py-1 text-sm"
           >
             Register Player
           </Btn>
@@ -200,11 +208,6 @@ export const RegisterPlayerComponent = () => {
 
   return (
     <div>
-      <Title slot="title">Register Player</Title>
-      <div slot="title" style={{ marginLeft: "8px", flexShrink: 0 }}>
-        <Spacer width={4} />
-      </div>
-
       <div className="flex flex-col gap-6">
         <div className="rounded-lg">
           <h3 className="mb-4 text-lg font-semibold">Player Registration</h3>

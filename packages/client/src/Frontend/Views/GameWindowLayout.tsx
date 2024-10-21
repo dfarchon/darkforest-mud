@@ -422,9 +422,9 @@ export function GameWindowLayout({
             !userHotKeysVisibleSetting &&
             userExperimentalVisibleSetting && (
               <>
-                <HotkeysArtShipPane
+                {/* <HotkeysArtShipPane
                   selectedPlanetVisible={selectedPlanetVisible}
-                />
+                /> */}
                 <HotkeysMainLinePane
                   selectedPlanetVisible={selectedPlanetVisible}
                 />
