@@ -56,12 +56,13 @@ function generate(config: MinimapConfig): DrawMessage {
           spaceTypePerlin({ x: i, y: j }, config),
           config,
         );
-        const MAX_LEVEL_DIST = [50000, 45000, 40000, 20000, 10000];
+
+        const MAX_LEVEL_DIST = [10000, 20000, 40000, 45000, 50000];
         const distFromOrigin = Math.floor(Math.sqrt(i ** 2 + j ** 2));
 
         if (
-          distFromOrigin > MAX_LEVEL_DIST[1] &&
-          distFromOrigin < MAX_LEVEL_DIST[0]
+          distFromOrigin > MAX_LEVEL_DIST[3] &&
+          distFromOrigin < MAX_LEVEL_DIST[4]
         ) {
           tmpSpaceType = SpaceType.NEBULA;
         }

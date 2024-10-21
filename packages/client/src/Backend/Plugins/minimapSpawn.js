@@ -195,7 +195,7 @@ class MinimapSpawnPlugin {
       // let rimNormalized = (normalize(rim) / 2) * 0.91; // idk why here need
       // to be corection??
       const MAX_LEVEL_DIST = df.getContractConstants().MAX_LEVEL_DIST;
-      const normalizeRadius = (MAX_LEVEL_DIST[1] * radiusNormalized) / radius;
+      const normalizeRadius = (MAX_LEVEL_DIST[3] * radiusNormalized) / radius;
 
       ctx.beginPath();
       ctx.arc(
@@ -254,7 +254,7 @@ class MinimapSpawnPlugin {
       const radius = ui.getWorldRadius();
       // const rim = Math.sqrt(df.getContractConstants().SPAWN_RIM_AREA);
       const MAX_LEVEL_DIST = df.getContractConstants().MAX_LEVEL_DIST;
-      const rim = MAX_LEVEL_DIST[1];
+      const rim = MAX_LEVEL_DIST[3];
 
       const checkIfCoordsInPinkZones = (x, y) => {
         const pinkZones = Array.from(df.getPinkZones());
