@@ -66,7 +66,8 @@ contract PostDeploy is Script {
     if (toml.readBool(".temp.b_skip_proof_check")) {
       _setTestPlanets(abi.decode(toml.parseRaw(".test_planets_fake"), (TestPlanet[])));
     } else {
-      _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
+      // PUNK
+      // _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
     }
 
     // register fallback delegation of df namespace

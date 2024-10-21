@@ -11,6 +11,7 @@ import type { UnconfirmedUseKey } from "@df/types";
 import { bigIntFromKey } from "@df/whitelist";
 import { RegisterPlayerComponent } from "@frontend/Components/RegisterPlayerComponent";
 import { WalletModal } from "@frontend/Components/WalletModal";
+import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
 import { useStore as useStoreHook } from "@hooks/useStore";
 import { getComponentValue } from "@latticexyz/recs";
 import {
@@ -19,6 +20,7 @@ import {
   singletonEntity,
 } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 import { utils, Wallet } from "ethers";
 import { reverse } from "lodash-es";
 import React, {
@@ -75,8 +77,6 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
-import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
-import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 
 const enum TerminalPromptStep {
   NONE,
@@ -1748,7 +1748,8 @@ export function GameLandingPage() {
   return (
     <>
       {isDataLoaded &&
-        (mainAccount === zeroAddress ||
+        (isPlayerRegistered === false ||
+          mainAccount === zeroAddress ||
           burnerBalanceValue <= LOW_BALANCE_THRESHOLD) && <WalletModal />}
 
       <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
