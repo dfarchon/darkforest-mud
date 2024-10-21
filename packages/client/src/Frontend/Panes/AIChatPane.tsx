@@ -1,25 +1,14 @@
 import { ModalName } from "@df/types";
-import { useState } from "react";
 import styled from "styled-components";
-import Button from "../Components/Button";
 import { Spacer } from "../Components/CoreUI";
-import { TextInput } from "../Components/Input";
 import { useAccount, usePlayer, useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
 // Styled component for the main content area
 const AIChatContent = styled.div`
   width: 500px;
   height: 600px;
-  overflow-y: scroll;
   display: flex;
   flex-direction: column;
-`;
-// Styled component for chat messages
-const ChatMessage = styled.div`
-  margin-bottom: 10px;
-  padding: 5px;
-  border-radius: 5px;
-  background-color: #f0f0f0;
 `;
 // Help content component
 function HelpContent() {
@@ -31,6 +20,12 @@ function HelpContent() {
     </div>
   );
 }
+// Styled component for iframe
+const ChatIframe = styled.iframe`
+  width: 100%;
+  height: 100%;
+  border: none;
+`;
 // Main AIChatPane component
 export function AIChatPane({
   visible,
@@ -42,19 +37,9 @@ export function AIChatPane({
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
   const player = usePlayer(uiManager).value;
-  const [input, setInput] = useState("");
-  const [chatHistory, setChatHistory] = useState<string[]>([]);
   if (!account || !player) {
     return <></>;
   }
-  // Handler for sending messages
-  const handleSend = () => {
-    if (input.trim()) {
-      // TODO: Implement actual AI chat API call here
-      setChatHistory([...chatHistory, `You: ${input}`]);
-      setInput("");
-    }
-  };
   return (
     <ModalPane
       id={ModalName.AIChat}
@@ -64,17 +49,7 @@ export function AIChatPane({
       helpContent={HelpContent}
     >
       <AIChatContent>
-        {chatHistory.map((message, index) => (
-          <ChatMessage key={index}>{message}</ChatMessage>
-        ))}
-        <Spacer height={16} />
-        <TextInput
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message here..."
-        />
-        <Spacer height={8} />
-        <Button onClick={handleSend}>Send</Button>
+        <ChatIframe src="https://df-ai-chat.vercel.app/" />
       </AIChatContent>
     </ModalPane>
   );
