@@ -1,3 +1,5 @@
+import WalletButton from "@wallet/WalletButton";
+
 import { CreateMoveForm } from "./CreateMoveFormTest";
 import { CreatePlanetForm } from "./CreatePlanetFormTest";
 import { PlanetReadForm } from "./PlanetReadForm";
@@ -93,6 +95,9 @@ export const PlanetTestPage = () => {
 
   return (
     <div className="p-6">
+      <div className="p-6">
+        <WalletButton />
+      </div>
       <div className="flex items-start gap-4">
         <div className="mt-6">
           <PlayPauseTickButton />

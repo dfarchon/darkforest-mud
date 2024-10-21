@@ -31,6 +31,7 @@ import { TradePane } from "../Panes/TradePane";
 import { TransactionLogPane } from "../Panes/TransactionLogPane";
 import { TutorialPane } from "../Panes/TutorialPane";
 import { TwitterVerifyPane } from "../Panes/TwitterVerifyPane";
+import { WalletPane } from "../Panes/WalletPane";
 import { ZoomPane } from "../Panes/ZoomPane";
 import { useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
@@ -102,6 +103,9 @@ export function GameWindowLayout({
 
   const [aiChatVisible, setAIChatVisible] = useState<boolean>(
     isModalOpen(ModalName.AIChat),
+  );
+  const [walletVisible, setWalletVisible] = useState<boolean>(
+    isModalOpen(ModalName.Wallet),
   );
 
   const [tradeVisible, setTradeVisible] = useState<boolean>(
@@ -356,6 +360,10 @@ export function GameWindowLayout({
           onClose={() => setTradeVisible(false)}
         />
 
+        <WalletPane
+          visible={walletVisible}
+          onClose={() => setWalletVisible(false)}
+        />
         {/* PUNK */}
         {/* <TradePane
           visible={tradeVisible}
@@ -409,6 +417,7 @@ export function GameWindowLayout({
           {paneVisible && (
             <SidebarPane
               aiChatHook={[aiChatVisible, setAIChatVisible]}
+              walletHook={[walletVisible, setWalletVisible]}
               tradeHook={[tradeVisible, setTradeVisible]}
               transactionLogHook={[
                 transactionLogVisible,

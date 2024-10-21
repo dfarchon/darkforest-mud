@@ -41,6 +41,7 @@ export const ModalName = {
   ManageAccount: "ManageAccount" as ModalName,
   Onboarding: "Onboarding" as ModalName,
   Private: "Private" as ModalName,
+  Wallet: "Wallet" as ModalName,
 };
 
 export type CursorState = Abstract<string, "CursorState">;

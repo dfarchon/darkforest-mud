@@ -14,16 +14,20 @@ import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { PlanetType, SpaceType, ArtifactStatus } from "../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../src/lib/Artifact.sol";
+import { TempConfigSet } from "../src/codegen/index.sol";
 
 contract ArtifactTest is MudTest {
   address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
   function setUp() public virtual override {
     super.setUp();
-    vm.prank(admin);
+    vm.startPrank(admin);
+    // skip snark check
+    TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
+    vm.stopPrank();
   }
 
   function testProspect() public {

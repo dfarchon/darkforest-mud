@@ -889,7 +889,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public isOwnedByMe(planet: Planet): boolean {
-    return planet.owner === this.gameManager.getAccount();
+    return this.gameManager.isOwnedByMe(planet);
   }
 
   public addNewChunk(chunk: Chunk) {

@@ -3,7 +3,17 @@ import {
   CONTRACT_PRECISION,
   EMPTY_ADDRESS,
   MIN_PLANET_LEVEL,
+  MOVE_SYSTEM_ABI,
+  MOVE_SYSTEM_ID,
   PLANET_CLAIM_MIN_LEVEL,
+  PLANET_REVEAL_SYSTEM_ABI,
+  PLANET_REVEAL_SYSTEM_ID,
+  PLANET_UPGRADE_SYSTEM_ABI,
+  PLANET_UPGRADE_SYSTEM_ID,
+  PLANET_WITHDRAW_SILVER_SYSTEM_ABI,
+  PLANET_WITHDRAW_SILVER_SYSTEM_ID,
+  PLAYER_SYSTEM_ABI,
+  PLAYER_SYSTEM_ID,
 } from "@df/constants";
 import type { Monomitter, Subscription } from "@df/events";
 import { monomitter } from "@df/events";
@@ -428,7 +438,7 @@ export class GameManager extends EventEmitter {
 
   private constructor(
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
-    account: EthAddress | undefined,
+    mainAccount: EthAddress | undefined,
     players: Map<string, Player>,
     touchedPlanets: Map<LocationId, Planet>,
     allTouchedPlanetIds: Set<LocationId>,
@@ -469,7 +479,7 @@ export class GameManager extends EventEmitter {
       height: 0,
     };
     this.terminal = terminal;
-    this.account = account;
+    this.account = mainAccount;
     this.players = players;
     this.worldRadius = worldRadius;
     // this.networkHealth$ = monomitter(true);
@@ -592,7 +602,7 @@ export class GameManager extends EventEmitter {
     // }
 
     this.entityStore = new GameObjects(
-      account,
+      mainAccount,
       touchedPlanets,
       allTouchedPlanetIds,
       revealedLocations,
@@ -834,12 +844,14 @@ export class GameManager extends EventEmitter {
   }
 
   static async create({
+    mainAccount,
     connection,
     terminal,
     contractAddress,
     components,
     spectate = false,
   }: {
+    mainAccount: EthAddress | undefined;
     connection: EthConnection;
     terminal: React.MutableRefObject<TerminalHandle | undefined>;
     contractAddress: EthAddress;
@@ -852,7 +864,7 @@ export class GameManager extends EventEmitter {
 
     const account = spectate
       ? <EthAddress>"0x0000000000000000000000000000000000000001"
-      : connection.getAddress();
+      : mainAccount; // connection.getAddress();
 
     if (!account) {
       throw new Error("no account on eth connection");
@@ -953,7 +965,7 @@ export class GameManager extends EventEmitter {
 
     const gameManager = new GameManager(
       terminal,
-      account,
+      mainAccount,
       initialState.players,
       initialState.touchedAndLocatedPlanets,
       new Set(Array.from(initialState.allTouchedPlanetIds)),
@@ -1690,6 +1702,10 @@ export class GameManager extends EventEmitter {
     return this.account;
   }
 
+  public isOwnedByMe(planet: Planet): boolean {
+    return planet.owner === this.getAccount();
+  }
+
   /**
    * Get the thing that handles contract interaction.
    */
@@ -2017,7 +2033,7 @@ export class GameManager extends EventEmitter {
   setMinerCores(nCores: number): void {
     const config = {
       contractAddress: this.getContractAddress(),
-      account: this.account,
+      account: this.getAccount(),
     };
     setSetting(config, Setting.MiningCores, nCores + "");
   }
@@ -2051,11 +2067,12 @@ export class GameManager extends EventEmitter {
    * Whether or not this client has successfully found and landed on a home planet.
    */
   hasJoinedGame(): boolean {
-    const player = Array.from(this.players.values()).find(
-      (p) => p.address === this.account,
-    );
+    const account = this.getAccount();
+    if (!account) {
+      return false;
+    }
 
-    // const player = this.players.get(this.account as string);
+    const player = this.players.get(account);
     if (!player) {
       return false;
     }
@@ -2982,7 +2999,15 @@ export class GameManager extends EventEmitter {
         return revealArgs;
       };
 
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
       const txIntent: UnconfirmedReveal = {
+        delegator: delegator,
+        systemId: PLANET_REVEAL_SYSTEM_ID,
+        abi: PLANET_REVEAL_SYSTEM_ABI,
         methodName: "df__legacyRevealLocation",
         contract: this.contractsAPI.contract,
         locationId: planetId,
@@ -3795,6 +3820,7 @@ export class GameManager extends EventEmitter {
       this.initMiningManager({ x: 0, y: 0 });
       this.emit(GameManagerEvent.InitializedPlayer);
     }
+
     try {
       // if (this.checkGameHasEnded()) {
       //   throw new Error('game has ended');
@@ -3843,12 +3869,20 @@ export class GameManager extends EventEmitter {
         // return [...args, distFromOriginSquare];
       };
 
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
       const txIntent: UnconfirmedInit = {
         methodName: "df__initializePlayer",
         contract: this.contractsAPI.contract,
         locationId: planet.location.hash,
         location: planet.location,
         args: getArgs(),
+        delegator: delegator,
+        systemId: PLAYER_SYSTEM_ID,
+        abi: PLAYER_SYSTEM_ABI,
       };
 
       this.terminal.current?.println(
@@ -4855,7 +4889,7 @@ export class GameManager extends EventEmitter {
         if (planet.planetType !== PlanetType.TRADING_POST) {
           throw new Error("can only withdraw silver from spacetime rips");
         }
-        if (planet.owner !== this.account) {
+        if (planet.owner !== this.getAccount()) {
           throw new Error("can only withdraw silver from a planet you own");
         }
         if (
@@ -4889,7 +4923,15 @@ export class GameManager extends EventEmitter {
         locationId,
       );
 
+      const delegator = this.getAccount();
+
+      if (!delegator) {
+        throw Error("no main account");
+      }
       const txIntent: UnconfirmedWithdrawSilver = {
+        delegator: delegator,
+        systemId: PLANET_WITHDRAW_SILVER_SYSTEM_ID,
+        abi: PLANET_WITHDRAW_SILVER_SYSTEM_ABI,
         methodName: "df__withdrawSilver",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([
@@ -5153,9 +5195,9 @@ export class GameManager extends EventEmitter {
       const oldPlanet = this.entityStore.getPlanetWithLocation(oldLocation);
 
       if (
-        ((!bypassChecks && !this.account) ||
+        ((!bypassChecks && !this.getAccount()) ||
           !oldPlanet ||
-          oldPlanet.owner !== this.account) &&
+          oldPlanet.owner !== this.getAccount()) &&
         !isSpaceShip(this.getArtifactWithId(artifactMoved)?.artifactType)
       ) {
         throw new Error("attempted to move from a planet not owned by player");
@@ -5200,7 +5242,14 @@ export class GameManager extends EventEmitter {
         return args;
       };
 
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw Error("no main account");
+      }
       const txIntent: UnconfirmedMove = {
+        delegator: delegator,
+        systemId: MOVE_SYSTEM_ID,
+        abi: MOVE_SYSTEM_ABI,
         methodName: "df__legacyMove",
         contract: this.contractsAPI.contract,
         args: getArgs(),
@@ -5262,7 +5311,15 @@ export class GameManager extends EventEmitter {
         branch.toString(),
       );
 
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
       const txIntent: UnconfirmedUpgrade = {
+        delegator: delegator,
+        systemId: PLANET_UPGRADE_SYSTEM_ID,
+        abi: PLANET_UPGRADE_SYSTEM_ABI,
         methodName: "df__legacyUpgradePlanet",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([
