@@ -91,7 +91,7 @@ export function BuyPlanetPane(): React.ReactElement {
     const radius = Math.sqrt(x ** 2 + y ** 2);
 
     const MAX_LEVEL_DIST = gameManager.getContractConstants().MAX_LEVEL_DIST;
-    return radius > MAX_LEVEL_DIST[1];
+    return radius > MAX_LEVEL_DIST[3];
   };
   const rangeCheckPassed = getRangeCheck();
 

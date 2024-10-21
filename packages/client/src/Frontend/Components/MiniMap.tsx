@@ -349,14 +349,9 @@ function draw(
   ctx.fill();
 }
 
-function DFARESLogo({ rimRadius }: { rimRadius: number }) {
-  const size = rimRadius * 0.75; // adjust size as needed
+function DFMUDLogo({ rimRadius }: { rimRadius: number }) {
+  const size = rimRadius * 1.25; // adjust size as needed
   const offset = (canvasSize + canvasBorderSize * 2 - size) / 2;
-  //   <img
-  //   src="../../../../public/DFARESLogo-v3.svg"
-  //   width={size}
-  //   height={size}
-  // />
 
   return (
     <div
@@ -367,7 +362,14 @@ function DFARESLogo({ rimRadius }: { rimRadius: number }) {
         width: `${size}px`,
         height: `${size}px`,
       }}
-    ></div>
+    >
+      <img
+        src="../../../../public/darkforest_mud_logo.png"
+        width={size}
+        height={size}
+      />
+      ;
+    </div>
   );
 }
 
@@ -381,7 +383,7 @@ function MiniMapImpl({}, ref: React.Ref<MiniMapHandle>) {
   const infoOptionsRef = useRef(null);
   const overlayRef = useRef(null);
 
-  const MAX_LEVEL_DIST = df.getContractConstants().MAX_LEVEL_DIST[1];
+  const MAX_LEVEL_DIST = df.getContractConstants().MAX_LEVEL_DIST[3];
 
   const worldRadius = df.getWorldRadius();
   const rimRadius = canvasRadius * (MAX_LEVEL_DIST / worldRadius);
@@ -606,7 +608,7 @@ function MiniMapImpl({}, ref: React.Ref<MiniMapHandle>) {
           borderRadius: "50%",
         }}
       />
-      <DFARESLogo rimRadius={rimRadius} />
+      <DFMUDLogo rimRadius={rimRadius} />
 
       <StyledCoords ref={infoOptionsRef}></StyledCoords>
       <div
