@@ -1,4 +1,4 @@
-import { addressToHex, address as toEthAddress } from "@df/serde";
+import { address as toEthAddress, addressToHex } from "@df/serde";
 import { Btn } from "@frontend/Components/Btn";
 import { Spacer, Title } from "@frontend/Components/CoreUI";
 import { Modal } from "@frontend/Components/Modal";
@@ -218,14 +218,20 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
         value={state.transferAmount ?? "0"}
         onChange={(e) => {
           const value = parseFloat(e.target.value);
-          if (value >= 0 && value <= 5) {
+          if (value >= 0 && value <= 2) {
             setState((prev) => ({ ...prev, transferAmount: value }));
           }
         }}
         min="0"
-        max="1"
+        max="2"
         step="0.001"
-        className="w-32 rounded border"
+        style={{
+          width: "160px",
+          padding: "8px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          outline: "none",
+        }}
       />{" "}
       <Btn onClick={drainBurner} disabled={(burnerBalanceValue ?? 0) <= 0}>
         Withdraw All
@@ -253,13 +259,6 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
 
     return (
       <div>
-        {burnerWalletClient.account && state.burnerBalance === 0n && (
-          <div>
-            <Red>
-              Warning: Your burner wallet needs funds to register and play.
-            </Red>
-          </div>
-        )}
         {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
           <div>
             <Red>Warning: Low session wallet balance!</Red>

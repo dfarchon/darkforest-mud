@@ -75,6 +75,8 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
+import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 
 const enum TerminalPromptStep {
   NONE,
@@ -136,6 +138,22 @@ export function GameLandingPage() {
   const gameUIManagerRef = useRef<GameUIManager | null>(null);
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const miniMapRef = useRef<MiniMapHandle>();
+
+  const { value: burnerBalanceValue, refetch: refetchBurnerBalance } =
+    useBurnerBalance();
+
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchBalances = async () => {
+      await refetchBurnerBalance();
+      setIsDataLoaded(true);
+    };
+
+    fetchBalances();
+    const intervalId = setInterval(fetchBalances, 500);
+    return () => clearInterval(intervalId);
+  }, [refetchBurnerBalance]);
 
   const [gameManager, setGameManager] = useState<GameManager | undefined>();
   const [terminalVisible, setTerminalVisible] = useState(true);
@@ -1729,7 +1747,9 @@ export function GameLandingPage() {
 
   return (
     <>
-      <WalletModal />
+      {isDataLoaded &&
+        (mainAccount === zeroAddress ||
+          burnerBalanceValue <= LOW_BALANCE_THRESHOLD) && <WalletModal />}
 
       <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
         <GameWindowWrapper

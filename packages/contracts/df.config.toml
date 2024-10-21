@@ -125,131 +125,131 @@ b_speed = 0
 # 2000 0 2bb1f24d6e4d57fb10f1848b416b4853b3d12e4ce32875c728c8523ad9d47547
 # -2000 0 287c5ea0d4d162f78a5246328a252f7eb2effa479fe4a3c5f8035cfd2d5cbd64
 
-[[test_planets]]
-a_x = 5
-b_y = 1467
-c_hash = "0x0000558417c74218f4dd6c5d2efc08b26e85de2cb44967137a82c83422a46383"
-d_owner = "0x0000000000000000000000000000000000000000"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 9
-h_planet_type = 1
-i_space_type = 2
-j_population = 800000000
-k_silver = 200000000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 5
+# b_y = 1467
+# c_hash = "0x0000558417c74218f4dd6c5d2efc08b26e85de2cb44967137a82c83422a46383"
+# d_owner = "0x0000000000000000000000000000000000000000"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 9
+# h_planet_type = 1
+# i_space_type = 2
+# j_population = 800000000
+# k_silver = 200000000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 21
-b_y = 66
-c_hash = "0x00001a6f368a18eb4bf7e14f513752d2a64ebb0ea946214730c08f0103fb3e0f"
-d_owner = "0x0000000000000000000000000000000000000000"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 7
-h_planet_type = 2
-i_space_type = 3
-j_population = 500000000
-k_silver = 100000000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 21
+# b_y = 66
+# c_hash = "0x00001a6f368a18eb4bf7e14f513752d2a64ebb0ea946214730c08f0103fb3e0f"
+# d_owner = "0x0000000000000000000000000000000000000000"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 7
+# h_planet_type = 2
+# i_space_type = 3
+# j_population = 500000000
+# k_silver = 100000000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 40
-b_y = 946
-c_hash = "0x00004878935de58b28a236aa410b644fc9e6c64500fbaf1591ffa099cd8a35fe"
-d_owner = "0x0000000000000000000000000000000000000000"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 5
-h_planet_type = 3
-i_space_type = 3
-j_population = 100000000
-k_silver = 25000000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 40
+# b_y = 946
+# c_hash = "0x00004878935de58b28a236aa410b644fc9e6c64500fbaf1591ffa099cd8a35fe"
+# d_owner = "0x0000000000000000000000000000000000000000"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 5
+# h_planet_type = 3
+# i_space_type = 3
+# j_population = 100000000
+# k_silver = 25000000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 523
-b_y = 300
-c_hash = "0x00005eefee0cb9641164e3710943913fa843454b815d0091b34c0617b2be59b4"
-d_owner = "0x0000000000000000000000000000000000000000"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 3
-h_planet_type = 4
-i_space_type = 3
-j_population = 6000000
-k_silver = 1500000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 523
+# b_y = 300
+# c_hash = "0x00005eefee0cb9641164e3710943913fa843454b815d0091b34c0617b2be59b4"
+# d_owner = "0x0000000000000000000000000000000000000000"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 3
+# h_planet_type = 4
+# i_space_type = 3
+# j_population = 6000000
+# k_silver = 1500000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 518
-b_y = 1874
-c_hash = "0x00002a32854a173e807b1dff928d8cccd3a0e46dc5fd04347e399134d8f9b365"
-d_owner = "0x0000000000000000000000000000000000000000"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 1
-h_planet_type = 5
-i_space_type = 3
-j_population = 400000
-k_silver = 500000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 518
+# b_y = 1874
+# c_hash = "0x00002a32854a173e807b1dff928d8cccd3a0e46dc5fd04347e399134d8f9b365"
+# d_owner = "0x0000000000000000000000000000000000000000"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 1
+# h_planet_type = 5
+# i_space_type = 3
+# j_population = 400000
+# k_silver = 500000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 560
-b_y = 1552
-c_hash = "0x0000654dfd969969eb7eaa2cfa19068901fbad6a35ee918587ab96ed9c9369ff"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 8
-h_planet_type = 1
-i_space_type = 1
-j_population = 700000000
-k_silver = 100000000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 560
+# b_y = 1552
+# c_hash = "0x0000654dfd969969eb7eaa2cfa19068901fbad6a35ee918587ab96ed9c9369ff"
+# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 8
+# h_planet_type = 1
+# i_space_type = 1
+# j_population = 700000000
+# k_silver = 100000000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 1031
-b_y = 793
-c_hash = "0x00008c071c4014d5c6839995fa4b328a1a5fe21186cbf68cb6625fefcf0af530"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 6
-h_planet_type = 1
-i_space_type = 2
-j_population = 300000000
-k_silver = 50000000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 1031
+# b_y = 793
+# c_hash = "0x00008c071c4014d5c6839995fa4b328a1a5fe21186cbf68cb6625fefcf0af530"
+# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 6
+# h_planet_type = 1
+# i_space_type = 2
+# j_population = 300000000
+# k_silver = 50000000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 1039
-b_y = 1644
-c_hash = "0x00000bdd0db70b93586f31baf2fa1e47006a371927a8bfa32d1686d9c0c8e9c3"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 4
-h_planet_type = 1
-i_space_type = 3
-j_population = 25000000
-k_silver = 6000000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 1039
+# b_y = 1644
+# c_hash = "0x00000bdd0db70b93586f31baf2fa1e47006a371927a8bfa32d1686d9c0c8e9c3"
+# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 4
+# h_planet_type = 1
+# i_space_type = 3
+# j_population = 25000000
+# k_silver = 6000000
+# l_upgrades = 0
 
-[[test_planets]]
-a_x = 1507
-b_y = 273
-c_hash = "0x00004e95b5b09116388a36e32129ab5d798e50dfd8f79c39ad6849ab5cf47aad"
-d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-e_last_update_tick = 0
-f_perlin = 0
-g_level = 2
-h_planet_type = 1
-i_space_type = 4
-j_population = 1600000
-k_silver = 200000
-l_upgrades = 0
+# [[test_planets]]
+# a_x = 1507
+# b_y = 273
+# c_hash = "0x00004e95b5b09116388a36e32129ab5d798e50dfd8f79c39ad6849ab5cf47aad"
+# d_owner = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+# e_last_update_tick = 0
+# f_perlin = 0
+# g_level = 2
+# h_planet_type = 1
+# i_space_type = 4
+# j_population = 1600000
+# k_silver = 200000
+# l_upgrades = 0
 
 [[test_planets_fake]]
 a_x = 10000
