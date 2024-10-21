@@ -177,7 +177,7 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
           <span className="rounded-lg bg-gray-800 p-2 text-white shadow-md focus:outline-none">
             {formatAddress(address!)}
           </span>
-          {/* <Btn onClick={() => disconnect()}>Log Off</Btn> */}
+          <Btn onClick={() => disconnect()}>Log Off</Btn>
         </div>
       )}
     </div>

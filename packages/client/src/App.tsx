@@ -58,12 +58,12 @@ export const App = () => {
               }
             />
             <Route path="/play/:contract" element={<GameLandingPage />} />
-            <Route path="/landing" element={<ClassicLandingPage />} />
+            <Route path="/" element={<ClassicLandingPage />} />
             <Route path="/sandbox" element={<SandboxPage />} />
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/game" element={<GamePage />} />
             <Route path="/test" element={<PlanetTestPage />} />
-            <Route path="/" element={<HelloPage />} />
+            <Route path="/hello" element={<HelloPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route
               path="/wallet/:contract/:addr/:actionId/:balance/:method"

@@ -14,7 +14,7 @@ export const enum LandingPageZIndex {
 }
 
 const DFArchonLinks = {
-  twitter: "https://twitter.com/DFArchon",
+  twitter: "https://twitter.com/darkforest_mud",
   email: "mailto:dfarchon@gmail.com",
   blog: "https://mirror.xyz/dfarchon.eth",
   discord: "https://discord.com/invite/XpBPEnsvgX",
@@ -114,8 +114,8 @@ export const ClassicLandingPage = () => {
                       <Round3Title>Dark Forest MUD</Round3Title>
                     </span>
                     <br />
-                    <span style={{ fontSize: "50px" }}>
-                      <Round3Title> onchain MMO </Round3Title>
+                    <span style={{ fontSize: "30px" }}>
+                      <Round3Title> v0.1.1 </Round3Title>
                     </span>
                   </div>
 
@@ -128,7 +128,7 @@ export const ClassicLandingPage = () => {
             <SubTitle>
               <div style={{ fontSize: "30px", color: "pink" }}>
                 <Round3Title>
-                  These violent delights have violent ends.
+                  Community-driven development of Dark Forest on MUD
                 </Round3Title>
               </div>
 
@@ -326,12 +326,12 @@ function Fundraising() {
   return (
     <HideOnMobile>
       <Modal contain={["top", "left", "right"]} initialX={50} initialY={50}>
-        <Title slot="title">How to Support DFArchon </Title>
+        <Title slot="title">How to Support DFArchon team</Title>
         <div style={{ maxWidth: "300px" }}>
           As a community team, we need to raise funds to support our future
           development plans. <Pink>Donations are welcome.</Pink>
           <br />
-          <br />
+          {/* <br />
           In return, we offer:
           <br />
           <Pink>Onchain Gaming Insights:</Pink> Expertise in fully onchain games
@@ -339,7 +339,7 @@ function Fundraising() {
           <br />
           <Pink>Custom Dark Forest Services:</Pink> Fast development of
           customized Dark Forest versions.
-          <br />
+          <br /> */}
           <br />
           Interested in supporting us? Contact{" "}
           <Link to="https://t.me/cherryblue1024">cherryblue1024</Link>.
