@@ -165,8 +165,6 @@ library ArtifactLib {
     artifact._initType(seed);
   }
 
-  // never directly call this function
-  // artifact should be got from planet.mustGetArtifact(artifactId)
   function readFromStore(Artifact memory artifact, uint256 curTick) internal view {
     ArtifactData memory data = ArtifactTable.get(uint32(artifact.id));
     artifact.rarity = data.rarity;

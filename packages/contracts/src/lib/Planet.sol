@@ -420,11 +420,12 @@ library PlanetLib {
 
   function _readEffects(Planet memory planet) internal view {
     PlanetEffectsData memory effectsData = PlanetEffects.get(bytes32(planet.planetHash));
-    planet.effectNumber = effectsData.num;
-    Effect[] memory effects = new Effect[](planet.effectNumber);
+    uint256 effectNum = effectsData.num;
+    planet.effectNumber = effectNum;
+    Effect[] memory effects = new Effect[](effectNum);
     uint256 effectsArray = effectsData.effects;
-    for (uint256 i; i < planet.effectNumber; ) {
-      effects[i] = EffectLib.parseEffect(uint24(effectsArray));
+    for (uint256 i; i < effectNum; ) {
+      effects[effectNum - 1 - i] = EffectLib.parseEffect(uint24(effectsArray));
       unchecked {
         effectsArray >>= 24;
         ++i;

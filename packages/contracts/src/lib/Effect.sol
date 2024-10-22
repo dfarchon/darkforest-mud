@@ -159,11 +159,12 @@ library EffectLib {
     for (uint256 i; i < effectNumber; ++i) {
       if (effects[i].id == effectId) {
         continue;
+      } else {
+        newEffects[j] = effects[i];
+        unchecked {
+          ++j;
+        }
       }
-      unchecked {
-        ++j;
-      }
-      newEffects[j] = effects[i];
     }
     planet.effects = newEffects;
     unchecked {
