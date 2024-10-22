@@ -27,6 +27,7 @@ contract CannonTest is MudTest {
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     vm.stopPrank();
     vm.startPrank(address(1));
     vm.roll(1000);
@@ -87,9 +88,34 @@ contract CannonTest is MudTest {
     assertEq(planetAfter.effects[0].id, COMMON_CHARGE);
     assertEq(planetAfter.effects[1].id, COMMON_ACTIVATE);
     assertEq(planetAfter.effects[2].id, COMMON_ACTIVATE_AFTER_MOVE);
+    assertEq(planetAfter.artifactStorage.number, 0);
     assertTrue(artifact.status == ArtifactStatus.BROKEN);
     assertTrue(artifact.activateTick == Ticker.getTickNumber());
     assertTrue(planetAfter.range > planet.range);
     assertTrue(planetAfter.speed > planet.speed);
+
+    vm.prank(address(1));
+    _move(1, 2, 80, 100000, 5000, 0);
+    planetAfter = IWorld(worldAddress).df__readPlanet(1);
+    assertEq(planetAfter.effectNumber, 0);
+    assertEq(planetAfter.defense, planet.defense);
+    assertEq(planetAfter.range, planet.range);
+    assertEq(planetAfter.speed, planet.speed);
+  }
+
+  function _move(
+    uint256 from,
+    uint256 to,
+    uint256 distance,
+    uint256 population,
+    uint256 silver,
+    uint256 artifact
+  ) internal {
+    Proof memory proof;
+    MoveInput memory input;
+    input.fromPlanetHash = from;
+    input.toPlanetHash = to;
+    input.distance = distance;
+    IWorld(worldAddress).df__move(proof, input, population, silver, artifact);
   }
 }
