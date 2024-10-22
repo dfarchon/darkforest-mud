@@ -427,6 +427,9 @@ export class ContractsAPI extends EventEmitter {
       });
 
     this.moveSubscription = this.components.Move.update$.subscribe((update) => {
+      //PUNK move
+      console.log("move subscription");
+
       const entity = update.entity;
       const [nextValue] = update.value;
       const keyTuple = decodeEntity(
@@ -438,6 +441,10 @@ export class ContractsAPI extends EventEmitter {
         const fromId = locationIdFromHexStr(nextValue.from);
         const toId = locationIdFromHexStr(keyTuple.to);
         const arrivalId = nextValue.id.toString() as VoyageId;
+
+        console.log("fromId", fromId);
+        console.log("toId", toId);
+        console.log("arrivalId", arrivalId);
 
         this.emit(ContractsAPIEvent.ArrivalQueued, arrivalId, fromId, toId);
       }
