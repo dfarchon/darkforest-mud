@@ -33,6 +33,19 @@ export class TickerUtils {
     }
   }
 
+  public getCurrentTickerRate(): number {
+    const { Ticker } = this.components;
+    const tickerData = getComponentValue(Ticker, singletonEntity);
+    if (!tickerData) {
+      throw new Error("Game not started");
+    }
+    const rate = Number(tickerData.tickRate);
+    const preTickNumber = Number(tickerData.tickNumber);
+    const preTimestamp = Number(tickerData.timestamp);
+
+    return rate;
+  }
+
   public convertTickToMs(tick: number): number {
     const { Ticker } = this.components;
     const tickerData = getComponentValue(Ticker, singletonEntity);

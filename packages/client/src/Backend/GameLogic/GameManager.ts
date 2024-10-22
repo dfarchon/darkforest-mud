@@ -1724,6 +1724,10 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getCurrentTick();
   }
 
+  public getCurrentTickerRate(): number {
+    return this.contractsAPI.getCurrentTickerRate();
+  }
+
   public convertTickToMs(tick: number): number {
     return this.contractsAPI.convertTickToMs(tick);
   }
@@ -6178,7 +6182,9 @@ export class GameManager extends EventEmitter {
       deltaTime = deltaTime / 2;
     }
 
-    return deltaTime;
+    const tickerRate = this.getCurrentTickerRate();
+
+    return deltaTime / tickerRate;
   }
 
   /**

@@ -956,6 +956,10 @@ export class ContractsAPI extends EventEmitter {
     return this.tickerUtils.getCurrentTick();
   }
 
+  public getCurrentTickerRate(): number {
+    return this.tickerUtils.getCurrentTickerRate();
+  }
+
   public convertTickToMs(tick: number): number {
     return this.tickerUtils.convertTickToMs(tick);
   }
