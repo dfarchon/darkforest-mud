@@ -1922,16 +1922,12 @@ export class GameManager extends EventEmitter {
   }
 
   public getPlayerScore(addr: EthAddress): number | undefined {
-    console.log(addr);
-    return undefined;
-    // const player = this.players.get(addr);
-    // if (!player) {
-    //   return undefined;
-    // }
-    // if (player.lastClaimTimestamp === 0) {
-    //   return undefined;
-    // }
-    // return player?.score;
+    const player = this.players.get(addr);
+    if (!player) {
+      return undefined;
+    }
+
+    return player?.silver;
   }
 
   // public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
@@ -6449,7 +6445,7 @@ export class GameManager extends EventEmitter {
   }
 
   public isAdmin(): boolean {
-    return this.getAddress() === this.contractConstants.adminAddress;
+    return this.getAccount() === this.contractConstants.adminAddress;
   }
 
   /**

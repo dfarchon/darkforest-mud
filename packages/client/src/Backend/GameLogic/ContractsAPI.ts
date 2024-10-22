@@ -8,7 +8,7 @@ import {
   TxExecutor,
 } from "@df/network";
 import {
-  address,
+  address as toEthAddress,
   addressToHex,
   artifactIdFromEthersBN,
   artifactIdFromHexStr,
@@ -1158,7 +1158,7 @@ export class ContractsAPI extends EventEmitter {
       PERLIN_LENGTH_SCALE: Number(snarkConfig.perlinLengthScale),
       PERLIN_MIRROR_X: snarkConfig.perlinMirrorX === 1,
       PERLIN_MIRROR_Y: snarkConfig.perlinMirrorY === 1,
-      adminAddress: adminAddress as EthAddress,
+      adminAddress: toEthAddress(adminAddress) as EthAddress,
 
       // TODO: Planet default state
 
@@ -1209,7 +1209,7 @@ export class ContractsAPI extends EventEmitter {
 
     const player: Player = {
       address: playerId,
-      burner: address(rawPlayer.burner),
+      burner: toEthAddress(rawPlayer.burner),
       index: rawPlayer.index,
       createdAt: Number(rawPlayer.createdAt),
       name: rawPlayer.name,
