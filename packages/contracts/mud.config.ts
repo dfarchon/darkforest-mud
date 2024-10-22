@@ -159,12 +159,12 @@ export default defineWorld({
     },
     Effect: {
       schema: {
-        internalId: "uint8",
+        id: "uint24",
         effectType: "EffectType",
         modifierNumber: "uint8", // up to 7 modifiers
         modifiers: "uint248", // 32 bits per modifier, including the uint8 type and the uint24 value
       },
-      key: ["internalId"],
+      key: ["id"],
       codegen: {
         outputDirectory: "../modules/atfs/tables",
         tableIdArgument: true,

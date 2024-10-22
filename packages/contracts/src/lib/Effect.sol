@@ -13,7 +13,6 @@ struct Effect {
   uint256 id;
   uint256 origin;
   EffectType effectType;
-  uint256 internalId;
 }
 
 struct EffectData {
@@ -50,12 +49,12 @@ library EffectLib {
   }
 
   function parseEffect(uint256 effectId) internal pure returns (Effect memory) {
-    return Effect(effectId, effectId >> 16, EffectType(uint8((effectId >> 8))), uint8(effectId));
+    return Effect(effectId, effectId >> 16, EffectType(uint8((effectId >> 8))));
   }
 
   function getData(Effect memory effect) internal view returns (EffectData memory) {
     ResourceId effectTableId = _effectTableId(_artifactIndexToNamespace(effect.origin));
-    EffectTableData memory effectData = EffectTable.get(effectTableId, uint8(effect.id));
+    EffectTableData memory effectData = EffectTable.get(effectTableId, uint24(effect.id));
     uint256 modifierNumber = effectData.modifierNumber;
     Modifier[] memory modifiers = new Modifier[](modifierNumber);
     uint256 modifiersData = effectData.modifiers;
