@@ -131,6 +131,9 @@ export function getNetworkConfig() {
     ? Wallet.createRandom().privateKey
     : getBurnerWallet();
 
+  //PUNK
+  console.log(chain.indexerUrl);
+
   return {
     clock: {
       period: 1000,
@@ -150,5 +153,6 @@ export function getNetworkConfig() {
     initialBlockNumber,
     disableCache: import.meta.env.PROD,
     chain,
+    indexerUrl: params.get("indexerUrl") ?? chain.indexerUrl,
   };
 }

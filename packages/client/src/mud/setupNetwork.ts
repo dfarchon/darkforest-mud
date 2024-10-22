@@ -72,6 +72,7 @@ export async function setupNetwork() {
       config: mudConfig,
       address: networkConfig.worldAddress as Hex,
       publicClient,
+      indexerUrl: networkConfig.indexerUrl,
       startBlock: BigInt(networkConfig.initialBlockNumber),
     });
 
