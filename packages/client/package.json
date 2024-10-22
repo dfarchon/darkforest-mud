@@ -14,7 +14,8 @@
     "lint:eslint": "eslint --ext .js,.ts,tsx,.json src",
     "lint-fix": "pnpm lint-fix:eslint",
     "lint-fix:eslint": "pnpm lint:eslint --fix",
-    "lint:typecheck": "tsc"
+    "lint:typecheck": "tsc",
+    "deploy:prod": "netlify build && netlify deploy --prod"
   },
   "dependencies": {
     "@latticexyz/block-logs-stream": "2.2.11",
@@ -54,6 +55,7 @@
     "lit": "2.1.2",
     "lodash-es": "4.17.21",
     "mnemonist": "0.39.8",
+    "netlify-cli": "17.37.1",
     "p-defer": "4.0.1",
     "p-retry": "6.2.0",
     "p-timeout": "4.1.0",
