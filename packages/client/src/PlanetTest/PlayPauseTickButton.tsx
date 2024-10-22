@@ -23,6 +23,10 @@ export const PlayPauseTickButton = () => {
   const { data: walletClient } = useWalletClient();
 
   useEffect(() => {
+    //PUNK
+    console.log("tickerValue");
+    console.log(tickerValue);
+
     if (tickerValue && walletClient) {
       setIsPaused(tickerValue.paused);
     }

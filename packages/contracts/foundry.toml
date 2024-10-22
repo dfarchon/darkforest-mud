@@ -1,5 +1,6 @@
 [profile.default]
 solc = "0.8.24"
+priority_fee = 1 # 1wei
 ffi = false
 fuzz_runs = 256
 optimizer = true

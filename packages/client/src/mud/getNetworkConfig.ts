@@ -150,5 +150,6 @@ export function getNetworkConfig() {
     initialBlockNumber,
     disableCache: import.meta.env.PROD,
     chain,
+    indexerUrl: params.get("indexerUrl") ?? chain.indexerUrl,
   };
 }
