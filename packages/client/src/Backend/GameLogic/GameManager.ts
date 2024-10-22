@@ -1724,6 +1724,10 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getCurrentTick();
   }
 
+  public getCurrentTickerRate(): number {
+    return this.contractsAPI.getCurrentTickerRate();
+  }
+
   public convertTickToMs(tick: number): number {
     return this.contractsAPI.convertTickToMs(tick);
   }
@@ -1922,16 +1926,12 @@ export class GameManager extends EventEmitter {
   }
 
   public getPlayerScore(addr: EthAddress): number | undefined {
-    console.log(addr);
-    return undefined;
-    // const player = this.players.get(addr);
-    // if (!player) {
-    //   return undefined;
-    // }
-    // if (player.lastClaimTimestamp === 0) {
-    //   return undefined;
-    // }
-    // return player?.score;
+    const player = this.players.get(addr);
+    if (!player) {
+      return undefined;
+    }
+
+    return player?.silver;
   }
 
   // public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
@@ -6182,7 +6182,9 @@ export class GameManager extends EventEmitter {
       deltaTime = deltaTime / 2;
     }
 
-    return deltaTime;
+    const tickerRate = this.getCurrentTickerRate();
+
+    return deltaTime / tickerRate;
   }
 
   /**
@@ -6449,7 +6451,7 @@ export class GameManager extends EventEmitter {
   }
 
   public isAdmin(): boolean {
-    return this.getAddress() === this.contractConstants.adminAddress;
+    return this.getAccount() === this.contractConstants.adminAddress;
   }
 
   /**

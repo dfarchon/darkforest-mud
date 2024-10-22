@@ -13,7 +13,10 @@ export interface EmbeddedPlugin {
  * Load all of the embedded plugins in the dist directory of the `embedded_plugins/` project
  * as Plain Text files. This means that `embedded_plugins/` can't use `import` for relative paths.
  */
-const pluginsContext = import.meta.glob("../../../embedded_plugins/*.[jt]sx?", {
+// const pluginsContext = import.meta.glob("../../../embedded_plugins/*.[jt]sx?", {
+//   as: "raw",
+// });
+const pluginsContext = import.meta.glob("../../../embedded_plugins/*.[jt]s", {
   as: "raw",
 });
 
@@ -21,7 +24,8 @@ function cleanFilename(filename: string) {
   return filename
     .replace(/^\.\//, "")
     .replace(/[_-]/g, " ")
-    .replace(/\.[jt]sx?$/, "");
+    .replace(/\.[jt]sx?$/, "")
+    .slice(26);
 }
 
 export async function getEmbeddedPlugins(
@@ -40,9 +44,10 @@ export async function getEmbeddedPlugins(
       })
       .map(async ([filename, importPlugin]) => {
         const code = await importPlugin();
+        const newFileName = cleanFilename(filename);
         return {
-          id: filename as PluginId,
-          name: cleanFilename(filename),
+          id: newFileName as PluginId,
+          name: newFileName,
           code,
         };
       }),
