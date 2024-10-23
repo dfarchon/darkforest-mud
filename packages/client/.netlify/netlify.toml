@@ -1,0 +1,28 @@
+plugins = []
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "/Users/robot/pinkpunk/darkforest-mud/packages/client/packages/client/dist"
+publishOrigin = "ui"
+commandOrigin = "ui"
+base = "/Users/robot/pinkpunk/darkforest-mud/packages/client"
+command = "pnpm --filter client... run build"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
