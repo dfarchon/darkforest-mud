@@ -136,7 +136,7 @@ export function GameLandingPage() {
     },
   );
   const syncSign = useMemo(() => {
-    // console.log(syncProgress);
+    console.log(syncProgress.step, syncProgress.percentage);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
 
@@ -1804,6 +1804,7 @@ export function GameLandingPage() {
             issues={browserIssues}
             state={browserCompatibleState}
           />
+
           <Terminal
             ref={terminalHandle}
             promptCharacter={">"}
