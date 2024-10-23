@@ -14,12 +14,19 @@ export function entityToAddress(entity: string): string {
 // Adjust the import path as needed
 export const GamePage: React.FC = () => {
   const {
-    network: { tables, useStore, playerEntity },
+    network: { tables, playerEntity },
     components: { SyncProgress },
   } = useMUD();
   const [name, setName] = useState("");
-  // Zustand useStore state usage
-  const syncProgress = useStore((state) => state.syncProgress);
+
+  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
+    message: "Connecting",
+    percentage: 0,
+    step: "Initialize",
+    latestBlockNumber: 0n,
+    lastBlockNumberProcessed: 0n,
+  });
+
   const { isConnected, address } = useAccount();
 
   // const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
@@ -32,22 +39,24 @@ export const GamePage: React.FC = () => {
   // Todo checking sync progress if huge tables on sync
   console.log(syncProgress);
 
+  // PUNK fix here later
+  const playerSpawned = "";
   // Get the player's data to check if they have spawned a player
-  const playerSpawned = useStore((state) => {
-    const records = Object.values(state.getRecords(tables.Player));
-    // TODO zustand sync apply !!! this is not optimal for now is avoiding error if zustand not synced
+  // const playerSpawned = useStore((state) => {
+  //   const records = Object.values(state.getRecords(tables.Player));
+  //   // TODO zustand sync apply !!! this is not optimal for now is avoiding error if zustand not synced
 
-    if (records.length > 0) {
-      const record = records.filter((pl) => pl.fields.owner === address);
+  //   if (records.length > 0) {
+  //     const record = records.filter((pl) => pl.fields.owner === address);
 
-      if (record.length > 0) {
-        if (name !== record[0].value.name) {
-          setName(record[0].value.name);
-        }
-      }
-      return record.length > 0; // Check if the player has spawned
-    }
-  });
+  //     if (record.length > 0) {
+  //       if (name !== record[0].value.name) {
+  //         setName(record[0].value.name);
+  //       }
+  //     }
+  //     return record.length > 0; // Check if the player has spawned
+  //   }
+  // });
 
   return (
     <div>
