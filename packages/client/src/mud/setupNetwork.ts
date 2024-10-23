@@ -60,6 +60,10 @@ export async function setupNetwork() {
    * pass into MUD dev tools for transaction observability.
    */
   const write$ = new Subject<ContractWrite>();
+
+  // PUNK
+  console.log("network config");
+  console.log(networkConfig.indexerUrl);
   /*
    * Sync on-chain state into RECS and keeps our client in sync.
    * Uses the MUD indexer if available, otherwise falls back
@@ -72,6 +76,7 @@ export async function setupNetwork() {
       config: mudConfig,
       address: networkConfig.worldAddress as Hex,
       publicClient,
+      indexerUrl: networkConfig.indexerUrl,
       startBlock: BigInt(networkConfig.initialBlockNumber),
     });
 
