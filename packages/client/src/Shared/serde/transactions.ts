@@ -54,7 +54,7 @@ import type {
 export function isUnconfirmedReveal(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedReveal {
-  return txIntent.methodName === "revealLocation";
+  return txIntent.methodName === "df__legacyRevealLocation";
 }
 
 export function isUnconfirmedClaim(
@@ -72,7 +72,7 @@ export function isUnconfirmedInit(
 export function isUnconfirmedMove(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedMove {
-  return txIntent.methodName === "move";
+  return txIntent.methodName === "df__legacyMove";
 }
 
 export function isUnconfirmedRelease(
@@ -84,7 +84,7 @@ export function isUnconfirmedRelease(
 export function isUnconfirmedUpgrade(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedUpgrade {
-  return txIntent.methodName === "upgradePlanet";
+  return txIntent.methodName === "df__legacyUpgradePlanet";
 }
 
 export function isUnconfirmedRefreshPlanet(
@@ -108,7 +108,7 @@ export function isUnconfirmedTransfer(
 export function isUnconfirmedFindArtifact(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedFindArtifact {
-  return txIntent.methodName === "findArtifact";
+  return txIntent.methodName === "df__findArtifact";
 }
 
 export function isUnconfirmedDepositArtifact(
@@ -126,7 +126,7 @@ export function isUnconfirmedWithdrawArtifact(
 export function isUnconfirmedProspectPlanet(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedProspectPlanet {
-  return txIntent.methodName === "prospectPlanet";
+  return txIntent.methodName === "df__prospectPlanet";
 }
 
 export function isUnconfirmedActivateArtifact(
@@ -156,7 +156,7 @@ export function isUnconfirmedBuyArtifact(
 export function isUnconfirmedWithdrawSilver(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedWithdrawSilver {
-  return txIntent.methodName === "withdrawSilver";
+  return txIntent.methodName === "df__withdrawSilver";
 }
 
 export function isUnconfirmedGetShips(

@@ -77,6 +77,7 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
+import { useComponentValue } from "@latticexyz/react";
 
 const enum TerminalPromptStep {
   NONE,
@@ -115,7 +116,6 @@ export function GameLandingPage() {
   const {
     network: {
       walletClient: burnerWalletClient,
-      useStore,
       playerEntity,
       waitForTransaction,
     },
@@ -124,7 +124,17 @@ export function GameLandingPage() {
 
   const { Player } = components;
 
-  const syncProgress = useStore((state) => state.syncProgress); // Access sync progress
+  const syncProgress = useComponentValue(
+    components.SyncProgress,
+    singletonEntity,
+    {
+      message: "Connecting",
+      percentage: 0,
+      step: "Initialize",
+      latestBlockNumber: 0n,
+      lastBlockNumberProcessed: 0n,
+    },
+  );
 
   const syncSign = useMemo(() => {
     // console.log(syncProgress);

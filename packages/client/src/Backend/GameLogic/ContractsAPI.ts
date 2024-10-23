@@ -152,16 +152,10 @@ export class ContractsAPI extends EventEmitter {
   private playerSubscription: Subscription;
   private artifactSubscription: Subscription;
   private artifactOwnerSubscription: Subscription;
-  private planetArtifactSubscription: Subscription;
   private lastRevealSubscription: Subscription;
   private revealedPlanetSubscription: Subscription;
-  private prospectedPlanetSubscription: Subscription;
-  private exploredPlanetSubscription: Subscription;
   private planetSubscription: Subscription;
-  private planetPropsSubscription: Subscription;
-  private planetOwnerSubscription: Subscription;
   private moveSubscription: Subscription;
-  private pendingMoveSubscription: Subscription;
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
 
@@ -343,13 +337,6 @@ export class ContractsAPI extends EventEmitter {
         }
       });
 
-    this.planetArtifactSubscription =
-      this.components.PlanetArtifact.update$.subscribe((update) => {
-        const entity = update.entity;
-        const planetId = locationIdFromHexStr(entity.toString());
-        this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
-      });
-
     this.lastRevealSubscription = this.components.LastReveal.update$.subscribe(
       (update) => {
         const entity = update.entity;
@@ -372,28 +359,6 @@ export class ContractsAPI extends EventEmitter {
         }
       });
 
-    this.prospectedPlanetSubscription =
-      this.components.ProspectedPlanet.update$.subscribe((update) => {
-        const entity = update.entity;
-        const [nextValue] = update.value;
-        const planetId = locationIdFromHexStr(entity.toString());
-
-        if (nextValue) {
-          this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
-        }
-      });
-
-    this.exploredPlanetSubscription =
-      this.components.ExploredPlanet.update$.subscribe((update) => {
-        const entity = update.entity;
-        const [nextValue] = update.value;
-        const planetId = locationIdFromHexStr(entity.toString());
-
-        if (nextValue) {
-          this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
-        }
-      });
-
     this.planetSubscription = this.components.Planet.update$.subscribe(
       (update) => {
         const entity = update.entity;
@@ -403,28 +368,6 @@ export class ContractsAPI extends EventEmitter {
         );
       },
     );
-
-    this.planetPropsSubscription =
-      this.components.PlanetProps.update$.subscribe((update) => {
-        const entity = update.entity;
-        const [nextValue] = update.value;
-        const planetId = locationIdFromHexStr(entity.toString());
-
-        if (nextValue) {
-          this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
-        }
-      });
-
-    this.planetOwnerSubscription =
-      this.components.PlanetOwner.update$.subscribe((update) => {
-        const entity = update.entity;
-        const [nextValue] = update.value;
-        const planetId = locationIdFromHexStr(entity.toString());
-
-        if (nextValue) {
-          this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
-        }
-      });
 
     this.moveSubscription = this.components.Move.update$.subscribe((update) => {
       const entity = update.entity;
@@ -442,18 +385,6 @@ export class ContractsAPI extends EventEmitter {
         this.emit(ContractsAPIEvent.ArrivalQueued, arrivalId, fromId, toId);
       }
     });
-
-    this.pendingMoveSubscription =
-      this.components.PendingMove.update$.subscribe((update) => {
-        const entity = update.entity;
-        const [nextValue] = update.value;
-        const planetId = locationIdFromHexStr(entity.toString());
-        console.log("pending move update", entity.toString());
-
-        if (nextValue) {
-          this.emit(ContractsAPIEvent.PlanetUpdate, planetId);
-        }
-      });
 
     this.playerWithdrawSilverSubscription =
       this.components.PlayerWithdrawSilver.update$.subscribe((update) => {
@@ -850,17 +781,12 @@ export class ContractsAPI extends EventEmitter {
     this.playerSubscription.unsubscribe();
     this.artifactSubscription.unsubscribe();
     this.artifactOwnerSubscription.unsubscribe();
-    this.planetArtifactSubscription.unsubscribe();
     this.lastRevealSubscription.unsubscribe();
     this.revealedPlanetSubscription.unsubscribe();
-    this.prospectedPlanetSubscription.unsubscribe();
-    this.exploredPlanetSubscription.unsubscribe();
     this.planetSubscription.unsubscribe();
-    this.planetPropsSubscription.unsubscribe();
-    this.planetOwnerSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
-    this.pendingMoveSubscription.unsubscribe();
     this.playerWithdrawSilverSubscription.unsubscribe();
+    this.tickerRateSubscription.unsubscribe();
     return;
     const { contract } = this;
 
