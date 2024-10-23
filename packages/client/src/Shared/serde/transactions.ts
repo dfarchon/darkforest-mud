@@ -72,7 +72,7 @@ export function isUnconfirmedInit(
 export function isUnconfirmedMove(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedMove {
-  return txIntent.methodName === "move";
+  return txIntent.methodName === "df__legacyMove";
 }
 
 export function isUnconfirmedRelease(
