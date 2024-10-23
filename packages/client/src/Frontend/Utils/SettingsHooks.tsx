@@ -196,7 +196,7 @@ export function useSetting(
   setting: Setting,
 ): [string, (newValue: string | undefined) => void] {
   const contractAddress = uiManager.getContractAddress();
-  const account = uiManager.getAccount();
+  const account = uiManager.getEthConnection().getAddress();
   const config = { contractAddress, account };
   const [settingValue, setSettingValue] = useState(() =>
     getSetting(config, setting),

@@ -658,7 +658,7 @@ export class GameManager extends EventEmitter {
           if (this.minerManager) {
             const config = {
               contractAddress: this.getContractAddress(),
-              account: this.account,
+              account: this.ethConnection.getAccount(),
             };
             const cores = getNumberSetting(config, Setting.MiningCores);
             this.minerManager.setCores(cores);
@@ -999,7 +999,7 @@ export class GameManager extends EventEmitter {
 
     const config = {
       contractAddress,
-      account: gameManager.getAccount(),
+      account: gameManager.getEthConnection().getAddress(),
     };
     pollSetting(config, Setting.AutoApproveNonPurchaseTransactions);
 
@@ -1984,7 +1984,7 @@ export class GameManager extends EventEmitter {
 
     const config = {
       contractAddress: this.getContractAddress(),
-      account: this.account,
+      account: this.ethConnection.getAddress(),
     };
 
     this.minerManager.setCores(
@@ -2033,7 +2033,7 @@ export class GameManager extends EventEmitter {
   setMinerCores(nCores: number): void {
     const config = {
       contractAddress: this.getContractAddress(),
-      account: this.getAccount(),
+      account: this.ethConnection.getAddress(),
     };
     setSetting(config, Setting.MiningCores, nCores + "");
   }
@@ -2458,7 +2458,7 @@ export class GameManager extends EventEmitter {
     if (this.minerManager) {
       const config = {
         contractAddress: this.getContractAddress(),
-        account: this.account,
+        account: this.ethConnection.getAddress(),
       };
       setBooleanSetting(config, Setting.IsMining, true);
       this.minerManager.startExplore();
@@ -2472,7 +2472,7 @@ export class GameManager extends EventEmitter {
     if (this.minerManager) {
       const config = {
         contractAddress: this.getContractAddress(),
-        account: this.account,
+        account: this.ethConnection.getAddress(),
       };
       setBooleanSetting(config, Setting.IsMining, false);
       this.hashRate = 0;

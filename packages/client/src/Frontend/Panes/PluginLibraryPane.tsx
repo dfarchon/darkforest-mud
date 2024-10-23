@@ -88,7 +88,7 @@ export function PluginLibraryPane({
     pluginManager.getLibrary(),
   );
   const contractAddress = gameUIManager.getContractAddress();
-  const account = gameUIManager.getAccount();
+  const account = gameUIManager.getEthConnection().getAddress();
   const config = { contractAddress, account };
   const isAdmin = gameUIManager.isAdmin();
   const [editorIsOpen, setEditorIsOpen] = useState(false);
