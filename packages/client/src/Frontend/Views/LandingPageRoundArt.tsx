@@ -13,7 +13,7 @@ export function LandingPageRoundArt() {
       <ImgContainer>
         <LandingPageRoundArtImg
           // src={'/public/DFARESLogo-v3.svg'}
-          src={"/public/favicon.ico"}
+          src={"/public/darkforest_mud_logo.png"}
           onClick={() => history.push(`/play/${defaultAddress}`)}
         />
         {/* <Smaller>

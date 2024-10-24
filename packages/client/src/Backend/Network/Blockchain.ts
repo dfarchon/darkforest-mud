@@ -32,6 +32,8 @@ export function getEthConnection(): Promise<EthConnection> {
     url = "https://rpc.garnetchain.com";
   }
 
+  url = "https://rpc.garnetchain.com";
+
   console.log(`GAME METADATA:`);
   console.log(`rpc url: ${url}`);
   console.log(`is production: ${isProd}`);
