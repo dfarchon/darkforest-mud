@@ -6,7 +6,7 @@ import styled, { css } from "styled-components";
 import dfstyles from "../Styles/dfstyles";
 
 // export const ARTIFACT_URL = 'https://d2wspbczt15cqu.cloudfront.net/v0.6.0-artifacts/';
-export const ARTIFACT_URL = "/public/df_ares_artifact_icons/";
+export const ARTIFACT_URL = "/df_ares_artifact_icons/";
 
 // @ts-expect-error unused
 function getArtifactUrl(

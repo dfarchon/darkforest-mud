@@ -1,20 +1,20 @@
 import { CONTRACT_ADDRESS } from "@df/contracts";
 import { address } from "@df/serde";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 export function LandingPageRoundArt() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const defaultAddress = address(CONTRACT_ADDRESS);
 
   return (
     <Container>
       <ImgContainer>
         <LandingPageRoundArtImg
-          // src={'/public/DFARESLogo-v3.svg'}
-          src={"/public/darkforest_mud_logo.png"}
-          onClick={() => history.push(`/play/${defaultAddress}`)}
+          // src={'/DFARESLogo-v3.svg'}
+          src={"/darkforest_mud_logo.png"}
+          onClick={() => navigate(`/play/${defaultAddress}`)}
         />
         {/* <Smaller>
           <Text>Art by</Text> <TwitterLink twitter='JannehMoe' />{' '}

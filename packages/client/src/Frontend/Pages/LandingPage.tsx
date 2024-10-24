@@ -32,7 +32,7 @@ export function LandingPageRoundArt() {
     <Container>
       <ImgContainer>
         <LandingPageRoundArtImg
-          src={"/public/favicon.ico"}
+          src={"/favicon.ico"}
           onClick={() => navigate(`/play`)}
         />
       </ImgContainer>

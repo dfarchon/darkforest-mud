@@ -771,20 +771,24 @@ export function GameLandingPage() {
         terminal.current?.println(`Welcome, player ${playerAddress}.`);
         const storageKey = "mud:burnerWallet";
         localStorage.setItem(storageKey, ethConnection.getPrivateKey());
+
+        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+
+        // PUNK
         // TODO: Provide own env variable for this feature
-        if (!isProd) {
-          // in development, automatically get some ether from faucet
-          const balance = weiToEth(
-            await ethConnection?.loadBalance(playerAddress),
-          );
-          if (balance === 0) {
-            await requestDevFaucet(playerAddress);
-          }
-          // }
-          setStep(TerminalPromptStep.FETCHING_ETH_DATA);
-        } else {
-          setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);
-        }
+        // if (!isProd) {
+        //   // in development, automatically get some ether from faucet
+        //   const balance = weiToEth(
+        //     await ethConnection?.loadBalance(playerAddress),
+        //   );
+        //   if (balance === 0) {
+        //     await requestDevFaucet(playerAddress);
+        //   }
+        //   // }
+        //   setStep(TerminalPromptStep.FETCHING_ETH_DATA);
+        // } else {
+        //   setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);
+        // }
       } catch (e) {
         console.error(`error connecting to whitelist: ${e}`);
         terminal.current?.println(
