@@ -101,12 +101,9 @@ library ArtifactStorageLib {
     }
   }
 
-  function Remove(ArtifactStorage memory _s, uint256 _artifact) internal view {
+  function Remove(ArtifactStorage memory _s, uint256 _artifact) internal pure {
     if (_s.IsEmpty()) {
       revert Errors.ArtifactNotOnPlanet();
-    }
-    if (ArtifactTable.getStatus(uint32(_artifact)) > ArtifactStatus.CHARGING) {
-      revert Errors.ArtifactNotAvailable();
     }
     uint256 number = _s.number;
     uint256 artifacts = _s.artifacts;
@@ -206,9 +203,9 @@ library ArtifactLib {
   }
 
   function _updateArtifactStatus(Artifact memory artifact, uint256 curTick) internal pure {
-    if (artifact.status == ArtifactStatus.CHARGING && curTick >= artifact.chargeTick + artifact.charge) {
-      artifact.status = ArtifactStatus.READY;
-    } else if (artifact.status == ArtifactStatus.COOLDOWN && curTick >= artifact.cooldownTick + artifact.cooldown) {
+    if (artifact.status == ArtifactStatus.COOLDOWN && curTick >= artifact.cooldownTick + artifact.cooldown) {
+      artifact.status = ArtifactStatus.DEFAULT;
+    } else if (artifact.status == ArtifactStatus.CHARGING && curTick >= artifact.chargeTick + artifact.charge) {
       artifact.status = ArtifactStatus.READY;
     }
   }

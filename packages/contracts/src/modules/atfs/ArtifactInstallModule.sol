@@ -8,7 +8,8 @@ import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IInstallLibrary } from "./IInstallLibrary.sol";
 import { IArtifactSystem } from "../../codegen/world/IArtifactSystem.sol";
-import { _artifactIndexToNamespace } from "./utils.sol";
+import { IArtifactProxySystem } from "./IArtifactProxySystem.sol";
+import { _artifactIndexToNamespace, _artifactProxySystemId } from "./utils.sol";
 
 contract ArtifactInstallModule is Module {
   function install(bytes memory encodedArgs) public {
@@ -17,16 +18,22 @@ contract ArtifactInstallModule is Module {
 
     // Decode args
     (address installLibrary, address artifactProxySystem) = abi.decode(encodedArgs, (address, address));
+    uint256 index = IArtifactProxySystem(artifactProxySystem).getArtifactIndex();
+
+    bytes14 namespace = _artifactIndexToNamespace(index);
 
     // Install artifact
     IBaseWorld world = IBaseWorld(_world());
     (bool success, bytes memory returnData) = installLibrary.delegatecall(
-      abi.encodeCall(IInstallLibrary.installArtifact, (world, System(artifactProxySystem)))
+      abi.encodeCall(IInstallLibrary.installArtifact, (world, namespace, artifactProxySystem))
     );
     if (!success) revertWithBytes(returnData);
-    uint256 index = abi.decode(returnData, (uint256));
+
+    // Register artifact proxy system
+    world.registerSystem(_artifactProxySystemId(namespace), System(artifactProxySystem), true);
+
     // Transfer ownership of the namespace to the caller
-    world.transferOwnership(WorldResourceIdLib.encodeNamespace(_artifactIndexToNamespace(index)), _msgSender());
+    world.transferOwnership(WorldResourceIdLib.encodeNamespace(namespace), _msgSender());
 
     // Register the artifact into the game
     IArtifactSystem(address(world)).df__registerArtifact(index);

@@ -13,13 +13,14 @@ import { EffectLib } from "../../../lib/Effect.sol";
 import { ARTIFACT_INDEX, COMMON_CHARGE, RARE_CHARGE, EPIC_CHARGE, LEGENDARY_CHARGE, MYTHIC_CHARGE } from "./constant.sol";
 import { COMMON_ACTIVATE, RARE_ACTIVATE, EPIC_ACTIVATE, LEGENDARY_ACTIVATE, MYTHIC_ACTIVATE } from "./constant.sol";
 import { COMMON_ACTIVATE_AFTER_MOVE, RARE_ACTIVATE_AFTER_MOVE, EPIC_ACTIVATE_AFTER_MOVE, LEGENDARY_ACTIVATE_AFTER_MOVE, MYTHIC_ACTIVATE_AFTER_MOVE } from "./constant.sol";
+
 contract CannonSystem is ArtifactProxySystem {
   using EffectLib for Planet;
   function getArtifactIndex() public pure override returns (uint8) {
     return ARTIFACT_INDEX;
   }
 
-  function _shutdown(Planet memory planet, Artifact memory artifact) internal view virtual override {
+  function _shutdown(Planet memory planet, Artifact memory artifact) internal virtual override {
     super._shutdown(planet, artifact);
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
@@ -45,7 +46,7 @@ contract CannonSystem is ArtifactProxySystem {
     }
   }
 
-  function _charge(Planet memory planet, Artifact memory artifact) internal view virtual override {
+  function _charge(Planet memory planet, Artifact memory artifact) internal virtual override {
     super._charge(planet, artifact);
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
@@ -61,8 +62,8 @@ contract CannonSystem is ArtifactProxySystem {
     }
   }
 
-  function _activate(Planet memory planet, Artifact memory artifact) internal view virtual override {
-    super._activate(planet, artifact);
+  function _activate(Planet memory planet, Artifact memory artifact, bytes memory inputData) internal virtual override {
+    super._activate(planet, artifact, inputData);
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
       planet.applyEffect(COMMON_ACTIVATE);

@@ -169,7 +169,7 @@ library PlanetLib {
     planet.artifactStorage.Push(artifact);
   }
 
-  function removeArtifact(Planet memory planet, uint256 artifact) internal view {
+  function removeArtifact(Planet memory planet, uint256 artifact) internal pure {
     planet.artifactStorage.Remove(artifact);
   }
 
@@ -202,28 +202,29 @@ library PlanetLib {
   function activateArtifact(
     Planet memory planet,
     Artifact memory artifact,
+    bytes memory inputData,
     address world
   ) internal returns (Planet memory, Artifact memory) {
     _validateActivateArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
       _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
-      abi.encodeCall(IArtifactProxySystem.activate, (planet, artifact))
+      abi.encodeCall(IArtifactProxySystem.activate, (planet, artifact, inputData))
     );
     return abi.decode(data, (Planet, Artifact));
   }
 
-  function deactivateArtifact(
-    Planet memory planet,
-    Artifact memory artifact,
-    address world
-  ) internal returns (Planet memory, Artifact memory) {
-    _validateDeactivateArtifact(planet, artifact);
-    bytes memory data = IBaseWorld(world).call(
-      _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
-      abi.encodeCall(IArtifactProxySystem.deactivate, (planet, artifact))
-    );
-    return abi.decode(data, (Planet, Artifact));
-  }
+  // function deactivateArtifact(
+  //   Planet memory planet,
+  //   Artifact memory artifact,
+  //   address world
+  // ) internal returns (Planet memory, Artifact memory) {
+  //   _validateDeactivateArtifact(planet, artifact);
+  //   bytes memory data = IBaseWorld(world).call(
+  //     _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
+  //     abi.encodeCall(IArtifactProxySystem.deactivate, (planet, artifact))
+  //   );
+  //   return abi.decode(data, (Planet, Artifact));
+  // }
 
   function changeOwner(Planet memory planet, address newOwner) internal pure {
     planet.owner = newOwner;
@@ -668,16 +669,20 @@ library PlanetLib {
     if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
       revert Errors.NotEnoughResourceToActivate();
     }
-    if (artifact.status != ArtifactStatus.READY) {
+    if (
+      artifact.status == ArtifactStatus.READY || (artifact.status < ArtifactStatus.CHARGING && artifact.charge == 0)
+    ) {
+      return;
+    } else {
       revert Errors.ArtifactNotAvailable();
     }
   }
 
-  function _validateDeactivateArtifact(Planet memory, Artifact memory artifact) internal pure {
-    if (artifact.status != ArtifactStatus.ACTIVE) {
-      revert Errors.ArtifactNotAvailable();
-    }
-  }
+  // function _validateDeactivateArtifact(Planet memory, Artifact memory artifact) internal pure {
+  //   if (artifact.status != ArtifactStatus.ACTIVE) {
+  //     revert Errors.ArtifactNotAvailable();
+  //   }
+  // }
 
   function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
     uint256 res = uint8(planet.spaceType) * 3;

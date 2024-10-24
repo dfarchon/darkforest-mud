@@ -52,7 +52,7 @@ contract ArtifactSystem is System, Errors {
     planet.writeToStore();
   }
 
-  function activateArtifact(uint256 planetHash, uint256 artifactId) public {
+  function activateArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public {
     IWorld world = IWorld(_world());
     world.df__tick();
 
@@ -61,24 +61,24 @@ contract ArtifactSystem is System, Errors {
     if (planet.owner != _msgSender()) {
       revert Errors.NotPlanetOwner();
     }
-    (planet, artifact) = planet.activateArtifact(artifact, _world());
+    (planet, artifact) = planet.activateArtifact(artifact, data, _world());
 
     artifact.writeToStore();
     planet.writeToStore();
   }
 
-  function deactivateArtifact(uint256 planetHash, uint256 artifactId) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+  // function deactivateArtifact(uint256 planetHash, uint256 artifactId) public {
+  //   IWorld world = IWorld(_world());
+  //   world.df__tick();
 
-    Planet memory planet = world.df__readPlanet(planetHash);
-    Artifact memory artifact = planet.mustGetArtifact(artifactId);
-    if (planet.owner != _msgSender()) {
-      revert Errors.NotPlanetOwner();
-    }
-    (planet, artifact) = planet.deactivateArtifact(artifact, _world());
+  //   Planet memory planet = world.df__readPlanet(planetHash);
+  //   Artifact memory artifact = planet.mustGetArtifact(artifactId);
+  //   if (planet.owner != _msgSender()) {
+  //     revert Errors.NotPlanetOwner();
+  //   }
+  //   (planet, artifact) = planet.deactivateArtifact(artifact, _world());
 
-    artifact.writeToStore();
-    planet.writeToStore();
-  }
+  //   artifact.writeToStore();
+  //   planet.writeToStore();
+  // }
 }

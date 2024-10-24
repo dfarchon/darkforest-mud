@@ -81,7 +81,7 @@ contract CannonTest is MudTest {
     Artifact memory artifact = planet.mustGetArtifact(1);
     vm.warp(block.timestamp + artifact.charge / Ticker.getTickRate() + 1);
     vm.prank(address(1));
-    IWorld(worldAddress).df__activateArtifact(1, 1);
+    IWorld(worldAddress).df__activateArtifact(1, 1, bytes(""));
     Planet memory planetAfter = IWorld(worldAddress).df__readPlanet(1);
     artifact.readFromStore(Ticker.getTickNumber());
     assertEq(planetAfter.effectNumber, 3);

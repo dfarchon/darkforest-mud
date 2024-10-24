@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { EffectType } from "../../../codegen/common.sol";
-import { EffectLib } from "../../../lib/Effect.sol";
-
 uint8 constant ARTIFACT_INDEX = 6;
 
 uint24 constant COMMON_CHARGE = 0x06_01_00;

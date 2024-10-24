@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
 import { BaseInstallLibrary } from "../BaseInstallLibrary.sol";
 import { CannonSystem } from "./CannonSystem.sol";
 import { ArtifactInstallModule } from "../ArtifactInstallModule.sol";
@@ -40,7 +39,7 @@ contract CannonInstallLibrary is BaseInstallLibrary {
     return ARTIFACT_INDEX;
   }
 
-  function _install(IBaseWorld, bytes14 namespace) internal override {
+  function _install(IBaseWorld, bytes14 namespace, address) internal override {
     // setup effect ourside of the install library
     _setUpEffects(namespace);
 
@@ -71,9 +70,7 @@ contract CannonInstallLibrary is BaseInstallLibrary {
   function _setUpEffects(bytes14 namespace) internal {
     // register effect table
     ResourceId effectTableId = _effectTableId(namespace);
-    if (!ResourceIds.getExists(effectTableId)) {
-      Effect.register(effectTableId);
-    }
+    Effect.register(effectTableId);
 
     // set effects
     Modifier[] memory modifiers = new Modifier[](1);

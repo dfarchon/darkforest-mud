@@ -5,5 +5,5 @@ import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.
 import { System } from "@latticexyz/world/src/System.sol";
 
 interface IInstallLibrary {
-  function installArtifact(IBaseWorld world, System artifactProxySystem) external returns (uint256 index);
+  function installArtifact(IBaseWorld world, bytes14 namespace, address artifactProxySystem) external;
 }

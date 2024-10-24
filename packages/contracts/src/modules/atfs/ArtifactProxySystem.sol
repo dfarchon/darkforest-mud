@@ -59,31 +59,32 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
 
   function activate(
     Planet memory planet,
-    Artifact memory artifact
+    Artifact memory artifact,
+    bytes memory inputData
   ) public virtual onlyArtifactSystem returns (Planet memory, Artifact memory) {
     // ArtifactMetadataData memory metadata = _getMetadata(artifact);
     // _updateArtifactStatus(planet, artifact, metadata);
     // _validateActivateArtifact(planet, artifact, metadata);
 
     // internal activate logic
-    _activate(planet, artifact);
+    _activate(planet, artifact, inputData);
 
     return (planet, artifact);
   }
 
-  function deactivate(
-    Planet memory planet,
-    Artifact memory artifact
-  ) public virtual onlyArtifactSystem returns (Planet memory, Artifact memory) {
-    // ArtifactMetadataData memory metadata = _getMetadata(artifact);
-    // _updateArtifactStatus(planet, artifact, metadata);
-    // _validateDeactivateArtifact(planet, artifact, metadata);
+  // function deactivate(
+  //   Planet memory planet,
+  //   Artifact memory artifact
+  // ) public virtual onlyArtifactSystem returns (Planet memory, Artifact memory) {
+  //   // ArtifactMetadataData memory metadata = _getMetadata(artifact);
+  //   // _updateArtifactStatus(planet, artifact, metadata);
+  //   // _validateDeactivateArtifact(planet, artifact, metadata);
 
-    // internal deactivate logic
-    _deactivate(planet, artifact);
+  //   // internal deactivate logic
+  //   _deactivate(planet, artifact);
 
-    return (planet, artifact);
-  }
+  //   return (planet, artifact);
+  // }
 
   // function _updateArtifactStatus(
   //   Planet memory planet,
@@ -98,21 +99,26 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
   //   }
   // }
 
-  function _shutdown(Planet memory planet, Artifact memory artifact) internal view virtual {
-    if (artifact.status == ArtifactStatus.ACTIVE && !artifact.reusable) {
-      artifact.status = ArtifactStatus.BROKEN;
-      planet.removeArtifact(artifact.id);
+  function _shutdown(Planet memory planet, Artifact memory artifact) internal virtual {
+    if (artifact.status == ArtifactStatus.ACTIVE) {
+      if (artifact.reusable) {
+        artifact.status = ArtifactStatus.COOLDOWN;
+        artifact.cooldownTick = planet.lastUpdateTick;
+      } else {
+        artifact.status = ArtifactStatus.BROKEN;
+        planet.removeArtifact(artifact.id);
+      }
     } else {
       artifact.status = ArtifactStatus.DEFAULT;
     }
   }
 
-  function _charge(Planet memory planet, Artifact memory artifact) internal view virtual {
+  function _charge(Planet memory planet, Artifact memory artifact) internal virtual {
     artifact.chargeTick = planet.lastUpdateTick;
     artifact.status = ArtifactStatus.CHARGING;
   }
 
-  function _activate(Planet memory planet, Artifact memory artifact) internal view virtual {
+  function _activate(Planet memory planet, Artifact memory artifact, bytes memory) internal virtual {
     artifact.activateTick = planet.lastUpdateTick;
     planet.population -= artifact.reqPopulation;
     planet.silver -= artifact.reqSilver;
@@ -126,15 +132,15 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
     }
   }
 
-  function _deactivate(Planet memory planet, Artifact memory artifact) internal view virtual {
-    if (artifact.reusable) {
-      artifact.status = ArtifactStatus.COOLDOWN;
-      artifact.cooldownTick = planet.lastUpdateTick;
-    } else {
-      artifact.status = ArtifactStatus.BROKEN;
-      planet.removeArtifact(artifact.id);
-    }
-  }
+  // function _deactivate(Planet memory planet, Artifact memory artifact) internal virtual {
+  //   if (artifact.reusable) {
+  //     artifact.status = ArtifactStatus.COOLDOWN;
+  //     artifact.cooldownTick = planet.lastUpdateTick;
+  //   } else {
+  //     artifact.status = ArtifactStatus.BROKEN;
+  //     planet.removeArtifact(artifact.id);
+  //   }
+  // }
 
   // function _validateShutdownArtifact(
   //   Planet memory,

@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { Errors } from "../interfaces/errors.sol";
 import { Move, MoveData, Ticker, PendingMove, PendingMoveData, Counter } from "../codegen/index.sol";
 import { Artifact as ArtifactTable, ArtifactOwner } from "../codegen/index.sol";
-import { PlanetType } from "../codegen/common.sol";
+import { PlanetType, ArtifactStatus } from "../codegen/common.sol";
 import { Planet } from "./Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 
@@ -47,12 +47,16 @@ library MoveLib {
     from.silver -= silver;
   }
 
-  function loadArtifact(MoveData memory move, Planet memory from, uint256 artifact) internal view {
-    if (artifact == 0) {
+  function loadArtifact(MoveData memory move, Planet memory from, uint256 artifactId) internal view {
+    if (artifactId == 0) {
       return;
     }
-    move.artifact = artifact;
-    from.removeArtifact(artifact);
+    if (ArtifactTable.getStatus(uint32(artifactId)) >= ArtifactStatus.CHARGING) {
+      revert Errors.ArtifactNotAvailable();
+    }
+
+    move.artifact = artifactId;
+    from.removeArtifact(artifactId);
   }
 
   function headTo(MoveData memory move, Planet memory to, uint256 distance, uint256 speed) internal {

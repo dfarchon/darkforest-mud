@@ -18,7 +18,7 @@ export default defineWorld({
       "LAVA",
       "CORRUPTED",
     ],
-    ArtifactStatus: ["DEFAULT", "CHARGING", "COOLDOWN", "READY", "ACTIVE", "BROKEN"],
+    ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "READY", "ACTIVE", "BROKEN"],
     ArtifactGenre: ["UNKNOWN", "DEFENSIVE", "OFFENSIVE", "PRODUCTIVE", "GENERAL"],
     ArtifactRarity: ["UNKNOWN", "COMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC"],
     EffectType: ["UNKNOWN", "STAT", "BEFORE_MOVE", "AFTER_MOVE", "BEFORE_ARRIVAL", "AFTER_ARRIVAL"],
@@ -81,6 +81,14 @@ export default defineWorld({
         move: "uint64",
       },
       key: [],
+    },
+    DistanceMultiplier: {
+      schema: {
+        from: "bytes32",
+        to: "bytes32",
+        multiplier: "uint32",
+      },
+      key: ["from", "to"],
     },
     Player: {
       schema: {
