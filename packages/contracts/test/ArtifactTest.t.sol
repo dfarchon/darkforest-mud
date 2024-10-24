@@ -88,7 +88,7 @@ contract ArtifactTest is MudTest {
     ArtifactData memory data = ArtifactTable.get(uint32(artifact));
     Artifact memory tArtifact = ArtifactLib.NewArtifact(seed, 1, 1);
     assertEq(uint8(data.rarity), uint8(tArtifact.rarity));
-    assertEq(uint8(data.artifactType), uint8(tArtifact.artifactType));
+    assertEq(uint8(data.artifactIndex), tArtifact.artifactIndex);
     assertEq(uint8(data.status), uint8(ArtifactStatus.DEFAULT));
 
     vm.roll(2000);
