@@ -25,7 +25,7 @@ contract ArtifactInstallModule is Module {
     // Install artifact
     IBaseWorld world = IBaseWorld(_world());
     (bool success, bytes memory returnData) = installLibrary.delegatecall(
-      abi.encodeCall(IInstallLibrary.installArtifact, (world, namespace, artifactProxySystem))
+      abi.encodeCall(IInstallLibrary.installArtifact, (world, namespace))
     );
     if (!success) revertWithBytes(returnData);
 

@@ -23,6 +23,7 @@ import { AtfInstallModule } from "../src/codegen/index.sol";
 import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
 import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
 import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLibrary.sol";
+import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeInstallLibrary.sol";
 
 contract PostDeploy is Script {
   using stdToml for string;
@@ -172,5 +173,7 @@ contract PostDeploy is Script {
     console.log("Installing artifacts");
     uint256 index = installCannon(worldAddress);
     console.log("Installed cannon with index", index);
+    index = installWormhole(worldAddress);
+    console.log("Installed wormhole with index", index);
   }
 }

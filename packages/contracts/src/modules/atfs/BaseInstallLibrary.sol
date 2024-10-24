@@ -13,7 +13,7 @@ abstract contract BaseInstallLibrary is IInstallLibrary {
   /**
    * Install artifact, register needed systems and tables in specific namespace
    */
-  function installArtifact(IBaseWorld world, bytes14 namespace, address artifactProxySystem) public virtual {
+  function installArtifact(IBaseWorld world, bytes14 namespace) public virtual {
     // Register the namespace
     ResourceId atfNamespace = WorldResourceIdLib.encodeNamespace(namespace);
     world.registerNamespace(atfNamespace);
@@ -23,10 +23,10 @@ abstract contract BaseInstallLibrary is IInstallLibrary {
     ArtifactMetadata.register(tableId);
 
     // Register needed systems except artifact proxy system and other tables
-    _install(world, namespace, artifactProxySystem);
+    _install(world, namespace);
   }
 
   function _artifactIndex() internal pure virtual returns (uint8);
 
-  function _install(IBaseWorld world, bytes14 namespace, address artifactProxySystem) internal virtual;
+  function _install(IBaseWorld world, bytes14 namespace) internal virtual;
 }

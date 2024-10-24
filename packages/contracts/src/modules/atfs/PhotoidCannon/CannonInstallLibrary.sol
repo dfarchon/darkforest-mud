@@ -39,7 +39,7 @@ contract CannonInstallLibrary is BaseInstallLibrary {
     return ARTIFACT_INDEX;
   }
 
-  function _install(IBaseWorld, bytes14 namespace, address) internal override {
+  function _install(IBaseWorld, bytes14 namespace) internal override {
     // setup effect ourside of the install library
     _setUpEffects(namespace);
 

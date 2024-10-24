@@ -24,11 +24,15 @@ function installWormhole(address world) returns (uint256 index) {
   address moduleAddr = AtfInstallModule.get();
   require(moduleAddr != address(0), "ArtifactInstallModule not found");
 
+  WormholeSystem artifactProxySystem = new WormholeSystem();
   // Install the ERC20 module with the provided args
   IBaseWorld(world).installModule(
     ArtifactInstallModule(moduleAddr),
-    abi.encode(new WormholeInstallLibrary(), new WormholeSystem())
+    abi.encode(new WormholeInstallLibrary(), artifactProxySystem)
   );
+
+  // grant DistanceMultiplier access to the artifact proxy system
+  IBaseWorld(world).grantAccess(DistanceMultiplier._tableId, address(artifactProxySystem));
 
   return ARTIFACT_INDEX;
 }
@@ -38,10 +42,7 @@ contract WormholeInstallLibrary is BaseInstallLibrary {
     return ARTIFACT_INDEX;
   }
 
-  function _install(IBaseWorld world, bytes14 namespace, address artifactProxySystem) internal override {
-    // grant DistanceMultiplier access to the artifact proxy system
-    world.grantAccess(DistanceMultiplier._tableId, artifactProxySystem);
-
+  function _install(IBaseWorld, bytes14 namespace) internal override {
     // register wormhole table
     ResourceId wormholeTableId = _wormholeTableId(namespace);
     Wormhole.register(wormholeTableId);

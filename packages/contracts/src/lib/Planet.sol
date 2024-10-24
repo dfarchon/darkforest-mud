@@ -670,7 +670,7 @@ library PlanetLib {
       revert Errors.NotEnoughResourceToActivate();
     }
     if (
-      artifact.status == ArtifactStatus.READY || (artifact.status < ArtifactStatus.CHARGING && artifact.charge == 0)
+      artifact.status == ArtifactStatus.READY || (artifact.status == ArtifactStatus.DEFAULT && artifact.charge == 0)
     ) {
       return;
     } else {

@@ -14,6 +14,7 @@ import { _wormholeTableId } from "./utils.sol";
 contract WormholeSystem is ArtifactProxySystem {
   error WormholeAlreadySet(); // 0x1fa9cff1
   error WormholeNotSet(); // 0xf337e05a
+  error WormholeSetToSelf(); // 0x842ec8de
 
   uint32[6] private _distanceMultipliers = [1000, 500, 250, 125, 62, 31];
 
@@ -44,6 +45,9 @@ contract WormholeSystem is ArtifactProxySystem {
 
     bytes32 to = abi.decode(inputData, (bytes32));
     bytes32 from = bytes32(planet.planetHash);
+    if (from == to) {
+      revert WormholeSetToSelf();
+    }
     (bytes32 left, bytes32 right) = from < to ? (from, to) : (to, from);
     ResourceId wormholeTableId = _wormholeTableId(_namespace());
     if (Wormhole.get(wormholeTableId, left) != 0 || Wormhole.get(wormholeTableId, right) != 0) {
