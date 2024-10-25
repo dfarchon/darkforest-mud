@@ -16,9 +16,12 @@ export interface EmbeddedPlugin {
 // const pluginsContext = import.meta.glob("../../../embedded_plugins/*.[jt]sx?", {
 //   as: "raw",
 // });
-const pluginsContext = import.meta.glob("../../../embedded_plugins/*.[jt]s", {
-  as: "raw",
-});
+const pluginsContext = import.meta.glob(
+  "../../../embedded_plugins/*.{js,ts,tsx}",
+  {
+    as: "raw",
+  },
+);
 
 function cleanFilename(filename: string) {
   return filename
@@ -44,6 +47,7 @@ export async function getEmbeddedPlugins(
       })
       .map(async ([filename, importPlugin]) => {
         const code = await importPlugin();
+
         const newFileName = cleanFilename(filename);
         return {
           id: newFileName as PluginId,

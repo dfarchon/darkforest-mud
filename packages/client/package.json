@@ -93,6 +93,7 @@
     "tailwindcss": "3.4.10",
     "uuid": "3.3.2",
     "vite": "5.4.8",
+    "vite-plugin-babel": "^1.2.0",
     "vite-plugin-node-polyfills": "0.22.0",
     "wait-port": "1.1.0"
   }
