@@ -19,7 +19,7 @@ module.exports = {
     "src/Shared/snarks/*",
     "vite.config.ts",
     "src/Backend/Plugins/minimapSpawn.js",
-    "embedded_plugins/**/*"
+    "embedded_plugins/**/*",
   ],
   plugins: ["react", "react-hooks"],
   settings: {

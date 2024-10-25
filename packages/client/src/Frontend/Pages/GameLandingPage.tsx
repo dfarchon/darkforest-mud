@@ -1,6 +1,9 @@
 import {
-  BLOCK_EXPLORER_URL,
   BLOCKCHAIN_BRIDGE,
+  BLOCK_EXPLORER_URL,
+  HOW_TO_ENABLE_POPUPS,
+  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
+  PLAYER_GUIDE,
   TOKEN_NAME,
 } from "@df/constants";
 import type { EthConnection } from "@df/network";
@@ -136,11 +139,6 @@ export function GameLandingPage() {
     },
   );
 
-  const syncSign = useMemo(() => {
-    // console.log(syncProgress);
-    return syncProgress.step === "live" && syncProgress.percentage == 100;
-  }, [syncProgress]);
-
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
@@ -191,6 +189,33 @@ export function GameLandingPage() {
   );
 
   const [isPlayerRegistered, setIsPlayerRegistered] = useState(false);
+
+  const syncSign = useMemo(() => {
+    console.log(syncProgress.step, syncProgress.percentage);
+    return syncProgress.step === "live" && syncProgress.percentage == 100;
+  }, [syncProgress]);
+
+  const isWalletModalOpen = useMemo(() => {
+    return (
+      syncSign &&
+      isDataLoaded &&
+      (isPlayerRegistered === false ||
+        mainAccount === zeroAddress ||
+        burnerBalanceValue <= LOW_BALANCE_THRESHOLD)
+    );
+  }, [
+    syncSign,
+    isDataLoaded,
+    isPlayerRegistered,
+    mainAccount,
+    burnerBalanceValue,
+  ]);
+
+  const [playerWantWalletOpen, setPlayerWantWalletOpen] = useState(false);
+
+  const toggleWalletModal = () => {
+    setPlayerWantWalletOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     const checkPlayerRegistration = async () => {
@@ -250,9 +275,7 @@ export function GameLandingPage() {
         terminal.current?.printLink(
           "Please Click Here",
           () => {
-            window.open(
-              "https://dfares.notion.site/DFAres-Round-3-Guide-3980998d8f65440085c116ba0df0d99a",
-            );
+            window.open(PLAYER_GUIDE);
           },
           TerminalTextStyle.Blue,
         );
@@ -691,9 +714,7 @@ export function GameLandingPage() {
           terminal.current?.printLink(
             "How to get ETH on the Redstone mainnet for your account",
             () => {
-              window.open(
-                "https://dfares.notion.site/How-to-transfer-ETH-from-L2-to-Redstone-Mainnet-89198e3016a444779c121efa2590bddd?pvs=74",
-              );
+              window.open(HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE);
             },
             TerminalTextStyle.Green,
           );
@@ -765,23 +786,24 @@ export function GameLandingPage() {
 
         terminal.current?.print("Checking if whitelisted... ");
 
+        const isWhitelisted = true;
         // TODO(#2329): isWhitelisted should just check the contractOwner
         // if (isWhitelisted || playerAddress === adminAddress) {
-        terminal.current?.println("Player whitelisted.");
-        terminal.current?.println("");
-        terminal.current?.println(`Welcome, player ${playerAddress}.`);
-        const storageKey = "mud:burnerWallet";
-        localStorage.setItem(storageKey, ethConnection.getPrivateKey());
-        // TODO: Provide own env variable for this feature
-        if (!isProd) {
-          // in development, automatically get some ether from faucet
-          const balance = weiToEth(
-            await ethConnection?.loadBalance(playerAddress),
-          );
-          if (balance === 0) {
-            await requestDevFaucet(playerAddress);
+        if (isWhitelisted) {
+          terminal.current?.println("Player whitelisted.");
+          terminal.current?.println("");
+          terminal.current?.println(`Welcome, player ${playerAddress}.`);
+
+          // TODO: Provide own env variable for this feature
+          if (!isProd) {
+            // in development, automatically get some ether from faucet
+            const balance = weiToEth(
+              await ethConnection?.loadBalance(playerAddress),
+            );
+            if (balance === 0) {
+              await requestDevFaucet(playerAddress);
+            }
           }
-          // }
           setStep(TerminalPromptStep.FETCHING_ETH_DATA);
         } else {
           setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);
@@ -1312,9 +1334,7 @@ export function GameLandingPage() {
                 terminal.current?.printLink(
                   "How to enable popups",
                   () => {
-                    window.open(
-                      "https://dfares.notion.site/How-to-enable-popups-f01552bd77984ad582e1d7cc33b9523d",
-                    );
+                    window.open(HOW_TO_ENABLE_POPUPS);
                   },
                   TerminalTextStyle.Green,
                 );
@@ -1471,9 +1491,7 @@ export function GameLandingPage() {
                 terminal.current?.printLink(
                   "How to enable popups",
                   () => {
-                    window.open(
-                      "https://dfares.notion.site/How-to-enable-popups-f01552bd77984ad582e1d7cc33b9523d",
-                    );
+                    window.open(HOW_TO_ENABLE_POPUPS);
                   },
                   TerminalTextStyle.Green,
                 );
@@ -1757,10 +1775,30 @@ export function GameLandingPage() {
 
   return (
     <>
-      {isDataLoaded &&
-        (isPlayerRegistered === false ||
-          mainAccount === zeroAddress ||
-          burnerBalanceValue <= LOW_BALANCE_THRESHOLD) && <WalletModal />}
+      <button
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          padding: "10px",
+          backgroundColor: "#007BFF",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+        onClick={toggleWalletModal}
+      >
+        {"Wallet Toggle"}
+      </button>
+      {(isWalletModalOpen || playerWantWalletOpen) && (
+        <WalletModal
+          visible={isWalletModalOpen || playerWantWalletOpen}
+          onClose={() => {
+            setPlayerWantWalletOpen(false);
+          }}
+        />
+      )}
 
       <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
         <GameWindowWrapper
@@ -1779,6 +1817,7 @@ export function GameLandingPage() {
                 </UIManagerProvider>
               </TopLevelDivProvider>
             )}
+
           <TerminalToggler
             terminalEnabled={terminalVisible}
             setTerminalEnabled={setTerminalVisible}
