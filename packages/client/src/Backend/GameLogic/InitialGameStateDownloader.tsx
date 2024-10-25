@@ -72,7 +72,7 @@ export class InitialGameStateDownloader {
     contractsAPI: ContractsAPI,
     persistentChunkStore: PersistentChunkStore,
   ): Promise<InitialGameState> {
-    const isDev = process.env.NODE_ENV !== "production";
+    const isDev = import.meta.env.VITE_NODE_ENV !== "production";
 
     /**
      * In development we use the same contract address every time we deploy,

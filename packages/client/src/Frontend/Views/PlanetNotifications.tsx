@@ -36,7 +36,7 @@ export function getNotifsForPlanet(
     if (GameObjects.planetCanUpgrade(planet)) {
       notifs.push(PlanetNotifType.PlanetCanUpgrade);
     }
-    if (process.env.DF_WEBSERVER_URL) {
+    if (import.meta.env.VITE_WEBSERVER_URL) {
       notifs.push(PlanetNotifType.CanAddEmoji);
     }
   }
