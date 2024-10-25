@@ -160,14 +160,14 @@ export const snips = {
   pane: ``,
   // It is unclear where this should go in this file
   destroyedBackground: {
-    backgroundImage: 'url("/public/img/destroyedbg.png")',
+    backgroundImage: 'url("/img/destroyedbg.png")',
     backgroundSize: "150px",
     backgroundPosition: "right bottom",
     backgroundRepeat: "no-repeat",
   } as CSSStyleDeclaration & React.CSSProperties,
   // It is unclear where this should go in this file
   frozenBackground: {
-    backgroundImage: 'url("/public/img/frozenbg.png")',
+    backgroundImage: 'url("/img/frozenbg.png")',
     backgroundSize: "150px",
     backgroundPosition: "right bottom",
     backgroundRepeat: "no-repeat",

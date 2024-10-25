@@ -41,7 +41,7 @@ export function GifMaker() {
   useEffect(() => {
     const script = document.createElement("script");
 
-    script.src = "/public/CCapture.all.min.js";
+    script.src = "/CCapture.all.min.js";
     script.async = true;
 
     document.body.appendChild(script);
