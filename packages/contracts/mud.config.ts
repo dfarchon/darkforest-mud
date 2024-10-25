@@ -72,7 +72,7 @@ export default defineWorld({
       name: "DfDelegationCtrl",
     },
   },
-  excludeSystems: ["ArtifactProxySystem", "CannonSystem"],
+  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem"],
   tables: {
     Counter: {
       schema: {

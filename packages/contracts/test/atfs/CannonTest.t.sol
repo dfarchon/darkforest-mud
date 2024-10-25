@@ -5,16 +5,16 @@ import "forge-std/Test.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
-import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../src/codegen/index.sol";
-import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker, TempConfigSet } from "../src/codegen/index.sol";
-import { Errors } from "../src/interfaces/errors.sol";
-import { Proof } from "../src/lib/SnarkProof.sol";
-import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
-import { Planet } from "../src/lib/Planet.sol";
-import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity } from "../src/codegen/common.sol";
-import { Artifact, ArtifactLib } from "../src/lib/Artifact.sol";
-import { ARTIFACT_INDEX as CANNON_INDEX, COMMON_CHARGE, COMMON_ACTIVATE, COMMON_ACTIVATE_AFTER_MOVE } from "../src/modules/atfs/PhotoidCannon/constant.sol";
+import { IWorld } from "../../src/codegen/world/IWorld.sol";
+import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
+import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker, TempConfigSet } from "../../src/codegen/index.sol";
+import { Errors } from "../../src/interfaces/errors.sol";
+import { Proof } from "../../src/lib/SnarkProof.sol";
+import { BiomebaseInput, MoveInput } from "../../src/lib/VerificationInput.sol";
+import { Planet } from "../../src/lib/Planet.sol";
+import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity } from "../../src/codegen/common.sol";
+import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
+import { ARTIFACT_INDEX as CANNON_INDEX, COMMON_CHARGE, COMMON_ACTIVATE, COMMON_ACTIVATE_AFTER_MOVE } from "../../src/modules/atfs/PhotoidCannon/constant.sol";
 import "forge-std/console.sol";
 
 contract CannonTest is MudTest {

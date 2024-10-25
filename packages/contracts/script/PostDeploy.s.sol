@@ -24,7 +24,7 @@ import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfi
 import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
 import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLibrary.sol";
 import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeInstallLibrary.sol";
-
+import { installBloomFilter } from "../src/modules/atfs/BloomFilter/BloomFilterInstallLibrary.sol";
 contract PostDeploy is Script {
   using stdToml for string;
   using Strings for uint256;
@@ -175,5 +175,7 @@ contract PostDeploy is Script {
     console.log("Installed cannon with index", index);
     index = installWormhole(worldAddress);
     console.log("Installed wormhole with index", index);
+    index = installBloomFilter(worldAddress);
+    console.log("Installed bloom filter with index", index);
   }
 }
