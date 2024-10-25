@@ -229,7 +229,7 @@ export function GameLandingPage() {
     });
   }, []);
 
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = import.meta.env.VITE_NODE_ENV === "production";
 
   const advanceStateFromCompatibilityPassed = useCallback(
     async (

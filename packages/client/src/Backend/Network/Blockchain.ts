@@ -19,14 +19,14 @@ export async function loadDiamondContract<T extends Contract>(
 }
 
 export function getEthConnection(): Promise<EthConnection> {
-  const isProd = process.env.NODE_ENV === "production";
-  const defaultUrl = process.env.DEFAULT_RPC as string;
+  const isProd = import.meta.env.VITE_NODE_ENV === "production";
+  const defaultUrl = import.meta.env.VITE_DEFAULT_RPC as string;
   const faucetServiceUrl = process.env.FAUCET_SERVICE_URL as string;
 
   let url: string;
 
   if (isProd) {
-    url = localStorage.getItem("XDAI_RPC_ENDPOINT_v5") || defaultUrl;
+    url = localStorage.getItem("RPC_ENDPOINT_v5") || defaultUrl;
   } else {
     url = "http://localhost:8545";
   }
@@ -34,7 +34,7 @@ export function getEthConnection(): Promise<EthConnection> {
   console.log(`GAME METADATA:`);
   console.log(`rpc url: ${url}`);
   console.log(`is production: ${isProd}`);
-  console.log(`webserver url: ${process.env.DF_WEBSERVER_URL}`);
+  console.log(`webserver url: ${import.meta.env.VITE_WEBSERVER_URL}`);
   console.log(`leaderboard url: ${process.env.LEADER_BOARD_URL}`);
   console.log(`faucet service url:${faucetServiceUrl}`);
 

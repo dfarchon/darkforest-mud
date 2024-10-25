@@ -64,7 +64,7 @@ export function SettingsPane({
 }) {
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
-  const isDevelopment = process.env.NODE_ENV !== "production";
+  const isDevelopment = import.meta.env.VITE_NODE_ENV !== "production";
   // const gasPrices = useEmitterValue(ethConnection.gasPrices$, ethConnection.getAutoGasPrices());
 
   const [rpcUrl, setRpcURL] = useState<string>(ethConnection.getRpcEndpoint());
@@ -72,7 +72,7 @@ export function SettingsPane({
     ethConnection
       .setRpcUrl(rpcUrl)
       .then(() => {
-        localStorage.setItem("XDAI_RPC_ENDPOINT_v5", rpcUrl);
+        localStorage.setItem("RPC_ENDPOINT_v5", rpcUrl);
       })
       .catch(() => {
         setRpcURL(ethConnection.getRpcEndpoint());
