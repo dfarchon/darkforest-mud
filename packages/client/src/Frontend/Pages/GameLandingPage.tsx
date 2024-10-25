@@ -211,9 +211,12 @@ export function GameLandingPage() {
     burnerBalanceValue,
   ]);
 
-  const [playerWantWalletOpen, setPlayerWantWalletOpen] = useState(false);
+  const [playerWantWalletOpen, setPlayerWantWalletOpen] = useState(true);
 
   const toggleWalletModal = () => {
+    if (isWalletModalOpen) {
+      return;
+    }
     setPlayerWantWalletOpen((prev) => !prev);
   };
 
@@ -230,6 +233,12 @@ export function GameLandingPage() {
     };
 
     checkPlayerRegistration();
+
+    const intervalId = setInterval(() => {
+      checkPlayerRegistration();
+    }, 2000);
+
+    return () => clearInterval(intervalId);
   }, [playerEntity, Player, walletClient]);
 
   useEffect(() => {
@@ -1791,6 +1800,7 @@ export function GameLandingPage() {
       >
         {"Wallet Toggle"}
       </button>
+
       {(isWalletModalOpen || playerWantWalletOpen) && (
         <WalletModal
           visible={isWalletModalOpen || playerWantWalletOpen}
