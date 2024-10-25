@@ -1,6 +1,6 @@
 import {
-  BLOCKCHAIN_BRIDGE,
   BLOCK_EXPLORER_URL,
+  BLOCKCHAIN_BRIDGE,
   HOW_TO_ENABLE_POPUPS,
   HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   PLAYER_GUIDE,
@@ -16,6 +16,7 @@ import { RegisterPlayerComponent } from "@frontend/Components/RegisterPlayerComp
 import { WalletModal } from "@frontend/Components/WalletModal";
 import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
 import { useStore as useStoreHook } from "@hooks/useStore";
+import { useComponentValue } from "@latticexyz/react";
 import { getComponentValue } from "@latticexyz/recs";
 import {
   decodeEntity,
@@ -80,7 +81,6 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
-import { useComponentValue } from "@latticexyz/react";
 
 const enum TerminalPromptStep {
   NONE,
