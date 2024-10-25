@@ -89,7 +89,7 @@ contract PlayerSystem is System {
     world.df__tick();
 
     if (!world.df__verifySpawnProof(_proof, _input)) {
-      revert Errors.InvalidMoveProof();
+      revert Errors.InvalidSpawnProof();
     }
 
     address player = _msgSender();
