@@ -136,11 +136,6 @@ export function GameLandingPage() {
     },
   );
 
-  const syncSign = useMemo(() => {
-    // console.log(syncProgress);
-    return syncProgress.step === "live" && syncProgress.percentage == 100;
-  }, [syncProgress]);
-
   const mainAccount = walletClient?.account?.address ?? zeroAddress;
   const gameAccount = burnerWalletClient.account.address ?? zeroAddress;
 
@@ -191,6 +186,33 @@ export function GameLandingPage() {
   );
 
   const [isPlayerRegistered, setIsPlayerRegistered] = useState(false);
+
+  const syncSign = useMemo(() => {
+    console.log(syncProgress.step, syncProgress.percentage);
+    return syncProgress.step === "live" && syncProgress.percentage == 100;
+  }, [syncProgress]);
+
+  const isWalletModalOpen = useMemo(() => {
+    return (
+      syncSign &&
+      isDataLoaded &&
+      (isPlayerRegistered === false ||
+        mainAccount === zeroAddress ||
+        burnerBalanceValue <= LOW_BALANCE_THRESHOLD)
+    );
+  }, [
+    syncSign,
+    isDataLoaded,
+    isPlayerRegistered,
+    mainAccount,
+    burnerBalanceValue,
+  ]);
+
+  const [playerWantWalletOpen, setPlayerWantWalletOpen] = useState(false);
+
+  const toggleWalletModal = () => {
+    setPlayerWantWalletOpen((prev) => !prev);
+  };
 
   useEffect(() => {
     const checkPlayerRegistration = async () => {
@@ -1757,10 +1779,30 @@ export function GameLandingPage() {
 
   return (
     <>
-      {isDataLoaded &&
-        (isPlayerRegistered === false ||
-          mainAccount === zeroAddress ||
-          burnerBalanceValue <= LOW_BALANCE_THRESHOLD) && <WalletModal />}
+      <button
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          padding: "10px",
+          backgroundColor: "#007BFF",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+        onClick={toggleWalletModal}
+      >
+        {"Wallet Toggle"}
+      </button>
+      {(isWalletModalOpen || playerWantWalletOpen) && (
+        <WalletModal
+          visible={isWalletModalOpen || playerWantWalletOpen}
+          onClose={() => {
+            setPlayerWantWalletOpen(false);
+          }}
+        />
+      )}
 
       <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
         <GameWindowWrapper
@@ -1779,6 +1821,7 @@ export function GameLandingPage() {
                 </UIManagerProvider>
               </TopLevelDivProvider>
             )}
+
           <TerminalToggler
             terminalEnabled={terminalVisible}
             setTerminalEnabled={setTerminalVisible}
