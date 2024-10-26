@@ -13,6 +13,7 @@ import {
   getPlanetNameHash, //@ts-ignore
 } from "https://cdn.skypack.dev/@dfares/procedural";
 import {
+  EMPTY_ADDRESS,
   MAX_ARTIFACT_RARITY,
   MIN_ARTIFACT_RARITY,
   MIN_SPACESHIP_TYPE,
@@ -128,23 +129,32 @@ async function updateTickRate(tickRate) {
   return tx;
 }
 
-// PUNK fix createPlanet
 async function createPlanet(coords, level, type) {
   coords.x = Math.round(coords.x);
   coords.y = Math.round(coords.y);
   const location = df.locationBigIntFromCoords(coords).toString();
   const perlinValue = df.biomebasePerlin(coords, true);
+
+  //PUNK when dfares/types update, need to update here
+  type++;
+
+  //PUNK add more spaceType later
+  const spaceType = 1; // Math.round(df.spaceTypePerlin(coords));
+
   const args = Promise.resolve([
-    {
-      x: coords.x,
-      y: coords.y,
-      level,
-      planetType: type,
-      requireValidLocationId: false,
-      location: location,
-      perlin: perlinValue,
-    },
+    location,
+    EMPTY_ADDRESS,
+    perlinValue,
+    level,
+    type,
+    spaceType,
+    1000000,
+    0,
+    0,
   ]);
+  console.log("args");
+  console.log(args);
+
   const account = df.getAccount();
   const player = df.getPlayer(account);
   const tx = await df.submitTransaction({
@@ -154,12 +164,12 @@ async function createPlanet(coords, level, type) {
     methodName: "df__createPlanet",
   });
   await tx.confirmedPromise;
-  const revealArgs = df.getSnarkHelper().getRevealArgs(coords.x, coords.y);
+  const revealArgs = [location, coords.x, coords.y]; // df.getSnarkHelper().getRevealArgs(coords.x, coords.y);
   const revealTx = await df.submitTransaction({
     delegator: player.address,
     args: revealArgs,
     contract: df.getContract(),
-    methodName: "df__revealLocation",
+    methodName: "df__revealPlanetByAdmin",
   });
   await revealTx.confirmedPromise;
   await df.hardRefreshPlanet(locationIdFromDecStr(location));
@@ -171,12 +181,12 @@ async function revealPlanet(coords, level, type) {
   coords.x = Math.round(coords.x);
   coords.y = Math.round(coords.y);
   const location = df.locationBigIntFromCoords(coords).toString();
-  const revealArgs = df.getSnarkHelper().getRevealArgs(coords.x, coords.y);
+  const revealArgs = [location, coords.x, coords.y]; //df.getSnarkHelper().getRevealArgs(coords.x, coords.y);
   const revealTx = await df.submitTransaction({
     delegator: player.address,
     args: revealArgs,
     contract: df.getContract(),
-    methodName: "df__revealLocationByAdmin",
+    methodName: "df__revealPlanetByAdmin",
   });
   await revealTx.confirmedPromise;
   await df.hardRefreshPlanet(locationIdFromDecStr(location));

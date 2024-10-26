@@ -9,7 +9,6 @@ import { Planet } from "../lib/Planet.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { SpawnInput } from "../lib/VerificationInput.sol";
 import { Errors } from "../interfaces/errors.sol";
-import { RevealInput } from "../lib/VerificationInput.sol";
 
 contract TestOnlySystem is System, Errors {
   function createPlanet(
@@ -33,29 +32,8 @@ contract TestOnlySystem is System, Errors {
     PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
   }
 
-  function revealLocationByAdmin(Proof memory proof, RevealInput memory input) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
-
-    if (!world.df__verifyRevealProof(proof, input)) {
-      revert Errors.InvalidRevealProof();
-    }
-
-    int256 x = _getIntFromUintCoords(input.x);
-    int256 y = _getIntFromUintCoords(input.y);
-    Planet memory planet = world.df__readPlanet(input.planetHash, input.perlin, uint256(x * x + y * y));
-
-    RevealedPlanet.set(bytes32(input.planetHash), int32(x), int32(y), _msgSender());
-    planet.writeToStore();
-  }
-
-  function _getIntFromUintCoords(uint256 _in) internal pure returns (int256 out) {
-    uint256 p = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
-    assert(_in < p);
-    if (_in > (p / 2)) {
-      return 0 - int256(p - _in);
-    }
-    return int256(_in);
+  function revealPlanetByAdmin(uint256 planetHash, int256 x, int256 y) public {
+    RevealedPlanet.set(bytes32(planetHash), int32(x), int32(y), _msgSender());
   }
 
   function safeSetOwner(

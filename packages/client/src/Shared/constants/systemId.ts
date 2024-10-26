@@ -85,7 +85,7 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     return PLAYER_SYSTEM_ABI;
   } else if (
     functionName === "createPlanet" ||
-    functionName === "revealLocationByAdmin" ||
+    functionName === "revealPlanetByAdmin" ||
     functionName === "safeSetOwner"
   ) {
     return TEST_ONLY_SYSTEM_ABI;
@@ -121,7 +121,7 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     return PLAYER_SYSTEM_ID;
   } else if (
     functionName === "createPlanet" ||
-    functionName === "revealLocationByAdmin" ||
+    functionName === "revealPlanetByAdmin" ||
     functionName === "safeSetOwner"
   ) {
     return TEST_ONLY_SYSTEM_ID;
