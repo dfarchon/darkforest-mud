@@ -211,7 +211,7 @@ export function GameLandingPage() {
     burnerBalanceValue,
   ]);
 
-  const [playerWantWalletOpen, setPlayerWantWalletOpen] = useState(true);
+  const [playerWantWalletOpen, setPlayerWantWalletOpen] = useState(false);
 
   const toggleWalletModal = () => {
     if (isWalletModalOpen) {

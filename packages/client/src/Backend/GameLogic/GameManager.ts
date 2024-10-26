@@ -3,17 +3,6 @@ import {
   CONTRACT_PRECISION,
   EMPTY_ADDRESS,
   MIN_PLANET_LEVEL,
-  MOVE_SYSTEM_ABI,
-  MOVE_SYSTEM_ID,
-  PLANET_CLAIM_MIN_LEVEL,
-  PLANET_REVEAL_SYSTEM_ABI,
-  PLANET_REVEAL_SYSTEM_ID,
-  PLANET_UPGRADE_SYSTEM_ABI,
-  PLANET_UPGRADE_SYSTEM_ID,
-  PLANET_WITHDRAW_SILVER_SYSTEM_ABI,
-  PLANET_WITHDRAW_SILVER_SYSTEM_ID,
-  PLAYER_SYSTEM_ABI,
-  PLAYER_SYSTEM_ID,
 } from "@df/constants";
 import type { Monomitter, Subscription } from "@df/events";
 import { monomitter } from "@df/events";
@@ -658,7 +647,7 @@ export class GameManager extends EventEmitter {
           if (this.minerManager) {
             const config = {
               contractAddress: this.getContractAddress(),
-              account: this.ethConnection.getAccount(),
+              account: this.ethConnection.getAddress(),
             };
             const cores = getNumberSetting(config, Setting.MiningCores);
             this.minerManager.setCores(cores);
@@ -3006,8 +2995,6 @@ export class GameManager extends EventEmitter {
 
       const txIntent: UnconfirmedReveal = {
         delegator: delegator,
-        systemId: PLANET_REVEAL_SYSTEM_ID,
-        abi: PLANET_REVEAL_SYSTEM_ABI,
         methodName: "df__legacyRevealLocation",
         contract: this.contractsAPI.contract,
         locationId: planetId,
@@ -3881,8 +3868,6 @@ export class GameManager extends EventEmitter {
         location: planet.location,
         args: getArgs(),
         delegator: delegator,
-        systemId: PLAYER_SYSTEM_ID,
-        abi: PLAYER_SYSTEM_ABI,
       };
 
       this.terminal.current?.println(
@@ -4930,8 +4915,6 @@ export class GameManager extends EventEmitter {
       }
       const txIntent: UnconfirmedWithdrawSilver = {
         delegator: delegator,
-        systemId: PLANET_WITHDRAW_SILVER_SYSTEM_ID,
-        abi: PLANET_WITHDRAW_SILVER_SYSTEM_ABI,
         methodName: "df__withdrawSilver",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([
@@ -5248,8 +5231,6 @@ export class GameManager extends EventEmitter {
       }
       const txIntent: UnconfirmedMove = {
         delegator: delegator,
-        systemId: MOVE_SYSTEM_ID,
-        abi: MOVE_SYSTEM_ABI,
         methodName: "df__legacyMove",
         contract: this.contractsAPI.contract,
         args: getArgs(),
@@ -5318,8 +5299,6 @@ export class GameManager extends EventEmitter {
 
       const txIntent: UnconfirmedUpgrade = {
         delegator: delegator,
-        systemId: PLANET_UPGRADE_SYSTEM_ID,
-        abi: PLANET_UPGRADE_SYSTEM_ABI,
         methodName: "df__legacyUpgradePlanet",
         contract: this.contractsAPI.contract,
         args: Promise.resolve([

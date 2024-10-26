@@ -152,6 +152,7 @@ export class InitialGameStateDownloader {
       // revealedPlanetsLoadingBar,
       revealedPlanetsCoordsLoadingBar,
     );
+
     // const loadedClaimedCoords = contractsAPI.getClaimedPlanetsCoords(
     //   0,
     //   claimedPlanetsLoadingBar,
@@ -235,6 +236,7 @@ export class InitialGameStateDownloader {
     for (const arrival of pendingMoves) {
       planetsToLoad.push(arrival.fromPlanet);
     }
+
     planetsToLoad = [...new Set(planetsToLoad)].map((id) =>
       locationIdFromHexStr(id),
     );
