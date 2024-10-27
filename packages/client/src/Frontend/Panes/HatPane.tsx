@@ -6,6 +6,7 @@ import {
   MIN_LOGO_TYPE,
   MIN_MEME_TYPE,
   TOKEN_NAME,
+  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
 } from "@df/constants";
 import { weiToEth } from "@df/network";
 import {
@@ -187,11 +188,7 @@ export function HatPane({
         <EmSpacer height={1} />
 
         <div>
-          <Link
-            to={
-              "https://dfares.notion.site/How-to-transfer-ETH-from-L2-to-Redstone-Mainnet-89198e3016a444779c121efa2590bddd?pvs=74"
-            }
-          >
+          <Link to={HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE}>
             Guide: How to Get More ETH on Redstone
           </Link>
         </div>

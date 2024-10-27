@@ -152,8 +152,6 @@ async function createPlanet(coords, level, type) {
     0,
     0,
   ]);
-  console.log("args");
-  console.log(args);
 
   const account = df.getAccount();
   const player = df.getPlayer(account);

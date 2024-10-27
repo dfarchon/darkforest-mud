@@ -1,4 +1,8 @@
-import { BLOCK_EXPLORER_URL } from "@df/constants";
+import {
+  BLOCK_EXPLORER_URL,
+  PLAYER_GUIDE,
+  WIN_CONDITION_AND_PRIZES,
+} from "@df/constants";
 import { ModalName } from "@df/types";
 import React from "react";
 import styled from "styled-components";
@@ -74,10 +78,11 @@ export function HelpPane({
     { hotkey: "m", intro: "toggle around-screen panes" },
     { hotkey: ",", intro: "toggle bottom hotkey pane" },
     // { hotkey: "g", intro: "you can buy planet & spaceship here" }, // PUNK
+    { hotkey: "p", intro: "toggle wallet pane" },
     { hotkey: "h", intro: "help pane" },
     { hotkey: "j", intro: "settings pane" },
     { hotkey: "k", intro: "plugins pane" },
-    { hotkey: "l", intro: "your artifacts pane" },
+    // { hotkey: "l", intro: "your artifacts pane" },
     { hotkey: ";", intro: "your planets pane" },
     { hotkey: "'", intro: "transactions pane" },
     { hotkey: "i", intro: "diagnostics pane" },
@@ -115,9 +120,9 @@ export function HelpPane({
         {uiManager.isRoundOver() && (
           <Section>
             <SectionHeader>Dark Forest MUD Complete</SectionHeader>
-            Dark Forest MUD v0.1 is now complete! Scores are being compiled and
-            winners will be announced shortly. Also, Artifacts will no longer be
-            mintable. Thanks for playing!
+            Dark Forest MUD v0.1.1 is now complete! Scores are being compiled
+            and winners will be announced shortly. Also, Artifacts will no
+            longer be mintable. Thanks for playing!
           </Section>
         )}
         <Section>
@@ -126,7 +131,7 @@ export function HelpPane({
         </Section>
 
         <Section>
-          <SectionHeader>Dark Forest MUD v0.1 🦑</SectionHeader>
+          <SectionHeader>Dark Forest MUD v0.1.1 🦑</SectionHeader>
           {/* The game is a vast universe, obfuscated by zero-knowledge cryptography. Your{' '}
           <White>explorer</White> (bottom left) explores the universe, searching for{' '}
           <White>Planets</White> and other players.
@@ -142,14 +147,12 @@ export function HelpPane({
           buffing their stats. */}
           <div>
             Please read{" "}
-            <Link
-              to="https://dfares.notion.site/DFAres-Round-3-Guide-for-New-Players-3980998d8f65440085c116ba0df0d99a?pvs=74"
-              color="pink"
-            >
+            <Link to={PLAYER_GUIDE} color="pink">
               Dark Forest MUD guide
             </Link>{" "}
             to know how to play.
           </div>
+          <br />
 
           <div>
             <Link
@@ -158,12 +161,20 @@ export function HelpPane({
             >
               DFArchon team
             </Link>{" "}
-            host <Pink>Dark Forest MUD</Pink> on{" "}
+            hosts{" "}
+            <Link
+              to="https://twitter.com/darkforest_mud"
+              color={dfstyles.colors.dfpink}
+            >
+              Dark Forest MUD
+            </Link>{" "}
+            on{" "}
             <Link to={BLOCK_EXPLORER_URL} color={"rgb(243,66,66)"}>
               Redstone
             </Link>
             .
           </div>
+          <br />
           <div>
             <Pink>Dark Forest MUD</Pink> is community-driven deployment of{" "}
             <Link to="https://zkga.me" color={dfstyles.colors.dfgreen}>
@@ -176,10 +187,7 @@ export function HelpPane({
         <Section>
           <SectionHeader>Prizes and Scoring</SectionHeader>
           Please read{" "}
-          <Link
-            to="https://dfares.notion.site/Win-Conditions-Prizes-49e5518f136647559394201ffd329df5?pvs=74"
-            color="pink"
-          >
+          <Link to={WIN_CONDITION_AND_PRIZES} color="pink">
             Win Conditions/Prizes
           </Link>{" "}
           to know the prizes.
@@ -188,6 +196,10 @@ export function HelpPane({
         <Section>
           <SectionHeader>More Useful Links</SectionHeader>
 
+          <Link to={"https://twitter.com/darkforest_mud"}>
+            Dark Forest MUD Twitter
+          </Link>
+          <br />
           <Link to={DFArchonLinks.blog}>DFArchon&apos;s Blog</Link>
           <br />
           <Link to={DFArchonLinks.twitter}>DFArchon&apos;s Twitter</Link>

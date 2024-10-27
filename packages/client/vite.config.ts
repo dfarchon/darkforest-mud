@@ -16,6 +16,7 @@ export default defineConfig({
     target: "es2022",
     minify: true,
     sourcemap: true,
+    outDir: "dist",
   },
   resolve: {
     alias: {
