@@ -31,8 +31,9 @@ contract RevealTest is MudTest {
   function testRevealLocation() public {
     vm.prank(admin);
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
-
-    uint256 curTick = Ticker.getTickNumber();
+    uint256 curTick = 1;
+    vm.prank(admin);
+    Ticker.setTickNumber(uint64(curTick));
     vm.prank(admin);
     LastReveal.set(address(this), uint64(curTick));
     vm.expectRevert(Errors.RevealTooOften.selector);
