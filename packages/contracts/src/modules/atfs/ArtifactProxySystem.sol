@@ -45,14 +45,15 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
 
   function charge(
     Planet memory planet,
-    Artifact memory artifact
+    Artifact memory artifact,
+    bytes memory inputData
   ) public virtual onlyArtifactSystem returns (Planet memory, Artifact memory) {
     // ArtifactMetadataData memory metadata = _getMetadata(artifact);
     // _updateArtifactStatus(planet, artifact, metadata);
     // _validateChargeArtifact(planet, artifact, metadata);
 
     // internal charge logic
-    _charge(planet, artifact);
+    _charge(planet, artifact, inputData);
 
     return (planet, artifact);
   }
@@ -100,20 +101,27 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
   // }
 
   function _shutdown(Planet memory planet, Artifact memory artifact) internal virtual {
-    if (artifact.status == ArtifactStatus.ACTIVE) {
-      if (artifact.reusable) {
-        artifact.status = ArtifactStatus.COOLDOWN;
-        artifact.cooldownTick = planet.lastUpdateTick;
-      } else {
-        artifact.status = ArtifactStatus.BROKEN;
-        planet.removeArtifact(artifact.id);
-      }
+    // if (artifact.status == ArtifactStatus.ACTIVE) {
+    //   if (artifact.reusable) {
+    //     artifact.status = ArtifactStatus.COOLDOWN;
+    //     artifact.cooldownTick = planet.lastUpdateTick;
+    //   } else {
+    //     artifact.status = ArtifactStatus.BROKEN;
+    //     planet.removeArtifact(artifact.id);
+    //   }
+    // } else {
+    //   artifact.status = ArtifactStatus.DEFAULT;
+    // }
+    if (artifact.status == ArtifactStatus.ACTIVE && !artifact.reusable) {
+      artifact.status = ArtifactStatus.BROKEN;
+      planet.removeArtifact(artifact.id);
     } else {
-      artifact.status = ArtifactStatus.DEFAULT;
+      artifact.status = ArtifactStatus.COOLDOWN;
+      artifact.cooldownTick = planet.lastUpdateTick;
     }
   }
 
-  function _charge(Planet memory planet, Artifact memory artifact) internal virtual {
+  function _charge(Planet memory planet, Artifact memory artifact, bytes memory) internal virtual {
     artifact.chargeTick = planet.lastUpdateTick;
     artifact.status = ArtifactStatus.CHARGING;
   }

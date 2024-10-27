@@ -49,7 +49,7 @@ contract BloomFilterTest is MudTest {
   function testActivateBloomFilter() public {
     vm.prank(address(1));
     vm.expectRevert(Errors.ArtifactNotChargeable.selector);
-    IWorld(worldAddress).df__chargeArtifact(1, 1);
+    IWorld(worldAddress).df__chargeArtifact(1, 1, bytes(""));
 
     vm.startPrank(admin);
     PlanetConstants.setLevel(bytes32(uint256(1)), 9);

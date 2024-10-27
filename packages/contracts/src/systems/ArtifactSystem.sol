@@ -22,7 +22,7 @@ contract ArtifactSystem is System, Errors {
     ArtifactRegistry.set(bytes32(artifactId), true);
   }
 
-  function chargeArtifact(uint256 planetHash, uint256 artifactId) public {
+  function chargeArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public {
     IWorld world = IWorld(_world());
     world.df__tick();
 
@@ -31,7 +31,7 @@ contract ArtifactSystem is System, Errors {
     if (planet.owner != _msgSender()) {
       revert Errors.NotPlanetOwner();
     }
-    (planet, artifact) = planet.chargeArtifact(artifact, _world());
+    (planet, artifact) = planet.chargeArtifact(artifact, data, _world());
 
     artifact.writeToStore();
     planet.writeToStore();

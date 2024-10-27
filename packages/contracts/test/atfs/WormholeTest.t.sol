@@ -50,7 +50,7 @@ contract WormholeTest is MudTest {
     Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
     vm.prank(address(1));
     vm.expectRevert(Errors.ArtifactNotChargeable.selector);
-    IWorld(worldAddress).df__chargeArtifact(1, 1);
+    IWorld(worldAddress).df__chargeArtifact(1, 1, bytes(""));
 
     Artifact memory artifact = IWorld(worldAddress).df__readArtifact(1);
     vm.prank(address(1));

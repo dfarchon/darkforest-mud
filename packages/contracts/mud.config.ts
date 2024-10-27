@@ -3,6 +3,7 @@ import { defineWorld } from "@latticexyz/world";
 export default defineWorld({
   namespace: "df",
   enums: {
+    PlanetStatus: ["DEFAULT", "DESTROYED"],
     PlanetType: ["UNKNOWN", "PLANET", "ASTEROID_FIELD", "FOUNDRY", "SPACETIME_RIP", "QUASAR"],
     SpaceType: ["UNKNOWN", "NEBULA", "SPACE", "DEEP_SPACE", "DEAD_SPACE"],
     Biome: [
@@ -326,6 +327,7 @@ export default defineWorld({
     ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
+      status: "PlanetStatus",
       lastUpdateTick: "uint64",
       population: "uint64",
       silver: "uint64",
@@ -395,6 +397,37 @@ export default defineWorld({
         speed: "uint64",
       },
       key: [],
+    },
+    // artifact
+    Wormhole: {
+      schema: {
+        from: "bytes32",
+        to: "bytes32",
+      },
+      key: ["from"],
+      codegen: {
+        outputDirectory: "../modules/atfs/Wormhole/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
+    },
+    PinkBomb: {
+      schema: {
+        bombId: "uint32",
+        target: "bytes32",
+        departureTick: "uint64",
+        arrivalTick: "uint64",
+      },
+      key: ["bombId"],
+      codegen: {
+        outputDirectory: "../modules/atfs/PinkBomb/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
     },
   },
 });

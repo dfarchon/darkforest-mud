@@ -13,9 +13,7 @@ import { EffectLib } from "../../../lib/Effect.sol";
 import { ARTIFACT_INDEX } from "./constant.sol";
 
 contract BloomFilterSystem is ArtifactProxySystem {
-  using EffectLib for Planet;
-
-  error BloomFilterRarityTooLow();
+  error BloomFilterRarityTooLow(); // 0xc42327ab
 
   uint8[] private _requiredMaxLevels = [0, 2, 4, 6, 8, 9];
 

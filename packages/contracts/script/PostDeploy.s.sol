@@ -9,7 +9,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { SpaceType, PlanetType, ArtifactRarity } from "../src/codegen/common.sol";
+import { SpaceType, PlanetType, ArtifactRarity, PlanetStatus } from "../src/codegen/common.sol";
 import { PlanetMetadata, PlanetMetadataData, Planet, PlanetData, PlanetOwner, PlanetConstants } from "../src/codegen/index.sol";
 import { PlanetInitialResource, PlanetInitialResourceData } from "../src/codegen/index.sol";
 import { UniverseConfig, UniverseConfigData, TempConfigSet, TempConfigSetData } from "../src/codegen/index.sol";
@@ -158,6 +158,7 @@ contract PostDeploy is Script {
       );
       Planet.set(
         planets[i].planetHash,
+        PlanetStatus.DEFAULT,
         planets[i].lastUpdateTick,
         planets[i].population,
         planets[i].silver,

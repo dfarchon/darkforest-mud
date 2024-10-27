@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactStatus } from "../codegen/common.sol";
+import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
 import { PlanetOwner, PlanetConstants, PlanetConstantsData, PlanetProps, PlanetPropsData } from "../codegen/index.sol";
 import { PlanetEffects, PlanetEffectsData } from "../codegen/index.sol";
@@ -38,6 +38,7 @@ struct Planet {
   PlanetType planetType;
   SpaceType spaceType;
   // Table: Planet
+  PlanetStatus status;
   uint256 lastUpdateTick;
   uint256 population;
   uint256 silver;
@@ -115,6 +116,7 @@ library PlanetLib {
     PlanetTable.set(
       bytes32(planet.planetHash),
       PlanetData({
+        status: planet.status,
         lastUpdateTick: uint64(planet.lastUpdateTick),
         population: uint64(planet.population),
         silver: uint64(planet.silver),
@@ -176,12 +178,13 @@ library PlanetLib {
   function chargeArtifact(
     Planet memory planet,
     Artifact memory artifact,
+    bytes memory inputData,
     address world
   ) internal returns (Planet memory, Artifact memory) {
     _validateChargeArtifact(planet, artifact);
     bytes memory data = IBaseWorld(world).call(
       _artifactProxySystemId(_artifactIndexToNamespace(artifact.artifactIndex)),
-      abi.encodeCall(IArtifactProxySystem.charge, (planet, artifact))
+      abi.encodeCall(IArtifactProxySystem.charge, (planet, artifact, inputData))
     );
     return abi.decode(data, (Planet, Artifact));
   }
@@ -401,6 +404,7 @@ library PlanetLib {
   function _readPlanetData(Planet memory planet) internal view {
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
     PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
+    planet.status = data.status;
     planet.lastUpdateTick = data.lastUpdateTick;
     planet.population = data.population;
     planet.silver = data.silver;

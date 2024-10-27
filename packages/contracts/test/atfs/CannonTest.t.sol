@@ -49,7 +49,7 @@ contract CannonTest is MudTest {
     Artifact memory artifact = planet.mustGetArtifact(1);
     assertTrue(artifact.status == ArtifactStatus.DEFAULT);
     vm.prank(address(1));
-    IWorld(worldAddress).df__chargeArtifact(1, 1);
+    IWorld(worldAddress).df__chargeArtifact(1, 1, bytes(""));
     Planet memory planetAfter = IWorld(worldAddress).df__readPlanet(1);
     Artifact memory artifactAfter = planetAfter.mustGetArtifact(1);
     assertEq(planetAfter.effectNumber, 1);
@@ -62,7 +62,7 @@ contract CannonTest is MudTest {
   function testShutdownCannon() public {
     Planet memory originalPlanet = IWorld(worldAddress).df__readPlanet(1);
     vm.prank(address(1));
-    IWorld(worldAddress).df__chargeArtifact(1, 1);
+    IWorld(worldAddress).df__chargeArtifact(1, 1, bytes(""));
     vm.warp(block.timestamp + 100);
     vm.roll(block.number + 100);
     vm.prank(address(1));
@@ -77,7 +77,7 @@ contract CannonTest is MudTest {
   function testActivateCannon() public {
     Planet memory planet = IWorld(worldAddress).df__readPlanet(1);
     vm.prank(address(1));
-    IWorld(worldAddress).df__chargeArtifact(1, 1);
+    IWorld(worldAddress).df__chargeArtifact(1, 1, bytes(""));
     Artifact memory artifact = planet.mustGetArtifact(1);
     vm.warp(block.timestamp + artifact.charge / Ticker.getTickRate() + 1);
     vm.prank(address(1));

@@ -46,8 +46,8 @@ contract CannonSystem is ArtifactProxySystem {
     }
   }
 
-  function _charge(Planet memory planet, Artifact memory artifact) internal virtual override {
-    super._charge(planet, artifact);
+  function _charge(Planet memory planet, Artifact memory artifact, bytes memory inputData) internal virtual override {
+    super._charge(planet, artifact, inputData);
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
       planet.applyEffect(COMMON_CHARGE);

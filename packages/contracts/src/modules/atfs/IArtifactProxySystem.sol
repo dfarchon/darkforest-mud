@@ -9,7 +9,11 @@ interface IArtifactProxySystem {
 
   function shutdown(Planet memory planet, Artifact memory artifact) external returns (Planet memory, Artifact memory);
 
-  function charge(Planet memory planet, Artifact memory artifact) external returns (Planet memory, Artifact memory);
+  function charge(
+    Planet memory planet,
+    Artifact memory artifact,
+    bytes memory inputData
+  ) external returns (Planet memory, Artifact memory);
 
   function activate(
     Planet memory planet,
