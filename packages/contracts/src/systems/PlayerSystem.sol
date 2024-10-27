@@ -86,7 +86,9 @@ contract PlayerSystem is System {
    */
   function spawnPlayer(Proof memory _proof, SpawnInput memory _input) public returns (uint256) {
     IWorld world = IWorld(_world());
-    world.df__tick();
+
+    // NOTE: allow spawnPlayer when game is paused
+    // world.df__tick();
 
     if (!world.df__verifySpawnProof(_proof, _input)) {
       revert Errors.InvalidSpawnProof();
