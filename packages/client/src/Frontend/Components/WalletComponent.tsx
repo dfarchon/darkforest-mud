@@ -186,6 +186,8 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
   const renderWalletStatus = () => (
     <div>
       <div>
+        <Green> NOTE: Please link the same address as the Main Account </Green>{" "}
+        <br />
         <span>Main Wallet: </span>
         <span>{(walletClient?.account?.address ?? zeroAddress) as Hex}</span>
         <span> Balance: {formatEther(state.mainWalletBalance)} ETH</span>
