@@ -76,8 +76,6 @@ export type TxIntent = {
   methodName: LiteralUnion<ContractMethodName, string>;
   args: Promise<unknown[]>;
   delegator: EthAddress;
-  systemId: Hex;
-  abi: Abi;
 };
 
 /**

@@ -291,7 +291,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public getStringSetting(setting: Setting): string | undefined {
-    const account = this.getAccount();
+    const account = this.getEthConnection().getAddress();
     const config = {
       contractAddress: this.getContractAddress(),
       account,
@@ -301,7 +301,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public getBooleanSetting(setting: Setting): boolean {
-    const account = this.getAccount();
+    const account = this.getEthConnection().getAddress();
 
     if (!account) {
       return false;
@@ -1087,7 +1087,7 @@ export class GameUIManager extends EventEmitter {
 
   public onDiscoveredChunk(chunk: Chunk): void {
     const res = this.gameManager.getCurrentlyExploringChunk();
-    const account = this.getAccount();
+    const account = this.getEthConnection().getAddress();
     const config = {
       contractAddress: this.getContractAddress(),
       account,
@@ -1283,7 +1283,7 @@ export class GameUIManager extends EventEmitter {
   public getForcesSending(planetId?: LocationId): number {
     const config = {
       contractAddress: this.getContractAddress(),
-      account: this.getAccount(),
+      account: this.getEthConnection().getAddress(),
     };
     const defaultSending = getNumberSetting(
       config,

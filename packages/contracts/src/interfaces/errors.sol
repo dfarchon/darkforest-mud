@@ -13,6 +13,7 @@ interface Errors {
   error AlreadyRegisteredAsBurner(); // 0xb7887dbe
   error AlreadySpawned(); // 0xb7298922
   error InvalidSpawnPlanet(); // 0x486b36b3
+  error InvalidSpawnProof(); // 0x7cbbb34f
 
   // verify system
   error InvalidMoveProof(); // 0x217623c0

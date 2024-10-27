@@ -61,13 +61,13 @@ export default defineWorld({
   },
   systems: {
     TickSystem: {
-      openAccess: true,
+      openAccess: false,
     },
     InitializeSystem: {
       openAccess: false,
     },
     TestOnlySystem: {
-      openAccess: true,
+      openAccess: false,
     },
     DfDelegationControlSystem: {
       name: "DfDelegationCtrl",

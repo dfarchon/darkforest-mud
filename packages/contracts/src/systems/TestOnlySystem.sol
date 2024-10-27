@@ -4,10 +4,13 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { IWorld } from "../codegen/world/IWorld.sol";
 import { PlanetType, SpaceType, PlanetStatus } from "../codegen/common.sol";
-import { Planet as PlanetTable, PlanetOwner, PlanetConstants, Ticker } from "../codegen/index.sol";
+import { Planet as PlanetTable, PlanetOwner, PlanetConstants, Ticker, RevealedPlanet } from "../codegen/index.sol";
 import { Planet } from "../lib/Planet.sol";
+import { Proof } from "../lib/SnarkProof.sol";
+import { SpawnInput } from "../lib/VerificationInput.sol";
+import { Errors } from "../interfaces/errors.sol";
 
-contract TestOnlySystem is System {
+contract TestOnlySystem is System, Errors {
   function createPlanet(
     uint256 planetHash,
     address owner,
@@ -24,6 +27,8 @@ contract TestOnlySystem is System {
 
     PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
 
+    PlanetOwner.set(bytes32(planetHash), owner);
+
     PlanetTable.set(
       bytes32(planetHash),
       PlanetStatus.DEFAULT,
@@ -33,7 +38,37 @@ contract TestOnlySystem is System {
       upgrades,
       false
     );
+  }
 
-    PlanetOwner.set(bytes32(planetHash), owner);
+  function revealPlanetByAdmin(uint256 planetHash, int256 x, int256 y) public {
+    RevealedPlanet.set(bytes32(planetHash), int32(x), int32(y), _msgSender());
+  }
+
+  function safeSetOwner(
+    address newOwner,
+    uint256[2] memory _a,
+    uint256[2][2] memory _b,
+    uint256[2] memory _c,
+    uint256[9] memory _input
+  ) public {
+    Proof memory proof;
+    proof.genFrom(_a, _b, _c);
+    SpawnInput memory input;
+    input.genFrom(_input);
+
+    IWorld world = IWorld(_world());
+    world.df__tick();
+
+    if (!world.df__verifySpawnProof(proof, input)) {
+      revert Errors.InvalidSpawnProof();
+    }
+
+    // new planet instances in memory
+    Planet memory planet = world.df__readPlanet(input.planetHash, input.perlin, input.radiusSquare);
+    planet.changeOwner(newOwner);
+    planet.population = planet.populationCap;
+    planet.silver = planet.silverCap;
+
+    planet.writeToStore();
   }
 }

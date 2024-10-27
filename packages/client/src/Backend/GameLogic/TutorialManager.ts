@@ -76,7 +76,7 @@ class TutorialManager extends EventEmitter {
   reset() {
     const config = {
       contractAddress: this.uiManager.getContractAddress(),
-      account: this.uiManager.getAccount(),
+      account: this.uiManager.getEthConnection().getAddress(),
     };
     setBooleanSetting(config, Setting.TutorialOpen, true);
     this.setTutorialState(TutorialState.None);
@@ -86,7 +86,7 @@ class TutorialManager extends EventEmitter {
     this.setTutorialState(TutorialState.Completed);
     const config = {
       contractAddress: this.uiManager.getContractAddress(),
-      account: this.uiManager.getAccount(),
+      account: this.uiManager.getEthConnection().getAddress(),
     };
     setBooleanSetting(config, Setting.TutorialCompleted, true);
   }

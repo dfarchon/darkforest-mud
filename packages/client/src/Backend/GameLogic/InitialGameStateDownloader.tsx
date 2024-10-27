@@ -72,7 +72,7 @@ export class InitialGameStateDownloader {
     contractsAPI: ContractsAPI,
     persistentChunkStore: PersistentChunkStore,
   ): Promise<InitialGameState> {
-    const isDev = process.env.NODE_ENV !== "production";
+    const isDev = import.meta.env.VITE_NODE_ENV !== "production";
 
     /**
      * In development we use the same contract address every time we deploy,
@@ -152,6 +152,7 @@ export class InitialGameStateDownloader {
       // revealedPlanetsLoadingBar,
       revealedPlanetsCoordsLoadingBar,
     );
+
     // const loadedClaimedCoords = contractsAPI.getClaimedPlanetsCoords(
     //   0,
     //   claimedPlanetsLoadingBar,
@@ -235,6 +236,7 @@ export class InitialGameStateDownloader {
     for (const arrival of pendingMoves) {
       planetsToLoad.push(arrival.fromPlanet);
     }
+
     planetsToLoad = [...new Set(planetsToLoad)].map((id) =>
       locationIdFromHexStr(id),
     );

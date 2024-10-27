@@ -12,15 +12,21 @@ import { useWalletClient } from "wagmi";
 
 import { WalletComponent } from "./WalletComponent";
 
-export const WalletModal = () => {
+type WalletModalProps = {
+  visible?: boolean;
+  onClose?: () => void;
+};
+
+export const WalletModal = ({
+  visible = false,
+  onClose = () => {},
+}: WalletModalProps) => {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const {
     components: { Player },
     network: { playerEntity },
   } = useMUD();
   const { data: walletClient } = useWalletClient();
-
-  const [visible, setVisible] = useState(true);
 
   const { value: burnerBalanceValue, refetch: refetchBurnerBalance } =
     useBurnerBalance();
@@ -68,7 +74,7 @@ export const WalletModal = () => {
               You are registered and your burner wallet has funds. You are ready
               to play!
             </Green>
-            <Btn onClick={() => setVisible(false)}>Close</Btn>
+            <Btn onClick={onClose}>Close</Btn>
           </div>
         )}
       </Modal>

@@ -259,7 +259,7 @@ export function TopBar({
             ({weiToEth(balance).toFixed(2)} ${TOKEN_NAME})
           </Sub>
         </TooltipTrigger>
-        {process.env.DF_WEBSERVER_URL && (
+        {import.meta.env.VITE_WEBSERVER_URL && (
           <>
             <TooltipTrigger
               name={TooltipName.Empty}

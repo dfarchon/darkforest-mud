@@ -32,7 +32,7 @@ class MinimapSpawnPlugin {
     this.step = Math.floor((df.getWorldRadius() * 1.0) / 30);
 
     const image = new Image();
-    image.src = "../../../../public/DFARESLogo-v3.svg";
+    image.src = "/darkforest_mud_logo.png";
 
     // Wait for the image to load
     await new Promise((resolve) => {

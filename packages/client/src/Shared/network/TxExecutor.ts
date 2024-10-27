@@ -1,4 +1,8 @@
-import { FIXED_DIGIT_NUMBER } from "@df/constants";
+import {
+  FIXED_DIGIT_NUMBER,
+  get_ABI_from_FunctionName,
+  get_SystemId_from_FunctionName,
+} from "@df/constants";
 import { addressToHex } from "@df/serde";
 import type { AutoGasSetting } from "@df/types";
 import type {
@@ -388,10 +392,13 @@ export class TxExecutor {
           ? methodName.substring(4)
           : methodName;
 
+      const abi = get_ABI_from_FunctionName(functionName);
+      const systemId = get_SystemId_from_FunctionName(functionName);
+
       const callFromArgs = encodeSystemCallFrom({
-        abi: tx.intent.abi,
+        abi: abi,
         from: addressToHex(tx.intent.delegator),
-        systemId: tx.intent.systemId,
+        systemId: systemId,
         functionName: functionName,
         args: args,
       });

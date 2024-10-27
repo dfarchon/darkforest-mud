@@ -20,7 +20,8 @@ contract PlanetRevealSystem is System, Errors {
 
     address player = _msgSender();
     uint256 currentTick = Ticker.getTickNumber();
-    if (LastReveal.get(player) + TempConfigSet.getRevealCd() <= currentTick) {
+
+    if (LastReveal.get(player) == 0 || LastReveal.get(player) + TempConfigSet.getRevealCd() <= currentTick) {
       LastReveal.set(player, uint64(currentTick));
     } else {
       revert Errors.RevealTooOften();

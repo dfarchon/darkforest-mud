@@ -12,8 +12,8 @@ export function LandingPageRoundArt() {
     <Container>
       <ImgContainer>
         <LandingPageRoundArtImg
-          // src={'/public/DFARESLogo-v3.svg'}
-          src={"/public/favicon.ico"}
+          // src={'/DFARESLogo-v3.svg'}
+          src={"/favicon.ico"}
           onClick={() => history.push(`/play/${defaultAddress}`)}
         />
         {/* <Smaller>
