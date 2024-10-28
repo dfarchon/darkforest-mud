@@ -39,6 +39,9 @@ contract MoveSystem is System, Errors {
 
     // new planet instances in memory
     Planet memory fromPlanet = world.df__readPlanet(_input.fromPlanetHash);
+    if (_input.toPlanetHash == _input.fromPlanetHash) {
+      revert Errors.MoveToSamePlanet();
+    }
     Planet memory toPlanet = world.df__readPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
     // create a new move and load all resources
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
