@@ -17,7 +17,7 @@ function sort_players(m) {
   let notSortPart = a.filter((t) => t[1] === undefined);
 
   sortPart.sort((a, b) => {
-    return a[1] - b[1];
+    return b[1] - a[1];
   });
 
   let res = [];
