@@ -60,9 +60,6 @@ export default defineWorld({
     // ],
   },
   systems: {
-    TickSystem: {
-      openAccess: false,
-    },
     InitializeSystem: {
       openAccess: false,
     },
