@@ -25,6 +25,7 @@ import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule
 import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLibrary.sol";
 import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeInstallLibrary.sol";
 import { installBloomFilter } from "../src/modules/atfs/BloomFilter/BloomFilterInstallLibrary.sol";
+import { installPinkBomb } from "../src/modules/atfs/PinkBomb/PinkBombInstallLibrary.sol";
 contract PostDeploy is Script {
   using stdToml for string;
   using Strings for uint256;
@@ -178,5 +179,7 @@ contract PostDeploy is Script {
     console.log("Installed wormhole with index", index);
     index = installBloomFilter(worldAddress);
     console.log("Installed bloom filter with index", index);
+    index = installPinkBomb(worldAddress);
+    console.log("Installed pinkbomb with index", index);
   }
 }

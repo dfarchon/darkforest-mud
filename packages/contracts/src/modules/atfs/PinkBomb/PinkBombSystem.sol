@@ -28,7 +28,7 @@ contract PinkBombSystem is ArtifactProxySystem {
   error PinkBombOutOfRange(); // 0x26d5a017
   error PinkBombNotLaunched(); // 0x738856e5
 
-  uint32[] BOMB_RADIUS = [0, 1000 * 1000, 1500 * 1500, 2000 * 2000, 2500 * 2500, 3000 * 3000];
+  uint32[] BOMB_RADIUS = [0, 500 * 500, 1000 * 1000, 1500 * 1500, 2000 * 2000, 2500 * 2500];
 
   uint32 DESTROY_WINDOW = 300;
 
@@ -36,9 +36,8 @@ contract PinkBombSystem is ArtifactProxySystem {
     return ARTIFACT_INDEX;
   }
 
-  function destroy(uint256 bombId, bytes memory inputData) public {
+  function destroy(uint256 bombId, Proof memory proof, RevealInput memory input) public {
     // reveal destroyed planet
-    (Proof memory proof, RevealInput memory input) = abi.decode(inputData, (Proof, RevealInput));
     if (!IWorld(_world()).df__verifyRevealProof(proof, input)) {
       revert Errors.InvalidRevealProof();
     }
@@ -85,6 +84,12 @@ contract PinkBombSystem is ArtifactProxySystem {
     RevealedPlanet.set(bytes32(input.planetHash), int32(x), int32(y), planet.owner);
 
     PinkBomb.setTarget(_pinkBombTableId(_namespace()), uint32(artifact.id), bytes32(input.planetHash));
+  }
+
+  function _shutdown(Planet memory planet, Artifact memory artifact) internal virtual override {
+    super._shutdown(planet, artifact);
+
+    PinkBomb.setTarget(_pinkBombTableId(_namespace()), uint32(artifact.id), bytes32(0));
   }
 
   function _activate(Planet memory planet, Artifact memory artifact, bytes memory inputData) internal virtual override {

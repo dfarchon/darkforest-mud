@@ -6,6 +6,7 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
+import { Counter, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
 import { Planet as PlanetTable, PlanetConstants, Move, MoveData, Ticker, TickerData } from "../../src/codegen/index.sol";
 import { Artifact as ArtifactTable, ArtifactData, TempConfigSet, DistanceMultiplier } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
@@ -30,19 +31,10 @@ contract BloomFilterTest is MudTest {
     IWorld(worldAddress).df__unpause();
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
-    vm.stopPrank();
-    vm.startPrank(address(1));
-    vm.roll(1000);
-    IWorld(worldAddress).df__prospectPlanet(1);
-    Proof memory proof;
-    BiomebaseInput memory input;
-    input.planetHash = 1;
-    vm.roll(1100);
-    IWorld(worldAddress).df__findingArtifact(proof, input);
-    vm.stopPrank();
-    vm.startPrank(admin);
-    ArtifactTable.setArtifactIndex(1, BLOOM_FILTER_INDEX);
-    ArtifactTable.setRarity(1, ArtifactRarity.COMMON);
+    Counter.setArtifact(1);
+    PlanetArtifact.set(bytes32(uint256(1)), 1);
+    ArtifactOwner.set(1, bytes32(uint256(1)));
+    ArtifactTable.set(1, BLOOM_FILTER_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
     vm.stopPrank();
   }
 
