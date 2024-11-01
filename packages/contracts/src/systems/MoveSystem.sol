@@ -39,6 +39,9 @@ contract MoveSystem is System, Errors {
 
     // new planet instances in memory
     Planet memory fromPlanet = DFUtils.readInitedPlanet(worldAddress, _input.fromPlanetHash);
+    if (_input.toPlanetHash == _input.fromPlanetHash) {
+      revert Errors.MoveToSamePlanet();
+    }
     Planet memory toPlanet = DFUtils.readAnyPlanet(
       worldAddress,
       _input.toPlanetHash,

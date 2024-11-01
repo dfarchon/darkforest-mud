@@ -42,6 +42,11 @@ export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
   const networkConfig = getNetworkConfig();
+
+  //PUNK
+  console.log("show indexer url");
+  console.log(networkConfig.indexerUrl);
+
   const waitForStateChange = Promise.withResolvers<WaitForStateChange>();
   /*
    * Create a viem public (read only) client
@@ -72,6 +77,7 @@ export async function setupNetwork() {
       config: mudConfig,
       address: networkConfig.worldAddress as Hex,
       publicClient,
+      indexerUrl: networkConfig.indexerUrl,
       startBlock: BigInt(networkConfig.initialBlockNumber),
     });
 

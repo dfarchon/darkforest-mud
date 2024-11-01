@@ -86,7 +86,9 @@ contract PlayerSystem is System {
    */
   function spawnPlayer(Proof memory _proof, SpawnInput memory _input) public returns (uint256) {
     address worldAddress = _world();
-    DFUtils.tick(worldAddress);
+
+    // NOTE: allow spawnPlayer when game is paused
+    // DFUtils.tick(worldAddress);
 
     DFUtils.verify(worldAddress, _proof, _input);
 

@@ -44,13 +44,13 @@ export const App = () => {
       <Theme color="dark" scale="medium">
         <Router>
           <Routes>
-            <Route
+            {/* <Route
               path="/play_v1/"
               element={
                 <Navigate to={`/play/${defaultAddress}`} replace={true} />
               }
             />
-            <Route path="/play_v1/:contract" element={<GameLandingPage_v1 />} />
+            <Route path="/play_v1/:contract" element={<GameLandingPage_v1 />} /> */}
             <Route
               path="/play"
               element={
@@ -59,11 +59,11 @@ export const App = () => {
             />
             <Route path="/play/:contract" element={<GameLandingPage />} />
             <Route path="/" element={<ClassicLandingPage />} />
-            <Route path="/sandbox" element={<SandboxPage />} />
-            <Route path="/welcome" element={<WelcomePage />} />
-            <Route path="/game" element={<GamePage />} />
+            {/* <Route path="/sandbox" element={<SandboxPage />} /> */}
+            {/* <Route path="/welcome" element={<WelcomePage />} /> */}
+            {/* <Route path="/game" element={<GamePage />} /> */}
             <Route path="/test" element={<PlanetTestPage />} />
-            <Route path="/hello" element={<HelloPage />} />
+            {/* <Route path="/hello" element={<HelloPage />} /> */}
             <Route path="*" element={<NotFoundPage />} />
             <Route
               path="/wallet/:contract/:addr/:actionId/:balance/:method"

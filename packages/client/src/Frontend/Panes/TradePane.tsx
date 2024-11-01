@@ -8,6 +8,7 @@ import { ModalPane } from "../Views/ModalPane";
 import { BuyPlanetPane } from "./BuyPlanetPane";
 import { BuySpaceshipPane } from "./BuySpaceshipPane";
 import { DonationPane } from "./DonationPane";
+import { HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE } from "@df/constants";
 
 const TradeContent = styled.div`
   width: 500px;
@@ -66,11 +67,7 @@ export function TradePane({
       helpContent={HelpContent}
     >
       <TradeContent>
-        <Link
-          to={
-            "https://dfares.notion.site/How-to-transfer-ETH-from-L2-to-Redstone-Mainnet-89198e3016a444779c121efa2590bddd?pvs=74"
-          }
-        >
+        <Link to={HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE}>
           Guide: How to Get More ETH on Redstone
         </Link>
         <DonationPane />

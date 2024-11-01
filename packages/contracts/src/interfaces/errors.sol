@@ -21,6 +21,7 @@ interface Errors {
 
   // move system
   error NotPlanetOwner(); // 0xab2bcfd3
+  error MoveToSamePlanet(); // 0xf13223e1
   error NotEnoughPopulation(); // 0xb4560519
   error NotEnoughPopulationToReach(); // 0x8c2529c4
   error NotEnoughSilver(); // 0xb973ef98
