@@ -70,7 +70,7 @@ export default defineWorld({
       name: "DfDelegationCtrl",
     },
   },
-  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem"],
+  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem", "PinkBombSystem"],
   tables: {
     Counter: {
       schema: {
@@ -358,73 +358,73 @@ export default defineWorld({
       },
       key: [],
     },
-    // artifact module
-    Effect: {
-      schema: {
-        id: "uint24",
-        effectType: "EffectType",
-        modifierNumber: "uint8", // up to 7 modifiers
-        modifiers: "uint248", // 32 bits per modifier, including the uint8 type and the uint24 value
-      },
-      key: ["id"],
-      codegen: {
-        outputDirectory: "../modules/atfs/tables",
-        tableIdArgument: true,
-      },
-      deploy: {
-        disabled: true,
-      },
-    },
-    ArtifactMetadata: {
-      schema: {
-        rarity: "ArtifactRarity",
-        genre: "ArtifactGenre",
-        charge: "uint32",
-        cooldown: "uint32",
-        durable: "bool",
-        reusable: "bool",
-        reqLevel: "uint8",
-        reqPopulation: "uint64",
-        reqSilver: "uint64",
-      },
-      key: ["rarity"],
-      codegen: {
-        outputDirectory: "../modules/atfs/tables",
-        tableIdArgument: true,
-      },
-      deploy: {
-        disabled: true,
-      },
-    },
-    Wormhole: {
-      schema: {
-        from: "bytes32",
-        to: "bytes32",
-      },
-      key: ["from"],
-      codegen: {
-        outputDirectory: "../modules/atfs/Wormhole/tables",
-        tableIdArgument: true,
-      },
-      deploy: {
-        disabled: true,
-      },
-    },
-    PinkBomb: {
-      schema: {
-        bombId: "uint32",
-        target: "bytes32",
-        departureTick: "uint64",
-        arrivalTick: "uint64",
-      },
-      key: ["bombId"],
-      codegen: {
-        outputDirectory: "../modules/atfs/PinkBomb/tables",
-        tableIdArgument: true,
-      },
-      deploy: {
-        disabled: true,
-      },
-    },
+    // // artifact module
+    // Effect: {
+    //   schema: {
+    //     id: "uint24",
+    //     effectType: "EffectType",
+    //     modifierNumber: "uint8", // up to 7 modifiers
+    //     modifiers: "uint248", // 32 bits per modifier, including the uint8 type and the uint24 value
+    //   },
+    //   key: ["id"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // ArtifactMetadata: {
+    //   schema: {
+    //     rarity: "ArtifactRarity",
+    //     genre: "ArtifactGenre",
+    //     charge: "uint32",
+    //     cooldown: "uint32",
+    //     durable: "bool",
+    //     reusable: "bool",
+    //     reqLevel: "uint8",
+    //     reqPopulation: "uint64",
+    //     reqSilver: "uint64",
+    //   },
+    //   key: ["rarity"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // Wormhole: {
+    //   schema: {
+    //     from: "bytes32",
+    //     to: "bytes32",
+    //   },
+    //   key: ["from"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/Wormhole/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // PinkBomb: {
+    //   schema: {
+    //     bombId: "uint32",
+    //     target: "bytes32",
+    //     departureTick: "uint64",
+    //     arrivalTick: "uint64",
+    //   },
+    //   key: ["bombId"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/PinkBomb/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
   },
 });

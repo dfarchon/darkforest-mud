@@ -6,7 +6,6 @@ import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { TickSystem } from "../systems/TickSystem.sol";
 import { IPlanetReadSystem } from "../codegen/world/IPlanetReadSystem.sol";
-import { PlanetReadSystem } from "../systems/PlanetReadSystem.sol";
 import { VerifySystem } from "../systems/VerifySystem.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "../lib/VerificationInput.sol";

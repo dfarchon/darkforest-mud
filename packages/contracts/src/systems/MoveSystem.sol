@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { IWorld } from "../codegen/world/IWorld.sol";
+import { IEffectSystem } from "../codegen/world/IEffectSystem.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput } from "../lib/VerificationInput.sol";
@@ -33,14 +33,14 @@ contract MoveSystem is System, Errors {
     uint256 _silver,
     uint256 _artifact
   ) public {
-    IWorld world = IWorld(_world());
-    DFUtils.tick(address(world));
-    DFUtils.verify(address(world), _proof, _input);
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
+    DFUtils.verify(worldAddress, _proof, _input);
 
     // new planet instances in memory
-    Planet memory fromPlanet = DFUtils.readInitedPlanet(address(world), _input.fromPlanetHash);
+    Planet memory fromPlanet = DFUtils.readInitedPlanet(worldAddress, _input.fromPlanetHash);
     Planet memory toPlanet = DFUtils.readAnyPlanet(
-      address(world),
+      worldAddress,
       _input.toPlanetHash,
       _input.toPerlin,
       _input.toRadiusSquare
@@ -48,7 +48,7 @@ contract MoveSystem is System, Errors {
 
     // trigger before move effects
     // Discussion: Do we need to implement it via system hooks?
-    fromPlanet = world.df__beforeMove(fromPlanet);
+    fromPlanet = IEffectSystem(worldAddress).df__beforeMove(fromPlanet);
 
     // create a new move and load all resources
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
@@ -59,7 +59,7 @@ contract MoveSystem is System, Errors {
     shipping.headTo(toPlanet, distance, fromPlanet.speed);
 
     // trigger after move effects
-    fromPlanet = world.df__afterMove(fromPlanet);
+    fromPlanet = IEffectSystem(worldAddress).df__afterMove(fromPlanet);
 
     // write back to storage
     Counter.setMove(shipping.id);

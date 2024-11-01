@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-import { IWorld } from "../codegen/world/IWorld.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { BiomebaseInput } from "../lib/VerificationInput.sol";

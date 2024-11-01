@@ -14,7 +14,7 @@ import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../codegen/index.sol";
 import { ProspectedPlanet, ExploredPlanet } from "../codegen/index.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "../codegen/index.sol";
-import { ArtifactMetadataData } from "../codegen/index.sol";
+import { ArtifactMetadataData } from "../modules/atfs/tables/ArtifactMetadata.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "./Move.sol";
 import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "./Artifact.sol";

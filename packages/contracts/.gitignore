@@ -6,8 +6,6 @@ artifacts/
 broadcast/
 
 src/codegen/
-src/modules/atfs/tables/
-src/modules/atfs/*/tables
 
 # Ignore MUD deploy artifacts
 deploys/**/*.json

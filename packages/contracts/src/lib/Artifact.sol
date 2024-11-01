@@ -5,7 +5,8 @@ import { Errors } from "../interfaces/errors.sol";
 import { PlanetType, SpaceType, Biome, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "../codegen/common.sol";
 import { Counter, Ticker, Artifact as ArtifactTable, ArtifactData, PlanetArtifact } from "../codegen/index.sol";
 import { ArtifactConfig, ArtifactConfigData } from "../codegen/index.sol";
-import { PlanetArtifact, ArtifactOwner, ArtifactMetadata, ArtifactMetadataData } from "../codegen/index.sol";
+import { PlanetArtifact, ArtifactOwner } from "../codegen/index.sol";
+import { ArtifactMetadata, ArtifactMetadataData } from "../modules/atfs/tables/ArtifactMetadata.sol";
 import { _artifactMetadataTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
 
 using ArtifactStorageLib for ArtifactStorage global;
