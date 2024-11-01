@@ -9,6 +9,7 @@ import { Planet } from "../lib/Planet.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { SpawnInput } from "../lib/VerificationInput.sol";
 import { Errors } from "../interfaces/errors.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract TestOnlySystem is System, Errors {
   function createPlanet(
@@ -22,8 +23,7 @@ contract TestOnlySystem is System, Errors {
     uint64 silver,
     uint24 upgrades
   ) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    DFUtils.tick(_world());
 
     PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
 
@@ -56,15 +56,13 @@ contract TestOnlySystem is System, Errors {
     SpawnInput memory input;
     input.genFrom(_input);
 
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    if (!world.df__verifySpawnProof(proof, input)) {
-      revert Errors.InvalidSpawnProof();
-    }
+    DFUtils.verify(worldAddress, proof, input);
 
     // new planet instances in memory
-    Planet memory planet = world.df__readPlanet(input.planetHash, input.perlin, input.radiusSquare);
+    Planet memory planet = DFUtils.readAnyPlanet(worldAddress, input.planetHash, input.perlin, input.radiusSquare);
     planet.changeOwner(newOwner);
     planet.population = planet.populationCap;
     planet.silver = planet.silverCap;

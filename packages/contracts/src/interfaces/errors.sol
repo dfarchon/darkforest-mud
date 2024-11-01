@@ -39,6 +39,8 @@ interface Errors {
   error InvalidUpgradeTarget(); // 0x0ec7b300
   error UpgradeExceedMaxLevel(); // 0x1d245dc9
   error NotEnoughSilverToUpgrade(); // 0x3c1137b2
+  error PlanetNotAvailable(); // 0xa7d5125d
+  error PlanetNotInitialized(); // 0xcfd4ee18
 
   // reveal system
   error InvalidRevealProof(); // 0x5d655004

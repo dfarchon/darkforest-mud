@@ -10,6 +10,7 @@ import { Player, Counter, TempConfigSet, SpawnPlanet, UniverseZoneConfig } from 
 import { NameToPlayer, BurnerToPlayer } from "../codegen/index.sol";
 import { Planet } from "../lib/Planet.sol";
 import { SpaceType, PlanetType } from "../codegen/common.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract PlayerSystem is System {
   /**
@@ -85,12 +86,10 @@ contract PlayerSystem is System {
    * @param _input SpawnInput.
    */
   function spawnPlayer(Proof memory _proof, SpawnInput memory _input) public returns (uint256) {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    if (!world.df__verifySpawnProof(_proof, _input)) {
-      revert Errors.InvalidSpawnProof();
-    }
+    DFUtils.verify(worldAddress, _proof, _input);
 
     address player = _msgSender();
 
@@ -103,7 +102,7 @@ contract PlayerSystem is System {
     }
 
     // new planet instances in memory
-    Planet memory planet = world.df__readPlanet(_input.planetHash, _input.perlin, _input.radiusSquare);
+    Planet memory planet = DFUtils.readAnyPlanet(worldAddress, _input.planetHash, _input.perlin, _input.radiusSquare);
     planet.changeOwner(player);
     planet.population = 50000; // initial population for player's home planet
 

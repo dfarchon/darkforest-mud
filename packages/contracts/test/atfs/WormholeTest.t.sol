@@ -77,7 +77,6 @@ contract WormholeTest is MudTest {
     vm.stopPrank();
 
     vm.warp(_getTimestampAtTick(move1.arrivalTick) + 1);
-    vm.prank(admin);
     IWorld(worldAddress).df__tick();
     artifact = IWorld(worldAddress).df__readArtifact(1);
     vm.expectRevert(Errors.ArtifactNotAvailable.selector);

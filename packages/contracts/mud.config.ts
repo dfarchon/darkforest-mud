@@ -163,43 +163,6 @@ export default defineWorld({
       },
       key: ["rarity"],
     },
-    Effect: {
-      schema: {
-        id: "uint24",
-        effectType: "EffectType",
-        modifierNumber: "uint8", // up to 7 modifiers
-        modifiers: "uint248", // 32 bits per modifier, including the uint8 type and the uint24 value
-      },
-      key: ["id"],
-      codegen: {
-        outputDirectory: "../modules/atfs/tables",
-        tableIdArgument: true,
-      },
-      deploy: {
-        disabled: true,
-      },
-    },
-    ArtifactMetadata: {
-      schema: {
-        rarity: "ArtifactRarity",
-        genre: "ArtifactGenre",
-        charge: "uint32",
-        cooldown: "uint32",
-        durable: "bool",
-        reusable: "bool",
-        reqLevel: "uint8",
-        reqPopulation: "uint64",
-        reqSilver: "uint64",
-      },
-      key: ["rarity"],
-      codegen: {
-        outputDirectory: "../modules/atfs/tables",
-        tableIdArgument: true,
-      },
-      deploy: {
-        disabled: true,
-      },
-    },
     Artifact: {
       schema: {
         id: "uint32",
@@ -395,7 +358,44 @@ export default defineWorld({
       },
       key: [],
     },
-    // artifact
+    // artifact module
+    Effect: {
+      schema: {
+        id: "uint24",
+        effectType: "EffectType",
+        modifierNumber: "uint8", // up to 7 modifiers
+        modifiers: "uint248", // 32 bits per modifier, including the uint8 type and the uint24 value
+      },
+      key: ["id"],
+      codegen: {
+        outputDirectory: "../modules/atfs/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
+    },
+    ArtifactMetadata: {
+      schema: {
+        rarity: "ArtifactRarity",
+        genre: "ArtifactGenre",
+        charge: "uint32",
+        cooldown: "uint32",
+        durable: "bool",
+        reusable: "bool",
+        reqLevel: "uint8",
+        reqPopulation: "uint64",
+        reqSilver: "uint64",
+      },
+      key: ["rarity"],
+      codegen: {
+        outputDirectory: "../modules/atfs/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
+    },
     Wormhole: {
       schema: {
         from: "bytes32",

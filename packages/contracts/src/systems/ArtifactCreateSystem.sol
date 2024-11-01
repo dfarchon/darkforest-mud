@@ -2,32 +2,31 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { IWorld } from "../codegen/world/IWorld.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { BiomebaseInput } from "../lib/VerificationInput.sol";
 import { Planet } from "../lib/Planet.sol";
 import { Artifact } from "../lib/Artifact.sol";
 import { Counter } from "../codegen/index.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract ArtifactCreateSystem is System, Errors {
   function prospectPlanet(uint256 planetHash) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    Planet memory planet = world.df__readPlanet(planetHash);
+    Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
     planet.prospect(_msgSender());
     planet.writeToStore();
   }
 
   function findingArtifact(Proof memory proof, BiomebaseInput memory input) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    if (!world.df__verifyBiomebaseProof(proof, input)) {
-      revert Errors.InvalidBiomebaseProof();
-    }
-    Planet memory planet = world.df__readPlanet(input.planetHash);
+    DFUtils.verify(worldAddress, proof, input);
+
+    Planet memory planet = DFUtils.readInitedPlanet(worldAddress, input.planetHash);
     Artifact memory artifact = planet.findArtifact(_msgSender());
 
     Counter.setArtifact(uint32(artifact.id));

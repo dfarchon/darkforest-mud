@@ -7,6 +7,7 @@ import { Errors } from "../interfaces/errors.sol";
 import { Planet } from "../lib/Planet.sol";
 import { PlanetType, SpaceType, Biome } from "../codegen/common.sol";
 import { PlayerWithdrawSilver } from "../codegen/index.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract PlanetWithdrawSilverSystem is System, Errors {
   /**
@@ -16,10 +17,10 @@ contract PlanetWithdrawSilverSystem is System, Errors {
    */
 
   function withdrawSilver(uint256 planetHash, uint256 silverToWithdraw) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    Planet memory planet = world.df__readPlanet(planetHash);
+    Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
     address executor = _msgSender();
     uint256 playerWithdrawSilverAmount = PlayerWithdrawSilver.get(executor);
 

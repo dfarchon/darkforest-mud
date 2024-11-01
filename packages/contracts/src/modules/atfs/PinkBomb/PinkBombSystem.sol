@@ -18,6 +18,7 @@ import { Planet as PlanetTable } from "../../../codegen/index.sol";
 import { RevealedPlanet, RevealedPlanetData, Artifact as ArtifactTable, Ticker } from "../../../codegen/index.sol";
 import { PinkBomb, PinkBombData } from "./tables/PinkBomb.sol";
 import { _pinkBombTableId } from "./utils.sol";
+import { DFUtils } from "../../../lib/DFUtils.sol";
 
 contract PinkBombSystem is ArtifactProxySystem {
   using EffectLib for Planet;
@@ -37,6 +38,9 @@ contract PinkBombSystem is ArtifactProxySystem {
   }
 
   function destroy(uint256 bombId, Proof memory proof, RevealInput memory input) public {
+    // tick
+    DFUtils.tick(_world());
+
     // reveal destroyed planet
     if (!IWorld(_world()).df__verifyRevealProof(proof, input)) {
       revert Errors.InvalidRevealProof();

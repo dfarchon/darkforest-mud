@@ -13,7 +13,7 @@ import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Tick
 import { RevealedPlanet } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
 import { Proof } from "../../src/lib/SnarkProof.sol";
-import { BiomebaseInput, RevealInput } from "../../src/lib/VerificationInput.sol";
+import { RevealInput, MoveInput } from "../../src/lib/VerificationInput.sol";
 import { Planet } from "../../src/lib/Planet.sol";
 import { EffectLib } from "../../src/lib/Effect.sol";
 import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetStatus } from "../../src/codegen/common.sol";
@@ -40,7 +40,7 @@ contract PinkBombTest is MudTest {
     IWorld(worldAddress).df__unpause();
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
-    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(3, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     Counter.setArtifact(1);
     PlanetArtifact.set(bytes32(uint256(1)), 1);
     ArtifactOwner.set(1, bytes32(uint256(1)));
@@ -152,8 +152,6 @@ contract PinkBombTest is MudTest {
     ResourceId pinkBombResourceId = _pinkBombTableId(_artifactIndexToNamespace(PINK_BOMB_INDEX));
     PinkBombData memory pinkBomb = PinkBomb.get(pinkBombResourceId, 1);
     vm.warp(block.timestamp + (pinkBomb.arrivalTick - pinkBomb.departureTick) / Ticker.getTickRate() + 1);
-    vm.prank(admin);
-    IWorld(worldAddress).df__tick();
     input.planetHash = 3;
     input.x = 701;
     input.y = 200;
@@ -170,5 +168,25 @@ contract PinkBombTest is MudTest {
       abi.encodeWithSelector(PinkBombSystem.destroy.selector, 1, proof, input)
     );
     assertTrue(PlanetTable.getStatus(bytes32(uint256(3))) == PlanetStatus.DESTROYED);
+
+    vm.prank(address(3));
+    vm.expectRevert(Errors.PlanetNotAvailable.selector);
+    _move(3, 1, 100, 100000, 1000, 0);
+  }
+
+  function _move(
+    uint256 from,
+    uint256 to,
+    uint256 distance,
+    uint256 population,
+    uint256 silver,
+    uint256 artifact
+  ) internal {
+    Proof memory proof;
+    MoveInput memory input;
+    input.fromPlanetHash = from;
+    input.toPlanetHash = to;
+    input.distance = distance;
+    IWorld(worldAddress).df__move(proof, input, population, silver, artifact);
   }
 }

@@ -12,6 +12,7 @@ import { MoveLib } from "../lib/Move.sol";
 import { UniverseLib } from "../lib/Universe.sol";
 import { EffectLib } from "../lib/Effect.sol";
 import { Artifact } from "../lib/Artifact.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract MoveSystem is System, Errors {
   using MoveLib for MoveData;
@@ -33,17 +34,20 @@ contract MoveSystem is System, Errors {
     uint256 _artifact
   ) public {
     IWorld world = IWorld(_world());
-    world.df__tick();
-
-    if (!world.df__verifyMoveProof(_proof, _input)) {
-      revert Errors.InvalidMoveProof();
-    }
+    DFUtils.tick(address(world));
+    DFUtils.verify(address(world), _proof, _input);
 
     // new planet instances in memory
-    Planet memory fromPlanet = world.df__readPlanet(_input.fromPlanetHash);
-    Planet memory toPlanet = world.df__readPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
+    Planet memory fromPlanet = DFUtils.readInitedPlanet(address(world), _input.fromPlanetHash);
+    Planet memory toPlanet = DFUtils.readAnyPlanet(
+      address(world),
+      _input.toPlanetHash,
+      _input.toPerlin,
+      _input.toRadiusSquare
+    );
 
     // trigger before move effects
+    // Discussion: Do we need to implement it via system hooks?
     fromPlanet = world.df__beforeMove(fromPlanet);
 
     // create a new move and load all resources

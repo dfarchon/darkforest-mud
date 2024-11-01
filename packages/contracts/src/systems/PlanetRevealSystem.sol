@@ -8,15 +8,14 @@ import { Ticker, RevealedPlanet, LastReveal, TempConfigSet } from "../codegen/in
 import { Planet } from "../lib/Planet.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { RevealInput } from "../lib/VerificationInput.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract PlanetRevealSystem is System, Errors {
   function revealLocation(Proof memory proof, RevealInput memory input) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    if (!world.df__verifyRevealProof(proof, input)) {
-      revert Errors.InvalidRevealProof();
-    }
+    DFUtils.verify(worldAddress, proof, input);
 
     address player = _msgSender();
     uint256 currentTick = Ticker.getTickNumber();
@@ -29,7 +28,7 @@ contract PlanetRevealSystem is System, Errors {
 
     int256 x = _getIntFromUintCoords(input.x);
     int256 y = _getIntFromUintCoords(input.y);
-    Planet memory planet = world.df__readPlanet(input.planetHash, input.perlin, uint256(x * x + y * y));
+    Planet memory planet = DFUtils.readAnyPlanet(worldAddress, input.planetHash, input.perlin, uint256(x * x + y * y));
 
     RevealedPlanet.set(bytes32(input.planetHash), int32(x), int32(y), _msgSender());
     planet.writeToStore();
