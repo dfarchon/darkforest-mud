@@ -40,6 +40,8 @@ interface Errors {
   error InvalidUpgradeTarget(); // 0x0ec7b300
   error UpgradeExceedMaxLevel(); // 0x1d245dc9
   error NotEnoughSilverToUpgrade(); // 0x3c1137b2
+  error PlanetNotAvailable(); // 0xa7d5125d
+  error PlanetNotInitialized(); // 0xcfd4ee18
 
   // reveal system
   error InvalidRevealProof(); // 0x5d655004
@@ -57,6 +59,8 @@ interface Errors {
   error ArtifactNotChargeable(); // 0x342e603f
   error ArtifactLevelTooLow(); // 0x24c528ed
   error NotEnoughResourceToActivate(); // 0xe642b7b4
+  error ExistingArtifact(); // 0x11f0e4e4
+  error OnlyCallableByArtifactInstallModule(); // 0xbf9f6704
 
   // planet withdraw silver system
   error InvalidPlanetType(); // 0xcfb7f825

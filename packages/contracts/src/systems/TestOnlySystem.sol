@@ -3,12 +3,13 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 import { IWorld } from "../codegen/world/IWorld.sol";
-import { PlanetType, SpaceType } from "../codegen/common.sol";
+import { PlanetType, SpaceType, PlanetStatus } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetOwner, PlanetConstants, Ticker, RevealedPlanet } from "../codegen/index.sol";
 import { Planet } from "../lib/Planet.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { SpawnInput } from "../lib/VerificationInput.sol";
 import { Errors } from "../interfaces/errors.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract TestOnlySystem is System, Errors {
   function createPlanet(
@@ -22,14 +23,21 @@ contract TestOnlySystem is System, Errors {
     uint64 silver,
     uint24 upgrades
   ) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    DFUtils.tick(_world());
 
     PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
 
     PlanetOwner.set(bytes32(planetHash), owner);
 
-    PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
+    PlanetTable.set(
+      bytes32(planetHash),
+      PlanetStatus.DEFAULT,
+      Ticker.getTickNumber(),
+      population,
+      silver,
+      upgrades,
+      false
+    );
   }
 
   function revealPlanetByAdmin(uint256 planetHash, int256 x, int256 y) public {
@@ -48,15 +56,13 @@ contract TestOnlySystem is System, Errors {
     SpawnInput memory input;
     input.genFrom(_input);
 
-    IWorld world = IWorld(_world());
-    world.df__tick();
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    if (!world.df__verifySpawnProof(proof, input)) {
-      revert Errors.InvalidSpawnProof();
-    }
+    DFUtils.verify(worldAddress, proof, input);
 
     // new planet instances in memory
-    Planet memory planet = world.df__readPlanet(input.planetHash, input.perlin, input.radiusSquare);
+    Planet memory planet = DFUtils.readAnyPlanet(worldAddress, input.planetHash, input.perlin, input.radiusSquare);
     planet.changeOwner(newOwner);
     planet.population = planet.populationCap;
     planet.silver = planet.silverCap;
