@@ -14,8 +14,8 @@ export const enum TutorialState {
 
   HomePlanet,
   SendFleet,
-  SpaceJunk,
-  Spaceship,
+  // SpaceJunk,
+  // Spaceship,
   Deselect,
   ZoomOut,
   MinerMove,
