@@ -335,34 +335,42 @@ export class Overlay2DRenderer {
     renderInfo: PlanetRenderInfo,
     textAlpha: number,
   ) {
-    // planets have at most one emoji
-    let renderedEmoji = false;
+    this.drawEmojiMessage(
+      centerWorld,
+      radiusWorld,
+      renderInfo,
+      renderInfo.planet.emoji ?? "",
+      textAlpha,
+    );
 
-    renderInfo.planet.messages?.forEach((m) => {
-      if (isEmojiFlagMessage(m) && !renderedEmoji) {
-        this.drawEmojiMessage(
-          centerWorld,
-          radiusWorld,
-          renderInfo,
-          m,
-          textAlpha,
-        );
-        renderedEmoji = true;
-      }
-    });
+    // planets have at most one emoji
+    // let renderedEmoji = false;
+    // renderInfo.planet.messages?.forEach((m) => {
+    //   if (isEmojiFlagMessage(m) && !renderedEmoji) {
+    //     this.drawEmojiMessage(
+    //       centerWorld,
+    //       radiusWorld,
+    //       renderInfo,
+    //       m,
+    //       textAlpha,
+    //     );
+    //     renderedEmoji = true;
+    //   }
+    // });
   }
 
   drawEmojiMessage(
     centerWorld: WorldCoords,
     radiusWorld: number,
     renderInfo: PlanetRenderInfo,
-    message: PlanetMessage<EmojiFlagBody>,
+    emoji: string,
+    // message: PlanetMessage<EmojiFlagBody>,
     textAlpha: number,
   ) {
     const viewport = this.renderer.getViewport();
     const pixelCoords = viewport.worldToCanvasCoords(centerWorld);
     const radiusPixels = viewport.worldToCanvasDist(radiusWorld);
-    const text = message.body.emoji;
+    const text = emoji; //message.body.emoji;
 
     let size = radiusPixels;
     let offsetY = -2;
@@ -388,6 +396,7 @@ export class Overlay2DRenderer {
     this.ctx.font = `${size}px Arial`;
     this.ctx.fillStyle = `rgba(0, 0, 0, ${textAlpha})`;
     const textSize = this.ctx.measureText(text);
+
     this.ctx.fillText(
       text,
       pixelCoords.x - textSize.width / 2,

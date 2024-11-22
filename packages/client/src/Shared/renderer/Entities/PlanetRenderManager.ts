@@ -393,10 +393,16 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     radiusW: number,
     textAlpha: number,
   ) {
-    if (!renderInfo.planet.messages) {
+    if (!renderInfo.planet.emoji) {
       return;
     }
+
+    // if (!renderInfo.planet.messages) {
+    //   return;
+    // }
+
     const { overlay2dRenderer: cM } = this.renderer;
+
     cM.drawPlanetMessages(coords, radiusW, renderInfo, textAlpha);
   }
 

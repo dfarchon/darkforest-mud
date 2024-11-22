@@ -36,9 +36,12 @@ export function getNotifsForPlanet(
     if (GameObjects.planetCanUpgrade(planet)) {
       notifs.push(PlanetNotifType.PlanetCanUpgrade);
     }
-    if (import.meta.env.VITE_WEBSERVER_URL) {
-      notifs.push(PlanetNotifType.CanAddEmoji);
-    }
+
+    notifs.push(PlanetNotifType.CanAddEmoji);
+
+    // if (import.meta.env.VITE_WEBSERVER_URL) {
+    //   notifs.push(PlanetNotifType.CanAddEmoji);
+    // }
   }
 
   if (planet.claimer !== undefined) {

@@ -1405,6 +1405,10 @@ export class GameManager extends EventEmitter {
     this.entityStore.updateArrival(planetId, arrival);
   }
 
+  public getPlanetEmoji(planetId: LocationId): string | undefined {
+    return this.contractsAPI.getPlanetEmoji(planetId);
+  }
+
   // Dirty hack for only refreshing properties on a planet and nothing else
   public softRefreshPlanet(planetId: LocationId): void {
     const planet = this.contractsAPI.getPlanetById(planetId);
@@ -5017,45 +5021,48 @@ export class GameManager extends EventEmitter {
    * This function loads the planet states which live on the server. Plays nicely with our
    * notifications system and sets the appropriate loading state values on the planet.
    */
-  // public async refreshServerPlanetStates(planetIds: LocationId[]) {
-  //   const planets = this.getPlanetsWithIds(planetIds);
+  public async refreshServerPlanetStates(planetIds: LocationId[]) {
+    const planets = this.getPlanetsWithIds(planetIds);
 
-  //   planetIds.forEach((id) =>
-  //     this.getGameObjects().updatePlanet(id, (p) => {
-  //       p.loadingServerState = true;
-  //     }),
-  //   );
+    planetIds.forEach((id) =>
+      this.getGameObjects().updatePlanet(id, (p) => {
+        p.loadingServerState = true;
+      }),
+    );
 
-  //   const messages = await getMessagesOnPlanets({ planets: planetIds });
+    // const messages = await getMessagesOnPlanets({ planets: planetIds });
 
-  //   planets.forEach((planet) => {
-  //     const previousPlanetEmoji = getEmojiMessage(planet);
-  //     planet.messages = messages[planet.locationId];
-  //     const nowPlanetEmoji = getEmojiMessage(planet);
+    planets.forEach((planet) => {
+      const previousPlanetEmoji =
+        !planet.emoji || planet.emoji === "" ? undefined : planet.emoji;
 
-  //     // an emoji was added
-  //     if (previousPlanetEmoji === undefined && nowPlanetEmoji !== undefined) {
-  //       planet.emojiZoopAnimation = easeInAnimation(2000);
-  //       // an emoji was removed
-  //     } else if (
-  //       nowPlanetEmoji === undefined &&
-  //       previousPlanetEmoji !== undefined
-  //     ) {
-  //       planet.emojiZoopAnimation = undefined;
-  //       planet.emojiZoopOutAnimation = emojiEaseOutAnimation(
-  //         3000,
-  //         previousPlanetEmoji.body.emoji,
-  //       );
-  //     }
-  //   });
+      planet.emoji = this.contractsAPI.getPlanetEmoji(planet.locationId);
 
-  //   planetIds.forEach((id) =>
-  //     this.getGameObjects().updatePlanet(id, (p) => {
-  //       p.loadingServerState = false;
-  //       p.needsServerRefresh = false;
-  //     }),
-  //   );
-  // }
+      const nowPlanetEmoji = planet.emoji;
+
+      // an emoji was added
+      if (previousPlanetEmoji === undefined && nowPlanetEmoji !== undefined) {
+        planet.emojiZoopAnimation = easeInAnimation(2000);
+        // an emoji was removed
+      } else if (
+        nowPlanetEmoji === undefined &&
+        previousPlanetEmoji !== undefined
+      ) {
+        planet.emojiZoopAnimation = undefined;
+        planet.emojiZoopOutAnimation = emojiEaseOutAnimation(
+          3000,
+          previousPlanetEmoji,
+        );
+      }
+    });
+
+    planetIds.forEach((id) =>
+      this.getGameObjects().updatePlanet(id, (p) => {
+        p.loadingServerState = false;
+        p.needsServerRefresh = false;
+      }),
+    );
+  }
 
   /**
    * If you are the owner of this planet, you can set an 'emoji' to hover above the planet.

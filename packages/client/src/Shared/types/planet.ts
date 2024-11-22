@@ -129,13 +129,13 @@ export type Planet = {
   transactions?: TransactionCollection;
   // unconfirmedAddEmoji: boolean;
   // unconfirmedClearEmoji: boolean;
-  // loadingServerState: boolean;
-  // needsServerRefresh: boolean;
-  // lastLoadedServerState?: number;
+  loadingServerState: boolean;
+  needsServerRefresh: boolean;
+  lastLoadedServerState?: number;
 
-  // emojiBobAnimation?: DFAnimation;
-  // emojiZoopAnimation?: DFAnimation;
-  // emojiZoopOutAnimation?: DFStatefulAnimation<string>;
+  emojiBobAnimation?: DFAnimation;
+  emojiZoopAnimation?: DFAnimation;
+  emojiZoopOutAnimation?: DFStatefulAnimation<string>;
 
   silverSpent: number;
 
@@ -151,6 +151,7 @@ export type Planet = {
   // kardashevTimestamp?: number;
 
   // messages?: PlanetMessage<unknown>[];
+  emoji?: string;
 
   bonus: PlanetBonus;
   // pausers: number;
@@ -214,13 +215,13 @@ export type Planet = {
 //   transactions?: TransactionCollection;
 //   unconfirmedAddEmoji: boolean;
 //   unconfirmedClearEmoji: boolean;
-//   loadingServerState: boolean;
-//   needsServerRefresh: boolean;
-//   lastLoadedServerState?: number;
+// loadingServerState: boolean;
+// needsServerRefresh: boolean;
+// lastLoadedServerState?: number;
 
-//   emojiBobAnimation?: DFAnimation;
-//   emojiZoopAnimation?: DFAnimation;
-//   emojiZoopOutAnimation?: DFStatefulAnimation<string>;
+// emojiBobAnimation?: DFAnimation;
+// emojiZoopAnimation?: DFAnimation;
+// emojiZoopOutAnimation?: DFStatefulAnimation<string>;
 
 //   silverSpent: number;
 
@@ -235,7 +236,7 @@ export type Planet = {
 //   kardashevOperator?: EthAddress;
 //   kardashevTimestamp?: number;
 
-//   messages?: PlanetMessage<unknown>[];
+// messages?: PlanetMessage<unknown>[];
 
 //   bonus: PlanetBonus;
 //   pausers: number;

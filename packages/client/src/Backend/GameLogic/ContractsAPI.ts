@@ -1315,6 +1315,22 @@ export class ContractsAPI extends EventEmitter {
     return this.planetUtils.getPlanetById(planetId);
   }
 
+  public getPlanetEmoji(planetId: LocationId): string | undefined {
+    const { PlanetEmoji } = this.components;
+
+    const planetEntity = encodeEntity(PlanetEmoji.metadata.keySchema, {
+      id: locationIdToHexStr(planetId) as `0x${string}`,
+    });
+
+    const emoji = getComponentValue(PlanetEmoji, planetEntity);
+
+    if (!emoji || emoji.value === "") {
+      return undefined;
+    } else {
+      return emoji.value;
+    }
+  }
+
   public bulkGetPlanets(
     toLoadPlanets: LocationId[],
     onProgressPlanet?: (fractionCompleted: number) => void,
