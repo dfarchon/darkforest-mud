@@ -32,7 +32,7 @@ export class ViewportEntities {
   public constructor(gameManager: GameManager, gameUIManager: GameUIManager) {
     this.gameManager = gameManager;
     this.uiManager = gameUIManager;
-    // this.startRefreshing();
+    this.startRefreshing();
   }
 
   public startRefreshing() {

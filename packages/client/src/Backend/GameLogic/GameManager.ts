@@ -101,13 +101,13 @@ import type {
   UnconfirmedInit,
   UnconfirmedInvadePlanet,
   UnconfirmedKardashev,
-  UnconfirmedSetPlanetEmoji,
   UnconfirmedMove,
   UnconfirmedPink,
   UnconfirmedPlanetTransfer,
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSetPlanetEmoji,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawSilver,
@@ -1052,6 +1052,7 @@ export class GameManager extends EventEmitter {
           gameManager.hardRefreshPlanet(planetId);
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         }
+        await gameManager.refreshServerPlanetStates([planetId]);
       })
       .on(
         ContractsAPIEvent.ArrivalQueued,

@@ -110,14 +110,15 @@ function renderNotification(
   switch (notif) {
     case PlanetNotifType.PlanetCanUpgrade:
       return <PlanetCanUpgradeRow />;
+
+    case PlanetNotifType.CanAddEmoji:
+      return (
+        <EmojiRow
+          wrapper={planet}
+          key={notif + (planet.value?.locationId + "")}
+        />
+      );
     // PUNK
-    // case PlanetNotifType.CanAddEmoji:
-    //   return (
-    //     <EmojiRow
-    //       wrapper={planet}
-    //       key={notif + (planet.value?.locationId + "")}
-    //     />
-    //   );
     // case PlanetNotifType.Claimed:
     //   return (
     //     <PlanetClaimedRow
