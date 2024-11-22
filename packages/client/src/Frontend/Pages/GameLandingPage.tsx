@@ -1681,7 +1681,7 @@ export function GameLandingPage() {
       if (browserCompatibleState !== "supported") {
         return;
       }
-      if (ethConnection === undefined) {
+      if (ethConnection === undefined && !syncSign) {
         return;
       }
 
@@ -1760,6 +1760,7 @@ export function GameLandingPage() {
       advanceStateFromSpectating,
       ethConnection,
       browserCompatibleState,
+      syncSign,
     ],
   );
 
