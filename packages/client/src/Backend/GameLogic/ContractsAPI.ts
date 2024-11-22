@@ -158,6 +158,7 @@ export class ContractsAPI extends EventEmitter {
   private moveSubscription: Subscription;
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
+  private setPlanetEmojiSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -395,6 +396,20 @@ export class ContractsAPI extends EventEmitter {
         if (nextValue) {
           this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
         }
+      });
+
+    this.setPlanetEmojiSubscription =
+      this.components.PlanetEmoji.update$.subscribe((update) => {
+        const entity = update.entity;
+
+        // PUNK
+        console.log("set planet emoji subscription");
+        console.log(locationIdFromHexStr(entity.toString()));
+
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
       });
 
     this.tickerRateSubscription = this.components.Ticker.update$.subscribe(
@@ -787,6 +802,7 @@ export class ContractsAPI extends EventEmitter {
     this.moveSubscription.unsubscribe();
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
+    this.setPlanetEmojiSubscription.unsubscribe();
     return;
     const { contract } = this;
 

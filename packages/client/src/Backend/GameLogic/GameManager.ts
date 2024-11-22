@@ -47,6 +47,7 @@ import {
   isUnconfirmedProspectPlanetTx,
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
+  isUnconfirmedSetPlanetEmojiTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
@@ -100,6 +101,7 @@ import type {
   UnconfirmedInit,
   UnconfirmedInvadePlanet,
   UnconfirmedKardashev,
+  UnconfirmedSetPlanetEmoji,
   UnconfirmedMove,
   UnconfirmedPink,
   UnconfirmedPlanetTransfer,
@@ -1262,12 +1264,14 @@ export class GameManager extends EventEmitter {
             // gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawSilverTx(tx)) {
-          await gameManager.softRefreshPlanet(tx.intent.locationId);
+          await gameManager.hardRefreshPlanet(tx.intent.locationId);
         } else if (isUnconfirmedCapturePlanetTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlayer(gameManager.getAccount()),
             gameManager.hardRefreshPlanet(tx.intent.locationId),
           ]);
+        } else if (isUnconfirmedSetPlanetEmojiTx(tx)) {
+          await gameManager.hardRefreshPlanet(tx.intent.locationId);
         } else if (isUnconfirmedInvadePlanetTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlayer(gameManager.getAccount()),
@@ -4932,6 +4936,73 @@ export class GameManager extends EventEmitter {
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__withdrawSilver",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async setPlanetEmoji(
+    locationId: LocationId,
+    emoji: string,
+    bypassChecks = false,
+  ): Promise<Transaction<UnconfirmedSetPlanetEmoji>> {
+    try {
+      if (!bypassChecks) {
+        if (!this.account) {
+          throw new Error("no account");
+        }
+        // if (this.checkGameHasEnded()) {
+        //   throw new Error('game has ended');
+        // }
+        const planet = this.entityStore.getPlanetWithId(locationId);
+        if (!planet) {
+          throw new Error("tried to set emoji to an unknown planet");
+        }
+
+        if (planet.owner !== this.getAccount()) {
+          throw new Error("can only set emoji to your planet");
+        }
+        if (
+          planet.transactions?.hasTransaction(isUnconfirmedSetPlanetEmojiTx)
+        ) {
+          throw new Error(
+            "a set emoji action is already in progress for this planet",
+          );
+        }
+
+        if (planet.destroyed || planet.frozen) {
+          throw new Error("can't set emoji to a destroyed/frozen planet");
+        }
+      }
+
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-setPlanetEmoji-planetId`,
+        locationId,
+      );
+
+      const delegator = this.getAccount();
+
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
+      const txIntent: UnconfirmedSetPlanetEmoji = {
+        delegator: delegator,
+        methodName: "df__setPlanetEmoji",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([locationIdToDecStr(locationId), emoji]),
+        locationId,
+        emoji,
+      };
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent);
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__setPlanetEmoji",
         (e as Error).message,
       );
       throw e;
