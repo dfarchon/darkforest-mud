@@ -203,9 +203,6 @@ importers:
       ts-dedent:
         specifier: 2.2.0
         version: 2.2.0
-      twemoji:
-        specifier: ^14.0.2
-        version: 14.0.2
       utils:
         specifier: workspace:*
         version: link:../utils
@@ -317,16 +314,16 @@ importers:
         version: 2.2.14(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@latticexyz/schema-type':
         specifier: 2.2.14
-        version: 2.2.14(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 2.2.14(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/store':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/world':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/world-modules':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)
     devDependencies:
       '@types/node':
         specifier: ^18.15.11
@@ -342,7 +339,7 @@ importers:
         version: 1.3.1(prettier@3.3.3)
       solhint:
         specifier: 4.5.4
-        version: 4.5.4(typescript@5.6.3)
+        version: 4.5.4(typescript@5.4.2)
       solhint-config-mud:
         specifier: 2.2.14
         version: 2.2.14
@@ -7707,9 +7704,6 @@ packages:
   jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
 
-  jsonfile@5.0.0:
-    resolution: {integrity: sha512-NQRZ5CRo74MhMMC3/3r5g2k4fjodJ/wh8MxjFbCViWKFjxrnudWSY5vomh+23ZaXzAS7J3fBZIR2dV6WbmfM0w==}
-
   jsonparse@1.3.1:
     resolution: {integrity: sha512-POQXvpdL69+CluYsillJ7SUhKvytYjW9vG/GKpnf+xP8UWgYEM/RaMzHHofbALDiKbbP1W8UEYmgGl39WkPZsg==}
     engines: {'0': node >= 0.2.0}
@@ -10543,12 +10537,6 @@ packages:
 
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
-
-  twemoji-parser@14.0.0:
-    resolution: {integrity: sha512-9DUOTGLOWs0pFWnh1p6NF+C3CkQ96PWmEFwhOVmT3WbecRC+68AIqpsnJXygfkFcp4aXbOp8Dwbhh/HQgvoRxA==}
-
-  twemoji@14.0.2:
-    resolution: {integrity: sha512-BzOoXIe1QVdmsUmZ54xbEH+8AgtOKUiG53zO5vVP2iUu6h5u9lN15NcuS6te4OY96qx0H7JK9vjjl9WQbkTRuA==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -14162,13 +14150,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@latticexyz/world-modules@2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)':
+  '@latticexyz/world-modules@2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)':
     dependencies:
-      '@latticexyz/common': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/config': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/schema-type': 2.2.14(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/store': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/world': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/common': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/config': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/schema-type': 2.2.14(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/store': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/world': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - '@aws-sdk/client-kms'
@@ -19077,14 +19065,14 @@ snapshots:
       js-yaml: 3.14.1
       parse-json: 4.0.0
 
-  cosmiconfig@8.3.6(typescript@5.6.3):
+  cosmiconfig@8.3.6(typescript@5.4.2):
     dependencies:
       import-fresh: 3.3.0
       js-yaml: 4.1.0
       parse-json: 5.2.0
       path-type: 4.0.0
     optionalDependencies:
-      typescript: 5.6.3
+      typescript: 5.4.2
 
   cosmiconfig@9.0.0(typescript@5.6.3):
     dependencies:
@@ -21454,12 +21442,6 @@ snapshots:
   jsonc-parser@3.3.1: {}
 
   jsonfile@4.0.0:
-    optionalDependencies:
-      graceful-fs: 4.2.11
-
-  jsonfile@5.0.0:
-    dependencies:
-      universalify: 0.1.2
     optionalDependencies:
       graceful-fs: 4.2.11
 
@@ -24109,7 +24091,7 @@ snapshots:
     dependencies:
       '@solidity-parser/parser': 0.16.2
 
-  solhint@4.5.4(typescript@5.6.3):
+  solhint@4.5.4(typescript@5.4.2):
     dependencies:
       '@solidity-parser/parser': 0.18.0
       ajv: 6.12.6
@@ -24117,7 +24099,7 @@ snapshots:
       ast-parents: 0.0.1
       chalk: 4.1.2
       commander: 10.0.1
-      cosmiconfig: 8.3.6(typescript@5.6.3)
+      cosmiconfig: 8.3.6(typescript@5.4.2)
       fast-diff: 1.3.0
       glob: 8.1.0
       ignore: 5.3.2
@@ -24762,15 +24744,6 @@ snapshots:
   tunnel-agent@0.6.0:
     dependencies:
       safe-buffer: 5.2.1
-
-  twemoji-parser@14.0.0: {}
-
-  twemoji@14.0.2:
-    dependencies:
-      fs-extra: 8.1.0
-      jsonfile: 5.0.0
-      twemoji-parser: 14.0.0
-      universalify: 0.1.2
 
   type-check@0.4.0:
     dependencies:
