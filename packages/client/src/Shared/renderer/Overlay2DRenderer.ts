@@ -364,44 +364,42 @@ export class Overlay2DRenderer {
     radiusWorld: number,
     renderInfo: PlanetRenderInfo,
     emoji: string,
-    // message: PlanetMessage<EmojiFlagBody>,
     textAlpha: number,
   ) {
-    const viewport = this.renderer.getViewport();
-    const pixelCoords = viewport.worldToCanvasCoords(centerWorld);
-    const radiusPixels = viewport.worldToCanvasDist(radiusWorld);
-    const text = emoji; //message.body.emoji;
+    const getUnifiedFromEmoji = (emoji: string) => {
+      const codePoints = Array.from(emoji).map(
+        (char) => char.codePointAt(0)?.toString(16) || "",
+      );
+      return codePoints.join("-");
+    };
 
-    let size = radiusPixels;
-    let offsetY = -2;
-
-    if (renderInfo.planet.emojiZoopAnimation !== undefined) {
-      size *= renderInfo.planet.emojiZoopAnimation.value();
-    }
-
-    if (size < 2) {
+    const emojiData = getUnifiedFromEmoji(emoji);
+    if (!emojiData) {
       return;
     }
 
-    if (renderInfo.planet.emojiBobAnimation !== undefined) {
-      offsetY +=
-        renderInfo.planet.emojiBobAnimation.value() * (radiusPixels * 0.1);
-    }
+    const viewport = this.renderer.getViewport();
+    const pixelCoords = viewport.worldToCanvasCoords(centerWorld);
+    const radiusPixels = (viewport.worldToCanvasDist(radiusWorld) * 3) / 4;
 
-    // don't want to obscure the silver text
-    if (renderInfo.planet.silver !== 0) {
-      offsetY -= 15;
-    }
+    // Save current context state
+    this.ctx.save();
+    // Set the global alpha
+    this.ctx.globalAlpha = textAlpha;
 
-    this.ctx.font = `${size}px Arial`;
-    this.ctx.fillStyle = `rgba(0, 0, 0, ${textAlpha})`;
-    const textSize = this.ctx.measureText(text);
+    const img = new Image();
+    img.src = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${emojiData}.svg`;
 
-    this.ctx.fillText(
-      text,
-      pixelCoords.x - textSize.width / 2,
-      pixelCoords.y - radiusPixels * 1.3 + offsetY,
+    this.ctx.drawImage(
+      img,
+      pixelCoords.x - radiusPixels,
+      pixelCoords.y - radiusPixels * 2.7,
+      radiusPixels * 2,
+      radiusPixels * 2,
     );
+
+    // Restore context state
+    this.ctx.restore();
   }
 
   drawText(
