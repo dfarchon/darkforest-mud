@@ -22,7 +22,7 @@ importers:
         version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/explorer':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(@babel/core@7.25.2)(@netlify/blobs@7.4.0)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.56.2)(@types/react-dom@18.3.0)(@types/react@18.3.8)(asn1.js@5.4.1)(bufferutil@4.0.8)(kysely@0.26.3)(postcss@8.4.45)(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(rollup@4.21.2)(sql.js@1.11.0)(ts-node@10.9.2(@types/node@18.19.45)(typescript@5.6.3))(typescript@5.6.3)(utf-8-validate@5.0.10)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.56.2)(@types/react-dom@18.3.0)(@types/react@18.3.8)(asn1.js@5.4.1)(bufferutil@4.0.8)(kysely@0.26.3)(postcss@8.4.45)(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(rollup@4.21.2)(sql.js@1.11.0)(ts-node@10.9.2(@types/node@18.19.45)(typescript@5.6.3))(typescript@5.6.3)(utf-8-validate@5.0.10)
       '@latticexyz/store-indexer':
         specifier: 2.2.14
         version: 2.2.14(@aws-sdk/client-kms@3.635.0)(@opentelemetry/api@1.9.0)(@types/react@18.3.8)(asn1.js@5.4.1)(bufferutil@4.0.8)(kysely@0.26.3)(react@18.3.1)(sql.js@1.11.0)(typescript@5.6.3)(utf-8-validate@5.0.10)
@@ -266,7 +266,7 @@ importers:
         version: 8.4.41
       prettier-plugin-tailwindcss:
         specifier: 0.6.6
-        version: 0.6.6(prettier@3.2.5)
+        version: 0.6.6(prettier@3.3.3)
       prismjs:
         specifier: 1.29.0
         version: 1.29.0
@@ -314,16 +314,16 @@ importers:
         version: 2.2.14(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@latticexyz/schema-type':
         specifier: 2.2.14
-        version: 2.2.14(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 2.2.14(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/store':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/world':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@latticexyz/world-modules':
         specifier: 2.2.14
-        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)
+        version: 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)
     devDependencies:
       '@types/node':
         specifier: ^18.15.11
@@ -333,13 +333,13 @@ importers:
         version: https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0
       forge-std:
         specifier: https://github.com/foundry-rs/forge-std.git#1714bee72e286e73f76e320d110e0eaf5c4e649d
-        version: git+https://git@github.com:foundry-rs/forge-std.git#1714bee72e286e73f76e320d110e0eaf5c4e649d
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/1714bee72e286e73f76e320d110e0eaf5c4e649d
       prettier-plugin-solidity:
         specifier: 1.3.1
         version: 1.3.1(prettier@3.3.3)
       solhint:
         specifier: 4.5.4
-        version: 4.5.4(typescript@5.4.2)
+        version: 4.5.4(typescript@5.6.3)
       solhint-config-mud:
         specifier: 2.2.14
         version: 2.2.14
@@ -6766,8 +6766,8 @@ packages:
     resolution: {integrity: sha512-Ld2g8rrAyMYFXBhEqMz8ZAHBi4J4uS1i/CxGMDnjyFWddMXLVcDp051DZfu+t7+ab7Wv6SMqpWmyFIj5UbfFvg==}
     engines: {node: '>=14'}
 
-  forge-std@git+https://git@github.com:foundry-rs/forge-std.git#1714bee72e286e73f76e320d110e0eaf5c4e649d:
-    resolution: {commit: 1714bee72e286e73f76e320d110e0eaf5c4e649d, repo: git@github.com:foundry-rs/forge-std.git, type: git}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/1714bee72e286e73f76e320d110e0eaf5c4e649d:
+    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/1714bee72e286e73f76e320d110e0eaf5c4e649d}
     version: 1.9.2
 
   form-data-encoder@2.1.4:
@@ -13700,7 +13700,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@latticexyz/explorer@2.2.14(@aws-sdk/client-kms@3.635.0)(@babel/core@7.25.2)(@netlify/blobs@7.4.0)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.56.2)(@types/react-dom@18.3.0)(@types/react@18.3.8)(asn1.js@5.4.1)(bufferutil@4.0.8)(kysely@0.26.3)(postcss@8.4.45)(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(rollup@4.21.2)(sql.js@1.11.0)(ts-node@10.9.2(@types/node@18.19.45)(typescript@5.6.3))(typescript@5.6.3)(utf-8-validate@5.0.10)':
+  '@latticexyz/explorer@2.2.14(@aws-sdk/client-kms@3.635.0)(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.56.2)(@types/react-dom@18.3.0)(@types/react@18.3.8)(asn1.js@5.4.1)(bufferutil@4.0.8)(kysely@0.26.3)(postcss@8.4.45)(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(rollup@4.21.2)(sql.js@1.11.0)(ts-node@10.9.2(@types/node@18.19.45)(typescript@5.6.3))(typescript@5.6.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@hookform/resolvers': 3.9.0(react-hook-form@7.53.0(react@18.3.1))
       '@latticexyz/common': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
@@ -13720,7 +13720,7 @@ snapshots:
       '@radix-ui/react-separator': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.1.0(@types/react@18.3.8)(react@18.3.1)
       '@radix-ui/themes': 3.1.3(@types/react-dom@18.3.0)(@types/react@18.3.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rainbow-me/rainbowkit': 2.1.7(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(wagmi@2.12.11(@netlify/blobs@7.4.0)(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8))
+      '@rainbow-me/rainbowkit': 2.1.7(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(wagmi@2.12.11(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8))
       '@tanstack/react-query': 5.56.2(react@18.3.1)
       '@tanstack/react-table': 8.20.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       better-sqlite3: 8.7.0
@@ -13742,7 +13742,7 @@ snapshots:
       tailwind-merge: 1.14.0
       tsup: 6.7.0(postcss@8.4.45)(ts-node@10.9.2(@types/node@18.19.45)(typescript@5.6.3))(typescript@5.6.3)
       viem: 2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      wagmi: 2.12.11(@netlify/blobs@7.4.0)(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      wagmi: 2.12.11(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       yargs: 17.7.2
       zod: 3.23.8
       zustand: 4.5.5(@types/react@18.3.8)(react@18.3.1)
@@ -14150,13 +14150,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@latticexyz/world-modules@2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)':
+  '@latticexyz/world-modules@2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@latticexyz/common': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/config': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/schema-type': 2.2.14(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/store': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@latticexyz/world': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.4.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/common': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/config': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/schema-type': 2.2.14(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/store': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      '@latticexyz/world': 2.2.14(@aws-sdk/client-kms@3.635.0)(asn1.js@5.4.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - '@aws-sdk/client-kms'
@@ -15885,7 +15885,7 @@ snapshots:
       '@types/react': 18.3.8
       '@types/react-dom': 18.3.0
 
-  '@rainbow-me/rainbowkit@2.1.7(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(wagmi@2.12.11(@netlify/blobs@7.4.0)(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8))':
+  '@rainbow-me/rainbowkit@2.1.7(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(wagmi@2.12.11(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8))':
     dependencies:
       '@tanstack/react-query': 5.56.2(react@18.3.1)
       '@vanilla-extract/css': 1.15.5
@@ -15898,7 +15898,7 @@ snapshots:
       react-remove-scroll: 2.6.0(@types/react@18.3.8)(react@18.3.1)
       ua-parser-js: 1.0.38
       viem: 2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      wagmi: 2.12.11(@netlify/blobs@7.4.0)(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      wagmi: 2.12.11(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
     transitivePeerDependencies:
       - '@types/react'
       - babel-plugin-macros
@@ -17238,14 +17238,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@wagmi/connectors@5.1.10(@netlify/blobs@7.4.0)(@types/react@18.3.8)(@wagmi/core@2.13.5(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)':
+  '@wagmi/connectors@5.1.10(@types/react@18.3.8)(@wagmi/core@2.13.5(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)':
     dependencies:
       '@coinbase/wallet-sdk': 4.0.4
       '@metamask/sdk': 0.28.2(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(utf-8-validate@5.0.10)
       '@safe-global/safe-apps-provider': 0.18.3(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@wagmi/core': 2.13.5(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))
-      '@walletconnect/ethereum-provider': 2.16.1(@netlify/blobs@7.4.0)(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)
+      '@walletconnect/ethereum-provider': 2.16.1(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)
       '@walletconnect/modal': 2.6.2(@types/react@18.3.8)(react@18.3.1)
       cbw-sdk: '@coinbase/wallet-sdk@3.9.3'
       viem: 2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
@@ -17358,21 +17358,21 @@ snapshots:
       - immer
       - react
 
-  '@walletconnect/core@2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@walletconnect/core@2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/jsonrpc-ws-connection': 1.0.14(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/keyvaluestorage': 1.1.1(@netlify/blobs@7.4.0)
+      '@walletconnect/keyvaluestorage': 1.1.1(@netlify/blobs@8.1.0)
       '@walletconnect/logger': 2.1.2
       '@walletconnect/relay-api': 1.0.11
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.16.1(@netlify/blobs@7.4.0)
-      '@walletconnect/utils': 2.16.1(@netlify/blobs@7.4.0)
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
       lodash.isequal: 4.5.0
       uint8arrays: 3.1.0
@@ -17434,17 +17434,17 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/ethereum-provider@2.16.1(@netlify/blobs@7.4.0)(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)':
+  '@walletconnect/ethereum-provider@2.16.1(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.8
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/modal': 2.6.2(@types/react@18.3.8)(react@18.3.1)
-      '@walletconnect/sign-client': 2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/types': 2.16.1(@netlify/blobs@7.4.0)
-      '@walletconnect/universal-provider': 2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/utils': 2.16.1(@netlify/blobs@7.4.0)
+      '@walletconnect/sign-client': 2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/universal-provider': 2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -17547,26 +17547,6 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@walletconnect/keyvaluestorage@1.1.1(@netlify/blobs@7.4.0)':
-    dependencies:
-      '@walletconnect/safe-json': 1.0.2
-      idb-keyval: 6.2.1
-      unstorage: 1.12.0(@netlify/blobs@7.4.0)(idb-keyval@6.2.1)
-    transitivePeerDependencies:
-      - '@azure/app-configuration'
-      - '@azure/cosmos'
-      - '@azure/data-tables'
-      - '@azure/identity'
-      - '@azure/keyvault-secrets'
-      - '@azure/storage-blob'
-      - '@capacitor/preferences'
-      - '@netlify/blobs'
-      - '@planetscale/database'
-      - '@upstash/redis'
-      - '@vercel/kv'
-      - ioredis
-      - uWebSockets.js
-
   '@walletconnect/keyvaluestorage@1.1.1(@netlify/blobs@8.1.0)':
     dependencies:
       '@walletconnect/safe-json': 1.0.2
@@ -17659,16 +17639,16 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/sign-client@2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@walletconnect/sign-client@2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
-      '@walletconnect/core': 2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/core': 2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.16.1(@netlify/blobs@7.4.0)
-      '@walletconnect/utils': 2.16.1(@netlify/blobs@7.4.0)
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -17721,12 +17701,12 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/types@2.16.1(@netlify/blobs@7.4.0)':
+  '@walletconnect/types@2.16.1':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-types': 1.0.4
-      '@walletconnect/keyvaluestorage': 1.1.1(@netlify/blobs@7.4.0)
+      '@walletconnect/keyvaluestorage': 1.1.1(@netlify/blobs@8.1.0)
       '@walletconnect/logger': 2.1.2
       events: 3.3.0
     transitivePeerDependencies:
@@ -17769,16 +17749,16 @@ snapshots:
       - ioredis
       - uWebSockets.js
 
-  '@walletconnect/universal-provider@2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@walletconnect/universal-provider@2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.8
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
-      '@walletconnect/sign-client': 2.16.1(@netlify/blobs@7.4.0)(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/types': 2.16.1(@netlify/blobs@7.4.0)
-      '@walletconnect/utils': 2.16.1(@netlify/blobs@7.4.0)
+      '@walletconnect/sign-client': 2.16.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/types': 2.16.1
+      '@walletconnect/utils': 2.16.1
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -17829,7 +17809,7 @@ snapshots:
       - uWebSockets.js
       - utf-8-validate
 
-  '@walletconnect/utils@2.16.1(@netlify/blobs@7.4.0)':
+  '@walletconnect/utils@2.16.1':
     dependencies:
       '@stablelib/chacha20poly1305': 1.0.1
       '@stablelib/hkdf': 1.0.1
@@ -17840,7 +17820,7 @@ snapshots:
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.16.1(@netlify/blobs@7.4.0)
+      '@walletconnect/types': 2.16.1
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       detect-browser: 5.3.0
@@ -19065,14 +19045,14 @@ snapshots:
       js-yaml: 3.14.1
       parse-json: 4.0.0
 
-  cosmiconfig@8.3.6(typescript@5.4.2):
+  cosmiconfig@8.3.6(typescript@5.6.3):
     dependencies:
       import-fresh: 3.3.0
       js-yaml: 4.1.0
       parse-json: 5.2.0
       path-type: 4.0.0
     optionalDependencies:
-      typescript: 5.4.2
+      typescript: 5.6.3
 
   cosmiconfig@9.0.0(typescript@5.6.3):
     dependencies:
@@ -20477,7 +20457,7 @@ snapshots:
       cross-spawn: 7.0.3
       signal-exit: 4.1.0
 
-  forge-std@git+https://git@github.com:foundry-rs/forge-std.git#1714bee72e286e73f76e320d110e0eaf5c4e649d: {}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/1714bee72e286e73f76e320d110e0eaf5c4e649d: {}
 
   form-data-encoder@2.1.4: {}
 
@@ -23226,9 +23206,9 @@ snapshots:
       semver: 7.6.3
       solidity-comments-extractor: 0.0.8
 
-  prettier-plugin-tailwindcss@0.6.6(prettier@3.2.5):
+  prettier-plugin-tailwindcss@0.6.6(prettier@3.3.3):
     dependencies:
-      prettier: 3.2.5
+      prettier: 3.3.3
 
   prettier@2.8.8:
     optional: true
@@ -24091,7 +24071,7 @@ snapshots:
     dependencies:
       '@solidity-parser/parser': 0.16.2
 
-  solhint@4.5.4(typescript@5.4.2):
+  solhint@4.5.4(typescript@5.6.3):
     dependencies:
       '@solidity-parser/parser': 0.18.0
       ajv: 6.12.6
@@ -24099,7 +24079,7 @@ snapshots:
       ast-parents: 0.0.1
       chalk: 4.1.2
       commander: 10.0.1
-      cosmiconfig: 8.3.6(typescript@5.4.2)
+      cosmiconfig: 8.3.6(typescript@5.6.3)
       fast-diff: 1.3.0
       glob: 8.1.0
       ignore: 5.3.2
@@ -24881,24 +24861,6 @@ snapshots:
 
   unpipe@1.0.0: {}
 
-  unstorage@1.12.0(@netlify/blobs@7.4.0)(idb-keyval@6.2.1):
-    dependencies:
-      anymatch: 3.1.3
-      chokidar: 3.6.0
-      destr: 2.0.3
-      h3: 1.12.0
-      listhen: 1.7.2
-      lru-cache: 10.4.3
-      mri: 1.2.0
-      node-fetch-native: 1.6.4
-      ofetch: 1.3.4
-      ufo: 1.5.4
-    optionalDependencies:
-      '@netlify/blobs': 7.4.0
-      idb-keyval: 6.2.1
-    transitivePeerDependencies:
-      - uWebSockets.js
-
   unstorage@1.12.0(@netlify/blobs@8.1.0)(idb-keyval@6.2.1):
     dependencies:
       anymatch: 3.1.3
@@ -25114,10 +25076,10 @@ snapshots:
 
   vm-browserify@1.1.2: {}
 
-  wagmi@2.12.11(@netlify/blobs@7.4.0)(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8):
+  wagmi@2.12.11(@tanstack/query-core@5.56.2)(@tanstack/react-query@5.56.2(react@18.3.1))(@types/react@18.3.8)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8):
     dependencies:
       '@tanstack/react-query': 5.56.2(react@18.3.1)
-      '@wagmi/connectors': 5.1.10(@netlify/blobs@7.4.0)(@types/react@18.3.8)(@wagmi/core@2.13.5(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@wagmi/connectors': 5.1.10(@types/react@18.3.8)(@wagmi/core@2.13.5(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.8)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.21.2)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@wagmi/core': 2.13.5(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.19(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))
       react: 18.3.1
       use-sync-external-store: 1.2.0(react@18.3.1)
