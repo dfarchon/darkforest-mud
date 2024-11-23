@@ -25,6 +25,7 @@ export type ContractMethodName =
   | "changeArtifactImageType"
   | "buyArtifact"
   | "df__withdrawSilver"
+  | "df__setPlanetEmoji"
   | "useKey"
   | "adminUseKey"
   | "addKeys"
@@ -224,6 +225,15 @@ export type UnconfirmedWithdrawSilver = TxIntent & {
   methodName: "df__withdrawSilver";
   locationId: LocationId;
   amount: number;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedSetPlanetEmoji = TxIntent & {
+  methodName: "df__setPlanetEmoji";
+  locationId: LocationId;
+  emoji: string;
 };
 
 /**

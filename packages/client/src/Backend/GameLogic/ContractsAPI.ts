@@ -158,6 +158,7 @@ export class ContractsAPI extends EventEmitter {
   private moveSubscription: Subscription;
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
+  private setPlanetEmojiSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -395,6 +396,20 @@ export class ContractsAPI extends EventEmitter {
         if (nextValue) {
           this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
         }
+      });
+
+    this.setPlanetEmojiSubscription =
+      this.components.PlanetEmoji.update$.subscribe((update) => {
+        const entity = update.entity;
+
+        // PUNK
+        console.log("set planet emoji subscription");
+        console.log(locationIdFromHexStr(entity.toString()));
+
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
       });
 
     this.tickerRateSubscription = this.components.Ticker.update$.subscribe(
@@ -787,6 +802,7 @@ export class ContractsAPI extends EventEmitter {
     this.moveSubscription.unsubscribe();
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
+    this.setPlanetEmojiSubscription.unsubscribe();
     return;
     const { contract } = this;
 
@@ -1297,6 +1313,22 @@ export class ContractsAPI extends EventEmitter {
 
   public getPlanetById(planetId: LocationId): Planet | undefined {
     return this.planetUtils.getPlanetById(planetId);
+  }
+
+  public getPlanetEmoji(planetId: LocationId): string | undefined {
+    const { PlanetEmoji } = this.components;
+
+    const planetEntity = encodeEntity(PlanetEmoji.metadata.keySchema, {
+      id: locationIdToHexStr(planetId) as `0x${string}`,
+    });
+
+    const emoji = getComponentValue(PlanetEmoji, planetEntity);
+
+    if (!emoji || emoji.value === "") {
+      return undefined;
+    } else {
+      return emoji.value;
+    }
   }
 
   public bulkGetPlanets(

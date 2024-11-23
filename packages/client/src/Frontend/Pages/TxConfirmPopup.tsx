@@ -229,6 +229,10 @@ export function TxConfirmPopup() {
     `${account}-withdrawSilverPlanet`,
   );
 
+  const setEmojiPlanet = localStorage.getItem(
+    `${account}-setPlanetEmoji-planetId`,
+  );
+
   const buyArtifactOnPlanet = localStorage.getItem(
     `${account}-buyArtifactOnPlanet`,
   );
@@ -593,13 +597,19 @@ export function TxConfirmPopup() {
             </Row>
           </>
         )}
-        {method === "withdrawSilver" && (
+        {method === "df__withdrawSilver" && (
           <Row>
             <b>Planet ID</b>
             <span className="mono">{withdrawSilverPlanet}</span>
           </Row>
         )}
 
+        {method === "df__setPlanetEmoji" && (
+          <Row>
+            <b>Planet ID</b>
+            <span className="mono">{setEmojiPlanet}</span>
+          </Row>
+        )}
         {method === "df__initializePlayer" && (
           <>
             <Row>

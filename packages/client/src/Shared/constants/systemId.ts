@@ -1,5 +1,6 @@
 import { resourceToHex } from "@latticexyz/common";
 import MoveSystemAbi from "contracts/out/MoveSystem.sol/MoveSystem.abi.json";
+import PlanetEmojiSystemAbi from "contracts/out/PlanetEmojiSystem.sol/PlanetEmojiSystem.abi.json";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 import PlanetUpgradeSystemAbi from "contracts/out/PlanetUpgradeSystem.sol/PlanetUpgradeSystem.abi.json";
 import PlanetWithdrawSilverSystemAbi from "contracts/out/PlanetWithdrawSilverSystem.sol/PlanetWithdrawSilverSystem.abi.json";
@@ -36,6 +37,14 @@ export const PLANET_WITHDRAW_SILVER_SYSTEM_ID = resourceToHex({
   type: "system",
   namespace: "df",
   name: "PlanetWithdrawSilverSystem",
+});
+
+export const PLANET_EMOJI_SYSTEM_ABI: Abi = PlanetEmojiSystemAbi;
+
+export const PLANET_EMOJI_SYATEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "PlanetEmojiSystem",
 });
 
 export const PLANET_WITHDRAW_SILVER_SYSTEM_ABI: Abi =
@@ -81,6 +90,8 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     return PLANET_UPGRADE_SYSTEM_ABI;
   } else if (functionName === "withdrawSilver") {
     return PLANET_WITHDRAW_SILVER_SYSTEM_ABI;
+  } else if (functionName === "setPlanetEmoji") {
+    return PLANET_EMOJI_SYSTEM_ABI;
   } else if (functionName === "initializePlayer") {
     return PLAYER_SYSTEM_ABI;
   } else if (
@@ -115,6 +126,8 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     functionName === "legacyUpgradePlanet"
   ) {
     return PLANET_UPGRADE_SYSTEM_ID;
+  } else if (functionName === "setPlanetEmoji") {
+    return PLANET_EMOJI_SYATEM_ID;
   } else if (functionName === "withdrawSilver") {
     return PLANET_WITHDRAW_SILVER_SYSTEM_ID;
   } else if (functionName === "initializePlayer") {

@@ -312,6 +312,7 @@ export default defineWorld({
       silverCap: "uint64",
       silverGrowth: "uint32",
     },
+    PlanetEmoji: "string",
     PlanetOwner: "address",
     PlanetEffects: {
       id: "bytes32",

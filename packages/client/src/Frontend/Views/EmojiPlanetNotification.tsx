@@ -27,7 +27,7 @@ export function EmojiPlanetNotification({
 }) {
   const gameManager = useUIManager().getGameManager();
   const emojiMessage = getEmojiMessage(wrapper.value);
-  const currentEmoji = emojiMessage?.body?.emoji;
+  const currentEmoji = wrapper.value?.emoji; // emojiMessage?.body?.emoji;
   const [chosenEmoji, setChosenEmoji] = useState(currentEmoji);
 
   useEffect(() => {
@@ -42,7 +42,8 @@ export function EmojiPlanetNotification({
         </Sub>
       </Row>
     );
-  } else if (emojiMessage !== undefined && currentEmoji !== undefined) {
+  } else if (currentEmoji !== undefined && currentEmoji !== "") {
+    // } else if (emojiMessage !== undefined && currentEmoji !== undefined) {
     return (
       <Row>
         <Sub>Current emoji: {emojiMessage?.body?.emoji}</Sub>
@@ -53,7 +54,7 @@ export function EmojiPlanetNotification({
           }
           onClick={() => {
             if (wrapper.value?.locationId) {
-              gameManager.clearEmoji(wrapper.value.locationId);
+              gameManager.setPlanetEmoji(wrapper.value.locationId, "");
             }
           }}
         >

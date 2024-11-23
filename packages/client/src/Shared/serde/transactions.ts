@@ -39,6 +39,7 @@ import type {
   UnconfirmedRejectApplication,
   UnconfirmedReveal,
   UnconfirmedSendApplication,
+  UnconfirmedSetPlanetEmoji,
   UnconfirmedTransferLeaderRole,
   UnconfirmedUpgrade,
   UnconfirmedUseKey,
@@ -157,6 +158,12 @@ export function isUnconfirmedWithdrawSilver(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedWithdrawSilver {
   return txIntent.methodName === "df__withdrawSilver";
+}
+
+export function isUnconfirmedSetPlanetEmoji(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedWithdrawSilver {
+  return txIntent.methodName === "df__setPlanetEmoji";
 }
 
 export function isUnconfirmedGetShips(
@@ -421,6 +428,12 @@ export function isUnconfirmedWithdrawSilverTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedWithdrawSilver> {
   return isUnconfirmedWithdrawSilver(tx.intent);
+}
+
+export function isUnconfirmedSetPlanetEmojiTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedSetPlanetEmoji> {
+  return isUnconfirmedSetPlanetEmoji(tx.intent);
 }
 
 export function isUnconfirmedGetShipsTx(

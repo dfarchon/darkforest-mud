@@ -506,6 +506,10 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.withdrawSilver(locationId, amount);
   }
 
+  public setPlanetEmoji(locationId: LocationId, emoji: string) {
+    this.gameManager.setPlanetEmoji(locationId, emoji);
+  }
+
   public startLinkFrom(
     planet: LocatablePlanet,
     artifact: Artifact,

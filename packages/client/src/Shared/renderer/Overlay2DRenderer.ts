@@ -335,64 +335,71 @@ export class Overlay2DRenderer {
     renderInfo: PlanetRenderInfo,
     textAlpha: number,
   ) {
-    // planets have at most one emoji
-    let renderedEmoji = false;
+    this.drawEmojiMessage(
+      centerWorld,
+      radiusWorld,
+      renderInfo,
+      renderInfo.planet.emoji ?? "",
+      textAlpha,
+    );
 
-    renderInfo.planet.messages?.forEach((m) => {
-      if (isEmojiFlagMessage(m) && !renderedEmoji) {
-        this.drawEmojiMessage(
-          centerWorld,
-          radiusWorld,
-          renderInfo,
-          m,
-          textAlpha,
-        );
-        renderedEmoji = true;
-      }
-    });
+    // planets have at most one emoji
+    // let renderedEmoji = false;
+    // renderInfo.planet.messages?.forEach((m) => {
+    //   if (isEmojiFlagMessage(m) && !renderedEmoji) {
+    //     this.drawEmojiMessage(
+    //       centerWorld,
+    //       radiusWorld,
+    //       renderInfo,
+    //       m,
+    //       textAlpha,
+    //     );
+    //     renderedEmoji = true;
+    //   }
+    // });
   }
 
   drawEmojiMessage(
     centerWorld: WorldCoords,
     radiusWorld: number,
     renderInfo: PlanetRenderInfo,
-    message: PlanetMessage<EmojiFlagBody>,
+    emoji: string,
     textAlpha: number,
   ) {
-    const viewport = this.renderer.getViewport();
-    const pixelCoords = viewport.worldToCanvasCoords(centerWorld);
-    const radiusPixels = viewport.worldToCanvasDist(radiusWorld);
-    const text = message.body.emoji;
+    const getUnifiedFromEmoji = (emoji: string) => {
+      const codePoints = Array.from(emoji).map(
+        (char) => char.codePointAt(0)?.toString(16) || "",
+      );
+      return codePoints.join("-");
+    };
 
-    let size = radiusPixels;
-    let offsetY = -2;
-
-    if (renderInfo.planet.emojiZoopAnimation !== undefined) {
-      size *= renderInfo.planet.emojiZoopAnimation.value();
-    }
-
-    if (size < 2) {
+    const emojiData = getUnifiedFromEmoji(emoji);
+    if (!emojiData) {
       return;
     }
 
-    if (renderInfo.planet.emojiBobAnimation !== undefined) {
-      offsetY +=
-        renderInfo.planet.emojiBobAnimation.value() * (radiusPixels * 0.1);
-    }
+    const viewport = this.renderer.getViewport();
+    const pixelCoords = viewport.worldToCanvasCoords(centerWorld);
+    const radiusPixels = (viewport.worldToCanvasDist(radiusWorld) * 3) / 4;
 
-    // don't want to obscure the silver text
-    if (renderInfo.planet.silver !== 0) {
-      offsetY -= 15;
-    }
+    // Save current context state
+    this.ctx.save();
+    // Set the global alpha
+    this.ctx.globalAlpha = textAlpha;
 
-    this.ctx.font = `${size}px Arial`;
-    this.ctx.fillStyle = `rgba(0, 0, 0, ${textAlpha})`;
-    const textSize = this.ctx.measureText(text);
-    this.ctx.fillText(
-      text,
-      pixelCoords.x - textSize.width / 2,
-      pixelCoords.y - radiusPixels * 1.3 + offsetY,
+    const img = new Image();
+    img.src = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${emojiData}.svg`;
+
+    this.ctx.drawImage(
+      img,
+      pixelCoords.x - radiusPixels,
+      pixelCoords.y - radiusPixels * 2.7,
+      radiusPixels * 2,
+      radiusPixels * 2,
     );
+
+    // Restore context state
+    this.ctx.restore();
   }
 
   drawText(
