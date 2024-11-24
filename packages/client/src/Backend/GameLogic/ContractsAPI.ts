@@ -1321,13 +1321,12 @@ export class ContractsAPI extends EventEmitter {
     const planetEntity = encodeEntity(PlanetEmoji.metadata.keySchema, {
       id: locationIdToHexStr(planetId) as `0x${string}`,
     });
+    const result = getComponentValue(PlanetEmoji, planetEntity);
 
-    const emoji = getComponentValue(PlanetEmoji, planetEntity);
-
-    if (!emoji || emoji.value === "") {
+    if (!result || !result.emoji || result.emoji === "") {
       return undefined;
     } else {
-      return emoji.value;
+      return result.emoji;
     }
   }
 
