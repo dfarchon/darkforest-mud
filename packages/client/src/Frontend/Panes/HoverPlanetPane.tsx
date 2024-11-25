@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import { snips } from "../Styles/dfstyles";
 import {
@@ -18,10 +18,58 @@ export function HoverPlanetPane() {
   const hoverWrapper = useHoverPlanet(uiManager);
   const hovering = hoverWrapper.value;
   const selected = useSelectedPlanet(uiManager).value;
-
-  /* really bad way to do this but it works for now */
   const [sending, setSending] = useState<boolean>(false);
 
+  // State for debounced values
+  const [debouncedState, setDebouncedState] = useState<{
+    isVisible: boolean;
+    planetData: typeof hoverWrapper | null;
+  }>({
+    isVisible: false,
+    planetData: null,
+  });
+
+  // Ref for tracking updates
+  const updateRef = useRef({
+    timer: null as NodeJS.Timeout | null,
+    lastUpdate: 0,
+  });
+
+  // Update state with debounce
+  useEffect(() => {
+    const now = Date.now();
+
+    // Clear existing timer
+    if (updateRef.current.timer) {
+      clearTimeout(updateRef.current.timer);
+    }
+
+    // Calculate new state
+    const newVisible =
+      !!hovering &&
+      !sending &&
+      !uiManager.getMouseDownCoords() &&
+      (hovering.locationId !== selected?.locationId ||
+        !uiManager.getPlanetHoveringInRenderer());
+
+    // Set timer for state update
+    updateRef.current.timer = setTimeout(() => {
+      setDebouncedState({
+        isVisible: newVisible,
+        planetData: newVisible ? hoverWrapper : null,
+      });
+      updateRef.current.lastUpdate = now;
+    }, 500); // 500ms debounce
+
+    // Cleanup
+    return () => {
+      if (updateRef.current.timer) {
+        clearTimeout(updateRef.current.timer);
+      }
+    };
+  }, [hovering, selected, sending, uiManager, hoverWrapper]);
+
+  // Event listeners for sending state
   useEffect(() => {
     const uiEmitter = UIEmitter.getInstance();
     const setSendTrue = () => setSending(true);
@@ -38,27 +86,22 @@ export function HoverPlanetPane() {
     };
   }, []);
 
-  const visible = useMemo(
-    () =>
-      !!hovering &&
-      (hovering?.locationId !== selected?.locationId ||
-        !uiManager.getPlanetHoveringInRenderer()) &&
-      !sending &&
-      !uiManager.getMouseDownCoords(),
-    [hovering, selected, sending, uiManager],
-  );
-
   return (
     <HoverPane
       style={
-        hoverWrapper.value?.destroyed
+        debouncedState.planetData?.value?.destroyed
           ? snips.destroyedBackground
-          : hoverWrapper.value?.frozen
+          : debouncedState.planetData?.value?.frozen
             ? snips.frozenBackground
             : undefined
       }
-      visible={visible}
-      element={<PlanetCard standalone planetWrapper={hoverWrapper} />}
+      visible={debouncedState.isVisible}
+      element={
+        <PlanetCard
+          standalone
+          planetWrapper={debouncedState.planetData || hoverWrapper}
+        />
+      }
     />
   );
 }

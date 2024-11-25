@@ -5,6 +5,9 @@ import { snips } from "../Styles/dfstyles";
 import { DFZIndex } from "../Utils/constants";
 
 const StyledHoverPane = styled.div`
+  position: absolute;
+  pointer-events: none;
+  z-index: ${DFZIndex.Tooltip};
   ${snips.absoluteTopLeft}
   ${snips.defaultBackground}
   ${snips.roundedBordersWithEdge}
