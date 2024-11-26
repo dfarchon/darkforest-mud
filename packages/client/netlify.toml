@@ -1,7 +1,7 @@
 [build]
   command = "pnpm build"
   functions = "functions"
-  publish = "dist"
+  publish = "packages/client/dist"
 [[redirects]]
   from = "/*"
   to = "/index.html"

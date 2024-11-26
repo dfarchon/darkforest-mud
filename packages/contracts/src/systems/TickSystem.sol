@@ -2,6 +2,8 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
+import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
+import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { Ticker, TickerData, InnerCircle, InnerCircleData } from "../codegen/index.sol";
 import { Errors } from "../interfaces/errors.sol";
 
@@ -28,6 +30,7 @@ contract TickSystem is System, Errors {
   }
 
   function pause() public {
+    _requireOwner();
     TickerData memory ticker = Ticker.get();
     if (ticker.paused) {
       revert Errors.Paused();
@@ -38,6 +41,7 @@ contract TickSystem is System, Errors {
   }
 
   function unpause() public {
+    _requireOwner();
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
       revert Errors.NotPaused();
@@ -47,6 +51,7 @@ contract TickSystem is System, Errors {
   }
 
   function updateTickRate(uint256 tickRate) public {
+    _requireOwner();
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
       _tick(ticker);
@@ -77,6 +82,10 @@ contract TickSystem is System, Errors {
   function _unpause(TickerData memory ticker) internal view {
     ticker.paused = false;
     ticker.timestamp = uint64(block.timestamp);
+  }
+
+  function _requireOwner() internal view {
+    AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
   }
 
   function _globalUpdates(uint256 tickCount) internal {

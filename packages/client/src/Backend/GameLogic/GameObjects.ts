@@ -536,22 +536,24 @@ export class GameObjects {
     if (localPlanet) {
       const {
         transactions,
-        // loadingServerState,
-        // needsServerRefresh,
-        // lastLoadedServerState,
-        // emojiBobAnimation,
-        // emojiZoopAnimation,
-        // emojiZoopOutAnimation,
+        loadingServerState,
+        needsServerRefresh,
+        lastLoadedServerState,
+        emojiBobAnimation,
+        emojiZoopAnimation,
+        emojiZoopOutAnimation,
         // messages,
+        emoji,
       } = localPlanet;
       planet.transactions = transactions;
-      // planet.loadingServerState = loadingServerState;
-      // planet.needsServerRefresh = needsServerRefresh;
-      // planet.lastLoadedServerState = lastLoadedServerState;
-      // planet.emojiBobAnimation = emojiBobAnimation;
-      // planet.emojiZoopAnimation = emojiZoopAnimation;
-      // planet.emojiZoopOutAnimation = emojiZoopOutAnimation;
+      planet.loadingServerState = loadingServerState;
+      planet.needsServerRefresh = needsServerRefresh;
+      planet.lastLoadedServerState = lastLoadedServerState;
+      planet.emojiBobAnimation = emojiBobAnimation;
+      planet.emojiZoopAnimation = emojiZoopAnimation;
+      planet.emojiZoopOutAnimation = emojiZoopOutAnimation;
       // planet.messages = messages;
+      planet.emoji = emoji;
 
       // Possibly non updated props
       planet.heldArtifactIds = localPlanet.heldArtifactIds;

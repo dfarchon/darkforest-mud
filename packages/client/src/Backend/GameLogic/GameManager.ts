@@ -47,6 +47,7 @@ import {
   isUnconfirmedProspectPlanetTx,
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
+  isUnconfirmedSetPlanetEmojiTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
@@ -106,6 +107,7 @@ import type {
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSetPlanetEmoji,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawSilver,
@@ -1050,6 +1052,7 @@ export class GameManager extends EventEmitter {
           gameManager.hardRefreshPlanet(planetId);
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         }
+        await gameManager.refreshServerPlanetStates([planetId]);
       })
       .on(
         ContractsAPIEvent.ArrivalQueued,
@@ -1262,12 +1265,14 @@ export class GameManager extends EventEmitter {
             // gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawSilverTx(tx)) {
-          await gameManager.softRefreshPlanet(tx.intent.locationId);
+          await gameManager.hardRefreshPlanet(tx.intent.locationId);
         } else if (isUnconfirmedCapturePlanetTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlayer(gameManager.getAccount()),
             gameManager.hardRefreshPlanet(tx.intent.locationId),
           ]);
+        } else if (isUnconfirmedSetPlanetEmojiTx(tx)) {
+          await gameManager.hardRefreshPlanet(tx.intent.locationId);
         } else if (isUnconfirmedInvadePlanetTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlayer(gameManager.getAccount()),
@@ -1399,6 +1404,10 @@ export class GameManager extends EventEmitter {
 
   public updateArrival(planetId: LocationId, arrival: QueuedArrival): void {
     this.entityStore.updateArrival(planetId, arrival);
+  }
+
+  public getPlanetEmoji(planetId: LocationId): string | undefined {
+    return this.contractsAPI.getPlanetEmoji(planetId);
   }
 
   // Dirty hack for only refreshing properties on a planet and nothing else
@@ -4938,6 +4947,73 @@ export class GameManager extends EventEmitter {
     }
   }
 
+  public async setPlanetEmoji(
+    locationId: LocationId,
+    emoji: string,
+    bypassChecks = false,
+  ): Promise<Transaction<UnconfirmedSetPlanetEmoji>> {
+    try {
+      if (!bypassChecks) {
+        if (!this.account) {
+          throw new Error("no account");
+        }
+        // if (this.checkGameHasEnded()) {
+        //   throw new Error('game has ended');
+        // }
+        const planet = this.entityStore.getPlanetWithId(locationId);
+        if (!planet) {
+          throw new Error("tried to set emoji to an unknown planet");
+        }
+
+        if (planet.owner !== this.getAccount()) {
+          throw new Error("can only set emoji to your planet");
+        }
+        if (
+          planet.transactions?.hasTransaction(isUnconfirmedSetPlanetEmojiTx)
+        ) {
+          throw new Error(
+            "a set emoji action is already in progress for this planet",
+          );
+        }
+
+        if (planet.destroyed || planet.frozen) {
+          throw new Error("can't set emoji to a destroyed/frozen planet");
+        }
+      }
+
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-setPlanetEmoji-planetId`,
+        locationId,
+      );
+
+      const delegator = this.getAccount();
+
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
+      const txIntent: UnconfirmedSetPlanetEmoji = {
+        delegator: delegator,
+        methodName: "df__setPlanetEmoji",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([locationIdToDecStr(locationId), emoji]),
+        locationId,
+        emoji,
+      };
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent);
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__setPlanetEmoji",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
   /**
    * We have two locations which planet state can live: on the server, and on the blockchain. We use
    * the blockchain for the 'physics' of the universe, and the webserver for optional 'add-on'
@@ -4946,45 +5022,48 @@ export class GameManager extends EventEmitter {
    * This function loads the planet states which live on the server. Plays nicely with our
    * notifications system and sets the appropriate loading state values on the planet.
    */
-  // public async refreshServerPlanetStates(planetIds: LocationId[]) {
-  //   const planets = this.getPlanetsWithIds(planetIds);
+  public async refreshServerPlanetStates(planetIds: LocationId[]) {
+    const planets = this.getPlanetsWithIds(planetIds);
 
-  //   planetIds.forEach((id) =>
-  //     this.getGameObjects().updatePlanet(id, (p) => {
-  //       p.loadingServerState = true;
-  //     }),
-  //   );
+    planetIds.forEach((id) =>
+      this.getGameObjects().updatePlanet(id, (p) => {
+        p.loadingServerState = true;
+      }),
+    );
 
-  //   const messages = await getMessagesOnPlanets({ planets: planetIds });
+    // const messages = await getMessagesOnPlanets({ planets: planetIds });
 
-  //   planets.forEach((planet) => {
-  //     const previousPlanetEmoji = getEmojiMessage(planet);
-  //     planet.messages = messages[planet.locationId];
-  //     const nowPlanetEmoji = getEmojiMessage(planet);
+    planets.forEach((planet) => {
+      const previousPlanetEmoji =
+        !planet.emoji || planet.emoji === "" ? undefined : planet.emoji;
 
-  //     // an emoji was added
-  //     if (previousPlanetEmoji === undefined && nowPlanetEmoji !== undefined) {
-  //       planet.emojiZoopAnimation = easeInAnimation(2000);
-  //       // an emoji was removed
-  //     } else if (
-  //       nowPlanetEmoji === undefined &&
-  //       previousPlanetEmoji !== undefined
-  //     ) {
-  //       planet.emojiZoopAnimation = undefined;
-  //       planet.emojiZoopOutAnimation = emojiEaseOutAnimation(
-  //         3000,
-  //         previousPlanetEmoji.body.emoji,
-  //       );
-  //     }
-  //   });
+      planet.emoji = this.contractsAPI.getPlanetEmoji(planet.locationId);
 
-  //   planetIds.forEach((id) =>
-  //     this.getGameObjects().updatePlanet(id, (p) => {
-  //       p.loadingServerState = false;
-  //       p.needsServerRefresh = false;
-  //     }),
-  //   );
-  // }
+      const nowPlanetEmoji = planet.emoji;
+
+      // an emoji was added
+      if (previousPlanetEmoji === undefined && nowPlanetEmoji !== undefined) {
+        planet.emojiZoopAnimation = easeInAnimation(2000);
+        // an emoji was removed
+      } else if (
+        nowPlanetEmoji === undefined &&
+        previousPlanetEmoji !== undefined
+      ) {
+        planet.emojiZoopAnimation = undefined;
+        planet.emojiZoopOutAnimation = emojiEaseOutAnimation(
+          3000,
+          previousPlanetEmoji,
+        );
+      }
+    });
+
+    planetIds.forEach((id) =>
+      this.getGameObjects().updatePlanet(id, (p) => {
+        p.loadingServerState = false;
+        p.needsServerRefresh = false;
+      }),
+    );
+  }
 
   /**
    * If you are the owner of this planet, you can set an 'emoji' to hover above the planet.

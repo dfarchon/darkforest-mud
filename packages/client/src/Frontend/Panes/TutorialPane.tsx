@@ -211,11 +211,13 @@ function TutorialPaneContent({
         artifacts. The rarer the artifact, the more points it gives you! You can also increase your
         score via Capture Zones. Hover over the 'Capture Zone' section in the top bar for more info
         about capture zones. */}
-        <div>
+        {/* <div>
           Please note, that only planets of level 3+ can be claimed for score.
           You will need to fight for the closest planets, or maybe considering
           destroying your enemies planets!
-        </div>
+        </div> */}
+        You can increase your score by withdrawing silver via space time rips.
+        The more silver you withdraw, the higher your score will be!
         <div>
           <Btn
             className="btn"
@@ -233,8 +235,8 @@ function TutorialPaneContent({
       <div className="tutalmost">
         {/* Winners of each round of Dark Forest v0.6.x will receive a prize, and be added to the{' '}
         <Underline>Valhalla</Underline> universe. */}
-        Winners of each round of Dark Forest MUD v0.1 will get mysterious prizes
-        🎩
+        {/* Winners of each round of Dark Forest MUD v0.1 will get mysterious prizes 🎩 */}
+        Winners of each round of Dark Forest MUD v0.1.1 will get prizes 🎩
         <br />
         <br />
         To win, have the highest score (^:

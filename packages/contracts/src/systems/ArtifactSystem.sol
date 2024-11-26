@@ -2,82 +2,83 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { IWorld } from "../codegen/world/IWorld.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { BiomebaseInput } from "../lib/VerificationInput.sol";
 import { Planet } from "../lib/Planet.sol";
 import { Artifact } from "../lib/Artifact.sol";
-import { Counter } from "../codegen/index.sol";
+import { Counter, AtfInstallModule, ArtifactRegistry } from "../codegen/index.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract ArtifactSystem is System, Errors {
-  function prospectPlanet(uint256 planetHash) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
-
-    Planet memory planet = world.df__readPlanet(planetHash);
-    planet.prospect(_msgSender());
-    planet.writeToStore();
+  function registerArtifact(uint256 artifactId) public {
+    if (_msgSender() != AtfInstallModule.get()) {
+      revert Errors.OnlyCallableByArtifactInstallModule();
+    }
+    if (ArtifactRegistry.get(bytes32(artifactId))) {
+      revert Errors.ExistingArtifact();
+    }
+    ArtifactRegistry.set(bytes32(artifactId), true);
   }
 
-  function findingArtifact(Proof memory proof, BiomebaseInput memory input) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+  function chargeArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public {
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    if (!world.df__verifyBiomebaseProof(proof, input)) {
-      revert Errors.InvalidBiomebaseProof();
+    Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    if (planet.owner != _msgSender()) {
+      revert Errors.NotPlanetOwner();
     }
-    Planet memory planet = world.df__readPlanet(input.planetHash);
-    Artifact memory artifact = planet.findArtifact(_msgSender());
+    (planet, artifact) = planet.chargeArtifact(artifact, data, worldAddress);
 
-    Counter.setArtifact(uint32(artifact.id));
     artifact.writeToStore();
     planet.writeToStore();
   }
 
-  function chargeArtifact(uint256 planetHash, uint256 artifactId) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+  function shutdownArtifact(uint256 planetHash, uint256 artifactId) public {
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    Planet memory planet = world.df__readPlanet(planetHash);
-    planet.chargeArtifact(artifactId, _msgSender());
+    Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    if (planet.owner != _msgSender()) {
+      revert Errors.NotPlanetOwner();
+    }
+    (planet, artifact) = planet.shutdownArtifact(artifact, worldAddress);
 
+    artifact.writeToStore();
     planet.writeToStore();
   }
 
-  function activateArtifact(uint256 planetHash, uint256 artifactId) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+  function activateArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public {
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
 
-    Planet memory planet = world.df__readPlanet(planetHash);
-    planet.activateArtifact(artifactId, _msgSender());
+    Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    Artifact memory artifact = planet.mustGetArtifact(artifactId);
+    if (planet.owner != _msgSender()) {
+      revert Errors.NotPlanetOwner();
+    }
+    (planet, artifact) = planet.activateArtifact(artifact, data, worldAddress);
 
+    artifact.writeToStore();
     planet.writeToStore();
   }
 
-  function deactivateArtifact(uint256 planetHash, uint256 artifactId) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
+  // function deactivateArtifact(uint256 planetHash, uint256 artifactId) public {
+  //   address worldAddress = _world();
+  //   DFUtils.tick(worldAddress);
 
-    Planet memory planet = world.df__readPlanet(planetHash);
-    planet.deactivateArtifact(artifactId, _msgSender());
+  //   Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+  //   Artifact memory artifact = planet.mustGetArtifact(artifactId);
+  //   if (planet.owner != _msgSender()) {
+  //     revert Errors.NotPlanetOwner();
+  //   }
+  //   (planet, artifact) = planet.deactivateArtifact(artifact, _world());
 
-    planet.writeToStore();
-  }
-
-  /**
-   * @notice For backward compatibility, we keep the old findArtifact function signature.
-   */
-  function findArtifact(
-    uint256[2] memory _a,
-    uint256[2][2] memory _b,
-    uint256[2] memory _c,
-    uint256[7] memory _input
-  ) public {
-    Proof memory proof;
-    proof.genFrom(_a, _b, _c);
-    BiomebaseInput memory input;
-    input.genFrom(_input);
-    return findingArtifact(proof, input);
-  }
+  //   artifact.writeToStore();
+  //   planet.writeToStore();
+  // }
 }

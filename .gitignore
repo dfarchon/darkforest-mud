@@ -11,3 +11,6 @@ packages/classic-packages
 .env
 
 mprocs.log
+
+# Local Netlify folder
+.netlify

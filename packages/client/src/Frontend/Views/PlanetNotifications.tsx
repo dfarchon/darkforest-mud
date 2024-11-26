@@ -36,9 +36,12 @@ export function getNotifsForPlanet(
     if (GameObjects.planetCanUpgrade(planet)) {
       notifs.push(PlanetNotifType.PlanetCanUpgrade);
     }
-    if (import.meta.env.VITE_WEBSERVER_URL) {
-      notifs.push(PlanetNotifType.CanAddEmoji);
-    }
+
+    notifs.push(PlanetNotifType.CanAddEmoji);
+
+    // if (import.meta.env.VITE_WEBSERVER_URL) {
+    //   notifs.push(PlanetNotifType.CanAddEmoji);
+    // }
   }
 
   if (planet.claimer !== undefined) {
@@ -107,14 +110,15 @@ function renderNotification(
   switch (notif) {
     case PlanetNotifType.PlanetCanUpgrade:
       return <PlanetCanUpgradeRow />;
+
+    case PlanetNotifType.CanAddEmoji:
+      return (
+        <EmojiRow
+          wrapper={planet}
+          key={notif + (planet.value?.locationId + "")}
+        />
+      );
     // PUNK
-    // case PlanetNotifType.CanAddEmoji:
-    //   return (
-    //     <EmojiRow
-    //       wrapper={planet}
-    //       key={notif + (planet.value?.locationId + "")}
-    //     />
-    //   );
     // case PlanetNotifType.Claimed:
     //   return (
     //     <PlanetClaimedRow

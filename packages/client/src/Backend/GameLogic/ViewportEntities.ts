@@ -44,10 +44,10 @@ export class ViewportEntities {
   public getPlanetsAndChunks() {
     this.updateLocationsAndChunks();
 
-    //for (const p of this.cachedPlanets.values()) {
-    // p.planet.emojiBobAnimation?.update();
-    // p.planet.emojiZoopAnimation?.update();
-    //  }
+    for (const p of this.cachedPlanets.values()) {
+      p.planet.emojiBobAnimation?.update();
+      p.planet.emojiZoopAnimation?.update();
+    }
 
     return {
       chunks: this.cachedExploredChunks,
@@ -98,7 +98,7 @@ export class ViewportEntities {
       }
     }
 
-    // await this.gameManager.refreshServerPlanetStates(planetIds);
+    await this.gameManager.refreshServerPlanetStates(planetIds);
   }
 
   private recalculateViewportPlanets(viewport: Viewport) {

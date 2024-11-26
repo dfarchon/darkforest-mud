@@ -3,6 +3,7 @@ import { defineWorld } from "@latticexyz/world";
 export default defineWorld({
   namespace: "df",
   enums: {
+    PlanetStatus: ["DEFAULT", "DESTROYED"],
     PlanetType: ["UNKNOWN", "PLANET", "ASTEROID_FIELD", "FOUNDRY", "SPACETIME_RIP", "QUASAR"],
     SpaceType: ["UNKNOWN", "NEBULA", "SPACE", "DEEP_SPACE", "DEAD_SPACE"],
     Biome: [
@@ -18,41 +19,49 @@ export default defineWorld({
       "LAVA",
       "CORRUPTED",
     ],
-    ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "ACTIVE", "BROKEN"],
+    ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "READY", "ACTIVE", "BROKEN"],
     ArtifactGenre: ["UNKNOWN", "DEFENSIVE", "OFFENSIVE", "PRODUCTIVE", "GENERAL"],
     ArtifactRarity: ["UNKNOWN", "COMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC"],
-    ArtifactType: [
+    EffectType: ["UNKNOWN", "STAT", "BEFORE_MOVE", "AFTER_MOVE", "BEFORE_ARRIVAL", "AFTER_ARRIVAL"],
+    ModifierType: [
       "UNKNOWN",
-      "WORMHOLE",
-      "PLANETARY_SHIELD",
-      "PHOTOID_CANNON",
-      "BLOOM_FILTER",
-      "BLACK_DOMAIN",
-      "STELLAR_SHIELD",
-      "BOMB",
-      "KARDASHEV",
-      "AVATAR",
-      "MONOLITH",
-      "COLLOSSUS",
-      "SPACESHIP",
-      "PYRAMID",
-      "ICE_LINK",
-      "FIRE_LINK",
-      "BLIND_BOX",
-      "SHIP_MOTHERSHIP",
-      "SHIP_CRESCENT",
-      "SHIP_WHALE",
-      "SHIP_GEAR",
-      "SHIP_TITAN",
-      "SHIP_PINK",
+      "MULTIPLY_DEFENSE",
+      "MULTIPLY_RANGE",
+      "MULTIPLY_SPEED",
+      "MULTIPLY_POPULATION_GROWTH",
+      "MULTIPLY_SILVER_GROWTH",
+      "APPLY_EFFECT",
+      "REMOVE_EFFECT",
     ],
     GuildStatus: ["UNEXIST", "ACTIVE", "DELETED"],
     GuildRole: ["NONE", "MEMBER", "OFFICER", "OWNER"],
+    // ArtifactType: [
+    //   "UNKNOWN",
+    //   "WORMHOLE",
+    //   "PLANETARY_SHIELD",
+    //   "PHOTOID_CANNON",
+    //   "BLOOM_FILTER",
+    //   "BLACK_DOMAIN",
+    //   "STELLAR_SHIELD",
+    //   "BOMB",
+    //   "KARDASHEV",
+    //   "AVATAR",
+    //   "MONOLITH",
+    //   "COLLOSSUS",
+    //   "SPACESHIP",
+    //   "PYRAMID",
+    //   "ICE_LINK",
+    //   "FIRE_LINK",
+    //   "BLIND_BOX",
+    //   "SHIP_MOTHERSHIP",
+    //   "SHIP_CRESCENT",
+    //   "SHIP_WHALE",
+    //   "SHIP_GEAR",
+    //   "SHIP_TITAN",
+    //   "SHIP_PINK",
+    // ],
   },
   systems: {
-    TickSystem: {
-      openAccess: false,
-    },
     InitializeSystem: {
       openAccess: false,
     },
@@ -63,6 +72,7 @@ export default defineWorld({
       name: "DfDelegationCtrl",
     },
   },
+  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem", "PinkBombSystem"],
   tables: {
     Counter: {
       schema: {
@@ -72,6 +82,14 @@ export default defineWorld({
         guild: "uint32",
       },
       key: [],
+    },
+    DistanceMultiplier: {
+      schema: {
+        from: "bytes32",
+        to: "bytes32",
+        multiplier: "uint32",
+      },
+      key: ["from", "to"],
     },
     Player: {
       schema: {
@@ -133,37 +151,30 @@ export default defineWorld({
       },
       key: [],
     },
+    AtfInstallModule: {
+      schema: {
+        addr: "address",
+      },
+      key: [],
+    },
+    ArtifactRegistry: "bool",
     ArtifactConfig: {
       schema: {
         rarity: "ArtifactRarity",
-        typeProbabilities: "uint16[]",
+        indexes: "uint8[]",
+        probabilities: "uint16[]",
       },
       key: ["rarity"],
-    },
-    ArtifactMetadata: {
-      schema: {
-        artifactType: "ArtifactType",
-        rarity: "ArtifactRarity",
-        genre: "ArtifactGenre",
-        charge: "uint32",
-        cooldown: "uint32",
-        instant: "bool",
-        oneTime: "bool",
-        reqLevel: "uint8",
-        reqPopulation: "uint64",
-        reqSilver: "uint64",
-      },
-      key: ["artifactType", "rarity"],
     },
     Artifact: {
       schema: {
         id: "uint32",
+        artifactIndex: "uint8",
         rarity: "ArtifactRarity",
-        artifactType: "ArtifactType",
         status: "ArtifactStatus",
-        chargeTime: "uint64",
-        activateTime: "uint64",
-        cooldownTime: "uint64",
+        chargeTick: "uint64",
+        activateTick: "uint64",
+        cooldownTick: "uint64",
       },
       key: ["id"],
     },
@@ -279,6 +290,7 @@ export default defineWorld({
     ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
+      status: "PlanetStatus",
       lastUpdateTick: "uint64",
       population: "uint64",
       silver: "uint64",
@@ -303,7 +315,20 @@ export default defineWorld({
       silverCap: "uint64",
       silverGrowth: "uint32",
     },
+    PlanetEmoji: {
+      schema: {
+        id: "bytes32",
+        emoji: "string",
+      },
+      key: ["id"],
+      type: "offchainTable",
+    },
     PlanetOwner: "address",
+    PlanetEffects: {
+      id: "bytes32",
+      num: "uint8",
+      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 effectId | uint8 type
+    },
     PendingMove: {
       schema: {
         to: "bytes32",
@@ -388,5 +413,73 @@ export default defineWorld({
       },
       key: ["player"],
     },
+    // // artifact module
+    // Effect: {
+    //   schema: {
+    //     id: "uint24",
+    //     effectType: "EffectType",
+    //     modifierNumber: "uint8", // up to 7 modifiers
+    //     modifiers: "uint248", // 32 bits per modifier, including the uint8 type and the uint24 value
+    //   },
+    //   key: ["id"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // ArtifactMetadata: {
+    //   schema: {
+    //     rarity: "ArtifactRarity",
+    //     genre: "ArtifactGenre",
+    //     charge: "uint32",
+    //     cooldown: "uint32",
+    //     durable: "bool",
+    //     reusable: "bool",
+    //     reqLevel: "uint8",
+    //     reqPopulation: "uint64",
+    //     reqSilver: "uint64",
+    //   },
+    //   key: ["rarity"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // Wormhole: {
+    //   schema: {
+    //     from: "bytes32",
+    //     to: "bytes32",
+    //   },
+    //   key: ["from"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/Wormhole/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // PinkBomb: {
+    //   schema: {
+    //     bombId: "uint32",
+    //     target: "bytes32",
+    //     departureTick: "uint64",
+    //     arrivalTick: "uint64",
+    //   },
+    //   key: ["bombId"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/PinkBomb/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
   },
 });

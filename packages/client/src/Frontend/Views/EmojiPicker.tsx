@@ -1,4 +1,4 @@
-import Picker from "emoji-picker-react";
+import Picker, { Theme, EmojiStyle, Emoji } from "emoji-picker-react";
 import React, { useState } from "react";
 import styled from "styled-components";
 
@@ -12,18 +12,26 @@ export function EmojiPicker({
   setEmoji: (emoji: string) => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState<string>();
 
   return (
     <EmojiPickerContainer>
       <SelectedEmoji onClick={() => setPickerOpen((open) => !open)}>
-        {emoji || "\u00a0"}
+        {emoji && selectedEmoji ? (
+          <Emoji unified={selectedEmoji} emojiStyle={EmojiStyle.TWITTER} />
+        ) : (
+          "\u00a0"
+        )}
       </SelectedEmoji>
       {pickerOpen && (
         <EmojiPickerElementContainer>
           <Picker
-            disableSearchBar={true}
-            onEmojiClick={(event, emojiObject) => {
+            theme={Theme.DARK}
+            lazyLoadEmojis={true}
+            emojiStyle={EmojiStyle.TWITTER}
+            onEmojiClick={(emojiObject) => {
               setEmoji(emojiObject.emoji);
+              setSelectedEmoji(emojiObject.unified);
               setPickerOpen(false);
             }}
           />

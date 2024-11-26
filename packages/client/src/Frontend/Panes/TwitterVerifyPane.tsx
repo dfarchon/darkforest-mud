@@ -45,8 +45,8 @@ export function TwitterVerifyPane({
       // ${tweetText}`;
 
       // PUNK need to change later
-      const str = `Verifying my DF ARES v0.1  account (https://dfares.xyz/)🩷\n @darkforest_eth Community Round hosted by @DFArchon: ${tweetText}`;
-
+      // const str = `Verifying my DF ARES v0.1  account (https://dfares.xyz/)🩷\n @darkforest_eth Community Round hosted by @DFArchon: ${tweetText}`;
+      const str = `A new chapter unfold here! 🦑 https://dfmud.xyz 🦑 \n Dark Forest MUD is community-driven development of @darkforest_eth game on @mud_dev engine. \n Follow @darkforest_mud to get latest udpates !`;
       // const str = `Verifying my DFAres v0.1 Round 3 account (https://dfares.xyz/)🩷\n @darkforest_eth community round hosted by @DFArchon \n ${tweetText}`;
       window.open(
         `https://twitter.com/intent/tweet?hashtags=darkforest&text=${encodeURI(str)}`,
@@ -89,7 +89,7 @@ export function TwitterVerifyPane({
   return (
     <ModalPane
       id={ModalName.TwitterVerify}
-      title="Connect/Disconnect Twitter"
+      title="Share Game on Twitter"
       visible={visible}
       onClose={onClose}
       initialPosition={{ y: 100, x: window.innerWidth / 2 - 300 }}
@@ -97,12 +97,17 @@ export function TwitterVerifyPane({
     >
       {user.value !== undefined && user.value.twitter === undefined && (
         <TabbedView
-          tabTitles={["Tweet Proof", "Verify Tweet"]}
+          // tabTitles={["Tweet Proof", "Verify Tweet"]}
+          tabTitles={["share game website on twitter"]}
           tabContents={(i: number) => {
             if (i === 0) {
               return (
                 <>
-                  Tweet a signed message, proving account ownership!
+                  {/* Tweet a signed message, proving account ownership! */}
+                  Send a tweet on social media to invite your friends to join
+                  the game .
+                  <br />
+                  Thank you so much !
                   <Spacer height={8} />
                   <TextInput
                     placeholder="Your Twitter handle"

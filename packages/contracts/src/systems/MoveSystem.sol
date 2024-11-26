@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { IWorld } from "../codegen/world/IWorld.sol";
+import { IEffectSystem } from "../codegen/world/IEffectSystem.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput } from "../lib/VerificationInput.sol";
@@ -10,6 +10,9 @@ import { Planet } from "../lib/Planet.sol";
 import { MoveData, Counter } from "../codegen/index.sol";
 import { MoveLib } from "../lib/Move.sol";
 import { UniverseLib } from "../lib/Universe.sol";
+import { EffectLib } from "../lib/Effect.sol";
+import { Artifact } from "../lib/Artifact.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract MoveSystem is System, Errors {
   using MoveLib for MoveData;
@@ -30,19 +33,26 @@ contract MoveSystem is System, Errors {
     uint256 _silver,
     uint256 _artifact
   ) public {
-    IWorld world = IWorld(_world());
-    world.df__tick();
-
-    if (!world.df__verifyMoveProof(_proof, _input)) {
-      revert Errors.InvalidMoveProof();
-    }
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
+    DFUtils.verify(worldAddress, _proof, _input);
 
     // new planet instances in memory
-    Planet memory fromPlanet = world.df__readPlanet(_input.fromPlanetHash);
+    Planet memory fromPlanet = DFUtils.readInitedPlanet(worldAddress, _input.fromPlanetHash);
     if (_input.toPlanetHash == _input.fromPlanetHash) {
       revert Errors.MoveToSamePlanet();
     }
-    Planet memory toPlanet = world.df__readPlanet(_input.toPlanetHash, _input.toPerlin, _input.toRadiusSquare);
+    Planet memory toPlanet = DFUtils.readAnyPlanet(
+      worldAddress,
+      _input.toPlanetHash,
+      _input.toPerlin,
+      _input.toRadiusSquare
+    );
+
+    // trigger before move effects
+    // Discussion: Do we need to implement it via system hooks?
+    fromPlanet = IEffectSystem(worldAddress).df__beforeMove(fromPlanet);
+
     // create a new move and load all resources
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
     uint256 distance = UniverseLib.distance(fromPlanet, toPlanet, _input.distance);
@@ -50,6 +60,9 @@ contract MoveSystem is System, Errors {
     shipping.loadSilver(fromPlanet, _silver);
     shipping.loadArtifact(fromPlanet, _artifact);
     shipping.headTo(toPlanet, distance, fromPlanet.speed);
+
+    // trigger after move effects
+    fromPlanet = IEffectSystem(worldAddress).df__afterMove(fromPlanet);
 
     // write back to storage
     Counter.setMove(shipping.id);
