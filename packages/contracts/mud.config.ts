@@ -46,6 +46,8 @@ export default defineWorld({
       "SHIP_TITAN",
       "SHIP_PINK",
     ],
+    GuildStatus: ["UNEXIST", "ACTIVE", "DELETED"],
+    GuildRole: ["NONE", "MEMBER", "OFFICER", "OWNER"],
   },
   systems: {
     TickSystem: {
@@ -67,6 +69,7 @@ export default defineWorld({
         player: "uint32",
         artifact: "uint32",
         move: "uint64",
+        guild: "uint32",
       },
       key: [],
     },
@@ -340,6 +343,50 @@ export default defineWorld({
         speed: "uint64",
       },
       key: [],
+    },
+    Guild: {
+      schema: {
+        id: "uint8",
+        status: "GuildStatus",
+        rank: "uint8",
+        number: "uint8",
+        registry: "uint16",
+        owner: "address",
+      },
+      key: ["id"],
+    },
+    GuildName: {
+      schema: {
+        id: "uint8",
+        name: "string",
+      },
+      key: ["id"],
+    },
+    GuildMember: {
+      schema: {
+        memberId: "uint24",
+        role: "GuildRole",
+        grant: "GuildRole",
+        joinedAt: "uint64",
+        leftAt: "uint64",
+      },
+      key: ["memberId"],
+    },
+    GuildHistory: {
+      schema: {
+        player: "address",
+        curMemberId: "uint24",
+        memberIds: "uint24[]",
+      },
+      key: ["player"],
+    },
+    GuildCandidate: {
+      schema: {
+        player: "address",
+        invitations: "uint8[]",
+        applications: "uint8[]",
+      },
+      key: ["player"],
     },
   },
 });
