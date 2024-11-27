@@ -33,7 +33,7 @@ export default defineWorld({
       "APPLY_EFFECT",
       "REMOVE_EFFECT",
     ],
-    GuildStatus: ["UNEXIST", "ACTIVE", "DELETED"],
+    GuildStatus: ["UNEXIST", "ACTIVE", "DISBANDED"],
     GuildRole: ["NONE", "MEMBER", "OFFICER", "OWNER"],
     // ArtifactType: [
     //   "UNKNOWN",
@@ -376,7 +376,7 @@ export default defineWorld({
         rank: "uint8",
         number: "uint8",
         registry: "uint16",
-        owner: "address",
+        owner: "uint24", // memberId
       },
       key: ["id"],
     },
@@ -394,6 +394,7 @@ export default defineWorld({
         grant: "GuildRole",
         joinedAt: "uint64",
         leftAt: "uint64",
+        addr: "address",
       },
       key: ["memberId"],
     },
