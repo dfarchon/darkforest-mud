@@ -119,9 +119,11 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     try {
       setWaitingMessage("Initiating transfer...");
       const value = parseEther((state.transferAmount ?? 0).toString());
+      const gasLimit = 21000;
       const hash = await walletClient.sendTransaction({
         to: burnerWalletClient.account?.address,
         value,
+        gasLimit,
       });
 
       setWaitingMessage("Waiting for transaction confirmation...");
