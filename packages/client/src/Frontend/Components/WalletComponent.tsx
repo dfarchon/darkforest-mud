@@ -29,7 +29,11 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
   showRegisterPlayer = false,
 }) => {
   const {
-    network: { walletClient: burnerWalletClient, playerEntity },
+    network: {
+      walletClient: burnerWalletClient,
+      playerEntity,
+      waitForTransaction,
+    },
     components: { Player },
   } = useMUD();
 
@@ -60,8 +64,6 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     };
 
     fetchBalances();
-    const intervalId = setInterval(fetchBalances, 2000);
-    return () => clearInterval(intervalId);
   }, [refetchBurnerBalance, refetchMainWalletBalance]);
 
   useEffect(() => {
@@ -107,18 +109,27 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     walletClient?.addChain({ chain: chain });
   };
 
+  const [waitingMessage, setWaitingMessage] = useState<string>("");
+
   const transferToBurner = async () => {
     if (!burnerWalletClient || !walletClient) {
       return;
     }
-    const value = parseEther((state.transferAmount ?? 0).toString());
+
     try {
-      const gasLimit = 21000;
-      await walletClient.sendTransaction({
+      setWaitingMessage("Initiating transfer...");
+      const value = parseEther((state.transferAmount ?? 0).toString());
+      const hash = await walletClient.sendTransaction({
         to: burnerWalletClient.account?.address,
         value,
-        gasLimit,
       });
+
+      setWaitingMessage("Waiting for transaction confirmation...");
+      await waitForTransaction(hash);
+
+      setWaitingMessage("Updating balances...");
+      await refetchBurnerBalance();
+      await refetchMainWalletBalance();
       setState((prev) => ({ ...prev, txSuccessful: true }));
       setTimeout(
         () => setState((prev) => ({ ...prev, txSuccessful: false })),
@@ -126,6 +137,9 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
       );
     } catch (err) {
       console.error("Error sending transaction:", err);
+      setState((prev) => ({ ...prev, txSuccessful: false }));
+    } finally {
+      setWaitingMessage("");
     }
   };
 
@@ -135,10 +149,11 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     }
     const value = state.burnerBalance;
     try {
-      await burnerWalletClient.sendTransaction({
+      const hash = await burnerWalletClient.sendTransaction({
         to: walletClient.account?.address,
         value,
       });
+      await waitForTransaction(hash);
       setState((prev) => ({ ...prev, txSuccessful: true }));
       setTimeout(
         () => setState((prev) => ({ ...prev, txSuccessful: false })),
@@ -256,17 +271,17 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
 
   const renderStatusMessages = () => {
     if (!state.isDataLoaded) {
-      return null; // Don't render anything if data hasn't loaded
+      return null;
     }
 
     return (
       <div>
+        {waitingMessage && <div>{waitingMessage}</div>}
         {burnerBalanceValue <= LOW_BALANCE_THRESHOLD && (
           <div>
             <Red>Warning: Low session wallet balance!</Red>
           </div>
         )}
-
         {state.txSuccessful && (
           <div>
             <Green>Transaction successful!</Green>

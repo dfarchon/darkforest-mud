@@ -7,10 +7,21 @@ import { useMUD } from "@mud/MUDContext";
 import React, { useCallback, useEffect, useState } from "react";
 import { encodeFunctionData } from "viem";
 import { useWalletClient } from "wagmi";
+import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
 
 export const RegisterPlayerComponent = () => {
+  const { value: burnerBalanceValue, refetch: refetchBurnerBalance } =
+    useBurnerBalance();
+  const { value: mainWalletBalanceValue, refetch: refetchMainWalletBalance } =
+    useMainWalletBalance();
+
   const {
-    network: { walletClient: burnerWalletClient, playerEntity, worldContract },
+    network: {
+      walletClient: burnerWalletClient,
+      playerEntity,
+      worldContract,
+      waitForTransaction,
+    },
     components: { Player },
   } = useMUD();
 
@@ -101,6 +112,10 @@ export const RegisterPlayerComponent = () => {
 
       const txResponse = await walletClient.sendTransaction(txData);
       console.log("Transaction sent:", txResponse);
+      await waitForTransaction(txResponse);
+      await refetchBurnerBalance();
+      await refetchMainWalletBalance();
+
       setRegistrationMessage("Player registered successfully!");
 
       // Set a timer to clear the message after 5 seconds

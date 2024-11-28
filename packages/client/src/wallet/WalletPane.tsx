@@ -15,7 +15,7 @@ import { useWalletClient } from "wagmi";
 
 export const WalletPane = ({ onClose }: { onClose: () => void }) => {
   const {
-    network: { walletClient: burnerWalletClient },
+    network: { walletClient: burnerWalletClient, waitForTransaction },
   } = useMUD();
 
   const [burnerBalance, setBurnerBalance] = useState<bigint>(0n);
@@ -47,13 +47,6 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
     };
 
     fetchBalances(); // Initial fetch
-
-    const intervalId = setInterval(() => {
-      fetchBalances(); // Fetch every 2 seconds
-    }, 2000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
   }, [
     refetchBurnerBalance,
     refetchMainWalletBalance,
@@ -68,11 +61,13 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
     const value = parseEther((transferAmount ?? 0).toString());
     try {
       const gasLimit = 21000; // Typical gas limit for simple ETH transfers
-      await walletClient.sendTransaction({
+      const hash = await walletClient.sendTransaction({
         to: burnerWalletClient.account?.address,
         value,
         gasLimit,
       });
+
+      await waitForTransaction(hash);
       setTxSuccessful(true);
       // fetchBalances(); // Refresh balances after transaction
       setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
@@ -87,10 +82,11 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
     }
     const value = burnerBalance;
     try {
-      await burnerWalletClient.sendTransaction({
+      const hash = await burnerWalletClient.sendTransaction({
         to: walletClient.account?.address,
         value,
       });
+      await waitForTransaction(hash);
       setTxSuccessful(true);
       // fetchBalances(); // Refresh balances after transaction
       setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
