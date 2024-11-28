@@ -159,8 +159,6 @@ export function GameLandingPage() {
     };
 
     fetchBalances();
-    const intervalId = setInterval(fetchBalances, 500);
-    return () => clearInterval(intervalId);
   }, [refetchBurnerBalance]);
 
   const [gameManager, setGameManager] = useState<GameManager | undefined>();

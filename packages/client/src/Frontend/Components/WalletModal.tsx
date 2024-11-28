@@ -37,8 +37,6 @@ export const WalletModal = ({
     };
 
     fetchBalances();
-    const intervalId = setInterval(fetchBalances, 2000);
-    return () => clearInterval(intervalId);
   }, [refetchBurnerBalance]);
 
   useEffect(() => {
