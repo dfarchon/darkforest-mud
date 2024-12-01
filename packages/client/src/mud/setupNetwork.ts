@@ -12,7 +12,11 @@ import {
 import { transactionQueue, writeObserver } from "@latticexyz/common/actions";
 import { observer } from "@latticexyz/explorer/observer";
 import { encodeEntity, syncToRecs } from "@latticexyz/store-sync/recs";
-import { syncToZustand } from "@latticexyz/store-sync/zustand";
+// import { syncToZustand } from "@latticexyz/store-sync/zustand";
+import {
+  loadComponentsFromIndexedDB,
+  loadStateInfoFromIndexedDB,
+} from "@mud/IndexerDB";
 /*
  * Import our MUD config, which includes strong types for
  * our tables and other config options. We use this to generate
@@ -37,7 +41,6 @@ import {
 
 import { getNetworkConfig } from "./getNetworkConfig";
 import { world } from "./world";
-
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
 export async function setupNetwork() {
@@ -71,6 +74,13 @@ export async function setupNetwork() {
    * to the viem publicClient to make RPC calls to fetch MUD
    * events from the chain.
    */
+  const savedComponents = await loadComponentsFromIndexedDB();
+
+  const savedState = await loadStateInfoFromIndexedDB();
+  // Use a fallback value if `savedState` is undefined
+  const startBlock = savedState?.snapshotStartBlock
+    ? BigInt(savedState.snapshotStartBlock)
+    : BigInt(-1);
   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } =
     await syncToRecs({
       world,
@@ -78,8 +88,11 @@ export async function setupNetwork() {
       address: networkConfig.worldAddress as Hex,
       publicClient,
       indexerUrl: networkConfig.indexerUrl,
-      startBlock: BigInt(networkConfig.initialBlockNumber),
+      startBlock: startBlock,
     });
+  // todo de-sanitized
+  //debugger;
+  const same = savedComponents === components;
 
   // const {
   //   tables,
@@ -117,6 +130,7 @@ export async function setupNetwork() {
   });
 
   waitForStateChange.resolve(waitForTransaction);
+
   return {
     world,
     components,

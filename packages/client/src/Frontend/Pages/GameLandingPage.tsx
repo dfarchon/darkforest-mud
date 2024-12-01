@@ -23,6 +23,14 @@ import {
   encodeEntity,
   singletonEntity,
 } from "@latticexyz/store-sync/recs";
+import { getNetworkConfig } from "@mud/getNetworkConfig";
+import {
+  loadComponentsFromIndexedDB,
+  loadStateInfoFromIndexedDB,
+  saveInitialComponents,
+  saveStateInfoToIndexedDB,
+  syncIncrementalChanges,
+} from "@mud/IndexerDB";
 import { useMUD } from "@mud/MUDContext";
 import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 import { utils, Wallet } from "ethers";
@@ -116,13 +124,17 @@ export function GameLandingPage() {
   const params = new URLSearchParams(location.search);
   const queryParam = params.toString();
   const { data: walletClient } = useWalletClient();
+  const networkConfig = getNetworkConfig();
+
   const {
     network: {
       walletClient: burnerWalletClient,
       playerEntity,
       waitForTransaction,
+      latestBlock$,
     },
     components: components, //{ SyncProgress },
+    systemCalls: systemCalls,
   } = useMUD();
 
   const { Player } = components;
@@ -194,6 +206,113 @@ export function GameLandingPage() {
     console.log(syncProgress.step, syncProgress.percentage);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
+  // Create a subscription for lastestBlock$
+  useEffect(() => {
+    let lastProcessedBlock = Number(networkConfig.initialBlockNumber);
+
+    const subscription = latestBlock$.subscribe((block) => {
+      const currentBlock = Number(block.number);
+
+      // Check if the current block is at least 10 blocks ahead of the last processed block
+      if (currentBlock >= lastProcessedBlock + 10) {
+        console.log(
+          `Resuming sync from block ${lastProcessedBlock + 1} to ${currentBlock}`,
+        );
+
+        // Prepare updated state info for IndexedDB
+        const updatedStateInfo = {
+          snapshotStartBlock: lastProcessedBlock + 1,
+          snapshotEndBlock: currentBlock,
+        };
+        saveStateInfoToIndexedDB(updatedStateInfo);
+
+        // Sync the batch of 10 blocks
+        syncIncrementalChanges(
+          components,
+          {
+            ...syncProgress,
+            lastBlockNumberProcessed: BigInt(currentBlock),
+          },
+          networkConfig.initialBlockNumber,
+        );
+
+        // Update the last processed block
+        lastProcessedBlock = currentBlock;
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe();
+  }, [
+    components,
+    latestBlock$,
+    networkConfig.initialBlockNumber,
+    syncProgress,
+  ]);
+  // Create a initiate state for indexDB after LIVE status
+  useEffect(() => {
+    const initializeSync = async () => {
+      try {
+        if (!components || !syncSign) {
+          console.log("Components not ready or syncSign is false.");
+          return;
+        }
+
+        console.log("Initializing synchronization...");
+
+        // Load state information from IndexedDB (TABLE_NAME1)
+        const savedState = await loadStateInfoFromIndexedDB();
+        const latestBlockSynced = savedState?.snapshotEndBlock || 0;
+
+        console.log("Loaded state from IndexedDB:", savedState);
+
+        const savedComponent = await loadComponentsFromIndexedDB();
+        console.log("Loaded components:", components);
+        console.log("Loaded components from IndexedDB:", savedComponent);
+        // Save all components once when the status is `live` and no prior state exists
+        if (syncSign && latestBlockSynced === 0) {
+          console.log("Saving initial components and state info...");
+
+          await saveInitialComponents(
+            components,
+            networkConfig.initialBlockNumber,
+            Number(syncProgress.latestBlockNumber),
+          );
+          console.log("Initial components saved.");
+        } else if (latestBlockSynced < Number(syncProgress.latestBlockNumber)) {
+          // Perform incremental synchronization
+          console.log(
+            `Resuming sync from block ${latestBlockSynced + 1} to ${
+              syncProgress.latestBlockNumber
+            }`,
+          );
+
+          await syncIncrementalChanges(
+            components,
+            {
+              ...syncProgress,
+              lastBlockNumberProcessed: BigInt(latestBlockSynced),
+            },
+            networkConfig.initialBlockNumber,
+          );
+
+          console.log("Synchronization completed successfully.");
+        } else {
+          console.log("All blocks are already synchronized.");
+        }
+      } catch (error) {
+        console.error("Error during synchronization:", error);
+      }
+    };
+
+    initializeSync();
+  }, [
+    components,
+    syncSign,
+    syncProgress,
+    syncProgress.latestBlockNumber,
+    networkConfig.initialBlockNumber,
+  ]);
 
   const isWalletModalOpen = useMemo(() => {
     return (

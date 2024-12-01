@@ -1,0 +1,193 @@
+<mxfile host="65bd71144e">
+    <diagram id="RdqgfykIx25jyGRf60rx" name="IndexedDB Aproach ">
+        <mxGraphModel dx="1332" dy="877" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="SyncProgres &lt;br&gt;Status" style="rounded=1;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="410" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="endArrow=classic;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=16;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4" target="2" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="950" y="400" as="sourcePoint"/>
+                        <mxPoint x="1000" y="350" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="120" y="510"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6" value="" style="endArrow=classic;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=16;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="4" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="810" y="450" as="sourcePoint"/>
+                        <mxPoint x="250" y="640" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="250" y="620"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Downloading from scratch&lt;/font&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=20;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
+                    <mxGeometry x="110" y="320" width="280" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="350" y="170" width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="&lt;div style=&quot;&quot;&gt;&lt;ol&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;Original DF code - &lt;br&gt;client storage&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;background-color: initial; text-align: left;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;Indexer LatestBlock &lt;br&gt;State storage&lt;br&gt;&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="13" vertex="1">
+                    <mxGeometry width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="IndexedDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="13" vertex="1">
+                    <mxGeometry x="36" width="84" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="&lt;font style=&quot;font-size: 23px;&quot;&gt;1.&lt;/font&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="Empty" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=23;dashed=1;dashPattern=1 1;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="90" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="&lt;span style=&quot;font-size: 23px;&quot;&gt;2.&lt;/span&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry y="330" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="100" y="170" width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="MUD SQL LITE&lt;br&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="19" vertex="1">
+                    <mxGeometry width="140" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="Store state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="19" vertex="1">
+                    <mxGeometry x="30" width="80" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="Empty" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=23;dashed=1;dashPattern=1 1;" parent="19" vertex="1">
+                    <mxGeometry x="60" y="-80" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&quot;LIVE&quot;" style="rhombus;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="490" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="20" y="650" width="180" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="Store state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="26" vertex="1">
+                    <mxGeometry x="30" width="80" height="32.30769230769231" as="geometry"/>
+                </mxCell>
+                <mxCell id="55" value="" style="group" parent="26" vertex="1" connectable="0">
+                    <mxGeometry y="-86.15384615384615" width="180" height="226.15384615384613" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="MUD SQL LITE&lt;br&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="55" vertex="1">
+                    <mxGeometry y="86.15384615384615" width="140" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="Synced" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=23;dashed=1;dashPattern=1 1;" parent="55" vertex="1">
+                    <mxGeometry x="60" width="120" height="86.15384615384615" as="geometry"/>
+                </mxCell>
+                <mxCell id="85" value="Store state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="55" vertex="1">
+                    <mxGeometry x="30" y="86.15384615384619" width="80" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="Replicate store state&amp;nbsp;" style="triangle;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="680" width="130" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="&lt;font style=&quot;font-size: 23px;&quot;&gt;3.&lt;/font&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="600" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;First time Game client on browser&lt;/font&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=20;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
+                    <mxGeometry x="110" width="370" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Refresh page&lt;/font&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=20;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
+                    <mxGeometry x="750" width="280" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="880" y="179.99999999999997" width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="&lt;div style=&quot;&quot;&gt;&lt;ol&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;Original DF code - &lt;br&gt;client storage&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;background-color: initial; text-align: left;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;IndexeDB LatestBlock &lt;br&gt;State storege&lt;br&gt;&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="36" vertex="1">
+                    <mxGeometry width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="IndexedDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="36" vertex="1">
+                    <mxGeometry x="36" width="84" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="Empty" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=23;dashed=1;dashPattern=1 1;" parent="1" vertex="1">
+                    <mxGeometry x="750" y="99.99615384615379" width="120" height="86.15384615384615" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="Latest State" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=23;dashed=1;dashPattern=1 1;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="100" width="130" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="690" y="186.14999999999998" width="140" height="123.85000000000002" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="MUD SQL LITE&lt;br&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="43" vertex="1">
+                    <mxGeometry y="2.842170943040401e-14" width="140" height="123.85" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" value="Store state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="43" vertex="1">
+                    <mxGeometry x="30" width="80" height="32.30769230769231" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="880" y="363" width="140" height="123.85000000000002" as="geometry"/>
+                </mxCell>
+                <mxCell id="49" value="MUD SQL LITE&lt;br&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="48" vertex="1">
+                    <mxGeometry y="2.842170943040401e-14" width="140" height="123.85" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" value="Store state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="48" vertex="1">
+                    <mxGeometry x="30" width="80" height="32.30769230769231" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="" style="shape=flexArrow;endArrow=classic;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=11;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.511;exitY=1.05;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="37" target="50" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="940" y="320" as="sourcePoint"/>
+                        <mxPoint x="850" y="380" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="54" value="start sync from latest block" style="rhombus;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="705" y="380" width="170" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="56" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="320" y="580" width="200" height="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="" style="group" parent="56" vertex="1" connectable="0">
+                    <mxGeometry y="80" width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="&lt;div style=&quot;&quot;&gt;&lt;ol&gt;&lt;li style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;Original DF code - &lt;br&gt;client storage&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;background-color: initial; text-align: left;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;Indexer LatestBlock &lt;br&gt;State storege&lt;br&gt;&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/div&gt;&lt;div style=&quot;width: 12px; z-index: 1; touch-action: none; top: 69px; left: 212px; bottom: 38px;&quot; class=&quot;geHsplit&quot;&gt;&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;align=center;" parent="23" vertex="1">
+                    <mxGeometry width="180" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="IndexedDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="23" vertex="1">
+                    <mxGeometry x="36" width="84" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="Synced" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=23;dashed=1;dashPattern=1 1;" parent="56" vertex="1">
+                    <mxGeometry x="80" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="83" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Downloading from latest block&lt;/font&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=20;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
+                    <mxGeometry x="670" y="310" width="300" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="84" value="&lt;span style=&quot;font-size: 23px;&quot;&gt;4.&lt;/span&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="310" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="87" value="Feed Store state by IndexedDB last state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;dashPattern=1 1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="320" width="130" height="30" as="geometry"/>
+                </mxCell>
+                <UserObject label="&lt;font style=&quot;font-size: 15px;&quot;&gt;https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB&lt;/font&gt;" link="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB" id="89">
+                    <mxCell style="text;whiteSpace=wrap;html=1;fontSize=18;fontFamily=Architects Daughter;" parent="1" vertex="1">
+                        <mxGeometry x="530" y="690" width="860" height="40" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <UserObject label="https://www.monkcode.com/sqlite_to_indexeddb/" link="https://www.monkcode.com/sqlite_to_indexeddb/" id="90">
+                    <mxCell style="text;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Architects Daughter;" parent="1" vertex="1">
+                        <mxGeometry x="540" y="760" width="720" height="40" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <mxCell id="91" value="IndexedDB docs" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;dashPattern=1 1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=18;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="495" y="660" width="210" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="92" value="SQL Lite -&amp;gt; IndexedDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;dashPattern=1 1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=18;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="520" y="730" width="210" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="94" value="" style="endArrow=classic;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=18;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.05;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="54" target="2">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="620" y="580" as="sourcePoint"/>
+                        <mxPoint x="670" y="530" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <UserObject label="https://www.sqlite.org/docs.html" link="https://www.sqlite.org/docs.html" id="95">
+                    <mxCell style="text;whiteSpace=wrap;html=1;fontSize=15;fontFamily=Architects Daughter;" vertex="1" parent="1">
+                        <mxGeometry x="530" y="630" width="300" height="50" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <mxCell id="96" value="SQL Lite docs" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;dashPattern=1 1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;fontSize=18;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="490" y="600" width="210" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
