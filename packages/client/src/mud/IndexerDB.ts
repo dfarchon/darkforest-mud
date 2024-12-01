@@ -55,8 +55,7 @@ export const loadStateInfoFromIndexedDB = async () => {
   const transaction = db.transaction(TABLE_NAME1, "readonly");
   const store = transaction.objectStore(TABLE_NAME1);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new Promise<any>((resolve) => {
+  return new Promise<unknown>((resolve) => {
     const request = store.get("state");
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => resolve(null);
