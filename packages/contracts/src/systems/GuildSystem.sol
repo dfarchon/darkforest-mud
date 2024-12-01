@@ -23,9 +23,10 @@ contract GuildSystem is System {
   error GuildHasMembers(); // 0xabb7f52d
 
   function createGuild(string memory name) public {
-    if (_msgValue() < 0.005 ether) {
-      revert NeedFundsToCreateGuild();
-    }
+    // TODO Transaction call with MSG value and confirm on wallet
+    // if (_msgValue() < 0.005 ether) {
+    //   revert NeedFundsToCreateGuild();
+    // }
 
     uint256 id = uint256(Counter.getGuild()) + 1;
     if (id > 255) {
