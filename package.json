@@ -1,6 +1,7 @@
 {
   "name": "mud-template-react-ecs",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "pnpm recursive run build",
     "dev": "mprocs",
@@ -18,25 +19,27 @@
   "devDependencies": {
     "@commitlint/cli": "19.5.0",
     "@commitlint/config-conventional": "19.5.0",
+    "@eslint/js": "9.16.0",
     "@latticexyz/cli": "2.2.14",
     "@latticexyz/common": "2.2.14",
     "@latticexyz/explorer": "2.2.14",
     "@latticexyz/store-indexer": "2.2.14",
     "@types/debug": "4.1.12",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
-    "eslint": "8.57.0",
+    "eslint": "9.16.0",
     "eslint-config-prettier": "9",
-    "eslint-import-resolver-typescript": "3.6.3",
-    "eslint-plugin-import": "2.30.0",
+    "eslint-import-resolver-typescript": "3.7.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-simple-import-sort": "12.1.1",
+    "eslint-plugin-unicorn": "56.0.1",
+    "globals": "15.13.0",
     "husky": "9.1.6",
     "lint-staged": "15.2.10",
     "mprocs": "0.7.1",
     "prettier": "3.3.3",
     "rimraf": "6.0.1",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.17.0"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json}": [
