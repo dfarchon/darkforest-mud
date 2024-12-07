@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "echo 'tests not implemented'",
     "lint": "pnpm lint:eslint && pnpm lint:typecheck",
-    "lint:eslint": "eslint --ext .js,.ts,tsx,.json src",
+    "lint:eslint": "eslint .",
     "lint-fix": "pnpm lint-fix:eslint",
     "lint-fix:eslint": "pnpm lint:eslint --fix",
     "lint:typecheck": "tsc",
