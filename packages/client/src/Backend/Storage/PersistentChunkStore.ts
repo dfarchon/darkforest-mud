@@ -1,3 +1,4 @@
+import { throttle } from "@backend/Utils/throttle";
 import type {
   BurnedCoords,
   Chunk,
@@ -15,7 +16,6 @@ import type {
 } from "@df/types";
 import type { IDBPDatabase } from "idb";
 import { openDB } from "idb";
-import { throttle } from "lodash-es";
 
 import type {
   ChunkId,
