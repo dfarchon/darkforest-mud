@@ -11,6 +11,7 @@ import {
   TOGGLE_SETTINGS_PANE,
   TOGGLE_TRADE_PANE,
   TOGGLE_TRANSACTIONS_PANE,
+  TOGGLE_AI_CHAT_PANE,
   TOGGLE_WALLET_PANE,
   TOGGLE_YOUR_ARTIFACTS_PANE,
   TOGGLE_YOUR_PLANETS_DEX_PANE,
@@ -18,6 +19,7 @@ import {
 import { ModalToggleButton } from "./ModalIcon";
 
 export function SidebarPane({
+  aiChatHook,
   walletHook,
   tradeHook,
   settingsHook,
@@ -27,6 +29,7 @@ export function SidebarPane({
   planetdexHook,
   transactionLogHook,
 }: {
+  aiChatHook: Hook<boolean>;
   walletHook: Hook<boolean>;
   tradeHook: Hook<boolean>;
   settingsHook: Hook<boolean>;
@@ -46,6 +49,15 @@ export function SidebarPane({
       <BorderlessPane
         style={{ zIndex: sidebarHovered ? DFZIndex.Tooltip : undefined }}
       >
+        <ModalToggleButton
+          modal={ModalName.AIChat}
+          hook={aiChatHook}
+          text={sidebarHovered ? "AI Chat" : undefined}
+          size="stretch"
+          shortcutKey={TOGGLE_AI_CHAT_PANE}
+          shortcutText={sidebarHovered ? TOGGLE_AI_CHAT_PANE : undefined}
+        />
+        <EmSpacer height={0.5} />
         <ModalToggleButton
           modal={ModalName.Wallet}
           hook={walletHook}

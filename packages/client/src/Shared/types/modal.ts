@@ -20,6 +20,7 @@ export const ModalName = {
   TwitterVerify: "TwitterVerify" as ModalName,
   Broadcast: "Broadcast" as ModalName,
   Hats: "Hats" as ModalName,
+  AIChat: "AIChat" as ModalName,
   Trade: "Trade" as ModalName,
   Settings: "Settings" as ModalName,
   YourArtifacts: "YourArtifacts" as ModalName,
