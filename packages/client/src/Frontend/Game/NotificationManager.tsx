@@ -9,8 +9,8 @@ import type {
   TxIntent,
 } from "@df/types";
 import { Biome } from "@df/types";
+import { startCase } from "@df/utils/string";
 import EventEmitter from "events";
-import { startCase } from "lodash-es";
 import React from "react";
 
 import { getRandomActionId } from "../../Backend/Utils/Utils";

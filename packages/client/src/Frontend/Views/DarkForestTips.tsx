@@ -1,4 +1,4 @@
-import { shuffle } from "lodash-es";
+import { shuffle } from "@df/utils/list";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 

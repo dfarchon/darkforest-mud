@@ -12,7 +12,6 @@ import type {
   RevealedCoords,
   VoyageId,
 } from "@df/types";
-import { flatMap } from "lodash-es";
 import React from "react";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
@@ -139,7 +138,7 @@ export class InitialGameStateDownloader {
 
     const minedChunks = Array.from(await persistentChunkStore.allChunks());
     const minedPlanetIds = new Set(
-      flatMap(minedChunks, (c) => c.planetLocations).map((l) => l.hash),
+      minedChunks.flatMap((c) => c.planetLocations).map((l) => l.hash),
     );
 
     const loadedTouchedPlanetIds = await contractsAPI.getTouchedPlanetIds(
