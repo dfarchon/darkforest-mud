@@ -1,4 +1,4 @@
-import _ from "lodash-es";
+import { chunk } from "@df/utils/list";
 import React from "react";
 
 import type {
@@ -38,24 +38,23 @@ const junkRowStyle = { gap: "8px" } as CSSStyleDeclaration &
 export function SpaceJunkPane({ config, onUpdate }: LobbiesPaneProps) {
   let spaceJunkOptions = null;
   if (config.SPACE_JUNK_ENABLED.currentValue === true) {
-    const junk = _.chunk(
-      config.PLANET_LEVEL_JUNK.displayValue,
-      rowChunkSize,
-    ).map((items, rowIdx) => {
-      return (
-        <Row key={`junk-row-${rowIdx}`} style={junkRowStyle}>
-          {items.map((displayValue, idx) => (
-            <JunkPerLevel
-              key={`junk-lvl-${idx}`}
-              config={config}
-              value={displayValue}
-              index={rowIdx * rowChunkSize + idx}
-              onUpdate={onUpdate}
-            />
-          ))}
-        </Row>
-      );
-    });
+    const junk = chunk(config.PLANET_LEVEL_JUNK.displayValue, rowChunkSize).map(
+      (items, rowIdx) => {
+        return (
+          <Row key={`junk-row-${rowIdx}`} style={junkRowStyle}>
+            {items.map((displayValue, idx) => (
+              <JunkPerLevel
+                key={`junk-lvl-${idx}`}
+                config={config}
+                value={displayValue}
+                index={rowIdx * rowChunkSize + idx}
+                onUpdate={onUpdate}
+              />
+            ))}
+          </Row>
+        );
+      },
+    );
     spaceJunkOptions = (
       <>
         <Row>

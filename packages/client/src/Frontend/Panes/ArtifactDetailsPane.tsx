@@ -15,7 +15,7 @@ import type {
   Upgrade,
 } from "@df/types";
 import { ArtifactRarityNames, ArtifactType, TooltipName } from "@df/types";
-import _ from "lodash-es";
+import { range } from "@df/utils/number";
 import styled from "styled-components";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
@@ -304,7 +304,7 @@ export function ArtifactDetailsBody({
       {hasStatBoost(artifact.artifactType) && (
         <ArtifactDetailsHeader>
           <StatsContainer>
-            {_.range(0, 5).map((val) => (
+            {range(0, 5).map((val) => (
               <UpgradeStatInfo
                 upgrades={[artifact.upgrade, artifact.timeDelayedUpgrade]}
                 stat={val}

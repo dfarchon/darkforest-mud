@@ -1,5 +1,5 @@
 import type { EthAddress } from "@df/types";
-import _ from "lodash-es";
+import { chunk } from "@df/utils/list";
 import React, { useEffect, useReducer, useState } from "react";
 import { Route, Switch, useRouteMatch } from "react-router-dom";
 
@@ -135,7 +135,7 @@ function ConfigurationNavigation({
   status: Status;
   onCreate: () => Promise<void>;
 }) {
-  const buttons = _.chunk(panes, 2).map(([fst, snd], idx) => {
+  const buttons = chunk(panes, 2).map(([fst, snd], idx) => {
     return (
       // Index key is fine here because the array is stable
       <ButtonRow key={idx}>

@@ -1,4 +1,3 @@
-import _ from "lodash-es";
 import React from "react";
 
 import type {
@@ -41,7 +40,7 @@ const rowStyle = { gap: "8px" } as CSSStyleDeclaration & React.CSSProperties;
 export function CaptureZonesPane({ config, onUpdate }: LobbiesPaneProps) {
   let captureZoneOptions = null;
   if (config.CAPTURE_ZONES_ENABLED.currentValue === true) {
-    const scores = _.chunk(
+    const scores = chunk(
       config.CAPTURE_ZONE_PLANET_LEVEL_SCORE.displayValue,
       rowChunkSize,
     ).map((items, rowIdx) => {

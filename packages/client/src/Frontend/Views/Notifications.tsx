@@ -1,5 +1,4 @@
 import { Setting } from "@df/types";
-import _ from "lodash-es";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -67,7 +66,7 @@ export function NotificationsPane() {
       }
 
       setNotifs((arr) => {
-        const newArr = _.clone(arr);
+        const newArr = structuredClone(arr);
         for (let i = 0; i < arr.length; i++) {
           if (arr[i].id === notif.id) {
             newArr[i] = notif;
@@ -98,7 +97,7 @@ export function NotificationsPane() {
   // creates a callback for a notif which removes itself
   const getRemove = (notif: NotificationInfo): (() => void) => {
     return (): void => {
-      const copy = _.clone(notifs);
+      const copy = structuredClone(notifs);
       for (let i = 0; i < copy.length; i++) {
         if (copy[i].id === notif.id) {
           copy.splice(i, 1);
