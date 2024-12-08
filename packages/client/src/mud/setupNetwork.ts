@@ -43,6 +43,31 @@ import { getNetworkConfig } from "./getNetworkConfig";
 import { world } from "./world";
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
+function findDifferences(obj1, obj2) {
+  const differences = {};
+
+  for (const key in obj1) {
+    if (obj1[key] !== obj2[key]) {
+      if (typeof obj1[key] === "object" && typeof obj2[key] === "object") {
+        const nestedDiff = findDifferences(obj1[key], obj2[key]);
+        if (Object.keys(nestedDiff).length > 0) {
+          differences[key] = nestedDiff;
+        }
+      } else {
+        differences[key] = { old: obj1[key], new: obj2[key] };
+      }
+    }
+  }
+
+  for (const key in obj2) {
+    if (!(key in obj1)) {
+      differences[key] = { old: undefined, new: obj2[key] };
+    }
+  }
+
+  return differences;
+}
+
 export async function setupNetwork() {
   const networkConfig = getNetworkConfig();
 
@@ -81,6 +106,7 @@ export async function setupNetwork() {
   const startBlock = savedState?.snapshotStartBlock
     ? BigInt(savedState.snapshotStartBlock)
     : BigInt(-1);
+
   const { components, latestBlock$, storedBlockLogs$, waitForTransaction } =
     await syncToRecs({
       world,
@@ -91,9 +117,15 @@ export async function setupNetwork() {
       startBlock: startBlock,
     });
   // todo de-sanitized
-  //debugger;
-  const same = savedComponents === components;
 
+  // const savedArtifacts = savedComponents["Artifact"];
+  // const componentsArtifacts = components["Artifact"];
+
+  // const same =
+  //   savedComponents["Artifact"].metadata.valueSchema ==
+  //   components["Artifact"].metadata.valueSchema;
+
+  // debugger;
   // const {
   //   tables,
   //   useStore,
