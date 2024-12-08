@@ -75,10 +75,10 @@ export const AIChatGameConfig = `
   "PlanetStatus": ["DEFAULT", "DESTROYED"],
   "PlanetType": {
     "PLANET": "Generates energy, upgradable object.",
-    "ASTEROID_FIELD": "Generates energy and silver.",
-    "FOUNDRY": "Prospects and discovers artifacts.",
-    "SPACETIME_RIP": "Stakes/unstakes artifacts, burns silver for score.",
-    "QUASAR": "Longest range, no energy or silver production."
+    "ASTEROID_FIELD": "Generates energy and silver, not upgradable object.",
+    "FOUNDRY": "Generates energy, Prospects and discovers artifacts, not upgradable object.",
+    "SPACETIME_RIP": "Generates energy, Stakes/unstakes artifacts, burns silver for score, not upgradable object.",
+    "QUASAR": "Longest range, no energy or silver generation, not upgradable object."
   },
   "SpaceType": {
     "NEBULA": "Forests, Grasslands, Oceans. Max planet level: 4, max upgrades: 3.",
@@ -101,7 +101,7 @@ export const AIChatGameConfig = `
     "MULTIPLY_POPULATION_GROWTH": "Speeds up recharge (excluding Quasar).",
     "MULTIPLY_SILVER_GROWTH": "Boosts silver production (Asteroids only)."
   },
-  "GameRadius": 100000,
+  "GameRadius": 150000,
   "PlanetLevel": {
     "ZERO": 0, "ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4,
     "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9
