@@ -18,6 +18,8 @@
     "deploy:prod": "netlify build && netlify deploy --prod"
   },
   "dependencies": {
+    "@langchain/core": "0.3.22",
+    "@langchain/openai": "0.3.14",
     "@latticexyz/block-logs-stream": "2.2.14",
     "@latticexyz/common": "2.2.14",
     "@latticexyz/dev-tools": "2.2.14",
@@ -52,6 +54,7 @@
     "js-quadtree": "3.3.6",
     "jszip": "3.10.1",
     "just-debounce": "1.1.0",
+    "langchain": "0.3.6",
     "lit": "2.1.2",
     "mnemonist": "0.39.8",
     "p-defer": "4.0.1",
