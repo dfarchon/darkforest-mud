@@ -318,7 +318,7 @@ export class PlanetUtils {
         if (id === 0n) {
           break;
         }
-        artifactIds.push(artifactIdFromHexStr(id.toString(16)));
+        artifactIds.push(artifactIdFromHexStr(id.toString()));
         val /= TWO_POW32;
       }
     }

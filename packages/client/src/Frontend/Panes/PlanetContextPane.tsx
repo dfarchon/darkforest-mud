@@ -274,8 +274,7 @@ function PlanetContextPaneContent({
         onToggleAbandon={onToggleAbandon}
       />
 
-      {/* PUNK */}
-      {/* <MineArtifactButton planetWrapper={planet} /> */}
+      <MineArtifactButton planetWrapper={planet} />
       {captureRow}
 
       <VerticalSplit>

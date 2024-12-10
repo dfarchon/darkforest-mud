@@ -105,6 +105,35 @@ export const ArtifactRarityNames = {
 } as const;
 
 /**
+ * Abstract type representing an artifact status.
+ */
+export type ArtifactStatus = Abstract<number, "ArtifactStatus">;
+
+/**
+ * Enumeration of possible artifact statuses
+ */
+export const ArtifactStatus = {
+  Default: 0 as ArtifactStatus,
+  Cooldown: 1 as ArtifactStatus,
+  Charging: 2 as ArtifactStatus,
+  Ready: 3 as ArtifactStatus,
+  Active: 4 as ArtifactStatus,
+  Broken: 5 as ArtifactStatus,
+} as const;
+
+/**
+ * Mapping from ArtifactStatus to pretty-printed names.
+ */
+export const ArtifactStatusNames = {
+  [ArtifactStatus.Default]: "Default",
+  [ArtifactStatus.Cooldown]: "Cooldown",
+  [ArtifactStatus.Charging]: "Charging",
+  [ArtifactStatus.Ready]: "Ready",
+  [ArtifactStatus.Active]: "Active",
+  [ArtifactStatus.Broken]: "Broken",
+} as const;
+
+/**
  * mapping from ArtifactRarity to points earned for finding this artifact.
  */
 export type ArtifactPointValues = { [ArtifactRarity: number]: number };
@@ -121,6 +150,7 @@ export type Artifact = {
   id: ArtifactId;
   planetDiscoveredOn: LocationId;
   rarity: ArtifactRarity;
+  status?: ArtifactStatus;
   planetBiome: Biome;
   mintedAtTimestamp: number;
   discoverer: EthAddress;
@@ -131,8 +161,8 @@ export type Artifact = {
   controller: EthAddress;
   imageType: number;
 
-  upgrade: Upgrade;
-  timeDelayedUpgrade: Upgrade;
+  upgrade?: Upgrade;
+  timeDelayedUpgrade?: Upgrade;
   currentOwner: EthAddress; // owner of the NFT - can be the contract
   linkTo?: LocationId;
   onPlanetId?: LocationId;

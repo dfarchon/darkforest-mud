@@ -901,7 +901,8 @@ export class GameManager extends EventEmitter {
     );
     // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
-    const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
+    // const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
+    const knownArtifacts = initialState.artifacts;
 
     for (let i = 0; i < initialState.loadedPlanets.length; i++) {
       const planet = initialState.touchedAndLocatedPlanets.get(
@@ -1015,7 +1016,7 @@ export class GameManager extends EventEmitter {
         gameManager.updateContractConstants(contractConstants);
       })
       .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
-        // await gameManager.hardRefreshArtifact(artifactId);
+        gameManager.hardRefreshArtifact(artifactId);
         gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
       })
       .on(
@@ -1508,7 +1509,7 @@ export class GameManager extends EventEmitter {
     this.entityStore.replacePlanetFromContractData(
       planet,
       arrivals,
-      undefined, // artifactsOnPlanet.map((a) => a.id),
+      planet.heldArtifactIds, // artifactsOnPlanet.map((a) => a.id),
       revealedLocation,
       // claimedCoords?.claimer,
       // burnedCoords?.operator,
@@ -1520,9 +1521,7 @@ export class GameManager extends EventEmitter {
     // effects of this type of move is that the active photoid canon deactivates upon a move
     // meaning we need to reload its data from the blockchain.
 
-    // artifactsOnPlanet.forEach((a) =>
-    //   this.entityStore.replaceArtifactFromContractData(a),
-    // );
+    planet.heldArtifactIds.forEach((a) => this.hardRefreshArtifact(a));
   }
 
   private bulkHardRefreshPlanets(planetIds: LocationId[]): void {
@@ -1572,13 +1571,14 @@ export class GameManager extends EventEmitter {
     // }
   }
 
-  // public async hardRefreshArtifact(artifactId: ArtifactId): Promise<void> {
-  //   const artifact = await this.contractsAPI.getArtifactById(artifactId);
-  //   if (!artifact) {
-  //     return;
-  //   }
-  //   this.entityStore.replaceArtifactFromContractData(artifact);
-  // }
+  public hardRefreshArtifact(artifactId: ArtifactId): void {
+    const artifacts = this.contractsAPI.bulkGetArtifacts([artifactId]);
+    const artifact = artifacts.get(artifactId);
+    if (!artifact) {
+      return;
+    }
+    this.entityStore.replaceArtifactFromContractData(artifact);
+  }
 
   //mytodo: test more
   // public async hardRefreshPinkZones(): Promise<void> {
@@ -4294,6 +4294,7 @@ export class GameManager extends EventEmitter {
         contract: this.contractsAPI.contract,
         planetId: planetId,
         args: Promise.resolve([locationIdToDecStr(planetId)]),
+        delegator: this.getAccount(),
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -4372,6 +4373,7 @@ export class GameManager extends EventEmitter {
           planet.location.coords.x,
           planet.location.coords.y,
         ),
+        delegator: this.getAccount(),
       };
 
       const tx =

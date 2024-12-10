@@ -476,7 +476,7 @@ export class GameObjects {
     const localArtifact = this.artifacts.get(artifact.id);
     if (localArtifact) {
       artifact.transactions = localArtifact.transactions;
-      artifact.onPlanetId = localArtifact.onPlanetId;
+      // artifact.onPlanetId = localArtifact.onPlanetId;
     }
 
     this.setArtifact(artifact);

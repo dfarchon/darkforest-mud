@@ -7,6 +7,8 @@ import PlanetWithdrawSilverSystemAbi from "contracts/out/PlanetWithdrawSilverSys
 import PlayerSystemAbi from "contracts/out/PlayerSystem.sol/PlayerSystem.abi.json";
 import TestOnlySystemAbi from "contracts/out/TestOnlySystem.sol/TestOnlySystem.abi.json";
 import TickSystemAbi from "contracts/out/TickSystem.sol/TickSystem.abi.json";
+import ArtifactSystemAbi from "contracts/out/ArtifactSystem.sol/ArtifactSystem.abi.json";
+import ArtifactCreateSystemAbi from "contracts/out/ArtifactCreateSystem.sol/ArtifactCreateSystem.abi.json";
 import type { Abi } from "viem";
 
 export const MOVE_SYSTEM_ID = resourceToHex({
@@ -74,6 +76,22 @@ export const TICK_SYSTEM_ID = resourceToHex({
 
 export const TICK_SYSTEM_ABI: Abi = TickSystemAbi;
 
+export const ARTIFACT_SYSTEM_ABI: Abi = ArtifactSystemAbi;
+
+export const ARTIFACT_CREATE_SYSTEM_ABI: Abi = ArtifactCreateSystemAbi;
+
+export const ARTIFACT_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "ArtifactSystem",
+});
+
+export const ARTIFACT_CREATE_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "ArtifactCreateSystem",
+});
+
 export const get_ABI_from_FunctionName = (functionName: string) => {
   if (functionName === "move" || functionName === "legacyMove") {
     return MOVE_SYSTEM_ABI;
@@ -106,6 +124,19 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     functionName === "updateTickRate"
   ) {
     return TICK_SYSTEM_ABI;
+  } else if (
+    functionName === "registerArtifact" ||
+    functionName === "chargeArtifact" ||
+    functionName === "shutdownArtifact" ||
+    functionName === "activateArtifact"
+  ) {
+    return ARTIFACT_SYSTEM_ABI;
+  } else if (
+    functionName === "prospectPlanet" ||
+    functionName === "findingArtifact" ||
+    functionName === "findArtifact"
+  ) {
+    return ARTIFACT_CREATE_SYSTEM_ABI;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ABI;
@@ -144,6 +175,19 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     functionName === "updateTickRate"
   ) {
     return TICK_SYSTEM_ID;
+  } else if (
+    functionName === "registerArtifact" ||
+    functionName === "chargeArtifact" ||
+    functionName === "shutdownArtifact" ||
+    functionName === "activateArtifact"
+  ) {
+    return ARTIFACT_SYSTEM_ID;
+  } else if (
+    functionName === "prospectPlanet" ||
+    functionName === "findingArtifact" ||
+    functionName === "findArtifact"
+  ) {
+    return ARTIFACT_CREATE_SYSTEM_ID;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ID;

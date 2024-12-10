@@ -181,16 +181,16 @@ export function ArtifactDetailsBody({
     return null;
   }
 
-  const activateArtifactCooldownPassed =
-    uiManager.getNextActivateArtifactAvailableTimestamp() <= Date.now();
+  // const activateArtifactCooldownPassed =
+  //   uiManager.getNextActivateArtifactAvailableTimestamp() <= Date.now();
 
   // console.log(ArtifactType);
 
   const account = (addr: EthAddress) => {
-    const twitter = uiManager?.getTwitter(addr);
-    if (twitter) {
-      return "@" + twitter;
-    }
+    // const twitter = uiManager?.getTwitter(addr);
+    // if (twitter) {
+    //   return "@" + twitter;
+    // }
     return <TextPreview text={addr} />;
   };
 
