@@ -34,7 +34,7 @@ export default defineWorld({
       "REMOVE_EFFECT",
     ],
     GuildStatus: ["UNEXIST", "ACTIVE", "DISBANDED"],
-    GuildRole: ["NONE", "MEMBER", "OFFICER", "OWNER"],
+    GuildRole: ["NONE", "MEMBER", "OFFICER", "LEADER"],
     // ArtifactType: [
     //   "UNKNOWN",
     //   "WORMHOLE",
@@ -366,6 +366,14 @@ export default defineWorld({
       schema: {
         radius: "uint64",
         speed: "uint64",
+      },
+      key: [],
+    },
+    GuildConfig: {
+      schema: {
+        createFee: "uint128",
+        maxMembers: "uint8",
+        cooldownTicks: "uint120",
       },
       key: [],
     },
