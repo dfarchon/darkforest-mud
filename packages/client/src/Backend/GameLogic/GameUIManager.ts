@@ -357,6 +357,10 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getCurrentTick();
   }
 
+  public getCurrentTickerRate(): number {
+    return this.gameManager.getCurrentTickerRate();
+  }
+
   public convertTickToMs(tick: number): number {
     return this.gameManager.convertTickToMs(tick);
   }

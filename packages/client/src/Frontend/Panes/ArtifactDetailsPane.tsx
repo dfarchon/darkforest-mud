@@ -14,9 +14,15 @@ import type {
   LocationId,
   Upgrade,
 } from "@df/types";
-import { ArtifactRarityNames, ArtifactType, TooltipName } from "@df/types";
+import {
+  ArtifactRarityNames,
+  ArtifactStatusNames,
+  ArtifactType,
+  TooltipName,
+} from "@df/types";
 import _ from "lodash-es";
 import styled from "styled-components";
+import TimeAgo from "react-timeago";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { StatIdx } from "../../_types/global/GlobalTypes";
@@ -33,13 +39,23 @@ import { AccountLabel } from "../Components/Labels/Labels";
 import { ReadMore } from "../Components/ReadMore";
 import { Green, Red, Sub, Text, Text2, White } from "../Components/Text";
 import { TextPreview } from "../Components/TextPreview";
-import { TimeUntil } from "../Components/TimeUntil";
+import { formatDuration, TimeUntil } from "../Components/TimeUntil";
 import dfstyles from "../Styles/dfstyles";
 import { useAccount, useArtifact, useUIManager } from "../Utils/AppHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ArtifactActions } from "./ManagePlanetArtifacts/ArtifactActions";
 import { ArtifactChangeImageType } from "./ManagePlanetArtifacts/ArtifactChangeImageType";
 import { TooltipTrigger } from "./Tooltip";
+import { useState } from "react";
+
+const ArtifactStatusText = {
+  0: "DEFAULT",
+  1: "COOLDOWN",
+  2: "CHARGING",
+  3: "READY",
+  4: "ACTIVE",
+  5: "BROKEN",
+} as const;
 
 const StatsContainer = styled.div`
   flex-grow: 1;
@@ -300,6 +316,35 @@ export function ArtifactDetailsBody({
           </>
         )}
       </div>
+      {/* <div>
+        <Text2>Charge</Text2>
+        <ArtifactDetailsHeader>
+          <StatsContainer>
+            <div className="statrow">
+              <span>Required Level</span>
+              <span>{artifact.reqLevel}</span>
+            </div>
+            <div className="statrow">
+              <span>Charge Amount</span>
+              <span>{artifact.charge}</span>
+            </div>
+          </StatsContainer>
+        </ArtifactDetailsHeader>
+
+        <Text2>Activate</Text2>
+        <ArtifactDetailsHeader>
+          <StatsContainer>
+            <div className="statrow">
+              <span>Required Population</span>
+              <span>{artifact.reqPopulation}</span>
+            </div>
+            <div className="statrow">
+              <span>Required Silver</span>
+              <span>{artifact.reqSilver}</span>
+            </div>
+          </StatsContainer>
+        </ArtifactDetailsHeader>
+      </div> */}
 
       {hasStatBoost(artifact.artifactType) && (
         <ArtifactDetailsHeader>
@@ -321,7 +366,7 @@ export function ArtifactDetailsBody({
 
       <StyledArtifactDetailsBody>
         {!isSpaceShip(artifact.artifactType) && (
-          <ArtifactDescription artifact={artifact} />
+          <NewArtifactDescription artifact={artifact} />
         )}
         <Spacer height={8} />
 
@@ -336,7 +381,7 @@ export function ArtifactDetailsBody({
           )}
         </div>
 
-        {!isSpaceShip(artifact.artifactType) && (
+        {/* {!isSpaceShip(artifact.artifactType) && (
           <>
             <div className="row">
               <span>Minted At</span>
@@ -351,7 +396,7 @@ export function ArtifactDetailsBody({
               <span>{discoverer()}</span>
             </div>
           </>
-        )}
+        )} */}
 
         {artifact.controller === EMPTY_ADDRESS && (
           <div className="row">
@@ -446,6 +491,141 @@ export function ArtifactDetailsPane({
       contractConstants={contractConstants}
       depositOn={depositOn}
     />
+  );
+}
+
+function NewArtifactDescription({
+  artifact,
+  collapsable,
+}: {
+  artifact: Artifact;
+  collapsable?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(!collapsable);
+  const uiManager = useUIManager();
+
+  if (!expanded) {
+    return (
+      <Text>
+        <div style={{ cursor: "pointer" }} onClick={() => setExpanded(true)}>
+          ▼ Show Details
+        </div>
+      </Text>
+    );
+  }
+
+  return (
+    <Text>
+      {collapsable && (
+        <div style={{ cursor: "pointer" }} onClick={() => setExpanded(false)}>
+          ▲ Hide Details
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.Bomb && (
+        <div>
+          <Green>Description:</Green> A powerful explosive device that can be
+          used to destroy planets. When activated, it will destroy the planet it
+          is on and any artifacts on that planet.
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.BloomFilter && (
+        <div>
+          <Green>Description:</Green> When activated refills your planet&apos;s
+          energy to their respective maximum values.
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.Wormhole && (
+        <div>
+          <Green>Description:</Green> A device that creates a portal between two
+          planets, allowing instant travel between them. When activated, it
+          allows instant travel between the two linked locations.
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.PhotoidCannon && (
+        <div>
+          <Green>Description:</Green> A powerful weapon that can be used to
+          attack planets from afar. When activated, it will fire a devastating
+          beam at the target planet. During charging, it reduces the
+          planet&apos;s defense.
+        </div>
+      )}
+
+      {artifact.reqLevel !== undefined && artifact.reqLevel !== 0 && (
+        <div>
+          <Green>Required Level:</Green> {artifact.reqLevel}
+        </div>
+      )}
+
+      {artifact.reqPopulation !== undefined &&
+        artifact.reqPopulation !== 0n && (
+          <div>
+            <Green>Required Energy:</Green> {artifact.reqPopulation.toString()}
+          </div>
+        )}
+
+      {artifact.reqSilver !== undefined && artifact.reqSilver !== 0n && (
+        <div>
+          <Green>Required Silver:</Green> {artifact.reqSilver.toString()}
+        </div>
+      )}
+
+      <div>
+        <Green>Properties:</Green>{" "}
+        {artifact.durable ? "Durable" : "Not Durable"},{" "}
+        {artifact.reusable ? "Reusable" : "Single Use"}
+      </div>
+
+      {artifact.charge !== undefined && artifact.charge > 0 && (
+        <div>
+          <Green>Charge Time:</Green>{" "}
+          {formatDuration(
+            Math.floor(
+              (artifact.charge / uiManager.getCurrentTickerRate()) * 1000,
+            ),
+          )}
+          {artifact.chargeTick !== undefined && artifact.chargeTick > 0 && (
+            <>
+              <br />
+              <Green>Last Charged:</Green>{" "}
+              <TimeAgo date={uiManager.convertTickToMs(artifact.chargeTick)} />
+            </>
+          )}
+        </div>
+      )}
+
+      {artifact.cooldown !== undefined && artifact.cooldown > 0 && (
+        <div>
+          <Green>Cooldown:</Green>{" "}
+          {formatDuration(
+            Math.floor(artifact.cooldown / uiManager.getCurrentTickerRate()),
+          )}
+          {artifact.cooldownTick !== undefined && artifact.cooldownTick > 0 && (
+            <>
+              <br />
+              <Green>Last Cooldown:</Green>{" "}
+              <TimeAgo
+                date={uiManager.convertTickToMs(artifact.cooldownTick)}
+              />
+            </>
+          )}
+        </div>
+      )}
+
+      {artifact.activateTick !== undefined && artifact.activateTick > 0 && (
+        <div>
+          <Green>Last Activated:</Green>{" "}
+          <TimeAgo date={uiManager.convertTickToMs(artifact.activateTick)} />
+        </div>
+      )}
+
+      <div>
+        <Green>Status:</Green> {ArtifactStatusNames[artifact.status ?? 0]}
+      </div>
+    </Text>
   );
 }
 

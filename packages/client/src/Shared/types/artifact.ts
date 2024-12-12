@@ -150,7 +150,6 @@ export type Artifact = {
   id: ArtifactId;
   planetDiscoveredOn: LocationId;
   rarity: ArtifactRarity;
-  status?: ArtifactStatus;
   planetBiome: Biome;
   mintedAtTimestamp: number;
   discoverer: EthAddress;
@@ -169,6 +168,20 @@ export type Artifact = {
   onVoyageId?: VoyageId;
 
   transactions?: TransactionCollection;
+
+  // mud version
+  artifactIndex?: number;
+  status?: ArtifactStatus;
+  chargeTick?: number;
+  activateTick?: number;
+  cooldownTick?: number;
+  charge?: number;
+  cooldown?: number;
+  durable?: boolean;
+  reusable?: boolean;
+  reqLevel?: number;
+  reqPopulation?: bigint;
+  reqSilver?: bigint;
 };
 
 // TODO: get this out of here

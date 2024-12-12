@@ -20,7 +20,9 @@ export type ContractMethodName =
   | "df__prospectPlanet"
   | "depositArtifact"
   | "withdrawArtifact"
-  | "activateArtifact"
+  | "df__activateArtifact"
+  | "df__shutdownArtifact"
+  | "df__chargeArtifact"
   | "deactivateArtifact"
   | "changeArtifactImageType"
   | "buyArtifact"
@@ -183,10 +185,28 @@ export type UnconfirmedWithdrawArtifact = TxIntent & {
  * @hidden
  */
 export type UnconfirmedActivateArtifact = TxIntent & {
-  methodName: "activateArtifact";
+  methodName: "df__activateArtifact";
   locationId: LocationId;
   artifactId: ArtifactId;
   linkTo?: LocationId;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedShutdownArtifact = TxIntent & {
+  methodName: "df__shutdownArtifact";
+  locationId: LocationId;
+  artifactId: ArtifactId;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedChargeArtifact = TxIntent & {
+  methodName: "df__chargeArtifact";
+  locationId: LocationId;
+  artifactId: ArtifactId;
 };
 
 /**

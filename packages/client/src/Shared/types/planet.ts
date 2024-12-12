@@ -87,6 +87,12 @@ export type PlanetBonus = [
   boolean,
 ];
 
+export type Effect = {
+  artifactIndex: number;
+  id: number;
+  effectType: number;
+};
+
 export type Planet = {
   locationId: LocationId; //planetHash
   perlin: number;
@@ -162,6 +168,8 @@ export type Planet = {
   // invadeStartBlock?: number;
   universeZone: number;
   distSquare: number;
+
+  effects?: Effect[];
 };
 
 /**

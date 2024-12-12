@@ -36,8 +36,16 @@ export class ArtifactUtils {
   }
 
   public getArtifactById(artifactId: ArtifactId): Artifact | undefined {
-    const { Artifact, ArtifactOwner, PlanetOwner, PlanetConstants } =
-      this.components;
+    const {
+      Artifact,
+      ArtifactOwner,
+      PlanetOwner,
+      PlanetConstants,
+      PinkBombMetadata,
+      BloomFilterMetadata,
+      WormholeMetadata,
+      CannonMetadata,
+    } = this.components;
 
     const artifactEntity = encodeEntity(Artifact.metadata.keySchema, {
       id: Number(artifactIdToDecStr(artifactId)),
@@ -66,16 +74,33 @@ export class ArtifactUtils {
       }
     }
 
+    const metadata = getComponentValue(
+      artifactRec.artifactIndex === 1
+        ? PinkBombMetadata
+        : artifactRec.artifactIndex === 4
+          ? BloomFilterMetadata
+          : artifactRec.artifactIndex === 5
+            ? WormholeMetadata
+            : CannonMetadata,
+      encodeEntity(
+        { rarity: "uint8" },
+        {
+          rarity: artifactRec.rarity,
+        },
+      ),
+    );
+    if (!metadata) {
+      throw new Error(
+        `artifact metadata not found, artifact index: ${artifactRec.artifactIndex}, rarity: ${artifactRec.rarity}`,
+      );
+    }
+
     return {
       isInititalized: true,
       imageType: 0,
       id: artifactId,
       planetDiscoveredOn: "0" as LocationId,
       rarity: artifactRec.rarity as ArtifactRarity,
-      status: artifactRec.status as ArtifactStatus,
-      // chargeTick: artifactRec.chargeTick,
-      // activateTick: artifactRec.activateTick,
-      // cooldownTick: artifactRec.cooldownTick,
       planetBiome: 0 as Biome,
       mintedAtTimestamp: 0,
       discoverer: EMPTY_ADDRESS,
@@ -86,6 +111,18 @@ export class ArtifactUtils {
       lastActivated: Number(artifactRec.activateTick),
       lastDeactivated: Number(artifactRec.cooldownTick),
       onPlanetId: planetId === "0" ? undefined : planetId,
+      artifactIndex: artifactRec.artifactIndex,
+      status: artifactRec.status as ArtifactStatus,
+      chargeTick: Number(artifactRec.chargeTick),
+      activateTick: Number(artifactRec.activateTick),
+      cooldownTick: Number(artifactRec.cooldownTick),
+      charge: metadata.charge,
+      cooldown: metadata.cooldown,
+      durable: metadata.durable,
+      reusable: metadata.reusable,
+      reqLevel: metadata.reqLevel,
+      reqPopulation: metadata.reqPopulation,
+      reqSilver: metadata.reqSilver,
     };
   }
 

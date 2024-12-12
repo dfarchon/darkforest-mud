@@ -93,6 +93,7 @@ import type {
   UnconfirmedBuySpaceship,
   UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
+  UnconfirmedChargeArtifact,
   UnconfirmedClaim,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -108,6 +109,7 @@ import type {
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
   UnconfirmedSetPlanetEmoji,
+  UnconfirmedShutdownArtifact,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawSilver,
@@ -4543,6 +4545,70 @@ export class GameManager extends EventEmitter {
     }
   }
 
+  public async chargeArtifact(
+    locationId: LocationId,
+    artifactId: ArtifactId,
+    data: string,
+  ): Promise<Transaction<UnconfirmedChargeArtifact>> {
+    try {
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-chargeArtifact`,
+        artifactId,
+      );
+
+      const txIntent: UnconfirmedChargeArtifact = {
+        methodName: "df__chargeArtifact",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          artifactIdToDecStr(artifactId),
+          data,
+        ]),
+        delegator: this.getAccount(),
+        locationId,
+        artifactId,
+      };
+      return this.contractsAPI.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__chargeArtifact",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async shutdownArtifact(
+    locationId: LocationId,
+    artifactId: ArtifactId,
+  ): Promise<Transaction<UnconfirmedShutdownArtifact>> {
+    try {
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-shutdownArtifact`,
+        artifactId,
+      );
+
+      const txIntent: UnconfirmedShutdownArtifact = {
+        methodName: "df__shutdownArtifact",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          artifactIdToDecStr(artifactId),
+        ]),
+        delegator: this.getAccount(),
+        locationId,
+        artifactId,
+      };
+      return this.contractsAPI.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__shutdownArtifact",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
   public async activateArtifact(
     locationId: LocationId,
     artifactId: ArtifactId,
@@ -4592,12 +4658,13 @@ export class GameManager extends EventEmitter {
       );
 
       const txIntent: UnconfirmedActivateArtifact = {
-        methodName: "activateArtifact",
+        methodName: "df__activateArtifact",
         contract: this.contractsAPI.contract,
+        delegator: this.getAccount(),
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
-          linkTo ? locationIdToDecStr(linkTo) : "0",
+          linkTo ? locationIdToDecStr(linkTo) : "",
         ]),
         locationId,
         artifactId,
@@ -4610,7 +4677,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "activateArtifact",
+        "df__activateArtifact",
         (e as Error).message,
       );
       throw e;

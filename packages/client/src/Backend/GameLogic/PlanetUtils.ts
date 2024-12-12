@@ -9,6 +9,7 @@ import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
 import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 import type {
+  Effect,
   EthAddress,
   LocatablePlanet,
   LocationId,
@@ -158,6 +159,7 @@ export class PlanetUtils {
       ProspectedPlanet,
       ExploredPlanet,
       PlanetArtifact,
+      PlanetEffects,
     } = this.components;
 
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
@@ -323,6 +325,21 @@ export class PlanetUtils {
       }
     }
 
+    const effects = getComponentValue(PlanetEffects, planetEntity);
+    const planetEffects: Effect[] = [];
+    if (effects) {
+      const effectNum = effects.num;
+      let effectsArray = effects.effects;
+      for (let i = 0; i < effectNum; i++) {
+        planetEffects[effectNum - 1 - i] = {
+          artifactIndex: Number((effectsArray & 0xff0000n) >> 16n),
+          id: Number((effectsArray & 0xff00n) >> 8n),
+          effectType: Number(effectsArray & 0xffn),
+        };
+        effectsArray >>= 24n;
+      }
+    }
+
     return {
       locationId: planetId,
       isHomePlanet: false,
@@ -358,6 +375,7 @@ export class PlanetUtils {
       heldArtifactIds: artifactIds,
       destroyed: false,
       frozen: false,
+      effects: planetEffects,
     };
   }
 
