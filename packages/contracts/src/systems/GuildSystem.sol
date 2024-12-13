@@ -364,4 +364,66 @@ contract GuildSystem is System {
     guild.number = 0;
     Guild.set(uint8(guildId), guild);
   }
+
+  function setGrant(GuildRole newGrant) public {
+    address player = _msgSender();
+
+    // Check if player is registered
+    if (!_isPlayerRegistered(player)) {
+      revert Errors.NotRegistered();
+    }
+
+    // Get player's current guild role and memberId
+    (GuildRole currentRole, uint256 memberId) = _getGuildRole(player);
+    if (currentRole == GuildRole.NONE) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Update the grant role
+    GuildMember.setGrant(uint24(memberId), newGrant);
+  }
+
+  function setMemberRole(address member, GuildRole newRole) public {
+    address operator = _msgSender();
+
+    // Check if operator is registered
+    if (!_isPlayerRegistered(operator)) {
+      revert Errors.NotRegistered();
+    }
+
+    // Check if target member is registered
+    if (!_isPlayerRegistered(member)) {
+      revert Errors.NotRegistered();
+    }
+
+    // Get operator's role and memberId
+    (GuildRole operatorRole, uint256 operatorMemberId) = _getGuildRole(operator);
+    if (operatorRole != GuildRole.LEADER) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Get member's role and memberId
+    (GuildRole memberRole, uint256 memberMemberId) = _getGuildRole(member);
+    if (memberRole == GuildRole.NONE) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Check they are in the same guild
+    if ((operatorMemberId >> 16) != (memberMemberId >> 16)) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Cannot set LEADER role or NONE role
+    if (newRole == GuildRole.LEADER || newRole == GuildRole.NONE) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Cannot change role of current leader
+    if (memberRole == GuildRole.LEADER) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Set the member's role
+    GuildMember.setRole(uint24(memberMemberId), newRole);
+  }
 }
