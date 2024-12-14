@@ -62,7 +62,7 @@ const StatsContainer = styled.div`
 `;
 
 const ArtifactDetailsHeader = styled.div`
-  min-height: 128px;
+  min-height: 25px;
   display: flex;
   flex-direction: row;
 
@@ -103,6 +103,10 @@ export function UpgradeStatInfo({
     }
   }
 
+  if (mult === 100) {
+    return null;
+  }
+
   const statName = [
     TooltipName.Energy,
     TooltipName.EnergyGrowth,
@@ -118,7 +122,6 @@ export function UpgradeStatInfo({
       </TooltipTrigger>
       <span>
         {mult > 100 && <Green>+{Math.round(mult - 100)}%</Green>}
-        {mult === 100 && <Sub>no effect</Sub>}
         {mult < 100 && <Red>-{Math.round(100 - mult)}%</Red>}
       </span>
     </div>
@@ -346,19 +349,41 @@ export function ArtifactDetailsBody({
         </ArtifactDetailsHeader>
       </div> */}
 
-      {hasStatBoost(artifact.artifactType) && (
-        <ArtifactDetailsHeader>
-          <StatsContainer>
-            {_.range(0, 5).map((val) => (
-              <UpgradeStatInfo
-                upgrades={[artifact.upgrade, artifact.timeDelayedUpgrade]}
-                stat={val}
-                key={val}
-              />
-            ))}
-          </StatsContainer>
-        </ArtifactDetailsHeader>
-      )}
+      <div>
+        {artifact.chargeUpgrade && (
+          <>
+            <Green>Charge Stats Change</Green>
+            <ArtifactDetailsHeader>
+              <StatsContainer>
+                {_.range(0, 5).map((val) => (
+                  <UpgradeStatInfo
+                    upgrades={[artifact.chargeUpgrade]}
+                    stat={val}
+                    key={val}
+                  />
+                ))}
+              </StatsContainer>
+            </ArtifactDetailsHeader>
+          </>
+        )}
+
+        {artifact.activateUpgrade && (
+          <>
+            <Green>Activate Stats Change</Green>
+            <ArtifactDetailsHeader>
+              <StatsContainer>
+                {_.range(0, 5).map((val) => (
+                  <UpgradeStatInfo
+                    upgrades={[artifact.activateUpgrade]}
+                    stat={val}
+                    key={val}
+                  />
+                ))}
+              </StatsContainer>
+            </ArtifactDetailsHeader>
+          </>
+        )}
+      </div>
 
       {isSpaceShip(artifact.artifactType) && (
         <ArtifactDescription collapsable={false} artifact={artifact} />
@@ -525,8 +550,12 @@ function NewArtifactDescription({
       {artifact.artifactType === ArtifactType.Bomb && (
         <div>
           <Green>Description:</Green> A powerful explosive device that can be
-          used to destroy planets. When activated, it will destroy the planet it
-          is on and any artifacts on that planet.
+          used to destroy planets. You need to choose a target planet for
+          starting charging. After charging is complete, you can activate it
+          which will consume energy to launch it at the designated target. When
+          it reaches the target it will explode, giving the launching player{" "}
+          <span style={{ color: "#ffff00" }}>5 minutes</span> to destroy planets
+          within the pink circle radius including the target.
         </div>
       )}
 
@@ -550,13 +579,15 @@ function NewArtifactDescription({
           <Green>Description:</Green> A powerful weapon that can be used to
           attack planets from afar. When activated, it will fire a devastating
           beam at the target planet. During charging, it reduces the
-          planet&apos;s defense.
+          planet&apos;s defense. Once charged, you can activate it and then the
+          next move will be able to go further and faster.
         </div>
       )}
 
       {artifact.reqLevel !== undefined && artifact.reqLevel !== 0 && (
         <div>
-          <Green>Required Level:</Green> {artifact.reqLevel}
+          <Green>Required Level:</Green> {artifact.reqLevel & 0xff} -{" "}
+          {(artifact.reqLevel >> 8) - 1}
         </div>
       )}
 
@@ -601,7 +632,9 @@ function NewArtifactDescription({
         <div>
           <Green>Cooldown:</Green>{" "}
           {formatDuration(
-            Math.floor(artifact.cooldown / uiManager.getCurrentTickerRate()),
+            Math.floor(
+              (artifact.cooldown / uiManager.getCurrentTickerRate()) * 1000,
+            ),
           )}
           {artifact.cooldownTick !== undefined && artifact.cooldownTick > 0 && (
             <>

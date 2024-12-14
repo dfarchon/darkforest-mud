@@ -10,12 +10,13 @@ import type {
   ArtifactId,
   ArtifactRarity,
   ArtifactStatus,
-  ArtifactType,
+  // ArtifactType,
   Biome,
   EthAddress,
   LocationId,
   Upgrade,
 } from "@df/types";
+import { ArtifactType } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -95,6 +96,12 @@ export class ArtifactUtils {
       );
     }
 
+    const artifactType = this.getArtifactType(artifactRec.artifactIndex);
+    const { chargeUpgrade, activateUpgrade } = this.getArtifactUpgrade(
+      artifactType,
+      artifactRec.rarity as ArtifactRarity,
+    );
+
     return {
       isInititalized: true,
       imageType: 0,
@@ -104,7 +111,7 @@ export class ArtifactUtils {
       planetBiome: 0 as Biome,
       mintedAtTimestamp: 0,
       discoverer: EMPTY_ADDRESS,
-      artifactType: this.getArtifactType(artifactRec.artifactIndex),
+      artifactType,
       controller: owner,
       currentOwner: owner,
       activations: 0,
@@ -123,23 +130,65 @@ export class ArtifactUtils {
       reqLevel: metadata.reqLevel,
       reqPopulation: metadata.reqPopulation,
       reqSilver: metadata.reqSilver,
+      chargeUpgrade,
+      activateUpgrade,
     };
   }
 
   private getArtifactType(index: number): ArtifactType {
     if (index === 1) {
-      // bomb
-      return 13 as ArtifactType;
+      return ArtifactType.Bomb;
     } else if (index === 4) {
-      // bloom filter
-      return 8 as ArtifactType;
+      return ArtifactType.BloomFilter;
     } else if (index === 5) {
-      // wormhole
-      return 5 as ArtifactType;
+      return ArtifactType.Wormhole;
     } else if (index === 6) {
-      // photoid cannon
-      return 7 as ArtifactType;
+      return ArtifactType.PhotoidCannon;
     }
-    return 0 as ArtifactType;
+    return ArtifactType.Unknown;
+  }
+
+  private getArtifactUpgrade(
+    artifactType: ArtifactType,
+    rarity: ArtifactRarity,
+  ): {
+    chargeUpgrade?: Upgrade;
+    activateUpgrade?: Upgrade;
+  } {
+    if (artifactType === ArtifactType.Bomb) {
+      return {
+        chargeUpgrade: undefined,
+        activateUpgrade: {
+          energyCapMultiplier: 100,
+          energyGroMultiplier: 100,
+          rangeMultiplier: 50,
+          speedMultiplier: 50,
+          defMultiplier: 100,
+        },
+      };
+    } else if (artifactType === ArtifactType.PhotoidCannon) {
+      const defenseMultiplier = [0, 50, 40, 30, 20, 10][rarity];
+      const speedMultiplier = [0, 500, 1000, 1500, 2000, 2500][rarity];
+      return {
+        chargeUpgrade: {
+          energyCapMultiplier: 100,
+          energyGroMultiplier: 100,
+          rangeMultiplier: 100,
+          speedMultiplier: 100,
+          defMultiplier: defenseMultiplier,
+        },
+        activateUpgrade: {
+          energyCapMultiplier: 100,
+          energyGroMultiplier: 100,
+          rangeMultiplier: 200,
+          speedMultiplier,
+          defMultiplier: 100,
+        },
+      };
+    }
+    return {
+      chargeUpgrade: undefined,
+      activateUpgrade: undefined,
+    };
   }
 }

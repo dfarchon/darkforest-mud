@@ -391,7 +391,7 @@ export default defineWorld({
     //     cooldown: "uint32",
     //     durable: "bool",
     //     reusable: "bool",
-    //     reqLevel: "uint8",
+    //     reqLevel: "uint16", // uint8 upbound | uint8 lowerbound, lowerbound <= planetLevel < upbound
     //     reqPopulation: "uint64",
     //     reqSilver: "uint64",
     //   },

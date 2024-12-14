@@ -655,8 +655,11 @@ library PlanetLib {
   }
 
   function _validateChargeArtifact(Planet memory planet, Artifact memory artifact) internal pure {
-    if (planet.level < artifact.reqLevel) {
-      revert Errors.ArtifactLevelTooLow();
+    if (
+      artifact.reqLevel > 0 &&
+      (planet.level < (artifact.reqLevel & 0xff) || planet.level >= (artifact.reqLevel & 0xff00) >> 8)
+    ) {
+      revert Errors.PlanetLevelMismatch();
     }
     if (artifact.status != ArtifactStatus.DEFAULT) {
       revert Errors.ArtifactNotAvailable();
@@ -667,8 +670,11 @@ library PlanetLib {
   }
 
   function _validateActivateArtifact(Planet memory planet, Artifact memory artifact) internal pure {
-    if (planet.level < artifact.reqLevel) {
-      revert Errors.ArtifactLevelTooLow();
+    if (
+      artifact.reqLevel > 0 &&
+      (planet.level < (artifact.reqLevel & 0xff) || planet.level >= (artifact.reqLevel & 0xff00) >> 8)
+    ) {
+      revert Errors.PlanetLevelMismatch();
     }
     if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
       revert Errors.NotEnoughResourceToActivate();

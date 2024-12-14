@@ -49,7 +49,7 @@ contract BloomFilterTest is MudTest {
     vm.stopPrank();
 
     vm.prank(address(1));
-    vm.expectRevert(BloomFilterSystem.BloomFilterRarityTooLow.selector);
+    vm.expectRevert(Errors.PlanetLevelMismatch.selector);
     IWorld(worldAddress).df__activateArtifact(1, 1, bytes(""));
     vm.prank(admin);
     PlanetConstants.setLevel(bytes32(uint256(1)), 2);

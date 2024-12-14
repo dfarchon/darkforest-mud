@@ -182,6 +182,8 @@ export type Artifact = {
   reqLevel?: number;
   reqPopulation?: bigint;
   reqSilver?: bigint;
+  chargeUpgrade?: Upgrade;
+  activateUpgrade?: Upgrade;
 };
 
 // TODO: get this out of here

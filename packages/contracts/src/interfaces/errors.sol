@@ -57,7 +57,7 @@ interface Errors {
   error ArtifactNotAvailable(); // 0xc878be8d
   error ArtifactOnCooldown(); // 0x47e6b7ca
   error ArtifactNotChargeable(); // 0x342e603f
-  error ArtifactLevelTooLow(); // 0x24c528ed
+  error PlanetLevelMismatch(); // 0x3b366702
   error NotEnoughResourceToActivate(); // 0xe642b7b4
   error ExistingArtifact(); // 0x11f0e4e4
   error OnlyCallableByArtifactInstallModule(); // 0xbf9f6704
