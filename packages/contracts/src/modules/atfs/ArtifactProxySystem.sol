@@ -12,8 +12,7 @@ import { Artifact } from "../../lib/Artifact.sol";
 import { ArtifactMetadata, ArtifactMetadataData } from "./tables/ArtifactMetadata.sol";
 import { _artifactMetadataTableId, _artifactSystemId, _artifactIndexToNamespace } from "./utils.sol";
 import { Errors } from "../../interfaces/errors.sol";
-
-import { ArtifactStatus } from "../../codegen/common.sol";
+import { ArtifactStatus, ArtifactGenre, PlanetFlagType } from "../../codegen/common.sol";
 
 abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
   using WorldResourceIdInstance for ResourceId;
@@ -61,7 +60,13 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
     return (planet, artifact);
   }
 
+  /*
+   * TODO:
+   * Thinking about moving those general logic into a specific system within df namespace
+   */
+
   function _shutdown(Planet memory planet, Artifact memory artifact) internal virtual {
+    _unsetFlag(planet, artifact.genre);
     if (artifact.status == ArtifactStatus.ACTIVE && !artifact.reusable) {
       artifact.status = ArtifactStatus.BROKEN;
       planet.removeArtifact(artifact.id);
@@ -74,6 +79,7 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
   function _charge(Planet memory planet, Artifact memory artifact, bytes memory) internal virtual {
     artifact.chargeTick = planet.lastUpdateTick;
     artifact.status = ArtifactStatus.CHARGING;
+    _setFlag(planet, artifact.genre);
   }
 
   function _activate(Planet memory planet, Artifact memory artifact, bytes memory) internal virtual {
@@ -82,11 +88,31 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
     planet.silver -= artifact.reqSilver;
     if (artifact.durable) {
       artifact.status = ArtifactStatus.ACTIVE;
-    } else if (artifact.reusable) {
-      artifact.status = ArtifactStatus.COOLDOWN;
+      _setFlag(planet, artifact.genre);
     } else {
-      artifact.status = ArtifactStatus.BROKEN;
-      planet.removeArtifact(artifact.id);
+      _unsetFlag(planet, artifact.genre);
+      if (artifact.reusable) {
+        artifact.status = ArtifactStatus.COOLDOWN;
+      } else {
+        artifact.status = ArtifactStatus.BROKEN;
+        planet.removeArtifact(artifact.id);
+      }
+    }
+  }
+
+  function _setFlag(Planet memory planet, ArtifactGenre genre) internal pure {
+    if (genre == ArtifactGenre.OFFENSIVE) {
+      planet.setFlag(PlanetFlagType.OFFENSIVE_ARTIFACT);
+    } else if (genre == ArtifactGenre.DEFENSIVE) {
+      planet.setFlag(PlanetFlagType.DEFENSIVE_ARTIFACT);
+    }
+  }
+
+  function _unsetFlag(Planet memory planet, ArtifactGenre genre) internal pure {
+    if (genre == ArtifactGenre.OFFENSIVE) {
+      planet.unsetFlag(PlanetFlagType.OFFENSIVE_ARTIFACT);
+    } else if (genre == ArtifactGenre.DEFENSIVE) {
+      planet.unsetFlag(PlanetFlagType.DEFENSIVE_ARTIFACT);
     }
   }
 

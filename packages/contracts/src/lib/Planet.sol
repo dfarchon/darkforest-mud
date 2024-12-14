@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus } from "../codegen/common.sol";
+import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagType, ArtifactGenre } from "../codegen/common.sol";
 import { Planet as PlanetTable, PlanetData, PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
 import { PlanetOwner, PlanetConstants, PlanetConstantsData, PlanetProps, PlanetPropsData } from "../codegen/index.sol";
 import { PlanetEffects, PlanetEffectsData } from "../codegen/index.sol";
@@ -12,8 +12,9 @@ import { SpaceTypeConfig, PlanetTypeConfig, SpaceTypeConfig } from "../codegen/i
 import { PlanetInitialResource, PlanetInitialResourceData, Ticker } from "../codegen/index.sol";
 import { PendingMoveData, MoveData } from "../codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../codegen/index.sol";
-import { ProspectedPlanet, ExploredPlanet } from "../codegen/index.sol";
+import { ProspectedPlanet } from "../codegen/index.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "../codegen/index.sol";
+import { PlanetFlags } from "../codegen/index.sol";
 import { ArtifactMetadataData } from "../modules/atfs/tables/ArtifactMetadata.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "./Move.sol";
@@ -21,6 +22,7 @@ import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "./Ar
 import { Effect, EffectLib } from "./Effect.sol";
 import { _artifactProxySystemId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
 import { IArtifactProxySystem } from "../modules/atfs/IArtifactProxySystem.sol";
+import { Flags, FlagsLib } from "./Flags.sol";
 
 using PlanetLib for Planet global;
 
@@ -62,6 +64,8 @@ struct Planet {
   // effects
   uint256 effectNumber;
   Effect[] effects;
+  // flags
+  Flags flags;
 }
 
 library PlanetLib {
@@ -79,6 +83,7 @@ library PlanetLib {
     planet.moveQueue.ReadFromStore(planet.planetHash);
 
     _readPropsOrMetadata(planet);
+    planet.flags = Flags.wrap(PlanetFlags.get(bytes32(planet.planetHash)));
   }
 
   function writeToStore(Planet memory planet) internal {
@@ -113,17 +118,7 @@ library PlanetLib {
     }
     planet.moveQueue.WriteToStore();
     planet.artifactStorage.WriteToStore();
-    PlanetTable.set(
-      bytes32(planet.planetHash),
-      PlanetData({
-        status: planet.status,
-        lastUpdateTick: uint64(planet.lastUpdateTick),
-        population: uint64(planet.population),
-        silver: uint64(planet.silver),
-        upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades),
-        useProps: planet.useProps
-      })
-    );
+
     uint256 effectsData;
     for (uint256 i; i < planet.effectNumber; ) {
       effectsData <<= 24;
@@ -138,6 +133,19 @@ library PlanetLib {
         PlanetEffectsData(uint8(planet.effectNumber), uint248(effectsData))
       );
     }
+
+    PlanetFlags.set(bytes32(planet.planetHash), Flags.unwrap(planet.flags));
+    PlanetTable.set(
+      bytes32(planet.planetHash),
+      PlanetData({
+        status: planet.status,
+        lastUpdateTick: uint64(planet.lastUpdateTick),
+        population: uint64(planet.population),
+        silver: uint64(planet.silver),
+        upgrades: uint24((planet.rangeUpgrades << 16) | (planet.speedUpgrades << 8) | planet.defenseUpgrades),
+        useProps: planet.useProps
+      })
+    );
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
@@ -258,7 +266,7 @@ library PlanetLib {
     ProspectedPlanet.set(bytes32(planet.planetHash), uint64(block.number));
   }
 
-  function findArtifact(Planet memory planet, address executor) internal returns (Artifact memory artifact) {
+  function findArtifact(Planet memory planet, address executor) internal view returns (Artifact memory artifact) {
     _validateFindingArtifact(planet, executor);
     artifact = ArtifactLib.NewArtifact(_createArtifactSeed(planet), planet.planetHash, planet.level);
     if (planet.hasArtifactSlot()) {
@@ -266,7 +274,7 @@ library PlanetLib {
     } else {
       revert Errors.ArtifactStorageFull();
     }
-    ExploredPlanet.set(bytes32(planet.planetHash), true);
+    setFlag(planet, PlanetFlagType.EXPLORED);
   }
 
   function mustGetArtifact(Planet memory planet, uint256 artifactId) internal view returns (Artifact memory artifact) {
@@ -277,6 +285,18 @@ library PlanetLib {
     } else {
       revert Errors.ArtifactNotOnPlanet();
     }
+  }
+
+  function setFlag(Planet memory planet, PlanetFlagType flagType) internal pure {
+    planet.flags = FlagsLib.set(planet.flags, flagType);
+  }
+
+  function unsetFlag(Planet memory planet, PlanetFlagType flagType) internal pure {
+    planet.flags = FlagsLib.unset(planet.flags, flagType);
+  }
+
+  function checkFlag(Planet memory planet, PlanetFlagType flagType) internal pure returns (bool) {
+    return FlagsLib.check(planet.flags, flagType);
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -629,14 +649,14 @@ library PlanetLib {
     if (prospectedAt != 0 && prospectedAt + 256 >= block.number) {
       revert Errors.PlanetAlreadyProspected();
     }
-    if (ExploredPlanet.get(bytes32(planet.planetHash))) {
+    if (checkFlag(planet, PlanetFlagType.EXPLORED)) {
       revert Errors.PlanetAlreadyExplored();
     }
     // todo check whether the gear spaceship is on this planet
   }
 
   function _validateFindingArtifact(Planet memory planet, address executor) internal view {
-    if (ExploredPlanet.get(bytes32(planet.planetHash))) {
+    if (checkFlag(planet, PlanetFlagType.EXPLORED)) {
       revert Errors.PlanetAlreadyExplored();
     }
     if (planet.owner != executor) {
@@ -667,6 +687,12 @@ library PlanetLib {
     if (artifact.charge == 0) {
       revert Errors.ArtifactNotChargeable();
     }
+    if (artifact.genre == ArtifactGenre.OFFENSIVE && checkFlag(planet, PlanetFlagType.OFFENSIVE_ARTIFACT)) {
+      revert Errors.ArtifactNotAvailable();
+    }
+    if (artifact.genre == ArtifactGenre.DEFENSIVE && checkFlag(planet, PlanetFlagType.DEFENSIVE_ARTIFACT)) {
+      revert Errors.ArtifactNotAvailable();
+    }
   }
 
   function _validateActivateArtifact(Planet memory planet, Artifact memory artifact) internal pure {
@@ -679,6 +705,14 @@ library PlanetLib {
     if (planet.population <= artifact.reqPopulation || planet.silver < artifact.reqSilver) {
       revert Errors.NotEnoughResourceToActivate();
     }
+    if (artifact.status == ArtifactStatus.DEFAULT) {
+      if (artifact.genre == ArtifactGenre.OFFENSIVE && checkFlag(planet, PlanetFlagType.OFFENSIVE_ARTIFACT)) {
+        revert Errors.ArtifactNotAvailable();
+      }
+      if (artifact.genre == ArtifactGenre.DEFENSIVE && checkFlag(planet, PlanetFlagType.DEFENSIVE_ARTIFACT)) {
+        revert Errors.ArtifactNotAvailable();
+      }
+    }
     if (
       artifact.status == ArtifactStatus.READY || (artifact.status == ArtifactStatus.DEFAULT && artifact.charge == 0)
     ) {
@@ -687,12 +721,6 @@ library PlanetLib {
       revert Errors.ArtifactNotAvailable();
     }
   }
-
-  // function _validateDeactivateArtifact(Planet memory, Artifact memory artifact) internal pure {
-  //   if (artifact.status != ArtifactStatus.ACTIVE) {
-  //     revert Errors.ArtifactNotAvailable();
-  //   }
-  // }
 
   function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
     uint256 res = uint8(planet.spaceType) * 3;

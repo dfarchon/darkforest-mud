@@ -33,31 +33,7 @@ export default defineWorld({
       "APPLY_EFFECT",
       "REMOVE_EFFECT",
     ],
-    // ArtifactType: [
-    //   "UNKNOWN",
-    //   "WORMHOLE",
-    //   "PLANETARY_SHIELD",
-    //   "PHOTOID_CANNON",
-    //   "BLOOM_FILTER",
-    //   "BLACK_DOMAIN",
-    //   "STELLAR_SHIELD",
-    //   "BOMB",
-    //   "KARDASHEV",
-    //   "AVATAR",
-    //   "MONOLITH",
-    //   "COLLOSSUS",
-    //   "SPACESHIP",
-    //   "PYRAMID",
-    //   "ICE_LINK",
-    //   "FIRE_LINK",
-    //   "BLIND_BOX",
-    //   "SHIP_MOTHERSHIP",
-    //   "SHIP_CRESCENT",
-    //   "SHIP_WHALE",
-    //   "SHIP_GEAR",
-    //   "SHIP_TITAN",
-    //   "SHIP_PINK",
-    // ],
+    PlanetFlagType: ["UNKNOWN", "EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT"],
   },
   systems: {
     InitializeSystem: {
@@ -284,7 +260,6 @@ export default defineWorld({
       id: "bytes32",
       blockNumber: "uint64",
     },
-    ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
       status: "PlanetStatus",
@@ -311,6 +286,13 @@ export default defineWorld({
       populationGrowth: "uint32",
       silverCap: "uint64",
       silverGrowth: "uint32",
+    },
+    PlanetFlags: {
+      schema: {
+        id: "bytes32",
+        flags: "uint256",
+      },
+      key: ["id"],
     },
     PlanetEmoji: {
       schema: {

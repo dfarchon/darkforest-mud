@@ -6,6 +6,7 @@ import { Planet } from "./Planet.sol";
 import { EffectType, ModifierType } from "../codegen/common.sol";
 import { _effectTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
 import { Effect as EffectTable, EffectData as EffectTableData } from "../modules/atfs/tables/Effect.sol";
+import { Errors } from "../interfaces/errors.sol";
 
 using EffectLib for Planet;
 
@@ -25,6 +26,7 @@ struct Modifier {
   uint256 value;
 }
 
+uint256 constant MAX_EFFECT_NUMBER = 10;
 library EffectLib {
   function genEffectId(uint256 origin, EffectType effectType, uint256 internalId) internal pure returns (uint256) {
     return (origin << 16) | (uint256(effectType) << 8) | internalId;
@@ -134,6 +136,9 @@ library EffectLib {
     planet.effects = newEffects;
     unchecked {
       ++planet.effectNumber;
+    }
+    if (planet.effectNumber > MAX_EFFECT_NUMBER) {
+      revert Errors.EffectNumberExceeded();
     }
     if (effect.effectType == EffectType.STAT) {
       EffectData memory effectData = EffectLib.getData(effect);

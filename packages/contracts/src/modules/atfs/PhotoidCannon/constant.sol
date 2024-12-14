@@ -3,6 +3,8 @@ pragma solidity >=0.8.24;
 
 uint8 constant ARTIFACT_INDEX = 6;
 
+uint256 constant EFFECT_DETECT_MASK = 0x060000_060000_060000_060000_060000_060000_060000_060000_060000_060000;
+
 uint24 constant COMMON_CHARGE = 0x06_01_00;
 uint24 constant RARE_CHARGE = 0x06_01_01;
 uint24 constant EPIC_CHARGE = 0x06_01_02;
