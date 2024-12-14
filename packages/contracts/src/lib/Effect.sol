@@ -195,7 +195,8 @@ library EffectLib {
 
   function beforeMove(Planet memory planet) internal view {
     Effect[] memory effects = planet.effects;
-    for (uint256 i; i < planet.effectNumber; ) {
+    uint256 effectNumber = planet.effectNumber;
+    for (uint256 i; i < effectNumber; ) {
       EffectLib.triggerEvent(planet, effects[i], EffectType.BEFORE_MOVE);
       unchecked {
         ++i;
@@ -205,7 +206,8 @@ library EffectLib {
 
   function afterMove(Planet memory planet) internal view {
     Effect[] memory effects = planet.effects;
-    for (uint256 i; i < planet.effectNumber; ) {
+    uint256 effectNumber = planet.effectNumber;
+    for (uint256 i; i < effectNumber; ) {
       EffectLib.triggerEvent(planet, effects[i], EffectType.AFTER_MOVE);
       unchecked {
         ++i;

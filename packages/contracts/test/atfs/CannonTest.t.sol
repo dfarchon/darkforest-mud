@@ -8,13 +8,14 @@ import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
 import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker, TempConfigSet } from "../../src/codegen/index.sol";
+import { Move, MoveData } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
 import { Proof } from "../../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../../src/lib/VerificationInput.sol";
 import { Planet } from "../../src/lib/Planet.sol";
 import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity } from "../../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
-import { ARTIFACT_INDEX as CANNON_INDEX, COMMON_CHARGE, COMMON_ACTIVATE, COMMON_ACTIVATE_AFTER_MOVE } from "../../src/modules/atfs/PhotoidCannon/constant.sol";
+import { ARTIFACT_INDEX as CANNON_INDEX, COMMON_CHARGE, COMMON_ACTIVATE_BEFORE_MOVE } from "../../src/modules/atfs/PhotoidCannon/constant.sol";
 import "forge-std/console.sol";
 
 contract CannonTest is MudTest {
@@ -75,15 +76,12 @@ contract CannonTest is MudTest {
     IWorld(worldAddress).df__activateArtifact(1, 1, bytes(""));
     Planet memory planetAfter = IWorld(worldAddress).df__readPlanet(1);
     artifact.readFromStore(Ticker.getTickNumber());
-    assertEq(planetAfter.effectNumber, 3);
+    assertEq(planetAfter.effectNumber, 2);
     assertEq(planetAfter.effects[0].id, COMMON_CHARGE);
-    assertEq(planetAfter.effects[1].id, COMMON_ACTIVATE);
-    assertEq(planetAfter.effects[2].id, COMMON_ACTIVATE_AFTER_MOVE);
+    assertEq(planetAfter.effects[1].id, COMMON_ACTIVATE_BEFORE_MOVE);
     assertEq(planetAfter.artifactStorage.number, 0);
     assertTrue(artifact.status == ArtifactStatus.BROKEN);
     assertTrue(artifact.activateTick == Ticker.getTickNumber());
-    assertTrue(planetAfter.range > planet.range);
-    assertTrue(planetAfter.speed > planet.speed);
 
     vm.prank(address(1));
     _move(1, 2, 80, 100000, 5000, 0);
@@ -92,6 +90,8 @@ contract CannonTest is MudTest {
     assertEq(planetAfter.defense, planet.defense);
     assertEq(planetAfter.range, planet.range);
     assertEq(planetAfter.speed, planet.speed);
+    MoveData memory move = Move.get(bytes32(uint256(2)), 0);
+    assertEq(move.arrivalTick - move.departureTick, (80 * 100) / (planet.speed * 5));
   }
 
   function _move(

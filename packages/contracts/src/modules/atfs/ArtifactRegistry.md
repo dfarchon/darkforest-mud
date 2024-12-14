@@ -1,6 +1,6 @@
-| Name          | Index |
-| ------------- | ----- |
-| PinkBomb      | 1     |
-| BloomFilter   | 4     |
-| Wormhole      | 5     |
-| PhotoidCannon | 6     |
+| Name          | Index | Genre     |
+| ------------- | ----- | --------- |
+| PinkBomb      | 1     | Offensive |
+| BloomFilter   | 4     | General   |
+| Wormhole      | 5     | General   |
+| PhotoidCannon | 6     | Offensive |

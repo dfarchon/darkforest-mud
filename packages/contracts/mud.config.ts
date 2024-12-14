@@ -324,7 +324,7 @@ export default defineWorld({
     PlanetEffects: {
       id: "bytes32",
       num: "uint8",
-      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 effectId | uint8 type
+      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 type | uint8 internalId
     },
     PendingMove: {
       schema: {
