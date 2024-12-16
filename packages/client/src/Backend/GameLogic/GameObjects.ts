@@ -52,6 +52,8 @@ import {
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilver,
   isUnconfirmedWithdrawSilverTx,
+  locationIdToHexStr,
+  locationIdFromHexStr,
 } from "@df/serde";
 import type {
   Abstract,
@@ -75,7 +77,7 @@ import type {
 } from "@df/types";
 import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
-import { ArtifactType, PlanetType, SpaceType } from "@df/types";
+import { ArtifactType, PlanetType, SpaceType, ArtifactStatus } from "@df/types";
 import type { ClientComponents } from "@mud/createClientComponents";
 import autoBind from "auto-bind";
 import bigInt from "big-integer";
@@ -95,7 +97,10 @@ import type { PlanetDiff } from "./ArrivalUtils";
 import { arrive, updatePlanetToTick } from "./ArrivalUtils";
 import { LayeredMap } from "./LayeredMap";
 import { PlanetUtils } from "./PlanetUtils";
+import { getComponentValue } from "@latticexyz/recs";
 import { TickerUtils } from "./TickerUtils";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
+import { updateArtifactStatus } from "./ArtifactUtils";
 
 type CoordsString = Abstract<string, "CoordString">;
 
@@ -246,6 +251,7 @@ export class GameObjects {
 
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
+  private components: ClientComponents;
 
   constructor(
     address: EthAddress | undefined,
@@ -288,6 +294,7 @@ export class GameObjects {
       contractConstants: contractConstants,
     });
     this.tickerUtils = new TickerUtils({ components });
+    this.components = components;
 
     this.planetUpdated$ = monomitter();
     this.artifactUpdated$ = monomitter();
@@ -391,6 +398,14 @@ export class GameObjects {
   }
 
   public getArtifactById(artifactId?: ArtifactId): Artifact | undefined {
+    if (artifactId) {
+      const artifact = this.artifacts.get(artifactId);
+      if (artifact) {
+        const curTick = this.tickerUtils.getCurrentTick();
+        updateArtifactStatus(artifact, curTick);
+      }
+      return artifact;
+    }
     return artifactId ? this.artifacts.get(artifactId) : undefined;
   }
 
@@ -1267,12 +1282,22 @@ export class GameObjects {
       artifact.artifactType === ArtifactType.Wormhole &&
       artifact.onPlanetId
     ) {
-      if (artifact.linkTo && isActivated(artifact)) {
-        this.links.set(artifact.id, {
-          from: artifact.onPlanetId,
-          to: artifact.linkTo,
-          artifactId: artifact.id,
-        });
+      if (artifact.status === ArtifactStatus.Active) {
+        const { Wormhole } = this.components;
+        const planetEntity = encodeEntity(
+          { from: "bytes32" },
+          {
+            from: locationIdToHexStr(artifact.onPlanetId) as `0x${string}`,
+          },
+        );
+        const wormholeRec = getComponentValue(Wormhole, planetEntity);
+        if (wormholeRec) {
+          this.links.set(artifact.id, {
+            from: artifact.onPlanetId,
+            to: locationIdFromHexStr(wormholeRec.to.toString()),
+            artifactId: artifact.id,
+          });
+        }
       } else {
         this.links.delete(artifact.id);
       }

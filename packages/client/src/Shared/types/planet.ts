@@ -72,6 +72,30 @@ export const PlanetTypeNames = {
   [PlanetType.TRADING_POST]: "Spacetime Rip",
   [PlanetType.SILVER_BANK]: "Quasar",
 } as const;
+/**
+ * Abstract type representing a planet flag type.
+ */
+export type PlanetFlagType = Abstract<number, "PlanetFlagType">;
+
+/**
+ * Enumeration of the planet flag types.
+ */
+export const PlanetFlagType = {
+  EXPLORED: 0 as PlanetFlagType,
+  OFFENSIVE_ARTIFACT: 1 as PlanetFlagType,
+  DEFENSIVE_ARTIFACT: 2 as PlanetFlagType,
+  PRODUCTIVE_ARTIFACT: 3 as PlanetFlagType,
+} as const;
+
+/**
+ * Mapping from PlanetFlagType to pretty-printed names.
+ */
+export const PlanetFlagTypeNames = {
+  [PlanetFlagType.EXPLORED]: "Explored",
+  [PlanetFlagType.OFFENSIVE_ARTIFACT]: "Offensive Artifact",
+  [PlanetFlagType.DEFENSIVE_ARTIFACT]: "Defensive Artifact",
+  [PlanetFlagType.PRODUCTIVE_ARTIFACT]: "Productive Artifact",
+} as const;
 
 /**
  * A list of five flags, indicating whether the planet has an attached comet
@@ -170,6 +194,7 @@ export type Planet = {
   distSquare: number;
 
   effects?: Effect[];
+  flags?: bigint;
 };
 
 /**

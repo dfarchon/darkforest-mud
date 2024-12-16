@@ -319,35 +319,6 @@ export function ArtifactDetailsBody({
           </>
         )}
       </div>
-      {/* <div>
-        <Text2>Charge</Text2>
-        <ArtifactDetailsHeader>
-          <StatsContainer>
-            <div className="statrow">
-              <span>Required Level</span>
-              <span>{artifact.reqLevel}</span>
-            </div>
-            <div className="statrow">
-              <span>Charge Amount</span>
-              <span>{artifact.charge}</span>
-            </div>
-          </StatsContainer>
-        </ArtifactDetailsHeader>
-
-        <Text2>Activate</Text2>
-        <ArtifactDetailsHeader>
-          <StatsContainer>
-            <div className="statrow">
-              <span>Required Population</span>
-              <span>{artifact.reqPopulation}</span>
-            </div>
-            <div className="statrow">
-              <span>Required Silver</span>
-              <span>{artifact.reqSilver}</span>
-            </div>
-          </StatsContainer>
-        </ArtifactDetailsHeader>
-      </div> */}
 
       <div>
         {artifact.chargeUpgrade && (

@@ -132,6 +132,32 @@ export const ArtifactStatusNames = {
   [ArtifactStatus.Active]: "Active",
   [ArtifactStatus.Broken]: "Broken",
 } as const;
+/**
+ * Abstract type representing an artifact genre.
+ */
+export type ArtifactGenre = Abstract<number, "ArtifactGenre">;
+
+/**
+ * Enumeration of possible artifact genres
+ */
+export const ArtifactGenre = {
+  Unknown: 0 as ArtifactGenre,
+  Defensive: 1 as ArtifactGenre,
+  Offensive: 2 as ArtifactGenre,
+  Productive: 3 as ArtifactGenre,
+  General: 4 as ArtifactGenre,
+} as const;
+
+/**
+ * Mapping from ArtifactGenre to pretty-printed names.
+ */
+export const ArtifactGenreNames = {
+  [ArtifactGenre.Unknown]: "Unknown",
+  [ArtifactGenre.Defensive]: "Defensive",
+  [ArtifactGenre.Offensive]: "Offensive",
+  [ArtifactGenre.Productive]: "Productive",
+  [ArtifactGenre.General]: "General",
+} as const;
 
 /**
  * mapping from ArtifactRarity to points earned for finding this artifact.
@@ -172,6 +198,7 @@ export type Artifact = {
   // mud version
   artifactIndex?: number;
   status?: ArtifactStatus;
+  genre?: ArtifactGenre;
   chargeTick?: number;
   activateTick?: number;
   cooldownTick?: number;

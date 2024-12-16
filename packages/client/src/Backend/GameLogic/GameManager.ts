@@ -53,6 +53,7 @@ import {
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdToDecStr,
+  locationIdToHexStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -203,6 +204,7 @@ import type { ContractsAPI } from "./ContractsAPI";
 import { makeContractsAPI } from "./ContractsAPI";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
+import type { Hex } from "viem";
 
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
@@ -4548,7 +4550,7 @@ export class GameManager extends EventEmitter {
   public async chargeArtifact(
     locationId: LocationId,
     artifactId: ArtifactId,
-    data: string,
+    data: Hex,
   ): Promise<Transaction<UnconfirmedChargeArtifact>> {
     try {
       localStorage.setItem(
@@ -4657,6 +4659,13 @@ export class GameManager extends EventEmitter {
         artifactId,
       );
 
+      console.log(
+        "activateArtifact",
+        locationId,
+        artifactId,
+        linkTo ? locationIdToHexStr(linkTo) : "",
+      );
+
       const txIntent: UnconfirmedActivateArtifact = {
         methodName: "df__activateArtifact",
         contract: this.contractsAPI.contract,
@@ -4664,7 +4673,7 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
-          linkTo ? locationIdToDecStr(linkTo) : "",
+          linkTo ? locationIdToHexStr(linkTo) : "",
         ]),
         locationId,
         artifactId,

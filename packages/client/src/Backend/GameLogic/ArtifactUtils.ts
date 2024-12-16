@@ -9,14 +9,15 @@ import type {
   Artifact,
   ArtifactId,
   ArtifactRarity,
-  ArtifactStatus,
+  // ArtifactStatus,
   // ArtifactType,
+  ArtifactGenre,
   Biome,
   EthAddress,
   LocationId,
   Upgrade,
 } from "@df/types";
-import { ArtifactType } from "@df/types";
+import { ArtifactType, ArtifactStatus } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -120,6 +121,7 @@ export class ArtifactUtils {
       onPlanetId: planetId === "0" ? undefined : planetId,
       artifactIndex: artifactRec.artifactIndex,
       status: artifactRec.status as ArtifactStatus,
+      genre: metadata.genre as ArtifactGenre,
       chargeTick: Number(artifactRec.chargeTick),
       activateTick: Number(artifactRec.activateTick),
       cooldownTick: Number(artifactRec.cooldownTick),
@@ -192,3 +194,20 @@ export class ArtifactUtils {
     };
   }
 }
+
+export const updateArtifactStatus = (
+  artifact: Artifact,
+  curTick: number,
+): void => {
+  if (
+    artifact.status === ArtifactStatus.Cooldown &&
+    curTick >= artifact.cooldownTick + artifact.cooldown
+  ) {
+    artifact.status = ArtifactStatus.Default;
+  } else if (
+    artifact.status === ArtifactStatus.Charging &&
+    curTick >= artifact.chargeTick + artifact.charge
+  ) {
+    artifact.status = ArtifactStatus.Ready;
+  }
+};

@@ -33,7 +33,7 @@ export default defineWorld({
       "APPLY_EFFECT",
       "REMOVE_EFFECT",
     ],
-    PlanetFlagType: ["UNKNOWN", "EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT"],
+    PlanetFlagType: ["EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT"],
   },
   systems: {
     InitializeSystem: {

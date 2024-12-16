@@ -90,7 +90,7 @@ import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
-import { ArtifactUtils } from "./ArtifactUtils";
+import { ArtifactUtils, updateArtifactStatus } from "./ArtifactUtils";
 import { TickerUtils } from "./TickerUtils";
 
 interface ContractsApiConfig {
@@ -1385,6 +1385,7 @@ export class ContractsAPI extends EventEmitter {
       const artifactId = artifactIds[i];
       const artifact = this.artifactUtils.getArtifactById(artifactId);
       if (artifact) {
+        updateArtifactStatus(artifact, this.tickerUtils.getCurrentTick());
         artifacts.set(artifact.id, artifact);
       }
       onProgress && onProgress((i + 1) / nArtifactIds);

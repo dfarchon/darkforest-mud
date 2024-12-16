@@ -75,6 +75,7 @@ import type { GameObjects } from "./GameObjects";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
+import type { Hex } from "viem";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -433,6 +434,10 @@ export class GameUIManager extends EventEmitter {
     this.getPluginManager().drawAllRunningPlugins(ctx);
   }
 
+  public chargeArtifact(locationId: LocationId, id: ArtifactId, data: Hex) {
+    this.gameManager.chargeArtifact(locationId, id, data);
+  }
+
   public activateArtifact(
     locationId: LocationId,
     id: ArtifactId,
@@ -449,6 +454,10 @@ export class GameUIManager extends EventEmitter {
     }
 
     this.gameManager.activateArtifact(locationId, id, linkTo);
+  }
+
+  public shutdownArtifact(locationId: LocationId, id: ArtifactId) {
+    this.gameManager.shutdownArtifact(locationId, id);
   }
 
   public deactivateArtifact(
