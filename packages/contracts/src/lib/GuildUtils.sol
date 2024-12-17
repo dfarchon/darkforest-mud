@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { GuildHistory } from "../codegen/tables/GuildHistory.sol";
 import { GuildMember, GuildMemberData } from "../codegen/tables/GuildMember.sol";
+import { GuildRole } from "../codegen/common.sol";
 
 library GuildUtils {
   /**
@@ -75,5 +76,30 @@ library GuildUtils {
 
     // Both must be in a guild and have the same guildId
     return (guildId1 != 0) && (guildId1 == guildId2);
+  }
+
+  /**
+   * Check if a grantee meets the permission requirement set by the grantor in the same guild
+   * @param grantor The player who sets permission requirements (the one giving permission)
+   * @param grantee The player requesting to act as proxy (the one receiving permission)
+   * @return bool True if grantee meets the grantor's permission requirement
+   */
+  function meetGrantRequirement(address grantor, address grantee) internal view returns (bool) {
+    // First check if they are in the same guild
+    if (!inSameGuildNow(grantor, grantee)) {
+      return false;
+    }
+
+    // Get current memberIds
+    uint24 grantorMemberId = GuildHistory.getCurMemberId(grantor);
+    uint24 granteeMemberId = GuildHistory.getCurMemberId(grantee);
+
+    // Get member data
+    GuildMemberData memory grantorData = GuildMember.get(grantorMemberId);
+    GuildMemberData memory granteeData = GuildMember.get(granteeMemberId);
+
+    if (grantorData.grant != GuildRole.NONE) return false;
+
+    return uint8(grantorData.grant) <= uint8(granteeData.role);
   }
 }

@@ -26,6 +26,6 @@ contract DfDelegationControlSystem is DelegationControl {
     }
 
     // Check if both addresses are in the same guild
-    return GuildUtils.inSameGuildNow(playerAddress, delegator);
+    return GuildUtils.meetGrantRequirement(delegator, playerAddress);
   }
 }
