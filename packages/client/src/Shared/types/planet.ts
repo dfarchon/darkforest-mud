@@ -111,10 +111,39 @@ export type PlanetBonus = [
   boolean,
 ];
 
+/**
+ * Abstract type representing an effect type.
+ */
+export type EffectType = Abstract<number, "EffectType">;
+
+/**
+ * Enumeration of the effect types.
+ */
+export const EffectType = {
+  UNKNOWN: 0 as EffectType,
+  STAT: 1 as EffectType,
+  BEFORE_MOVE: 2 as EffectType,
+  AFTER_MOVE: 3 as EffectType,
+  BEFORE_ARRIVAL: 4 as EffectType,
+  AFTER_ARRIVAL: 5 as EffectType,
+} as const;
+
+/**
+ * Mapping from EffectType to pretty-printed names.
+ */
+export const EffectTypeNames = {
+  [EffectType.UNKNOWN]: "Unknown",
+  [EffectType.STAT]: "Stat",
+  [EffectType.BEFORE_MOVE]: "Before Move",
+  [EffectType.AFTER_MOVE]: "After Move",
+  [EffectType.BEFORE_ARRIVAL]: "Before Arrival",
+  [EffectType.AFTER_ARRIVAL]: "After Arrival",
+} as const;
+
 export type Effect = {
   artifactIndex: number;
+  effectType: EffectType;
   id: number;
-  effectType: number;
 };
 
 export type Planet = {

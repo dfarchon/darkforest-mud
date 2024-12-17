@@ -10,6 +10,7 @@ import { TxCollection } from "@df/network";
 import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 import type {
   Effect,
+  EffectType,
   EthAddress,
   LocatablePlanet,
   LocationId,
@@ -333,10 +334,31 @@ export class PlanetUtils {
       for (let i = 0; i < effectNum; i++) {
         planetEffects[effectNum - 1 - i] = {
           artifactIndex: Number((effectsArray & 0xff0000n) >> 16n),
-          id: Number((effectsArray & 0xff00n) >> 8n),
-          effectType: Number(effectsArray & 0xffn),
+          effectType: Number((effectsArray & 0xff00n) >> 8n) as EffectType,
+          id: Number(effectsArray & 0xffn),
         };
         effectsArray >>= 24n;
+      }
+    }
+
+    // Check for effect 0x060200 and apply multipliers, it's a BEFORE_MOVE type effect of cannon
+    if (planetEffects.length > 0) {
+      for (const effect of planetEffects) {
+        if (effect.artifactIndex === 0x06 && effect.effectType === 0x02) {
+          range *= 2;
+          if (effect.id === 0x00) {
+            speed *= 5;
+          } else if (effect.id === 0x01) {
+            speed *= 10;
+          } else if (effect.id === 0x02) {
+            speed *= 15;
+          } else if (effect.id === 0x03) {
+            speed *= 20;
+          } else if (effect.id === 0x04) {
+            speed *= 25;
+          }
+          break;
+        }
       }
     }
 
