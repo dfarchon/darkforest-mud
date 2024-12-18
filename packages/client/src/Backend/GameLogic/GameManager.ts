@@ -190,15 +190,16 @@ import {
   verifyTwitterHandle,
 } from "../Network/UtilityServerAPI";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
-import PersistentChunkStore from "../Storage/PersistentChunkStore";
+import type PersistentChunkStore from "../Storage/PersistentChunkStore";
 import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
-import SnarkArgsHelper from "../Utils/SnarkArgsHelper";
+import type SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
 // import { getEmojiMessage } from "./ArrivalUtils";
 import type { CaptureZonesGeneratedEvent } from "./CaptureZoneGenerator";
 import { CaptureZoneGenerator } from "./CaptureZoneGenerator";
 import type { ContractsAPI } from "./ContractsAPI";
 import { makeContractsAPI } from "./ContractsAPI";
+import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
 
@@ -217,7 +218,7 @@ export class GameManager extends EventEmitter {
   /**
    * This variable contains the internal state of objects that live in the game world.
    */
-  private readonly entityStore: GameObjects;
+  public readonly entityStore: GameObjects;
 
   /**
    * Kind of hacky, but we store a reference to the terminal that the player sees when the initially
@@ -256,7 +257,7 @@ export class GameManager extends EventEmitter {
    *   {@link ContractCaller} and transactions (writes to the blockchain on behalf of the player),
    *   implemented by {@link TxExecutor} via two separately tuned {@link ThrottledConcurrentQueue}s.
    */
-  private readonly contractsAPI: ContractsAPI;
+  public readonly contractsAPI: ContractsAPI;
 
   /**
    * An object that syncs any newly added or deleted chunks to the player's IndexedDB.
@@ -264,7 +265,7 @@ export class GameManager extends EventEmitter {
    * @todo it also persists other game data to IndexedDB. This class needs to be renamed `GameSaver`
    * or something like that.
    */
-  private readonly persistentChunkStore: PersistentChunkStore;
+  public readonly persistentChunkStore: PersistentChunkStore;
 
   /**
    * Responsible for generating snark proofs.
@@ -427,7 +428,7 @@ export class GameManager extends EventEmitter {
    */
   // private captureZoneGenerator: CaptureZoneGenerator | undefined;
 
-  private constructor(
+  public constructor(
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
     mainAccount: EthAddress | undefined,
     players: Map<string, Player>,
@@ -849,486 +850,17 @@ export class GameManager extends EventEmitter {
     components: ClientComponents;
     spectate: boolean;
   }): Promise<GameManager> {
-    if (!terminal.current) {
-      throw new Error("you must pass in a handle to a terminal");
-    }
-
-    const account = spectate
-      ? <EthAddress>"0x0000000000000000000000000000000000000001"
-      : mainAccount; // connection.getAddress();
-
-    if (!account) {
-      throw new Error("no account on eth connection");
-    }
-
-    const gameStateDownloader = new InitialGameStateDownloader(
-      terminal.current,
-    );
-    const contractsAPI = await makeContractsAPI({
-      connection,
-      contractAddress,
-      components,
-    });
-
-    terminal.current?.println("Loading game data from disk...");
-
-    const persistentChunkStore = await PersistentChunkStore.create({
-      account,
-      contractAddress,
-    });
-
-    terminal.current?.println("Downloading data from Ethereum blockchain...");
-    terminal.current?.println(
-      "(the contract is very big. this may take a while)",
-    );
-    terminal.current?.newline();
-
-    const initialState = await gameStateDownloader.download(
-      contractsAPI,
-      persistentChunkStore,
-    );
-
-    const possibleHomes = await persistentChunkStore.getHomeLocations();
-
-    terminal.current?.println("");
-    terminal.current?.println("Building Index...");
-
-    await persistentChunkStore.saveTouchedPlanetIds(
-      initialState.allTouchedPlanetIds,
-    );
-    await persistentChunkStore.saveRevealedCoords(
-      initialState.allRevealedCoords,
-    );
-    // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
-
-    const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
-
-    for (let i = 0; i < initialState.loadedPlanets.length; i++) {
-      const planet = initialState.touchedAndLocatedPlanets.get(
-        initialState.loadedPlanets[i],
-      );
-
-      if (!planet) {
-        continue;
-      }
-
-      // planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
-
-      // for (const heldArtifact of initialState.heldArtifacts[i]) {
-      //   knownArtifacts.set(heldArtifact.id, heldArtifact);
-      // }
-    }
-
-    // for (const myArtifact of initialState.myArtifacts) {
-    //   knownArtifacts.set(myArtifact.id, myArtifact);
-    // }
-
-    // for (const artifact of initialState.artifactsOnVoyages) {
-    //   knownArtifacts.set(artifact.id, artifact);
-    // }
-
-    // figure out what's my home planet
-    let homeLocation: WorldLocation | undefined = undefined;
-    for (const loc of possibleHomes) {
-      if (initialState.allTouchedPlanetIds.includes(loc.hash)) {
-        homeLocation = loc;
-        await persistentChunkStore.confirmHomeLocation(loc);
-        break;
-      }
-    }
-
-    const hashConfig: HashConfig = {
-      planetHashKey: initialState.contractConstants.PLANETHASH_KEY,
-      spaceTypeKey: initialState.contractConstants.SPACETYPE_KEY,
-      biomebaseKey: initialState.contractConstants.BIOMEBASE_KEY,
-      perlinLengthScale: initialState.contractConstants.PERLIN_LENGTH_SCALE,
-      perlinMirrorX: initialState.contractConstants.PERLIN_MIRROR_X,
-      perlinMirrorY: initialState.contractConstants.PERLIN_MIRROR_Y,
-      planetRarity: initialState.contractConstants.PLANET_RARITY,
-    };
-
-    const useMockHash = initialState.contractConstants.DISABLE_ZK_CHECKS;
-    const snarkHelper = SnarkArgsHelper.create(
-      hashConfig,
-      terminal,
-      useMockHash,
-    );
-
-    const gameManager = new GameManager(
-      terminal,
+    return GameManagerFactory.create({
       mainAccount,
-      initialState.players,
-      initialState.touchedAndLocatedPlanets,
-      new Set(Array.from(initialState.allTouchedPlanetIds)),
-      initialState.revealedCoordsMap,
-      // initialState.claimedCoordsMap
-      //   ? initialState.claimedCoordsMap
-      //   : new Map<LocationId, ClaimedCoords>(),
-      // initialState.burnedCoordsMap
-      //   ? initialState.burnedCoordsMap
-      //   : new Map<LocationId, BurnedCoords>(),
-      // initialState.kardashevCoordsMap
-      //   ? initialState.kardashevCoordsMap
-      //   : new Map<LocationId, KardashevCoords>(),
-      initialState.worldRadius,
-      initialState.arrivals,
-      initialState.planetVoyageIdMap,
-      contractsAPI,
-      initialState.contractConstants,
-      persistentChunkStore,
-      snarkHelper,
-      homeLocation,
-      useMockHash,
-      knownArtifacts,
       connection,
-      initialState.paused,
-      // initialState.halfPrice,
-      components,
-    );
-
-    // gameManager.setPlayerTwitters(initialState.twitters);
-
-    const config = {
+      terminal,
       contractAddress,
-      account: gameManager.getEthConnection().getAddress(),
-    };
-    pollSetting(config, Setting.AutoApproveNonPurchaseTransactions);
-
-    persistentChunkStore.setDiagnosticUpdater(gameManager);
-    contractsAPI.setDiagnosticUpdater(gameManager);
-
-    // important that this happens AFTER we load the game state from the blockchain. Otherwise our
-    // 'loading game state' contract calls will be competing with events from the blockchain that
-    // are happening now, which makes no sense.
-
-    contractsAPI.setupEventListeners();
-
-    // get twitter handles
-    // gameManager.refreshTwitters();
-
-    // gameManager.listenForNewBlock();
-
-    // set up listeners: whenever ContractsAPI reports some game state update, do some logic
-    gameManager.contractsAPI
-      .on(ContractsAPIEvent.TickRateUpdate, async (newtickRate: number) => {
-        const contractConstants = contractsAPI.getConstants();
-        gameManager.updateContractConstants(contractConstants);
-      })
-      .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
-        // await gameManager.hardRefreshArtifact(artifactId);
-        gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
-      })
-      .on(
-        ContractsAPIEvent.PlanetTransferred,
-        async (planetId: LocationId, newOwner: EthAddress) => {
-          await gameManager.hardRefreshPlanet(planetId);
-          const planetAfter = gameManager.getPlanetWithId(planetId);
-
-          if (planetAfter && newOwner === gameManager.account) {
-            NotificationManager.getInstance().receivedPlanet(planetAfter);
-          }
-        },
-      )
-      .on(ContractsAPIEvent.PlayerUpdate, async (playerId: EthAddress) => {
-        await gameManager.hardRefreshPlayer(playerId);
-      })
-      .on(ContractsAPIEvent.PauseStateChanged, async (paused: boolean) => {
-        gameManager.paused = paused;
-        gameManager.paused$.publish(paused);
-      })
-      // .on(ContractsAPIEvent.HalfPriceChanged, async (halfPrice: boolean) => {
-      //   gameManager.halfPrice = halfPrice;
-      //   gameManager.halfPrice$.publish(halfPrice);
-      // })
-      .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
-        // PUNK
-        console.log("handle ContractsAPI.PlanetUpdate");
-        console.log(planetId);
-
-        // don't reload planets that you don't have in your map. once a planet
-        // is in your map it will be loaded from the contract.
-        const localPlanet = gameManager.entityStore.getPlanetWithId(planetId);
-        if (localPlanet && isLocatable(localPlanet)) {
-          gameManager.hardRefreshPlanet(planetId);
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        }
-        await gameManager.refreshServerPlanetStates([planetId]);
-      })
-      .on(
-        ContractsAPIEvent.ArrivalQueued,
-        async (_arrivalId: VoyageId, fromId: LocationId, toId: LocationId) => {
-          // PUNK
-          console.log("handle ContractsAPIEvent.ArrivalQueued");
-          console.log("arrivalId", _arrivalId);
-          console.log("fromId", fromId);
-          console.log("toId", toId);
-
-          // only reload planets if the toPlanet is in the map
-          const localToPlanet = gameManager.entityStore.getPlanetWithId(toId);
-          if (localToPlanet && isLocatable(localToPlanet)) {
-            gameManager.bulkHardRefreshPlanets([fromId, toId]);
-            gameManager.emit(GameManagerEvent.PlanetUpdate);
-          }
-        },
-      )
-      .on(
-        ContractsAPIEvent.LocationRevealed,
-        async (planetId: LocationId, _revealer: EthAddress) => {
-          // TODO: hook notifs or emit event to UI if you want
-          await gameManager.hardRefreshPlanet(planetId);
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        },
-      )
-      .on(
-        ContractsAPIEvent.LocationClaimed,
-        async (planetId: LocationId, _revealer: EthAddress) => {
-          // TODO: hook notifs or emit event to UI if you want
-
-          // console.log('[testInfo]: ContractsAPIEvent.LocationClaimed');
-          await gameManager.hardRefreshPlanet(planetId);
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        },
-      )
-      .on(ContractsAPIEvent.TxQueued, (tx: Transaction) => {
-        gameManager.entityStore.onTxIntent(tx);
-      })
-      .on(ContractsAPIEvent.TxSubmitted, (tx: Transaction) => {
-        gameManager.persistentChunkStore.onEthTxSubmit(tx);
-        gameManager.onTxSubmit(tx);
-      })
-      .on(ContractsAPIEvent.TxConfirmed, async (tx: Transaction) => {
-        if (!tx.hash) {
-          return;
-        } // this should never happen
-        gameManager.persistentChunkStore.onEthTxComplete(tx.hash);
-
-        if (isUnconfirmedRevealTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBurnTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-          // await gameManager.hardRefreshPinkZones();
-        } else if (isUnconfirmedPinkTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        }
-        //  else if (isUnconfirmedKardashevTx(tx)) {
-        //   await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        //   // await gameManager.hardRefreshBlueZones();
-        // } else if (isUnconfirmedBlueTx(tx)) {
-        //   const centerPlanetId = gameManager.getBlueZoneCenterPlanetId(
-        //     tx.intent.locationId,
-        //   );
-        //   if (centerPlanetId) {
-        //     await gameManager.bulkHardRefreshPlanets([
-        //       tx.intent.locationId,
-        //       centerPlanetId,
-        //     ]);
-        //   } else {
-        //     // notice: this should never happen
-        //     await gameManager.bulkHardRefreshPlanets([tx.intent.locationId]);
-        //   }
-
-        //   gameManager.emit(GameManagerEvent.PlanetUpdate);
-        // }
-        else if (isUnconfirmedInitTx(tx)) {
-          terminal.current?.println("Loading Home Planet from Blockchain...");
-          const retries = 5;
-          for (let i = 0; i < retries; i++) {
-            const planet = gameManager.contractsAPI.getPlanetById(
-              tx.intent.locationId,
-            );
-            if (planet) {
-              break;
-            } else if (i === retries - 1) {
-              console.error("couldn't load player's home planet");
-            } else {
-              await delay(2000);
-            }
-          }
-          gameManager.hardRefreshPlanet(tx.intent.locationId);
-          // mining manager should be initialized already via joinGame, but just in case...
-          gameManager.initMiningManager(tx.intent.location.coords, 4);
-        } else if (isUnconfirmedMoveTx(tx)) {
-          const promises = [
-            gameManager.bulkHardRefreshPlanets([tx.intent.from, tx.intent.to]),
-          ];
-          if (tx.intent.artifact) {
-            // promises.push(gameManager.hardRefreshArtifact(tx.intent.artifact));
-          }
-          await Promise.all(promises);
-        } else if (isUnconfirmedUpgradeTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedRefreshPlanetTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBuyHatTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBuyPlanetTx(tx)) {
-          //todo
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBuySpaceshipTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedFindArtifactTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.planetId);
-        } else if (isUnconfirmedDepositArtifactTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedWithdrawArtifactTx(tx)) {
-          await Promise.all([
-            await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedProspectPlanetTx(tx)) {
-          await gameManager.softRefreshPlanet(tx.intent.planetId);
-        } else if (isUnconfirmedActivateArtifactTx(tx)) {
-          let refreshFlag = true;
-          const fromPlanet = await gameManager.getPlanetWithId(
-            tx.intent.locationId,
-          );
-          const artifact = await gameManager.getArtifactWithId(
-            tx.intent.artifactId,
-          );
-
-          if (artifact?.artifactType === ArtifactType.FireLink) {
-            if (fromPlanet && fromPlanet.locationId && tx.intent.linkTo) {
-              const toPlanet = await gameManager.getPlanetWithId(
-                tx.intent.linkTo,
-              );
-              if (toPlanet) {
-                const activeArtifactOnToPlanet =
-                  await gameManager.getActiveArtifact(toPlanet);
-                if (
-                  activeArtifactOnToPlanet &&
-                  activeArtifactOnToPlanet.artifactType ===
-                    ArtifactType.IceLink &&
-                  activeArtifactOnToPlanet.linkTo
-                ) {
-                  const toLinkPlanet = await gameManager.getPlanetWithId(
-                    activeArtifactOnToPlanet.linkTo,
-                  );
-                  if (toLinkPlanet) {
-                    await Promise.all([
-                      gameManager.bulkHardRefreshPlanets([
-                        fromPlanet.locationId,
-                        toPlanet.locationId,
-                        toLinkPlanet.locationId,
-                      ]),
-                      // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-                    ]);
-                    refreshFlag = false;
-                  }
-                }
-              }
-            }
-          }
-
-          if (refreshFlag) {
-            if (tx.intent.linkTo) {
-              await Promise.all([
-                gameManager.bulkHardRefreshPlanets([
-                  tx.intent.locationId,
-                  tx.intent.linkTo,
-                ]),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            } else {
-              await Promise.all([
-                gameManager.hardRefreshPlanet(tx.intent.locationId),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            }
-          }
-        } else if (isUnconfirmedDeactivateArtifactTx(tx)) {
-          // console.log(tx);
-          if (tx.intent.linkTo) {
-            await Promise.all([
-              gameManager.bulkHardRefreshPlanets([
-                tx.intent.locationId,
-                tx.intent.linkTo,
-              ]),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-            ]);
-          } else {
-            await Promise.all([
-              gameManager.hardRefreshPlanet(tx.intent.locationId),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-            ]);
-          }
-        } else if (isUnconfirmedChangeArtifactImageTypeTx(tx)) {
-          await Promise.all([
-            await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedBuyArtifactTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedWithdrawSilverTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedCapturePlanetTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlayer(gameManager.getAccount()),
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-          ]);
-        } else if (isUnconfirmedSetPlanetEmojiTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedInvadePlanetTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlayer(gameManager.getAccount()),
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-          ]);
-        } else if (isUnconfirmedClaimTx(tx)) {
-          // gameManager.entityStore.updatePlanet(
-          //   tx.intent.locationId,
-          //   (p) => (p.claimer = gameManager.getAccount()),
-          // );
-        }
-        gameManager.entityStore.clearUnconfirmedTxIntent(tx);
-        gameManager.onTxConfirmed(tx);
-      })
-      .on(ContractsAPIEvent.TxErrored, async (tx: Transaction) => {
-        gameManager.entityStore.clearUnconfirmedTxIntent(tx);
-        if (tx.hash) {
-          gameManager.persistentChunkStore.onEthTxComplete(tx.hash);
-        }
-        gameManager.onTxReverted(tx);
-      })
-      .on(ContractsAPIEvent.TxCancelled, async (tx: Transaction) => {
-        gameManager.onTxCancelled(tx);
-      })
-      .on(ContractsAPIEvent.RadiusUpdated, async () => {
-        const newRadius = gameManager.contractsAPI.getWorldRadius();
-        gameManager.setRadius(newRadius);
-      });
-
-    const unconfirmedTxs =
-      await persistentChunkStore.getUnconfirmedSubmittedEthTxs();
-    const confirmationQueue = new ThrottledConcurrentQueue({
-      invocationIntervalMs: 1000,
-      maxInvocationsPerIntervalMs: 10,
-      maxConcurrency: 1,
+      components,
+      spectate,
     });
-
-    for (const unconfirmedTx of unconfirmedTxs) {
-      confirmationQueue.add(async () => {
-        const tx =
-          gameManager.contractsAPI.txExecutor.waitForTransaction(unconfirmedTx);
-        gameManager.contractsAPI.emitTransactionEvents(tx);
-        return tx.confirmedPromise;
-      });
-    }
-
-    // we only want to initialize the mining manager if the player has already joined the game
-    // if they haven't, we'll do this once the player has joined the game
-    if (!!homeLocation && initialState.players.has(account as string)) {
-      gameManager.initMiningManager(homeLocation.coords);
-    }
-
-    return gameManager;
   }
 
-  private hardRefreshPlayer(address?: EthAddress): void {
+  public hardRefreshPlayer(address?: EthAddress): void {
     if (!address) {
       return;
     }
@@ -1525,7 +1057,7 @@ export class GameManager extends EventEmitter {
     // );
   }
 
-  private bulkHardRefreshPlanets(planetIds: LocationId[]): void {
+  public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
     const allVoyages = this.contractsAPI.getAllArrivals(planetIds);
@@ -1630,7 +1162,7 @@ export class GameManager extends EventEmitter {
   //   }
   // }
 
-  private onTxSubmit(tx: Transaction): void {
+  public onTxSubmit(tx: Transaction): void {
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
       TerminalTextStyle.Blue,
@@ -1645,7 +1177,7 @@ export class GameManager extends EventEmitter {
     this.terminal.current?.println(`) submitted`, TerminalTextStyle.Blue);
   }
 
-  private onTxConfirmed(tx: Transaction) {
+  public onTxConfirmed(tx: Transaction) {
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
       TerminalTextStyle.Green,
@@ -1660,7 +1192,7 @@ export class GameManager extends EventEmitter {
     this.terminal.current?.println(`) confirmed`, TerminalTextStyle.Green);
   }
 
-  private onTxReverted(tx: Transaction) {
+  public onTxReverted(tx: Transaction) {
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
       TerminalTextStyle.Red,
@@ -1676,7 +1208,7 @@ export class GameManager extends EventEmitter {
     this.terminal.current?.println(`) reverted`, TerminalTextStyle.Red);
   }
 
-  private onTxCancelled(tx: Transaction) {
+  public onTxCancelled(tx: Transaction) {
     this.entityStore.clearUnconfirmedTxIntent(tx);
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
@@ -1961,7 +1493,7 @@ export class GameManager extends EventEmitter {
   //   return this.contractConstants.PLANET_LEVEL_JUNK[level];
   // }
 
-  private initMiningManager(homeCoords: WorldCoords, cores?: number): void {
+  public initMiningManager(homeCoords: WorldCoords, cores?: number): void {
     if (this.minerManager) {
       return;
     }
@@ -2478,7 +2010,7 @@ export class GameManager extends EventEmitter {
     }
   }
 
-  private setRadius(worldRadius: number) {
+  public setRadius(worldRadius: number) {
     this.worldRadius = worldRadius;
 
     if (this.minerManager) {
@@ -6556,6 +6088,11 @@ export class GameManager extends EventEmitter {
 
   public getPaused(): boolean {
     return this.paused;
+  }
+
+  public setPaused(paused: boolean) {
+    this.paused = paused;
+    this.paused$.publish(paused);
   }
 
   public getPaused$(): Monomitter<boolean> {
