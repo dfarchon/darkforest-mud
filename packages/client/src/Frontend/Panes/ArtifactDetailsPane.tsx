@@ -525,8 +525,10 @@ function NewArtifactDescription({
           starting charging. After charging is complete, you can activate it
           which will consume energy to launch it at the designated target. When
           it reaches the target it will explode, giving the launching player{" "}
-          <span style={{ color: "#ffff00" }}>5 minutes</span> to destroy planets
-          within the pink circle radius including the target.
+          <span style={{ color: "#ffff00" }}>
+            {Math.floor(500 / uiManager.getCurrentTickerRate())} seconds
+          </span>{" "}
+          to destroy planets within the pink circle radius including the target.
         </div>
       )}
 

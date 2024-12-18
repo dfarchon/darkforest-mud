@@ -54,17 +54,20 @@ import {
   isUnconfirmedWithdrawSilverTx,
   locationIdToHexStr,
   locationIdFromHexStr,
+  artifactIdToDecStr,
 } from "@df/serde";
 import type {
   Abstract,
   ArrivalWithTimer,
   Artifact,
   ArtifactId,
+  BurnedLocation,
   Chunk,
   EthAddress,
   Link,
   LocatablePlanet,
   LocationId,
+  PinkZone,
   Planet,
   QueuedArrival,
   Radii,
@@ -204,6 +207,7 @@ export class GameObjects {
   // private readonly claimedLocations: Map<LocationId, ClaimedLocation>;
   // private readonly burnedLocations: Map<LocationId, BurnedLocation>;
   // private readonly kardashevLocations: Map<LocationId, BurnedLocation>;
+  private readonly pinkZones: Map<ArtifactId, PinkZone>;
 
   /**
    * Some of the game's parameters are downloaded from the blockchain. This allows the client to be
@@ -279,6 +283,7 @@ export class GameObjects {
     // this.claimedLocations = claimedLocations;
     // this.burnedLocations = burnedLocations;
     // this.kardashevLocations = kardashevLocations;
+    this.pinkZones = new Map();
     this.artifacts = artifacts;
     this.myArtifacts = new Map();
     this.contractConstants = contractConstants;
@@ -1182,6 +1187,14 @@ export class GameObjects {
   //   this.burnedLocations.set(burnedLocation.hash, burnedLocation);
   // }
 
+  public getPinkZones(): Map<ArtifactId, PinkZone> {
+    return this.pinkZones;
+  }
+
+  public setPinkZone(pinkZone: PinkZone) {
+    this.pinkZones.set(pinkZone.artifactId, pinkZone);
+  }
+
   // public getKardashevLocations(): Map<LocationId, KardashevLocation> {
   //   return this.kardashevLocations;
   // }
@@ -1327,6 +1340,36 @@ export class GameObjects {
         });
       } else {
         this.links.delete(artifact.id);
+      }
+    }
+
+    if (artifact.artifactType === ArtifactType.Bomb && artifact.onPlanetId) {
+      if (isActivated(artifact)) {
+        const { PinkBomb } = this.components;
+        const artifactEntity = encodeEntity(PinkBomb.metadata.keySchema, {
+          bombId: Number(artifactIdToDecStr(artifact.id)),
+        });
+        const bomb = getComponentValue(PinkBomb, artifactEntity);
+        if (!bomb) {
+          throw new Error("bomb launch data not found");
+        }
+        const targetLocation = this.getLocationOfPlanet(
+          locationIdFromHexStr(bomb.target.toString()),
+        );
+        if (targetLocation) {
+          this.setPinkZone({
+            locationId: targetLocation.hash,
+            coords: targetLocation.coords,
+            operator: artifact.currentOwner,
+            radius: Number(artifact.rarity) * 500,
+            artifactId: artifact.id,
+            launchTick: Number(bomb.departureTick),
+            arrivalTick: Number(bomb.arrivalTick),
+            launchPlanet: artifact.onPlanetId,
+          });
+        }
+      } else {
+        this.pinkZones.delete(artifact.id);
       }
     }
 

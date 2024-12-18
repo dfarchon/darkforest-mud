@@ -203,9 +203,9 @@ export type Planet = {
   coordsRevealed: boolean;
   revealer?: EthAddress;
   // claimer?: EthAddress;
-  // burnOperator?: EthAddress; //only record burn/pink operator
-  // burnStartTimestamp?: number;
-  // pinkOperator?: EthAddress;
+  burnOperator?: EthAddress; //only record burn/pink operator
+  burnStartTimestamp?: number;
+  pinkOperator?: EthAddress;
   // kardashevOperator?: EthAddress;
   // kardashevTimestamp?: number;
 

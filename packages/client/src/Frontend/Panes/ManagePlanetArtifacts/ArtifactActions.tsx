@@ -3,6 +3,7 @@ import {
   canDepositArtifact,
   canWithdrawArtifact,
   durationUntilArtifactAvailable,
+  getRange,
   isActivated,
   isLocatable,
 } from "@df/gamelogic";
@@ -40,6 +41,7 @@ import {
 import { DropBombPane } from "../DropBombPane";
 import type { TooltipTriggerProps } from "../Tooltip";
 import { TooltipTrigger } from "../Tooltip";
+import NotificationManager from "@frontend/Game/NotificationManager";
 
 export function ArtifactActions({
   artifactId,
@@ -109,11 +111,28 @@ export function ArtifactActions({
           targetPlanetId = targetPlanet?.locationId;
         }
 
-        uiManager.chargeArtifact(
-          onPlanet.locationId,
-          artifact.id,
-          targetPlanetId ? `0x${targetPlanetId.toString()}` : "0x",
-        );
+        if (targetPlanetId) {
+          const targetPlanet = uiManager.getPlanetWithId(targetPlanetId);
+          if (targetPlanet && isLocatable(targetPlanet)) {
+            const distance = uiManager.getDistCoords(
+              onPlanet.location.coords,
+              targetPlanet.location.coords,
+            );
+            if (distance < getRange(onPlanet, 100) / 2) {
+              console.log("targetPlanetId", targetPlanetId);
+              uiManager.chargeArtifact(
+                onPlanet.locationId,
+                artifact.id,
+                targetPlanetId ? `0x${targetPlanetId.toString()}` : "0x",
+              );
+            } else {
+              NotificationManager.getInstance().txInitError(
+                "df__chargeArtifact",
+                "Target planet is too far away",
+              );
+            }
+          }
+        }
       }
     },
     [onPlanet, uiManager],
@@ -343,6 +362,28 @@ export function ArtifactActions({
   if (canActivate) {
     actions.unshift({
       name: TooltipName.ActivateArtifact,
+      extraContent: (
+        <>
+          {". "}
+          You need{" "}
+          {Math.floor(
+            uiManager.getEnergyNeededForMove(
+              onPlanet.locationId,
+              uiManager.getPinkZoneByArtifactId(artifact.id)?.locationId ??
+                onPlanet.locationId,
+              0,
+              {
+                energyCapMultiplier: 100,
+                energyGroMultiplier: 100,
+                rangeMultiplier: 50,
+                speedMultiplier: 50,
+                defMultiplier: 100,
+              },
+            ),
+          )}{" "}
+          energy to launch this bomb.
+        </>
+      ),
       children: (
         <Btn
           disabled={activating || !activateArtifactCooldownPassed}

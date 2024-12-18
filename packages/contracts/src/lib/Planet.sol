@@ -134,7 +134,10 @@ library PlanetLib {
       );
     }
 
-    PlanetFlags.set(bytes32(planet.planetHash), Flags.unwrap(planet.flags));
+    if (Flags.unwrap(planet.flags) != PlanetFlags.get(bytes32(planet.planetHash))) {
+      PlanetFlags.set(bytes32(planet.planetHash), Flags.unwrap(planet.flags));
+    }
+
     PlanetTable.set(
       bytes32(planet.planetHash),
       PlanetData({

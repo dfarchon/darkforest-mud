@@ -111,7 +111,7 @@ export function isActivated(artifact: Artifact | undefined) {
   // return artifact.lastActivated > artifact.lastDeactivated;
   return (
     artifact.status !== ArtifactStatus.Default &&
-    artifact.status !== ArtifactStatus.Charging
+    artifact.status !== ArtifactStatus.Cooldown
   );
 }
 

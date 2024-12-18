@@ -52,6 +52,7 @@ import {
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
+  locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
 } from "@df/serde";
@@ -205,6 +206,8 @@ import { makeContractsAPI } from "./ContractsAPI";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
 import type { Hex } from "viem";
+import { encodeFunctionData, toBytes } from "viem";
+import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
@@ -2307,6 +2310,15 @@ export class GameManager extends EventEmitter {
   // getBurnedLocations(): Map<LocationId, BurnedLocation> {
   //   return this.entityStore.getBurnedLocations();
   // }
+
+  getPinkZones(): Set<PinkZone> {
+    const pinkZonesMap = this.entityStore.getPinkZones();
+    return new Set(pinkZonesMap.values());
+  }
+
+  getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined {
+    return this.entityStore.getPinkZones().get(artifactId);
+  }
 
   // getKardashevLocations(): Map<LocationId, BurnedLocation> {
   //   return this.entityStore.getKardashevLocations();
@@ -4557,6 +4569,45 @@ export class GameManager extends EventEmitter {
         `${this.getAccount()?.toLowerCase()}-chargeArtifact`,
         artifactId,
       );
+      const artifact = this.getArtifactWithId(artifactId);
+      if (!artifact) {
+        throw new Error("artifact not found");
+      }
+      const getArgs = async () => {
+        if (artifact.artifactType !== ArtifactType.Bomb) {
+          return "";
+        }
+        const targetPlanet = this.entityStore.getPlanetWithId(
+          locationIdFromHexStr(data),
+        );
+        if (!targetPlanet) {
+          throw new Error("target planet not found");
+        }
+        if (!isLocatable(targetPlanet)) {
+          throw new Error("target planet not locatable");
+        }
+        const revealArgs = await this.snarkHelper.getRevealArgs(
+          targetPlanet.location.coords.x,
+          targetPlanet.location.coords.y,
+        );
+
+        this.terminal.current?.println(
+          "REVEAL: calculated SNARK with args:",
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.println(
+          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.newline();
+
+        const encoded = encodeFunctionData({
+          abi: PlanetRevealSystemAbi,
+          functionName: "legacyRevealLocation",
+          args: revealArgs,
+        });
+        return `0x${encoded.slice(10)}` as Hex;
+      };
 
       const txIntent: UnconfirmedChargeArtifact = {
         methodName: "df__chargeArtifact",
@@ -4564,7 +4615,7 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
-          data,
+          await getArgs(),
         ]),
         delegator: this.getAccount(),
         locationId,
@@ -4666,6 +4717,50 @@ export class GameManager extends EventEmitter {
         linkTo ? locationIdToHexStr(linkTo) : "",
       );
 
+      const artifact = this.getArtifactWithId(artifactId);
+      if (!artifact) {
+        throw new Error("artifact not found");
+      }
+
+      const getArgs = async () => {
+        if (artifact.artifactType === ArtifactType.Wormhole) {
+          if (!linkTo) {
+            throw new Error("linkTo not found");
+          }
+          return locationIdToHexStr(linkTo);
+        } else if (artifact.artifactType !== ArtifactType.Bomb) {
+          return "";
+        }
+        const launchPlanet = this.entityStore.getPlanetWithId(locationId);
+        if (!launchPlanet) {
+          throw new Error("launch planet not found");
+        }
+        if (!isLocatable(launchPlanet)) {
+          throw new Error("launch planet not locatable");
+        }
+        const revealArgs = await this.snarkHelper.getRevealArgs(
+          launchPlanet.location.coords.x,
+          launchPlanet.location.coords.y,
+        );
+
+        this.terminal.current?.println(
+          "REVEAL: calculated SNARK with args:",
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.println(
+          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.newline();
+
+        const encoded = encodeFunctionData({
+          abi: PlanetRevealSystemAbi,
+          functionName: "legacyRevealLocation",
+          args: revealArgs,
+        });
+        return `0x${encoded.slice(10)}` as Hex;
+      };
+
       const txIntent: UnconfirmedActivateArtifact = {
         methodName: "df__activateArtifact",
         contract: this.contractsAPI.contract,
@@ -4673,7 +4768,7 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
-          linkTo ? locationIdToHexStr(linkTo) : "",
+          await getArgs(),
         ]),
         locationId,
         artifactId,
@@ -6155,18 +6250,30 @@ export class GameManager extends EventEmitter {
     toId: LocationId,
     arrivingEnergy: number,
     abandoning = false,
+    upgrade: Upgrade = {
+      energyCapMultiplier: 100,
+      energyGroMultiplier: 100,
+      rangeMultiplier: 100,
+      speedMultiplier: 100,
+      defMultiplier: 100,
+    },
   ): number {
     const from = this.getPlanetWithId(fromId);
     if (!from) {
       throw new Error("origin planet unknown");
     }
+    const upgradedPlanet = {
+      ...from,
+      range: (from.range * upgrade.rangeMultiplier) / 100,
+      energyCap: (from.energyCap * upgrade.energyCapMultiplier) / 100,
+    };
     const dist = this.getDist(fromId, toId);
-    const range = from.range * this.getRangeBuff(abandoning);
+    const range = upgradedPlanet.range * this.getRangeBuff(abandoning);
     const rangeSteps = dist / range;
 
-    const arrivingProp = arrivingEnergy / from.energyCap + 0.05;
+    const arrivingProp = arrivingEnergy / upgradedPlanet.energyCap + 0.05;
 
-    return arrivingProp * Math.pow(2, rangeSteps) * from.energyCap;
+    return arrivingProp * Math.pow(2, rangeSteps) * upgradedPlanet.energyCap;
   }
 
   /**

@@ -1,6 +1,7 @@
 import type {
   Artifact,
   ArtifactId,
+  ArtifactRarity,
   ArtifactType,
   AsteroidRendererType,
   BackgroundRendererType,
@@ -162,8 +163,14 @@ export interface RendererGameContext extends DiagnosticUpdater {
     dist: number | undefined,
     energy: number,
   ): number;
+  getEnergyNeededForMove(
+    fromId: LocationId,
+    toId: LocationId,
+    energy: number,
+  ): number;
   getIsChoosingTargetPlanet(): boolean;
   getLinkSourceArtifactType(): ArtifactType;
+  getLinkSourceArtifactRarity(): ArtifactRarity;
   getLinks(): Iterable<Link>;
   getRadiusOfPlanetLevel(planetRarity: PlanetLevel): number;
   getDistCoords(from: WorldCoords, to: WorldCoords): number;
@@ -178,6 +185,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getAbandonRangeChangePercent(): number;
   getCaptureZones(): Iterable<CaptureZone>;
   getPinkZones(): Iterable<PinkZone>;
+  getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined;
   getBlueZones(): Iterable<BlueZone>;
 }
 
