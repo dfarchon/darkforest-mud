@@ -17,7 +17,7 @@ import { ArtifactRarity, ArtifactGenre, ModifierType, EffectType } from "../../.
 import { AtfInstallModule } from "../../../codegen/tables/AtfInstallModule.sol";
 import { EffectLib, Modifier } from "../../../lib/Effect.sol";
 import { ARTIFACT_INDEX, GENERAL_ACTIVATE } from "./constant.sol";
-import { RevealedPlanet, Planet } from "../../../codegen/index.sol";
+import { RevealedPlanet, PlanetFlags } from "../../../codegen/index.sol";
 
 /**
  * @notice Installs the Pink Bomb artifact into the game
@@ -36,7 +36,7 @@ function installPinkBomb(address world) returns (uint256 index) {
 
   // grant RevealedPlanet and Planet access to the artifact proxy system
   IBaseWorld(world).grantAccess(RevealedPlanet._tableId, address(artifactProxySystem));
-  IBaseWorld(world).grantAccess(Planet._tableId, address(artifactProxySystem));
+  IBaseWorld(world).grantAccess(PlanetFlags._tableId, address(artifactProxySystem));
 
   return ARTIFACT_INDEX;
 }

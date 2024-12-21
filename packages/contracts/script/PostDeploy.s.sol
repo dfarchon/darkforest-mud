@@ -158,7 +158,6 @@ contract PostDeploy is Script {
       );
       Planet.set(
         planets[i].planetHash,
-        PlanetStatus.DEFAULT,
         planets[i].lastUpdateTick,
         planets[i].population,
         planets[i].silver,

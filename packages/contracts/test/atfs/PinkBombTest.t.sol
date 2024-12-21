@@ -177,7 +177,8 @@ contract PinkBombTest is MudTest {
       _artifactProxySystemId(_artifactIndexToNamespace(PINK_BOMB_INDEX)),
       abi.encodeWithSelector(PinkBombSystem.destroy.selector, 1, proof, input)
     );
-    assertTrue(PlanetTable.getStatus(bytes32(uint256(3))) == PlanetStatus.DESTROYED);
+    Planet memory planet = IWorld(worldAddress).df__readPlanet(3);
+    assertTrue(planet.status == PlanetStatus.DESTROYED);
 
     vm.prank(address(3));
     vm.expectRevert(Errors.PlanetNotAvailable.selector);

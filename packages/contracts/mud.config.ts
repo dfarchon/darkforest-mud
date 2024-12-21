@@ -33,7 +33,7 @@ export default defineWorld({
       "APPLY_EFFECT",
       "REMOVE_EFFECT",
     ],
-    PlanetFlagType: ["EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT"],
+    PlanetFlagType: ["EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT", "DESTROYED"],
   },
   systems: {
     InitializeSystem: {
@@ -262,7 +262,7 @@ export default defineWorld({
     },
     Planet: {
       id: "bytes32",
-      status: "PlanetStatus",
+      // status: "PlanetStatus", // planet status is determined by its flags
       lastUpdateTick: "uint64",
       population: "uint64",
       silver: "uint64",

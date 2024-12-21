@@ -30,6 +30,7 @@ struct Planet {
   uint256 planetHash;
   uint256 distSquare; // only for toPlanet in a move
   uint256 universeZone; // only for newly initialized toPlanet in a move
+  PlanetStatus status; // derived from flags
   // Table: PlanetOwner
   bool ownerChanged;
   address owner;
@@ -40,7 +41,6 @@ struct Planet {
   PlanetType planetType;
   SpaceType spaceType;
   // Table: Planet
-  PlanetStatus status;
   uint256 lastUpdateTick;
   uint256 population;
   uint256 silver;
@@ -84,6 +84,9 @@ library PlanetLib {
 
     _readPropsOrMetadata(planet);
     planet.flags = Flags.wrap(PlanetFlags.get(bytes32(planet.planetHash)));
+    planet.status = FlagsLib.check(planet.flags, PlanetFlagType.DESTROYED)
+      ? PlanetStatus.DESTROYED
+      : PlanetStatus.DEFAULT;
   }
 
   function writeToStore(Planet memory planet) internal {
@@ -141,7 +144,6 @@ library PlanetLib {
     PlanetTable.set(
       bytes32(planet.planetHash),
       PlanetData({
-        status: planet.status,
         lastUpdateTick: uint64(planet.lastUpdateTick),
         population: uint64(planet.population),
         silver: uint64(planet.silver),
@@ -427,7 +429,6 @@ library PlanetLib {
   function _readPlanetData(Planet memory planet) internal view {
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
     PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
-    planet.status = data.status;
     planet.lastUpdateTick = data.lastUpdateTick;
     planet.population = data.population;
     planet.silver = data.silver;
