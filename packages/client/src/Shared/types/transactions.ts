@@ -339,9 +339,10 @@ export type UnconfirmedBurn = TxIntent & {
  * @hidden
  */
 export type UnconfirmedPink = TxIntent & {
-  methodName: "pinkLocation";
+  methodName: "destroy";
   locationId: LocationId;
   location: WorldLocation;
+  artifactId: ArtifactId;
 };
 
 /**

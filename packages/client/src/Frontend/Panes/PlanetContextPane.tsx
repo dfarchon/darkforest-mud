@@ -91,9 +91,9 @@ function PlanetContextPaneContent({
 
   const gt3 = p && p.planetLevel >= 3;
 
-  // const pinkZonePassed = useMemo(() => {
-  //   return p && uiManager.checkPlanetCanPink(p.locationId);
-  // }, [p]);
+  const pinkZonePassed = useMemo(() => {
+    return p && uiManager.checkPlanetCanPink(p.locationId);
+  }, [p]);
 
   // const blueZonePassed = useMemo(() => {
   //   return p && uiManager.checkPlanetCanBlue(p.locationId);
@@ -162,16 +162,16 @@ function PlanetContextPaneContent({
   //   );
   // }
 
-  // let pinkRow = null;
-  // if (!p?.destroyed && !p?.frozen && gt3 && pinkZonePassed) {
-  //   pinkRow = (
-  //     <OpenPinkButton
-  //       modal={modal}
-  //       planetId={p?.locationId}
-  //       key={PlanetPaneName.Pink}
-  //     />
-  //   );
-  // }
+  let pinkRow = null;
+  if (!p?.destroyed && !p?.frozen && pinkZonePassed) {
+    pinkRow = (
+      <OpenPinkButton
+        modal={modal}
+        planetId={p?.locationId}
+        key={PlanetPaneName.Pink}
+      />
+    );
+  }
 
   // let kardashevRow = null;
   // if (!p?.destroyed && !p?.frozen && owned && gt3 && !kardasheved) {
@@ -241,9 +241,9 @@ function PlanetContextPaneContent({
   // if (dropBombRow) {
   //   rows.push(dropBombRow);
   // }
-  // if (pinkRow) {
-  //   rows.push(pinkRow);
-  // }
+  if (pinkRow) {
+    rows.push(pinkRow);
+  }
   // if (kardashevRow) {
   //   rows.push(kardashevRow);
   // }

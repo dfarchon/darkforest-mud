@@ -34,6 +34,7 @@ import {
   isUnconfirmedBuySpaceshipTx,
   isUnconfirmedCapturePlanetTx,
   isUnconfirmedChangeArtifactImageTypeTx,
+  isUnconfirmedChargeArtifactTx,
   isUnconfirmedClaimTx,
   isUnconfirmedDeactivateArtifactTx,
   isUnconfirmedDepositArtifactTx,
@@ -48,6 +49,7 @@ import {
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
   isUnconfirmedSetPlanetEmojiTx,
+  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
@@ -208,7 +210,13 @@ import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
 import type { Hex } from "viem";
 import { encodeFunctionData, toBytes } from "viem";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
-
+import { encodeEntity } from "@latticexyz/store-sync/recs";
+import { getComponentValue } from "@latticexyz/recs";
+import type {
+  RevealInput,
+  RevealSnarkContractCallArgs,
+  SnarkProof,
+} from "@df/snarks";
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -221,6 +229,7 @@ export enum GameManagerEvent {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class GameManager extends EventEmitter {
+  private readonly components: ClientComponents;
   /**
    * This variable contains the internal state of objects that live in the game world.
    */
@@ -476,6 +485,7 @@ export class GameManager extends EventEmitter {
       width: 0,
       height: 0,
     };
+    this.components = components;
     this.terminal = terminal;
     this.account = mainAccount;
     this.players = players;
@@ -1188,64 +1198,70 @@ export class GameManager extends EventEmitter {
           ]);
         } else if (isUnconfirmedProspectPlanetTx(tx)) {
           await gameManager.softRefreshPlanet(tx.intent.planetId);
-        } else if (isUnconfirmedActivateArtifactTx(tx)) {
-          let refreshFlag = true;
-          const fromPlanet = await gameManager.getPlanetWithId(
-            tx.intent.locationId,
-          );
-          const artifact = await gameManager.getArtifactWithId(
-            tx.intent.artifactId,
-          );
+        } else if (
+          isUnconfirmedChargeArtifactTx(tx) ||
+          isUnconfirmedActivateArtifactTx(tx) ||
+          isUnconfirmedShutdownArtifactTx(tx)
+        ) {
+          await gameManager.hardRefreshPlanet(tx.intent.locationId);
+          // } else if (isUnconfirmedActivateArtifactTx(tx)) {
+          //   let refreshFlag = true;
+          //   const fromPlanet = await gameManager.getPlanetWithId(
+          //     tx.intent.locationId,
+          //   );
+          //   const artifact = await gameManager.getArtifactWithId(
+          //     tx.intent.artifactId,
+          //   );
 
-          if (artifact?.artifactType === ArtifactType.FireLink) {
-            if (fromPlanet && fromPlanet.locationId && tx.intent.linkTo) {
-              const toPlanet = await gameManager.getPlanetWithId(
-                tx.intent.linkTo,
-              );
-              if (toPlanet) {
-                const activeArtifactOnToPlanet =
-                  await gameManager.getActiveArtifact(toPlanet);
-                if (
-                  activeArtifactOnToPlanet &&
-                  activeArtifactOnToPlanet.artifactType ===
-                    ArtifactType.IceLink &&
-                  activeArtifactOnToPlanet.linkTo
-                ) {
-                  const toLinkPlanet = await gameManager.getPlanetWithId(
-                    activeArtifactOnToPlanet.linkTo,
-                  );
-                  if (toLinkPlanet) {
-                    await Promise.all([
-                      gameManager.bulkHardRefreshPlanets([
-                        fromPlanet.locationId,
-                        toPlanet.locationId,
-                        toLinkPlanet.locationId,
-                      ]),
-                      // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-                    ]);
-                    refreshFlag = false;
-                  }
-                }
-              }
-            }
-          }
+          //   if (artifact?.artifactType === ArtifactType.FireLink) {
+          //     if (fromPlanet && fromPlanet.locationId && tx.intent.linkTo) {
+          //       const toPlanet = await gameManager.getPlanetWithId(
+          //         tx.intent.linkTo,
+          //       );
+          //       if (toPlanet) {
+          //         const activeArtifactOnToPlanet =
+          //           await gameManager.getActiveArtifact(toPlanet);
+          //         if (
+          //           activeArtifactOnToPlanet &&
+          //           activeArtifactOnToPlanet.artifactType ===
+          //             ArtifactType.IceLink &&
+          //           activeArtifactOnToPlanet.linkTo
+          //         ) {
+          //           const toLinkPlanet = await gameManager.getPlanetWithId(
+          //             activeArtifactOnToPlanet.linkTo,
+          //           );
+          //           if (toLinkPlanet) {
+          //             await Promise.all([
+          //               gameManager.bulkHardRefreshPlanets([
+          //                 fromPlanet.locationId,
+          //                 toPlanet.locationId,
+          //                 toLinkPlanet.locationId,
+          //               ]),
+          //               // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+          //             ]);
+          //             refreshFlag = false;
+          //           }
+          //         }
+          //       }
+          //     }
+          //   }
 
-          if (refreshFlag) {
-            if (tx.intent.linkTo) {
-              await Promise.all([
-                gameManager.bulkHardRefreshPlanets([
-                  tx.intent.locationId,
-                  tx.intent.linkTo,
-                ]),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            } else {
-              await Promise.all([
-                gameManager.hardRefreshPlanet(tx.intent.locationId),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            }
-          }
+          //   if (refreshFlag) {
+          //     if (tx.intent.linkTo) {
+          //       await Promise.all([
+          //         gameManager.bulkHardRefreshPlanets([
+          //           tx.intent.locationId,
+          //           tx.intent.linkTo,
+          //         ]),
+          //         // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+          //       ]);
+          //     } else {
+          //       await Promise.all([
+          //         gameManager.hardRefreshPlanet(tx.intent.locationId),
+          //         // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+          //       ]);
+          //     }
+          //   }
         } else if (isUnconfirmedDeactivateArtifactTx(tx)) {
           // console.log(tx);
           if (tx.intent.linkTo) {
@@ -1428,10 +1444,17 @@ export class GameManager extends EventEmitter {
   }
 
   public hardRefreshPlanet(planetId: LocationId): void {
-    const planet = this.contractsAPI.getPlanetById(planetId);
+    let planet = this.contractsAPI.getPlanetById(planetId);
 
     if (!planet) {
-      return;
+      // in some cases, the planet is not entirely initialized in the contract, but only some crucial table fields are set
+      // in this case, we still need to generate the planet from contract side and update it into the entity store
+      const location = this.entityStore.getLocationOfPlanet(planetId);
+      if (location) {
+        planet = this.contractsAPI.getDefaultPlanetByLocation(location);
+      } else {
+        return;
+      }
     }
 
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
@@ -2945,6 +2968,12 @@ export class GameManager extends EventEmitter {
   //   return blueZones || new Set();
   // }
 
+  private transformRevealArgs(
+    args: RevealSnarkContractCallArgs,
+  ): [SnarkProof, RevealInput] {
+    return [[args[0], args[1], args[2]], args[3]];
+  }
+
   /**
    * Reveals a planet's location on-chain.
    */
@@ -3275,31 +3304,41 @@ export class GameManager extends EventEmitter {
   //     throw e;
   //   }
   // }
+  public checkPlanetCanPink(planetId: LocationId): {
+    canPink: boolean;
+    artifactId?: ArtifactId;
+  } {
+    if (!this.account) {
+      return { canPink: false };
+    }
+    const planet = this.getPlanetWithId(planetId);
+    if (!planet) {
+      return { canPink: false };
+    }
+    if (!isLocatable(planet)) {
+      return { canPink: false };
+    }
+    const pinkZones = this.getPinkZones();
+    const curTick = this.getCurrentTick();
+    for (const pinkZone of pinkZones) {
+      if (
+        pinkZone.arrivalTick === 0 ||
+        curTick < pinkZone.arrivalTick ||
+        curTick >= pinkZone.arrivalTick + 300
+      ) {
+        continue;
+      }
+      const coords = pinkZone.coords;
+      const radius = pinkZone.radius;
 
-  // public checkPlanetCanPink(planetId: LocationId): boolean {
-  //   if (!this.account) {
-  //     return false;
-  //   }
-  //   const planet = this.getPlanetWithId(planetId);
-  //   if (!planet) {
-  //     return false;
-  //   }
-  //   if (!isLocatable(planet)) {
-  //     return false;
-  //   }
-  //   const myPinkZones = this.getMyPinkZones();
-  //   for (const pinkZone of myPinkZones) {
-  //     const coords = pinkZone.coords;
-  //     const radius = pinkZone.radius;
+      const dis = this.getDistCoords(coords, planet.location.coords);
 
-  //     const dis = this.getDistCoords(coords, planet.location.coords);
-
-  //     if (dis <= radius) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
+      if (dis <= radius) {
+        return { canPink: true, artifactId: pinkZone.artifactId };
+      }
+    }
+    return { canPink: false };
+  }
 
   /**
    * return isCurrentlyPinking
@@ -3311,99 +3350,107 @@ export class GameManager extends EventEmitter {
    * pinkLocation reveals a planet's location on-chain.
    */
 
-  // public async pinkLocation(
-  //   planetId: LocationId,
-  // ): Promise<Transaction<UnconfirmedPink>> {
-  //   try {
-  //     if (!this.account) {
-  //       throw new Error("no account set");
-  //     }
+  public async pinkLocation(
+    planetId: LocationId,
+  ): Promise<Transaction<UnconfirmedPink>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account set");
+      }
 
-  //     if (this.checkGameHasEnded()) {
-  //       throw new Error("game has ended");
-  //     }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error("game has ended");
+      // }
 
-  //     const planet = this.entityStore.getPlanetWithId(planetId);
+      const planet = this.entityStore.getPlanetWithId(planetId);
 
-  //     if (!planet) {
-  //       throw new Error("you can't pink a planet you haven't discovered");
-  //     }
+      if (!planet) {
+        throw new Error("you can't pink a planet you haven't discovered");
+      }
 
-  //     if (!isLocatable(planet)) {
-  //       throw new Error(
-  //         "you can't pink a planet whose coordinates you don't know",
-  //       );
-  //     }
+      if (!isLocatable(planet)) {
+        throw new Error(
+          "you can't pink a planet whose coordinates you don't know",
+        );
+      }
 
-  //     if (planet.destroyed || planet.frozen) {
-  //       throw new Error("you can't pink destroyed/frozen planets");
-  //     }
+      if (planet.destroyed || planet.frozen) {
+        throw new Error("you can't pink destroyed/frozen planets");
+      }
 
-  //     // if (planet.operator !== undefined && planet.operator !== EMPTY_ADDRESS) {
-  //     //   throw new Error('someone already burn this planet');
-  //     // }
+      // if (planet.operator !== undefined && planet.operator !== EMPTY_ADDRESS) {
+      //   throw new Error('someone already burn this planet');
+      // }
 
-  //     if (planet.transactions?.hasTransaction(isUnconfirmedPinkTx)) {
-  //       throw new Error("you're already pinking this planet's location 1");
-  //     }
+      if (planet.transactions?.hasTransaction(isUnconfirmedPinkTx)) {
+        throw new Error("you're already pinking this planet's location 1");
+      }
 
-  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx)) {
-  //       throw new Error("you're already pinking this planet's location 2");
-  //     }
+      if (this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx)) {
+        throw new Error("you're already pinking this planet's location 2");
+      }
 
-  //     // const myLastBurnTimestamp = this.players.get(this.account)?.lastBurnTimestamp;
+      // const myLastBurnTimestamp = this.players.get(this.account)?.lastBurnTimestamp;
 
-  //     // if (myLastBurnTimestamp && Date.now() < this.getNextBurnAvailableTimestamp()) {
-  //     //   throw new Error('still on cooldown for burning');
-  //     // }
-  //     if (!this.checkPlanetCanPink(planet.locationId)) {
-  //       throw new Error("this planet don't in your pink zones");
-  //     }
+      // if (myLastBurnTimestamp && Date.now() < this.getNextBurnAvailableTimestamp()) {
+      //   throw new Error('still on cooldown for burning');
+      // }
+      const { canPink, artifactId } = this.checkPlanetCanPink(
+        planet.locationId,
+      );
+      if (!canPink || !artifactId) {
+        throw new Error("this planet don't in your pink zones");
+      }
 
-  //     // this is shitty. used for the popup window
-  //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
-  //       planetId,
-  //     );
+      // this is shitty. used for the popup window
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
+        planetId,
+      );
 
-  //     const getArgs = async () => {
-  //       const revealArgs = await this.snarkHelper.getRevealArgs(
-  //         planet.location.coords.x,
-  //         planet.location.coords.y,
-  //       );
-  //       this.terminal.current?.println(
-  //         "REVEAL: calculated SNARK with args:",
-  //         TerminalTextStyle.Sub,
-  //       );
-  //       this.terminal.current?.println(
-  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-  //         TerminalTextStyle.Sub,
-  //       );
-  //       this.terminal.current?.newline();
+      const getArgs = async () => {
+        const revealArgs = await this.snarkHelper.getRevealArgs(
+          planet.location.coords.x,
+          planet.location.coords.y,
+        );
+        this.terminal.current?.println(
+          "REVEAL: calculated SNARK with args:",
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.println(
+          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.newline();
 
-  //       return revealArgs;
-  //     };
+        return this.transformRevealArgs(revealArgs);
+      };
 
-  //     const txIntent: UnconfirmedPink = {
-  //       methodName: "pinkLocation",
-  //       locationId: planetId,
-  //       location: planet.location,
-  //       contract: this.contractsAPI.contract,
-  //       args: getArgs(),
-  //     };
+      const txIntent: UnconfirmedPink = {
+        methodName: "destroy",
+        locationId: planetId,
+        location: planet.location,
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          artifactIdToDecStr(artifactId),
+          ...(await getArgs()),
+        ]),
+        artifactId: artifactId,
+        delegator: this.getAccount(),
+      };
 
-  //     // Always await the submitTransaction so we can catch rejections
-  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-  //     return tx;
-  //   } catch (e) {
-  //     this.getNotificationsManager().txInitError(
-  //       "pinkLocation",
-  //       (e as Error).message,
-  //     );
-  //     throw e;
-  //   }
-  // }
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "pinkLocation",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
 
   // public async kardashev(
   //   planetId: LocationId,
@@ -4269,9 +4316,9 @@ export class GameManager extends EventEmitter {
       }
 
       if (!bypassChecks) {
-        if (this.checkGameHasEnded()) {
-          throw new Error("game ended");
-        }
+        // if (this.checkGameHasEnded()) {
+        //   throw new Error("game ended");
+        // }
 
         if (!planet) {
           throw new Error("you can't prospect a planet you haven't discovered");
@@ -4352,9 +4399,9 @@ export class GameManager extends EventEmitter {
       }
 
       if (!bypassChecks) {
-        if (this.checkGameHasEnded()) {
-          throw new Error("game has ended");
-        }
+        // if (this.checkGameHasEnded()) {
+        //   throw new Error("game has ended");
+        // }
 
         if (planet.owner !== this.getAccount()) {
           throw new Error("you can't find artifacts on planets you don't own");
@@ -4603,8 +4650,8 @@ export class GameManager extends EventEmitter {
 
         const encoded = encodeFunctionData({
           abi: PlanetRevealSystemAbi,
-          functionName: "legacyRevealLocation",
-          args: revealArgs,
+          functionName: "revealLocation",
+          args: this.transformRevealArgs(revealArgs),
         });
         return `0x${encoded.slice(10)}` as Hex;
       };
@@ -4755,8 +4802,8 @@ export class GameManager extends EventEmitter {
 
         const encoded = encodeFunctionData({
           abi: PlanetRevealSystemAbi,
-          functionName: "legacyRevealLocation",
-          args: revealArgs,
+          functionName: "revealLocation",
+          args: this.transformRevealArgs(revealArgs),
         });
         return `0x${encoded.slice(10)}` as Hex;
       };
@@ -6181,14 +6228,25 @@ export class GameManager extends EventEmitter {
       );
     }
 
-    const wormholeFactors = this.getWormholeFactors(planetFrom, planetTo);
+    const { DistanceMultiplier } = this.components;
+    const [left, right] =
+      BigInt(locationIdToDecStr(fromId)) < BigInt(locationIdToDecStr(toId))
+        ? [fromId, toId]
+        : [toId, fromId];
+
+    const key = encodeEntity(DistanceMultiplier.metadata.keySchema, {
+      from: locationIdToHexStr(left) as `0x${string}`,
+      to: locationIdToHexStr(right) as `0x${string}`,
+    });
+    const value = getComponentValue(DistanceMultiplier, key);
+
     const distance = this.getDistCoords(
       planetFrom.location.coords,
       planetTo.location.coords,
     );
-    const distanceFactor = wormholeFactors ? wormholeFactors.distanceFactor : 1;
+    const distanceFactor = value ? value.multiplier / 1000 : 1;
 
-    return distance / distanceFactor;
+    return distance * distanceFactor;
   }
 
   /**
@@ -6300,14 +6358,14 @@ export class GameManager extends EventEmitter {
 
     const dist = (toId && this.getDist(fromId, toId)) || (distance as number);
 
-    if (to && toId) {
-      const wormholeFactors = this.getWormholeFactors(from, to);
-      if (wormholeFactors !== undefined) {
-        if (to.owner !== from.owner) {
-          return 0;
-        }
-      }
-    }
+    // if (to && toId) {
+    //   const wormholeFactors = this.getWormholeFactors(from, to);
+    //   if (wormholeFactors !== undefined) {
+    //     if (to.owner !== from.owner) {
+    //       return 0;
+    //     }
+    //   }
+    // }
 
     const range = from.range * this.getRangeBuff(abandoning);
     const scale = (1 / 2) ** (dist / range);
@@ -6322,9 +6380,9 @@ export class GameManager extends EventEmitter {
   /**
    * Gets the active artifact on this planet, if one exists.
    */
-  getActiveArtifact(planet: Planet): Artifact | undefined {
+  getActiveArtifacts(planet: Planet): Artifact[] {
     const artifacts = this.getArtifactsWithIds(planet.heldArtifactIds);
-    const active = artifacts.find((a) => a && isActivated(a));
+    const active = artifacts.filter((a) => a && isActivated(a)) as Artifact[];
 
     return active;
   }
@@ -6334,57 +6392,57 @@ export class GameManager extends EventEmitter {
    * is active and targetting the other planet, return the wormhole boost which is greater. Values
    * represent a multiplier.
    */
-  getWormholeFactors(
-    fromPlanet: Planet,
-    toPlanet: Planet,
-  ): { distanceFactor: number; speedFactor: number } | undefined {
-    const fromActiveArtifact = this.getActiveArtifact(fromPlanet);
-    const toActiveArtifact = this.getActiveArtifact(toPlanet);
+  // getWormholeFactors(
+  //   fromPlanet: Planet,
+  //   toPlanet: Planet,
+  // ): { distanceFactor: number; speedFactor: number } | undefined {
+  //   const fromActiveArtifact = this.getActiveArtifact(fromPlanet);
+  //   const toActiveArtifact = this.getActiveArtifact(toPlanet);
 
-    const fromHasActiveWormhole =
-      fromActiveArtifact?.artifactType === ArtifactType.Wormhole &&
-      fromActiveArtifact.linkTo === toPlanet.locationId;
-    const toHasActiveWormhole =
-      toActiveArtifact?.artifactType === ArtifactType.Wormhole &&
-      toActiveArtifact.linkTo === fromPlanet.locationId;
+  //   const fromHasActiveWormhole =
+  //     fromActiveArtifact?.artifactType === ArtifactType.Wormhole &&
+  //     fromActiveArtifact.linkTo === toPlanet.locationId;
+  //   const toHasActiveWormhole =
+  //     toActiveArtifact?.artifactType === ArtifactType.Wormhole &&
+  //     toActiveArtifact.linkTo === fromPlanet.locationId;
 
-    let greaterRarity: ArtifactRarity | undefined = undefined;
-    switch (true) {
-      // active wormhole on both from and to planets choose the biggest rarity
-      case fromHasActiveWormhole && toHasActiveWormhole: {
-        greaterRarity = Math.max(
-          fromActiveArtifact.rarity,
-          toActiveArtifact.rarity,
-        ) as ArtifactRarity;
-        break;
-      }
-      // only from planet has active wormhole, use that one
+  //   let greaterRarity: ArtifactRarity | undefined = undefined;
+  //   switch (true) {
+  //     // active wormhole on both from and to planets choose the biggest rarity
+  //     case fromHasActiveWormhole && toHasActiveWormhole: {
+  //       greaterRarity = Math.max(
+  //         fromActiveArtifact.rarity,
+  //         toActiveArtifact.rarity,
+  //       ) as ArtifactRarity;
+  //       break;
+  //     }
+  //     // only from planet has active wormhole, use that one
 
-      case fromHasActiveWormhole: {
-        greaterRarity = fromActiveArtifact.rarity;
-        break;
-      }
-      // only destination planet has active wormhole, use that one
-      case toHasActiveWormhole: {
-        greaterRarity = toActiveArtifact.rarity;
-        break;
-      }
-    }
+  //     case fromHasActiveWormhole: {
+  //       greaterRarity = fromActiveArtifact.rarity;
+  //       break;
+  //     }
+  //     // only destination planet has active wormhole, use that one
+  //     case toHasActiveWormhole: {
+  //       greaterRarity = toActiveArtifact.rarity;
+  //       break;
+  //     }
+  //   }
 
-    if (
-      greaterRarity === undefined ||
-      greaterRarity <= ArtifactRarity.Unknown
-    ) {
-      return undefined;
-    }
+  //   if (
+  //     greaterRarity === undefined ||
+  //     greaterRarity <= ArtifactRarity.Unknown
+  //   ) {
+  //     return undefined;
+  //   }
 
-    const rangeUpgradesPerRarity = [0, 2, 4, 6, 8, 10];
-    const speedUpgradesPerRarity = [0, 10, 20, 30, 40, 50];
-    return {
-      distanceFactor: rangeUpgradesPerRarity[greaterRarity],
-      speedFactor: speedUpgradesPerRarity[greaterRarity],
-    };
-  }
+  //   const rangeUpgradesPerRarity = [0, 2, 4, 6, 8, 10];
+  //   const speedUpgradesPerRarity = [0, 10, 20, 30, 40, 50];
+  //   return {
+  //     distanceFactor: rangeUpgradesPerRarity[greaterRarity],
+  //     speedFactor: speedUpgradesPerRarity[greaterRarity],
+  //   };
+  // }
 
   /**
    * Gets the amount of time, in seconds that a voyage between from the first to the

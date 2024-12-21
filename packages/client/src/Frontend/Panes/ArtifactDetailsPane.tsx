@@ -524,9 +524,9 @@ function NewArtifactDescription({
           used to destroy planets. You need to choose a target planet for
           starting charging. After charging is complete, you can activate it
           which will consume energy to launch it at the designated target. When
-          it reaches the target it will explode, giving the launching player{" "}
+          it reaches the target it will explode, giving all players{" "}
           <span style={{ color: "#ffff00" }}>
-            {Math.floor(500 / uiManager.getCurrentTickerRate())} seconds
+            {Math.floor(300 / uiManager.getCurrentTickerRate())} seconds
           </span>{" "}
           to destroy planets within the pink circle radius including the target.
         </div>

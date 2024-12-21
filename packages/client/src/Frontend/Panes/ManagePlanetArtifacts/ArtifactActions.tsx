@@ -14,6 +14,7 @@ import {
   isUnconfirmedShutdownArtifactTx,
   isUnconfirmedDepositArtifactTx,
   isUnconfirmedWithdrawArtifactTx,
+  locationIdToHexStr,
 } from "@df/serde";
 import type { Artifact, ArtifactId, LocationId } from "@df/types";
 import {
@@ -42,6 +43,7 @@ import { DropBombPane } from "../DropBombPane";
 import type { TooltipTriggerProps } from "../Tooltip";
 import { TooltipTrigger } from "../Tooltip";
 import NotificationManager from "@frontend/Game/NotificationManager";
+import type { Hex } from "viem";
 
 export function ArtifactActions({
   artifactId,
@@ -101,38 +103,31 @@ export function ArtifactActions({
   const charge = useCallback(
     async (artifact: Artifact) => {
       if (onPlanet && isLocatable(onPlanet)) {
-        let targetPlanetId = undefined;
+        let data: Hex = "0x";
 
         if (artifact.artifactType === ArtifactType.Bomb) {
           const targetPlanet = await uiManager.startLinkFrom(
             onPlanet,
             artifact,
           );
-          targetPlanetId = targetPlanet?.locationId;
-        }
-
-        if (targetPlanetId) {
-          const targetPlanet = uiManager.getPlanetWithId(targetPlanetId);
-          if (targetPlanet && isLocatable(targetPlanet)) {
+          if (targetPlanet) {
+            const targetPlanetId = targetPlanet?.locationId;
             const distance = uiManager.getDistCoords(
               onPlanet.location.coords,
               targetPlanet.location.coords,
             );
-            if (distance < getRange(onPlanet, 100) / 2) {
-              console.log("targetPlanetId", targetPlanetId);
-              uiManager.chargeArtifact(
-                onPlanet.locationId,
-                artifact.id,
-                targetPlanetId ? `0x${targetPlanetId.toString()}` : "0x",
-              );
-            } else {
+            if (distance >= getRange(onPlanet, 100) / 2) {
               NotificationManager.getInstance().txInitError(
                 "df__chargeArtifact",
                 "Target planet is too far away",
               );
+              return;
             }
+            data = locationIdToHexStr(targetPlanetId) as Hex;
           }
         }
+
+        uiManager.chargeArtifact(onPlanet.locationId, artifact.id, data);
       }
     },
     [onPlanet, uiManager],
@@ -362,28 +357,29 @@ export function ArtifactActions({
   if (canActivate) {
     actions.unshift({
       name: TooltipName.ActivateArtifact,
-      extraContent: (
-        <>
-          {". "}
-          You need{" "}
-          {Math.floor(
-            uiManager.getEnergyNeededForMove(
-              onPlanet.locationId,
-              uiManager.getPinkZoneByArtifactId(artifact.id)?.locationId ??
+      extraContent:
+        artifact.artifactType === ArtifactType.Bomb ? (
+          <>
+            {". "}
+            You need{" "}
+            {Math.floor(
+              uiManager.getEnergyNeededForMove(
                 onPlanet.locationId,
-              0,
-              {
-                energyCapMultiplier: 100,
-                energyGroMultiplier: 100,
-                rangeMultiplier: 50,
-                speedMultiplier: 50,
-                defMultiplier: 100,
-              },
-            ),
-          )}{" "}
-          energy to launch this bomb.
-        </>
-      ),
+                uiManager.getPinkZoneByArtifactId(artifact.id)?.locationId ??
+                  onPlanet.locationId,
+                0,
+                {
+                  energyCapMultiplier: 100,
+                  energyGroMultiplier: 100,
+                  rangeMultiplier: 50,
+                  speedMultiplier: 50,
+                  defMultiplier: 100,
+                },
+              ),
+            )}{" "}
+            energy to launch this bomb.
+          </>
+        ) : undefined,
       children: (
         <Btn
           disabled={activating || !activateArtifactCooldownPassed}

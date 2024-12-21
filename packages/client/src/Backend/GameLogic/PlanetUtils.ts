@@ -21,7 +21,7 @@ import type {
   UpgradeState,
   WorldLocation,
 } from "@df/types";
-import { Biome, SpaceType, PlanetFlagType } from "@df/types";
+import { Biome, SpaceType, PlanetFlagType, PlanetStatus } from "@df/types";
 import { PlanetLevel } from "@df/types";
 import {
   type Entity,
@@ -110,6 +110,10 @@ export class PlanetUtils {
       prospectedBlockNumber: planet.prospectedBlockNumber,
       hasTriedFindingArtifact: planet.hasTriedFindingArtifact,
       heldArtifactIds: planet.heldArtifactIds,
+      destroyed: planet.destroyed,
+      frozen: planet.frozen,
+      effects: planet.effects,
+      flags: planet.flags,
     };
   }
 
@@ -311,7 +315,7 @@ export class PlanetUtils {
 
     const planetFlags = getComponentValue(PlanetFlags, planetEntity);
 
-    const TWO_POW32 = 4294967295n;
+    const TWO_POW32 = 4294967296n;
 
     const artifactIds = [];
     if (planetArtifact) {
@@ -397,7 +401,9 @@ export class PlanetUtils {
         ? (planetFlags.flags & (1n << BigInt(PlanetFlagType.EXPLORED))) > 0n
         : false,
       heldArtifactIds: artifactIds,
-      destroyed: false,
+      destroyed: planetFlags
+        ? (planetFlags.flags & (1n << BigInt(PlanetFlagType.DESTROYED))) > 0n
+        : false,
       frozen: false,
       effects: planetEffects,
       flags: planetFlags?.flags,

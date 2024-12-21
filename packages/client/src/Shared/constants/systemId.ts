@@ -9,6 +9,7 @@ import TestOnlySystemAbi from "contracts/out/TestOnlySystem.sol/TestOnlySystem.a
 import TickSystemAbi from "contracts/out/TickSystem.sol/TickSystem.abi.json";
 import ArtifactSystemAbi from "contracts/out/ArtifactSystem.sol/ArtifactSystem.abi.json";
 import ArtifactCreateSystemAbi from "contracts/out/ArtifactCreateSystem.sol/ArtifactCreateSystem.abi.json";
+import PinkBombSystemAbi from "contracts/out/PinkBombSystem.sol/PinkBombSystem.abi.json";
 import type { Abi } from "viem";
 
 export const MOVE_SYSTEM_ID = resourceToHex({
@@ -92,6 +93,14 @@ export const ARTIFACT_CREATE_SYSTEM_ID = resourceToHex({
   name: "ArtifactCreateSystem",
 });
 
+export const PINK_BOMB_SYSTEM_ABI: Abi = PinkBombSystemAbi;
+
+export const PINK_BOMB_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "atf.1",
+  name: "ProxySystem",
+});
+
 export const get_ABI_from_FunctionName = (functionName: string) => {
   if (functionName === "move" || functionName === "legacyMove") {
     return MOVE_SYSTEM_ABI;
@@ -137,6 +146,8 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     functionName === "findArtifact"
   ) {
     return ARTIFACT_CREATE_SYSTEM_ABI;
+  } else if (functionName === "destroy") {
+    return PINK_BOMB_SYSTEM_ABI;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ABI;
@@ -188,6 +199,8 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     functionName === "findArtifact"
   ) {
     return ARTIFACT_CREATE_SYSTEM_ID;
+  } else if (functionName === "destroy") {
+    return PINK_BOMB_SYSTEM_ID;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ID;

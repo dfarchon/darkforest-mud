@@ -133,7 +133,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
     cachedPlanets: Map<LocationId, PlanetRenderInfo>;
   };
   getLocationOfPlanet(planetId: LocationId): WorldLocation | undefined;
-  getActiveArtifact(planet: Planet): Artifact | undefined;
+  getActiveArtifacts(planet: Planet): Artifact[];
   getPlanetWithId(planetId: LocationId | undefined): Planet | undefined;
   updateArrival(planetId: LocationId, arrival: QueuedArrival): void;
   getAccount(): EthAddress | undefined;

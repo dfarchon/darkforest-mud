@@ -52,7 +52,7 @@ export class PinkZoneRenderer implements PinkZoneRendererType {
         );
         cR.queueCircleWorld(zone.coords, zone.radius, pinkA, 2);
         this.drawBombOnFly(zone);
-      } else if (curTick < zone.arrivalTick + 500) {
+      } else if (curTick < zone.arrivalTick + 300) {
         cR.queueCircleWorld(zone.coords, zone.radius, [255, 192, 203, 160]);
       }
     }

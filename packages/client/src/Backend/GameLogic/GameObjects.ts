@@ -55,6 +55,10 @@ import {
   locationIdToHexStr,
   locationIdFromHexStr,
   artifactIdToDecStr,
+  isUnconfirmedChargeArtifactTx,
+  isUnconfirmedShutdownArtifactTx,
+  isUnconfirmedShutdownArtifact,
+  isUnconfirmedChargeArtifact,
 } from "@df/serde";
 import type {
   Abstract,
@@ -873,6 +877,28 @@ export class GameObjects {
         artifact.transactions?.addTransaction(tx);
         this.setArtifact(artifact);
       }
+    } else if (isUnconfirmedChargeArtifactTx(tx)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.addTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.addTransaction(tx);
+        this.setArtifact(artifact);
+      }
+    } else if (isUnconfirmedShutdownArtifactTx(tx)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.addTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.addTransaction(tx);
+        this.setArtifact(artifact);
+      }
     } else if (isUnconfirmedActivateArtifactTx(tx)) {
       const planet = this.getPlanetWithId(tx.intent.locationId);
       const artifact = this.getArtifactById(tx.intent.artifactId);
@@ -1061,6 +1087,28 @@ export class GameObjects {
       if (planet) {
         planet.transactions?.removeTransaction(tx);
         this.setPlanet(planet);
+      }
+    } else if (isUnconfirmedChargeArtifact(tx.intent)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.removeTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.removeTransaction(tx);
+        this.setArtifact(artifact);
+      }
+    } else if (isUnconfirmedShutdownArtifact(tx.intent)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.removeTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.removeTransaction(tx);
+        this.setArtifact(artifact);
       }
     } else if (isUnconfirmedActivateArtifact(tx.intent)) {
       const planet = this.getPlanetWithId(tx.intent.locationId);

@@ -43,6 +43,26 @@ export const PlanetLevelNames = {
   [PlanetLevel.EIGHT]: "Level 8",
   [PlanetLevel.NINE]: "Level 9",
 } as const;
+/**
+ * Abstract type representing a planet status.
+ */
+export type PlanetStatus = Abstract<number, "PlanetStatus">;
+
+/**
+ * Enumeration of the possible planet statuses.
+ */
+export const PlanetStatus = {
+  DEFAULT: 0 as PlanetStatus,
+  DESTROYED: 1 as PlanetStatus,
+} as const;
+
+/**
+ * Mapping from PlanetStatus to pretty-printed names.
+ */
+export const PlanetStatusNames = {
+  [PlanetStatus.DEFAULT]: "Default",
+  [PlanetStatus.DESTROYED]: "Destroyed",
+} as const;
 
 /**
  * Abstract type representing a planet type.
@@ -85,6 +105,7 @@ export const PlanetFlagType = {
   OFFENSIVE_ARTIFACT: 1 as PlanetFlagType,
   DEFENSIVE_ARTIFACT: 2 as PlanetFlagType,
   PRODUCTIVE_ARTIFACT: 3 as PlanetFlagType,
+  DESTROYED: 4 as PlanetFlagType,
 } as const;
 
 /**
@@ -95,6 +116,7 @@ export const PlanetFlagTypeNames = {
   [PlanetFlagType.OFFENSIVE_ARTIFACT]: "Offensive Artifact",
   [PlanetFlagType.DEFENSIVE_ARTIFACT]: "Defensive Artifact",
   [PlanetFlagType.PRODUCTIVE_ARTIFACT]: "Productive Artifact",
+  [PlanetFlagType.DESTROYED]: "Destroyed",
 } as const;
 
 /**

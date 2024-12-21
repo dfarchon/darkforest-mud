@@ -558,15 +558,14 @@ export class GameUIManager extends EventEmitter {
   }
 
   public checkPlanetCanPink(planetId: LocationId): boolean {
-    return false;
     //TODO: fix here
-    return this.gameManager.checkPlanetCanPink(planetId);
+    const { canPink } = this.gameManager.checkPlanetCanPink(planetId);
+    return canPink;
   }
 
   public pinkLocation(locationId: LocationId) {
     // TODO: fix here
-    return;
-    // this.gameManager.pinkLocation(locationId);
+    this.gameManager.pinkLocation(locationId);
   }
 
   public kardashev(locationId: LocationId) {
@@ -1534,8 +1533,8 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getLocationOfPlanet(planetId);
   }
 
-  public getActiveArtifact(planet: Planet): Artifact | undefined {
-    return this.gameManager.getActiveArtifact(planet);
+  public getActiveArtifacts(planet: Planet): Artifact[] {
+    return this.gameManager.getActiveArtifacts(planet);
   }
 
   public getExploredChunks(): Iterable<Chunk> {

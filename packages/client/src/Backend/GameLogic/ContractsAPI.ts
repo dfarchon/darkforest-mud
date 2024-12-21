@@ -53,6 +53,7 @@ import type {
   UpgradeBranches,
   UpgradeLevels,
   VoyageId,
+  WorldLocation,
 } from "@df/types";
 import { Setting } from "@df/types";
 import { hexToResource } from "@latticexyz/common";
@@ -161,6 +162,7 @@ export class ContractsAPI extends EventEmitter {
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
   private setPlanetEmojiSubscription: Subscription;
+  private planetFlagsSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -414,6 +416,15 @@ export class ContractsAPI extends EventEmitter {
         console.log("set planet emoji subscription");
         console.log(locationIdFromHexStr(entity.toString()));
 
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
+      });
+
+    this.planetFlagsSubscription =
+      this.components.PlanetFlags.update$.subscribe((update) => {
+        const entity = update.entity;
         this.emit(
           ContractsAPIEvent.PlanetUpdate,
           locationIdFromHexStr(entity.toString()),
@@ -811,6 +822,7 @@ export class ContractsAPI extends EventEmitter {
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
     this.setPlanetEmojiSubscription.unsubscribe();
+    this.planetFlagsSubscription.unsubscribe();
     return;
     const { contract } = this;
 
@@ -1321,6 +1333,10 @@ export class ContractsAPI extends EventEmitter {
 
   public getPlanetById(planetId: LocationId): Planet | undefined {
     return this.planetUtils.getPlanetById(planetId);
+  }
+
+  public getDefaultPlanetByLocation(location: WorldLocation): Planet {
+    return this.planetUtils.defaultPlanetFromLocation(location);
   }
 
   public getPlanetEmoji(planetId: LocationId): string | undefined {
