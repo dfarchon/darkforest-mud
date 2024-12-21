@@ -20,7 +20,6 @@ import {
   ArtifactType,
   TooltipName,
 } from "@df/types";
-import _ from "lodash-es";
 import { range } from "@df/utils/number";
 import styled from "styled-components";
 import TimeAgo from "react-timeago";
@@ -327,7 +326,7 @@ export function ArtifactDetailsBody({
             <Green>Charge Stats Change</Green>
             <ArtifactDetailsHeader>
               <StatsContainer>
-                {_.range(0, 5).map((val) => (
+                {range(0, 5).map((val) => (
                   <UpgradeStatInfo
                     upgrades={[artifact.chargeUpgrade]}
                     stat={val}
@@ -344,7 +343,7 @@ export function ArtifactDetailsBody({
             <Green>Activate Stats Change</Green>
             <ArtifactDetailsHeader>
               <StatsContainer>
-                {_.range(0, 5).map((val) => (
+                {range(0, 5).map((val) => (
                   <UpgradeStatInfo
                     upgrades={[artifact.activateUpgrade]}
                     stat={val}

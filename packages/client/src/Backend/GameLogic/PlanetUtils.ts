@@ -406,7 +406,7 @@ export class PlanetUtils {
         : false,
       frozen: false,
       effects: planetEffects,
-      flags: planetFlags?.flags,
+      flags: planetFlags ? planetFlags.flags : 0n,
     };
   }
 
