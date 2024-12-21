@@ -294,7 +294,9 @@ export function ArtifactActions({
 
   const artifactGenreCheck =
     artifact.genre === ArtifactGenre.General ||
-    artifact.genre === ArtifactGenre.Productive ||
+    (artifact.genre === ArtifactGenre.Productive &&
+      (onPlanet.flags & (1n << BigInt(PlanetFlagType.PRODUCTIVE_ARTIFACT))) ===
+        0n) ||
     (artifact.genre === ArtifactGenre.Offensive &&
       (onPlanet.flags & (1n << BigInt(PlanetFlagType.OFFENSIVE_ARTIFACT))) ===
         0n) ||

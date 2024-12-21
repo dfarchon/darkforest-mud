@@ -697,6 +697,9 @@ library PlanetLib {
     if (artifact.genre == ArtifactGenre.DEFENSIVE && checkFlag(planet, PlanetFlagType.DEFENSIVE_ARTIFACT)) {
       revert Errors.ArtifactNotAvailable();
     }
+    if (artifact.genre == ArtifactGenre.PRODUCTIVE && checkFlag(planet, PlanetFlagType.PRODUCTIVE_ARTIFACT)) {
+      revert Errors.ArtifactNotAvailable();
+    }
   }
 
   function _validateActivateArtifact(Planet memory planet, Artifact memory artifact) internal pure {
@@ -714,6 +717,9 @@ library PlanetLib {
         revert Errors.ArtifactNotAvailable();
       }
       if (artifact.genre == ArtifactGenre.DEFENSIVE && checkFlag(planet, PlanetFlagType.DEFENSIVE_ARTIFACT)) {
+        revert Errors.ArtifactNotAvailable();
+      }
+      if (artifact.genre == ArtifactGenre.PRODUCTIVE && checkFlag(planet, PlanetFlagType.PRODUCTIVE_ARTIFACT)) {
         revert Errors.ArtifactNotAvailable();
       }
     }

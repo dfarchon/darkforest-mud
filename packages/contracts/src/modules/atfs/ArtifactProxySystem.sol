@@ -105,6 +105,8 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
       planet.setFlag(PlanetFlagType.OFFENSIVE_ARTIFACT);
     } else if (genre == ArtifactGenre.DEFENSIVE) {
       planet.setFlag(PlanetFlagType.DEFENSIVE_ARTIFACT);
+    } else if (genre == ArtifactGenre.PRODUCTIVE) {
+      planet.setFlag(PlanetFlagType.PRODUCTIVE_ARTIFACT);
     }
   }
 
@@ -113,6 +115,8 @@ abstract contract ArtifactProxySystem is IArtifactProxySystem, System, Errors {
       planet.unsetFlag(PlanetFlagType.OFFENSIVE_ARTIFACT);
     } else if (genre == ArtifactGenre.DEFENSIVE) {
       planet.unsetFlag(PlanetFlagType.DEFENSIVE_ARTIFACT);
+    } else if (genre == ArtifactGenre.PRODUCTIVE) {
+      planet.unsetFlag(PlanetFlagType.PRODUCTIVE_ARTIFACT);
     }
   }
 
