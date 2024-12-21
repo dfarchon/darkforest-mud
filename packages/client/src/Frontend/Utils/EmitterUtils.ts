@@ -1,8 +1,8 @@
+import { cloneDeep } from "@backend/Utils/clone-deep";
 import type { Monomitter } from "@df/events";
 import { monomitter } from "@df/events";
 import { isSpaceShip } from "@df/gamelogic";
 import type { Artifact, EthAddress, Planet } from "@df/types";
-import { cloneDeep } from "lodash-es";
 
 /**
  * Create a monomitter to emit objects with a given id from a cached map of ids to objects.

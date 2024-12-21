@@ -1,5 +1,5 @@
 import { TOKEN_NAME } from "@df/constants";
-import _ from "lodash-es";
+import { chunk } from "@df/utils/list";
 import React from "react";
 
 import type { DarkForestNumberInput } from "../../Components/Input";
@@ -39,7 +39,7 @@ function RewardByPlayerRank({
 export function RewardsPane({ config, onUpdate }: LobbiesPaneProps) {
   let rewardInputs = null;
   if (config.ROUND_END_REWARDS_BY_RANK.displayValue) {
-    rewardInputs = _.chunk(
+    rewardInputs = chunk(
       config.ROUND_END_REWARDS_BY_RANK.displayValue,
       rowChunkSize,
     ).map((items, rowIdx) => {

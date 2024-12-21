@@ -11,6 +11,7 @@ import { neverResolves, weiToEth } from "@df/network";
 import { address } from "@df/serde";
 import { addressToHex } from "@df/serde";
 import type { UnconfirmedUseKey } from "@df/types";
+import { reversed } from "@df/utils/list";
 import { bigIntFromKey } from "@df/whitelist";
 import { RegisterPlayerComponent } from "@frontend/Components/RegisterPlayerComponent";
 import { WalletModal } from "@frontend/Components/WalletModal";
@@ -26,7 +27,6 @@ import {
 import { useMUD } from "@mud/MUDContext";
 import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 import { utils, Wallet } from "ethers";
-import { reverse } from "lodash-es";
 import React, {
   useCallback,
   useEffect,
@@ -350,7 +350,7 @@ export function GameLandingPage() {
 
         // Search accounts backwards in case a player has used a private key more than once.
         // In that case, we want to take the most recently created account.
-        const account = reverse(getAccounts()).find(
+        const account = reversed(getAccounts()).find(
           (a) => a.address === selectedAddress,
         );
         if (!account) {

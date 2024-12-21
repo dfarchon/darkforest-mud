@@ -27,7 +27,9 @@ import {
   type Transaction,
 } from "@df/types";
 import { IconType } from "@df/ui";
-import { isEmpty, reverse, startCase, values } from "lodash-es";
+import { isEmpty } from "@df/utils/comparison";
+import { reversed } from "@df/utils/list";
+import { startCase } from "@df/utils/string";
 import { useCallback } from "react";
 import Loader from "react-loader-spinner";
 import TimeAgo from "react-timeago";
@@ -282,7 +284,7 @@ function QueuedTransactionsTable({
   transactions: Wrapper<TransactionRecord>;
 }) {
   const uiManager = useUIManager();
-  const visibleTransactions = reverse(values(transactions.value));
+  const visibleTransactions = reversed(Object.values(transactions.value));
 
   const headers = ["Type", "Hash", "State", "Planet", "Updated", "Actions"];
   const alignments: Array<"r" | "c" | "l"> = ["c", "c", "c", "c", "c", "c"];
@@ -309,7 +311,7 @@ function QueuedTransactionsTable({
   );
 
   const queuedTransctions = useCallback(() => {
-    return values(transactions.value).filter((tx) =>
+    return Object.values(transactions.value).filter((tx) =>
       ["Init", "Prioritized"].includes(tx.state),
     );
   }, [transactions]);

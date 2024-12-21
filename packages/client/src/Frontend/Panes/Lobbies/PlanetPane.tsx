@@ -1,4 +1,4 @@
-import _ from "lodash-es";
+import { chunk } from "@df/utils/list";
 import React from "react";
 
 import type { DarkForestNumberInput } from "../../Components/Input";
@@ -53,7 +53,7 @@ function ThresholdByPlanetLevel({
 export function PlanetPane({ config, onUpdate }: LobbiesPaneProps) {
   let planetLevelThresholds = null;
   if (config.PLANET_LEVEL_THRESHOLDS.displayValue) {
-    planetLevelThresholds = _.chunk(
+    planetLevelThresholds = chunk(
       config.PLANET_LEVEL_THRESHOLDS.displayValue,
       rowChunkSize,
     ).map((items, rowIdx) => {

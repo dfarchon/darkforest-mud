@@ -21,6 +21,7 @@ import {
   TooltipName,
 } from "@df/types";
 import _ from "lodash-es";
+import { range } from "@df/utils/number";
 import styled from "styled-components";
 import TimeAgo from "react-timeago";
 

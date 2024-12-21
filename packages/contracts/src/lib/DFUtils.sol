@@ -10,6 +10,7 @@ import { VerifySystem } from "../systems/VerifySystem.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "../lib/VerificationInput.sol";
 import { Planet } from "../lib/Planet.sol";
+import { Ticker, TickerData } from "../codegen/tables/Ticker.sol";
 import { PlanetStatus } from "../codegen/common.sol";
 import { Errors } from "../interfaces/errors.sol";
 
@@ -101,5 +102,16 @@ library DFUtils {
     if (planet.status != PlanetStatus.DEFAULT) {
       revert Errors.PlanetNotAvailable();
     }
+  }
+
+  /**
+   * Used to get the current tick number.
+   */
+  function getCurrentTick() internal view returns (uint256) {
+    TickerData memory ticker = Ticker.get();
+    if (ticker.paused) {
+      return ticker.tickNumber;
+    }
+    return ticker.tickNumber + uint64((block.timestamp - ticker.timestamp) * ticker.tickRate);
   }
 }

@@ -73,7 +73,6 @@ import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractFunction, Event, providers } from "ethers";
 import { BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
-import { flatten } from "lodash-es";
 import type { Subscription } from "rxjs";
 import type { Hex } from "viem";
 

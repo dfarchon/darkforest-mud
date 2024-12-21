@@ -1,5 +1,6 @@
+import { cloneDeep } from "@backend/Utils/clone-deep";
 import { CONTRACT_PRECISION } from "@df/constants";
-import { hasOwner, isActivated, isEmojiFlagMessage } from "@df/gamelogic";
+import { hasOwner, isEmojiFlagMessage } from "@df/gamelogic";
 import type {
   Artifact,
   EmojiFlagBody,
@@ -9,7 +10,6 @@ import type {
   Upgrade,
 } from "@df/types";
 import { ArrivalType, ArtifactType, PlanetType } from "@df/types";
-import { cloneDeep } from "lodash-es";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 

@@ -1,4 +1,3 @@
-import { findIndex } from "lodash-es";
 import CircularBuffer from "mnemonist/circular-buffer";
 import deferred from "p-defer";
 
@@ -137,8 +136,7 @@ export class ThrottledConcurrentQueue<U = unknown> implements Queue {
   public remove(
     predicate: (metadata: U | undefined) => boolean,
   ): QueuedTask<unknown, U> {
-    const foundIndex = findIndex(
-      this.taskQueue,
+    const foundIndex = this.taskQueue.findIndex(
       (task: QueuedTask<unknown, U>) => predicate(task.metadata),
     );
 
@@ -162,8 +160,7 @@ export class ThrottledConcurrentQueue<U = unknown> implements Queue {
   public prioritize(
     predicate: (metadata: U | undefined) => boolean,
   ): QueuedTask<unknown, U> {
-    const foundIndex = findIndex(
-      this.taskQueue,
+    const foundIndex = this.taskQueue.findIndex(
       (task: QueuedTask<unknown, U>) => predicate(task.metadata),
     );
 

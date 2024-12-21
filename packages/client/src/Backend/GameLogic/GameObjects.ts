@@ -1,12 +1,7 @@
-import {
-  EMPTY_ADDRESS,
-  MAX_PLANET_LEVEL,
-  MIN_PLANET_LEVEL,
-} from "@df/constants";
+import { EMPTY_ADDRESS } from "@df/constants";
 import type { Monomitter } from "@df/events";
 import { monomitter } from "@df/events";
 import { hasOwner, isActivated, isLocatable } from "@df/gamelogic";
-import { getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
 import {
   isUnconfirmedActivateArtifact,
@@ -87,9 +82,7 @@ import type { Biome } from "@df/types";
 import { ArtifactType, PlanetType, SpaceType, ArtifactStatus } from "@df/types";
 import type { ClientComponents } from "@mud/createClientComponents";
 import autoBind from "auto-bind";
-import bigInt from "big-integer";
 import { ethers } from "ethers";
-import { remove } from "lodash-es";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import NotificationManager from "../../Frontend/Game/NotificationManager";
@@ -1464,9 +1457,21 @@ export class GameObjects {
   }
 
   private removeArrival(planetId: LocationId, arrivalId: VoyageId) {
-    this.arrivals?.delete(arrivalId);
-    const planetArrivalIds = this.planetArrivalIds?.get(planetId) ?? [];
-    remove(planetArrivalIds, (id) => id === arrivalId);
+    this.arrivals.delete(arrivalId);
+    const planetArrivalIds = this.planetArrivalIds.get(planetId) ?? [];
+    if (planetArrivalIds.length === 0) {
+      // NOTE: perhaps we should delete the reference here or set to undefined use WeakMap to automatically GC
+      //       since this will just acumulate pointers to empty arrays in memory the longer the gameplay is
+      // this.planetArrivalIds?.delete(planetId);
+      // this.planetArrivalIds?.set(planetId, undefined);
+      return;
+    }
+
+    this.planetArrivalIds.set(
+      planetId,
+      // filter out planet arrival by id, and keep rest
+      planetArrivalIds.filter((id) => id !== arrivalId),
+    );
   }
 
   public updateArrival(planetId: LocationId, arrival: QueuedArrival): void {
