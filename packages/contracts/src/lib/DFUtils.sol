@@ -13,6 +13,7 @@ import { Planet } from "../lib/Planet.sol";
 import { Ticker, TickerData } from "../codegen/tables/Ticker.sol";
 import { PlanetStatus } from "../codegen/common.sol";
 import { Errors } from "../interfaces/errors.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 bytes14 constant DF_NAMESPACE = "df";
 
@@ -113,5 +114,9 @@ library DFUtils {
       return ticker.tickNumber;
     }
     return ticker.tickNumber + uint64((block.timestamp - ticker.timestamp) * ticker.tickRate);
+  }
+
+  function getDFNamespace() internal pure returns (ResourceId) {
+    return WorldResourceIdLib.encodeNamespace(DF_NAMESPACE);
   }
 }

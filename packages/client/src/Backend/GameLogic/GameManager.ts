@@ -84,7 +84,10 @@ import type {
   SignedMessage,
   Transaction,
   TxIntent,
+  UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
+  UnconfirmedApplyToGuild,
+  UnconfirmedApproveApplication,
   UnconfirmedBlue,
   UnconfirmedBurn,
   UnconfirmedBuyArtifact,
@@ -94,20 +97,28 @@ import type {
   UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
   UnconfirmedClaim,
+  UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
+  UnconfirmedDisbandGuild,
   UnconfirmedDonate,
   UnconfirmedFindArtifact,
   UnconfirmedInit,
   UnconfirmedInvadePlanet,
+  UnconfirmedInviteToGuild,
   UnconfirmedKardashev,
+  UnconfirmedKickMember,
+  UnconfirmedLeaveGuild,
   UnconfirmedMove,
   UnconfirmedPink,
   UnconfirmedPlanetTransfer,
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSetGrant,
+  UnconfirmedSetMemberRole,
   UnconfirmedSetPlanetEmoji,
+  UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawSilver,
@@ -116,9 +127,12 @@ import type {
   WorldCoords,
   WorldLocation,
 } from "@df/types";
+import type { Guild, GuildId } from "@df/types";
 import {
   ArtifactRarity,
   ArtifactType,
+  GuildRole,
+  GuildStatus,
   HatType,
   PlanetMessageType,
   PlanetType,
@@ -132,6 +146,7 @@ import bigInt from "big-integer";
 import delay from "delay";
 import type { Contract, ContractInterface, providers } from "ethers";
 import { BigNumber } from "ethers";
+import { utils } from "ethers";
 import { EventEmitter } from "events";
 
 import type {
@@ -244,6 +259,15 @@ export class GameManager extends EventEmitter {
   private readonly players: Map<string, Player>;
 
   /**
+   * Map from guild IDs to Guild objects. This isn't stored in {@link GameObjects},
+   * because it's not technically an entity that exists in the world. A player just controls planets
+   * and artifacts that do exist in the world.
+   *
+   * @todo move this into a new `Guild` class.
+   */
+  // private readonly guilds: Map<GuildId, Guild>;
+
+  /**
    * Allows us to make contract calls, and execute transactions. Be careful about how you use this
    * guy. You don't want to cause your client to send an excessive amount of traffic to whatever
    * node you're connected to.
@@ -325,6 +349,11 @@ export class GameManager extends EventEmitter {
    * Whenever we refresh the players twitter accounts or scores, we publish an event here.
    */
   public readonly playersUpdated$: Monomitter<void>;
+
+  /**
+   * Whenever we refresh the guilds, we publish an event here.
+   */
+  public readonly guildsUpdated$: Monomitter<void>;
 
   /**
    * Handle to an interval that periodically uploads diagnostic information from this client.
@@ -478,6 +507,7 @@ export class GameManager extends EventEmitter {
     this.paused$ = monomitter(true);
     // this.halfPrice$ = monomitter(true);
     this.playersUpdated$ = monomitter();
+    this.guildsUpdated$ = monomitter();
 
     // if (contractConstants.CAPTURE_ZONES_ENABLED) {
     //   this.captureZoneGenerator = new CaptureZoneGenerator(
@@ -2506,7 +2536,7 @@ export class GameManager extends EventEmitter {
 
       // this is shitty. used for the popup window
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-revealLocationId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-revealLocationId`,
         planetId,
       );
 
@@ -2619,7 +2649,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-claimLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-claimLocationId`,
   //       planetId,
   //     );
 
@@ -2749,7 +2779,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-burnLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-burnLocationId`,
   //       planetId,
   //     );
 
@@ -2878,7 +2908,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-pinkLocationId`,
   //       planetId,
   //     );
 
@@ -3009,7 +3039,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-kardashevLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-kardashevLocationId`,
   //       planetId,
   //     );
 
@@ -3159,7 +3189,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-blueLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-blueLocationId`,
   //       planetId,
   //     );
 
@@ -3235,7 +3265,7 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-invadePlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-invadePlanet`,
   //       locationId,
   //     );
 
@@ -3314,7 +3344,7 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-capturePlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-capturePlanet`,
   //       locationId,
   //     );
 
@@ -3422,13 +3452,13 @@ export class GameManager extends EventEmitter {
       // to resolve that error. if the asynchronous `beforeRetry` function returns
       // true, retry initializing the player. if it returns false, or if the
       // `beforeRetry` is undefined, then don't retry and throw an exception.
-      // eslint-disable-next-line no-constant-condition
+
       while (true) {
         try {
           const entryFee = 0; //await this.contractsAPI.getEntryFee();
           console.log("entry fee: ", entryFee.toString());
           localStorage.setItem(
-            `${this.getAccount()?.toLowerCase()}-entryFee`,
+            `${this.ethConnection.getAddress()?.toLowerCase()}-entryFee`,
             entryFee.toString(),
           );
 
@@ -3817,7 +3847,7 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-prospectPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-prospectPlanet`,
         planetId,
       );
 
@@ -3892,7 +3922,7 @@ export class GameManager extends EventEmitter {
 
       // this is shitty. used for the popup window
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-findArtifactOnPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-findArtifactOnPlanet`,
         planetId,
       );
 
@@ -3961,11 +3991,11 @@ export class GameManager extends EventEmitter {
   ): Promise<Transaction<UnconfirmedDepositArtifact>> {
     try {
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-depositPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-depositPlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-depositArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-depositArtifact`,
         artifactId,
       );
 
@@ -4029,11 +4059,11 @@ export class GameManager extends EventEmitter {
 
       // this is shitty. used for the popup window
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-withdrawPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawPlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-withdrawArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawArtifact`,
         artifactId,
       );
 
@@ -4113,11 +4143,11 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-activatePlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-activatePlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-activateArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-activateArtifact`,
         artifactId,
       );
 
@@ -4162,11 +4192,11 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-deactivatePlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-deactivatePlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-deactivateArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-deactivateArtifact`,
         artifactId,
       );
 
@@ -4209,15 +4239,15 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-changeArtifactImageType-locationId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-changeArtifactImageType-locationId`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-changeArtifactImageType-artifactId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-changeArtifactImageType-artifactId`,
         artifactId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-changeArtifactImageType-newImageType`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-changeArtifactImageType-newImageType`,
         newImageType.toString(),
       );
 
@@ -4265,26 +4295,26 @@ export class GameManager extends EventEmitter {
   //     const halfPrice = this.getHalfPrice();
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyArtifactOnPlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifactOnPlanet`,
   //       locationId,
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyArtifactType`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifactType`,
   //       Number(type).toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyArtifactRarity`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifactRarity`,
   //       Number(rarity).toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
-  //     // localStorage.setItem(`${this.getAccount()?.toLowerCase()}-buyArtifact`, artifactId);
+  //     // localStorage.setItem(`${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifact`, artifactId);
 
   //     // eslint-disable-next-line no-inner-declarations
   //     function random256Id() {
@@ -4445,7 +4475,7 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-withdrawSilverPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawSilverPlanet`,
         locationId,
       );
 
@@ -4514,7 +4544,7 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-setPlanetEmoji-planetId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-setPlanetEmoji-planetId`,
         locationId,
       );
 
@@ -4737,10 +4767,13 @@ export class GameManager extends EventEmitter {
     bypassChecks = false,
   ): Promise<Transaction<UnconfirmedMove>> {
     localStorage.setItem(
-      `${this.getAccount()?.toLowerCase()}-fromPlanet`,
+      `${this.ethConnection.getAddress()?.toLowerCase()}-fromPlanet`,
       from,
     );
-    localStorage.setItem(`${this.getAccount()?.toLowerCase()}-toPlanet`, to);
+    localStorage.setItem(
+      `${this.ethConnection.getAddress()?.toLowerCase()}-toPlanet`,
+      to,
+    );
 
     try {
       // if (!bypassChecks && this.checkGameHasEnded()) {
@@ -4895,11 +4928,11 @@ export class GameManager extends EventEmitter {
     try {
       // this is shitty
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-upPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-upPlanet`,
         planetId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-branch`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-branch`,
         branch.toString(),
       );
 
@@ -4942,7 +4975,7 @@ export class GameManager extends EventEmitter {
     try {
       // this is shitty
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-refreshPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-refreshPlanet`,
         planetId,
       );
 
@@ -5008,26 +5041,26 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatPlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatPlanet`,
   //       planetId,
   //     );
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatLevel`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatLevel`,
   //       planet.hatLevel.toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatType`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatType`,
   //       planet.hatType.toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatCostEth`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatCostEth`,
   //       hatCostEth.toString(),
   //     );
 
@@ -5175,17 +5208,17 @@ export class GameManager extends EventEmitter {
   //     };
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyPlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyPlanet`,
   //       planetId,
   //     );
 
   //     // localStorage.setItem(
-  //     //   `${this.getAccount()?.toLowerCase()}-buyPlanetAmountBefore`,
+  //     //   `${this.ethConnection.getAddress()?.toLowerCase()}-buyPlanetAmountBefore`,
   //     //   player.buyPlanetAmount.toString()
   //     // );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
@@ -5288,11 +5321,11 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buySpaceshipOnPlanetId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buySpaceshipOnPlanetId`,
   //       planetId,
   //     );
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
@@ -5347,7 +5380,7 @@ export class GameManager extends EventEmitter {
       const fee = bigInt(1_000_000_000_000_000).multiply(amount).toString();
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-donateAmount`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-donateAmount`,
         amount.toString(),
       );
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
@@ -5387,11 +5420,11 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-transferPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-transferPlanet`,
         planetId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-transferOwner`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-transferOwner`,
         newOwner,
       );
 
@@ -5809,7 +5842,7 @@ export class GameManager extends EventEmitter {
   /**
    * Returns constructors of classes that may be useful for developing plugins.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   public getConstructors() {
     return {
       MinerManager,
@@ -6106,4 +6139,563 @@ export class GameManager extends EventEmitter {
   // public getHalfPrice$(): Monomitter<boolean> {
   //   return this.halfPrice$;
   // }
+
+  // Guild Stuff
+
+  public getGuild(guildId?: GuildId): Guild | undefined {
+    return this.contractsAPI.getGuildUtils().getGuildById(guildId);
+  }
+
+  public getPlayerGuildId(addr: EthAddress): GuildId | undefined {
+    return this.contractsAPI.getGuildUtils().getGuildIdByPlayer(addr);
+  }
+
+  public getAllGuildIds(): GuildId[] {
+    return this.contractsAPI.getGuildUtils().getGuildIds();
+  }
+
+  public getAllGuilds(): Guild[] {
+    const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
+    const res: Guild[] = [];
+
+    for (let i = 0; i < guildIds.length; i++) {
+      const guildId = guildIds[i];
+      const guild = this.getGuild(guildId);
+      if (!guild) continue;
+      res.push(guild);
+    }
+    return res;
+  }
+
+  public hardRefreshGuild(guildId?: GuildId): void {
+    if (!guildId) return;
+
+    const guildFromBlockchain = this.contractsAPI
+      .getGuildUtils()
+      .getGuildById(guildId);
+    if (!guildFromBlockchain) return;
+
+    this.guildsUpdated$.publish();
+  }
+
+  public getGuildCreateFee(): bigint {
+    const result = this.contractsAPI.getGuildUtils().getCreateGuildFee();
+    if (!result) throw Error("Create Fee Error");
+    return result;
+  }
+
+  public async createGuild(
+    guildName: string,
+  ): Promise<Transaction<UnconfirmedCreateGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (guildId) throw Error("you are already in a guild");
+
+      const unionCreationFee = this.getGuildCreateFee();
+
+      const unionCreationFeeETH = utils.formatEther(unionCreationFee);
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-guildName`,
+        guildName,
+      );
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-fee`,
+        unionCreationFeeETH.toString(),
+      );
+
+      console.log("test");
+      console.log(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-unionName`,
+      );
+      console.log(guildName);
+      console.log(unionCreationFeeETH);
+
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
+      const txIntent: UnconfirmedCreateGuild = {
+        delegator: delegator,
+        methodName: "df__createGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([guildName]),
+        name: guildName,
+      };
+
+      const tx = await this.submitTransaction(txIntent, {
+        value: unionCreationFee.toString(),
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__createGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async inviteToGuild(
+    invitee: EthAddress,
+  ): Promise<Transaction<UnconfirmedInviteToGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+      const inviter = this.account;
+
+      const inviterGuildId = this.getPlayerGuildId(inviter);
+      if (!inviterGuildId) throw Error("no inviter guildId");
+
+      const inviterRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(inviter);
+
+      if (inviterRole === GuildRole.NONE || inviterRole === GuildRole.MEMBER)
+        throw Error("no inviter role");
+
+      const inviteePlayer = this.getPlayer(invitee);
+      if (!inviteePlayer) throw Error("no invitee player");
+
+      const invitee_guildId = this.getPlayerGuildId(invitee);
+
+      if (invitee_guildId) throw Error("invitee is already in a guild");
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}--inviteToGuild-guildId`,
+        inviterGuildId.toString(),
+      );
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}--inviteToGuild-invitee`,
+        invitee.toString(),
+      );
+
+      const txIntent: UnconfirmedInviteToGuild = {
+        delegator: this.account,
+        methodName: "df__inviteToGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([invitee]),
+        guildId: inviterGuildId,
+        invitee: invitee,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__inviteToGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async acceptInvitation(
+    guildId: GuildId,
+  ): Promise<Transaction<UnconfirmedAcceptInvitation>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const playerGuildId = this.getPlayerGuildId(this.account);
+      if (playerGuildId) throw Error("you are already in a guild");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const isInvited = this.contractsAPI
+        .getGuildUtils()
+        .isInvitedToGuild(this.account, guildId);
+      if (!isInvited) throw Error("you are not invited to this guild");
+
+      const isOnLeaveCooldown = this.contractsAPI
+        .getGuildUtils()
+        .checkGuildLeaveCooldown(this.account);
+      if (!isOnLeaveCooldown) throw Error("you are on leave cooldown");
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}---acceptInvitation-guildId`,
+        guildId.toString(),
+      );
+
+      const txIntent: UnconfirmedAcceptInvitation = {
+        delegator: this.account,
+        methodName: "df__acceptInvitation",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([guildId]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__acceptInvitation",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async applyToGuild(
+    guildId: GuildId,
+  ): Promise<Transaction<UnconfirmedApplyToGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const playerGuild = this.getPlayerGuildId(this.account);
+      if (playerGuild) throw Error("you are already in a guild");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const isOnLeaveCooldown = this.contractsAPI
+        .getGuildUtils()
+        .checkGuildLeaveCooldown(this.account);
+      if (!isOnLeaveCooldown) throw Error("you are on leave cooldown");
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}---applyToGuild-guildId`,
+        guildId.toString(),
+      );
+
+      const txIntent: UnconfirmedApplyToGuild = {
+        delegator: this.account,
+        methodName: "df__applyToGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([guildId]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__applyToGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async approveApplication(
+    player: EthAddress,
+  ): Promise<Transaction<UnconfirmedApproveApplication>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const operator = this.account;
+      const operatorInfo = this.getPlayer(operator);
+      if (!operatorInfo) throw Error("no operatorInfo");
+
+      const playerInfo = this.getPlayer(player);
+      if (!playerInfo) throw Error("no playerInfo");
+
+      const guildId = this.getPlayerGuildId(operator);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const guildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(operator);
+      if (guildRole !== GuildRole.OFFICER && guildRole !== GuildRole.LEADER)
+        throw Error("not an officer or leader");
+
+      const playerGuild = this.getPlayerGuildId(player);
+      if (playerGuild) throw Error("you are already in a guild");
+
+      const txIntent: UnconfirmedApproveApplication = {
+        delegator: operator,
+        methodName: "df__approveApplication",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([player]),
+        guildId: guildId,
+        applicant: player,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__approveApplication",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async leaveGuild(): Promise<Transaction<UnconfirmedLeaveGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(this.account);
+      if (guildRole === GuildRole.NONE || guildRole === GuildRole.LEADER)
+        throw Error("guild role unexpected");
+
+      const txIntent: UnconfirmedLeaveGuild = {
+        delegator: this.account,
+        methodName: "df__leaveGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__leaveGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async transferGuildLeadership(
+    newOwner: EthAddress,
+  ): Promise<Transaction<UnconfirmedTransferGuildLeadership>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const newOwnerPlayer = this.getPlayer(newOwner);
+      if (!newOwnerPlayer) throw Error("no newOwnerPlayer");
+
+      const newOwnerGuildId = this.getPlayerGuildId(newOwner);
+      if (!newOwnerGuildId) throw Error("no newOwnerGuildId");
+
+      if (newOwnerGuildId !== guildId)
+        throw Error("newOwner is not in the guild");
+
+      const txIntent: UnconfirmedTransferGuildLeadership = {
+        delegator: this.account,
+        methodName: "df__transferGuildLeadership",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([newOwner]),
+        guildId: guildId,
+        newOwner: newOwner,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__transferGuildLeadership",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async disbandGuild(): Promise<Transaction<UnconfirmedDisbandGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+
+      if (guild.status === GuildStatus.DISBANDED)
+        throw Error("guild is disbanded");
+
+      if (guild.number > 1) {
+        throw Error("guild has members");
+      }
+
+      if (guild.owner !== this.account) throw Error("not the guild leader");
+
+      alert(
+        "This is a dangerous operation. Are you sure you want to disband the guild?",
+      );
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}--disbandGuild-guildId`,
+        guildId.toString(),
+      );
+
+      const txIntent: UnconfirmedDisbandGuild = {
+        delegator: this.account,
+        methodName: "df__disbandGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__disbandGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async setGrant(
+    newGrant: GuildRole,
+  ): Promise<Transaction<UnconfirmedSetGrant>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const txIntent: UnconfirmedSetGrant = {
+        delegator: this.account,
+        methodName: "df__setGrant",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([newGrant]),
+        guildId: guildId,
+        newGrant: newGrant,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__setGrant",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async setMemberRole(
+    member: EthAddress,
+    newRole: GuildRole,
+  ): Promise<Transaction<UnconfirmedSetMemberRole>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const memberPlayer = this.getPlayer(member);
+      if (!memberPlayer) throw Error("no memberPlayer");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const memberGuildId = this.getPlayerGuildId(member);
+      if (!memberGuildId) throw Error("no memberGuildId");
+
+      if (memberGuildId !== guildId) throw Error("member is not in the guild");
+
+      const operatorGuildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(this.account);
+      if (operatorGuildRole !== GuildRole.LEADER) throw Error("not a leader");
+
+      const memberGuildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(member);
+      if (memberGuildRole === GuildRole.NONE)
+        throw Error("member is not in the guild");
+
+      if (newRole === GuildRole.LEADER || newRole === GuildRole.NONE)
+        throw Error("new role unexpected");
+
+      if (memberGuildRole === GuildRole.LEADER)
+        throw Error("cannot change role of current leader");
+
+      const txIntent: UnconfirmedSetMemberRole = {
+        delegator: this.account,
+        methodName: "df__setMemberRole",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([member, newRole]),
+        guildId: guildId,
+        member: member,
+        newRole: newRole,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__setMemberRole",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async kickMember(
+    member: EthAddress,
+  ): Promise<Transaction<UnconfirmedKickMember>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const memberPlayer = this.getPlayer(member);
+      if (!memberPlayer) throw Error("no memberPlayer");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const memberGuildId = this.getPlayerGuildId(member);
+      if (!memberGuildId) throw Error("no memberGuildId");
+
+      if (memberGuildId !== guildId) throw Error("member is not in the guild");
+
+      const operatorGuildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(this.account);
+      if (operatorGuildRole !== GuildRole.LEADER) throw Error("not a leader");
+
+      const txIntent: UnconfirmedKickMember = {
+        delegator: this.account,
+        methodName: "df__kickMember",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([member]),
+        guildId: guildId,
+        member: member,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__kickMember",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
 }

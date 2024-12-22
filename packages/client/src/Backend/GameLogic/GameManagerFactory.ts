@@ -69,7 +69,7 @@ import type { HashConfig } from "../../_types/global/GlobalTypes";
 import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { pollSetting } from "../../Frontend/Utils/SettingsHooks";
 import type { TerminalHandle } from "../../Frontend/Views/Terminal";
-import { PersistentChunkStore } from "../Storage/PersistentChunkStore";
+import PersistentChunkStore from "../Storage/PersistentChunkStore";
 import SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { makeContractsAPI } from "./ContractsAPI";
 import { GameManager } from "./GameManager";

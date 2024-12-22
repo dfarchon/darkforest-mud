@@ -125,9 +125,9 @@ class ReaderDataStore {
 
     if (planet && isLocatable(planet)) {
       // clear the location of the LocatablePlanet, turning it back into a planet
-      /* eslint-disable @typescript-eslint/no-unused-vars */
+
       const { location, biome, ...nonLocatable } = planet;
-      /* eslint-enable @typescript-eslint/no-unused-vars */
+
       planet = nonLocatable;
     }
 

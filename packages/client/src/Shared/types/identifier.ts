@@ -33,8 +33,8 @@ export type EthAddress = Abstract<string, "EthAddress">;
 export type ArtifactId = Abstract<string, "ArtifactId">;
 
 /**
- * a union UID. these start at 1 and auto-increment in the contract. this is
- * immutable and the only place a UnionId should ever be created is on
- * initial deserialization of a Union from contract data (see `serde`)
+ * a guild UID. these start at 1 and auto-increment in the contract. this is
+ * immutable and the only place a GuildId should ever be created is on
+ * initial deserialization of a Guild from contract data (see `serde`)
  */
-export type UnionId = Abstract<string, "UnionId">;
+export type GuildId = Abstract<number, "GuildId">;

@@ -330,6 +330,5 @@ export class VoyageRenderer implements VoyageRendererType {
     );
   }
 
-  // eslint-disable-next-line
   flush() {}
 }

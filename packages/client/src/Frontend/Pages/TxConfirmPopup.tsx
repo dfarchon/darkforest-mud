@@ -253,6 +253,7 @@ export function TxConfirmPopup() {
     `${account}-buySpaceshipOnPlanetId`,
   );
   const buySpaceshipCost =
+    // eslint-disable-next-line no-nested-ternary
     method === "buySpaceship"
       ? halfPrice && halfPrice === "true"
         ? 0.0005
@@ -265,6 +266,13 @@ export function TxConfirmPopup() {
   const donationAmount =
     method === "donate" ? Number(rawDonateAmount) * 0.001 : 0;
 
+  const createGuildName = localStorage.getItem(
+    `${account}-createGuild-guildName`,
+  );
+
+  const createGuildFee = localStorage.getItem(`${account}-createGuild-fee`);
+
+  const createGuildFeeEth = createGuildFee ? Number(createGuildFee) : 0;
   // function isTypeOK() {
   //     if (butArtifactType === undefined) return false;
   //     const val = Number(butArtifactType);
@@ -339,6 +347,7 @@ export function TxConfirmPopup() {
         buyPlanetCost +
         buySpaceshipCost +
         donationAmount +
+        createGuildFeeEth +
         weiToEth(gweiToWei(Number(gasLimit) * Number(gasFeeGwei)));
 
       return res.toFixed(18).toString();
@@ -368,6 +377,7 @@ export function TxConfirmPopup() {
         buyPlanetCost +
         buySpaceshipCost +
         donationAmount +
+        createGuildFeeEth +
         weiToEth(gweiToWei(Number(gasLimit) * Number(val)));
 
       return pre + res.toFixed(18).toString();
@@ -401,7 +411,7 @@ export function TxConfirmPopup() {
       <div className="section">
         <Row>
           <b>Contract Action</b>
-          <span>{method.toUpperCase()}</span>
+          <span>{method?.toUpperCase()}</span>
         </Row>
         {method === "revealLocation" && (
           <Row>
@@ -488,7 +498,18 @@ export function TxConfirmPopup() {
           </>
         )}
 
-        {method === "move" && (
+        {method === "df__createGuild" && (
+          <>
+            <Row>
+              <b>Create Guild Fee </b>
+              <span>
+                {createGuildFeeEth} ${TOKEN_NAME}
+              </span>
+            </Row>
+          </>
+        )}
+
+        {method === "df__legacyMove" && (
           <>
             <Row>
               <b>From</b>
@@ -500,7 +521,7 @@ export function TxConfirmPopup() {
             </Row>
           </>
         )}
-        {method === "upgradePlanet" && (
+        {method === "df__upgradePlanet" && (
           <>
             <Row>
               <b>On</b>

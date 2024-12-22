@@ -15,6 +15,11 @@ import { DFUtils } from "../lib/DFUtils.sol";
 import { GuildConfig } from "../codegen/tables/GuildConfig.sol";
 import { Player } from "../codegen/index.sol";
 import { Errors } from "../interfaces/errors.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
+import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
+import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
+import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
+import { Balances } from "@latticexyz/world/src/codegen/tables/Balances.sol";
 
 contract GuildSystem is System {
   error NeedFundsToCreateGuild(); // 0xce43bd9e
@@ -26,6 +31,16 @@ contract GuildSystem is System {
   error GuildHasMembers(); // 0xabb7f52d
   error GuildLeaveCooldownNotExpired(); // 0x19e69be5
   error GuildMemberLimitReached(); // 0x82c1f5c6
+
+  function _requireOwner() internal view {
+    AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
+  }
+
+  function withdraw() public {
+    _requireOwner();
+    uint256 balance = Balances.get(DFUtils.getDFNamespace());
+    IBaseWorld(_world()).transferBalanceToAddress(DFUtils.getDFNamespace(), _msgSender(), balance);
+  }
 
   function _isPlayerRegistered(address player) internal view returns (bool) {
     return Player.getIndex(player) != 0;
@@ -218,10 +233,19 @@ contract GuildSystem is System {
       revert Errors.NotRegistered();
     }
 
+    // Check if player is already in another guild
+    (bool inGuild, ) = _isInGuild(player);
+    if (inGuild) {
+      revert GuildRoleUnexpected();
+    }
+    if (Guild.getStatus(guildId) != GuildStatus.ACTIVE) {
+      revert GuildNotActive();
+    }
+
     // Check invitation exists
     bool invitationFound = false;
     uint8[] memory invitations = GuildCandidate.getInvitations(player);
-    for (uint i = 0; i < invitations.length; i++) {
+    for (uint256 i = 0; i < invitations.length; i++) {
       if (invitations[i] == guildId) {
         invitationFound = true;
       }
@@ -254,13 +278,6 @@ contract GuildSystem is System {
       revert GuildNotActive();
     }
 
-    // Check cooldown since last guild leave
-    uint64 lastLeaveTick = _getLastGuildLeaveTick(player);
-    uint64 currentTick = uint64(DFUtils.getCurrentTick());
-    if (currentTick - lastLeaveTick < GuildConfig.getCooldownTicks()) {
-      revert GuildLeaveCooldownNotExpired();
-    }
-
     _checkGuildLeaveCooldown(player);
     // Add application to player's candidate record
     GuildCandidate.pushApplications(player, guildId);
@@ -282,12 +299,22 @@ contract GuildSystem is System {
     if (role < GuildRole.OFFICER) {
       revert GuildRoleUnexpected();
     }
-    uint256 guildId = uint8(operatorMemberId >> 16);
+    uint8 guildId = uint8(operatorMemberId >> 16);
+
+    // Check if player is already in another guild
+    (bool inGuild, ) = _isInGuild(player);
+    if (inGuild) {
+      revert GuildRoleUnexpected();
+    }
+
+    if (Guild.getStatus(guildId) != GuildStatus.ACTIVE) {
+      revert GuildNotActive();
+    }
 
     // Check application exists
     bool applicationFound = false;
     uint8[] memory applications = GuildCandidate.getApplications(player);
-    for (uint i = 0; i < applications.length; i++) {
+    for (uint256 i = 0; i < applications.length; i++) {
       if (applications[i] == guildId) {
         applicationFound = true;
       }
@@ -317,7 +344,7 @@ contract GuildSystem is System {
     _leaveGuild(uint8(memberId >> 16), memberId, player);
   }
 
-  function transferOwnership(address newOwner) public {
+  function transferGuildLeadership(address newOwner) public {
     address player = _msgSender();
 
     if (!_isPlayerRegistered(player)) {
@@ -332,7 +359,14 @@ contract GuildSystem is System {
     if (role != GuildRole.LEADER) {
       revert GuildRoleUnexpected();
     }
-    uint256 guildId = uint8(memberId >> 16);
+
+    uint8 guildId = uint8(memberId >> 16);
+
+    // Verify guild is active
+    if (Guild.getStatus(guildId) != GuildStatus.ACTIVE) {
+      revert GuildNotActive();
+    }
+
     (, uint256 newOwnerMemberId) = _isInGuild(newOwner);
     if (newOwnerMemberId >> 16 != guildId) {
       revert GuildRoleUnexpected();
@@ -342,6 +376,8 @@ contract GuildSystem is System {
   }
 
   function disbandGuild() public {
+    leaveGuild();
+
     address player = _msgSender();
 
     if (!_isPlayerRegistered(player)) {
@@ -425,5 +461,39 @@ contract GuildSystem is System {
 
     // Set the member's role
     GuildMember.setRole(uint24(memberMemberId), newRole);
+  }
+
+  function kickMember(address member) public {
+    address operator = _msgSender();
+
+    // Check if operator is registered
+    if (!_isPlayerRegistered(operator)) {
+      revert Errors.NotRegistered();
+    }
+
+    // Check if target member is registered
+    if (!_isPlayerRegistered(member)) {
+      revert Errors.NotRegistered();
+    }
+
+    // Get operator's role and memberId
+    (GuildRole operatorRole, uint256 operatorMemberId) = _getGuildRole(operator);
+    if (operatorRole != GuildRole.LEADER) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Get member's role and memberId
+    (GuildRole memberRole, uint256 memberMemberId) = _getGuildRole(member);
+    if (memberRole == GuildRole.NONE || memberRole == GuildRole.LEADER) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Check they are in the same guild
+    if ((operatorMemberId >> 16) != (memberMemberId >> 16)) {
+      revert GuildRoleUnexpected();
+    }
+
+    // Kick member from guild
+    _leaveGuild(uint8(memberMemberId >> 16), memberMemberId, member);
   }
 }

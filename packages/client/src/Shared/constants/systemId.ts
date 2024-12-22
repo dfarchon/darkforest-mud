@@ -1,4 +1,5 @@
 import { resourceToHex } from "@latticexyz/common";
+import GuildSystemAbi from "contracts/out/GuildSystem.sol/GuildSystem.abi.json";
 import MoveSystemAbi from "contracts/out/MoveSystem.sol/MoveSystem.abi.json";
 import PlanetEmojiSystemAbi from "contracts/out/PlanetEmojiSystem.sol/PlanetEmojiSystem.abi.json";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
@@ -74,6 +75,14 @@ export const TICK_SYSTEM_ID = resourceToHex({
 
 export const TICK_SYSTEM_ABI: Abi = TickSystemAbi;
 
+export const GUILD_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "GuildSystem",
+});
+
+export const GUILD_SYSTEM_ABI: Abi = GuildSystemAbi;
+
 export const get_ABI_from_FunctionName = (functionName: string) => {
   if (functionName === "move" || functionName === "legacyMove") {
     return MOVE_SYSTEM_ABI;
@@ -106,6 +115,19 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     functionName === "updateTickRate"
   ) {
     return TICK_SYSTEM_ABI;
+  } else if (
+    functionName === "createGuild" ||
+    functionName === "inviteToGuild" ||
+    functionName === "acceptInvitation" ||
+    functionName === "applyToGuild" ||
+    functionName === "approveApplication" ||
+    functionName === "leaveGuild" ||
+    functionName === "transferGuildLeadership" ||
+    functionName === "disbandGuild" ||
+    functionName === "setGrant" ||
+    functionName === "setMemberRole"
+  ) {
+    return GUILD_SYSTEM_ABI;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ABI;
@@ -144,6 +166,19 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     functionName === "updateTickRate"
   ) {
     return TICK_SYSTEM_ID;
+  } else if (
+    functionName === "createGuild" ||
+    functionName === "inviteToGuild" ||
+    functionName === "acceptInvitation" ||
+    functionName === "applyToGuild" ||
+    functionName === "approveApplication" ||
+    functionName === "leaveGuild" ||
+    functionName === "transferGuildLeadership" ||
+    functionName === "disbandGuild" ||
+    functionName === "setGrant" ||
+    functionName === "setMemberRole"
+  ) {
+    return GUILD_SYSTEM_ABI;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ID;

@@ -87,10 +87,10 @@ import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
+import { GuildUtils } from "./GuildUtils";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
-
 interface ContractsApiConfig {
   connection: EthConnection;
   contractAddress: EthAddress;
@@ -146,6 +146,7 @@ export class ContractsAPI extends EventEmitter {
   private planetUtils: PlanetUtils;
   private moveUtils: MoveUtils;
   private tickerUtils: TickerUtils;
+  private guildUtils: GuildUtils;
 
   private pausedStateSubscription: Subscription;
   private playerSubscription: Subscription;
@@ -187,6 +188,7 @@ export class ContractsAPI extends EventEmitter {
     });
     this.moveUtils = new MoveUtils({ components });
     this.tickerUtils = new TickerUtils({ components });
+    this.guildUtils = new GuildUtils({ components });
   }
 
   /**
@@ -1694,6 +1696,10 @@ export class ContractsAPI extends EventEmitter {
 
   public getAddress() {
     return this.ethConnection.getAddress();
+  }
+
+  public getGuildUtils() {
+    return this.guildUtils;
   }
 }
 

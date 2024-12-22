@@ -446,7 +446,7 @@ class NotificationManager extends EventEmitter {
     this.notify(
       NotificationType.TxInitError,
       <span>
-        {startCase(methodName)} failed. Reason: {failureReason}
+        {methodName} failed. Reason: {failureReason}
       </span>,
     );
   }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { snips } from "../Styles/dfstyles";
 import {
@@ -89,6 +89,7 @@ export function HoverPlanetPane() {
   return (
     <HoverPane
       style={
+        // eslint-disable-next-line no-nested-ternary
         debouncedState.planetData?.value?.destroyed
           ? snips.destroyedBackground
           : debouncedState.planetData?.value?.frozen

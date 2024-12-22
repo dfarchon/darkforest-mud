@@ -22,7 +22,7 @@ library GuildUtils {
     }
 
     // Find the valid membership at given tick
-    for (uint i = memberIds.length; i > 0; i--) {
+    for (uint256 i = memberIds.length; i > 0; i--) {
       uint24 memberId = memberIds[i - 1];
       GuildMemberData memory memberData = GuildMember.get(memberId);
 
