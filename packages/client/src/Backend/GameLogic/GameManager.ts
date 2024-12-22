@@ -265,7 +265,7 @@ export class GameManager extends EventEmitter {
    *
    * @todo move this into a new `Guild` class.
    */
-  // private readonly guilds: Map<GuildId, Guild>;
+  private readonly guilds: Map<GuildId, Guild>;
 
   /**
    * Allows us to make contract calls, and execute transactions. Be careful about how you use this
@@ -641,6 +641,9 @@ export class GameManager extends EventEmitter {
     );
 
     this.contractsAPI = contractsAPI;
+
+    this.guilds = this.getInitGuilds();
+
     this.persistentChunkStore = persistentChunkStore;
     this.snarkHelper = snarkHelper;
     this.useMockHash = useMockHash;
@@ -6154,6 +6157,12 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getGuildUtils().getGuildIds();
   }
 
+  public getNextGuildId(): GuildId {
+    const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
+    const result: GuildId = (guildIds.length + 1) as GuildId;
+    return result;
+  }
+
   public getAllGuilds(): Guild[] {
     const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
     const res: Guild[] = [];
@@ -6167,6 +6176,22 @@ export class GameManager extends EventEmitter {
     return res;
   }
 
+  public getGuildRole(addr: EthAddress) {
+    return this.contractsAPI.getGuildUtils().getGuildRole(addr);
+  }
+
+  public getInitGuilds(): Map<GuildId, Guild> {
+    const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
+    const res: Map<GuildId, Guild> = new Map();
+    for (let i = 0; i < guildIds.length; i++) {
+      const guildId = guildIds[i];
+      const guild = this.getGuild(guildId);
+      if (!guild) continue;
+      res.set(guildId, guild);
+    }
+    return res;
+  }
+
   public hardRefreshGuild(guildId?: GuildId): void {
     if (!guildId) return;
 
@@ -6174,6 +6199,8 @@ export class GameManager extends EventEmitter {
       .getGuildUtils()
       .getGuildById(guildId);
     if (!guildFromBlockchain) return;
+
+    this.guilds.set(guildId, guildFromBlockchain);
 
     this.guildsUpdated$.publish();
   }
@@ -6209,7 +6236,6 @@ export class GameManager extends EventEmitter {
         unionCreationFeeETH.toString(),
       );
 
-      console.log("test");
       console.log(
         `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-unionName`,
       );
@@ -6227,6 +6253,7 @@ export class GameManager extends EventEmitter {
         contract: this.contractsAPI.contract,
         args: Promise.resolve([guildName]),
         name: guildName,
+        guildId: this.getNextGuildId(),
       };
 
       const tx = await this.submitTransaction(txIntent, {

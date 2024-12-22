@@ -376,8 +376,6 @@ contract GuildSystem is System {
   }
 
   function disbandGuild() public {
-    leaveGuild();
-
     address player = _msgSender();
 
     if (!_isPlayerRegistered(player)) {
@@ -397,8 +395,10 @@ contract GuildSystem is System {
 
     // Disband guild
     guild.status = GuildStatus.DISBANDED;
-    guild.number = 0;
     Guild.set(uint8(guildId), guild);
+
+    // Leave guild
+    _leaveGuild(uint8(memberId >> 16), memberId, player);
   }
 
   function setGrant(GuildRole newGrant) public {

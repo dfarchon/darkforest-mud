@@ -1383,6 +1383,7 @@ export class GameObjects {
     arrivals: QueuedArrival[],
   ): ArrivalWithTimer[] {
     const planet = this.planets.get(planetId);
+
     if (!planet) {
       console.error(
         `attempted to process arrivals for planet not in memory: ${planetId}`,
@@ -1396,6 +1397,7 @@ export class GameObjects {
     arrivals.sort((a, b) => a.arrivalTick - b.arrivalTick);
 
     const nowTick = this.tickerUtils.getCurrentTick();
+
     for (const arrival of arrivals) {
       try {
         if (nowTick - arrival.arrivalTick > 0) {
@@ -1409,6 +1411,7 @@ export class GameObjects {
           );
 
           this.removeArrival(planetId, update.arrival.eventId);
+
           this.emitArrivalNotifications(update);
         } else {
           // otherwise, set a timer to do this arrival in the future

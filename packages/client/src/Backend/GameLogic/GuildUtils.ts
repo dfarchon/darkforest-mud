@@ -65,11 +65,11 @@ export class GuildUtils {
     const guild = getComponentValue(Guild, guildEntity);
     if (!guild) return undefined;
 
-    const guildMemberEntity = encodeEntity(GuildMember.metadata.keySchema, {
+    const guildOwnerEntity = encodeEntity(GuildMember.metadata.keySchema, {
       memberId: guild.owner,
     });
-    const guildMember = getComponentValue(GuildMember, guildMemberEntity);
-    if (!guildMember) return undefined;
+    const guildOwner = getComponentValue(GuildMember, guildOwnerEntity);
+    if (!guildOwner) return undefined;
 
     const guildNameEntity = encodeEntity(GuildName.metadata.keySchema, {
       id: guildId,
@@ -81,12 +81,13 @@ export class GuildUtils {
 
     const members: EthAddress[] = [];
 
-    for (let i = 0; i < registry; i++) {
+    for (let i = 1; i <= registry; i++) {
       const memberEntity = encodeEntity(GuildMember.metadata.keySchema, {
-        memberId: i,
+        memberId: (guildId << 16) + i,
       });
       const member = getComponentValue(GuildMember, memberEntity);
       if (!member) continue;
+      if (member.leftAt !== 0n) continue;
       members.push(member.addr.toLowerCase() as EthAddress);
     }
 
@@ -96,7 +97,7 @@ export class GuildUtils {
       rank: guild.rank,
       number: guild.number,
       registry: guild.number,
-      owner: guildMember.addr.toLowerCase() as EthAddress,
+      owner: guildOwner.addr.toLowerCase() as EthAddress,
       name: guildName.name as string,
       members: members,
     };

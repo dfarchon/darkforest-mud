@@ -43,7 +43,6 @@ export type ContractMethodName =
   | "buyPlanet"
   | "buySpaceship"
   | "donate"
-  | "addMemberByAdmin"
   | "df__createGuild"
   | "df__inviteToGuild"
   | "df__acceptInvitation"
@@ -373,6 +372,7 @@ export type UnconfirmedDonate = TxIntent & {
 export type UnconfirmedCreateGuild = TxIntent & {
   methodName: "df__createGuild";
   name: string;
+  guildId: GuildId;
 };
 
 /**

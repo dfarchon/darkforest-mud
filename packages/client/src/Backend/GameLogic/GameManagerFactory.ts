@@ -15,7 +15,10 @@ import {
 import {
   address,
   artifactIdToDecStr,
+  isUnconfirmedAcceptInvitationTx,
   isUnconfirmedActivateArtifactTx,
+  isUnconfirmedApplyToGuildTx,
+  isUnconfirmedApproveApplicationTx,
   isUnconfirmedBlueTx,
   isUnconfirmedBurnTx,
   isUnconfirmedBuyArtifactTx,
@@ -25,26 +28,34 @@ import {
   isUnconfirmedCapturePlanetTx,
   isUnconfirmedChangeArtifactImageTypeTx,
   isUnconfirmedClaimTx,
+  isUnconfirmedCreateGuildTx,
   isUnconfirmedDeactivateArtifactTx,
   isUnconfirmedDepositArtifactTx,
+  isUnconfirmedDisbandGuildTx,
   isUnconfirmedDonateTx,
   isUnconfirmedFindArtifactTx,
   isUnconfirmedInitTx,
   isUnconfirmedInvadePlanetTx,
+  isUnconfirmedInviteToGuildTx,
   isUnconfirmedKardashevTx,
+  isUnconfirmedKickMemberTx,
+  isUnconfirmedLeaveGuildTx,
   isUnconfirmedMoveTx,
   isUnconfirmedPinkTx,
   isUnconfirmedProspectPlanetTx,
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
+  isUnconfirmedSetGrantTx,
+  isUnconfirmedSetMemberRoleTx,
   isUnconfirmedSetPlanetEmojiTx,
+  isUnconfirmedTransferGuildLeadershipTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdToDecStr,
 } from "@df/serde";
-import type { EthAddress, VoyageId } from "@df/types";
+import type { EthAddress, GuildId, VoyageId } from "@df/types";
 import type {
   Artifact,
   ArtifactId,
@@ -339,6 +350,9 @@ export class GameManagerFactory {
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         },
       )
+      .on(ContractsAPIEvent.GuildUpdate, async (guildId: GuildId) => {
+        await gameManager.hardRefreshGuild(guildId);
+      })
       .on(ContractsAPIEvent.TxQueued, (tx: Transaction) => {
         gameManager.entityStore.onTxIntent(tx);
       })
@@ -533,7 +547,30 @@ export class GameManagerFactory {
           //   tx.intent.locationId,
           //   (p) => (p.claimer = gameManager.getAccount()),
           // );
+        } else if (isUnconfirmedCreateGuildTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedInviteToGuildTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedAcceptInvitationTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedApplyToGuildTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedApproveApplicationTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedLeaveGuildTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedTransferGuildLeadershipTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedDisbandGuildTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedSetGrantTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedSetMemberRoleTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
+        } else if (isUnconfirmedKickMemberTx(tx)) {
+          gameManager.hardRefreshGuild(tx.intent.guildId);
         }
+
         gameManager.entityStore.clearUnconfirmedTxIntent(tx);
         gameManager.onTxConfirmed(tx);
       })
