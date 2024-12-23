@@ -446,6 +446,10 @@ export class ContractsAPI extends EventEmitter {
       },
     );
 
+    // since no events are processed on the client, we need to subscribe to new blocks
+    // to get the latest block number
+    this.ethConnection.subscribeToNewBlock();
+
     return;
 
     const { contract } = this;

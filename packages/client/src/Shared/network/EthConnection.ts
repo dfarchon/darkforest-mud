@@ -264,6 +264,13 @@ export class EthConnection {
     });
   }
 
+  public subscribeToNewBlock() {
+    this.provider.on("block", async (latestBlockNumber: number) => {
+      this.blockNumber = latestBlockNumber;
+      this.blockNumber$.publish(latestBlockNumber);
+    });
+  }
+
   /**
    * Whenever we become aware of the fact that there have been one or more new blocks mined on the
    * blockchain, we need to update the internal game state of the game to reflect everything that
