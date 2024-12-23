@@ -286,8 +286,8 @@ export class GameObjects {
     this.contractConstants = contractConstants;
     this.coordsToLocation = new Map();
     this.planetLocationMap = new Map();
-    const planetArrivalIds = new Map();
-    const arrivals = new Map();
+    this.planetArrivalIds = new Map();
+    this.arrivals = new Map();
     this.transactions = new TxCollection();
     this.links = new Map();
     this.layeredMap = new LayeredMap(worldRadius);
@@ -336,13 +336,13 @@ export class GameObjects {
           arrivalsForPlanet,
         );
 
-        planetArrivalIds.set(
+        this.planetArrivalIds.set(
           planetId,
           arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
         );
         for (const arrivalWithTimer of arrivalsWithTimers) {
           const arrivalId = arrivalWithTimer.arrivalData.eventId;
-          arrivals.set(arrivalId, arrivalWithTimer);
+          this.arrivals.set(arrivalId, arrivalWithTimer);
         }
         const planetLocation = this.planetLocationMap.get(planetId);
         if (planet && planetLocation) {
@@ -354,10 +354,6 @@ export class GameObjects {
         this.updateScore(planetId as LocationId);
       }
     });
-
-    this.arrivals = arrivals;
-
-    this.planetArrivalIds = planetArrivalIds;
 
     // for (const [_locId, claimedLoc] of claimedLocations) {
     //   this.updatePlanet(claimedLoc.hash, (p) => {
