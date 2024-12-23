@@ -81,6 +81,7 @@ export const enum NotificationType {
   PlanetLost,
   PlanetWon,
   PlanetAttacked,
+  PlanetSupportedByGuild,
   ArtifactProspected,
   ArtifactFound,
   ReceivedPlanet,
@@ -203,6 +204,10 @@ class NotificationManager extends EventEmitter {
         return <PlanetLost height={"48px"} width={"48px"} />;
         break;
       case NotificationType.PlanetWon:
+        return <PlanetConquered height={"48px"} width={"48px"} />;
+        break;
+      case NotificationType.PlanetSupportedByGuild:
+        //PUNK TODO: change the icon
         return <PlanetConquered height={"48px"} width={"48px"} />;
         break;
       case NotificationType.ArtifactProspected:
@@ -407,6 +412,16 @@ class NotificationManager extends EventEmitter {
       <span>
         Your Planet <PlanetNameLink planet={planet}></PlanetNameLink> has been
         attacked!
+      </span>,
+    );
+  }
+
+  planetSupportedByGuild(planet: LocatablePlanet): void {
+    this.notify(
+      NotificationType.PlanetSupportedByGuild,
+      <span>
+        Your Planet <PlanetNameLink planet={planet}></PlanetNameLink> has been
+        supported by your guild!
       </span>,
     );
   }

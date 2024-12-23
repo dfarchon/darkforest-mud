@@ -179,6 +179,12 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getCaptureZones(): Iterable<CaptureZone>;
   getPinkZones(): Iterable<PinkZone>;
   getBlueZones(): Iterable<BlueZone>;
+  inSameGuildAtTick(
+    player1: EthAddress,
+    player2: EthAddress,
+    tick: number,
+  ): boolean;
+  inSameGuildRightNow(player1: EthAddress, player2: EthAddress): boolean;
 }
 
 export class Renderer {

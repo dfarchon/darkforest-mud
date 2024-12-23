@@ -1,11 +1,6 @@
 import { addressToHex } from "@df/serde";
-import type {
-  EthAddress,
-  Guild,
-  GuildId,
-  GuildRole,
-  GuildStatus,
-} from "@df/types";
+import type { EthAddress, Guild, GuildId, GuildRole } from "@df/types";
+import { GuildStatus } from "@df/types";
 import {
   type Entity,
   getComponentValue,
@@ -143,6 +138,26 @@ export class GuildUtils {
     return guildMember.role as GuildRole;
   }
 
+  public getPlayerGrant(playerAddr: EthAddress): GuildRole | undefined {
+    if (this.getGuildIdByPlayer(playerAddr) === undefined) return undefined;
+
+    const { GuildHistory, GuildMember } = this.components;
+
+    const guildHistoryEntity = encodeEntity(GuildHistory.metadata.keySchema, {
+      player: addressToHex(playerAddr) as Hex,
+    });
+
+    const guildHistory = getComponentValue(GuildHistory, guildHistoryEntity);
+    if (!guildHistory) return undefined;
+
+    const guildMemberEntity = encodeEntity(GuildMember.metadata.keySchema, {
+      memberId: guildHistory.curMemberId,
+    });
+    const guildMember = getComponentValue(GuildMember, guildMemberEntity);
+    if (!guildMember) return undefined;
+    return guildMember.grant as GuildRole;
+  }
+
   public isInvitedToGuild(playerAddr: EthAddress, guildId: GuildId): boolean {
     const { GuildCandidate } = this.components;
 
@@ -210,5 +225,159 @@ export class GuildUtils {
       Number(currentTick) - Number(lastLeaveTick) >=
       Number(config.cooldownTicks)
     );
+  }
+
+  /**
+   * Check if two accounts meet the delegation conditions
+   * @param delegator The address of the delegator
+   * @param delegate The address of the delegate
+   * @returns {boolean} Whether the delegation conditions are met
+   */
+  public checkDelegateCondition(
+    delegator: EthAddress,
+    delegate: EthAddress,
+  ): boolean {
+    try {
+      // Check if accounts are the same (self-delegation is not allowed)
+      if (delegator.toLowerCase() === delegate.toLowerCase()) {
+        throw new Error("cannot delegate to yourself");
+      }
+
+      // Get guild IDs for both accounts
+      const delegatorGuildId = this.getGuildIdByPlayer(delegator);
+      const delegateGuildId = this.getGuildIdByPlayer(delegate);
+
+      // Check if both accounts are in a guild
+      if (!delegatorGuildId || !delegateGuildId) {
+        throw new Error("one or both players are not in a guild");
+      }
+
+      // Check if they are in the same guild
+      if (delegatorGuildId !== delegateGuildId) {
+        throw new Error("players must be in the same guild");
+      }
+
+      // Check if the guild is active
+      const guild = this.getGuildById(delegatorGuildId);
+      if (!guild || guild.status !== GuildStatus.ACTIVE) {
+        throw new Error("guild is not active");
+      }
+
+      const delegatorGrant = this.getPlayerGrant(delegator);
+      const delegateRole = this.getGuildRole(delegate);
+
+      if (!delegatorGrant || !delegateRole) {
+        throw new Error("delegator grant or delegate role is wrong");
+      }
+
+      if (delegatorGrant > delegateRole) {
+        throw new Error("delegator has higher grant role than delegate");
+      }
+
+      return true;
+    } catch (e) {
+      console.log("Delegate condition check failed:", (e as Error).message);
+      return false;
+    }
+  }
+
+  /**
+   * Get player's guild ID at a specific tick
+   * @param playerAddr Player's address
+   * @param tick Target tick
+   * @returns Guild ID or undefined if not in a guild
+   */
+  public getPlayerGuildIdAtTick(
+    playerAddr: EthAddress,
+    tick: number,
+  ): GuildId | undefined {
+    const { GuildHistory, GuildMember } = this.components;
+
+    // Get player's member history
+    const historyEntity = encodeEntity(GuildHistory.metadata.keySchema, {
+      player: addressToHex(playerAddr) as Hex,
+    });
+
+    const history = getComponentValue(GuildHistory, historyEntity);
+    if (!history || !history.memberIds.length) return undefined;
+
+    // Go through member history to find the guild at the given tick
+    for (let i = history.memberIds.length - 1; i >= 0; i--) {
+      const memberId = history.memberIds[i];
+      const memberEntity = encodeEntity(GuildMember.metadata.keySchema, {
+        memberId: memberId,
+      });
+
+      const member = getComponentValue(GuildMember, memberEntity);
+      if (!member) continue;
+
+      // If member joined before or at the tick and either hasn't left or left after the tick
+      if (
+        Number(member.joinedAt) <= tick &&
+        (member.leftAt === 0n || Number(member.leftAt) > tick)
+      ) {
+        return Number(memberId >> 16) as GuildId;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Check if two players were in the same guild at a specific tick
+   * @param player1 First player's address
+   * @param player2 Second player's address
+   * @param tick Target tick
+   * @returns {boolean} True if players were in the same guild, false otherwise
+   */
+  public inSameGuildAtTick(
+    player1: EthAddress,
+    player2: EthAddress,
+    tick: number,
+  ): boolean {
+    try {
+      // Get guild IDs for both players at the specified tick
+      const guild1 = this.getPlayerGuildIdAtTick(player1, tick);
+      const guild2 = this.getPlayerGuildIdAtTick(player2, tick);
+
+      // If either player wasn't in a guild, return false
+      if (!guild1 || !guild2) {
+        return false;
+      }
+
+      // Check if guild IDs match
+      return guild1 === guild2;
+    } catch (e) {
+      console.log("Error checking same guild at tick:", (e as Error).message);
+      return false;
+    }
+  }
+
+  /**
+   * Check if two players are currently in the same guild
+   * @param player1 First player's address
+   * @param player2 Second player's address
+   * @returns {boolean} True if players are in the same guild, false otherwise
+   */
+  public inSameGuildRightNow(
+    player1: EthAddress,
+    player2: EthAddress,
+  ): boolean {
+    try {
+      // Get current guild IDs for both players
+      const guild1 = this.getGuildIdByPlayer(player1);
+      const guild2 = this.getGuildIdByPlayer(player2);
+
+      // If either player is not in a guild, return false
+      if (!guild1 || !guild2) {
+        return false;
+      }
+
+      // Check if guild IDs match
+      return guild1 === guild2;
+    } catch (e) {
+      console.log("Error checking same guild:", (e as Error).message);
+      return false;
+    }
   }
 }

@@ -415,8 +415,12 @@ contract GuildSystem is System {
       revert GuildRoleUnexpected();
     }
 
-    // Update the grant role
-    GuildMember.setGrant(uint24(memberId), newGrant);
+    if (newGrant == GuildRole.MEMBER || newGrant == GuildRole.OFFICER || newGrant == GuildRole.LEADER) {
+      // Update the grant role
+      GuildMember.setGrant(uint24(memberId), newGrant);
+    } else {
+      revert GuildRoleUnexpected();
+    }
   }
 
   function setMemberRole(address member, GuildRole newRole) public {

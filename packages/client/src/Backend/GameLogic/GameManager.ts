@@ -6180,6 +6180,44 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getGuildUtils().getGuildRole(addr);
   }
 
+  public getPlayerGrant(addr: EthAddress) {
+    return this.contractsAPI.getGuildUtils().getPlayerGrant(addr);
+  }
+
+  public checkDelegateCondition(delegator: EthAddress, delegate: EthAddress) {
+    return this.contractsAPI
+      .getGuildUtils()
+      .checkDelegateCondition(delegator, delegate);
+  }
+
+  public getPlayerGuildIdAtTick(
+    player: EthAddress,
+    tick: number,
+  ): GuildId | undefined {
+    return this.contractsAPI
+      .getGuildUtils()
+      .getPlayerGuildIdAtTick(player, tick);
+  }
+
+  public inSameGuildAtTick(
+    player1: EthAddress,
+    player2: EthAddress,
+    tick: number,
+  ) {
+    return this.contractsAPI
+      .getGuildUtils()
+      .inSameGuildAtTick(player1, player2, tick);
+  }
+
+  public inSameGuildRightNow(
+    player1: EthAddress,
+    player2: EthAddress,
+  ): boolean {
+    return this.contractsAPI
+      .getGuildUtils()
+      .inSameGuildRightNow(player1, player2);
+  }
+
   public getInitGuilds(): Map<GuildId, Guild> {
     const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
     const res: Map<GuildId, Guild> = new Map();
