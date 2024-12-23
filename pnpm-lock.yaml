@@ -81,10 +81,10 @@ importers:
   packages/client:
     dependencies:
       '@langchain/core':
-        specifier: ^0.3.22
+        specifier: 0.3.22
         version: 0.3.22(openai@4.76.0(zod@3.23.8))
       '@langchain/openai':
-        specifier: ^0.3.14
+        specifier: 0.3.14
         version: 0.3.14(@langchain/core@0.3.22(openai@4.76.0(zod@3.23.8)))
       '@latticexyz/block-logs-stream':
         specifier: 2.2.14
@@ -189,7 +189,7 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
       langchain:
-        specifier: ^0.3.6
+        specifier: 0.3.6
         version: 0.3.6(@langchain/core@0.3.22(openai@4.76.0(zod@3.23.8)))(openai@4.76.0(zod@3.23.8))
       lit:
         specifier: 2.1.2
