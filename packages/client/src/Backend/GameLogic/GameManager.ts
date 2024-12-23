@@ -6341,6 +6341,12 @@ export class GameManager extends EventEmitter {
       if (guild.status !== GuildStatus.ACTIVE)
         throw Error("guild is not active");
 
+      const maxMembers = this.contractsAPI.getGuildUtils().getMaxGuildMembers();
+      if (!maxMembers) throw Error("no max members");
+      if (guild.number >= maxMembers) {
+        throw Error("guild member limit reached");
+      }
+
       const isInvited = this.contractsAPI
         .getGuildUtils()
         .isInvitedToGuild(this.account, guildId);
@@ -6437,6 +6443,12 @@ export class GameManager extends EventEmitter {
       if (!guild) throw Error("no guild");
       if (guild.status !== GuildStatus.ACTIVE)
         throw Error("guild is not active");
+
+      const maxMembers = this.contractsAPI.getGuildUtils().getMaxGuildMembers();
+      if (!maxMembers) throw Error("no max members");
+      if (guild.number >= maxMembers) {
+        throw Error("guild member limit reached");
+      }
 
       const guildRole = this.contractsAPI
         .getGuildUtils()
