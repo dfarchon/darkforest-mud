@@ -713,6 +713,10 @@ export class GameUIManager extends EventEmitter {
       } else if (
         mouseDownPlanet &&
         (mouseDownPlanet.owner === this.gameManager.getAccount() ||
+          this.gameManager.checkDelegateCondition(
+            mouseDownPlanet.owner,
+            this.gameManager.getAccount(),
+          ) ||
           this.isSendingShip(mouseDownPlanet.locationId))
       ) {
         // move initiated if enough forces
@@ -1374,6 +1378,13 @@ export class GameUIManager extends EventEmitter {
     if (!planet) {
       return undefined;
     }
+
+    return this.gameManager.checkDelegateCondition(
+      planet.owner,
+      this.gameManager.getAccount(),
+    )
+      ? planet
+      : undefined;
     return planet.owner === this.gameManager.getAccount() ? planet : undefined;
   }
 

@@ -85,6 +85,8 @@ library GuildUtils {
    * @return bool True if grantee meets the grantor's permission requirement
    */
   function meetGrantRequirement(address grantor, address grantee) internal view returns (bool) {
+    if (grantor == grantee) return true;
+
     // First check if they are in the same guild
     if (!inSameGuildNow(grantor, grantee)) {
       return false;
@@ -98,7 +100,7 @@ library GuildUtils {
     GuildMemberData memory grantorData = GuildMember.get(grantorMemberId);
     GuildMemberData memory granteeData = GuildMember.get(granteeMemberId);
 
-    if (grantorData.grant != GuildRole.NONE) return false;
+    if (grantorData.grant == GuildRole.NONE) return false;
 
     return uint8(grantorData.grant) <= uint8(granteeData.role);
   }

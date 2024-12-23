@@ -4431,62 +4431,58 @@ export class GameManager extends EventEmitter {
   public async withdrawSilver(
     locationId: LocationId,
     amount: number,
-    bypassChecks = false,
   ): Promise<Transaction<UnconfirmedWithdrawSilver>> {
     try {
-      if (!bypassChecks) {
-        if (!this.account) {
-          throw new Error("no account");
-        }
-        // if (this.checkGameHasEnded()) {
-        //   throw new Error('game has ended');
-        // }
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to withdraw silver from an unknown planet");
-        }
-        if (planet.planetType !== PlanetType.TRADING_POST) {
-          throw new Error("can only withdraw silver from spacetime rips");
-        }
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("can only withdraw silver from a planet you own");
-        }
-        if (
-          planet.transactions?.hasTransaction(isUnconfirmedWithdrawSilverTx)
-        ) {
-          throw new Error(
-            "a withdraw silver action is already in progress for this planet",
-          );
-        }
-        if (amount > planet.silver) {
-          throw new Error("not enough silver to withdraw!");
-        }
-
-        if (amount * 5 < planet.silverCap) {
-          throw new Error("require silverAmount >= silverCap * 0.2");
-        }
-
-        if (amount === 0) {
-          throw new Error("must withdraw more than 0 silver!");
-        }
-
-        // if (planet.destroyed || planet.frozen) {
-        //   throw new Error(
-        //     "can't withdraw silver from a destroyed/frozen planet",
-        //   );
-        // }
+      if (!this.account) {
+        throw new Error("no account");
       }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to withdraw silver from an unknown planet");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("can only withdraw silver from spacetime rips");
+      }
+      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
+        throw new Error("can only withdraw silver from a planet you own");
+      }
+      if (planet.transactions?.hasTransaction(isUnconfirmedWithdrawSilverTx)) {
+        throw new Error(
+          "a withdraw silver action is already in progress for this planet",
+        );
+      }
+      if (amount > planet.silver) {
+        throw new Error("not enough silver to withdraw!");
+      }
+
+      if (amount * 5 < planet.silverCap) {
+        throw new Error("require silverAmount >= silverCap * 0.2");
+      }
+
+      if (amount === 0) {
+        throw new Error("must withdraw more than 0 silver!");
+      }
+
+      // if (planet.destroyed || planet.frozen) {
+      //   throw new Error(
+      //     "can't withdraw silver from a destroyed/frozen planet",
+      //   );
+      // }
 
       localStorage.setItem(
         `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawSilverPlanet`,
         locationId,
       );
 
-      const delegator = this.getAccount();
+      const delegator = planet.owner;
 
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
+
       const txIntent: UnconfirmedWithdrawSilver = {
         delegator: delegator,
         methodName: "df__withdrawSilver",
@@ -4515,35 +4511,35 @@ export class GameManager extends EventEmitter {
   public async setPlanetEmoji(
     locationId: LocationId,
     emoji: string,
-    bypassChecks = false,
   ): Promise<Transaction<UnconfirmedSetPlanetEmoji>> {
     try {
-      if (!bypassChecks) {
-        if (!this.account) {
-          throw new Error("no account");
-        }
-        // if (this.checkGameHasEnded()) {
-        //   throw new Error('game has ended');
-        // }
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to set emoji to an unknown planet");
-        }
+      if (!this.account) {
+        throw new Error("no account");
+      }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to set emoji to an unknown planet");
+      }
 
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("can only set emoji to your planet");
-        }
-        if (
-          planet.transactions?.hasTransaction(isUnconfirmedSetPlanetEmojiTx)
-        ) {
-          throw new Error(
-            "a set emoji action is already in progress for this planet",
-          );
-        }
+      const canDelegate = this.checkDelegateCondition(
+        planet.owner,
+        this.getAccount(),
+      );
 
-        if (planet.destroyed || planet.frozen) {
-          throw new Error("can't set emoji to a destroyed/frozen planet");
-        }
+      if (planet.owner !== this.getAccount() && !canDelegate) {
+        throw new Error("can only set emoji to your planet");
+      }
+      if (planet.transactions?.hasTransaction(isUnconfirmedSetPlanetEmojiTx)) {
+        throw new Error(
+          "a set emoji action is already in progress for this planet",
+        );
+      }
+
+      if (planet.destroyed || planet.frozen) {
+        throw new Error("can't set emoji to a destroyed/frozen planet");
       }
 
       localStorage.setItem(
@@ -4551,10 +4547,10 @@ export class GameManager extends EventEmitter {
         locationId,
       );
 
-      const delegator = this.getAccount();
+      const delegator = planet.owner; //this.getAccount();
 
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
 
       const txIntent: UnconfirmedSetPlanetEmoji = {
@@ -4767,7 +4763,6 @@ export class GameManager extends EventEmitter {
     silver: number,
     artifactMoved?: ArtifactId,
     abandoning = false,
-    bypassChecks = false,
   ): Promise<Transaction<UnconfirmedMove>> {
     localStorage.setItem(
       `${this.ethConnection.getAddress()?.toLowerCase()}-fromPlanet`,
@@ -4824,11 +4819,18 @@ export class GameManager extends EventEmitter {
 
       const oldPlanet = this.entityStore.getPlanetWithLocation(oldLocation);
 
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      if (!oldPlanet) {
+        throw new Error("no old planet");
+      }
+
       if (
-        ((!bypassChecks && !this.getAccount()) ||
-          !oldPlanet ||
-          oldPlanet.owner !== this.getAccount()) &&
-        !isSpaceShip(this.getArtifactWithId(artifactMoved)?.artifactType)
+        oldPlanet.owner !== this.getAccount() &&
+        !this.checkDelegateCondition(oldPlanet.owner, this.getAccount())
+        //  || !isSpaceShip(this.getArtifactWithId(artifactMoved)?.artifactType)
       ) {
         throw new Error("attempted to move from a planet not owned by player");
       }
@@ -4872,10 +4874,11 @@ export class GameManager extends EventEmitter {
         return args;
       };
 
-      const delegator = this.getAccount();
+      const delegator = oldPlanet?.owner; // this.getAccount();
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
+
       const txIntent: UnconfirmedMove = {
         delegator: delegator,
         methodName: "df__legacyMove",
@@ -4926,7 +4929,6 @@ export class GameManager extends EventEmitter {
   public async upgrade(
     planetId: LocationId,
     branch: number,
-    _bypassChecks = false,
   ): Promise<Transaction<UnconfirmedUpgrade>> {
     try {
       // this is shitty
@@ -4939,9 +4941,14 @@ export class GameManager extends EventEmitter {
         branch.toString(),
       );
 
-      const delegator = this.getAccount();
+      const planet = this.entityStore.getPlanetWithId(planetId);
+      if (!planet) {
+        throw new Error("planet not found");
+      }
+
+      const delegator = planet.owner; // this.getAccount();
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
 
       const txIntent: UnconfirmedUpgrade = {
@@ -6184,7 +6191,8 @@ export class GameManager extends EventEmitter {
     return this.contractsAPI.getGuildUtils().getPlayerGrant(addr);
   }
 
-  public checkDelegateCondition(delegator: EthAddress, delegate: EthAddress) {
+  public checkDelegateCondition(delegator?: EthAddress, delegate?: EthAddress) {
+    if (!delegator || !delegate) return false;
     return this.contractsAPI
       .getGuildUtils()
       .checkDelegateCondition(delegator, delegate);
@@ -6210,9 +6218,10 @@ export class GameManager extends EventEmitter {
   }
 
   public inSameGuildRightNow(
-    player1: EthAddress,
-    player2: EthAddress,
+    player1?: EthAddress,
+    player2?: EthAddress,
   ): boolean {
+    if (!player1 || !player2) return false;
     return this.contractsAPI
       .getGuildUtils()
       .inSameGuildRightNow(player1, player2);
@@ -6612,7 +6621,9 @@ export class GameManager extends EventEmitter {
         throw Error("guild has members");
       }
 
-      if (guild.owner !== this.account) throw Error("not the guild leader");
+      if (guild.owner !== this.account) {
+        throw Error("not the guild leader");
+      }
 
       alert(
         "This is a dangerous operation. Are you sure you want to disband the guild?",

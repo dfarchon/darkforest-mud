@@ -234,9 +234,12 @@ export class GuildUtils {
    * @returns {boolean} Whether the delegation conditions are met
    */
   public checkDelegateCondition(
-    delegator: EthAddress,
-    delegate: EthAddress,
+    delegator?: EthAddress,
+    delegate?: EthAddress,
   ): boolean {
+    if (!delegator || !delegate) return false;
+
+    if (delegator === delegate) return true;
     try {
       // Check if accounts are the same (self-delegation is not allowed)
       if (delegator.toLowerCase() === delegate.toLowerCase()) {
@@ -331,10 +334,12 @@ export class GuildUtils {
    * @returns {boolean} True if players were in the same guild, false otherwise
    */
   public inSameGuildAtTick(
-    player1: EthAddress,
-    player2: EthAddress,
-    tick: number,
+    player1?: EthAddress,
+    player2?: EthAddress,
+    tick?: number,
   ): boolean {
+    if (!player1 || !player2) return false;
+    if (!tick) return false;
     try {
       // Get guild IDs for both players at the specified tick
       const guild1 = this.getPlayerGuildIdAtTick(player1, tick);
@@ -360,9 +365,10 @@ export class GuildUtils {
    * @returns {boolean} True if players are in the same guild, false otherwise
    */
   public inSameGuildRightNow(
-    player1: EthAddress,
-    player2: EthAddress,
+    player1?: EthAddress,
+    player2?: EthAddress,
   ): boolean {
+    if (!player1 || !player2) return false;
     try {
       // Get current guild IDs for both players
       const guild1 = this.getGuildIdByPlayer(player1);

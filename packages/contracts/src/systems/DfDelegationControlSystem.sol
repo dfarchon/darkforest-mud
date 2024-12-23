@@ -5,6 +5,7 @@ import { DelegationControl } from "@latticexyz/world/src/DelegationControl.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Player, BurnerToPlayer } from "../codegen/index.sol";
 import { GuildUtils } from "../lib/GuildUtils.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract DfDelegationControlSystem is DelegationControl {
   /**
@@ -13,7 +14,7 @@ contract DfDelegationControlSystem is DelegationControl {
    * 1. The sender is the burner address of the delegator, OR
    * 2. The sender's main address and delegator are in the same guild
    */
-  function verify(address delegator, ResourceId, bytes memory) public view returns (bool) {
+  function verify(address delegator, ResourceId resourceId, bytes memory) public view returns (bool) {
     // Check if sender is the burner address
     if (Player.getBurner(delegator) == _msgSender()) {
       return true;
@@ -25,7 +26,10 @@ contract DfDelegationControlSystem is DelegationControl {
       playerAddress = _msgSender();
     }
 
-    // Check if both addresses are in the same guild
+    if (DFUtils.isValidSystemResourceId(resourceId) != true) {
+      return false;
+    }
+
     return GuildUtils.meetGrantRequirement(delegator, playerAddress);
   }
 }

@@ -184,7 +184,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
     player2: EthAddress,
     tick: number,
   ): boolean;
-  inSameGuildRightNow(player1: EthAddress, player2: EthAddress): boolean;
+  inSameGuildRightNow(player1?: EthAddress, player2?: EthAddress): boolean;
 }
 
 export class Renderer {
