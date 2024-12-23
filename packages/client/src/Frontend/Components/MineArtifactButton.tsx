@@ -152,7 +152,7 @@ export function MineArtifactButton({
               className="button"
               size="stretch"
               active={finding}
-              disabled={!findable || !(gearEnabled && hasGear)}
+              disabled={!findable}
               onClick={find}
               onShortcutPressed={find}
               shortcutKey={MINE_ARTIFACT}

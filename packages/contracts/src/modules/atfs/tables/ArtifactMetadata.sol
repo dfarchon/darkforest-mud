@@ -25,19 +25,19 @@ struct ArtifactMetadataData {
   uint32 cooldown;
   bool durable;
   bool reusable;
-  uint8 reqLevel;
+  uint16 reqLevel;
   uint64 reqPopulation;
   uint64 reqSilver;
 }
 
 library ArtifactMetadata {
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x001c080001040401010108080000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x001d080001040401010208080000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (uint8)
   Schema constant _keySchema = Schema.wrap(0x0001010000000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (uint8, uint32, uint32, bool, bool, uint8, uint64, uint64)
-  Schema constant _valueSchema = Schema.wrap(0x001c080000030360600007070000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint8, uint32, uint32, bool, bool, uint16, uint64, uint64)
+  Schema constant _valueSchema = Schema.wrap(0x001d080000030360600107070000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -291,29 +291,29 @@ library ArtifactMetadata {
   /**
    * @notice Get reqLevel.
    */
-  function getReqLevel(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint8 reqLevel) {
+  function getReqLevel(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint16 reqLevel) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 5, _fieldLayout);
-    return (uint8(bytes1(_blob)));
+    return (uint16(bytes2(_blob)));
   }
 
   /**
    * @notice Get reqLevel.
    */
-  function _getReqLevel(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint8 reqLevel) {
+  function _getReqLevel(ResourceId _tableId, ArtifactRarity rarity) internal view returns (uint16 reqLevel) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 5, _fieldLayout);
-    return (uint8(bytes1(_blob)));
+    return (uint16(bytes2(_blob)));
   }
 
   /**
    * @notice Set reqLevel.
    */
-  function setReqLevel(ResourceId _tableId, ArtifactRarity rarity, uint8 reqLevel) internal {
+  function setReqLevel(ResourceId _tableId, ArtifactRarity rarity, uint16 reqLevel) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
@@ -323,7 +323,7 @@ library ArtifactMetadata {
   /**
    * @notice Set reqLevel.
    */
-  function _setReqLevel(ResourceId _tableId, ArtifactRarity rarity, uint8 reqLevel) internal {
+  function _setReqLevel(ResourceId _tableId, ArtifactRarity rarity, uint16 reqLevel) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint8(rarity)));
 
@@ -455,7 +455,7 @@ library ArtifactMetadata {
     uint32 cooldown,
     bool durable,
     bool reusable,
-    uint8 reqLevel,
+    uint16 reqLevel,
     uint64 reqPopulation,
     uint64 reqSilver
   ) internal {
@@ -490,7 +490,7 @@ library ArtifactMetadata {
     uint32 cooldown,
     bool durable,
     bool reusable,
-    uint8 reqLevel,
+    uint16 reqLevel,
     uint64 reqPopulation,
     uint64 reqSilver
   ) internal {
@@ -576,7 +576,7 @@ library ArtifactMetadata {
       uint32 cooldown,
       bool durable,
       bool reusable,
-      uint8 reqLevel,
+      uint16 reqLevel,
       uint64 reqPopulation,
       uint64 reqSilver
     )
@@ -591,11 +591,11 @@ library ArtifactMetadata {
 
     reusable = (_toBool(uint8(Bytes.getBytes1(_blob, 10))));
 
-    reqLevel = (uint8(Bytes.getBytes1(_blob, 11)));
+    reqLevel = (uint16(Bytes.getBytes2(_blob, 11)));
 
-    reqPopulation = (uint64(Bytes.getBytes8(_blob, 12)));
+    reqPopulation = (uint64(Bytes.getBytes8(_blob, 13)));
 
-    reqSilver = (uint64(Bytes.getBytes8(_blob, 20)));
+    reqSilver = (uint64(Bytes.getBytes8(_blob, 21)));
   }
 
   /**
@@ -651,7 +651,7 @@ library ArtifactMetadata {
     uint32 cooldown,
     bool durable,
     bool reusable,
-    uint8 reqLevel,
+    uint16 reqLevel,
     uint64 reqPopulation,
     uint64 reqSilver
   ) internal pure returns (bytes memory) {
@@ -670,7 +670,7 @@ library ArtifactMetadata {
     uint32 cooldown,
     bool durable,
     bool reusable,
-    uint8 reqLevel,
+    uint16 reqLevel,
     uint64 reqPopulation,
     uint64 reqSilver
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {

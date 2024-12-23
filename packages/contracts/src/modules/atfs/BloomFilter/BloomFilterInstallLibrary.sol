@@ -49,14 +49,18 @@ contract BloomFilterInstallLibrary is BaseInstallLibrary {
       cooldown: 0,
       durable: false,
       reusable: false,
-      reqLevel: 0,
+      reqLevel: 0x0300, // 0 <= level < 3
       reqPopulation: 0,
       reqSilver: 0
     });
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.COMMON, metadata);
+    metadata.reqLevel = 0x0500; // 3 <= level < 5
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.RARE, metadata);
+    metadata.reqLevel = 0x0700; // 5 <= level < 7
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.EPIC, metadata);
+    metadata.reqLevel = 0x0900; // 7 <= level < 9
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.LEGENDARY, metadata);
+    metadata.reqLevel = 0x0a00; // 9 <= level < 10
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.MYTHIC, metadata);
   }
 }

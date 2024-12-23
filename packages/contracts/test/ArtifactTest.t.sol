@@ -6,13 +6,13 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../src/codegen/index.sol";
+import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner } from "../src/codegen/index.sol";
 import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
 import { Planet } from "../src/lib/Planet.sol";
-import { PlanetType, SpaceType, ArtifactStatus } from "../src/codegen/common.sol";
+import { PlanetType, SpaceType, ArtifactStatus, PlanetFlagType } from "../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../src/lib/Artifact.sol";
 import { TempConfigSet } from "../src/codegen/index.sol";
 
@@ -80,7 +80,8 @@ contract ArtifactTest is MudTest {
     uint256 seed = uint256(keccak256(abi.encodePacked(uint256(1), block.timestamp, hash)));
     vm.prank(address(1));
     IWorld(worldAddress).df__findingArtifact(proof, input);
-    assertEq(ExploredPlanet.get(bytes32(uint256(1))), true);
+    Planet memory planet = IWorld(worldAddress).df__readPlanet(1);
+    assertEq(planet.checkFlag(PlanetFlagType.EXPLORED), true);
     uint256 artifact = PlanetArtifact.getArtifacts(bytes32(uint256(1)));
     assertEq(artifact, 1);
     assertEq(Counter.getArtifact(), 1);

@@ -79,8 +79,7 @@ contract PostDeploy is Script {
     if (toml.readBool(".temp.b_skip_proof_check")) {
       _setTestPlanets(abi.decode(toml.parseRaw(".test_planets_fake"), (TestPlanet[])));
     } else {
-      // PUNK
-      // _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
+      _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
     }
 
     // register fallback delegation of df namespace
@@ -159,7 +158,6 @@ contract PostDeploy is Script {
       );
       Planet.set(
         planets[i].planetHash,
-        PlanetStatus.DEFAULT,
         planets[i].lastUpdateTick,
         planets[i].population,
         planets[i].silver,

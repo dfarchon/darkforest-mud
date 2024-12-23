@@ -29,15 +29,7 @@ contract TestOnlySystem is System, Errors {
 
     PlanetOwner.set(bytes32(planetHash), owner);
 
-    PlanetTable.set(
-      bytes32(planetHash),
-      PlanetStatus.DEFAULT,
-      Ticker.getTickNumber(),
-      population,
-      silver,
-      upgrades,
-      false
-    );
+    PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
   }
 
   function revealPlanetByAdmin(uint256 planetHash, int256 x, int256 y) public {

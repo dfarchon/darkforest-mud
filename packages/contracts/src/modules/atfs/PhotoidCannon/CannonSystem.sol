@@ -11,11 +11,14 @@ import { ArtifactStatus, ArtifactRarity } from "../../../codegen/common.sol";
 import { ArtifactProxySystem } from "../ArtifactProxySystem.sol";
 import { EffectLib } from "../../../lib/Effect.sol";
 import { ARTIFACT_INDEX, COMMON_CHARGE, RARE_CHARGE, EPIC_CHARGE, LEGENDARY_CHARGE, MYTHIC_CHARGE } from "./constant.sol";
-import { COMMON_ACTIVATE, RARE_ACTIVATE, EPIC_ACTIVATE, LEGENDARY_ACTIVATE, MYTHIC_ACTIVATE } from "./constant.sol";
-import { COMMON_ACTIVATE_AFTER_MOVE, RARE_ACTIVATE_AFTER_MOVE, EPIC_ACTIVATE_AFTER_MOVE, LEGENDARY_ACTIVATE_AFTER_MOVE, MYTHIC_ACTIVATE_AFTER_MOVE } from "./constant.sol";
+import { COMMON_ACTIVATE_BEFORE_MOVE, RARE_ACTIVATE_BEFORE_MOVE, EPIC_ACTIVATE_BEFORE_MOVE, LEGENDARY_ACTIVATE_BEFORE_MOVE, MYTHIC_ACTIVATE_BEFORE_MOVE } from "./constant.sol";
+import { EFFECT_DETECT_MASK } from "./constant.sol";
 
 contract CannonSystem is ArtifactProxySystem {
   using EffectLib for Planet;
+
+  error OneCannonOnly(); // 0xc5056fc5
+
   function getArtifactIndex() public pure override returns (uint8) {
     return ARTIFACT_INDEX;
   }
@@ -25,29 +28,36 @@ contract CannonSystem is ArtifactProxySystem {
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
       planet.removeEffect(COMMON_CHARGE);
-      planet.removeEffect(COMMON_ACTIVATE);
-      planet.removeEffect(COMMON_ACTIVATE_AFTER_MOVE);
+      planet.removeEffect(COMMON_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.RARE) {
       planet.removeEffect(RARE_CHARGE);
-      planet.removeEffect(RARE_ACTIVATE);
-      planet.removeEffect(RARE_ACTIVATE_AFTER_MOVE);
+      planet.removeEffect(RARE_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.EPIC) {
       planet.removeEffect(EPIC_CHARGE);
-      planet.removeEffect(EPIC_ACTIVATE);
-      planet.removeEffect(EPIC_ACTIVATE_AFTER_MOVE);
+      planet.removeEffect(EPIC_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.LEGENDARY) {
       planet.removeEffect(LEGENDARY_CHARGE);
-      planet.removeEffect(LEGENDARY_ACTIVATE);
-      planet.removeEffect(LEGENDARY_ACTIVATE_AFTER_MOVE);
+      planet.removeEffect(LEGENDARY_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.MYTHIC) {
       planet.removeEffect(MYTHIC_CHARGE);
-      planet.removeEffect(MYTHIC_ACTIVATE);
-      planet.removeEffect(MYTHIC_ACTIVATE_AFTER_MOVE);
+      planet.removeEffect(MYTHIC_ACTIVATE_BEFORE_MOVE);
     }
   }
 
   function _charge(Planet memory planet, Artifact memory artifact, bytes memory inputData) internal virtual override {
     super._charge(planet, artifact, inputData);
+
+    uint256 effectsData;
+    for (uint256 i; i < planet.effectNumber; ) {
+      effectsData <<= 24;
+      effectsData += uint24(planet.effects[i].id);
+      unchecked {
+        ++i;
+      }
+    }
+    if (effectsData & EFFECT_DETECT_MASK != 0) {
+      revert OneCannonOnly();
+    }
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
       planet.applyEffect(COMMON_CHARGE);
@@ -66,20 +76,15 @@ contract CannonSystem is ArtifactProxySystem {
     super._activate(planet, artifact, inputData);
 
     if (artifact.rarity == ArtifactRarity.COMMON) {
-      planet.applyEffect(COMMON_ACTIVATE);
-      planet.applyEffect(COMMON_ACTIVATE_AFTER_MOVE);
+      planet.applyEffect(COMMON_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.RARE) {
-      planet.applyEffect(RARE_ACTIVATE);
-      planet.applyEffect(RARE_ACTIVATE_AFTER_MOVE);
+      planet.applyEffect(RARE_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.EPIC) {
-      planet.applyEffect(EPIC_ACTIVATE);
-      planet.applyEffect(EPIC_ACTIVATE_AFTER_MOVE);
+      planet.applyEffect(EPIC_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.LEGENDARY) {
-      planet.applyEffect(LEGENDARY_ACTIVATE);
-      planet.applyEffect(LEGENDARY_ACTIVATE_AFTER_MOVE);
+      planet.applyEffect(LEGENDARY_ACTIVATE_BEFORE_MOVE);
     } else if (artifact.rarity == ArtifactRarity.MYTHIC) {
-      planet.applyEffect(MYTHIC_ACTIVATE);
-      planet.applyEffect(MYTHIC_ACTIVATE_AFTER_MOVE);
+      planet.applyEffect(MYTHIC_ACTIVATE_BEFORE_MOVE);
     }
   }
 }

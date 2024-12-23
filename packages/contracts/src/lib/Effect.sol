@@ -6,6 +6,7 @@ import { Planet } from "./Planet.sol";
 import { EffectType, ModifierType } from "../codegen/common.sol";
 import { _effectTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
 import { Effect as EffectTable, EffectData as EffectTableData } from "../modules/atfs/tables/Effect.sol";
+import { Errors } from "../interfaces/errors.sol";
 
 using EffectLib for Planet;
 
@@ -25,6 +26,7 @@ struct Modifier {
   uint256 value;
 }
 
+uint256 constant MAX_EFFECT_NUMBER = 10;
 library EffectLib {
   function genEffectId(uint256 origin, EffectType effectType, uint256 internalId) internal pure returns (uint256) {
     return (origin << 16) | (uint256(effectType) << 8) | internalId;
@@ -135,6 +137,9 @@ library EffectLib {
     unchecked {
       ++planet.effectNumber;
     }
+    if (planet.effectNumber > MAX_EFFECT_NUMBER) {
+      revert Errors.EffectNumberExceeded();
+    }
     if (effect.effectType == EffectType.STAT) {
       EffectData memory effectData = EffectLib.getData(effect);
       for (uint256 i; i < effectData.modifierNumber; ) {
@@ -195,7 +200,8 @@ library EffectLib {
 
   function beforeMove(Planet memory planet) internal view {
     Effect[] memory effects = planet.effects;
-    for (uint256 i; i < planet.effectNumber; ) {
+    uint256 effectNumber = planet.effectNumber;
+    for (uint256 i; i < effectNumber; ) {
       EffectLib.triggerEvent(planet, effects[i], EffectType.BEFORE_MOVE);
       unchecked {
         ++i;
@@ -205,7 +211,8 @@ library EffectLib {
 
   function afterMove(Planet memory planet) internal view {
     Effect[] memory effects = planet.effects;
-    for (uint256 i; i < planet.effectNumber; ) {
+    uint256 effectNumber = planet.effectNumber;
+    for (uint256 i; i < effectNumber; ) {
       EffectLib.triggerEvent(planet, effects[i], EffectType.AFTER_MOVE);
       unchecked {
         ++i;

@@ -44,7 +44,6 @@ library ArtifactStorageLib {
     if (!_s.shouldWrite) {
       return;
     }
-    PlanetArtifact.set(bytes32(_s.planetHash), _s.artifacts);
 
     uint256 artifacts = _s.inArtifacts;
     for (uint256 i; i < MAX_ARTIFACTS_PER_PLANET; ) {
@@ -58,6 +57,8 @@ library ArtifactStorageLib {
         artifacts >>= 32;
       }
     }
+
+    PlanetArtifact.set(bytes32(_s.planetHash), _s.artifacts);
   }
 
   function IsEmpty(ArtifactStorage memory _s) internal pure returns (bool) {

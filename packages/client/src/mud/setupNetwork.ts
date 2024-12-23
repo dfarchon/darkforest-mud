@@ -37,6 +37,10 @@ import {
 
 import { getNetworkConfig } from "./getNetworkConfig";
 import { world } from "./world";
+import {
+  syncFilters as extraSyncFilters,
+  tables as extraTables,
+} from "./extraTables";
 
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 
@@ -79,6 +83,7 @@ export async function setupNetwork() {
       publicClient,
       indexerUrl: networkConfig.indexerUrl,
       startBlock: BigInt(networkConfig.initialBlockNumber),
+      tables: extraTables,
     });
 
   // const {

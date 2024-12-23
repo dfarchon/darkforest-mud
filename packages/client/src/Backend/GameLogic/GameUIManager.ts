@@ -10,7 +10,6 @@ import { isUnconfirmedMoveTx } from "@df/serde";
 import type {
   Artifact,
   ArtifactId,
-  ArtifactRarity,
   BaseRenderer,
   Biome,
   Chunk,
@@ -35,6 +34,7 @@ import type {
   WorldLocation,
 } from "@df/types";
 import {
+  ArtifactRarity,
   ArtifactType,
   CursorState,
   PlanetLevel,
@@ -75,6 +75,7 @@ import type { GameObjects } from "./GameObjects";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
+import type { Hex } from "viem";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -116,6 +117,7 @@ export class GameUIManager extends EventEmitter {
   private onChooseTargetPlanet?: (planet: LocatablePlanet | undefined) => void;
 
   private linkSourceArtifactType = ArtifactType.Unknown;
+  private linkSourceArtifactRarity = ArtifactRarity.Unknown;
 
   // TODO: Remove later and just use minerLocations array
   private minerLocation: WorldCoords | undefined;
@@ -357,6 +359,10 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getCurrentTick();
   }
 
+  public getCurrentTickerRate(): number {
+    return this.gameManager.getCurrentTickerRate();
+  }
+
   public convertTickToMs(tick: number): number {
     return this.gameManager.convertTickToMs(tick);
   }
@@ -429,6 +435,10 @@ export class GameUIManager extends EventEmitter {
     this.getPluginManager().drawAllRunningPlugins(ctx);
   }
 
+  public chargeArtifact(locationId: LocationId, id: ArtifactId, data: Hex) {
+    this.gameManager.chargeArtifact(locationId, id, data);
+  }
+
   public activateArtifact(
     locationId: LocationId,
     id: ArtifactId,
@@ -445,6 +455,10 @@ export class GameUIManager extends EventEmitter {
     }
 
     this.gameManager.activateArtifact(locationId, id, linkTo);
+  }
+
+  public shutdownArtifact(locationId: LocationId, id: ArtifactId) {
+    this.gameManager.shutdownArtifact(locationId, id);
   }
 
   public deactivateArtifact(
@@ -519,7 +533,7 @@ export class GameUIManager extends EventEmitter {
     this.mouseDownOverPlanet = planet;
 
     this.linkSourceArtifactType = artifact.artifactType;
-
+    this.linkSourceArtifactRarity = artifact.rarity;
     const { resolve, promise } = deferred<LocatablePlanet | undefined>();
 
     this.onChooseTargetPlanet = resolve;
@@ -544,15 +558,14 @@ export class GameUIManager extends EventEmitter {
   }
 
   public checkPlanetCanPink(planetId: LocationId): boolean {
-    return false;
     //TODO: fix here
-    return this.gameManager.checkPlanetCanPink(planetId);
+    const { canPink } = this.gameManager.checkPlanetCanPink(planetId);
+    return canPink;
   }
 
   public pinkLocation(locationId: LocationId) {
     // TODO: fix here
-    return;
-    // this.gameManager.pinkLocation(locationId);
+    this.gameManager.pinkLocation(locationId);
   }
 
   public kardashev(locationId: LocationId) {
@@ -644,12 +657,31 @@ export class GameUIManager extends EventEmitter {
     );
   }
 
+  public getEnergyNeededForMove(
+    fromId: LocationId,
+    toId: LocationId,
+    energy: number,
+    upgrade: Upgrade,
+  ): number {
+    return this.gameManager.getEnergyNeededForMove(
+      fromId,
+      toId,
+      energy,
+      false,
+      upgrade,
+    );
+  }
+
   getIsChoosingTargetPlanet() {
     return this.isChoosingTargetPlanet;
   }
 
   getLinkSourceArtifactType() {
     return this.linkSourceArtifactType;
+  }
+
+  getLinkSourceArtifactRarity() {
+    return this.linkSourceArtifactRarity;
   }
 
   public onMouseDown(coords: WorldCoords) {
@@ -664,7 +696,7 @@ export class GameUIManager extends EventEmitter {
     if (this.getIsChoosingTargetPlanet()) {
       this.isChoosingTargetPlanet = false;
       this.linkSourceArtifactType = ArtifactType.Unknown;
-
+      this.linkSourceArtifactRarity = ArtifactRarity.Unknown;
       if (this.onChooseTargetPlanet) {
         this.onChooseTargetPlanet(hoveringOverPlanet as LocatablePlanet);
         this.mouseDownOverPlanet = undefined;
@@ -793,6 +825,7 @@ export class GameUIManager extends EventEmitter {
       this.isChoosingTargetPlanet = false;
 
       this.linkSourceArtifactType = ArtifactType.Unknown;
+      this.linkSourceArtifactRarity = ArtifactRarity.Unknown;
     } else {
       uiEmitter.emit(UIEmitterEvent.SendCancelled);
     }
@@ -1500,8 +1533,8 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getLocationOfPlanet(planetId);
   }
 
-  public getActiveArtifact(planet: Planet): Artifact | undefined {
-    return this.gameManager.getActiveArtifact(planet);
+  public getActiveArtifacts(planet: Planet): Artifact[] {
+    return this.gameManager.getActiveArtifacts(planet);
   }
 
   public getExploredChunks(): Iterable<Chunk> {
@@ -1518,8 +1551,11 @@ export class GameUIManager extends EventEmitter {
   }
 
   public getPinkZones() {
-    return [];
-    // return this.gameManager.getPinkZones();
+    return this.gameManager.getPinkZones();
+  }
+
+  public getPinkZoneByArtifactId(artifactId: ArtifactId) {
+    return this.gameManager.getPinkZoneByArtifactId(artifactId);
   }
 
   public getMyPinkZones() {

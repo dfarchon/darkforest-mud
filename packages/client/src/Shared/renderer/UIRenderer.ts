@@ -1,4 +1,4 @@
-import { isLocatable } from "@df/gamelogic";
+import { isLocatable, getRange } from "@df/gamelogic";
 import { isUnconfirmedMoveTx } from "@df/serde";
 import type { Planet, RGBVec, UIRendererType, WorldCoords } from "@df/types";
 import { ArtifactType, RendererType, RenderZIndex } from "@df/types";
@@ -33,7 +33,6 @@ export class UIRenderer implements UIRendererType {
       context: uiManager,
       lineRenderer: lR,
       textRenderer: tR,
-      // @ts-expect-error `cr` variable seems to be unused, double check and remove if redundant
       circleRenderer: cR,
     } = this.renderer;
     const mouseDownPlanet = uiManager.getMouseDownPlanet();
@@ -66,7 +65,16 @@ export class UIRenderer implements UIRendererType {
           lineColor = redA;
         } else if (artifactType === ArtifactType.Bomb) {
           showText = "Bomb Target";
-          lineColor = purpleA;
+          lineColor = pinkA;
+          const fromPlanet = uiManager.getPlanetWithCoords(from);
+          if (fromPlanet) {
+            const range = getRange(fromPlanet, 100);
+            cR.queueCircleWorld(from, range / 2, pinkA, 2);
+          }
+          if (toPlanet) {
+            const rarity = uiManager.getLinkSourceArtifactRarity();
+            cR.queueCircleWorld(to, Number(rarity) * 500, [255, 192, 203, 100]);
+          }
         }
 
         lR.queueLineWorld(from, to, lineColor, 2, RenderZIndex.Voyages);

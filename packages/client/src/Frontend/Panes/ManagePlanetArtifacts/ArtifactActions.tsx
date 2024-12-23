@@ -3,17 +3,27 @@ import {
   canDepositArtifact,
   canWithdrawArtifact,
   durationUntilArtifactAvailable,
+  getRange,
   isActivated,
   isLocatable,
 } from "@df/gamelogic";
 import {
   isUnconfirmedActivateArtifactTx,
+  isUnconfirmedChargeArtifactTx,
   isUnconfirmedDeactivateArtifactTx,
+  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedDepositArtifactTx,
   isUnconfirmedWithdrawArtifactTx,
+  locationIdToHexStr,
 } from "@df/serde";
 import type { Artifact, ArtifactId, LocationId } from "@df/types";
-import { ArtifactType, TooltipName } from "@df/types";
+import {
+  ArtifactStatus,
+  ArtifactGenre,
+  PlanetFlagType,
+  ArtifactType,
+  TooltipName,
+} from "@df/types";
 import React, { useCallback } from "react";
 
 import { Btn } from "../../Components/Btn";
@@ -32,6 +42,8 @@ import {
 import { DropBombPane } from "../DropBombPane";
 import type { TooltipTriggerProps } from "../Tooltip";
 import { TooltipTrigger } from "../Tooltip";
+import NotificationManager from "@frontend/Game/NotificationManager";
+import type { Hex } from "viem";
 
 export function ArtifactActions({
   artifactId,
@@ -69,23 +81,56 @@ export function ArtifactActions({
   //   ? activateArtifactAmountInContract
   //   : 0;
 
-  const withdraw = useCallback(
-    (artifact: Artifact) => {
-      onPlanet && uiManager.withdrawArtifact(onPlanet.locationId, artifact?.id);
+  // const withdraw = useCallback(
+  //   (artifact: Artifact) => {
+  //     onPlanet && uiManager.withdrawArtifact(onPlanet.locationId, artifact?.id);
+  //   },
+  //   [onPlanet, uiManager],
+  // );
+
+  // const deposit = useCallback(
+  //   (artifact: Artifact) => {
+  //     artifact &&
+  //       depositPlanetWrapper.value &&
+  //       uiManager.depositArtifact(
+  //         depositPlanetWrapper.value.locationId,
+  //         artifact?.id,
+  //       );
+  //   },
+  //   [uiManager, depositPlanetWrapper.value],
+  // );
+
+  const charge = useCallback(
+    async (artifact: Artifact) => {
+      if (onPlanet && isLocatable(onPlanet)) {
+        let data: Hex = "0x";
+
+        if (artifact.artifactType === ArtifactType.Bomb) {
+          const targetPlanet = await uiManager.startLinkFrom(
+            onPlanet,
+            artifact,
+          );
+          if (targetPlanet) {
+            const targetPlanetId = targetPlanet?.locationId;
+            const distance = uiManager.getDistCoords(
+              onPlanet.location.coords,
+              targetPlanet.location.coords,
+            );
+            if (distance >= getRange(onPlanet, 100) / 2) {
+              NotificationManager.getInstance().txInitError(
+                "df__chargeArtifact",
+                "Target planet is too far away",
+              );
+              return;
+            }
+            data = locationIdToHexStr(targetPlanetId) as Hex;
+          }
+        }
+
+        uiManager.chargeArtifact(onPlanet.locationId, artifact.id, data);
+      }
     },
     [onPlanet, uiManager],
-  );
-
-  const deposit = useCallback(
-    (artifact: Artifact) => {
-      artifact &&
-        depositPlanetWrapper.value &&
-        uiManager.depositArtifact(
-          depositPlanetWrapper.value.locationId,
-          artifact?.id,
-        );
-    },
-    [uiManager, depositPlanetWrapper.value],
   );
 
   const activate = useCallback(
@@ -93,14 +138,7 @@ export function ArtifactActions({
       if (onPlanet && isLocatable(onPlanet)) {
         let targetPlanetId = undefined;
 
-        if (
-          artifact.artifactType === ArtifactType.Wormhole ||
-          // artifact.artifactType === ArtifactType.BlackDomain ||
-          // artifact.artifactType === ArtifactType.Kardashev ||
-          artifact.artifactType === ArtifactType.IceLink ||
-          artifact.artifactType === ArtifactType.FireLink
-          // || artifact.artifactType === ArtifactType.Bomb
-        ) {
+        if (artifact.artifactType === ArtifactType.Wormhole) {
           const targetPlanet = await uiManager.startLinkFrom(
             onPlanet,
             artifact,
@@ -118,6 +156,13 @@ export function ArtifactActions({
     [onPlanet, uiManager],
   );
 
+  const shutdown = useCallback(
+    (artifact: Artifact) => {
+      onPlanet && uiManager.shutdownArtifact(onPlanet.locationId, artifact.id);
+    },
+    [onPlanet, uiManager],
+  );
+
   const deactivate = useCallback(
     (artifact: Artifact) => {
       onPlanet &&
@@ -130,109 +175,96 @@ export function ArtifactActions({
     [onPlanet, uiManager],
   );
 
-  if (!artifact || (!onPlanet && !depositPlanet) || !account) {
+  // if (!artifact || (!onPlanet && !depositPlanet) || !account) {
+  //   return null;
+  // }
+  if (!artifact || !onPlanet || !account) {
     return null;
   }
 
   const actions: TooltipTriggerProps[] = [];
 
-  const withdrawing = artifact.transactions?.hasTransaction(
-    isUnconfirmedWithdrawArtifactTx,
-  );
-  const depositing = artifact.transactions?.hasTransaction(
-    isUnconfirmedDepositArtifactTx,
-  );
+  // const withdrawing = artifact.transactions?.hasTransaction(
+  //   isUnconfirmedWithdrawArtifactTx,
+  // );
+  // const depositing = artifact.transactions?.hasTransaction(
+  //   isUnconfirmedDepositArtifactTx,
+  // );
   const activating = artifact.transactions?.hasTransaction(
     isUnconfirmedActivateArtifactTx,
   );
   const deactivating = artifact.transactions?.hasTransaction(
     isUnconfirmedDeactivateArtifactTx,
   );
+  const charging = artifact.transactions?.hasTransaction(
+    isUnconfirmedChargeArtifactTx,
+  );
+  const shuttingDown = artifact.transactions?.hasTransaction(
+    isUnconfirmedShutdownArtifactTx,
+  );
 
-  const canHandleDeposit =
-    depositPlanetWrapper.value &&
-    depositPlanetWrapper.value.planetLevel > artifact.rarity;
-  const canHandleWithdraw =
-    onPlanetWrapper.value &&
-    onPlanetWrapper.value.planetLevel > artifact.rarity;
+  // const canHandleDeposit =
+  //   depositPlanetWrapper.value &&
+  //   depositPlanetWrapper.value.planetLevel > artifact.rarity;
+  // const canHandleWithdraw =
+  //   onPlanetWrapper.value &&
+  //   onPlanetWrapper.value.planetLevel > artifact.rarity;
 
-  const wait = durationUntilArtifactAvailable(artifact);
+  // const wait = durationUntilArtifactAvailable(artifact);
 
-  if (canDepositArtifact(account, artifact, depositPlanetWrapper.value)) {
-    actions.unshift({
-      name: TooltipName.DepositArtifact,
-      extraContent: !canHandleDeposit && (
-        <>
-          . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
-          {` artifacts can only be deposited on level ${artifact.rarity + 1}+ spacetime rips`}
-        </>
-      ),
-      children: (
-        <Btn
-          disabled={depositing}
-          onClick={(e) => {
-            e.stopPropagation();
-            canHandleDeposit && deposit(artifact);
-          }}
-        >
-          {depositing ? (
-            <LoadingSpinner initialText={"Depositing..."} />
-          ) : (
-            "Deposit"
-          )}
-        </Btn>
-      ),
-    });
-  }
-  if (
-    isActivated(artifact) &&
-    artifact.artifactType !== ArtifactType.BlackDomain
-  ) {
-    actions.unshift({
-      name: TooltipName.DeactivateArtifact,
-      children: (
-        <Btn
-          disabled={deactivating}
-          onClick={(e) => {
-            e.stopPropagation();
-            deactivate(artifact);
-          }}
-        >
-          {deactivating ? (
-            <LoadingSpinner initialText={"Deactivating..."} />
-          ) : (
-            "Deactivate"
-          )}
-        </Btn>
-      ),
-    });
-  }
-  if (canWithdrawArtifact(account, artifact, onPlanet)) {
-    actions.unshift({
-      name: TooltipName.WithdrawArtifact,
-      extraContent: !canHandleWithdraw && (
-        <>
-          . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
-          {` artifacts can only be withdrawn from level ${artifact.rarity + 1}+ spacetime rips`}
-        </>
-      ),
-      children: (
-        <Btn
-          disabled={withdrawing}
-          onClick={(e) => {
-            e.stopPropagation();
-            canHandleWithdraw && withdraw(artifact);
-          }}
-        >
-          {withdrawing ? (
-            <LoadingSpinner initialText={"Withdrawing..."} />
-          ) : (
-            "Withdraw"
-          )}
-        </Btn>
-      ),
-    });
-  }
+  // if (canDepositArtifact(account, artifact, depositPlanetWrapper.value)) {
+  //   actions.unshift({
+  //     name: TooltipName.DepositArtifact,
+  //     extraContent: !canHandleDeposit && (
+  //       <>
+  //         . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
+  //         {` artifacts can only be deposited on level ${artifact.rarity + 1}+ spacetime rips`}
+  //       </>
+  //     ),
+  //     children: (
+  //       <Btn
+  //         disabled={depositing}
+  //         onClick={(e) => {
+  //           e.stopPropagation();
+  //           canHandleDeposit && deposit(artifact);
+  //         }}
+  //       >
+  //         {depositing ? (
+  //           <LoadingSpinner initialText={"Depositing..."} />
+  //         ) : (
+  //           "Deposit"
+  //         )}
+  //       </Btn>
+  //     ),
+  //   });
+  // }
+
+  // if (canWithdrawArtifact(account, artifact, onPlanet)) {
+  //   actions.unshift({
+  //     name: TooltipName.WithdrawArtifact,
+  //     extraContent: !canHandleWithdraw && (
+  //       <>
+  //         . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
+  //         {` artifacts can only be withdrawn from level ${artifact.rarity + 1}+ spacetime rips`}
+  //       </>
+  //     ),
+  //     children: (
+  //       <Btn
+  //         disabled={withdrawing}
+  //         onClick={(e) => {
+  //           e.stopPropagation();
+  //           canHandleWithdraw && withdraw(artifact);
+  //         }}
+  //       >
+  //         {withdrawing ? (
+  //           <LoadingSpinner initialText={"Withdrawing..."} />
+  //         ) : (
+  //           "Withdraw"
+  //         )}
+  //       </Btn>
+  //     ),
+  //   });
+  // }
 
   const activateArtifactCooldownPassed = true; // uiManager.getNextActivateArtifactAvailableTimestamp() <= Date.now();
 
@@ -242,9 +274,114 @@ export function ArtifactActions({
   //     artifact.artifactType === ArtifactType.Avatar)
   // )
 
-  if (canActivateArtifact(artifact, onPlanet, otherArtifactsOnPlanet)) {
+  if (
+    artifact.genre === undefined ||
+    artifact.charge === undefined ||
+    artifact.cooldown === undefined ||
+    artifact.reqLevel === undefined ||
+    artifact.reqPopulation === undefined ||
+    artifact.reqSilver === undefined ||
+    artifact.status === undefined ||
+    artifact.durable === undefined ||
+    artifact.reusable === undefined ||
+    artifact.rarity === undefined ||
+    artifact.chargeTick === undefined ||
+    artifact.cooldownTick === undefined ||
+    onPlanet.flags === undefined
+  ) {
+    return null;
+  }
+
+  const artifactGenreCheck =
+    artifact.genre === ArtifactGenre.General ||
+    (artifact.genre === ArtifactGenre.Productive &&
+      (onPlanet.flags & (1n << BigInt(PlanetFlagType.PRODUCTIVE_ARTIFACT))) ===
+        0n) ||
+    (artifact.genre === ArtifactGenre.Offensive &&
+      (onPlanet.flags & (1n << BigInt(PlanetFlagType.OFFENSIVE_ARTIFACT))) ===
+        0n) ||
+    (artifact.genre === ArtifactGenre.Defensive &&
+      (onPlanet.flags & (1n << BigInt(PlanetFlagType.DEFENSIVE_ARTIFACT))) ===
+        0n);
+
+  const populationCheck = onPlanet.energy > artifact.reqPopulation;
+
+  const silverCheck = onPlanet.silver >= artifact.reqSilver;
+
+  const levelCheck =
+    artifact.reqLevel === 0 ||
+    (onPlanet.planetLevel >= (artifact.reqLevel & 0xff) &&
+      onPlanet.planetLevel < (artifact.reqLevel & 0xff00) >> 8);
+
+  const canCharge =
+    artifact.status === ArtifactStatus.Default &&
+    artifact.charge > 0 &&
+    artifactGenreCheck &&
+    levelCheck;
+
+  const canActivate =
+    (artifact.status === ArtifactStatus.Ready ||
+      (artifact.status === ArtifactStatus.Default &&
+        artifact.charge === 0 &&
+        artifactGenreCheck)) &&
+    populationCheck &&
+    silverCheck &&
+    levelCheck;
+
+  const canShutdown =
+    artifact.status >= ArtifactStatus.Charging &&
+    artifact.status <= ArtifactStatus.Active;
+
+  // console.log("populationCheck", populationCheck);
+  // console.log("silverCheck", silverCheck);
+  // console.log("levelCheck", levelCheck);
+  // console.log("canCharge", canCharge);
+  // console.log("canActivate", canActivate);
+  // console.log("canShutdown", canShutdown);
+
+  if (canCharge) {
+    actions.unshift({
+      name: TooltipName.ChargeArtifact,
+      children: (
+        <Btn
+          disabled={charging}
+          onClick={(e) => {
+            e.stopPropagation();
+            charge(artifact);
+          }}
+        >
+          {charging ? <LoadingSpinner initialText={"Charging..."} /> : "Charge"}
+        </Btn>
+      ),
+    });
+  }
+
+  if (canActivate) {
     actions.unshift({
       name: TooltipName.ActivateArtifact,
+      extraContent:
+        artifact.artifactType === ArtifactType.Bomb ? (
+          <>
+            {". "}
+            You need{" "}
+            {Math.floor(
+              uiManager.getEnergyNeededForMove(
+                onPlanet.locationId,
+                uiManager.getPinkZoneByArtifactId(artifact.id)?.locationId ??
+                  onPlanet.locationId,
+                0,
+                {
+                  energyCapMultiplier: 100,
+                  energyGroMultiplier: 100,
+                  rangeMultiplier: 50,
+                  speedMultiplier: 50,
+                  defMultiplier: 100,
+                },
+              ),
+            )}{" "}
+            energy to launch this bomb.
+          </>
+        ) : undefined,
       children: (
         <Btn
           disabled={activating || !activateArtifactCooldownPassed}
@@ -263,11 +400,45 @@ export function ArtifactActions({
     });
   }
 
-  if (wait > 0) {
+  if (
+    artifact.status === ArtifactStatus.Charging ||
+    artifact.status === ArtifactStatus.Cooldown
+  ) {
     actions.unshift({
       name: TooltipName.Empty,
-      extraContent: <>You have to wait before activating an artifact again</>,
-      children: <Sub>{formatDuration(wait)}</Sub>,
+      extraContent: <>You must wait before proceeding to the next step</>,
+      children: (
+        <Sub>
+          {formatDuration(
+            uiManager.convertTickToMs(
+              artifact.status === ArtifactStatus.Charging
+                ? artifact.chargeTick + artifact.charge
+                : artifact.cooldownTick + artifact.cooldown,
+            ) - Date.now(),
+          )}
+        </Sub>
+      ),
+    });
+  }
+
+  if (canShutdown) {
+    actions.unshift({
+      name: TooltipName.ShutdownArtifact,
+      children: (
+        <Btn
+          disabled={shuttingDown}
+          onClick={(e) => {
+            e.stopPropagation();
+            shutdown(artifact);
+          }}
+        >
+          {shuttingDown ? (
+            <LoadingSpinner initialText={"Shutting down..."} />
+          ) : (
+            "Shutdown"
+          )}
+        </Btn>
+      ),
     });
   }
 

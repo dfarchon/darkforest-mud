@@ -53,6 +53,7 @@ import type {
   UpgradeBranches,
   UpgradeLevels,
   VoyageId,
+  WorldLocation,
 } from "@df/types";
 import { Setting } from "@df/types";
 import { hexToResource } from "@latticexyz/common";
@@ -89,6 +90,7 @@ import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
+import { ArtifactUtils, updateArtifactStatus } from "./ArtifactUtils";
 import { TickerUtils } from "./TickerUtils";
 
 interface ContractsApiConfig {
@@ -144,13 +146,14 @@ export class ContractsAPI extends EventEmitter {
   private contractConstants: ContractConstants;
 
   private planetUtils: PlanetUtils;
+  private artifactUtils: ArtifactUtils;
   private moveUtils: MoveUtils;
   private tickerUtils: TickerUtils;
 
   private pausedStateSubscription: Subscription;
   private playerSubscription: Subscription;
   private artifactSubscription: Subscription;
-  private artifactOwnerSubscription: Subscription;
+  private planetArtifactsSubscription: Subscription;
   private lastRevealSubscription: Subscription;
   private revealedPlanetSubscription: Subscription;
   private planetSubscription: Subscription;
@@ -158,6 +161,7 @@ export class ContractsAPI extends EventEmitter {
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
   private setPlanetEmojiSubscription: Subscription;
+  private planetFlagsSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -182,6 +186,10 @@ export class ContractsAPI extends EventEmitter {
     this.components = components;
     this.contractConstants = this.getConstants();
     this.planetUtils = new PlanetUtils({
+      components: components,
+      contractConstants: this.contractConstants,
+    });
+    this.artifactUtils = new ArtifactUtils({
       components: components,
       contractConstants: this.contractConstants,
     });
@@ -326,14 +334,16 @@ export class ContractsAPI extends EventEmitter {
       },
     );
 
-    this.artifactOwnerSubscription =
-      this.components.ArtifactOwner.update$.subscribe((update) => {
+    this.planetArtifactsSubscription =
+      this.components.PlanetArtifact.update$.subscribe((update) => {
         const entity = update.entity;
         const [nextValue] = update.value;
-        const artifactId = artifactIdFromHexStr(entity.toString());
 
         if (nextValue) {
-          this.emit(ContractsAPIEvent.ArtifactUpdate, artifactId);
+          this.emit(
+            ContractsAPIEvent.PlanetUpdate,
+            locationIdFromHexStr(entity.toString()),
+          );
         }
       });
 
@@ -411,6 +421,15 @@ export class ContractsAPI extends EventEmitter {
         );
       });
 
+    this.planetFlagsSubscription =
+      this.components.PlanetFlags.update$.subscribe((update) => {
+        const entity = update.entity;
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
+      });
+
     this.tickerRateSubscription = this.components.Ticker.update$.subscribe(
       (update) => {
         const [nextValue, preValue] = update.value;
@@ -426,6 +445,10 @@ export class ContractsAPI extends EventEmitter {
         }
       },
     );
+
+    // since no events are processed on the client, we need to subscribe to new blocks
+    // to get the latest block number
+    this.ethConnection.subscribeToNewBlock();
 
     return;
 
@@ -794,7 +817,7 @@ export class ContractsAPI extends EventEmitter {
     this.pausedStateSubscription.unsubscribe();
     this.playerSubscription.unsubscribe();
     this.artifactSubscription.unsubscribe();
-    this.artifactOwnerSubscription.unsubscribe();
+    this.planetArtifactsSubscription.unsubscribe();
     this.lastRevealSubscription.unsubscribe();
     this.revealedPlanetSubscription.unsubscribe();
     this.planetSubscription.unsubscribe();
@@ -802,6 +825,7 @@ export class ContractsAPI extends EventEmitter {
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
     this.setPlanetEmojiSubscription.unsubscribe();
+    this.planetFlagsSubscription.unsubscribe();
     return;
     const { contract } = this;
 
@@ -1314,6 +1338,10 @@ export class ContractsAPI extends EventEmitter {
     return this.planetUtils.getPlanetById(planetId);
   }
 
+  public getDefaultPlanetByLocation(location: WorldLocation): Planet {
+    return this.planetUtils.defaultPlanetFromLocation(location);
+  }
+
   public getPlanetEmoji(planetId: LocationId): string | undefined {
     const { PlanetEmoji } = this.components;
 
@@ -1347,6 +1375,41 @@ export class ContractsAPI extends EventEmitter {
       onProgressPlanet && onProgressPlanet((i + 1) / nPlanetIds);
     }
     return planets;
+  }
+
+  public async getTouchedArtifactIds(
+    onProgress?: (fractionCompleted: number) => void,
+  ): Promise<ArtifactId[]> {
+    const { Artifact } = this.components;
+    const artifactIds = [...runQuery([Has(Artifact)])];
+    const nArtifactIds = artifactIds.length;
+    const result: ArtifactId[] = [];
+
+    for (let i = 0; i < nArtifactIds; i++) {
+      const artifactId = artifactIdFromHexStr(artifactIds[i].toString());
+      result.push(artifactId);
+      onProgress && onProgress((i + 1) / nArtifactIds);
+    }
+    return result;
+  }
+
+  public bulkGetArtifacts(
+    artifactIds: ArtifactId[],
+    onProgress?: (fractionCompleted: number) => void,
+  ): Map<ArtifactId, Artifact> {
+    const artifacts: Map<ArtifactId, Artifact> = new Map();
+    const nArtifactIds: number = artifactIds.length;
+
+    for (let i = 0; i < nArtifactIds; i += 1) {
+      const artifactId = artifactIds[i];
+      const artifact = this.artifactUtils.getArtifactById(artifactId);
+      if (artifact) {
+        updateArtifactStatus(artifact, this.tickerUtils.getCurrentTick());
+        artifacts.set(artifact.id, artifact);
+      }
+      onProgress && onProgress((i + 1) / nArtifactIds);
+    }
+    return artifacts;
   }
 
   // public async getEntryFee(): Promise<EthersBN> {

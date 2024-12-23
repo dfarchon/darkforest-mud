@@ -98,46 +98,50 @@ export function PinkPane({
   };
 
   const isDestoryedOrFrozen = planet.destroyed || planet.frozen;
-  const levelPassed = planet ? planet.planetLevel >= 3 : false;
+  // const levelPassed = planet ? planet.planetLevel >= 3 : false;
   const pinkZonePassed = planetId && uiManager.checkPlanetCanPink(planetId);
 
-  if (isDestoryedOrFrozen || !levelPassed || !pinkZonePassed) {
+  if (isDestoryedOrFrozen || !pinkZonePassed) {
     return notice;
   }
 
-  const pinkLocationCooldownPassed =
-    planetId && ui.getNextPinkAvailableTimestamp(planetId) <= Date.now();
+  // const pinkLocationCooldownPassed =
+  //   planetId && ui.getNextPinkAvailableTimestamp(planetId) <= Date.now();
 
-  const hasStellarShield =
-    activeArtifact &&
-    activeArtifact.artifactType === ArtifactType.StellarShield;
-  const notPinkingAnyPlanet = uiManager.isCurrentlyPinking() === false;
+  // const hasStellarShield =
+  //   activeArtifact &&
+  //   activeArtifact.artifactType === ArtifactType.StellarShield;
+  // const notPinkingAnyPlanet = uiManager.isCurrentlyPinking() === false;
 
-  let pinkBtn = undefined;
+  const pinkBtn = (
+    <Btn disabled={false} onClick={pinkLocation}>
+      Pink It
+    </Btn>
+  );
 
-  if (isDestoryedOrFrozen) {
-    pinkBtn = <Btn disabled={true}>Pink It </Btn>;
-  } else if (!notPinkingAnyPlanet) {
-    pinkBtn = (
-      <Btn disabled={true}>
-        <LoadingSpinner initialText={"Pinking It..."} />
-      </Btn>
-    );
-  } else if (!pinkLocationCooldownPassed) {
-    pinkBtn = <Btn disabled={true}>Pink It </Btn>;
-  } else if (!pinkZonePassed) {
-    pinkBtn = <Btn disabled={true}>Pink It </Btn>;
-  } else if (hasStellarShield) {
-    pinkBtn = <Btn disabled={true}>Pink It </Btn>;
-  } else if (!levelPassed) {
-    pinkBtn = <Btn disabled={true}>Pink It </Btn>;
-  } else {
-    pinkBtn = (
-      <Btn disabled={false} onClick={pinkLocation}>
-        Pink It
-      </Btn>
-    );
-  }
+  // if (isDestoryedOrFrozen) {
+  //   pinkBtn = <Btn disabled={true}>Pink It </Btn>;
+  // } else if (!notPinkingAnyPlanet) {
+  //   pinkBtn = (
+  //     <Btn disabled={true}>
+  //       <LoadingSpinner initialText={"Pinking It..."} />
+  //     </Btn>
+  //   );
+  //   } else if (!pinkLocationCooldownPassed) {
+  //     pinkBtn = <Btn disabled={true}>Pink It </Btn>;
+  // } else if (!pinkZonePassed) {
+  //   pinkBtn = <Btn disabled={true}>Pink It </Btn>;
+  // } else if (hasStellarShield) {
+  //   pinkBtn = <Btn disabled={true}>Pink It </Btn>;
+  // } else if (!levelPassed) {
+  //   pinkBtn = <Btn disabled={true}>Pink It </Btn>;
+  // } else {
+  //   pinkBtn = (
+  //     <Btn disabled={false} onClick={pinkLocation}>
+  //       Pink It
+  //     </Btn>
+  //   );
+  // }
 
   const warningsSection = (
     <div>
@@ -146,14 +150,14 @@ export function PinkPane({
           <Blue>INFO:</Blue> You only can pink planets in your pink circle.
         </p>
       )}
-      {hasStellarShield && (
+      {/* {hasStellarShield && (
         <p>
           <Blue>INFO:</Blue> You can&apos;t pink a planet with active
           StellarShield.
         </p>
-      )}
+      )} */}
 
-      {pinkZonePassed && !pinkLocationCooldownPassed && planetId && (
+      {/* {pinkZonePassed && !pinkLocationCooldownPassed && planetId && (
         <p>
           <Blue>INFO:</Blue> You must wait{" "}
           <TimeUntil
@@ -162,14 +166,14 @@ export function PinkPane({
           />{" "}
           to pink this planet.
         </p>
-      )}
+      )} */}
     </div>
   );
 
   if (planet) {
     return (
       <PinkWrapper>
-        <div>
+        {/* <div>
           <Green>Tip:</Green> You need to wait{" "}
           <White>
             {formatDuration(
@@ -177,7 +181,7 @@ export function PinkPane({
             )}
           </White>{" "}
           after dropping bomb.
-        </div>
+        </div> */}
         <div className="message">{warningsSection}</div>
         <div className="row">
           <span>Coordinates</span>

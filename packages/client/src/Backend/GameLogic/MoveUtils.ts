@@ -1,5 +1,10 @@
 import { CONTRACT_PRECISION } from "@df/constants";
-import { address, locationIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import {
+  address,
+  locationIdFromHexStr,
+  locationIdToHexStr,
+  artifactIdFromHexStr,
+} from "@df/serde";
 import type {
   ArtifactId,
   EthAddress,
@@ -62,7 +67,7 @@ export class MoveUtils {
           artifactId:
             move.artifact === 0n
               ? undefined
-              : (move.artifact.toString() as ArtifactId),
+              : artifactIdFromHexStr(move.artifact.toString()),
           departureTick: Number(move.departureTick),
           distance: 0, // TODO: calculate distance
           arrivalTick: Number(move.arrivalTick),

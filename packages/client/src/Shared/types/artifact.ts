@@ -105,6 +105,61 @@ export const ArtifactRarityNames = {
 } as const;
 
 /**
+ * Abstract type representing an artifact status.
+ */
+export type ArtifactStatus = Abstract<number, "ArtifactStatus">;
+
+/**
+ * Enumeration of possible artifact statuses
+ */
+export const ArtifactStatus = {
+  Default: 0 as ArtifactStatus,
+  Cooldown: 1 as ArtifactStatus,
+  Charging: 2 as ArtifactStatus,
+  Ready: 3 as ArtifactStatus,
+  Active: 4 as ArtifactStatus,
+  Broken: 5 as ArtifactStatus,
+} as const;
+
+/**
+ * Mapping from ArtifactStatus to pretty-printed names.
+ */
+export const ArtifactStatusNames = {
+  [ArtifactStatus.Default]: "Default",
+  [ArtifactStatus.Cooldown]: "Cooldown",
+  [ArtifactStatus.Charging]: "Charging",
+  [ArtifactStatus.Ready]: "Ready",
+  [ArtifactStatus.Active]: "Active",
+  [ArtifactStatus.Broken]: "Broken",
+} as const;
+/**
+ * Abstract type representing an artifact genre.
+ */
+export type ArtifactGenre = Abstract<number, "ArtifactGenre">;
+
+/**
+ * Enumeration of possible artifact genres
+ */
+export const ArtifactGenre = {
+  Unknown: 0 as ArtifactGenre,
+  Defensive: 1 as ArtifactGenre,
+  Offensive: 2 as ArtifactGenre,
+  Productive: 3 as ArtifactGenre,
+  General: 4 as ArtifactGenre,
+} as const;
+
+/**
+ * Mapping from ArtifactGenre to pretty-printed names.
+ */
+export const ArtifactGenreNames = {
+  [ArtifactGenre.Unknown]: "Unknown",
+  [ArtifactGenre.Defensive]: "Defensive",
+  [ArtifactGenre.Offensive]: "Offensive",
+  [ArtifactGenre.Productive]: "Productive",
+  [ArtifactGenre.General]: "General",
+} as const;
+
+/**
  * mapping from ArtifactRarity to points earned for finding this artifact.
  */
 export type ArtifactPointValues = { [ArtifactRarity: number]: number };
@@ -131,14 +186,31 @@ export type Artifact = {
   controller: EthAddress;
   imageType: number;
 
-  upgrade: Upgrade;
-  timeDelayedUpgrade: Upgrade;
+  upgrade?: Upgrade;
+  timeDelayedUpgrade?: Upgrade;
   currentOwner: EthAddress; // owner of the NFT - can be the contract
   linkTo?: LocationId;
   onPlanetId?: LocationId;
   onVoyageId?: VoyageId;
 
   transactions?: TransactionCollection;
+
+  // mud version
+  artifactIndex?: number;
+  status?: ArtifactStatus;
+  genre?: ArtifactGenre;
+  chargeTick?: number;
+  activateTick?: number;
+  cooldownTick?: number;
+  charge?: number;
+  cooldown?: number;
+  durable?: boolean;
+  reusable?: boolean;
+  reqLevel?: number;
+  reqPopulation?: bigint;
+  reqSilver?: bigint;
+  chargeUpgrade?: Upgrade;
+  activateUpgrade?: Upgrade;
 };
 
 // TODO: get this out of here
