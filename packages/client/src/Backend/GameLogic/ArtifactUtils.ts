@@ -22,6 +22,7 @@ import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
+import { TxCollection } from "@df/network";
 
 interface ArtifactUtilsConfig {
   components: ClientComponents;
@@ -76,21 +77,29 @@ export class ArtifactUtils {
       }
     }
 
-    const metadata = getComponentValue(
-      artifactRec.artifactIndex === 1
-        ? PinkBombMetadata
-        : artifactRec.artifactIndex === 4
-          ? BloomFilterMetadata
-          : artifactRec.artifactIndex === 5
-            ? WormholeMetadata
-            : CannonMetadata,
-      encodeEntity(
-        { rarity: "uint8" },
-        {
-          rarity: artifactRec.rarity,
-        },
-      ),
-    );
+    let metadata;
+    if (artifactRec.artifactIndex === 1) {
+      metadata = getComponentValue(
+        PinkBombMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: artifactRec.rarity }),
+      );
+    } else if (artifactRec.artifactIndex === 4) {
+      metadata = getComponentValue(
+        BloomFilterMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: artifactRec.rarity }),
+      );
+    } else if (artifactRec.artifactIndex === 5) {
+      metadata = getComponentValue(
+        WormholeMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: artifactRec.rarity }),
+      );
+    } else if (artifactRec.artifactIndex === 6) {
+      metadata = getComponentValue(
+        CannonMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: artifactRec.rarity }),
+      );
+    }
+
     if (!metadata) {
       throw new Error(
         `artifact metadata not found, artifact index: ${artifactRec.artifactIndex}, rarity: ${artifactRec.rarity}`,
@@ -134,6 +143,7 @@ export class ArtifactUtils {
       reqSilver: metadata.reqSilver,
       chargeUpgrade,
       activateUpgrade,
+      transactions: new TxCollection(),
     };
   }
 
