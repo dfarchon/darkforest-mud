@@ -366,6 +366,13 @@ export default defineWorld({
       },
       key: [],
     },
+    GPTTokens: {
+      schema: {
+        player: "address",
+        amount: "uint256",
+      },
+      key: ["player"],
+    },
     // // artifact module
     // Effect: {
     //   schema: {

@@ -56,7 +56,10 @@ export type ContractMethodName =
   | "transferLeaderRole"
   | "changeUnionName"
   | "disbandUnion"
-  | "levelUpUnion";
+  | "levelUpUnion"
+  | "df__buyGPTTokens"
+  | "df__spendGPTTokens"
+  | "df__sendGPTTokens";
 
 export type EthTxStatus =
   | "Init"
@@ -495,4 +498,28 @@ export type UnconfirmedDisbandUnion = TxIntent & {
 export type UnconfirmedLevelUpUnion = TxIntent & {
   methodName: "levelUpUnion";
   unionId: UnionId;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedBuyGPTTokens = TxIntent & {
+  methodName: "df__buyGPTTokens";
+  amount: number;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedSpendGPTTokens = TxIntent & {
+  methodName: "df__spendGPTTokens";
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedSendGPTTokens = TxIntent & {
+  methodName: "df__sendGPTTokens";
+  player: EthAddress;
+  amount: number;
 };

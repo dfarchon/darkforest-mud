@@ -1,9 +1,17 @@
 import { ModalName } from "@df/types";
+import { Btn } from "@frontend/Components/Btn";
+import { LoadingSpinner } from "@frontend/Components/LoadingSpinner";
+import dfstyles from "@frontend/Styles/dfstyles";
+import { type Entity, getComponentValue } from "@latticexyz/recs";
+import { useMUD } from "@mud/MUDContext";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { zeroAddress } from "viem";
+import { useWalletClient } from "wagmi";
 
 import { Spacer } from "../Components/CoreUI";
 import { TextInput } from "../Components/Input";
+import { Blue, Green, Red, Sub, White } from "../Components/Text";
 import { useAccount, usePlayer, useUIManager } from "../Utils/AppHooks";
 import {
   clearChatHistoryFromIndexedDB,
@@ -11,7 +19,59 @@ import {
   saveMessageToIndexedDB,
 } from "../Utils/IndexedDB-ChatMemory";
 import { ModalPane } from "../Views/ModalPane";
+
 const API_URL = import.meta.env.VITE_AI_API_URL;
+
+// Styled component for Currency View
+const CurrencyViewContainer = styled(Sub)`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export function CurrencyView() {
+  const {
+    network: { playerEntity, waitForTransaction },
+    components: components, //{ SyncProgress },
+  } = useMUD();
+  const { data: walletClient } = useWalletClient();
+  const { GPTTokens } = components;
+
+  const currentGptCredits =
+    getComponentValue(GPTTokens, playerEntity)?.amount || 0;
+
+  const currentCreditPrice = 0.001;
+
+  const isBuyingCredits = false;
+
+  const [buyAmount, _setBuyAmount] = useState(5);
+  const buyMore = false;
+
+  return (
+    <CurrencyViewContainer>
+      <span>
+        You have{" "}
+        {currentGptCredits === 0 ? (
+          <Red>0</Red>
+        ) : (
+          <Green>{currentGptCredits.toString()}</Green>
+        )}{" "}
+        credits
+      </span>
+      <span>
+        for Price: <Green>{currentCreditPrice.toString()} ETH each</Green>
+      </span>
+      <Btn onClick={buyMore} disabled={isBuyingCredits}>
+        {isBuyingCredits ? (
+          <LoadingSpinner initialText="buying credits..." />
+        ) : (
+          <span>Buy {buyAmount} Credits</span>
+        )}
+      </Btn>
+    </CurrencyViewContainer>
+  );
+}
 
 const AIChatContent = styled.div`
   width: 500px;
@@ -171,10 +231,11 @@ export function AIChatPane({
           placeholder="Type your message here..."
         />
         <div className="flex items-center justify-between p-2">
-          <df-button onClick={handleSend}>Send</df-button>
-          <df-button onClick={handleClearChat}>Clear</df-button>
+          <Btn onClick={handleSend}>Send</Btn>
+          <Btn onClick={handleClearChat}>Clear</Btn>
         </div>
       </AIChatContent>
+      <CurrencyView />
     </ModalPane>
   );
 }

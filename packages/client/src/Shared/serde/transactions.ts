@@ -8,6 +8,7 @@ import type {
   UnconfirmedBlue,
   UnconfirmedBurn,
   UnconfirmedBuyArtifact,
+  UnconfirmedBuyGPTTokens,
   UnconfirmedBuyHat,
   UnconfirmedBuyPlanet,
   UnconfirmedBuySpaceship,
@@ -39,7 +40,9 @@ import type {
   UnconfirmedRejectApplication,
   UnconfirmedReveal,
   UnconfirmedSendApplication,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedTransferLeaderRole,
   UnconfirmedUpgrade,
   UnconfirmedUseKey,
@@ -162,7 +165,7 @@ export function isUnconfirmedWithdrawSilver(
 
 export function isUnconfirmedSetPlanetEmoji(
   txIntent: TxIntent,
-): txIntent is UnconfirmedWithdrawSilver {
+): txIntent is UnconfirmedSetPlanetEmoji {
   return txIntent.methodName === "df__setPlanetEmoji";
 }
 
@@ -320,6 +323,24 @@ export function isUnconfirmedLevelUpUnion(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedLevelUpUnion {
   return txIntent.methodName === "levelUpUnion";
+}
+
+export function isUnconfirmedBuyGPTTokens(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedBuyGPTTokens {
+  return txIntent.methodName === "buyGPTTokens";
+}
+
+export function isUnconfirmedSpendGPTTokens(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedSpendGPTTokens {
+  return txIntent.methodName === "spendGPTTokens";
+}
+
+export function isUnconfirmedSendGPTTokens(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedSendGPTTokens {
+  return txIntent.methodName === "sendGPTTokens";
 }
 
 export function isUnconfirmedRevealTx(
@@ -590,4 +611,20 @@ export function isUnconfirmedLevelUpUnionTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedLevelUpUnion> {
   return isUnconfirmedLevelUpUnion(tx.intent);
+}
+
+export function isUnconfirmedBuyGPTTokensTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedBuyGPTTokens> {
+  return isUnconfirmedBuyGPTTokens(tx.intent);
+}
+export function isUnconfirmedSendGPTTokensTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedSendGPTTokens> {
+  return isUnconfirmedSendGPTTokens(tx.intent);
+}
+export function isUnconfirmedSpendGPTTokensTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedSpendGPTTokens> {
+  return isUnconfirmedSpendGPTTokens(tx.intent);
 }
