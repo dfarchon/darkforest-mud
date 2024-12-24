@@ -63,45 +63,49 @@ export function AIChatPane({
     { message: string; isUser: boolean }[]
   >([]);
 
+  const [temp, setTemp] = useState(true);
   useEffect(() => {
-    const initializeChat = async () => {
-      const history = await loadConversationFromIndexedDB();
+    if (visible && temp) {
+      const initializeChat = async () => {
+        const history = await loadConversationFromIndexedDB();
 
-      if (history && history.length === 0) {
-        try {
-          const response = await fetch(`${API_URL}/api/conversation/start`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              username: player?.name,
-              message: "Hello!",
-              indexedHistory: history.map((h) => h.message).join("\n"),
-            }),
-          });
+        if (history && history.length === 0) {
+          try {
+            const response = await fetch(`${API_URL}/api/conversation/start`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username: player?.name,
+                message: "Hello!",
+                indexedHistory: history.map((h) => h.message).join("\n"),
+              }),
+            });
 
-          if (response.ok) {
-            const aiResponse = await response.json();
+            if (response.ok) {
+              const aiResponse = await response.json();
 
-            const aiMessage = { message: aiResponse, isUser: false };
-            setChatHistory((prev) => [...prev, aiMessage]);
-            saveMessageToIndexedDB(aiMessage);
+              const aiMessage = { message: aiResponse, isUser: false };
+              setChatHistory((prev) => [...prev, aiMessage]);
+              saveMessageToIndexedDB(aiMessage);
+            }
+          } catch (error) {
+            console.error("Error starting chat:", error);
           }
-        } catch (error) {
-          console.error("Error starting chat:", error);
+        } else if (history && history.length > 0) {
+          const loadChatHistory = async () => {
+            const historyIndexedDB = await loadConversationFromIndexedDB();
+            setChatHistory(historyIndexedDB || []);
+          };
+          loadChatHistory();
         }
-      } else if (history && history.length > 0) {
-        const loadChatHistory = async () => {
-          const historyIndexedDB = await loadConversationFromIndexedDB();
-          setChatHistory(historyIndexedDB || []);
-        };
-        loadChatHistory();
-      }
-    };
+      };
 
-    initializeChat();
-  }, []);
+      initializeChat();
+      setTemp(false);
+    }
+  }, [visible]);
 
   const handleSend = async () => {
     if (input.trim()) {
