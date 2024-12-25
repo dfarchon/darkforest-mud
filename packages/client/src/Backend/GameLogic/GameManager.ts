@@ -217,6 +217,7 @@ import type {
   RevealSnarkContractCallArgs,
   SnarkProof,
 } from "@df/snarks";
+import { prospectExpired } from "./ArrivalUtils";
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -966,10 +967,12 @@ export class GameManager extends EventEmitter {
     };
 
     const useMockHash = initialState.contractConstants.DISABLE_ZK_CHECKS;
+    const biomeCheck = initialState.contractConstants.BIOME_CHECKS;
     const snarkHelper = SnarkArgsHelper.create(
       hashConfig,
       terminal,
       useMockHash,
+      biomeCheck,
     );
 
     const gameManager = new GameManager(
@@ -4332,7 +4335,13 @@ export class GameManager extends EventEmitter {
           throw new Error("you don't know this planet's location");
         }
 
-        if (planet.prospectedBlockNumber !== undefined) {
+        if (
+          planet.prospectedBlockNumber !== undefined &&
+          !prospectExpired(
+            this.ethConnection.getCurrentBlockNumber(),
+            planet.prospectedBlockNumber,
+          )
+        ) {
           throw new Error("someone already prospected this planet");
         }
 

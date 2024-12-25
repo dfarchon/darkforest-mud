@@ -114,6 +114,7 @@ class SnarkArgsHelper {
    */
   private static readonly DEFAULT_SNARK_CACHE_SIZE = 20;
   private readonly useMockHash: boolean;
+  private readonly biomeCheck: boolean;
   private readonly snarkProverQueue: SnarkProverQueue;
   private readonly terminal: React.MutableRefObject<TerminalHandle | undefined>;
   private readonly hashConfig: HashConfig;
@@ -126,8 +127,10 @@ class SnarkArgsHelper {
     hashConfig: HashConfig,
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
     useMockHash: boolean,
+    biomeCheck: boolean,
   ) {
     this.useMockHash = useMockHash;
+    this.biomeCheck = biomeCheck;
     this.terminal = terminal;
     this.snarkProverQueue = new SnarkProverQueue();
     this.hashConfig = hashConfig;
@@ -159,8 +162,14 @@ class SnarkArgsHelper {
     hashConfig: HashConfig,
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
     fakeHash = false,
+    biomeCheck = true,
   ): SnarkArgsHelper {
-    const snarkArgsHelper = new SnarkArgsHelper(hashConfig, terminal, fakeHash);
+    const snarkArgsHelper = new SnarkArgsHelper(
+      hashConfig,
+      terminal,
+      fakeHash,
+      biomeCheck,
+    );
     return snarkArgsHelper;
   }
 
@@ -340,7 +349,9 @@ class SnarkArgsHelper {
       x: modPBigInt(x).toString(),
       y: modPBigInt(y).toString(),
       PLANETHASH_KEY: this.hashConfig.planetHashKey.toString(),
-      BIOMEBASE_KEY: this.hashConfig.biomebaseKey.toString(),
+      BIOMEBASE_KEY: this.biomeCheck
+        ? this.hashConfig.biomebaseKey.toString()
+        : this.hashConfig.spaceTypeKey.toString(),
       SCALE: this.hashConfig.perlinLengthScale.toString(),
       xMirror: this.hashConfig.perlinMirrorX ? "1" : "0",
       yMirror: this.hashConfig.perlinMirrorY ? "1" : "0",
