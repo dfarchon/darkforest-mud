@@ -905,6 +905,21 @@ export class ContractsAPI extends EventEmitter {
     return this.tickerUtils.convertTickToMs(tick);
   }
 
+  public getCurrentInnerRadius(): number {
+    const { InnerCircle, Ticker } = this.components;
+    const innerCircle = getComponentValue(InnerCircle, singletonEntity);
+    const ticker = getComponentValue(Ticker, singletonEntity);
+    if (!innerCircle || !ticker) {
+      throw new Error("InnerCircle or Ticker not set");
+    }
+    const innerRadius =
+      Number(innerCircle.radius) -
+      ((this.getCurrentTick() - Number(ticker.tickNumber)) *
+        Number(innerCircle.speed)) /
+        1000;
+    return innerRadius < 0 ? 0 : innerRadius;
+  }
+
   public hasJoinedGame(playerId: EthAddress): boolean {
     const { SpawnPlanet } = this.components;
 
