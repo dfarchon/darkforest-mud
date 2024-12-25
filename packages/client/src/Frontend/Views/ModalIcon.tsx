@@ -47,6 +47,8 @@ const icon = (modal: ModalName): React.ReactNode => {
     return <Icon type={IconType.Withdraw} />;
   } else if (modal === ModalName.TransactionLog) {
     return <Icon type={IconType.DoubleArrows} />;
+  } else if (modal === ModalName.GuildContextPane) {
+    return <span>G</span>;
   }
   return <span>T</span>;
 };

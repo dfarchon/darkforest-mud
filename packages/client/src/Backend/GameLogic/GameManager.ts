@@ -6227,6 +6227,48 @@ export class GameManager extends EventEmitter {
       .inSameGuildRightNow(player1, player2);
   }
 
+  public getGuildRejoinCooldownTicks(): number {
+    return this.contractsAPI.getGuildUtils().getGuildRejoinCooldownTicks();
+  }
+
+  public getGuildRejoinCooldownTime(): number {
+    const cooldownTicks = this.getGuildRejoinCooldownTicks();
+    return Math.ceil(cooldownTicks / this.getCurrentTickerRate());
+  }
+
+  public timeUntilNextApplyGuildAvaiable(_account?: EthAddress) {
+    const account = _account ?? this.account;
+    if (!account) {
+      throw new Error("no account set");
+    }
+
+    const myLastLeaveGuildTick = this.contractsAPI
+      .getGuildUtils()
+      .getPlayerLastLeaveGuildTick(account);
+
+    const myLastLeaveGuildTimestamp = myLastLeaveGuildTick
+      ? Math.ceil(this.convertTickToMs(myLastLeaveGuildTick) / 1000)
+      : undefined;
+
+    if (!myLastLeaveGuildTimestamp) return 0;
+
+    const cooldownTicks = this.contractsAPI
+      .getGuildUtils()
+      .getGuildRejoinCooldownTicks();
+
+    const cooldownDuration = Math.ceil(
+      cooldownTicks / this.getCurrentTickerRate(),
+    );
+
+    return (myLastLeaveGuildTimestamp + cooldownDuration) * 1000 - Date.now();
+  }
+
+  public getNextApplyGuildAvailableTimestamp(_account?: EthAddress) {
+    const account = _account ?? this.account;
+    const _ = this.timeUntilNextApplyGuildAvaiable(account);
+    return Date.now() + _;
+  }
+
   public getInitGuilds(): Map<GuildId, Guild> {
     const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
     const res: Map<GuildId, Guild> = new Map();
@@ -6252,10 +6294,10 @@ export class GameManager extends EventEmitter {
     this.guildsUpdated$.publish();
   }
 
-  public getGuildCreateFee(): bigint {
+  public getGuildCreateFee(): number {
     const result = this.contractsAPI.getGuildUtils().getCreateGuildFee();
     if (!result) throw Error("Create Fee Error");
-    return result;
+    return Number(result);
   }
 
   public async createGuild(

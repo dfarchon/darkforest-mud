@@ -1001,7 +1001,7 @@ export class ContractsAPI extends EventEmitter {
     const { SpawnPlanet } = this.components;
 
     const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
-      player: addressToHex(playerId),
+      player: playerId,
     });
 
     const result = getComponentValue(SpawnPlanet, spawnPlanetKey);

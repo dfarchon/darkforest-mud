@@ -1,4 +1,5 @@
-import { addressToHex } from "@df/serde";
+import { CONTRACT_PRECISION } from "@df/constants";
+import { addressToHex, hexToEthAddress } from "@df/serde";
 import type { EthAddress, Guild, GuildId, GuildRole } from "@df/types";
 import { GuildStatus } from "@df/types";
 import {
@@ -11,7 +12,6 @@ import {
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { Hex } from "viem";
-import { CONTRACT_PRECISION } from "@df/constants";
 
 import { TickerUtils } from "./TickerUtils";
 interface GuildUtilsConfig {
@@ -53,7 +53,8 @@ export class GuildUtils {
 
   public getGuildById(guildId?: GuildId): Guild | undefined {
     if (!guildId) return undefined;
-    const { Guild, GuildMember, GuildName } = this.components;
+    const { Guild, GuildMember, GuildName, Player, GuildCandidate } =
+      this.components;
     const guildEntity = encodeEntity(Guild.metadata.keySchema, {
       id: guildId,
     });
@@ -87,6 +88,23 @@ export class GuildUtils {
       members.push(member.addr.toLowerCase() as EthAddress);
     }
 
+    const players = [...runQuery([Has(Player)])];
+
+    const invitees: EthAddress[] = [];
+    const applicants: EthAddress[] = [];
+
+    for (let i = 0; i < players.length; i++) {
+      const addr = hexToEthAddress(players[i] as Hex);
+      const candidateEntity = encodeEntity(GuildCandidate.metadata.keySchema, {
+        player: addr,
+      });
+      const candidate = getComponentValue(GuildCandidate, candidateEntity);
+      if (!candidate) continue;
+
+      if (candidate.invitations.includes(guildId)) invitees.push(addr);
+      if (candidate.applications.includes(guildId)) applicants.push(addr);
+    }
+
     const result: Guild = {
       id: guildId,
       status: guild.status as GuildStatus,
@@ -97,6 +115,8 @@ export class GuildUtils {
       name: guildName.name as string,
       members: members,
       silver: Math.floor(Number(guild.silver) / CONTRACT_PRECISION),
+      invitees: invitees,
+      applicants: applicants,
     };
 
     return result;
@@ -206,6 +226,25 @@ export class GuildUtils {
     if (!member) return undefined;
 
     return member.leftAt;
+  }
+
+  public getGuildRejoinCooldownTicks(): number {
+    const { GuildConfig } = this.components;
+    // Get cooldown period from config
+    const configEntity = encodeEntity(
+      GuildConfig.metadata.keySchema,
+      {},
+    ) as Entity;
+    const config = getComponentValueStrict(GuildConfig, configEntity);
+    return Number(config.cooldownTicks);
+  }
+
+  public getPlayerLastLeaveGuildTick(
+    playerAddr: EthAddress,
+  ): number | undefined {
+    const lastLeaveTick = this.getPlayerLastLeaveTick(playerAddr);
+    if (!lastLeaveTick) return undefined;
+    return Number(lastLeaveTick);
   }
 
   public checkGuildLeaveCooldown(playerAddr: EthAddress): boolean {

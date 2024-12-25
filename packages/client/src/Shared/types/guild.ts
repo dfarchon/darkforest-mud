@@ -29,6 +29,8 @@ export type Guild = {
   name: string;
   members: EthAddress[];
   silver: number;
+  invitees: EthAddress[];
+  applicants: EthAddress[];
 };
 
 export type GuildRole = Abstract<number, "GuildRole">;

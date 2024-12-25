@@ -1,4 +1,4 @@
-import type { EthAddress, LocationId, UnionId } from "./identifier";
+import type { EthAddress, LocationId, GuildId } from "./identifier";
 
 export type Player = {
   address: EthAddress; // owner
