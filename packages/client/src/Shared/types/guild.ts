@@ -28,6 +28,7 @@ export type Guild = {
   owner: EthAddress;
   name: string;
   members: EthAddress[];
+  silver: number;
 };
 
 export type GuildRole = Abstract<number, "GuildRole">;

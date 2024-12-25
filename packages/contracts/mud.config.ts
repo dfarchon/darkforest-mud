@@ -385,6 +385,7 @@ export default defineWorld({
         number: "uint8",
         registry: "uint16",
         owner: "uint24", // memberId
+        silver: "uint256",
       },
       key: ["id"],
     },

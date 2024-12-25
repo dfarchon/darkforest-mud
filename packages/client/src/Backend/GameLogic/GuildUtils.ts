@@ -11,6 +11,7 @@ import {
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { Hex } from "viem";
+import { CONTRACT_PRECISION } from "@df/constants";
 
 import { TickerUtils } from "./TickerUtils";
 interface GuildUtilsConfig {
@@ -95,6 +96,7 @@ export class GuildUtils {
       owner: guildOwner.addr.toLowerCase() as EthAddress,
       name: guildName.name as string,
       members: members,
+      silver: Math.floor(Number(guild.silver) / CONTRACT_PRECISION),
     };
 
     return result;

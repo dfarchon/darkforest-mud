@@ -20,6 +20,7 @@ import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.
 import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { Balances } from "@latticexyz/world/src/codegen/tables/Balances.sol";
+import { PlayerWithdrawSilver } from "../codegen/tables/PlayerWithdrawSilver.sol";
 
 contract GuildSystem is System {
   error NeedFundsToCreateGuild(); // 0xce43bd9e
@@ -93,7 +94,8 @@ contract GuildSystem is System {
       rank: 1,
       number: 1,
       registry: 1,
-      owner: uint24(memberId)
+      owner: uint24(memberId),
+      silver: 0
     });
     Guild.set(uint8(guildId), guild);
 
@@ -126,6 +128,10 @@ contract GuildSystem is System {
       revert GuildMemberLimitReached();
     }
 
+    uint playerSilver = PlayerWithdrawSilver.get(player);
+    uint guildSilver = guild.silver + playerSilver;
+    guild.silver = guildSilver;
+
     memberId = (guildId << 16) | ++guild.registry;
     ++guild.number;
     Guild.set(uint8(guildId), guild);
@@ -148,6 +154,10 @@ contract GuildSystem is System {
   }
 
   function _leaveGuild(uint256 guildId, uint256 memberId, address player) internal {
+    uint guildSilver = Guild.getSilver(uint8(guildId));
+    uint playerSilver = PlayerWithdrawSilver.get(player);
+    Guild.setSilver(uint8(guildId), guildSilver - playerSilver);
+
     Guild.setNumber(uint8(guildId), Guild.getNumber(uint8(guildId)) - 1);
     GuildMember.setLeftAt(uint24(memberId), uint64(DFUtils.getCurrentTick()));
     GuildHistory.setCurMemberId(player, 0);
