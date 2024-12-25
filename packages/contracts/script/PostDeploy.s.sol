@@ -76,7 +76,7 @@ contract PostDeploy is Script {
     _installArtifacts(worldAddress);
 
     // set test planets
-    if (toml.readBool(".temp.g_set_test_planets")) {
+    if (toml.readBool(".test.set_planets")) {
       if (toml.readBool(".temp.b_skip_proof_check")) {
         _setTestPlanets(abi.decode(toml.parseRaw(".test_planets_fake"), (TestPlanet[])));
       } else {

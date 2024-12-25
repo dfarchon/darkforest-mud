@@ -3,13 +3,11 @@ a_sparsity = 16384
 b_radius = 150000
 
 [temp]
-a_biome_check = true
 b_skip_proof_check = false
 c_player_limit = 100
 d_spawn_perlin_min = 1
 e_spawn_perlin_max = 31
 f_reveal_cd = 300
-g_set_test_planets = false
 
 [space_type]
 a_perlin_thresholds = [14, 15, 19]
@@ -79,19 +77,14 @@ threshold2 = 17
 8 = [112, 64, 32, 32, 16]
 9 = [112, 64, 32, 32, 16]
 
-# wormhole, planetary_shield, cannon, bloom_filter, black_domain, stellar_shield, bomb, kardashev, avatar
+# 1: pink_bomb, 4: bloom_filter, 5: wormhole, 6: cannon
 [artifact]
-indexes = [4, 6]
-1 = [2048, 4096]
-2 = [2048, 4096]
-3 = [2048, 4096]
-4 = [2048, 4096]
-5 = [2048, 4096]
-# 1 = [455, 455, 455, 455, 455, 455, 455, 455, 456]
-# 2 = [455, 455, 455, 455, 455, 455, 455, 455, 456]
-# 3 = [512, 512, 512, 512, 512, 512, 512, 512, 0]
-# 4 = [512, 512, 512, 512, 512, 512, 512, 512, 0]
-# 5 = [512, 512, 512, 512, 512, 512, 512, 512, 0]
+indexes = [1, 4, 5, 6]
+1 = [1024, 2048, 3072 ,4096] # common
+2 = [1024, 2048, 3072 ,4096] # rare
+3 = [1024, 2048, 3072 ,4096] # epic
+4 = [1024, 2048, 3072 ,4096] # legendary
+5 = [1024, 2048, 3072 ,4096] # mythic
 
 [upgrade_config]
 a_population_cap_multiplier = 120
@@ -117,6 +110,9 @@ rate = 1
 [inner_circle]
 a_radius = 0
 b_speed = 0
+
+[test]
+set_planets = false
 
 [[test_planets]]
 

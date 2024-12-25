@@ -967,12 +967,10 @@ export class GameManager extends EventEmitter {
     };
 
     const useMockHash = initialState.contractConstants.DISABLE_ZK_CHECKS;
-    const biomeCheck = initialState.contractConstants.BIOME_CHECKS;
     const snarkHelper = SnarkArgsHelper.create(
       hashConfig,
       terminal,
       useMockHash,
-      biomeCheck,
     );
 
     const gameManager = new GameManager(

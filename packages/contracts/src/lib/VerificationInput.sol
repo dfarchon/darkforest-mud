@@ -43,6 +43,7 @@ library MoveInputLib {
       !CommonLib.checkSnarkAndPerlinConfig(
         input.mimcHashKey,
         input.spaceTypeKey,
+        0,
         input.perlinLengthScale,
         input.perlinMirrorX,
         input.perlinMirrorY
@@ -112,6 +113,7 @@ library SpawnInputLib {
       !CommonLib.checkSnarkAndPerlinConfig(
         input.mimcHashKey,
         input.spaceTypeKey,
+        0,
         input.perlinLengthScale,
         input.perlinMirrorX,
         input.perlinMirrorY
@@ -170,6 +172,7 @@ library RevealInputLib {
       !CommonLib.checkSnarkAndPerlinConfig(
         input.mimcHashKey,
         input.spaceTypeKey,
+        0,
         input.perlinLengthScale,
         input.perlinMirrorX,
         input.perlinMirrorY
@@ -211,7 +214,7 @@ struct BiomebaseInput {
   uint256 planetHash;
   uint256 biomebase;
   uint256 mimcHashKey;
-  uint256 spaceTypeKey;
+  uint256 biomebaseKey;
   uint256 perlinLengthScale;
   uint256 perlinMirrorX;
   uint256 perlinMirrorY;
@@ -222,7 +225,8 @@ library BiomebaseInputLib {
     if (
       !CommonLib.checkSnarkAndPerlinConfig(
         input.mimcHashKey,
-        input.spaceTypeKey,
+        0,
+        input.biomebaseKey,
         input.perlinLengthScale,
         input.perlinMirrorX,
         input.perlinMirrorY
@@ -236,7 +240,7 @@ library BiomebaseInputLib {
     input.planetHash = rawInput[0];
     input.biomebase = rawInput[1];
     input.mimcHashKey = rawInput[2];
-    input.spaceTypeKey = rawInput[3];
+    input.biomebaseKey = rawInput[3];
     input.perlinLengthScale = rawInput[4];
     input.perlinMirrorX = rawInput[5];
     input.perlinMirrorY = rawInput[6];
@@ -247,7 +251,7 @@ library BiomebaseInputLib {
     res[0] = input.planetHash;
     res[1] = input.biomebase;
     res[2] = input.mimcHashKey;
-    res[3] = input.spaceTypeKey;
+    res[3] = input.biomebaseKey;
     res[4] = input.perlinLengthScale;
     res[5] = input.perlinMirrorX;
     res[6] = input.perlinMirrorY;
@@ -258,6 +262,7 @@ library CommonLib {
   function checkSnarkAndPerlinConfig(
     uint256 mimcHashKey,
     uint256 spaceTypeKey,
+    uint256 biomebaseKey,
     uint256 perlinLengthScale,
     uint256 perlinMirrorX,
     uint256 perlinMirrorY
@@ -266,14 +271,11 @@ library CommonLib {
     if (mimcHashKey != config.planetHashKey) {
       return false;
     }
-    if (TempConfigSet.getBiomeCheck()) {
-      if (spaceTypeKey != config.biomeBaseKey) {
-        return false;
-      }
-    } else {
-      if (spaceTypeKey != config.spaceTypeKey) {
-        return false;
-      }
+    if (spaceTypeKey != 0 && spaceTypeKey != config.spaceTypeKey) {
+      return false;
+    }
+    if (biomebaseKey != 0 && biomebaseKey != config.biomeBaseKey) {
+      return false;
     }
     if (perlinLengthScale != config.perlinLengthScale) {
       return false;

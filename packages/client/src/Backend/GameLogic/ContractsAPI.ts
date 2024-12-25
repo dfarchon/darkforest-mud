@@ -1077,7 +1077,6 @@ export class ContractsAPI extends EventEmitter {
     ];
 
     const constants: ContractConstants = {
-      BIOME_CHECKS: tempConfigSet.biomeCheck,
       DISABLE_ZK_CHECKS: tempConfigSet.skipProofCheck,
       PLAYER_AMOUNT_LIMIT: tempConfigSet.playerLimit,
       INIT_PERLIN_MIN: tempConfigSet.spawnPerlinMin,

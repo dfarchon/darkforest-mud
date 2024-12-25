@@ -120,7 +120,6 @@ export default defineWorld({
     },
     TempConfigSet: {
       schema: {
-        biomeCheck: "bool",
         skipProofCheck: "bool",
         playerLimit: "uint32",
         spawnPerlinMin: "uint8",
