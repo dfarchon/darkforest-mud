@@ -80,41 +80,34 @@ export function GuildDelegationPane() {
   // Load guild, role and grant info
   useEffect(() => {
     if (!account || !gameManager) return;
-    const guildId = gameManager.getPlayerGuildId(account);
-    const guildState = gameManager.getGuild(guildId);
 
-    const role_number = gameManager.getGuildRole(account);
-    let role = "Member";
-    if (role_number === 3) role = "Leader";
-    if (role_number === 2) role = "Officer";
+    const refreshGuildInfo = () => {
+      // Refresh guild info
+      const guildId = gameManager.getPlayerGuildId(account);
+      const guildState = gameManager.getGuild(guildId);
 
-    // TODO: Replace with actual API call to get granted addresses
-    const granted = gameManager.getGrantedAddresses(account);
+      // Refresh role info
+      const role_number = gameManager.getGuildRole(account);
+      let role = "Member";
+      if (role_number === 3) role = "Leader";
+      if (role_number === 2) role = "Officer";
 
-    setGuild(guildState);
-    setMemberRole(role);
-    setGrantedAddresses(granted);
-  }, [account, gameManager]);
-
-  // Add auto-refresh effect for granted addresses
-  useEffect(() => {
-    if (!account || !gameManager) return;
-
-    const refreshGrantedAddresses = () => {
+      // Refresh granted addresses
       const granted = gameManager.getGrantedAddresses(account);
+
+      setGuild(guildState);
+      setMemberRole(role);
       setGrantedAddresses(granted);
     };
 
     // Initial load
-    refreshGrantedAddresses();
+    refreshGuildInfo();
 
-    // Set up interval for refresh
-    const intervalId = setInterval(refreshGrantedAddresses, 5000); // refresh every 10 seconds
+    // Set up interval for refresh every 5 seconds
+    const intervalId = setInterval(refreshGuildInfo, 5000);
 
     // Cleanup on unmount
-    return () => {
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, [account, gameManager]);
 
   // Add effect to load and refresh addresses that authorized you
