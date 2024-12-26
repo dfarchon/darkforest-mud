@@ -437,7 +437,6 @@ export class GameManager extends EventEmitter {
    * @todo move this into a new `GameConfiguration` class.
    */
   private worldRadius: number;
-  protected innerRadius: number;
 
   /**
    * Emits whenever we load the network health summary from the webserver, which is derived from
@@ -486,7 +485,6 @@ export class GameManager extends EventEmitter {
     // burnedCoords: Map<LocationId, BurnedCoords>,
     // kardashevCoords: Map<LocationId, KardashevCoords>,
     worldRadius: number,
-    innerRadius: number,
     unprocessedArrivals: Map<VoyageId, QueuedArrival>,
     unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>,
     contractsAPI: ContractsAPI,
@@ -523,7 +521,6 @@ export class GameManager extends EventEmitter {
     this.account = mainAccount;
     this.players = players;
     this.worldRadius = worldRadius;
-    this.innerRadius = innerRadius;
     // this.networkHealth$ = monomitter(true);
     this.paused$ = monomitter(true);
     // this.halfPrice$ = monomitter(true);
@@ -693,6 +690,7 @@ export class GameManager extends EventEmitter {
       if (this.account) {
         this.hardRefreshPlayer(this.account);
         // this.hardRefreshPlayerSpaceships(this.account);
+        this.updateMinerManagerInnerRadius();
       }
     }, 10_000);
 
@@ -930,6 +928,13 @@ export class GameManager extends EventEmitter {
 
     this.players.set(address, playerFromBlockchain);
     this.playersUpdated$.publish();
+  }
+
+  public updateMinerManagerInnerRadius() {
+    if (this.minerManager) {
+      console.log("updateMinerManagerInnerRadius", this.getInnerRadius());
+      this.minerManager.setInnerRadius(this.getInnerRadius());
+    }
   }
 
   // private async hardRefreshPlayerSpaceships(
@@ -1571,7 +1576,7 @@ export class GameManager extends EventEmitter {
       this.persistentChunkStore,
       myPattern,
       this.worldRadius,
-      this.innerRadius,
+      this.getInnerRadius(),
       this.planetRarity,
       this.hashConfig,
       this.useMockHash,
@@ -3733,7 +3738,7 @@ export class GameManager extends EventEmitter {
         chunkStore,
         pattern,
         this.worldRadius,
-        this.innerRadius,
+        this.getInnerRadius(),
         this.planetRarity,
         this.hashConfig,
         this.useMockHash,
@@ -3836,7 +3841,7 @@ export class GameManager extends EventEmitter {
               planetPerlin < initPerlinMax &&
               planetPerlin >= initPerlinMin &&
               distFromOrigin < this.worldRadius &&
-              distFromOrigin >= this.innerRadius &&
+              distFromOrigin >= this.getInnerRadius() &&
               // distFromOrigin >= spawnInnerRadius &&
               distFromOrigin >= requireRadiusMin &&
               // distFromOrigin < requireRadiusMax &&
@@ -5125,9 +5130,7 @@ export class GameManager extends EventEmitter {
         throw new Error("attempted to move out of bounds");
       }
 
-      console.log("inner radius", this.innerRadius);
-
-      if (newX ** 2 + newY ** 2 < this.innerRadius ** 2) {
+      if (newX ** 2 + newY ** 2 < this.getInnerRadius() ** 2) {
         throw new Error("attempted to move into inner circle");
       }
 

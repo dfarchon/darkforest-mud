@@ -235,7 +235,6 @@ export class GameManagerFactory {
       //   ? initialState.kardashevCoordsMap
       //   : new Map<LocationId, KardashevCoords>(),
       initialState.worldRadius,
-      initialState.innerRadius,
       initialState.arrivals,
       initialState.planetVoyageIdMap,
       contractsAPI,
