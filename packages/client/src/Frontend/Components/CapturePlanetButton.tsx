@@ -38,7 +38,9 @@ export function CapturePlanetButton({
     uiManager.getEthConnection().blockNumber$,
     undefined,
   );
+
   const owned = planetWrapper.value?.owner === account;
+
   const captureZoneGenerator = uiManager.getCaptureZoneGenerator();
 
   const canGiveScore = useMemo(() => {

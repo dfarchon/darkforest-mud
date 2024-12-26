@@ -39,7 +39,13 @@ export function MineArtifactButton({
     uiManager.getEthConnection().blockNumber$,
     undefined,
   );
-  const owned = planetWrapper.value?.owner === account;
+
+  const canDelegate = gameManager.checkDelegateCondition(
+    planetWrapper.value?.owner,
+    account,
+  );
+
+  const owned = planetWrapper.value?.owner === account || canDelegate;
 
   const isRuins = useMemo(
     () => planetWrapper.value?.planetType === PlanetType.RUINS,

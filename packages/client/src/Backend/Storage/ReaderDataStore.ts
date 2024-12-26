@@ -20,6 +20,7 @@ import type { ContractsAPI } from "../GameLogic/ContractsAPI";
 import { makeContractsAPI } from "../GameLogic/ContractsAPI";
 import { getAllTwitters } from "../Network/UtilityServerAPI";
 import PersistentChunkStore from "./PersistentChunkStore";
+import { GuildUtils } from "@backend/GameLogic/GuildUtils";
 
 export const enum SinglePlanetDataStoreEvent {
   REFRESHED_PLANET = "REFRESHED_PLANET",
@@ -49,6 +50,7 @@ class ReaderDataStore {
   private readonly persistentChunkStore: PersistentChunkStore | undefined;
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
+  private guildUtils: GuildUtils;
 
   private constructor({
     viewer,
@@ -68,6 +70,7 @@ class ReaderDataStore {
       contractConstants: this.contractsAPI.getConstants(),
     });
     this.tickerUtils = new TickerUtils({ components });
+    this.guildUtils = new GuildUtils({ components });
   }
 
   public destroy(): void {
@@ -125,9 +128,9 @@ class ReaderDataStore {
 
     if (planet && isLocatable(planet)) {
       // clear the location of the LocatablePlanet, turning it back into a planet
-      /* eslint-disable @typescript-eslint/no-unused-vars */
+
       const { location, biome, ...nonLocatable } = planet;
-      /* eslint-enable @typescript-eslint/no-unused-vars */
+
       planet = nonLocatable;
     }
 
@@ -171,7 +174,14 @@ class ReaderDataStore {
       if (currentTick < arrival.arrivalTick) {
         break;
       }
-      arrive(planet, [], arrival, undefined, contractConstants);
+      arrive(
+        planet,
+        [],
+        arrival,
+        undefined,
+        contractConstants,
+        this.guildUtils,
+      );
     }
 
     updatePlanetToTick(planet, [], currentTick, contractConstants);

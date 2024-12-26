@@ -171,6 +171,5 @@ export class UIRenderer implements UIRendererType {
       this.renderer.planetRenderManager.queueRangeRings(selectedPlanet);
   }
 
-  // eslint-disable-next-line
   flush(): void {}
 }

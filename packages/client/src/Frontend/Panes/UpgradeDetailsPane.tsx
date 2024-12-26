@@ -71,6 +71,18 @@ function SilverRequired({ planet }: { planet: Planet }) {
   );
 }
 
+const getUpgradeStatusMessage = (
+  planetAtMaxRank: boolean,
+  branchAtMaxRank: boolean,
+  enoughSilver: boolean,
+  branch: UpgradeBranchName,
+) => {
+  if (planetAtMaxRank) return <Red>Planet at Max Rank</Red>;
+  if (branchAtMaxRank) return <Red>{upgradeName(branch)} at Max Rank</Red>;
+  if (!enoughSilver) return <Red>Not Enough Silver</Red>;
+  return null;
+};
+
 export function UpgradeDetailsPane({
   initialPlanetId,
   modal: _modal,
@@ -86,9 +98,10 @@ export function UpgradeDetailsPane({
   const planet = usePlanet(uiManager, planetId).value;
   const account = useAccount(uiManager);
   const planetAtMaxRank = isFullRank(planet);
+  const gameManager = uiManager.getGameManager();
 
   if (planet && account) {
-    if (planet.owner !== account) {
+    if (gameManager.checkDelegateCondition(planet.owner, account) === false) {
       // Empty block
     } else if (
       planet.planetType !== PlanetType.PLANET ||
@@ -161,13 +174,12 @@ export function UpgradeDetailsPane({
                         >
                           {"Upgrade"}
                         </Btn>{" "}
-                        {planetAtMaxRank ? (
-                          <Red>Planet at Max Rank</Red>
-                        ) : branchAtMaxRank ? (
-                          <Red>{upgradeName(branch)} at Max Rank</Red>
-                        ) : !enoughSilver ? (
-                          <Red>Not Enough Silver</Red>
-                        ) : undefined}
+                        {getUpgradeStatusMessage(
+                          planetAtMaxRank,
+                          branchAtMaxRank,
+                          enoughSilver,
+                          branch,
+                        )}
                       </>
                     )}
                   </div>

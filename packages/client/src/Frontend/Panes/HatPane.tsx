@@ -1,4 +1,5 @@
 import {
+  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   MAX_AVATAR_TYPE,
   MAX_LOGO_TYPE,
   MAX_MEME_TYPE,
@@ -6,7 +7,6 @@ import {
   MIN_LOGO_TYPE,
   MIN_MEME_TYPE,
   TOKEN_NAME,
-  HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
 } from "@df/constants";
 import { weiToEth } from "@df/network";
 import {

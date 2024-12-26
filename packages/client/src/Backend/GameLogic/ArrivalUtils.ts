@@ -12,7 +12,7 @@ import type {
 import { ArrivalType, ArtifactType, PlanetType } from "@df/types";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
-
+import type { GuildUtils } from "./GuildUtils";
 // TODO: planet class, cmon, let's go
 export const blocksLeftToProspectExpiration = (
   currentBlockNumber: number,
@@ -173,6 +173,7 @@ export const arrive = (
   arrival: QueuedArrival,
   arrivingArtifact: Artifact | undefined,
   contractConstants: ContractConstants,
+  guildUtils: GuildUtils,
 ): PlanetDiff => {
   // this function optimistically simulates an arrival
   if (toPlanet.locationId !== arrival.toPlanet) {
@@ -202,7 +203,13 @@ export const arrive = (
     (a) => a.lastActivated > a.lastDeactivated,
   );
 
-  if (arrival.player !== toPlanet.owner) {
+  const inSameGuild = guildUtils.inSameGuildAtTick(
+    arrival.player,
+    toPlanet.owner,
+    arrivalTick,
+  );
+
+  if (arrival.player !== toPlanet.owner && !inSameGuild) {
     if (arrival.arrivalType === ArrivalType.Wormhole) {
       // if this is a wormhole arrival to a planet that isn't owned by the initiator of
       // the move, then don't move any energy

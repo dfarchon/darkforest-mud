@@ -117,6 +117,11 @@ rate = 1
 a_radius = 0
 b_speed = 0
 
+[guild_config]
+a_create_fee = 5000000000000000  # 0.005 ETH
+b_max_members = 6
+c_cooldown_ticks = 60         # 60 seconds
+
 # 0 0 998e0e5b072dc5847e5f91271d02483e506e9bac4c97e7a43abc594999ac43b
 # 0 1000 2f2f570496eba865f0f7e547c58e5f408c59b1a4888738ef05f9ced2334a98cc
 # 1000 1000 2b793eaafe86e97e2bf670ba48d5a1c3984ad11e335d87bc9657c7ab6d030caf

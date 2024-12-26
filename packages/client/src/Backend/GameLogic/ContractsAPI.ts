@@ -8,6 +8,7 @@ import {
   TxExecutor,
 } from "@df/network";
 import {
+  address,
   address as toEthAddress,
   addressToHex,
   artifactIdFromEthersBN,
@@ -54,6 +55,7 @@ import type {
   UpgradeLevels,
   VoyageId,
 } from "@df/types";
+import type { GuildId } from "@df/types";
 import { Setting } from "@df/types";
 import { hexToResource } from "@latticexyz/common";
 import {
@@ -87,10 +89,10 @@ import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
+import { GuildUtils } from "./GuildUtils";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
-
 interface ContractsApiConfig {
   connection: EthConnection;
   contractAddress: EthAddress;
@@ -146,6 +148,7 @@ export class ContractsAPI extends EventEmitter {
   private planetUtils: PlanetUtils;
   private moveUtils: MoveUtils;
   private tickerUtils: TickerUtils;
+  private guildUtils: GuildUtils;
 
   private pausedStateSubscription: Subscription;
   private playerSubscription: Subscription;
@@ -158,6 +161,13 @@ export class ContractsAPI extends EventEmitter {
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
   private setPlanetEmojiSubscription: Subscription;
+
+  //guild
+  private guildSubscription: Subscription;
+  private guildNameSubscription: Subscription;
+  private guildMemberSubscription: Subscription;
+  private guildHistorySubscription: Subscription;
+  private guildCandidateSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -187,6 +197,7 @@ export class ContractsAPI extends EventEmitter {
     });
     this.moveUtils = new MoveUtils({ components });
     this.tickerUtils = new TickerUtils({ components });
+    this.guildUtils = new GuildUtils({ components });
   }
 
   /**
@@ -426,6 +437,81 @@ export class ContractsAPI extends EventEmitter {
         }
       },
     );
+
+    this.guildSubscription = this.components.Guild.update$.subscribe(
+      (update) => {
+        const entity = update.entity;
+
+        const keyTuple = decodeEntity(
+          this.components.Guild.metadata.keySchema,
+          entity,
+        );
+
+        this.emit(ContractsAPIEvent.GuildUpdate, keyTuple.id as GuildId);
+      },
+    );
+
+    this.guildNameSubscription = this.components.GuildName.update$.subscribe(
+      (update) => {
+        const entity = update.entity;
+
+        const keyTuple = decodeEntity(
+          this.components.GuildName.metadata.keySchema,
+          entity,
+        );
+
+        this.emit(ContractsAPIEvent.GuildUpdate, keyTuple.id as GuildId);
+      },
+    );
+
+    this.guildMemberSubscription =
+      this.components.GuildMember.update$.subscribe((update) => {
+        const entity = update.entity;
+        const keyTuple = decodeEntity(
+          this.components.GuildMember.metadata.keySchema,
+          entity,
+        );
+
+        const guildId = keyTuple.memberId >> 16;
+
+        this.emit(ContractsAPIEvent.GuildUpdate, guildId);
+      });
+
+    this.guildHistorySubscription =
+      this.components.GuildHistory.update$.subscribe((update) => {
+        const [newValue] = update.value;
+
+        if (newValue) {
+          const memberIds = newValue.memberIds;
+
+          const guild_id_1 = memberIds[memberIds.length - 1] >> 16;
+
+          this.emit(ContractsAPIEvent.GuildUpdate, guild_id_1);
+
+          if (memberIds.length > 1) {
+            const guild_id_2 = memberIds[memberIds.length - 2] >> 16;
+            this.emit(ContractsAPIEvent.GuildUpdate, guild_id_2);
+          }
+        }
+      });
+
+    this.guildCandidateSubscription =
+      this.components.GuildCandidate.update$.subscribe((update) => {
+        const [newValue, preValue] = update.value;
+
+        if (newValue) {
+          if (newValue.invitations.length > 0) {
+            const guild_id_1 = newValue.invitations[-1];
+
+            this.emit(ContractsAPIEvent.GuildUpdate, guild_id_1);
+          }
+
+          if (newValue.applications.length > 0) {
+            const guild_id_2 = newValue.applications[-1];
+            this.emit(ContractsAPIEvent.GuildUpdate, guild_id_2);
+          }
+        }
+      });
 
     return;
 
@@ -802,6 +888,12 @@ export class ContractsAPI extends EventEmitter {
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
     this.setPlanetEmojiSubscription.unsubscribe();
+    this.guildSubscription.unsubscribe();
+    this.guildNameSubscription.unsubscribe();
+    this.guildMemberSubscription.unsubscribe();
+    this.guildHistorySubscription.unsubscribe();
+    this.guildCandidateSubscription.unsubscribe();
+
     return;
     const { contract } = this;
 
@@ -909,7 +1001,7 @@ export class ContractsAPI extends EventEmitter {
     const { SpawnPlanet } = this.components;
 
     const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
-      player: addressToHex(playerId),
+      player: playerId,
     });
 
     const result = getComponentValue(SpawnPlanet, spawnPlanetKey);
@@ -1694,6 +1786,10 @@ export class ContractsAPI extends EventEmitter {
 
   public getAddress() {
     return this.ethConnection.getAddress();
+  }
+
+  public getGuildUtils() {
+    return this.guildUtils;
   }
 }
 

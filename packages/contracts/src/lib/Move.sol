@@ -7,6 +7,7 @@ import { Artifact as ArtifactTable, ArtifactOwner } from "../codegen/index.sol";
 import { PlanetType, ArtifactStatus } from "../codegen/common.sol";
 import { Planet } from "./Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
+import { GuildUtils } from "./GuildUtils.sol";
 
 library MoveLib {
   function NewMove(Planet memory from, address captain) internal view returns (MoveData memory move) {
@@ -76,17 +77,17 @@ library MoveLib {
     }
   }
 
-  function arrivedAt(MoveData memory move, Planet memory planet) internal pure {
+  function arrivedAt(MoveData memory move, Planet memory planet) internal view {
     assert(move.arrivalTick == planet.lastUpdateTick);
     unloadPopulation(move, planet);
     unloadSilver(move, planet);
     unloadArtifact(move, planet);
   }
 
-  function unloadPopulation(MoveData memory move, Planet memory to) internal pure {
+  function unloadPopulation(MoveData memory move, Planet memory to) internal view {
     uint256 population = to.population;
     uint256 arrivedPopulation = move.population;
-    if (move.captain == to.owner) {
+    if (move.captain == to.owner || GuildUtils.inSameGuild(move.captain, to.owner, move.arrivalTick)) {
       population += arrivedPopulation;
     } else {
       uint256 defense = to.defense;

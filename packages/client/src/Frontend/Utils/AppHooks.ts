@@ -3,6 +3,8 @@ import type {
   Artifact,
   ArtifactId,
   EthAddress,
+  Guild,
+  GuildId,
   // Leaderboard,
   LocationId,
   Planet,
@@ -333,3 +335,42 @@ export function usePaused() {
 //   const ui = useUIManager();
 //   return useEmitterValue(ui.getHalfPrice$(), ui.getHalfPrice());
 // }
+
+/**
+ * Hook which gets you the guild
+ */
+export function useGuild(
+  uiManager: GameUIManager,
+  guildId: GuildId,
+): Wrapper<Guild | undefined> {
+  console.log(guildId);
+  const [guild, setGuild] = useState<Wrapper<Guild | undefined>>(
+    () => new Wrapper(uiManager.getGameManager().getGuild(guildId)),
+  );
+
+  useEmitterSubscribe(
+    uiManager.getGameManager().guildsUpdated$,
+    () => {
+      setGuild(new Wrapper(uiManager.getGameManager().getGuild(guildId)));
+    },
+    [uiManager, setGuild],
+  );
+  return guild;
+}
+
+/**
+ * Hook which gets you the unions
+ */
+export function useGuilds(uiManager: GameUIManager): Wrapper<Guild[]> {
+  const [guilds, setGuilds] = useState<Wrapper<Guild[]>>(
+    () => new Wrapper(uiManager.getGameManager().getAllGuilds()),
+  );
+  useEmitterSubscribe(
+    uiManager.getGameManager().guildsUpdated$,
+    () => {
+      setGuilds(new Wrapper(uiManager.getGameManager().getAllGuilds()));
+    },
+    [uiManager, setGuilds],
+  );
+  return guilds;
+}

@@ -141,11 +141,6 @@ export const GAS_PRICES_INTERVAL_MS = 60_000 as const;
  * {@link PlanetContextPane} is this wide, and all the subpanes of that modal also try to stay this
  * size as well.
  */
-
-/**
- * {@link UnionContextPane} is this wide, and all the subpanes of that modal also try to stay this
- * size as well.
- */
 export const RECOMMENDED_MODAL_WIDTH = "400px" as const;
 
 /**

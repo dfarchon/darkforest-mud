@@ -14,6 +14,7 @@ import {
   TOGGLE_WALLET_PANE,
   TOGGLE_YOUR_ARTIFACTS_PANE,
   TOGGLE_YOUR_PLANETS_DEX_PANE,
+  TOGGLE_GUILD_PANE,
 } from "../Utils/ShortcutConstants";
 import { ModalToggleButton } from "./ModalIcon";
 
@@ -26,6 +27,7 @@ export function SidebarPane({
   yourArtifactsHook,
   planetdexHook,
   transactionLogHook,
+  guildHook,
 }: {
   walletHook: Hook<boolean>;
   tradeHook: Hook<boolean>;
@@ -35,6 +37,7 @@ export function SidebarPane({
   yourArtifactsHook: Hook<boolean>;
   planetdexHook: Hook<boolean>;
   transactionLogHook: Hook<boolean>;
+  guildHook: Hook<boolean>;
 }) {
   const [sidebarHovered, setSidebarHovered] = useState<boolean>(false);
 
@@ -123,6 +126,16 @@ export function SidebarPane({
           size="stretch"
           shortcutKey={TOGGLE_TRANSACTIONS_PANE}
           shortcutText={sidebarHovered ? TOGGLE_TRANSACTIONS_PANE : undefined}
+        />
+
+        <EmSpacer height={0.5} />
+        <ModalToggleButton
+          modal={ModalName.GuildContextPane}
+          hook={guildHook}
+          text={sidebarHovered ? "Guild" : undefined}
+          size="stretch"
+          shortcutKey={TOGGLE_GUILD_PANE}
+          shortcutText={sidebarHovered ? TOGGLE_GUILD_PANE : undefined}
         />
       </BorderlessPane>
     </WindowTogglesPaneContainer>

@@ -2,6 +2,7 @@ import { Setting } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { cloneDeep } from "../../Backend/Utils/clone-deep";
 import type { NotificationInfo } from "../Game/NotificationManager";
 import NotificationManager, {
   NotificationManagerEvent,
@@ -66,7 +67,7 @@ export function NotificationsPane() {
       }
 
       setNotifs((arr) => {
-        const newArr = structuredClone(arr);
+        const newArr = cloneDeep(arr);
         for (let i = 0; i < arr.length; i++) {
           if (arr[i].id === notif.id) {
             newArr[i] = notif;
@@ -97,7 +98,7 @@ export function NotificationsPane() {
   // creates a callback for a notif which removes itself
   const getRemove = (notif: NotificationInfo): (() => void) => {
     return (): void => {
-      const copy = structuredClone(notifs);
+      const copy = cloneDeep(notifs);
       for (let i = 0; i < copy.length; i++) {
         if (copy[i].id === notif.id) {
           copy.splice(i, 1);
