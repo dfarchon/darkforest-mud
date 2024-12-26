@@ -37,6 +37,7 @@ import React, {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { zeroAddress } from "viem";
 import { useWalletClient } from "wagmi";
+import styled from "styled-components";
 
 import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
 import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
@@ -81,7 +82,7 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
-
+import dfstyles from "../Styles/dfstyles";
 const enum TerminalPromptStep {
   NONE,
   COMPATIBILITY_CHECKS_PASSED,
@@ -108,6 +109,47 @@ const enum TerminalPromptStep {
 type TerminalStateOptions = {
   showHelp: boolean;
 };
+
+const LoadingContent = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: ${dfstyles.colors.dfpink};
+  gap: 1em;
+`;
+
+const LoadingText = styled.div`
+  font-size: 1.7em;
+  text-align: center;
+`;
+
+const LoadingNote = styled.div`
+  font-size: 1.5em;
+  color: ${dfstyles.colors.dfpink};
+  text-align: center;
+`;
+
+const Spinner = styled.div`
+  width: 50px;
+  height: 50px;
+  border: 4px solid ${dfstyles.colors.text};
+  border-top: 4px solid ${dfstyles.colors.dfpink};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px 0;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
 
 export function GameLandingPage() {
   const navigate = useNavigate();
@@ -1779,6 +1821,24 @@ export function GameLandingPage() {
       advanceState(terminalHandle);
     }
   }, [terminalHandle, topLevelContainer, advanceState]);
+
+  if (syncSign === false) {
+    return (
+      <LoadingContent>
+        <Spinner />
+        <LoadingText>
+          Step: {syncProgress.step}
+          <br />
+          Progress: {syncProgress.percentage}%
+        </LoadingText>
+        <LoadingNote>
+          Please wait while the indexer syncs...
+          <br />
+          This may take a few minutes
+        </LoadingNote>
+      </LoadingContent>
+    );
+  }
 
   return (
     <>

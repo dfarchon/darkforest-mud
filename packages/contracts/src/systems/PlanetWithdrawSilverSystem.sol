@@ -7,6 +7,8 @@ import { Planet } from "../lib/Planet.sol";
 import { PlanetType, SpaceType, Biome } from "../codegen/common.sol";
 import { PlayerWithdrawSilver } from "../codegen/index.sol";
 import { DFUtils } from "../lib/DFUtils.sol";
+import { GuildUtils } from "../lib/GuildUtils.sol";
+import { Guild } from "../codegen/tables/Guild.sol";
 
 contract PlanetWithdrawSilverSystem is System, Errors {
   /**
@@ -30,6 +32,11 @@ contract PlanetWithdrawSilverSystem is System, Errors {
 
     planet.silver -= silverToWithdraw;
     playerWithdrawSilverAmount += silverToWithdraw;
+
+    uint8 guildId = GuildUtils.getCurrentGuildId(executor);
+    if (guildId != 0) {
+      Guild.setSilver(guildId, Guild.getSilver(guildId) + silverToWithdraw);
+    }
 
     planet.writeToStore();
     PlayerWithdrawSilver.set(executor, playerWithdrawSilverAmount);

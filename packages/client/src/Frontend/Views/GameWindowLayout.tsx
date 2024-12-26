@@ -51,6 +51,7 @@ import {
 import { NotificationsPane } from "./Notifications";
 import { SidebarPane } from "./SidebarPane";
 import { TopBar } from "./TopBar";
+import GuildContextPane from "../Panes/GuildPane";
 
 export function GameWindowLayout({
   terminalVisible,
@@ -86,8 +87,13 @@ export function GameWindowLayout({
   const [helpVisible, setHelpVisible] = useState<boolean>(
     isModalOpen(ModalName.Help),
   );
+
   const [transactionLogVisible, setTransactionLogVisible] = useState<boolean>(
     isModalOpen(ModalName.TransactionLog),
+  );
+
+  const [guildVisible, setGuildVisible] = useState<boolean>(
+    isModalOpen(ModalName.GuildContextPane),
   );
   const [planetdexVisible, setPlanetdexVisible] = useState<boolean>(
     isModalOpen(ModalName.PlanetDex),
@@ -371,6 +377,12 @@ export function GameWindowLayout({
           visible={diagnosticsVisible}
           onClose={() => setDiagnosticsVisible(false)}
         />
+
+        <GuildContextPane
+          visible={guildVisible}
+          onClose={() => setGuildVisible(false)}
+        />
+
         {modalsContainer && (
           <PluginLibraryPane
             modalsContainer={modalsContainer}
@@ -410,6 +422,7 @@ export function GameWindowLayout({
                 setPlayerArtifactsVisible,
               ]}
               planetdexHook={[planetdexVisible, setPlanetdexVisible]}
+              guildHook={[guildVisible, setGuildVisible]}
             />
           )}
           <CanvasWrapper>

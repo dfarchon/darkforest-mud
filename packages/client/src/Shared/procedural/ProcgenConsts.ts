@@ -1,4 +1,3 @@
-/* eslint-disable */
 const genericVerb = [
   "ruin",
   "snow",

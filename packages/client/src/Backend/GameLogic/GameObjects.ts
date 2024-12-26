@@ -86,6 +86,7 @@ import {
 } from "../../Frontend/Utils/EmitterUtils";
 import type { PlanetDiff } from "./ArrivalUtils";
 import { arrive, updatePlanetToTick } from "./ArrivalUtils";
+import { GuildUtils } from "./GuildUtils";
 import { LayeredMap } from "./LayeredMap";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
@@ -239,7 +240,7 @@ export class GameObjects {
 
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
-
+  private guildUtils: GuildUtils;
   constructor(
     address: EthAddress | undefined,
     touchedPlanets: Map<LocationId, Planet>,
@@ -281,7 +282,7 @@ export class GameObjects {
       contractConstants: contractConstants,
     });
     this.tickerUtils = new TickerUtils({ components });
-
+    this.guildUtils = new GuildUtils({ components });
     this.planetUpdated$ = monomitter();
     this.artifactUpdated$ = monomitter();
     this.myArtifactsUpdated$ = monomitter();
@@ -1331,12 +1332,29 @@ export class GameObjects {
     if (previous.owner === this.address && current.owner !== this.address) {
       notifManager.planetLost(current as LocatablePlanet);
     }
+
+    const inSameGuild = this.guildUtils.inSameGuildAtTick(
+      arrival.player,
+      this.address,
+      arrival.arrivalTick,
+    );
+
     if (
+      inSameGuild === false &&
       arrival.player !== this.address &&
       current.owner === this.address &&
       arrival.energyArriving !== 0
     ) {
       notifManager.planetAttacked(current as LocatablePlanet);
+    }
+
+    if (
+      inSameGuild &&
+      arrival.player !== this.address &&
+      current.owner === this.address &&
+      arrival.energyArriving !== 0
+    ) {
+      notifManager.planetSupportedByGuild(current as LocatablePlanet);
     }
   }
 
@@ -1372,6 +1390,7 @@ export class GameObjects {
       arrival,
       this.getArtifactById(arrival.artifactId),
       this.contractConstants,
+      this.guildUtils,
     );
 
     this.removeArrival(planetId, update.arrival.eventId);
@@ -1383,6 +1402,7 @@ export class GameObjects {
     arrivals: QueuedArrival[],
   ): ArrivalWithTimer[] {
     const planet = this.planets.get(planetId);
+
     if (!planet) {
       console.error(
         `attempted to process arrivals for planet not in memory: ${planetId}`,
@@ -1396,6 +1416,7 @@ export class GameObjects {
     arrivals.sort((a, b) => a.arrivalTick - b.arrivalTick);
 
     const nowTick = this.tickerUtils.getCurrentTick();
+
     for (const arrival of arrivals) {
       try {
         if (nowTick - arrival.arrivalTick > 0) {
@@ -1406,9 +1427,11 @@ export class GameObjects {
             arrival,
             this.getArtifactById(arrival.artifactId),
             this.contractConstants,
+            this.guildUtils,
           );
 
           this.removeArrival(planetId, update.arrival.eventId);
+
           this.emitArrivalNotifications(update);
         } else {
           // otherwise, set a timer to do this arrival in the future

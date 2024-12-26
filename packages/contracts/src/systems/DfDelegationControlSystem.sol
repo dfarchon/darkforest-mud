@@ -3,13 +3,33 @@ pragma solidity >=0.8.24;
 
 import { DelegationControl } from "@latticexyz/world/src/DelegationControl.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
-import { Player } from "../codegen/index.sol";
+import { Player, BurnerToPlayer } from "../codegen/index.sol";
+import { GuildUtils } from "../lib/GuildUtils.sol";
+import { DFUtils } from "../lib/DFUtils.sol";
 
 contract DfDelegationControlSystem is DelegationControl {
   /**
    * Verify a delegation.
+   * Allow delegation if:
+   * 1. The sender is the burner address of the delegator, OR
+   * 2. The sender's main address and delegator are in the same guild
    */
-  function verify(address delegator, ResourceId, bytes memory) public view returns (bool) {
-    return Player.getBurner(delegator) == _msgSender();
+  function verify(address delegator, ResourceId resourceId, bytes memory) public view returns (bool) {
+    // Check if sender is the burner address
+    if (Player.getBurner(delegator) == _msgSender()) {
+      return true;
+    }
+
+    address playerAddress = BurnerToPlayer.get(bytes32(uint256(uint160(_msgSender()))));
+
+    if (playerAddress == address(0)) {
+      playerAddress = _msgSender();
+    }
+
+    if (DFUtils.isValidSystemResourceId(resourceId) != true) {
+      return false;
+    }
+
+    return GuildUtils.meetGrantRequirement(delegator, playerAddress);
   }
 }
