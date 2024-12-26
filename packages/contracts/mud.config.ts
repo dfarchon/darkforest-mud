@@ -365,6 +365,7 @@ export default defineWorld({
     InnerCircle: {
       schema: {
         radius: "uint64",
+        radiusx1000: "uint64",
         speed: "uint64",
       },
       key: [],

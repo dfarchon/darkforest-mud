@@ -323,7 +323,7 @@ class RemoteExplorerPlugin {
       df.getChunkStore(),
       pattern,
       df.getWorldRadius(),
-      //   df.getInnerRadius(),
+      df.getInnerRadius(),
       df.planetRarity,
       df.getHashConfig(),
       false,

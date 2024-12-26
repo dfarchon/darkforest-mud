@@ -420,6 +420,7 @@ export class GameManager extends EventEmitter {
    * @todo move this into a new `GameConfiguration` class.
    */
   private worldRadius: number;
+  protected innerRadius: number;
 
   /**
    * Emits whenever we load the network health summary from the webserver, which is derived from
@@ -468,6 +469,7 @@ export class GameManager extends EventEmitter {
     // burnedCoords: Map<LocationId, BurnedCoords>,
     // kardashevCoords: Map<LocationId, KardashevCoords>,
     worldRadius: number,
+    innerRadius: number,
     unprocessedArrivals: Map<VoyageId, QueuedArrival>,
     unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>,
     contractsAPI: ContractsAPI,
@@ -503,6 +505,7 @@ export class GameManager extends EventEmitter {
     this.account = mainAccount;
     this.players = players;
     this.worldRadius = worldRadius;
+    this.innerRadius = innerRadius;
     // this.networkHealth$ = monomitter(true);
     this.paused$ = monomitter(true);
     // this.halfPrice$ = monomitter(true);
@@ -1440,6 +1443,10 @@ export class GameManager extends EventEmitter {
     return this.worldRadius;
   }
 
+  public getInnerRadius(): number {
+    return this.contractsAPI.getCurrentInnerRadius();
+  }
+
   /**
    * Gets the total amount of silver that lives on a planet that somebody owns.
    */
@@ -1540,6 +1547,7 @@ export class GameManager extends EventEmitter {
       this.persistentChunkStore,
       myPattern,
       this.worldRadius,
+      this.innerRadius,
       this.planetRarity,
       this.hashConfig,
       this.useMockHash,
@@ -3668,6 +3676,7 @@ export class GameManager extends EventEmitter {
         chunkStore,
         pattern,
         this.worldRadius,
+        this.innerRadius,
         this.planetRarity,
         this.hashConfig,
         this.useMockHash,
@@ -3770,6 +3779,7 @@ export class GameManager extends EventEmitter {
               planetPerlin < initPerlinMax &&
               planetPerlin >= initPerlinMin &&
               distFromOrigin < this.worldRadius &&
+              distFromOrigin >= this.innerRadius &&
               // distFromOrigin >= spawnInnerRadius &&
               distFromOrigin >= requireRadiusMin &&
               // distFromOrigin < requireRadiusMax &&
@@ -4815,6 +4825,10 @@ export class GameManager extends EventEmitter {
 
       if (newX ** 2 + newY ** 2 >= this.worldRadius ** 2) {
         throw new Error("attempted to move out of bounds");
+      }
+
+      if (newX ** 2 + newY ** 2 < this.innerRadius ** 2) {
+        throw new Error("attempted to move into inner circle");
       }
 
       const oldPlanet = this.entityStore.getPlanetWithLocation(oldLocation);

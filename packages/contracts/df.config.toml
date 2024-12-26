@@ -114,8 +114,9 @@ f_perlin_mirror_y = 0
 rate = 1
 
 [inner_circle]
-a_radius = 0
-b_speed = 0
+a_radius = 110000
+b_radiusx1000 = 110000000
+c_speed = 255
 
 [guild_config]
 a_create_fee = 5000000000000000  # 0.005 ETH

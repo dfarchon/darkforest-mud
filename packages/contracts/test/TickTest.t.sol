@@ -54,22 +54,22 @@ contract MoveTest is MudTest {
     IWorld(worldAddress).df__unpause();
     uint64 radius = 5000;
     uint64 speed = 2;
-    InnerCircle.set(radius, speed);
+    InnerCircle.set(radius, radius * 1000, speed);
 
-    vm.warp(timestamp + 1100);
+    vm.warp(timestamp + 2000);
     IWorld(worldAddress).df__tick();
     InnerCircleData memory innerCircle = InnerCircle.get();
-    assertEq(innerCircle.radius, radius - speed * 100 * rate);
+    assertEq(innerCircle.radius, radius - speed * rate);
 
-    vm.warp(timestamp + 1200);
+    vm.warp(timestamp + 3000);
     IWorld(worldAddress).df__pause();
     innerCircle = InnerCircle.get();
-    assertEq(innerCircle.radius, radius - speed * 200 * rate);
+    assertEq(innerCircle.radius, radius - speed * 2 * rate);
 
-    vm.warp(timestamp + 1300);
+    vm.warp(timestamp + 4000);
     IWorld(worldAddress).df__unpause();
     innerCircle = InnerCircle.get();
-    assertEq(innerCircle.radius, radius - speed * 200 * rate);
+    assertEq(innerCircle.radius, radius - speed * 2 * rate);
   }
 
   function testTickRate() public {

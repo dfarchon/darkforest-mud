@@ -47,7 +47,7 @@ export default [
       "src/Shared/snarks/*",
       "vite.config.ts",
       "src/Backend/Plugins/minimapSpawn.js",
-      "embedded_plugins/**/*",
+      "embedded_plugins/",
       "dist/*",
       "public/*",
       "postcss.config.js",
