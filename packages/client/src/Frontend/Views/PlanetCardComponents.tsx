@@ -74,7 +74,7 @@ export function PlanetActiveArtifact({
         <White>
           {" "}
           <ArtifactRarityLabelAnim rarity={artifact.rarity} />{" "}
-          <ArtifactBiomeText artifact={artifact} />{" "}
+          {/* <ArtifactBiomeText artifact={artifact} />{" "} */}
           <ArtifactTypeText artifact={artifact} />
         </White>
       </Sub>

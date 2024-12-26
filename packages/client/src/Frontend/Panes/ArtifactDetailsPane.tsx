@@ -14,9 +14,15 @@ import type {
   LocationId,
   Upgrade,
 } from "@df/types";
-import { ArtifactRarityNames, ArtifactType, TooltipName } from "@df/types";
+import {
+  ArtifactRarityNames,
+  ArtifactStatusNames,
+  ArtifactType,
+  TooltipName,
+} from "@df/types";
 import { range } from "@df/utils/number";
 import styled from "styled-components";
+import TimeAgo from "react-timeago";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { StatIdx } from "../../_types/global/GlobalTypes";
@@ -33,20 +39,30 @@ import { AccountLabel } from "../Components/Labels/Labels";
 import { ReadMore } from "../Components/ReadMore";
 import { Green, Red, Sub, Text, Text2, White } from "../Components/Text";
 import { TextPreview } from "../Components/TextPreview";
-import { TimeUntil } from "../Components/TimeUntil";
+import { formatDuration, TimeUntil } from "../Components/TimeUntil";
 import dfstyles from "../Styles/dfstyles";
 import { useAccount, useArtifact, useUIManager } from "../Utils/AppHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ArtifactActions } from "./ManagePlanetArtifacts/ArtifactActions";
 import { ArtifactChangeImageType } from "./ManagePlanetArtifacts/ArtifactChangeImageType";
 import { TooltipTrigger } from "./Tooltip";
+import { useState } from "react";
+
+const ArtifactStatusText = {
+  0: "DEFAULT",
+  1: "COOLDOWN",
+  2: "CHARGING",
+  3: "READY",
+  4: "ACTIVE",
+  5: "BROKEN",
+} as const;
 
 const StatsContainer = styled.div`
   flex-grow: 1;
 `;
 
 const ArtifactDetailsHeader = styled.div`
-  min-height: 128px;
+  min-height: 25px;
   display: flex;
   flex-direction: row;
 
@@ -87,6 +103,10 @@ export function UpgradeStatInfo({
     }
   }
 
+  if (mult === 100) {
+    return null;
+  }
+
   const statName = [
     TooltipName.Energy,
     TooltipName.EnergyGrowth,
@@ -102,7 +122,6 @@ export function UpgradeStatInfo({
       </TooltipTrigger>
       <span>
         {mult > 100 && <Green>+{Math.round(mult - 100)}%</Green>}
-        {mult === 100 && <Sub>no effect</Sub>}
         {mult < 100 && <Red>-{Math.round(100 - mult)}%</Red>}
       </span>
     </div>
@@ -181,16 +200,16 @@ export function ArtifactDetailsBody({
     return null;
   }
 
-  const activateArtifactCooldownPassed =
-    uiManager.getNextActivateArtifactAvailableTimestamp() <= Date.now();
+  // const activateArtifactCooldownPassed =
+  //   uiManager.getNextActivateArtifactAvailableTimestamp() <= Date.now();
 
   // console.log(ArtifactType);
 
   const account = (addr: EthAddress) => {
-    const twitter = uiManager?.getTwitter(addr);
-    if (twitter) {
-      return "@" + twitter;
-    }
+    // const twitter = uiManager?.getTwitter(addr);
+    // if (twitter) {
+    //   return "@" + twitter;
+    // }
     return <TextPreview text={addr} />;
   };
 
@@ -301,19 +320,41 @@ export function ArtifactDetailsBody({
         )}
       </div>
 
-      {hasStatBoost(artifact.artifactType) && (
-        <ArtifactDetailsHeader>
-          <StatsContainer>
-            {range(0, 5).map((val) => (
-              <UpgradeStatInfo
-                upgrades={[artifact.upgrade, artifact.timeDelayedUpgrade]}
-                stat={val}
-                key={val}
-              />
-            ))}
-          </StatsContainer>
-        </ArtifactDetailsHeader>
-      )}
+      <div>
+        {artifact.chargeUpgrade && (
+          <>
+            <Green>Charge Stats Change</Green>
+            <ArtifactDetailsHeader>
+              <StatsContainer>
+                {range(0, 5).map((val) => (
+                  <UpgradeStatInfo
+                    upgrades={[artifact.chargeUpgrade]}
+                    stat={val}
+                    key={val}
+                  />
+                ))}
+              </StatsContainer>
+            </ArtifactDetailsHeader>
+          </>
+        )}
+
+        {artifact.activateUpgrade && (
+          <>
+            <Green>Activate Stats Change</Green>
+            <ArtifactDetailsHeader>
+              <StatsContainer>
+                {range(0, 5).map((val) => (
+                  <UpgradeStatInfo
+                    upgrades={[artifact.activateUpgrade]}
+                    stat={val}
+                    key={val}
+                  />
+                ))}
+              </StatsContainer>
+            </ArtifactDetailsHeader>
+          </>
+        )}
+      </div>
 
       {isSpaceShip(artifact.artifactType) && (
         <ArtifactDescription collapsable={false} artifact={artifact} />
@@ -321,7 +362,7 @@ export function ArtifactDetailsBody({
 
       <StyledArtifactDetailsBody>
         {!isSpaceShip(artifact.artifactType) && (
-          <ArtifactDescription artifact={artifact} />
+          <NewArtifactDescription artifact={artifact} />
         )}
         <Spacer height={8} />
 
@@ -336,7 +377,7 @@ export function ArtifactDetailsBody({
           )}
         </div>
 
-        {!isSpaceShip(artifact.artifactType) && (
+        {/* {!isSpaceShip(artifact.artifactType) && (
           <>
             <div className="row">
               <span>Minted At</span>
@@ -351,7 +392,7 @@ export function ArtifactDetailsBody({
               <span>{discoverer()}</span>
             </div>
           </>
-        )}
+        )} */}
 
         {artifact.controller === EMPTY_ADDRESS && (
           <div className="row">
@@ -446,6 +487,151 @@ export function ArtifactDetailsPane({
       contractConstants={contractConstants}
       depositOn={depositOn}
     />
+  );
+}
+
+function NewArtifactDescription({
+  artifact,
+  collapsable,
+}: {
+  artifact: Artifact;
+  collapsable?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(!collapsable);
+  const uiManager = useUIManager();
+
+  if (!expanded) {
+    return (
+      <Text>
+        <div style={{ cursor: "pointer" }} onClick={() => setExpanded(true)}>
+          ▼ Show Details
+        </div>
+      </Text>
+    );
+  }
+
+  return (
+    <Text>
+      {collapsable && (
+        <div style={{ cursor: "pointer" }} onClick={() => setExpanded(false)}>
+          ▲ Hide Details
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.Bomb && (
+        <div>
+          <Green>Description:</Green> A powerful explosive device that can be
+          used to destroy planets. You need to choose a target planet for
+          starting charging. After charging is complete, you can activate it
+          which will consume energy to launch it at the designated target. When
+          it reaches the target it will explode, giving all players{" "}
+          <span style={{ color: "#ffff00" }}>
+            {Math.floor(300 / uiManager.getCurrentTickerRate())} seconds
+          </span>{" "}
+          to destroy planets within the pink circle radius including the target.
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.BloomFilter && (
+        <div>
+          <Green>Description:</Green> When activated refills your planet&apos;s
+          energy to their respective maximum values.
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.Wormhole && (
+        <div>
+          <Green>Description:</Green> A device that creates a portal between two
+          planets, allowing instant travel between them. When activated, it
+          allows instant travel between the two linked locations.
+        </div>
+      )}
+
+      {artifact.artifactType === ArtifactType.PhotoidCannon && (
+        <div>
+          <Green>Description:</Green> A powerful weapon that can be used to
+          attack planets from afar. When activated, it will fire a devastating
+          beam at the target planet. During charging, it reduces the
+          planet&apos;s defense. Once charged, you can activate it and then the
+          next move will be able to go further and faster.
+        </div>
+      )}
+
+      {artifact.reqLevel !== undefined && artifact.reqLevel !== 0 && (
+        <div>
+          <Green>Required Level:</Green> {artifact.reqLevel & 0xff} -{" "}
+          {(artifact.reqLevel >> 8) - 1}
+        </div>
+      )}
+
+      {artifact.reqPopulation !== undefined &&
+        artifact.reqPopulation !== 0n && (
+          <div>
+            <Green>Required Energy:</Green> {artifact.reqPopulation.toString()}
+          </div>
+        )}
+
+      {artifact.reqSilver !== undefined && artifact.reqSilver !== 0n && (
+        <div>
+          <Green>Required Silver:</Green> {artifact.reqSilver.toString()}
+        </div>
+      )}
+
+      <div>
+        <Green>Properties:</Green>{" "}
+        {artifact.durable ? "Durable" : "Not Durable"},{" "}
+        {artifact.reusable ? "Reusable" : "Single Use"}
+      </div>
+
+      {artifact.charge !== undefined && artifact.charge > 0 && (
+        <div>
+          <Green>Charge Time:</Green>{" "}
+          {formatDuration(
+            Math.floor(
+              (artifact.charge / uiManager.getCurrentTickerRate()) * 1000,
+            ),
+          )}
+          {artifact.chargeTick !== undefined && artifact.chargeTick > 0 && (
+            <>
+              <br />
+              <Green>Last Charged:</Green>{" "}
+              <TimeAgo date={uiManager.convertTickToMs(artifact.chargeTick)} />
+            </>
+          )}
+        </div>
+      )}
+
+      {artifact.cooldown !== undefined && artifact.cooldown > 0 && (
+        <div>
+          <Green>Cooldown:</Green>{" "}
+          {formatDuration(
+            Math.floor(
+              (artifact.cooldown / uiManager.getCurrentTickerRate()) * 1000,
+            ),
+          )}
+          {artifact.cooldownTick !== undefined && artifact.cooldownTick > 0 && (
+            <>
+              <br />
+              <Green>Last Cooldown:</Green>{" "}
+              <TimeAgo
+                date={uiManager.convertTickToMs(artifact.cooldownTick)}
+              />
+            </>
+          )}
+        </div>
+      )}
+
+      {artifact.activateTick !== undefined && artifact.activateTick > 0 && (
+        <div>
+          <Green>Last Activated:</Green>{" "}
+          <TimeAgo date={uiManager.convertTickToMs(artifact.activateTick)} />
+        </div>
+      )}
+
+      <div>
+        <Green>Status:</Green> {ArtifactStatusNames[artifact.status ?? 0]}
+      </div>
+    </Text>
   );
 }
 

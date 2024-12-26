@@ -1,6 +1,7 @@
 import type {
   Artifact,
   ArtifactId,
+  ArtifactRarity,
   ArtifactType,
   AsteroidRendererType,
   BackgroundRendererType,
@@ -131,7 +132,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
     cachedPlanets: Map<LocationId, PlanetRenderInfo>;
   };
   getLocationOfPlanet(planetId: LocationId): WorldLocation | undefined;
-  getActiveArtifact(planet: Planet): Artifact | undefined;
+  getActiveArtifacts(planet: Planet): Artifact[];
   getPlanetWithId(planetId: LocationId | undefined): Planet | undefined;
   updateArrival(planetId: LocationId, arrival: QueuedArrival): void;
   getAccount(): EthAddress | undefined;
@@ -161,8 +162,14 @@ export interface RendererGameContext extends DiagnosticUpdater {
     dist: number | undefined,
     energy: number,
   ): number;
+  getEnergyNeededForMove(
+    fromId: LocationId,
+    toId: LocationId,
+    energy: number,
+  ): number;
   getIsChoosingTargetPlanet(): boolean;
   getLinkSourceArtifactType(): ArtifactType;
+  getLinkSourceArtifactRarity(): ArtifactRarity;
   getLinks(): Iterable<Link>;
   getRadiusOfPlanetLevel(planetRarity: PlanetLevel): number;
   getDistCoords(from: WorldCoords, to: WorldCoords): number;
@@ -177,6 +184,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getAbandonRangeChangePercent(): number;
   getCaptureZones(): Iterable<CaptureZone>;
   getPinkZones(): Iterable<PinkZone>;
+  getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined;
   getBlueZones(): Iterable<BlueZone>;
   inSameGuildAtTick(
     player1: EthAddress,

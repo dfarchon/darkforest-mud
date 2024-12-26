@@ -15,6 +15,7 @@ import type {
 import {
   ArtifactRarity,
   ArtifactRarityNames,
+  ArtifactStatus,
   ArtifactType,
   ArtifactTypeNames,
   Biome,
@@ -107,7 +108,11 @@ export function isActivated(artifact: Artifact | undefined) {
     return false;
   }
 
-  return artifact.lastActivated > artifact.lastDeactivated;
+  // return artifact.lastActivated > artifact.lastDeactivated;
+  return (
+    artifact.status !== ArtifactStatus.Default &&
+    artifact.status !== ArtifactStatus.Cooldown
+  );
 }
 
 export function getActivatedArtifact(

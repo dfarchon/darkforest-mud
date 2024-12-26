@@ -33,6 +33,7 @@ export default defineWorld({
       "APPLY_EFFECT",
       "REMOVE_EFFECT",
     ],
+    PlanetFlagType: ["EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT", "DESTROYED"],
     GuildStatus: ["UNEXIST", "ACTIVE", "DISBANDED"],
     GuildRole: ["NONE", "MEMBER", "OFFICER", "LEADER"],
     // ArtifactType: [
@@ -119,7 +120,6 @@ export default defineWorld({
     },
     TempConfigSet: {
       schema: {
-        biomeCheck: "bool",
         skipProofCheck: "bool",
         playerLimit: "uint32",
         spawnPerlinMin: "uint8",
@@ -287,10 +287,9 @@ export default defineWorld({
       id: "bytes32",
       blockNumber: "uint64",
     },
-    ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
-      status: "PlanetStatus",
+      // status: "PlanetStatus", // planet status is determined by its flags
       lastUpdateTick: "uint64",
       population: "uint64",
       silver: "uint64",
@@ -315,6 +314,13 @@ export default defineWorld({
       silverCap: "uint64",
       silverGrowth: "uint32",
     },
+    PlanetFlags: {
+      schema: {
+        id: "bytes32",
+        flags: "uint256",
+      },
+      key: ["id"],
+    },
     PlanetEmoji: {
       schema: {
         id: "bytes32",
@@ -327,7 +333,7 @@ export default defineWorld({
     PlanetEffects: {
       id: "bytes32",
       num: "uint8",
-      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 effectId | uint8 type
+      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 type | uint8 internalId
     },
     PendingMove: {
       schema: {
@@ -449,7 +455,7 @@ export default defineWorld({
     //     cooldown: "uint32",
     //     durable: "bool",
     //     reusable: "bool",
-    //     reqLevel: "uint8",
+    //     reqLevel: "uint16", // uint8 upbound | uint8 lowerbound, lowerbound <= planetLevel < upbound
     //     reqPopulation: "uint64",
     //     reqSilver: "uint64",
     //   },

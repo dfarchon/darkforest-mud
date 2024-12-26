@@ -9,6 +9,8 @@ import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
 import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
 import type {
+  Effect,
+  EffectType,
   EthAddress,
   LocatablePlanet,
   LocationId,
@@ -19,7 +21,7 @@ import type {
   UpgradeState,
   WorldLocation,
 } from "@df/types";
-import { Biome, SpaceType } from "@df/types";
+import { Biome, SpaceType, PlanetFlagType, PlanetStatus } from "@df/types";
 import { PlanetLevel } from "@df/types";
 import {
   type Entity,
@@ -108,6 +110,10 @@ export class PlanetUtils {
       prospectedBlockNumber: planet.prospectedBlockNumber,
       hasTriedFindingArtifact: planet.hasTriedFindingArtifact,
       heldArtifactIds: planet.heldArtifactIds,
+      destroyed: planet.destroyed,
+      frozen: planet.frozen,
+      effects: planet.effects,
+      flags: planet.flags,
     };
   }
 
@@ -156,8 +162,9 @@ export class PlanetUtils {
       PlanetMetadata,
       RevealedPlanet,
       ProspectedPlanet,
-      ExploredPlanet,
+      PlanetFlags,
       PlanetArtifact,
+      PlanetEffects,
     } = this.components;
 
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
@@ -304,11 +311,11 @@ export class PlanetUtils {
 
     const prospectedPlanet = getComponentValue(ProspectedPlanet, planetEntity);
 
-    const exploredPlanet = getComponentValue(ExploredPlanet, planetEntity);
-
     const planetArtifact = getComponentValue(PlanetArtifact, planetEntity);
 
-    const TWO_POW32 = 4294967295n;
+    const planetFlags = getComponentValue(PlanetFlags, planetEntity);
+
+    const TWO_POW32 = 4294967296n;
 
     const artifactIds = [];
     if (planetArtifact) {
@@ -318,8 +325,44 @@ export class PlanetUtils {
         if (id === 0n) {
           break;
         }
-        artifactIds.push(artifactIdFromHexStr(id.toString(16)));
+        artifactIds.push(artifactIdFromHexStr(id.toString()));
         val /= TWO_POW32;
+      }
+    }
+
+    const effects = getComponentValue(PlanetEffects, planetEntity);
+    const planetEffects: Effect[] = [];
+    if (effects) {
+      const effectNum = effects.num;
+      let effectsArray = effects.effects;
+      for (let i = 0; i < effectNum; i++) {
+        planetEffects[effectNum - 1 - i] = {
+          artifactIndex: Number((effectsArray & 0xff0000n) >> 16n),
+          effectType: Number((effectsArray & 0xff00n) >> 8n) as EffectType,
+          id: Number(effectsArray & 0xffn),
+        };
+        effectsArray >>= 24n;
+      }
+    }
+
+    // Check for effect 0x060200 and apply multipliers, it's a BEFORE_MOVE type effect of cannon
+    if (planetEffects.length > 0) {
+      for (const effect of planetEffects) {
+        if (effect.artifactIndex === 0x06 && effect.effectType === 0x02) {
+          range *= 2;
+          if (effect.id === 0x00) {
+            speed *= 5;
+          } else if (effect.id === 0x01) {
+            speed *= 10;
+          } else if (effect.id === 0x02) {
+            speed *= 15;
+          } else if (effect.id === 0x03) {
+            speed *= 20;
+          } else if (effect.id === 0x04) {
+            speed *= 25;
+          }
+          break;
+        }
       }
     }
 
@@ -354,10 +397,16 @@ export class PlanetUtils {
       prospectedBlockNumber: prospectedPlanet
         ? Number(prospectedPlanet.blockNumber)
         : undefined,
-      hasTriedFindingArtifact: exploredPlanet ? exploredPlanet.value : false,
+      hasTriedFindingArtifact: planetFlags
+        ? (planetFlags.flags & (1n << BigInt(PlanetFlagType.EXPLORED))) > 0n
+        : false,
       heldArtifactIds: artifactIds,
-      destroyed: false,
+      destroyed: planetFlags
+        ? (planetFlags.flags & (1n << BigInt(PlanetFlagType.DESTROYED))) > 0n
+        : false,
       frozen: false,
+      effects: planetEffects,
+      flags: planetFlags ? planetFlags.flags : 0n,
     };
   }
 

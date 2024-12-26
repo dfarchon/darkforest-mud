@@ -10,7 +10,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { DF_NAMESPACE, ARTIFACT_METADATA_TABLE_NAME, ARTIFACT_SYSTEM_NAME, ARTIFACT_PROXY_SYSTEM_NAME, EFFECT_TABLE_NAME } from "./constants.sol";
 
 function _artifactIndexToNamespace(uint256 index) pure returns (bytes14) {
-  return bytes14(bytes(string.concat("aft.", Strings.toString(index))));
+  return bytes14(bytes(string.concat("atf.", Strings.toString(index))));
 }
 
 function _artifactMetadataTableId(bytes14 namespace) pure returns (ResourceId) {

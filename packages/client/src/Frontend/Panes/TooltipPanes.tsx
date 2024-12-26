@@ -60,8 +60,16 @@ export function WithdrawArtifactPane() {
   return <>Withdraw this artifact</>;
 }
 
+export function ChargeArtifactPane() {
+  return <>Charge this artifact</>;
+}
+
 export function ActivateArtifactPane() {
   return <>Activate this artifact</>;
+}
+
+export function ShutdownArtifactPane() {
+  return <>Shutdown this artifact</>;
 }
 
 export function TimeUntilActivationPossiblePane() {
@@ -748,6 +756,12 @@ export function TooltipContent({ name }: { name: TooltipName | undefined }) {
   }
   if (name === TooltipName.ActivateArtifact) {
     return <ActivateArtifactPane />;
+  }
+  if (name === TooltipName.ChargeArtifact) {
+    return <ChargeArtifactPane />;
+  }
+  if (name === TooltipName.ShutdownArtifact) {
+    return <ShutdownArtifactPane />;
   }
   if (name === TooltipName.DefenseMultiplier) {
     return <DefenseMultiplierPane />;

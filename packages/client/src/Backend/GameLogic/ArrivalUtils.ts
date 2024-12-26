@@ -210,33 +210,7 @@ export const arrive = (
   );
 
   if (arrival.player !== toPlanet.owner && !inSameGuild) {
-    if (arrival.arrivalType === ArrivalType.Wormhole) {
-      // if this is a wormhole arrival to a planet that isn't owned by the initiator of
-      // the move, then don't move any energy
-    }
-    // attacking enemy - includes emptyAddress
-    else if (
-      arrival.arrivalType === ArrivalType.Photoid &&
-      activeArtifact?.artifactType === ArtifactType.StellarShield
-
-      // && arrivalTick >=
-      //   activeArtifact.lastActivated +
-      //     contractConstants.STELLAR_ACTIVATION_DELAY
-    ) {
-      //stellar shield successfully blocks an attack
-      //then deactivated the shield
-      // console.log(
-      //   toPlanet,
-      //   artifactsOnPlanet,
-      //   arrival,
-      //   arrivingArtifact,
-      //   contractConstants,
-      //   contractConstants
-      // );
-      toPlanet.heldArtifactIds = toPlanet.heldArtifactIds.filter(
-        (id) => id !== activeArtifact.id,
-      );
-    } else if (
+    if (
       toPlanet.energy >
       Math.floor(
         (energyArriving * CONTRACT_PRECISION * 100) / toPlanet.defense,
@@ -284,22 +258,22 @@ export const arrive = (
     toPlanet.heldArtifactIds.push(arrival.artifactId);
   }
 
-  // if (arrivingArtifact) {
-  //   if (arrivingArtifact.artifactType === ArtifactType.ShipMothership) {
-  //     if (toPlanet.energyGroDoublers === 0) {
-  //       toPlanet.energyGrowth *= 2;
-  //     }
-  //     toPlanet.energyGroDoublers++;
-  //   } else if (arrivingArtifact.artifactType === ArtifactType.ShipWhale) {
-  //     if (toPlanet.silverGroDoublers === 0) {
-  //       toPlanet.silverGrowth *= 2;
-  //     }
-  //     toPlanet.silverGroDoublers++;
-  //   } else if (arrivingArtifact.artifactType === ArtifactType.ShipTitan) {
-  //     toPlanet.pausers++;
-  //   }
-  //   arrivingArtifact.onPlanetId = toPlanet.locationId;
-  // }
+  if (arrivingArtifact) {
+    // if (arrivingArtifact.artifactType === ArtifactType.ShipMothership) {
+    //   if (toPlanet.energyGroDoublers === 0) {
+    //     toPlanet.energyGrowth *= 2;
+    //   }
+    //   toPlanet.energyGroDoublers++;
+    // } else if (arrivingArtifact.artifactType === ArtifactType.ShipWhale) {
+    //   if (toPlanet.silverGroDoublers === 0) {
+    //     toPlanet.silverGrowth *= 2;
+    //   }
+    //   toPlanet.silverGroDoublers++;
+    // } else if (arrivingArtifact.artifactType === ArtifactType.ShipTitan) {
+    //   toPlanet.pausers++;
+    // }
+    arrivingArtifact.onPlanetId = toPlanet.locationId;
+  }
 
   return { arrival, current: toPlanet, previous: prevPlanet };
 };

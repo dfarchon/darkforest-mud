@@ -8,7 +8,7 @@ import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Math } from "openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
-import { Planet as PlanetTable, ProspectedPlanet, ExploredPlanet, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
+import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
 import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker, TempConfigSet } from "../../src/codegen/index.sol";
 import { RevealedPlanet } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
@@ -16,7 +16,7 @@ import { Proof } from "../../src/lib/SnarkProof.sol";
 import { RevealInput, MoveInput } from "../../src/lib/VerificationInput.sol";
 import { Planet } from "../../src/lib/Planet.sol";
 import { EffectLib } from "../../src/lib/Effect.sol";
-import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetStatus } from "../../src/codegen/common.sol";
+import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetStatus, PlanetFlagType } from "../../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as PINK_BOMB_INDEX } from "../../src/modules/atfs/PinkBomb/constant.sol";
 import { GENERAL_ACTIVATE } from "../../src/modules/atfs/PinkBomb/constant.sol";
@@ -41,10 +41,12 @@ contract PinkBombTest is MudTest {
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     IWorld(worldAddress).df__createPlanet(3, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
-    Counter.setArtifact(1);
-    PlanetArtifact.set(bytes32(uint256(1)), 1);
+    Counter.setArtifact(2);
+    PlanetArtifact.set(bytes32(uint256(1)), (1 << 32) + 2);
     ArtifactOwner.set(1, bytes32(uint256(1)));
+    ArtifactOwner.set(2, bytes32(uint256(1)));
     ArtifactTable.set(1, PINK_BOMB_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
+    ArtifactTable.set(2, PINK_BOMB_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
     vm.stopPrank();
   }
 
@@ -60,12 +62,19 @@ contract PinkBombTest is MudTest {
     IWorld(worldAddress).df__chargeArtifact(1, 1, abi.encode(proof, input));
     assertEq(RevealedPlanet.getX(bytes32(uint256(2))), 200);
     assertEq(RevealedPlanet.getY(bytes32(uint256(2))), 200);
+    Planet memory planet = IWorld(worldAddress).df__readPlanet(1);
+    assertEq(planet.checkFlag(PlanetFlagType.OFFENSIVE_ARTIFACT), true);
     artifact = IWorld(worldAddress).df__readArtifact(1);
     assertTrue(artifact.status == ArtifactStatus.CHARGING);
     assertTrue(artifact.chargeTick == Ticker.getTickNumber());
     ResourceId pinkBombResourceId = _pinkBombTableId(_artifactIndexToNamespace(PINK_BOMB_INDEX));
     PinkBombData memory pinkBomb = PinkBomb.get(pinkBombResourceId, 1);
     assertEq(pinkBomb.target, bytes32(uint256(2)));
+
+    // charge another pink bomb
+    vm.prank(address(1));
+    vm.expectRevert(Errors.ArtifactNotAvailable.selector);
+    IWorld(worldAddress).df__chargeArtifact(1, 2, abi.encode(proof, input));
   }
 
   function testShutdownPinkBomb() public {
@@ -118,6 +127,7 @@ contract PinkBombTest is MudTest {
     ResourceId pinkBombResourceId = _pinkBombTableId(_artifactIndexToNamespace(PINK_BOMB_INDEX));
     PinkBombData memory pinkBomb = PinkBomb.get(pinkBombResourceId, 1);
     Planet memory planet = IWorld(worldAddress).df__readPlanet(1);
+    assertEq(planet.checkFlag(PlanetFlagType.OFFENSIVE_ARTIFACT), false);
     planet.applyEffect(GENERAL_ACTIVATE);
     assertEq(pinkBomb.target, bytes32(uint256(2)));
     assertEq(pinkBomb.arrivalTick, Ticker.getTickNumber() + (distance * 100) / planet.speed);
@@ -167,7 +177,8 @@ contract PinkBombTest is MudTest {
       _artifactProxySystemId(_artifactIndexToNamespace(PINK_BOMB_INDEX)),
       abi.encodeWithSelector(PinkBombSystem.destroy.selector, 1, proof, input)
     );
-    assertTrue(PlanetTable.getStatus(bytes32(uint256(3))) == PlanetStatus.DESTROYED);
+    Planet memory planet = IWorld(worldAddress).df__readPlanet(3);
+    assertTrue(planet.status == PlanetStatus.DESTROYED);
 
     vm.prank(address(3));
     vm.expectRevert(Errors.PlanetNotAvailable.selector);

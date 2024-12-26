@@ -114,6 +114,7 @@ class SnarkArgsHelper {
    */
   private static readonly DEFAULT_SNARK_CACHE_SIZE = 20;
   private readonly useMockHash: boolean;
+  private readonly biomeCheck: boolean;
   private readonly snarkProverQueue: SnarkProverQueue;
   private readonly terminal: React.MutableRefObject<TerminalHandle | undefined>;
   private readonly hashConfig: HashConfig;

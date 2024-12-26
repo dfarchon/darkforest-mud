@@ -54,6 +54,8 @@ import {
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdToDecStr,
+  isUnconfirmedChargeArtifactTx,
+  isUnconfirmedShutdownArtifactTx,
 } from "@df/serde";
 import type { EthAddress, GuildId, VoyageId } from "@df/types";
 import type {
@@ -233,6 +235,7 @@ export class GameManagerFactory {
       //   ? initialState.kardashevCoordsMap
       //   : new Map<LocationId, KardashevCoords>(),
       initialState.worldRadius,
+      initialState.innerRadius,
       initialState.arrivals,
       initialState.planetVoyageIdMap,
       contractsAPI,
@@ -277,7 +280,7 @@ export class GameManagerFactory {
         gameManager.updateContractConstants(contractConstants);
       })
       .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
-        // await gameManager.hardRefreshArtifact(artifactId);
+        await gameManager.hardRefreshArtifact(artifactId);
         gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
       })
       .on(
@@ -444,64 +447,70 @@ export class GameManagerFactory {
           ]);
         } else if (isUnconfirmedProspectPlanetTx(tx)) {
           await gameManager.softRefreshPlanet(tx.intent.planetId);
-        } else if (isUnconfirmedActivateArtifactTx(tx)) {
-          let refreshFlag = true;
-          const fromPlanet = await gameManager.getPlanetWithId(
-            tx.intent.locationId,
-          );
-          const artifact = await gameManager.getArtifactWithId(
-            tx.intent.artifactId,
-          );
+        } else if (
+          isUnconfirmedChargeArtifactTx(tx) ||
+          isUnconfirmedActivateArtifactTx(tx) ||
+          isUnconfirmedShutdownArtifactTx(tx)
+        ) {
+          await gameManager.hardRefreshPlanet(tx.intent.locationId);
+          // } else if (isUnconfirmedActivateArtifactTx(tx)) {
+          //   let refreshFlag = true;
+          //   const fromPlanet = await gameManager.getPlanetWithId(
+          //     tx.intent.locationId,
+          //   );
+          //   const artifact = await gameManager.getArtifactWithId(
+          //     tx.intent.artifactId,
+          //   );
 
-          if (artifact?.artifactType === ArtifactType.FireLink) {
-            if (fromPlanet && fromPlanet.locationId && tx.intent.linkTo) {
-              const toPlanet = await gameManager.getPlanetWithId(
-                tx.intent.linkTo,
-              );
-              if (toPlanet) {
-                const activeArtifactOnToPlanet =
-                  await gameManager.getActiveArtifact(toPlanet);
-                if (
-                  activeArtifactOnToPlanet &&
-                  activeArtifactOnToPlanet.artifactType ===
-                    ArtifactType.IceLink &&
-                  activeArtifactOnToPlanet.linkTo
-                ) {
-                  const toLinkPlanet = await gameManager.getPlanetWithId(
-                    activeArtifactOnToPlanet.linkTo,
-                  );
-                  if (toLinkPlanet) {
-                    await Promise.all([
-                      gameManager.bulkHardRefreshPlanets([
-                        fromPlanet.locationId,
-                        toPlanet.locationId,
-                        toLinkPlanet.locationId,
-                      ]),
-                      // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-                    ]);
-                    refreshFlag = false;
-                  }
-                }
-              }
-            }
-          }
+          //   if (artifact?.artifactType === ArtifactType.FireLink) {
+          //     if (fromPlanet && fromPlanet.locationId && tx.intent.linkTo) {
+          //       const toPlanet = await gameManager.getPlanetWithId(
+          //         tx.intent.linkTo,
+          //       );
+          //       if (toPlanet) {
+          //         const activeArtifactOnToPlanet =
+          //           await gameManager.getActiveArtifact(toPlanet);
+          //         if (
+          //           activeArtifactOnToPlanet &&
+          //           activeArtifactOnToPlanet.artifactType ===
+          //             ArtifactType.IceLink &&
+          //           activeArtifactOnToPlanet.linkTo
+          //         ) {
+          //           const toLinkPlanet = await gameManager.getPlanetWithId(
+          //             activeArtifactOnToPlanet.linkTo,
+          //           );
+          //           if (toLinkPlanet) {
+          //             await Promise.all([
+          //               gameManager.bulkHardRefreshPlanets([
+          //                 fromPlanet.locationId,
+          //                 toPlanet.locationId,
+          //                 toLinkPlanet.locationId,
+          //               ]),
+          //               // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+          //             ]);
+          //             refreshFlag = false;
+          //           }
+          //         }
+          //       }
+          //     }
+          //   }
 
-          if (refreshFlag) {
-            if (tx.intent.linkTo) {
-              await Promise.all([
-                gameManager.bulkHardRefreshPlanets([
-                  tx.intent.locationId,
-                  tx.intent.linkTo,
-                ]),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            } else {
-              await Promise.all([
-                gameManager.hardRefreshPlanet(tx.intent.locationId),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            }
-          }
+          //   if (refreshFlag) {
+          //     if (tx.intent.linkTo) {
+          //       await Promise.all([
+          //         gameManager.bulkHardRefreshPlanets([
+          //           tx.intent.locationId,
+          //           tx.intent.linkTo,
+          //         ]),
+          //         // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+          //       ]);
+          //     } else {
+          //       await Promise.all([
+          //         gameManager.hardRefreshPlanet(tx.intent.locationId),
+          //         // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+          //       ]);
+          //     }
+          //   }
         } else if (isUnconfirmedDeactivateArtifactTx(tx)) {
           // console.log(tx);
           if (tx.intent.linkTo) {

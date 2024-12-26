@@ -13,6 +13,7 @@ import type {
   UnconfirmedBuySpaceship,
   UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
+  UnconfirmedChargeArtifact,
   UnconfirmedClaim,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
@@ -36,6 +37,7 @@ import type {
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
   UnconfirmedSetPlanetEmoji,
+  UnconfirmedShutdownArtifact,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedUseKey,
@@ -129,7 +131,19 @@ export function isUnconfirmedProspectPlanet(
 export function isUnconfirmedActivateArtifact(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedActivateArtifact {
-  return txIntent.methodName === "activateArtifact";
+  return txIntent.methodName === "df__activateArtifact";
+}
+
+export function isUnconfirmedShutdownArtifact(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedShutdownArtifact {
+  return txIntent.methodName === "df__shutdownArtifact";
+}
+
+export function isUnconfirmedChargeArtifact(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedChargeArtifact {
+  return txIntent.methodName === "df__chargeArtifact";
 }
 
 export function isUnconfirmedDeactivateArtifact(
@@ -376,6 +390,18 @@ export function isUnconfirmedActivateArtifactTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedActivateArtifact> {
   return isUnconfirmedActivateArtifact(tx.intent);
+}
+
+export function isUnconfirmedShutdownArtifactTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedShutdownArtifact> {
+  return isUnconfirmedShutdownArtifact(tx.intent);
+}
+
+export function isUnconfirmedChargeArtifactTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedChargeArtifact> {
+  return isUnconfirmedChargeArtifact(tx.intent);
 }
 
 export function isUnconfirmedDeactivateArtifactTx(
