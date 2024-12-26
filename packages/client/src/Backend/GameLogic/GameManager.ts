@@ -3893,10 +3893,6 @@ export class GameManager extends EventEmitter {
           throw new Error("you can't prospect a planet you haven't discovered");
         }
 
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("you can't prospect a planet you don't own");
-        }
-
         if (!isLocatable(planet)) {
           throw new Error("you don't know this planet's location");
         }
@@ -3927,12 +3923,26 @@ export class GameManager extends EventEmitter {
         planetId,
       );
 
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedProspectPlanet = {
         methodName: "df__prospectPlanet",
         contract: this.contractsAPI.contract,
         planetId: planetId,
         args: Promise.resolve([locationIdToDecStr(planetId)]),
-        delegator: this.getAccount(),
+        delegator: delegator,
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -3978,10 +3988,6 @@ export class GameManager extends EventEmitter {
         //   throw new Error("game has ended");
         // }
 
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("you can't find artifacts on planets you don't own");
-        }
-
         if (planet.hasTriedFindingArtifact) {
           throw new Error(
             "someone already tried finding an artifact on this planet",
@@ -4003,6 +4009,20 @@ export class GameManager extends EventEmitter {
         planetId,
       );
 
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedFindArtifact = {
         methodName: "df__findArtifact",
         contract: this.contractsAPI.contract,
@@ -4011,7 +4031,7 @@ export class GameManager extends EventEmitter {
           planet.location.coords.x,
           planet.location.coords.y,
         ),
-        delegator: this.getAccount(),
+        delegator: delegator,
       };
 
       const tx =
@@ -4231,6 +4251,26 @@ export class GameManager extends EventEmitter {
         return `0x${encoded.slice(10)}` as Hex;
       };
 
+      const planet = this.getPlanetWithId(locationId);
+
+      if (!planet) {
+        throw Error("no planet");
+      }
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedChargeArtifact = {
         methodName: "df__chargeArtifact",
         contract: this.contractsAPI.contract,
@@ -4239,7 +4279,7 @@ export class GameManager extends EventEmitter {
           artifactIdToDecStr(artifactId),
           await getArgs(),
         ]),
-        delegator: this.getAccount(),
+        delegator: delegator,
         locationId,
         artifactId,
       };
@@ -4263,6 +4303,25 @@ export class GameManager extends EventEmitter {
         artifactId,
       );
 
+      const planet = this.getPlanetWithId(locationId);
+      if (!planet) {
+        throw Error("no planet");
+      }
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedShutdownArtifact = {
         methodName: "df__shutdownArtifact",
         contract: this.contractsAPI.contract,
@@ -4270,7 +4329,7 @@ export class GameManager extends EventEmitter {
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
         ]),
-        delegator: this.getAccount(),
+        delegator: delegator,
         locationId,
         artifactId,
       };
@@ -4383,10 +4442,29 @@ export class GameManager extends EventEmitter {
         return `0x${encoded.slice(10)}` as Hex;
       };
 
+      const planet = this.getPlanetWithId(locationId);
+      if (!planet) {
+        throw Error("no planet");
+      }
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedActivateArtifact = {
         methodName: "df__activateArtifact",
         contract: this.contractsAPI.contract,
-        delegator: this.getAccount(),
+        delegator: delegator,
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
@@ -5046,6 +5124,8 @@ export class GameManager extends EventEmitter {
       if (newX ** 2 + newY ** 2 >= this.worldRadius ** 2) {
         throw new Error("attempted to move out of bounds");
       }
+
+      console.log("inner radius", this.innerRadius);
 
       if (newX ** 2 + newY ** 2 < this.innerRadius ** 2) {
         throw new Error("attempted to move into inner circle");
