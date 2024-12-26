@@ -40,36 +40,11 @@ export function GuildListPane({
   const guilds = useGuilds(uiManager).value.sort(
     (_a: Guild, _b: Guild): number => {
       return _b.silver - _a.silver;
-
-      //   if (_a.silver !== _b.silver) return _b.silver - _a.silver;
-      //   else {
-      //     if (_a.highestRank === undefined) return 1;
-      //     if (_b.highestRank === undefined) return -1;
-      //     return _a.highestRank - _b.highestRank;
-      //   }
     },
   );
 
-  const headers = [
-    "Id",
-    "Name",
-    "Leader",
-    "Level",
-    "Amount",
-    "topPlayer",
-    "unionScore",
-    "Details",
-  ];
-  const alignments: Array<"r" | "c" | "l"> = [
-    "r",
-    "r",
-    "r",
-    "r",
-    "r",
-    "r",
-    "r",
-    "r",
-  ];
+  const headers = ["Id", "Name", "Leader", "members", "silver", "Details"];
+  const alignments: Array<"r" | "c" | "l"> = ["r", "r", "r", "r", "r", "r"];
 
   const columns = [
     //Id
@@ -92,19 +67,11 @@ export function GuildListPane({
         unFocusedWidth={"100px"}
       />
     ),
-    //Level
-    (guild: Guild) => <Sub> {formatNumber(guild.number)}</Sub>,
 
     //Amount
     (guild: Guild) => <Sub> {formatNumber(guild.members.length)}</Sub>,
 
-    //topPlayer
-    (guild: Guild) => (
-      <Sub> {"top player"}</Sub>
-      //   <Sub> {guild.highestRank ? "rank #" + union.highestRank : "n/a"}</Sub>
-    ),
-
-    //unionScore
+    //silver
     (guild: Guild) => <Sub>{formatNumber(guild.silver)} </Sub>,
 
     //Details
@@ -135,35 +102,13 @@ export function GuildListPane({
       const [leaderA, leaderB] = [_a.owner, _b.owner];
       return leaderA.localeCompare(leaderB);
     },
-    //Level
-    //PUNK fix here
-    (_a: Guild, _b: Guild): number =>
-      Number(_a.members.length) - Number(_b.members.length),
 
-    //Amount
+    //members
     (_a: Guild, _b: Guild): number => _a.members.length - _b.members.length,
 
-    // topPlayer
+    //silver
     (_a: Guild, _b: Guild): number => {
-      //PUNK fix here
-      return 1;
-
-      if (_a.highestRank === undefined) return 1;
-      if (_b.highestRank === undefined) return -1;
-      return _a.highestRank - _b.highestRank;
-    },
-
-    //unionScore
-    (_a: Guild, _b: Guild): number => {
-      //PUNK fix here
-      if (_a.silver !== _b.silver) return _b.silver - _a.silver;
-
-      //   if (_a.score !== _b.score) return _b.score - _a.score;
-      //   else {
-      //     if (_a.highestRank === undefined) return 1;
-      //     if (_b.highestRank === undefined) return -1;
-      //     return _a.highestRank - _b.highestRank;
-      //   }
+      return _b.silver - _a.silver;
     },
 
     //Details
@@ -174,7 +119,7 @@ export function GuildListPane({
   if (guilds.length === 0) {
     content = (
       <CenterBackgroundSubtext width="600px" height="100px">
-        There is no union right now.
+        There is no guild right now.
       </CenterBackgroundSubtext>
     );
   } else {

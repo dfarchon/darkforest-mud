@@ -6178,6 +6178,7 @@ export class GameManager extends EventEmitter {
       const guildId = guildIds[i];
       const guild = this.getGuild(guildId);
       if (!guild) continue;
+      if (guild.status !== GuildStatus.ACTIVE) continue;
       res.push(guild);
     }
     return res;
@@ -6189,6 +6190,76 @@ export class GameManager extends EventEmitter {
 
   public getPlayerGrant(addr: EthAddress) {
     return this.contractsAPI.getGuildUtils().getPlayerGrant(addr);
+  }
+
+  public getGrantedAddresses(account: EthAddress) {
+    const guildId = this.getPlayerGuildId(account);
+    if (!guildId) return [];
+
+    const guild = this.getGuild(guildId);
+    if (!guild) return [];
+
+    if (!account) return [];
+
+    const grant = this.getPlayerGrant(account);
+
+    if (grant === GuildRole.NONE) return [];
+
+    const result = [];
+
+    for (let i = 0; i < guild.members.length; i++) {
+      const member = guild.members[i];
+      const role = this.getGuildRole(member);
+
+      if (grant === GuildRole.NONE) continue;
+
+      if (grant === GuildRole.MEMBER) {
+        result.push(member);
+      } else if (grant === GuildRole.OFFICER) {
+        if (role === GuildRole.OFFICER || role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      } else if (grant === GuildRole.LEADER) {
+        if (role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public getAuthorizedByAddresses(account: EthAddress) {
+    const guildId = this.getPlayerGuildId(account);
+    if (!guildId) return [];
+    const guild = this.getGuild(guildId);
+    if (!guild) return [];
+    if (!account) return [];
+
+    const role = this.getGuildRole(account);
+
+    const result = [];
+
+    for (let i = 0; i < guild.members.length; i++) {
+      const member = guild.members[i];
+      const grant = this.getPlayerGrant(member);
+
+      if (grant === GuildRole.NONE) continue;
+
+      if (grant === GuildRole.MEMBER) {
+        result.push(member);
+      } else if (grant === GuildRole.OFFICER) {
+        if (role === GuildRole.OFFICER || role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      } else if (grant === GuildRole.LEADER) {
+        if (role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      }
+    }
+
+    return result;
   }
 
   public checkDelegateCondition(delegator?: EthAddress, delegate?: EthAddress) {
@@ -6542,6 +6613,7 @@ export class GameManager extends EventEmitter {
       const guildRole = this.contractsAPI
         .getGuildUtils()
         .getGuildRole(operator);
+
       if (guildRole !== GuildRole.OFFICER && guildRole !== GuildRole.LEADER)
         throw Error("not an officer or leader");
 

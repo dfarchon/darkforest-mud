@@ -97,7 +97,10 @@ export const GuildInfoPane: React.FC<{
         const address = guild.members[i];
         const player = gameManager.getPlayer(address);
         if (!player) continue;
-        const role = address === guild.owner ? "leader" : "";
+        const role_number = gameManager.getGuildRole(address);
+        let role = "member";
+        if (role_number === 3) role = "leader";
+        if (role_number === 2) role = "officer";
         const silver = player.silver ? player.silver : 0;
 
         const info: GuildMemberInfo = {
@@ -159,7 +162,7 @@ export const GuildInfoPane: React.FC<{
     (guildMemberInfo: GuildMemberInfo) => <span> {guildMemberInfo.role}</span>,
 
     (guildMemberInfo: GuildMemberInfo) => (
-      <span> {guildMemberInfo.silver}</span>
+      <span> {Math.floor(guildMemberInfo.silver / 1000).toLocaleString()}</span>
     ),
   ];
 
@@ -224,11 +227,10 @@ export const GuildInfoPane: React.FC<{
               <SpreadApart>
                 <AlignCenterHorizontally>
                   <EmSpacer width={1} />
-                  {""}
+                  Guild Silver
                 </AlignCenterHorizontally>
                 <AlignCenterHorizontally>
-                  {""}
-                  {/* {guild.highestRank ? "rank #" + guild.highestRank : "n/a"} */}
+                  {guild.silver.toLocaleString()}
                   <EmSpacer width={1} />
                 </AlignCenterHorizontally>
               </SpreadApart>
@@ -237,11 +239,10 @@ export const GuildInfoPane: React.FC<{
               <SpreadApart>
                 <AlignCenterHorizontally>
                   <EmSpacer width={1} />
-                  Guild Silver
+                  {""}
                 </AlignCenterHorizontally>
                 <AlignCenterHorizontally>
-                  {guild.silver}
-                  {/* {guild.score} */}
+                  {""}
                   <EmSpacer width={1} />
                 </AlignCenterHorizontally>
               </SpreadApart>

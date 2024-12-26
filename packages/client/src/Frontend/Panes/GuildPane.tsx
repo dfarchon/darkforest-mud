@@ -7,6 +7,7 @@ import { Btn } from "../Components/Btn";
 import { useAccount, useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane"; // Import ModalPane and ModalHandle
 import { GuildCreatePane } from "./GuildCreatePane";
+import { GuildDelegationPane } from "./GuildDelegationPane";
 import { GuildDetailPane } from "./GuildDetailPane";
 import { GuildListPane } from "./GuildListPane";
 import { GuildManagePane } from "./GuildManagePane";
@@ -97,8 +98,9 @@ export default function GuildContextPane({
           <Btn onClick={() => handleFrameChange("create")}>Create</Btn>
         )}
         <Btn onClick={() => handleFrameChange("list")}> List</Btn>
-        <Btn onClick={() => handleFrameChange("detail")}> Detail</Btn>
+        {/* <Btn onClick={() => handleFrameChange("detail")}> Detail</Btn> */}
         <Btn onClick={() => handleFrameChange("manage")}>Manage</Btn>
+        <Btn onClick={() => handleFrameChange("delegation")}>Delegation</Btn>
       </ButtonContainer>
 
       <Frame visible={activeFrame === "create"}>
@@ -125,6 +127,10 @@ export default function GuildContextPane({
 
       <Frame visible={activeFrame === "manage"}>
         <GuildManagePane />
+      </Frame>
+
+      <Frame visible={activeFrame === "delegation"}>
+        <GuildDelegationPane />
       </Frame>
     </ModalPane>
   );

@@ -89,13 +89,16 @@ contract GuildSystem is System {
 
   function _createGuild(uint256 guildId, address owner) internal returns (uint256 memberId) {
     memberId = (guildId << 16) | 1;
+
+    uint playerSilver = PlayerWithdrawSilver.get(owner);
+
     GuildData memory guild = GuildData({
       status: GuildStatus.ACTIVE,
       rank: 1,
       number: 1,
       registry: 1,
       owner: uint24(memberId),
-      silver: 0
+      silver: playerSilver
     });
     Guild.set(uint8(guildId), guild);
 
@@ -171,8 +174,8 @@ contract GuildSystem is System {
     }
     uint256 oldOwnerMemberId = guild.owner;
     Guild.setOwner(uint8(guildId), uint24(newOwnerMemberId));
-    GuildMember.setRole(uint24(newOwnerMemberId), GuildRole.LEADER);
     GuildMember.setRole(uint24(oldOwnerMemberId), GuildRole.MEMBER);
+    GuildMember.setRole(uint24(newOwnerMemberId), GuildRole.LEADER);
   }
 
   function createGuild(string memory name) public payable {
@@ -425,7 +428,12 @@ contract GuildSystem is System {
       revert GuildRoleUnexpected();
     }
 
-    if (newGrant == GuildRole.MEMBER || newGrant == GuildRole.OFFICER || newGrant == GuildRole.LEADER) {
+    if (
+      newGrant == GuildRole.MEMBER ||
+      newGrant == GuildRole.OFFICER ||
+      newGrant == GuildRole.LEADER ||
+      newGrant == GuildRole.NONE
+    ) {
       // Update the grant role
       GuildMember.setGrant(uint24(memberId), newGrant);
     } else {

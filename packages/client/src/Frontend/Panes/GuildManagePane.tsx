@@ -1,5 +1,6 @@
 import type { EthAddress, Guild } from "@df/types";
 import { GuildStatus, Setting } from "@df/types";
+import { GuildRole } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -37,7 +38,9 @@ const Row = styled.div`
 
 const BtnSet = styled.div`
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
+  margin-left: 1em;
+  gap: 1em;
 `;
 
 export const GuildManageSection = styled.div`
@@ -181,37 +184,11 @@ export function GuildManagePane() {
     }
   };
 
-  const handleCancelInvite = async (newAdminAddress: EthAddress) => {
-    if (!account || !guild || !validGuild(guild)) return;
-    setIsProcessing(true);
-
-    try {
-      // await gameManager.cancelInvite(guild.guildId, newAdminAddress);
-    } catch (err) {
-      console.error("Error canceling Invite:", err);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Round 4 Todo add functions here
-  const handleRejectApplication = async (applicant: EthAddress) => {
-    if (!account || !guild || !validGuild(guild)) return;
-    setIsProcessing(true);
-    try {
-      // await gameManager.rejectApplication(guild.guildId, applicant);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const handleAcceptApplication = async (applicant: EthAddress) => {
     if (!account || !guild || !validGuild(guild)) return;
     setIsProcessing(true);
     try {
-      // await gameManager.acceptApplication(applicant);
+      await gameManager.approveApplication(applicant);
     } catch (err) {
       console.error(err);
     } finally {
@@ -231,16 +208,9 @@ export function GuildManagePane() {
     }
   };
 
-  const handleLevelupGuild = async () => {
-    if (!account || !guild || !validGuild(guild)) return;
-    setIsProcessing(true);
-    try {
-      // await gameManager.levelUpGuild(guild.guildId);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsProcessing(false);
-    }
+  const setMemberRole = async (member: EthAddress, role: GuildRole) => {
+    if (!account || !guild) return;
+    await gameManager.setMemberRole(member, role as GuildRole);
   };
 
   if (!account || !player || !guild)
@@ -251,11 +221,9 @@ export function GuildManagePane() {
     return (
       <GuildManageContent>You haven't joined a guild yet</GuildManageContent>
     );
-  if (!isLeader(guild, account))
+  if (gameManager.getGuildRole(account) === GuildRole.MEMBER)
     return (
-      <GuildManageContent>
-        You are not the leader of one guild
-      </GuildManageContent>
+      <GuildManageContent>You are not the LEADER or OFFICER</GuildManageContent>
     );
 
   return (
@@ -278,18 +246,35 @@ export function GuildManagePane() {
             <li key={member}>
               <BtnSet>
                 {member}
-                <Actions>
-                  <Btn className="red" onClick={() => handleKickMember(member)}>
-                    Kick
-                  </Btn>
-                  <Spacer width={4} />
-                  <Btn
-                    className="button"
-                    onClick={() => handleTransferLeaderRole(member)}
-                  >
-                    Transfer Admin
-                  </Btn>
-                </Actions>
+                {member !== guild.owner && (
+                  <Actions>
+                    <Btn
+                      className="red"
+                      onClick={() => handleKickMember(member)}
+                    >
+                      Kick
+                    </Btn>
+                    <Spacer width={4} />
+
+                    {gameManager.getGuildRole(member) === GuildRole.OFFICER && (
+                      <Btn
+                        className="button"
+                        onClick={() => setMemberRole(member, GuildRole.MEMBER)}
+                      >
+                        set to MEMBER
+                      </Btn>
+                    )}
+
+                    {gameManager.getGuildRole(member) === GuildRole.MEMBER && (
+                      <Btn
+                        className="button"
+                        onClick={() => setMemberRole(member, GuildRole.OFFICER)}
+                      >
+                        set to OFFICER
+                      </Btn>
+                    )}
+                  </Actions>
+                )}
               </BtnSet>
             </li>
           ))}
@@ -324,15 +309,7 @@ export function GuildManagePane() {
         <ul>
           {guild.invitees.map((invitee) => (
             <li key={invitee}>
-              <BtnSet>
-                {invitee}
-                <Btn
-                  disabled={isProcessing}
-                  onClick={() => handleCancelInvite(invitee)}
-                >
-                  <span> Cancel Invition</span>
-                </Btn>
-              </BtnSet>
+              <BtnSet>{invitee}</BtnSet>
             </li>
           ))}
         </ul>
@@ -346,18 +323,12 @@ export function GuildManagePane() {
             <li key={applicant}>
               <BtnSet>
                 {applicant}
-                <Btn
-                  disabled={isProcessing}
-                  onClick={() => handleRejectApplication(applicant)}
-                >
-                  Reject
-                </Btn>
                 <Spacer width={4} />
                 <Btn
                   disabled={isProcessing}
                   onClick={() => handleAcceptApplication(applicant)}
                 >
-                  Accept
+                  Accept Application
                 </Btn>
               </BtnSet>
             </li>
