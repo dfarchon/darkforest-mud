@@ -1,8 +1,8 @@
+import { cloneDeep } from "@backend/Utils/clone-deep";
 import { Setting } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { cloneDeep } from "../../Backend/Utils/clone-deep";
 import type { NotificationInfo } from "../Game/NotificationManager";
 import NotificationManager, {
   NotificationManagerEvent,
@@ -11,7 +11,6 @@ import NotificationManager, {
 import dfstyles, { snips } from "../Styles/dfstyles";
 import { useUIManager } from "../Utils/AppHooks";
 import { DFZIndex } from "../Utils/constants";
-import { cloneDeep } from "@backend/Utils/clone-deep";
 
 /**
  * React component which represents a single notification. Can be hovered over for more info, or
