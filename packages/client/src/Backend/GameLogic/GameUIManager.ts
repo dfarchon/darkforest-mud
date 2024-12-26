@@ -47,6 +47,7 @@ import type { BigNumber } from "ethers";
 import EventEmitter from "events";
 import deferred from "p-defer";
 import type React from "react";
+import type { Hex } from "viem";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { HashConfig } from "../../_types/global/GlobalTypes";
@@ -72,10 +73,10 @@ import { coordsEqual } from "../Utils/Coordinates";
 import type { GameManager } from "./GameManager";
 import { GameManagerEvent } from "./GameManager";
 import type { GameObjects } from "./GameObjects";
+import type { GuildUtils } from "./GuildUtils";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
-import type { Hex } from "viem";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -744,6 +745,10 @@ export class GameUIManager extends EventEmitter {
       } else if (
         mouseDownPlanet &&
         (mouseDownPlanet.owner === this.gameManager.getAccount() ||
+          this.gameManager.checkDelegateCondition(
+            mouseDownPlanet.owner,
+            this.gameManager.getAccount(),
+          ) ||
           this.isSendingShip(mouseDownPlanet.locationId))
       ) {
         // move initiated if enough forces
@@ -1406,6 +1411,13 @@ export class GameUIManager extends EventEmitter {
     if (!planet) {
       return undefined;
     }
+
+    return this.gameManager.checkDelegateCondition(
+      planet.owner,
+      this.gameManager.getAccount(),
+    )
+      ? planet
+      : undefined;
     return planet.owner === this.gameManager.getAccount() ? planet : undefined;
   }
 
@@ -1597,6 +1609,10 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getWorldRadius();
   }
 
+  public getInnerRadius(): number {
+    return this.gameManager.getInnerRadius();
+  }
+
   public getWorldSilver(): number {
     return this.gameManager.getWorldSilver();
   }
@@ -1752,6 +1768,26 @@ export class GameUIManager extends EventEmitter {
     return this.contractConstants.SPACE_JUNK_ENABLED;
   }
 
+  public getGuildUtils(): GuildUtils {
+    return this.gameManager.getContractAPI().getGuildUtils();
+  }
+
+  public inSameGuildAtTick(
+    player1: EthAddress,
+    player2: EthAddress,
+    tick: number,
+  ) {
+    return this.getGuildUtils().inSameGuildAtTick(player1, player2, tick);
+  }
+
+  public inSameGuildRightNow(
+    player1?: EthAddress,
+    player2?: EthAddress,
+  ): boolean {
+    if (!player1) return false;
+    if (!player2) return false;
+    return this.getGuildUtils().inSameGuildRightNow(player1, player2);
+  }
   // public get captureZonesEnabled(): boolean {
   //   return this.contractConstants.CAPTURE_ZONES_ENABLED;
   // }

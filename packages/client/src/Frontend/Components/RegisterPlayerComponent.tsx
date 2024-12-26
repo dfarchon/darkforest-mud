@@ -1,13 +1,13 @@
 import { address as toEthAddress, addressToHex } from "@df/serde";
 import { Btn } from "@frontend/Components/Btn";
 import { Green, Red } from "@frontend/Components/Text";
+import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
 import React, { useCallback, useEffect, useState } from "react";
 import { encodeFunctionData } from "viem";
 import { useWalletClient } from "wagmi";
-import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
 
 export const RegisterPlayerComponent = () => {
   const { value: burnerBalanceValue, refetch: refetchBurnerBalance } =

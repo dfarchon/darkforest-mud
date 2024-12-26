@@ -222,8 +222,16 @@ export function SendResources({
   onToggleAbandon: () => void;
 }) {
   const uiManager = useUIManager();
+  const gameManager = uiManager.getGameManager();
   const account = useAccount(uiManager);
-  const owned = p.value?.owner === account;
+
+  const canDelegate = gameManager.checkDelegateCondition(
+    p.value?.owner,
+    account,
+  );
+
+  const owned = p.value?.owner === account || canDelegate;
+
   const locationId = p?.value?.locationId;
 
   const isSendingShip = uiManager.isSendingShip(locationId);
@@ -277,11 +285,9 @@ export function SendResources({
   // for each of the above keys, we set up a listener that is triggered whenever that key is
   // pressed, and sets the corresponding resource sending amount
   for (let i = 0; i < energyShortcuts.length; i++) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useOnUp(energyShortcuts[i], () => updateEnergySending((i + 1) * 10), [
       updateEnergySending,
     ]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useOnUp(silverShortcuts[i], () => updateSilverSending((i + 1) * 10), [
       updateSilverSending,
     ]);

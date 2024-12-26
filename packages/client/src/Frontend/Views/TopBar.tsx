@@ -72,7 +72,8 @@ function PlayerSilver({ account }: { account: EthAddress | undefined }) {
     let formattedSilver = "0";
 
     if (player.value.silver !== undefined && player.value.silver !== null) {
-      formattedSilver = player.value.silver.toLocaleString();
+      const silverAmount = Math.floor(player.value.silver / 1000);
+      formattedSilver = silverAmount.toLocaleString();
     }
     content = (
       <Sub>

@@ -24,8 +24,8 @@ export class UIRenderer implements UIRendererType {
     const radius = gameUIManager.getWorldRadius();
     whiteA[3] = 255;
     circleRenderer.queueCircleWorld({ x: 0, y: 0 }, radius, whiteA, 2);
-    // const innerRadius = gameUIManager.getInnerRadius();
-    // circleRenderer.queueCircleWorld({ x: 0, y: 0 }, innerRadius, whiteA, 2);
+    const innerRadius = gameUIManager.getInnerRadius();
+    circleRenderer.queueCircleWorld({ x: 0, y: 0 }, innerRadius, whiteA, 2);
   }
 
   queueMousePath() {
@@ -179,6 +179,5 @@ export class UIRenderer implements UIRendererType {
       this.renderer.planetRenderManager.queueRangeRings(selectedPlanet);
   }
 
-  // eslint-disable-next-line
   flush(): void {}
 }

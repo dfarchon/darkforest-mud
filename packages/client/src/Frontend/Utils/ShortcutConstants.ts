@@ -40,3 +40,4 @@ export const TOGGLE_PANE_VISIBLE = "m";
 export const TOGGLE_HOTKEY_VISIBLE = ",";
 
 export const TOGGLE_WALLET_PANE = "p";
+export const TOGGLE_GUILD_PANE = "u";

@@ -8,6 +8,7 @@ import {
   TxExecutor,
 } from "@df/network";
 import {
+  address,
   address as toEthAddress,
   addressToHex,
   artifactIdFromEthersBN,
@@ -55,6 +56,7 @@ import type {
   VoyageId,
   WorldLocation,
 } from "@df/types";
+import type { GuildId } from "@df/types";
 import { Setting } from "@df/types";
 import { hexToResource } from "@latticexyz/common";
 import {
@@ -88,11 +90,11 @@ import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
+import { GuildUtils } from "./GuildUtils";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
 import { ArtifactUtils, updateArtifactStatus } from "./ArtifactUtils";
 import { TickerUtils } from "./TickerUtils";
-
 interface ContractsApiConfig {
   connection: EthConnection;
   contractAddress: EthAddress;
@@ -149,6 +151,7 @@ export class ContractsAPI extends EventEmitter {
   private artifactUtils: ArtifactUtils;
   private moveUtils: MoveUtils;
   private tickerUtils: TickerUtils;
+  private guildUtils: GuildUtils;
 
   private pausedStateSubscription: Subscription;
   private playerSubscription: Subscription;
@@ -161,6 +164,13 @@ export class ContractsAPI extends EventEmitter {
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
   private setPlanetEmojiSubscription: Subscription;
+
+  //guild
+  private guildSubscription: Subscription;
+  private guildNameSubscription: Subscription;
+  private guildMemberSubscription: Subscription;
+  private guildHistorySubscription: Subscription;
+  private guildCandidateSubscription: Subscription;
   private planetFlagsSubscription: Subscription;
 
   get contract() {
@@ -195,6 +205,7 @@ export class ContractsAPI extends EventEmitter {
     });
     this.moveUtils = new MoveUtils({ components });
     this.tickerUtils = new TickerUtils({ components });
+    this.guildUtils = new GuildUtils({ components });
   }
 
   /**
@@ -449,6 +460,85 @@ export class ContractsAPI extends EventEmitter {
     // since no events are processed on the client, we need to subscribe to new blocks
     // to get the latest block number
     this.ethConnection.subscribeToNewBlock();
+
+    // since no events are processed on the client, we need to subscribe to new blocks
+    // to get the latest block number
+    this.ethConnection.subscribeToNewBlock();
+
+    this.guildSubscription = this.components.Guild.update$.subscribe(
+      (update) => {
+        const entity = update.entity;
+
+        const keyTuple = decodeEntity(
+          this.components.Guild.metadata.keySchema,
+          entity,
+        );
+
+        this.emit(ContractsAPIEvent.GuildUpdate, keyTuple.id as GuildId);
+      },
+    );
+
+    this.guildNameSubscription = this.components.GuildName.update$.subscribe(
+      (update) => {
+        const entity = update.entity;
+
+        const keyTuple = decodeEntity(
+          this.components.GuildName.metadata.keySchema,
+          entity,
+        );
+
+        this.emit(ContractsAPIEvent.GuildUpdate, keyTuple.id as GuildId);
+      },
+    );
+
+    this.guildMemberSubscription =
+      this.components.GuildMember.update$.subscribe((update) => {
+        const entity = update.entity;
+        const keyTuple = decodeEntity(
+          this.components.GuildMember.metadata.keySchema,
+          entity,
+        );
+
+        const guildId = keyTuple.memberId >> 16;
+
+        this.emit(ContractsAPIEvent.GuildUpdate, guildId);
+      });
+
+    this.guildHistorySubscription =
+      this.components.GuildHistory.update$.subscribe((update) => {
+        const [newValue] = update.value;
+
+        if (newValue) {
+          const memberIds = newValue.memberIds;
+
+          const guild_id_1 = memberIds[memberIds.length - 1] >> 16;
+
+          this.emit(ContractsAPIEvent.GuildUpdate, guild_id_1);
+
+          if (memberIds.length > 1) {
+            const guild_id_2 = memberIds[memberIds.length - 2] >> 16;
+            this.emit(ContractsAPIEvent.GuildUpdate, guild_id_2);
+          }
+        }
+      });
+
+    this.guildCandidateSubscription =
+      this.components.GuildCandidate.update$.subscribe((update) => {
+        const [newValue, preValue] = update.value;
+
+        if (newValue) {
+          if (newValue.invitations.length > 0) {
+            const guild_id_1 = newValue.invitations[-1];
+
+            this.emit(ContractsAPIEvent.GuildUpdate, guild_id_1);
+          }
+
+          if (newValue.applications.length > 0) {
+            const guild_id_2 = newValue.applications[-1];
+            this.emit(ContractsAPIEvent.GuildUpdate, guild_id_2);
+          }
+        }
+      });
 
     return;
 
@@ -825,6 +915,12 @@ export class ContractsAPI extends EventEmitter {
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
     this.setPlanetEmojiSubscription.unsubscribe();
+    this.guildSubscription.unsubscribe();
+    this.guildNameSubscription.unsubscribe();
+    this.guildMemberSubscription.unsubscribe();
+    this.guildHistorySubscription.unsubscribe();
+    this.guildCandidateSubscription.unsubscribe();
+
     this.planetFlagsSubscription.unsubscribe();
     return;
     const { contract } = this;
@@ -929,11 +1025,26 @@ export class ContractsAPI extends EventEmitter {
     return this.tickerUtils.convertTickToMs(tick);
   }
 
+  public getCurrentInnerRadius(): number {
+    const { InnerCircle, Ticker } = this.components;
+    const innerCircle = getComponentValue(InnerCircle, singletonEntity);
+    const ticker = getComponentValue(Ticker, singletonEntity);
+    if (!innerCircle || !ticker) {
+      throw new Error("InnerCircle or Ticker not set");
+    }
+    const innerRadius =
+      Number(innerCircle.radius) -
+      ((this.getCurrentTick() - Number(ticker.tickNumber)) *
+        Number(innerCircle.speed)) /
+        1000;
+    return innerRadius < 0 ? 0 : innerRadius;
+  }
+
   public hasJoinedGame(playerId: EthAddress): boolean {
     const { SpawnPlanet } = this.components;
 
     const spawnPlanetKey = encodeEntity(SpawnPlanet.metadata.keySchema, {
-      player: addressToHex(playerId),
+      player: playerId,
     });
 
     const result = getComponentValue(SpawnPlanet, spawnPlanetKey);
@@ -1756,6 +1867,10 @@ export class ContractsAPI extends EventEmitter {
 
   public getAddress() {
     return this.ethConnection.getAddress();
+  }
+
+  public getGuildUtils() {
+    return this.guildUtils;
   }
 }
 

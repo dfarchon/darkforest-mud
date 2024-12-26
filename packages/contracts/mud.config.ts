@@ -35,7 +35,7 @@ export default defineWorld({
     ],
     PlanetFlagType: ["EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT", "DESTROYED"],
     GuildStatus: ["UNEXIST", "ACTIVE", "DISBANDED"],
-    GuildRole: ["NONE", "MEMBER", "OFFICER", "OWNER"],
+    GuildRole: ["NONE", "MEMBER", "OFFICER", "LEADER"],
     // ArtifactType: [
     //   "UNKNOWN",
     //   "WORMHOLE",
@@ -371,7 +371,16 @@ export default defineWorld({
     InnerCircle: {
       schema: {
         radius: "uint64",
+        radiusx1000: "uint64",
         speed: "uint64",
+      },
+      key: [],
+    },
+    GuildConfig: {
+      schema: {
+        createFee: "uint128",
+        maxMembers: "uint8",
+        cooldownTicks: "uint120",
       },
       key: [],
     },
@@ -383,6 +392,7 @@ export default defineWorld({
         number: "uint8",
         registry: "uint16",
         owner: "uint24", // memberId
+        silver: "uint256",
       },
       key: ["id"],
     },

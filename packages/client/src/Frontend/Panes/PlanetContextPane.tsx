@@ -67,12 +67,18 @@ function PlanetContextPaneContent({
   onToggleAbandon: () => void;
 }) {
   const account = useAccount(uiManager);
+  const gameManager = uiManager.getGameManager();
   const notifs = useMemo(
-    () => getNotifsForPlanet(planet.value, account),
-    [planet, account],
+    () => getNotifsForPlanet(planet.value, account, gameManager),
+    [planet, account, gameManager],
   );
 
-  const owned = planet.value?.owner === account;
+  const canDelegate = gameManager.checkDelegateCondition(
+    planet.value?.owner,
+    account,
+  );
+
+  const owned = planet.value?.owner === account || canDelegate;
 
   useEffect(() => {
     if (!planet.value) {
@@ -401,6 +407,7 @@ export function PlanetContextPane({
   return (
     <ModalPane
       style={
+        // eslint-disable-next-line no-nested-ternary
         planet?.value?.destroyed
           ? snips.destroyedBackground
           : planet?.value?.frozen

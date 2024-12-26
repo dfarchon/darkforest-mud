@@ -135,7 +135,7 @@ export const enum ContractsAPIEvent {
   LocationClaimed = "LocationClaimed",
   LobbyCreated = "LobbyCreated",
   HalfPriceChanged = "HalfPriceChanged",
-  UnionUpdate = "UnionUpdate",
+  GuildUpdate = "GuildUpdate",
 }
 
 // planet locationID(BigInt), branch number

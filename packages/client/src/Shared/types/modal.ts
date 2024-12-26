@@ -28,7 +28,7 @@ export const ModalName = {
   PluginWarning: "PluginWarning" as ModalName,
   PluginEditor: "PluginEditor" as ModalName,
   PlanetContextPane: "PlanetContextPane" as ModalName,
-  UnionContextPane: "UnionContextPane" as ModalName,
+  GuildContextPane: "GuildContextPane" as ModalName,
   TransactionLog: "TransactionLog" as ModalName,
 
   WithdrawSilver: "WithdrawSilver" as ModalName,

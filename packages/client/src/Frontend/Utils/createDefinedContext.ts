@@ -15,7 +15,6 @@ export function createDefinedContext<T>(): ContextHookWithProvider<T> {
   /* This non-null assertion will indeed cause problems if the provider is passed
      a nullable value, but the below `throw` should catch that case. */
 
-  /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
   const context = React.createContext<T>(undefined!);
 
   const useDefinedContext = (): T => {

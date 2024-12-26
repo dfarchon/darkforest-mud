@@ -125,8 +125,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getBooleanSetting(setting: Setting): boolean;
   getIsHighPerfMode(): boolean;
   getWorldRadius(): number;
-  // TODO: fix later
-  // getInnerRadius(): number;
+  getInnerRadius(): number;
   getMouseDownPlanet(): LocatablePlanet | undefined;
   getLocationsAndChunks(): {
     chunks: Set<Chunk>;
@@ -187,6 +186,12 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getPinkZones(): Iterable<PinkZone>;
   getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined;
   getBlueZones(): Iterable<BlueZone>;
+  inSameGuildAtTick(
+    player1: EthAddress,
+    player2: EthAddress,
+    tick: number,
+  ): boolean;
+  inSameGuildRightNow(player1?: EthAddress, player2?: EthAddress): boolean;
 }
 
 export class Renderer {

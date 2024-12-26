@@ -2,6 +2,7 @@ import { Setting } from "@df/types";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { cloneDeep } from "../../Backend/Utils/clone-deep";
 import type { NotificationInfo } from "../Game/NotificationManager";
 import NotificationManager, {
   NotificationManagerEvent,
