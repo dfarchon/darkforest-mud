@@ -224,10 +224,10 @@ class DiplomacyAmbassador {
       this.getColorPicker("ownColor", "Your Color:", this.ownColor),
       this.getSelect(
         "highlight",
-        "Highligh:",
+        "Highlight:",
         [
           { value: 0, text: "Heatmap" },
-          { value: 1, text: "Circle" },
+          // { value: 1, text: "Circle" },
         ],
         this.highlightStyle,
       ),
