@@ -407,6 +407,7 @@ export class PlanetUtils {
       frozen: false,
       effects: planetEffects,
       flags: planetFlags ? planetFlags.flags : 0n,
+      transactions: new TxCollection(),
     };
   }
 
