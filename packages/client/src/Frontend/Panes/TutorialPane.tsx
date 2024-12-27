@@ -163,7 +163,7 @@ function TutorialPaneContent({
   } else if (tutorialState === TutorialState.HowToGetScore) {
     return (
       <div className="tutzoom">
-        <White>Race to Center</White>
+        {/*<White>Race to Center</White>
         <br />
         <div>
           Players can claim one planet and their score will update to reflect
@@ -172,6 +172,18 @@ function TutorialPaneContent({
         <div>
           Be careful though, as if the planet is destroyed, then its score wont
           count, and your score will update to your next closest claimed planet.
+        </div>
+        */}
+
+        <White>Guild Silver Accumulation Battle</White>
+        <br />
+        <div>
+          In this round, rankings are based on the total silver withdrawn by
+          guild members.
+        </div>
+        <div>
+          Planets at the center of the universe may have higher levels, so
+          advancing toward the center of the universe is still very meaningful.
         </div>
 
         <div>
@@ -216,8 +228,17 @@ function TutorialPaneContent({
           You will need to fight for the closest planets, or maybe considering
           destroying your enemies planets!
         </div> */}
-        You can increase your score by withdrawing silver via space time rips.
-        The more silver you withdraw, the higher your score will be!
+        <div>
+          You can increase your score by withdrawing silver via space time rips.
+          The more silver you withdraw, the higher your score will be!
+        </div>
+
+        <br />
+        <div>
+          The prize this time will be distributed by the guild, so make sure to
+          join a guild!
+        </div>
+
         <div>
           <Btn
             className="btn"
@@ -236,7 +257,7 @@ function TutorialPaneContent({
         {/* Winners of each round of Dark Forest v0.6.x will receive a prize, and be added to the{' '}
         <Underline>Valhalla</Underline> universe. */}
         {/* Winners of each round of Dark Forest MUD v0.1 will get mysterious prizes 🎩 */}
-        Winners of each round of Dark Forest MUD v0.1.1 will get prizes 🎩
+        Winners of each round of Dark Forest MUD v0.1.2 will get prizes 🎩
         <br />
         <br />
         To win, have the highest score (^:

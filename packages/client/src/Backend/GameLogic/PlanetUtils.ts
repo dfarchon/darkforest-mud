@@ -21,7 +21,7 @@ import type {
   UpgradeState,
   WorldLocation,
 } from "@df/types";
-import { Biome, SpaceType, PlanetFlagType, PlanetStatus } from "@df/types";
+import { Biome, PlanetFlagType, PlanetStatus, SpaceType } from "@df/types";
 import { PlanetLevel } from "@df/types";
 import {
   type Entity,

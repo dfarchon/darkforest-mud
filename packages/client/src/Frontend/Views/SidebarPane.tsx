@@ -6,6 +6,7 @@ import type { Hook } from "../../_types/global/GlobalTypes";
 import { BorderlessPane, EmSpacer } from "../Components/CoreUI";
 import { DFZIndex } from "../Utils/constants";
 import {
+  TOGGLE_GUILD_PANE,
   TOGGLE_HELP_PANE,
   TOGGLE_PLUGINS_PANE,
   TOGGLE_SETTINGS_PANE,
@@ -14,7 +15,6 @@ import {
   TOGGLE_WALLET_PANE,
   TOGGLE_YOUR_ARTIFACTS_PANE,
   TOGGLE_YOUR_PLANETS_DEX_PANE,
-  TOGGLE_GUILD_PANE,
 } from "../Utils/ShortcutConstants";
 import { ModalToggleButton } from "./ModalIcon";
 

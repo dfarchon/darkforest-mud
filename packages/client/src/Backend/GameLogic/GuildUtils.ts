@@ -293,11 +293,13 @@ export class GuildUtils {
 
       // Check if both accounts are in a guild
       if (!delegatorGuildId || !delegateGuildId) {
+        return false;
         throw new Error("one or both players are not in a guild");
       }
 
       // Check if they are in the same guild
       if (delegatorGuildId !== delegateGuildId) {
+        return false;
         throw new Error("players must be in the same guild");
       }
 
@@ -312,10 +314,12 @@ export class GuildUtils {
 
       if (!delegatorGrant || !delegateRole) {
         throw new Error("delegator grant or delegate role is wrong");
+        return false;
       }
 
       if (delegatorGrant > delegateRole) {
         throw new Error("delegator has higher grant role than delegate");
+        return false;
       }
 
       return true;

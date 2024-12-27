@@ -1,4 +1,4 @@
-import { isLocatable, getRange } from "@df/gamelogic";
+import { getRange, isLocatable } from "@df/gamelogic";
 import { isUnconfirmedMoveTx } from "@df/serde";
 import type { Planet, RGBVec, UIRendererType, WorldCoords } from "@df/types";
 import { ArtifactType, RendererType, RenderZIndex } from "@df/types";

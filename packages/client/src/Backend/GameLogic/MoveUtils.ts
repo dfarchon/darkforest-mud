@@ -1,9 +1,9 @@
 import { CONTRACT_PRECISION } from "@df/constants";
 import {
   address,
+  artifactIdFromHexStr,
   locationIdFromHexStr,
   locationIdToHexStr,
-  artifactIdFromHexStr,
 } from "@df/serde";
 import type {
   ArtifactId,

@@ -21,8 +21,9 @@ import {
   TooltipName,
 } from "@df/types";
 import { range } from "@df/utils/number";
-import styled from "styled-components";
+import { useState } from "react";
 import TimeAgo from "react-timeago";
+import styled from "styled-components";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { StatIdx } from "../../_types/global/GlobalTypes";
@@ -46,7 +47,6 @@ import type { ModalHandle } from "../Views/ModalPane";
 import { ArtifactActions } from "./ManagePlanetArtifacts/ArtifactActions";
 import { ArtifactChangeImageType } from "./ManagePlanetArtifacts/ArtifactChangeImageType";
 import { TooltipTrigger } from "./Tooltip";
-import { useState } from "react";
 
 const ArtifactStatusText = {
   0: "DEFAULT",

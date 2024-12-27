@@ -86,6 +86,7 @@ export function HelpPane({
     { hotkey: ";", intro: "your planets pane" },
     { hotkey: "'", intro: "transactions pane" },
     { hotkey: "i", intro: "diagnostics pane" },
+    { hotkey: "g", intro: "toggle guild pane" },
   ];
 
   const Table: React.FC<TableProps> = ({ data }) => {
@@ -120,7 +121,7 @@ export function HelpPane({
         {uiManager.isRoundOver() && (
           <Section>
             <SectionHeader>Dark Forest MUD Complete</SectionHeader>
-            Dark Forest MUD v0.1.1 is now complete! Scores are being compiled
+            Dark Forest MUD v0.1.2 is now complete! Scores are being compiled
             and winners will be announced shortly. Also, Artifacts will no
             longer be mintable. Thanks for playing!
           </Section>
@@ -131,7 +132,7 @@ export function HelpPane({
         </Section>
 
         <Section>
-          <SectionHeader>Dark Forest MUD v0.1.1 🦑</SectionHeader>
+          <SectionHeader>Dark Forest MUD v0.1.2 🦑</SectionHeader>
           {/* The game is a vast universe, obfuscated by zero-knowledge cryptography. Your{' '}
           <White>explorer</White> (bottom left) explores the universe, searching for{' '}
           <White>Planets</White> and other players.

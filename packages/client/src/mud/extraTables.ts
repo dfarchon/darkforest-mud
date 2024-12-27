@@ -1,7 +1,7 @@
 // copied from latticexyz skystrife
 import { resourceToHex } from "@latticexyz/common";
-import type { SyncFilter } from "@latticexyz/store-sync";
 import { defineTable } from "@latticexyz/store/internal";
+import type { SyncFilter } from "@latticexyz/store-sync";
 
 export const syncFilters: SyncFilter[] = [
   {

@@ -4,13 +4,13 @@ import {
   RendererType,
   RenderZIndex,
   type RGBAVec,
-  TextAnchor,
   TextAlign,
+  TextAnchor,
 } from "@df/types";
 
+import { engineConsts } from "../EngineConsts";
 import type { Renderer, RendererGameContext } from "../Renderer";
 import type { GameGLManager } from "../WebGL/GameGLManager";
-import { engineConsts } from "../EngineConsts";
 
 const { pinkA } = engineConsts.colors;
 

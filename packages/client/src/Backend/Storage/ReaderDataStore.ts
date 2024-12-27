@@ -1,3 +1,4 @@
+import { GuildUtils } from "@backend/GameLogic/GuildUtils";
 import { PlanetUtils } from "@backend/GameLogic/PlanetUtils";
 import { TickerUtils } from "@backend/GameLogic/TickerUtils";
 import { isLocatable } from "@df/gamelogic";
@@ -20,7 +21,6 @@ import type { ContractsAPI } from "../GameLogic/ContractsAPI";
 import { makeContractsAPI } from "../GameLogic/ContractsAPI";
 import { getAllTwitters } from "../Network/UtilityServerAPI";
 import PersistentChunkStore from "./PersistentChunkStore";
-import { GuildUtils } from "@backend/GameLogic/GuildUtils";
 
 export const enum SinglePlanetDataStoreEvent {
   REFRESHED_PLANET = "REFRESHED_PLANET",

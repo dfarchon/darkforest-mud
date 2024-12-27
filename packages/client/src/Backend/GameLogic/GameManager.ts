@@ -59,6 +59,11 @@ import {
   locationIdToHexStr,
 } from "@df/serde";
 import type {
+  RevealInput,
+  RevealSnarkContractCallArgs,
+  SnarkProof,
+} from "@df/snarks";
+import type {
   Artifact,
   ArtifactId,
   Biome,
@@ -146,14 +151,19 @@ import {
   SpaceType,
 } from "@df/types";
 import type { NumberType } from "@latticexyz/recs";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
+import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 import delay from "delay";
 import type { Contract, ContractInterface, providers } from "ethers";
 import { BigNumber } from "ethers";
 import { utils } from "ethers";
 import { EventEmitter } from "events";
+import type { Hex } from "viem";
+import { encodeFunctionData, toBytes } from "viem";
 
 import type {
   ContractConstants,
@@ -215,6 +225,7 @@ import type PersistentChunkStore from "../Storage/PersistentChunkStore";
 import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
 import type SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
+import { prospectExpired } from "./ArrivalUtils";
 // import { getEmojiMessage } from "./ArrivalUtils";
 import type { CaptureZonesGeneratedEvent } from "./CaptureZoneGenerator";
 import { CaptureZoneGenerator } from "./CaptureZoneGenerator";
@@ -223,17 +234,6 @@ import { makeContractsAPI } from "./ContractsAPI";
 import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
-import type { Hex } from "viem";
-import { encodeFunctionData, toBytes } from "viem";
-import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
-import { encodeEntity } from "@latticexyz/store-sync/recs";
-import { getComponentValue } from "@latticexyz/recs";
-import type {
-  RevealInput,
-  RevealSnarkContractCallArgs,
-  SnarkProof,
-} from "@df/snarks";
-import { prospectExpired } from "./ArrivalUtils";
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
   DiscoveredNewChunk = "DiscoveredNewChunk",

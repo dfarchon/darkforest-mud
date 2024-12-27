@@ -90,10 +90,10 @@ import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
 import { loadDiamondContract } from "../Network/Blockchain";
+import { ArtifactUtils, updateArtifactStatus } from "./ArtifactUtils";
 import { GuildUtils } from "./GuildUtils";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
-import { ArtifactUtils, updateArtifactStatus } from "./ArtifactUtils";
 import { TickerUtils } from "./TickerUtils";
 interface ContractsApiConfig {
   connection: EthConnection;
