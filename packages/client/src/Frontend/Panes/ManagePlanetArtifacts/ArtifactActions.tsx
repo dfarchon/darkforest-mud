@@ -11,20 +11,22 @@ import {
   isUnconfirmedActivateArtifactTx,
   isUnconfirmedChargeArtifactTx,
   isUnconfirmedDeactivateArtifactTx,
-  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedDepositArtifactTx,
+  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedWithdrawArtifactTx,
   locationIdToHexStr,
 } from "@df/serde";
 import type { Artifact, ArtifactId, LocationId } from "@df/types";
 import {
-  ArtifactStatus,
   ArtifactGenre,
-  PlanetFlagType,
+  ArtifactStatus,
   ArtifactType,
+  PlanetFlagType,
   TooltipName,
 } from "@df/types";
+import NotificationManager from "@frontend/Game/NotificationManager";
 import React, { useCallback } from "react";
+import type { Hex } from "viem";
 
 import { Btn } from "../../Components/Btn";
 import { Spacer } from "../../Components/CoreUI";
@@ -42,8 +44,6 @@ import {
 import { DropBombPane } from "../DropBombPane";
 import type { TooltipTriggerProps } from "../Tooltip";
 import { TooltipTrigger } from "../Tooltip";
-import NotificationManager from "@frontend/Game/NotificationManager";
-import type { Hex } from "viem";
 
 export function ArtifactActions({
   artifactId,

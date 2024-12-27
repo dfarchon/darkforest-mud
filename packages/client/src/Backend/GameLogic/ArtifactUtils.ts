@@ -1,4 +1,5 @@
 import { EMPTY_ADDRESS } from "@df/constants";
+import { TxCollection } from "@df/network";
 import {
   address,
   artifactIdToDecStr,
@@ -7,22 +8,22 @@ import {
 } from "@df/serde";
 import type {
   Artifact,
-  ArtifactId,
-  ArtifactRarity,
   // ArtifactStatus,
   // ArtifactType,
   ArtifactGenre,
+  ArtifactId,
+  ArtifactRarity,
   Biome,
   EthAddress,
   LocationId,
   Upgrade,
 } from "@df/types";
-import { ArtifactType, ArtifactStatus } from "@df/types";
+import { ArtifactStatus, ArtifactType } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
+
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
-import { TxCollection } from "@df/network";
 
 interface ArtifactUtilsConfig {
   components: ClientComponents;

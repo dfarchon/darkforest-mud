@@ -16,6 +16,7 @@ import { ArtifactHoverPane } from "../Panes/ArtifactHoverPane";
 import { CoordsPane } from "../Panes/CoordsPane";
 import { DiagnosticsPane } from "../Panes/DiagnosticsPane";
 import { ExplorePane } from "../Panes/ExplorePane";
+import GuildContextPane from "../Panes/GuildPane";
 import { HelpPane } from "../Panes/HelpPane";
 import { HotkeysArtShipPane, HotkeysMainLinePane } from "../Panes/HotKeyPane";
 import { HoverPlanetPane } from "../Panes/HoverPlanetPane";
@@ -51,7 +52,6 @@ import {
 import { NotificationsPane } from "./Notifications";
 import { SidebarPane } from "./SidebarPane";
 import { TopBar } from "./TopBar";
-import GuildContextPane from "../Panes/GuildPane";
 
 export function GameWindowLayout({
   terminalVisible,

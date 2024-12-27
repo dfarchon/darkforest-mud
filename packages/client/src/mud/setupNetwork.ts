@@ -35,12 +35,12 @@ import {
   webSocket,
 } from "viem";
 
-import { getNetworkConfig } from "./getNetworkConfig";
-import { world } from "./world";
 import {
   syncFilters as extraSyncFilters,
   tables as extraTables,
 } from "./extraTables";
+import { getNetworkConfig } from "./getNetworkConfig";
+import { world } from "./world";
 
 export type SetupNetworkResult = Awaited<ReturnType<typeof setupNetwork>>;
 

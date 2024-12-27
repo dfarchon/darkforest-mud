@@ -115,7 +115,7 @@ export const ClassicLandingPage = () => {
                     </span>
                     <br />
                     <span style={{ fontSize: "30px" }}>
-                      <Round3Title> v0.1.1 </Round3Title>
+                      <Round3Title> v0.1.2 </Round3Title>
                     </span>
                   </div>
 

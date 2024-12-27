@@ -78,20 +78,25 @@ const PLANET_UNKNOWN = "?????";
 
 const getPlanetString = (locationId) => {
   const planet = df.getPlanetWithId(locationId);
+  if (!planet) return;
+
+  const planetType = planet.planetType - 1;
   if (!planet) return PLANET_UNKNOWN;
   let type = "P";
-  if (planet.planetType == PlanetType.SILVER_MINE) type = "A";
-  else if (planet.planetType == PlanetType.RUINS) type = "F";
-  else if (planet.planetType == PlanetType.TRADING_POST) type = "STR";
-  else if (planet.planetType == PlanetType.SILVER_BANK) type = "Q";
+  if (planetType == PlanetType.SILVER_MINE) type = "A";
+  else if (planetType == PlanetType.RUINS) type = "F";
+  else if (planetType == PlanetType.TRADING_POST) type = "STR";
+  else if (planetType == PlanetType.SILVER_BANK) type = "Q";
   return `L${planet.planetLevel}-${type} ${getPlanetName(planet)}`;
 };
 
 const getPlanetMaxRank = (planet) => {
   if (!planet) return 0;
-  if (planet.planetType != PlanetType.PLANET) return 0;
-  if (planet.spaceType === SpaceType.NEBULA) return 3;
-  else if (planet.spaceType === SpaceType.SPACE) return 4;
+  const planetType = planet.planetType - 1;
+  if (planetType != PlanetType.PLANET) return 0;
+  const planetSapceType = planet.spaceType - 1;
+  if (planetSapceType === SpaceType.NEBULA) return 3;
+  else if (planetType === SpaceType.SPACE) return 4;
   else return 5;
 };
 

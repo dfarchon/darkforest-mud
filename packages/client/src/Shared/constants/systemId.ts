@@ -1,6 +1,9 @@
 import { resourceToHex } from "@latticexyz/common";
+import ArtifactCreateSystemAbi from "contracts/out/ArtifactCreateSystem.sol/ArtifactCreateSystem.abi.json";
+import ArtifactSystemAbi from "contracts/out/ArtifactSystem.sol/ArtifactSystem.abi.json";
 import GuildSystemAbi from "contracts/out/GuildSystem.sol/GuildSystem.abi.json";
 import MoveSystemAbi from "contracts/out/MoveSystem.sol/MoveSystem.abi.json";
+import PinkBombSystemAbi from "contracts/out/PinkBombSystem.sol/PinkBombSystem.abi.json";
 import PlanetEmojiSystemAbi from "contracts/out/PlanetEmojiSystem.sol/PlanetEmojiSystem.abi.json";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 import PlanetUpgradeSystemAbi from "contracts/out/PlanetUpgradeSystem.sol/PlanetUpgradeSystem.abi.json";
@@ -8,9 +11,6 @@ import PlanetWithdrawSilverSystemAbi from "contracts/out/PlanetWithdrawSilverSys
 import PlayerSystemAbi from "contracts/out/PlayerSystem.sol/PlayerSystem.abi.json";
 import TestOnlySystemAbi from "contracts/out/TestOnlySystem.sol/TestOnlySystem.abi.json";
 import TickSystemAbi from "contracts/out/TickSystem.sol/TickSystem.abi.json";
-import ArtifactSystemAbi from "contracts/out/ArtifactSystem.sol/ArtifactSystem.abi.json";
-import ArtifactCreateSystemAbi from "contracts/out/ArtifactCreateSystem.sol/ArtifactCreateSystem.abi.json";
-import PinkBombSystemAbi from "contracts/out/PinkBombSystem.sol/PinkBombSystem.abi.json";
 import type { Abi } from "viem";
 
 export const MOVE_SYSTEM_ID = resourceToHex({

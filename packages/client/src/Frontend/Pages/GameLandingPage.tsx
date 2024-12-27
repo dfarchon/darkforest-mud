@@ -35,9 +35,9 @@ import React, {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
 import { zeroAddress } from "viem";
 import { useWalletClient } from "wagmi";
-import styled from "styled-components";
 
 import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
 import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
@@ -74,6 +74,7 @@ import { MythicLabelText } from "../Components/Labels/MythicLabel";
 import type { MiniMapHandle } from "../Components/MiniMap";
 import { MiniMap } from "../Components/MiniMap";
 import { TextMask } from "../Components/TextMask";
+import dfstyles from "../Styles/dfstyles";
 import { TopLevelDivProvider, UIManagerProvider } from "../Utils/AppHooks";
 import type { Incompatibility } from "../Utils/BrowserChecks";
 import { unsupportedFeatures } from "../Utils/BrowserChecks";
@@ -82,7 +83,6 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
-import dfstyles from "../Styles/dfstyles";
 const enum TerminalPromptStep {
   NONE,
   COMPATIBILITY_CHECKS_PASSED,
@@ -1897,7 +1897,7 @@ export function GameLandingPage() {
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD v0.1.1`}
+            text={`Welcome To Dark Forest MUD v0.1.2`}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:
