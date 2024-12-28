@@ -32,11 +32,13 @@ import { TransactionLogPane } from "../Panes/TransactionLogPane";
 import { TutorialPane } from "../Panes/TutorialPane";
 import { TwitterVerifyPane } from "../Panes/TwitterVerifyPane";
 import { WalletPane } from "../Panes/WalletPane";
+import { AIChatPane } from "../Panes/AIChatPane";
 import { ZoomPane } from "../Panes/ZoomPane";
 import { useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
 import { useBooleanSetting } from "../Utils/SettingsHooks";
 import {
+  TOGGLE_AI_CHAT_PANE,
   TOGGLE_DIAGNOSTICS_PANE,
   TOGGLE_HELP_PANE,
   TOGGLE_HOTKEY_VISIBLE,
@@ -103,6 +105,10 @@ export function GameWindowLayout({
   );
   const [twitterVerifyVisible, setTwitterVerifyVisible] = useState<boolean>(
     isModalOpen(ModalName.TwitterVerify),
+  );
+
+  const [aiChatVisible, setAIChatVisible] = useState<boolean>(
+    isModalOpen(ModalName.AIChat),
   );
 
   const [walletVisible, setWalletVisible] = useState<boolean>(
@@ -256,6 +262,16 @@ export function GameWindowLayout({
   );
 
   useOnUp(
+    TOGGLE_AI_CHAT_PANE,
+    useCallback(() => {
+      if (paneVisible) {
+        return;
+      }
+      setTradeVisible(!aiChatVisible);
+    }, [paneVisible, aiChatVisible, setAIChatVisible]),
+  );
+
+  useOnUp(
     TOGGLE_HELP_PANE,
     useCallback(() => {
       if (paneVisible) {
@@ -346,6 +362,11 @@ export function GameWindowLayout({
           onClose={() => setTwitterVerifyVisible(false)}
         />
 
+        <AIChatPane
+          visible={aiChatVisible}
+          onClose={() => setAIChatVisible(false)}
+        />
+
         <WalletPane
           visible={walletVisible}
           onClose={() => setWalletVisible(false)}
@@ -408,6 +429,7 @@ export function GameWindowLayout({
 
           {paneVisible && (
             <SidebarPane
+              aiChatHook={[aiChatVisible, setAIChatVisible]}
               walletHook={[walletVisible, setWalletVisible]}
               tradeHook={[tradeVisible, setTradeVisible]}
               transactionLogHook={[

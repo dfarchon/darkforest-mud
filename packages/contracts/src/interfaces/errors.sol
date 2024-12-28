@@ -67,4 +67,8 @@ interface Errors {
   error InvalidPlanetType(); // 0xcfb7f825
   error InsufficientSilverOnPlanet(); // 0xfe845fce
   error WithdrawAmountTooLow(); // 0xba43ea37
+
+  // GPTToken system
+  error NotEnoughETH(); // 0x932b84b0
+  error NotEnoughGPTTokens(); // 0x134712e2
 }

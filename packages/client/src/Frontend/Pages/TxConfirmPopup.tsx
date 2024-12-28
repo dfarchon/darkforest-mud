@@ -252,6 +252,7 @@ export function TxConfirmPopup() {
   const buySpaceshipOnPlanetId = localStorage.getItem(
     `${account}-buySpaceshipOnPlanetId`,
   );
+
   const buySpaceshipCost =
     // eslint-disable-next-line no-nested-ternary
     method === "buySpaceship"
@@ -332,6 +333,12 @@ export function TxConfirmPopup() {
       ? weiToEth(BigNumber.from(entryFee))
       : 0;
 
+  const buyGPTTokenAmount = localStorage.getItem(
+    `${account}-buyGPTTokens-amount`,
+  );
+  const buyGPTTokensCost: number =
+    method === "df__buyGPTTokens" ? Number(buyGPTTokenAmount) * 0.0001 : 0;
+
   const getTxCost = () => {
     if (!isNaN(Number(gasFeeGwei))) {
       // console.log('first');
@@ -347,6 +354,7 @@ export function TxConfirmPopup() {
         buyPlanetCost +
         buySpaceshipCost +
         donationAmount +
+        buyGPTTokensCost +
         createGuildFeeEth +
         weiToEth(gweiToWei(Number(gasLimit) * Number(gasFeeGwei)));
 
@@ -377,6 +385,7 @@ export function TxConfirmPopup() {
         buyPlanetCost +
         buySpaceshipCost +
         donationAmount +
+        buyGPTTokensCost +
         createGuildFeeEth +
         weiToEth(gweiToWei(Number(gasLimit) * Number(val)));
 
@@ -642,6 +651,17 @@ export function TxConfirmPopup() {
               <b>Entry Fee </b>
               <span>
                 {joinGameCost} ${TOKEN_NAME}
+              </span>
+            </Row>
+          </>
+        )}
+
+        {method === "df__buyGPTTokens" && (
+          <>
+            <Row>
+              <b>Fee </b>
+              <span>
+                {buyGPTTokensCost} ${TOKEN_NAME}
               </span>
             </Row>
           </>

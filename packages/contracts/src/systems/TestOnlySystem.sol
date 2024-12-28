@@ -10,6 +10,7 @@ import { Proof } from "../lib/SnarkProof.sol";
 import { SpawnInput } from "../lib/VerificationInput.sol";
 import { Errors } from "../interfaces/errors.sol";
 import { DFUtils } from "../lib/DFUtils.sol";
+import { GPTTokens } from "../codegen/index.sol";
 
 contract TestOnlySystem is System, Errors {
   function createPlanet(
@@ -60,5 +61,14 @@ contract TestOnlySystem is System, Errors {
     planet.silver = planet.silverCap;
 
     planet.writeToStore();
+  }
+
+  /**
+   * @notice Admin adds GPT tokens to a player.
+   * @param player Address of the player
+   * @param amount Number of GPT tokens to add
+   */
+  function addGPTTokens(address player, uint256 amount) public {
+    GPTTokens.set(player, GPTTokens.get(player) + amount);
   }
 }

@@ -1,4 +1,5 @@
 import { resourceToHex } from "@latticexyz/common";
+import GPTSystemAbi from "contracts/out/GPTTokensSystem.sol/GPTTokensSystem.abi.json";
 import ArtifactCreateSystemAbi from "contracts/out/ArtifactCreateSystem.sol/ArtifactCreateSystem.abi.json";
 import ArtifactSystemAbi from "contracts/out/ArtifactSystem.sol/ArtifactSystem.abi.json";
 import GuildSystemAbi from "contracts/out/GuildSystem.sol/GuildSystem.abi.json";
@@ -78,6 +79,13 @@ export const TICK_SYSTEM_ID = resourceToHex({
 
 export const TICK_SYSTEM_ABI: Abi = TickSystemAbi;
 
+export const GPT_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "GPTTokensSystem",
+});
+
+export const GPT_SYSTEM_ABI: Abi = GPTSystemAbi;
 export const ARTIFACT_SYSTEM_ABI: Abi = ArtifactSystemAbi;
 
 export const ARTIFACT_CREATE_SYSTEM_ABI: Abi = ArtifactCreateSystemAbi;
@@ -132,7 +140,8 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
   } else if (
     functionName === "createPlanet" ||
     functionName === "revealPlanetByAdmin" ||
-    functionName === "safeSetOwner"
+    functionName === "safeSetOwner" ||
+    functionName === "addGPTTokens"
   ) {
     return TEST_ONLY_SYSTEM_ABI;
   } else if (
@@ -141,6 +150,12 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     functionName === "updateTickRate"
   ) {
     return TICK_SYSTEM_ABI;
+  } else if (
+    functionName === "buyGPTTokens" ||
+    functionName === "spendGPTTokens" ||
+    functionName === "sendGPTTokens"
+  ) {
+    return GPT_SYSTEM_ABI;
   } else if (
     functionName === "registerArtifact" ||
     functionName === "chargeArtifact" ||
@@ -199,7 +214,8 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
   } else if (
     functionName === "createPlanet" ||
     functionName === "revealPlanetByAdmin" ||
-    functionName === "safeSetOwner"
+    functionName === "safeSetOwner" ||
+    functionName === "addGPTTokens"
   ) {
     return TEST_ONLY_SYSTEM_ID;
   } else if (
@@ -208,6 +224,12 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     functionName === "updateTickRate"
   ) {
     return TICK_SYSTEM_ID;
+  } else if (
+    functionName === "buyGPTTokens" ||
+    functionName === "spendGPTTokens" ||
+    functionName === "sendGPTTokens"
+  ) {
+    return GPT_SYSTEM_ID;
   } else if (
     functionName === "registerArtifact" ||
     functionName === "chargeArtifact" ||

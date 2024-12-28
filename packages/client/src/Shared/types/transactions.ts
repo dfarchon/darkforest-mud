@@ -45,6 +45,24 @@ export type ContractMethodName =
   | "buyPlanet"
   | "buySpaceship"
   | "donate"
+  | "addMemberByAdmin"
+  | "createUnion"
+  | "inviteMember"
+  | "cancelInvite"
+  | "acceptInvite"
+  | "sendApplication"
+  | "cancelApplication"
+  | "rejectApplication"
+  | "acceptApplication"
+  | "leaveUnion"
+  | "kickMember"
+  | "transferLeaderRole"
+  | "changeUnionName"
+  | "disbandUnion"
+  | "levelUpUnion"
+  | "df__buyGPTTokens"
+  | "df__spendGPTTokens"
+  | "df__sendGPTTokens"
   | "df__createGuild"
   | "df__inviteToGuild"
   | "df__acceptInvitation"
@@ -482,4 +500,28 @@ export type UnconfirmedKickMember = TxIntent & {
   methodName: "df__kickMember";
   guildId: GuildId;
   member: EthAddress;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedBuyGPTTokens = TxIntent & {
+  methodName: "df__buyGPTTokens";
+  amount: number;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedSpendGPTTokens = TxIntent & {
+  methodName: "df__spendGPTTokens";
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedSendGPTTokens = TxIntent & {
+  methodName: "df__sendGPTTokens";
+  player: EthAddress;
+  amount: number;
 };

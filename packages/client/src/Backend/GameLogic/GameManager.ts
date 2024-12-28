@@ -29,6 +29,7 @@ import {
   isUnconfirmedBlueTx,
   isUnconfirmedBurnTx,
   isUnconfirmedBuyArtifactTx,
+  isUnconfirmedBuyGPTTokensTx,
   isUnconfirmedBuyHatTx,
   isUnconfirmedBuyPlanetTx,
   isUnconfirmedBuySpaceshipTx,
@@ -48,7 +49,9 @@ import {
   isUnconfirmedProspectPlanetTx,
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
+  isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
+  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedShutdownArtifactTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
@@ -100,6 +103,7 @@ import type {
   UnconfirmedBlue,
   UnconfirmedBurn,
   UnconfirmedBuyArtifact,
+  UnconfirmedBuyGPTTokens,
   UnconfirmedBuyHat,
   UnconfirmedBuyPlanet,
   UnconfirmedBuySpaceship,
@@ -127,7 +131,9 @@ import type {
   UnconfirmedReveal,
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedShutdownArtifact,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
@@ -932,7 +938,7 @@ export class GameManager extends EventEmitter {
 
   public updateMinerManagerInnerRadius() {
     if (this.minerManager) {
-      console.log("updateMinerManagerInnerRadius", this.getInnerRadius());
+      // console.log("updateMinerManagerInnerRadius", this.getInnerRadius());
       this.minerManager.setInnerRadius(this.getInnerRadius());
     }
   }
@@ -6480,6 +6486,127 @@ export class GameManager extends EventEmitter {
 
   public getPaused$(): Monomitter<boolean> {
     return this.paused$;
+  }
+
+  public async buyGPTTokens(
+    amount: number,
+  ): Promise<Transaction<UnconfirmedBuyGPTTokens>> {
+    try {
+      if (!this.account) {
+        throw new Error("No account connected");
+      }
+      if (amount <= 0) {
+        throw new Error("Amount to buy must be greater than 0");
+      }
+
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw new Error("No main account found");
+      }
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-buyGPTTokens-amount`,
+        amount.toString(),
+      );
+
+      const txIntent: UnconfirmedBuyGPTTokens = {
+        delegator,
+        methodName: "df__buyGPTTokens",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([amount]),
+        amount,
+      };
+
+      const price = BigInt(100_000_000_000_000);
+      const value = price * BigInt(amount);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        //  NOTE: when change gasLimit, need change the value in TxConfirmPopup.tsx
+        //
+        //  halfPrice
+        // ? bigInt(500_000_000_000_000).toString()
+        // : bigInt(1_000_000_000_000_000).toString(), //0.001eth
+        gasLimit: 3000000,
+        value: value.toString(), //0.0005eth
+      });
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__buyGPTTokens",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async spendGPTTokens(): Promise<
+    Transaction<UnconfirmedSpendGPTTokens>
+  > {
+    try {
+      if (!this.account) {
+        throw new Error("No account connected");
+      }
+
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw new Error("No main account found");
+      }
+
+      const txIntent: UnconfirmedSpendGPTTokens = {
+        delegator,
+        methodName: "df__spendGPTTokens",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([]),
+      };
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__spendGPTTokens",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async sendGPTTokens(
+    player: EthAddress,
+    amount: number,
+  ): Promise<Transaction<UnconfirmedSendGPTTokens>> {
+    try {
+      if (!this.account) {
+        throw new Error("No account connected");
+      }
+      if (!player) {
+        throw new Error("Player address is required");
+      }
+      if (amount <= 0) {
+        throw new Error("Amount to send must be greater than 0");
+      }
+
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw new Error("No main account found");
+      }
+
+      const txIntent: UnconfirmedSendGPTTokens = {
+        delegator,
+        methodName: "df__sendGPTTokens",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([player, amount]),
+        player,
+        amount,
+      };
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__sendGPTTokens",
+        (e as Error).message,
+      );
+      throw e;
+    }
   }
 
   // public getHalfPrice(): boolean {
