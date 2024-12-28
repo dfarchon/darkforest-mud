@@ -252,12 +252,10 @@ export function TxConfirmPopup() {
   const buySpaceshipOnPlanetId = localStorage.getItem(
     `${account}-buySpaceshipOnPlanetId`,
   );
+  const _buySpaceshipCost = method === "buySpaceship" ? 0.001 : 0;
+
   const buySpaceshipCost =
-    method === "buySpaceship"
-      ? halfPrice && halfPrice === "true"
-        ? 0.0005
-        : 0.001
-      : 0; // 0.001 eth
+    halfPrice === "true" ? _buySpaceshipCost * 0.5 : _buySpaceshipCost;
 
   //donate
   const rawDonateAmount = localStorage.getItem(`${account}-donateAmount`);
@@ -324,6 +322,12 @@ export function TxConfirmPopup() {
       ? weiToEth(BigNumber.from(entryFee))
       : 0;
 
+  const buyGPTTokenAmount = localStorage.getItem(
+    `${account}-buyGPTTokens-amount`,
+  );
+  const buyGPTTokensCost: number =
+    method === "df__buyGPTTokens" ? Number(buyGPTTokenAmount) * 0.0001 : 0;
+
   const getTxCost = () => {
     if (!isNaN(Number(gasFeeGwei))) {
       // console.log('first');
@@ -339,6 +343,7 @@ export function TxConfirmPopup() {
         buyPlanetCost +
         buySpaceshipCost +
         donationAmount +
+        buyGPTTokensCost +
         weiToEth(gweiToWei(Number(gasLimit) * Number(gasFeeGwei)));
 
       return res.toFixed(18).toString();
@@ -368,6 +373,7 @@ export function TxConfirmPopup() {
         buyPlanetCost +
         buySpaceshipCost +
         donationAmount +
+        buyGPTTokensCost +
         weiToEth(gweiToWei(Number(gasLimit) * Number(val)));
 
       return pre + res.toFixed(18).toString();
@@ -621,6 +627,17 @@ export function TxConfirmPopup() {
               <b>Entry Fee </b>
               <span>
                 {joinGameCost} ${TOKEN_NAME}
+              </span>
+            </Row>
+          </>
+        )}
+
+        {method === "df__buyGPTTokens" && (
+          <>
+            <Row>
+              <b>Fee </b>
+              <span>
+                {buyGPTTokensCost} ${TOKEN_NAME}
               </span>
             </Row>
           </>

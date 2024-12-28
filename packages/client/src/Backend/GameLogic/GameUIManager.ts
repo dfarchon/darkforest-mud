@@ -510,12 +510,12 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.setPlanetEmoji(locationId, emoji);
   }
 
-  public buyGPTTokens(amount: number) {
-    this.gameManager.buyGPTTokens(amount);
+  public async buyGPTTokens(amount: number) {
+    await this.gameManager.buyGPTTokens(amount);
   }
 
-  public spendGPTTokens() {
-    this.gameManager.spendGPTTokens();
+  public async spendGPTTokens() {
+    await this.gameManager.spendGPTTokens();
   }
 
   public startLinkFrom(

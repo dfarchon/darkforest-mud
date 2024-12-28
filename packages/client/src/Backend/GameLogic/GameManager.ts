@@ -6590,6 +6590,11 @@ export class GameManager extends EventEmitter {
         throw new Error("No main account found");
       }
 
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-buyGPTTokens-amount`,
+        amount.toString(),
+      );
+
       const txIntent: UnconfirmedBuyGPTTokens = {
         delegator,
         methodName: "df__buyGPTTokens",
@@ -6598,6 +6603,8 @@ export class GameManager extends EventEmitter {
         amount,
       };
 
+      const price = BigInt(100_000_000_000_000);
+      const value = price * BigInt(amount);
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
         //  NOTE: when change gasLimit, need change the value in TxConfirmPopup.tsx
         //
@@ -6605,7 +6612,7 @@ export class GameManager extends EventEmitter {
         // ? bigInt(500_000_000_000_000).toString()
         // : bigInt(1_000_000_000_000_000).toString(), //0.001eth
         gasLimit: 3000000,
-        value: bigInt(500_000_000_000_000).toString(), //0.0005eth
+        value: value.toString(), //0.0005eth
       });
       return tx;
     } catch (e) {

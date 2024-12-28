@@ -76,10 +76,7 @@ export function CurrencyView() {
   const buyMore = async () => {
     try {
       setIsBuyingCredits(true);
-      const tx = await uiManager.buyGPTTokens(buyAmount);
-
-      // Wait for transaction confirmation
-      await waitForTransaction(tx);
+      await uiManager.buyGPTTokens(buyAmount);
 
       // Reload state after buying
       console.log("Credits purchased successfully");
