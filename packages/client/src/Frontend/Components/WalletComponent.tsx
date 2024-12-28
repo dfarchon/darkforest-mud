@@ -156,6 +156,11 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
         value,
       });
       await waitForTransaction(hash);
+
+      // Update balance after transaction is confirmed
+      await refetchBurnerBalance();
+      await refetchMainWalletBalance();
+
       setState((prev) => ({ ...prev, txSuccessful: true }));
       setTimeout(
         () => setState((prev) => ({ ...prev, txSuccessful: false })),
