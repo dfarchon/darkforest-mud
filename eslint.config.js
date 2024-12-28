@@ -164,6 +164,7 @@ export default [
       "**/renovate.json",
       "**/eslint.config.js",
       "**/.stylelintrc.cjs",
+      "**/embedded_plugins/**",
     ],
   },
 ];

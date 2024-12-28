@@ -29,7 +29,7 @@ export const ModalName = {
   PluginWarning: "PluginWarning" as ModalName,
   PluginEditor: "PluginEditor" as ModalName,
   PlanetContextPane: "PlanetContextPane" as ModalName,
-  UnionContextPane: "UnionContextPane" as ModalName,
+  GuildContextPane: "GuildContextPane" as ModalName,
   TransactionLog: "TransactionLog" as ModalName,
 
   WithdrawSilver: "WithdrawSilver" as ModalName,
@@ -90,7 +90,9 @@ export const TooltipName = {
   DepositArtifact: "DepositArtifact" as TooltipName,
   DeactivateArtifact: "DeactivateArtifact" as TooltipName,
   WithdrawArtifact: "WithdrawArtifact" as TooltipName,
+  ChargeArtifact: "ChargeArtifact" as TooltipName,
   ActivateArtifact: "ActivateArtifact" as TooltipName,
+  ShutdownArtifact: "ShutdownArtifact" as TooltipName,
   RetryTransaction: "RetryTransaction" as TooltipName,
   CancelTransaction: "CancelTransaction" as TooltipName,
   PrioritizeTransaction: "PrioritizeTransaction" as TooltipName,

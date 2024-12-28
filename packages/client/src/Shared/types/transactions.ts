@@ -1,7 +1,8 @@
 import type { Contract } from "ethers";
 import type { Abi, Hex } from "viem";
 
-import type { ArtifactId, EthAddress, LocationId, UnionId } from "./identifier";
+import type { GuildRole } from "./guild";
+import type { ArtifactId, EthAddress, GuildId, LocationId } from "./identifier";
 import type { WorldLocation } from "./world";
 
 // import type { LiteralUnion } from "type-fest";
@@ -20,7 +21,9 @@ export type ContractMethodName =
   | "df__prospectPlanet"
   | "depositArtifact"
   | "withdrawArtifact"
-  | "activateArtifact"
+  | "df__activateArtifact"
+  | "df__shutdownArtifact"
+  | "df__chargeArtifact"
   | "deactivateArtifact"
   | "changeArtifactImageType"
   | "buyArtifact"
@@ -59,7 +62,18 @@ export type ContractMethodName =
   | "levelUpUnion"
   | "df__buyGPTTokens"
   | "df__spendGPTTokens"
-  | "df__sendGPTTokens";
+  | "df__sendGPTTokens"
+  | "df__createGuild"
+  | "df__inviteToGuild"
+  | "df__acceptInvitation"
+  | "df__applyToGuild"
+  | "df__approveApplication"
+  | "df__leaveGuild"
+  | "df__transferGuildLeadership"
+  | "df__disbandGuild"
+  | "df__setGrant"
+  | "df__setMemberRole"
+  | "df__kickMember";
 
 export type EthTxStatus =
   | "Init"
@@ -186,10 +200,28 @@ export type UnconfirmedWithdrawArtifact = TxIntent & {
  * @hidden
  */
 export type UnconfirmedActivateArtifact = TxIntent & {
-  methodName: "activateArtifact";
+  methodName: "df__activateArtifact";
   locationId: LocationId;
   artifactId: ArtifactId;
   linkTo?: LocationId;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedShutdownArtifact = TxIntent & {
+  methodName: "df__shutdownArtifact";
+  locationId: LocationId;
+  artifactId: ArtifactId;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedChargeArtifact = TxIntent & {
+  methodName: "df__chargeArtifact";
+  locationId: LocationId;
+  artifactId: ArtifactId;
 };
 
 /**
@@ -322,9 +354,10 @@ export type UnconfirmedBurn = TxIntent & {
  * @hidden
  */
 export type UnconfirmedPink = TxIntent & {
-  methodName: "pinkLocation";
+  methodName: "destroy";
   locationId: LocationId;
   location: WorldLocation;
+  artifactId: ArtifactId;
 };
 
 /**
@@ -373,131 +406,100 @@ export type UnconfirmedDonate = TxIntent & {
 
 /**
  * @hidden
+ *
  */
-export type UnconfirmedAddMemberByAdmin = TxIntent & {
-  methodName: "addMemberByAdmin";
-  unionId: UnionId;
-  member: EthAddress;
+export type UnconfirmedCreateGuild = TxIntent & {
+  methodName: "df__createGuild";
+  name: string;
+  guildId: GuildId;
 };
 
 /**
  * @hidden
  *
  */
-export type UnconfirmedCreateUnion = TxIntent & {
-  methodName: "createUnion";
-  name: string;
-};
-
-/**
- * @hidden
- */
-export type UnconfirmedInviteMember = TxIntent & {
-  methodName: "inviteMember";
-  unionId: UnionId;
+export type UnconfirmedInviteToGuild = TxIntent & {
+  methodName: "df__inviteToGuild";
+  guildId: GuildId;
   invitee: EthAddress;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedCancelInvite = TxIntent & {
-  methodName: "cancelInvite";
-  unionId: UnionId;
-  invitee: EthAddress;
+export type UnconfirmedAcceptInvitation = TxIntent & {
+  methodName: "df__acceptInvitation";
+  guildId: GuildId;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedSendApplication = TxIntent & {
-  methodName: "sendApplication";
-  unionId: UnionId;
+export type UnconfirmedApplyToGuild = TxIntent & {
+  methodName: "df__applyToGuild";
+  guildId: GuildId;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedCancelApplication = TxIntent & {
-  methodName: "cancelApplication";
-  unionId: UnionId;
-};
-
-/**
- * @hidden
- */
-export type UnconfirmedRejectApplication = TxIntent & {
-  methodName: "rejectApplication";
-  unionId: UnionId;
+export type UnconfirmedApproveApplication = TxIntent & {
+  methodName: "df__approveApplication";
+  guildId: GuildId;
   applicant: EthAddress;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedAcceptApplication = TxIntent & {
-  methodName: "acceptApplication";
-  unionId: UnionId;
-  applicant: EthAddress;
+export type UnconfirmedLeaveGuild = TxIntent & {
+  methodName: "df__leaveGuild";
+  guildId: GuildId;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedAcceptInvite = TxIntent & {
-  methodName: "acceptInvite";
-  unionId: UnionId;
+export type UnconfirmedTransferGuildLeadership = TxIntent & {
+  methodName: "df__transferGuildLeadership";
+  guildId: GuildId;
+  newOwner: EthAddress;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedLeaveUnion = TxIntent & {
-  methodName: "leaveUnion";
-  unionId: UnionId;
+export type UnconfirmedDisbandGuild = TxIntent & {
+  methodName: "df__disbandGuild";
+  guildId: GuildId;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedKickMember = TxIntent & {
-  methodName: "kickMember";
-  unionId: UnionId;
+export type UnconfirmedSetGrant = TxIntent & {
+  methodName: "df__setGrant";
+  guildId: GuildId;
+  newGrant: GuildRole;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedSetMemberRole = TxIntent & {
+  methodName: "df__setMemberRole";
+  guildId: GuildId;
+  newRole: GuildRole;
   member: EthAddress;
 };
 
 /**
  * @hidden
  */
-export type UnconfirmedTransferLeaderRole = TxIntent & {
-  methodName: "transferLeaderRole";
-  unionId: UnionId;
-  newLeader: EthAddress;
-};
-
-/**
- * @hidden
- */
-export type UnconfirmedChangeUnionName = TxIntent & {
-  methodName: "changeUnionName";
-  unionId: UnionId;
-  newName: string;
-};
-
-/**
- * @hidden
- */
-export type UnconfirmedDisbandUnion = TxIntent & {
-  methodName: "disbandUnion";
-  unionId: UnionId;
-};
-
-/**
- * @hidden
- */
-export type UnconfirmedLevelUpUnion = TxIntent & {
-  methodName: "levelUpUnion";
-  unionId: UnionId;
+export type UnconfirmedKickMember = TxIntent & {
+  methodName: "df__kickMember";
+  guildId: GuildId;
+  member: EthAddress;
 };
 
 /**

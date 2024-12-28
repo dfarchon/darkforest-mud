@@ -1,6 +1,10 @@
 import { resourceToHex } from "@latticexyz/common";
 import GPTSystemAbi from "contracts/out/GPTTokensSystem.sol/GPTTokensSystem.abi.json";
+import ArtifactCreateSystemAbi from "contracts/out/ArtifactCreateSystem.sol/ArtifactCreateSystem.abi.json";
+import ArtifactSystemAbi from "contracts/out/ArtifactSystem.sol/ArtifactSystem.abi.json";
+import GuildSystemAbi from "contracts/out/GuildSystem.sol/GuildSystem.abi.json";
 import MoveSystemAbi from "contracts/out/MoveSystem.sol/MoveSystem.abi.json";
+import PinkBombSystemAbi from "contracts/out/PinkBombSystem.sol/PinkBombSystem.abi.json";
 import PlanetEmojiSystemAbi from "contracts/out/PlanetEmojiSystem.sol/PlanetEmojiSystem.abi.json";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 import PlanetUpgradeSystemAbi from "contracts/out/PlanetUpgradeSystem.sol/PlanetUpgradeSystem.abi.json";
@@ -82,6 +86,36 @@ export const GPT_SYSTEM_ID = resourceToHex({
 });
 
 export const GPT_SYSTEM_ABI: Abi = GPTSystemAbi;
+export const ARTIFACT_SYSTEM_ABI: Abi = ArtifactSystemAbi;
+
+export const ARTIFACT_CREATE_SYSTEM_ABI: Abi = ArtifactCreateSystemAbi;
+
+export const ARTIFACT_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "ArtifactSystem",
+});
+
+export const ARTIFACT_CREATE_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "ArtifactCreateSystem",
+});
+
+export const PINK_BOMB_SYSTEM_ABI: Abi = PinkBombSystemAbi;
+
+export const PINK_BOMB_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "atf.1",
+  name: "ProxySystem",
+});
+export const GUILD_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "GuildSystem",
+});
+
+export const GUILD_SYSTEM_ABI: Abi = GuildSystemAbi;
 
 export const get_ABI_from_FunctionName = (functionName: string) => {
   if (functionName === "move" || functionName === "legacyMove") {
@@ -122,6 +156,35 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     functionName === "sendGPTTokens"
   ) {
     return GPT_SYSTEM_ABI;
+  } else if (
+    functionName === "registerArtifact" ||
+    functionName === "chargeArtifact" ||
+    functionName === "shutdownArtifact" ||
+    functionName === "activateArtifact"
+  ) {
+    return ARTIFACT_SYSTEM_ABI;
+  } else if (
+    functionName === "prospectPlanet" ||
+    functionName === "findingArtifact" ||
+    functionName === "findArtifact"
+  ) {
+    return ARTIFACT_CREATE_SYSTEM_ABI;
+  } else if (functionName === "destroy") {
+    return PINK_BOMB_SYSTEM_ABI;
+  } else if (
+    functionName === "createGuild" ||
+    functionName === "inviteToGuild" ||
+    functionName === "acceptInvitation" ||
+    functionName === "applyToGuild" ||
+    functionName === "approveApplication" ||
+    functionName === "leaveGuild" ||
+    functionName === "transferGuildLeadership" ||
+    functionName === "disbandGuild" ||
+    functionName === "setGrant" ||
+    functionName === "setMemberRole" ||
+    functionName === "kickMember"
+  ) {
+    return GUILD_SYSTEM_ABI;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ABI;
@@ -167,6 +230,35 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     functionName === "sendGPTTokens"
   ) {
     return GPT_SYSTEM_ID;
+  } else if (
+    functionName === "registerArtifact" ||
+    functionName === "chargeArtifact" ||
+    functionName === "shutdownArtifact" ||
+    functionName === "activateArtifact"
+  ) {
+    return ARTIFACT_SYSTEM_ID;
+  } else if (
+    functionName === "prospectPlanet" ||
+    functionName === "findingArtifact" ||
+    functionName === "findArtifact"
+  ) {
+    return ARTIFACT_CREATE_SYSTEM_ID;
+  } else if (functionName === "destroy") {
+    return PINK_BOMB_SYSTEM_ID;
+  } else if (
+    functionName === "createGuild" ||
+    functionName === "inviteToGuild" ||
+    functionName === "acceptInvitation" ||
+    functionName === "applyToGuild" ||
+    functionName === "approveApplication" ||
+    functionName === "leaveGuild" ||
+    functionName === "transferGuildLeadership" ||
+    functionName === "disbandGuild" ||
+    functionName === "setGrant" ||
+    functionName === "setMemberRole" ||
+    functionName === "kickMember"
+  ) {
+    return GUILD_SYSTEM_ID;
   } else {
     // NOTE:  shouldn't reach here
     return MOVE_SYSTEM_ID;

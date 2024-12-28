@@ -1,3 +1,4 @@
+import { HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE } from "@df/constants";
 import { ModalName } from "@df/types";
 import React from "react";
 import styled from "styled-components";
@@ -8,7 +9,6 @@ import { ModalPane } from "../Views/ModalPane";
 import { BuyPlanetPane } from "./BuyPlanetPane";
 import { BuySpaceshipPane } from "./BuySpaceshipPane";
 import { DonationPane } from "./DonationPane";
-import { HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE } from "@df/constants";
 
 const TradeContent = styled.div`
   width: 500px;

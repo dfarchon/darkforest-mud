@@ -46,7 +46,7 @@ export function TwitterVerifyPane({
 
       // PUNK need to change later
       // const str = `Verifying my DF ARES v0.1  account (https://dfares.xyz/)🩷\n @darkforest_eth Community Round hosted by @DFArchon: ${tweetText}`;
-      const str = `A new chapter unfold here! 🦑 https://dfmud.xyz 🦑 \n Dark Forest MUD is community-driven development of @darkforest_eth game on @mud_dev engine. \n Follow @darkforest_mud to get latest udpates !`;
+      const str = `A new chapter unfold here! https://dfmud.xyz (🦑,🪐)\n\n Dark Forest MUD is community-driven development of @darkforest_eth game on @mud_dev engine. \n Follow @darkforest_mud to get latest udpates !`;
       // const str = `Verifying my DFAres v0.1 Round 3 account (https://dfares.xyz/)🩷\n @darkforest_eth community round hosted by @DFArchon \n ${tweetText}`;
       window.open(
         `https://twitter.com/intent/tweet?hashtags=darkforest&text=${encodeURI(str)}`,

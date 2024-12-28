@@ -141,11 +141,6 @@ export const GAS_PRICES_INTERVAL_MS = 60_000 as const;
  * {@link PlanetContextPane} is this wide, and all the subpanes of that modal also try to stay this
  * size as well.
  */
-
-/**
- * {@link UnionContextPane} is this wide, and all the subpanes of that modal also try to stay this
- * size as well.
- */
 export const RECOMMENDED_MODAL_WIDTH = "400px" as const;
 
 /**
@@ -189,7 +184,7 @@ export const MIN_HAT_TYPE = 1;
 export const MAX_HAT_TYPE = 10;
 
 // export const PICTURE_URL = 'http://localhost:8081';
-export const PICTURE_URL = "https://dfares.xyz";
+export const PICTURE_URL = "https://dfmud.xyz";
 
 export const MIN_MEME_TYPE = 1;
 export const MAX_MEME_TYPE = 10;
@@ -207,13 +202,13 @@ export const THEGRAPH_API_URL =
   "https://api.thegraph.com/subgraphs/name/darkforest-eth/dark-forest-v06-round-5";
 
 export const PLAYER_GUIDE =
-  "https://dfares.notion.site/Dark-Forest-MUD-v0-1-1-12aa4dc234338013b1b3cf6a55f1ab5e";
+  "https://dfares.notion.site/Dark-Forest-MUD-v0-1-2-165a4dc2343380a08ff9ddffd3608af4";
 
 export const HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE =
-  "https://dfares.notion.site/How-to-Transfer-ETH-from-L2-to-Redstone-Mainnet-93decb48f2f64cb5bc8a0972e288860f";
+  "https://dfares.notion.site/How-to-Transfer-ETH-from-L2-to-Redstone-Mainnet-165a4dc23433815bbecddf8b88202346";
 
 export const HOW_TO_ENABLE_POPUPS =
-  "https://dfares.notion.site/How-to-Enable-Popups-3a685911e08b4241b7fa370282e62937";
+  "https://dfares.notion.site/How-to-Enable-Popups-165a4dc2343381d4855df6cc3b90e9cf";
 
 export const WIN_CONDITION_AND_PRIZES =
-  "https://dfares.notion.site/1-1-Win-Conditions-Prizes-aa02cdcf02284981b433c2d365b11932";
+  "https://dfares.notion.site/1-1-Win-Conditions-Prizes-165a4dc234338105bc0ff1164ca83bbb";

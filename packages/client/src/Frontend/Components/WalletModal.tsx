@@ -49,6 +49,7 @@ export const WalletModal = ({
         const rawPlayer = getComponentValue(Player, playerKey);
         const isRegistered = !!rawPlayer;
         const hasFunds = burnerBalanceValue > 0n;
+
         setIsPlayerReady(isRegistered && hasFunds);
       }
     };

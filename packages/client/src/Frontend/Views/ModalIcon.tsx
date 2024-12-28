@@ -49,6 +49,8 @@ const icon = (modal: ModalName): React.ReactNode => {
     return <Icon type={IconType.DoubleArrows} />;
   } else if (modal === ModalName.AIChat) {
     return <span>AI</span>;
+  } else if (modal === ModalName.GuildContextPane) {
+    return <span>G</span>;
   }
   return <span>T</span>;
 };

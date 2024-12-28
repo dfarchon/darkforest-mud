@@ -43,6 +43,26 @@ export const PlanetLevelNames = {
   [PlanetLevel.EIGHT]: "Level 8",
   [PlanetLevel.NINE]: "Level 9",
 } as const;
+/**
+ * Abstract type representing a planet status.
+ */
+export type PlanetStatus = Abstract<number, "PlanetStatus">;
+
+/**
+ * Enumeration of the possible planet statuses.
+ */
+export const PlanetStatus = {
+  DEFAULT: 0 as PlanetStatus,
+  DESTROYED: 1 as PlanetStatus,
+} as const;
+
+/**
+ * Mapping from PlanetStatus to pretty-printed names.
+ */
+export const PlanetStatusNames = {
+  [PlanetStatus.DEFAULT]: "Default",
+  [PlanetStatus.DESTROYED]: "Destroyed",
+} as const;
 
 /**
  * Abstract type representing a planet type.
@@ -72,6 +92,32 @@ export const PlanetTypeNames = {
   [PlanetType.TRADING_POST]: "Spacetime Rip",
   [PlanetType.SILVER_BANK]: "Quasar",
 } as const;
+/**
+ * Abstract type representing a planet flag type.
+ */
+export type PlanetFlagType = Abstract<number, "PlanetFlagType">;
+
+/**
+ * Enumeration of the planet flag types.
+ */
+export const PlanetFlagType = {
+  EXPLORED: 0 as PlanetFlagType,
+  OFFENSIVE_ARTIFACT: 1 as PlanetFlagType,
+  DEFENSIVE_ARTIFACT: 2 as PlanetFlagType,
+  PRODUCTIVE_ARTIFACT: 3 as PlanetFlagType,
+  DESTROYED: 4 as PlanetFlagType,
+} as const;
+
+/**
+ * Mapping from PlanetFlagType to pretty-printed names.
+ */
+export const PlanetFlagTypeNames = {
+  [PlanetFlagType.EXPLORED]: "Explored",
+  [PlanetFlagType.OFFENSIVE_ARTIFACT]: "Offensive Artifact",
+  [PlanetFlagType.DEFENSIVE_ARTIFACT]: "Defensive Artifact",
+  [PlanetFlagType.PRODUCTIVE_ARTIFACT]: "Productive Artifact",
+  [PlanetFlagType.DESTROYED]: "Destroyed",
+} as const;
 
 /**
  * A list of five flags, indicating whether the planet has an attached comet
@@ -86,6 +132,41 @@ export type PlanetBonus = [
   boolean,
   boolean,
 ];
+
+/**
+ * Abstract type representing an effect type.
+ */
+export type EffectType = Abstract<number, "EffectType">;
+
+/**
+ * Enumeration of the effect types.
+ */
+export const EffectType = {
+  UNKNOWN: 0 as EffectType,
+  STAT: 1 as EffectType,
+  BEFORE_MOVE: 2 as EffectType,
+  AFTER_MOVE: 3 as EffectType,
+  BEFORE_ARRIVAL: 4 as EffectType,
+  AFTER_ARRIVAL: 5 as EffectType,
+} as const;
+
+/**
+ * Mapping from EffectType to pretty-printed names.
+ */
+export const EffectTypeNames = {
+  [EffectType.UNKNOWN]: "Unknown",
+  [EffectType.STAT]: "Stat",
+  [EffectType.BEFORE_MOVE]: "Before Move",
+  [EffectType.AFTER_MOVE]: "After Move",
+  [EffectType.BEFORE_ARRIVAL]: "Before Arrival",
+  [EffectType.AFTER_ARRIVAL]: "After Arrival",
+} as const;
+
+export type Effect = {
+  artifactIndex: number;
+  effectType: EffectType;
+  id: number;
+};
 
 export type Planet = {
   locationId: LocationId; //planetHash
@@ -144,9 +225,9 @@ export type Planet = {
   coordsRevealed: boolean;
   revealer?: EthAddress;
   // claimer?: EthAddress;
-  // burnOperator?: EthAddress; //only record burn/pink operator
-  // burnStartTimestamp?: number;
-  // pinkOperator?: EthAddress;
+  burnOperator?: EthAddress; //only record burn/pink operator
+  burnStartTimestamp?: number;
+  pinkOperator?: EthAddress;
   // kardashevOperator?: EthAddress;
   // kardashevTimestamp?: number;
 
@@ -162,6 +243,9 @@ export type Planet = {
   // invadeStartBlock?: number;
   universeZone: number;
   distSquare: number;
+
+  effects?: Effect[];
+  flags?: bigint;
 };
 
 /**

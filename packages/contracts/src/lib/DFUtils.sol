@@ -10,14 +10,23 @@ import { VerifySystem } from "../systems/VerifySystem.sol";
 import { Proof } from "../lib/SnarkProof.sol";
 import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "../lib/VerificationInput.sol";
 import { Planet } from "../lib/Planet.sol";
+import { Ticker, TickerData } from "../codegen/tables/Ticker.sol";
 import { PlanetStatus } from "../codegen/common.sol";
 import { Errors } from "../interfaces/errors.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 bytes14 constant DF_NAMESPACE = "df";
 
 bytes16 constant TICK_SYSMTEM_NAME = "TickSystem";
 bytes16 constant PLANET_READ_SYSTEM_NAME = "PlanetReadSystem";
 bytes16 constant VERIFY_SYSTEM_NAME = "VerifySystem";
+
+bytes16 constant MOVE_SYSTEM_NAME = "MoveSystem";
+bytes16 constant PLANET_UPGRADE_SYSTEM_NAME = "PlanetUpgradeSys";
+bytes16 constant ARTIFACT_CREATE_SYSTEM_NAME = "ArtifactCreateSy";
+bytes16 constant ARTIFACT_SYSTEM_NAME = "ArtifactSystem";
+bytes16 constant PLANET_WITHDRAW_SILVER_SYSTEM_NAME = "PlanetWithdrawSi";
+bytes16 constant PLANET_EMOJI_SYSTEM_NAME = "PlanetEmojiSyste";
 
 library DFUtils {
   /**
@@ -101,5 +110,33 @@ library DFUtils {
     if (planet.status != PlanetStatus.DEFAULT) {
       revert Errors.PlanetNotAvailable();
     }
+  }
+
+  /**
+   * Used to get the current tick number.
+   */
+  function getCurrentTick() internal view returns (uint256) {
+    TickerData memory ticker = Ticker.get();
+    if (ticker.paused) {
+      return ticker.tickNumber;
+    }
+    return ticker.tickNumber + uint64((block.timestamp - ticker.timestamp) * ticker.tickRate);
+  }
+
+  function getDFNamespace() internal pure returns (ResourceId) {
+    return WorldResourceIdLib.encodeNamespace(DF_NAMESPACE);
+  }
+
+  function getSystemResourceId(bytes16 name) internal pure returns (ResourceId) {
+    return WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DF_NAMESPACE, name: name });
+  }
+
+  function isValidSystemResourceId(ResourceId resourceId) internal pure returns (bool) {
+    return (ResourceId.unwrap(resourceId) == ResourceId.unwrap(getSystemResourceId(MOVE_SYSTEM_NAME)) ||
+      ResourceId.unwrap(resourceId) == ResourceId.unwrap(getSystemResourceId(PLANET_UPGRADE_SYSTEM_NAME)) ||
+      ResourceId.unwrap(resourceId) == ResourceId.unwrap(getSystemResourceId(ARTIFACT_CREATE_SYSTEM_NAME)) ||
+      ResourceId.unwrap(resourceId) == ResourceId.unwrap(getSystemResourceId(ARTIFACT_SYSTEM_NAME)) ||
+      ResourceId.unwrap(resourceId) == ResourceId.unwrap(getSystemResourceId(PLANET_WITHDRAW_SILVER_SYSTEM_NAME)) ||
+      ResourceId.unwrap(resourceId) == ResourceId.unwrap(getSystemResourceId(PLANET_EMOJI_SYSTEM_NAME)));
   }
 }

@@ -19,6 +19,7 @@ import { PlanetLevelConfig, PlanetTypeConfig } from "../src/codegen/index.sol";
 import { SnarkConfig, SnarkConfigData, Ticker } from "../src/codegen/index.sol";
 import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
+import { GuildConfig, GuildConfigData } from "../src/codegen/index.sol";
 import { AtfInstallModule } from "../src/codegen/index.sol";
 import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
 import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
@@ -62,6 +63,7 @@ contract PostDeploy is Script {
     Ticker.set(0, uint64(toml.readUint(".ticker.rate")), 0, true);
     InnerCircle.set(abi.decode(toml.parseRaw(".inner_circle"), (InnerCircleData)));
     UpgradeConfig.set(abi.decode(toml.parseRaw(".upgrade_config"), (UpgradeConfigData)));
+    GuildConfig.set(abi.decode(toml.parseRaw(".guild_config"), (GuildConfigData)));
     uint8[] memory indexes = abi.decode(toml.parseRaw(".artifact.indexes"), (uint8[]));
     for (uint256 i = 1; i <= uint8(type(ArtifactRarity).max); i++) {
       string memory key = string.concat(".artifact.", i.toString());
@@ -76,11 +78,12 @@ contract PostDeploy is Script {
     _installArtifacts(worldAddress);
 
     // set test planets
-    if (toml.readBool(".temp.b_skip_proof_check")) {
-      _setTestPlanets(abi.decode(toml.parseRaw(".test_planets_fake"), (TestPlanet[])));
-    } else {
-      // PUNK
-      // _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
+    if (toml.readBool(".test.set_planets")) {
+      if (toml.readBool(".temp.b_skip_proof_check")) {
+        _setTestPlanets(abi.decode(toml.parseRaw(".test_planets_fake"), (TestPlanet[])));
+      } else {
+        _setTestPlanets(abi.decode(toml.parseRaw(".test_planets"), (TestPlanet[])));
+      }
     }
 
     // register fallback delegation of df namespace
@@ -159,7 +162,6 @@ contract PostDeploy is Script {
       );
       Planet.set(
         planets[i].planetHash,
-        PlanetStatus.DEFAULT,
         planets[i].lastUpdateTick,
         planets[i].population,
         planets[i].silver,

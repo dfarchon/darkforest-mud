@@ -23,20 +23,6 @@ import type { GameGLManager } from "../WebGL/GameGLManager";
 const { white, gold } = engineConsts.colors;
 const { enemyA, mineA, shipA, supportA } = engineConsts.colors.voyage;
 
-function getIsSupportVoyage(voyage: QueuedArrival, toPlanet: Planet) {
-  return false;
-  // let supportMove = false;
-
-  // for (let i = 0; i < voyage.members.length; i++) {
-  //   if (toPlanet.owner === voyage.members[i]) {
-  //     supportMove = true;
-  //     break;
-  //   }
-  // }
-  // const result = supportMove && voyage.player !== toPlanet.owner;
-  // return result;
-}
-
 function getVoyageColor(
   fromPlanet: Planet,
   toPlanet: Planet,
@@ -103,7 +89,15 @@ export class VoyageRenderer implements VoyageRendererType {
       // can draw a ring around dest, but don't know source location
       const myMove = voyage.player === gameUIManager.getAccount();
       const shipMove = voyage.player === EMPTY_ADDRESS;
-      const supportMove = getIsSupportVoyage(voyage, toPlanet);
+      const supportMove = gameUIManager.inSameGuildAtTick(
+        voyage.player,
+        toPlanet.owner,
+        voyage.arrivalTick,
+      );
+
+      console.log("PUNK");
+      console.log("supportMove");
+      console.log(supportMove);
 
       const now = nowMs / 1000;
 
@@ -253,9 +247,12 @@ export class VoyageRenderer implements VoyageRendererType {
         const sender = gameUIManager.getPlayer(voyage.player);
 
         const toPlanet = gameUIManager.getPlanetWithId(voyage.toPlanet);
-        const isSupportVoyage = toPlanet
-          ? getIsSupportVoyage(voyage, toPlanet)
-          : false;
+
+        const isSupportVoyage = gameUIManager.inSameGuildAtTick(
+          voyage.player,
+          toPlanet.owner,
+          voyage.arrivalTick,
+        );
 
         this.drawVoyagePath(
           voyage.fromPlanet,
@@ -330,6 +327,5 @@ export class VoyageRenderer implements VoyageRendererType {
     );
   }
 
-  // eslint-disable-next-line
   flush() {}
 }

@@ -33,6 +33,9 @@ export default defineWorld({
       "APPLY_EFFECT",
       "REMOVE_EFFECT",
     ],
+    PlanetFlagType: ["EXPLORED", "OFFENSIVE_ARTIFACT", "DEFENSIVE_ARTIFACT", "PRODUCTIVE_ARTIFACT", "DESTROYED"],
+    GuildStatus: ["UNEXIST", "ACTIVE", "DISBANDED"],
+    GuildRole: ["NONE", "MEMBER", "OFFICER", "LEADER"],
     // ArtifactType: [
     //   "UNKNOWN",
     //   "WORMHOLE",
@@ -77,6 +80,7 @@ export default defineWorld({
         player: "uint32",
         artifact: "uint32",
         move: "uint64",
+        guild: "uint32",
       },
       key: [],
     },
@@ -116,7 +120,6 @@ export default defineWorld({
     },
     TempConfigSet: {
       schema: {
-        biomeCheck: "bool",
         skipProofCheck: "bool",
         playerLimit: "uint32",
         spawnPerlinMin: "uint8",
@@ -284,10 +287,9 @@ export default defineWorld({
       id: "bytes32",
       blockNumber: "uint64",
     },
-    ExploredPlanet: "bool",
     Planet: {
       id: "bytes32",
-      status: "PlanetStatus",
+      // status: "PlanetStatus", // planet status is determined by its flags
       lastUpdateTick: "uint64",
       population: "uint64",
       silver: "uint64",
@@ -312,6 +314,13 @@ export default defineWorld({
       silverCap: "uint64",
       silverGrowth: "uint32",
     },
+    PlanetFlags: {
+      schema: {
+        id: "bytes32",
+        flags: "uint256",
+      },
+      key: ["id"],
+    },
     PlanetEmoji: {
       schema: {
         id: "bytes32",
@@ -324,7 +333,7 @@ export default defineWorld({
     PlanetEffects: {
       id: "bytes32",
       num: "uint8",
-      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 effectId | uint8 type
+      effects: "uint248", // at most 10 effects, each effect is uint24 and is composed of uint8 origin | uint8 type | uint8 internalId
     },
     PendingMove: {
       schema: {
@@ -362,6 +371,7 @@ export default defineWorld({
     InnerCircle: {
       schema: {
         radius: "uint64",
+        radiusx1000: "uint64",
         speed: "uint64",
       },
       key: [],
@@ -370,6 +380,60 @@ export default defineWorld({
       schema: {
         player: "address",
         amount: "uint256",
+      },
+      key: ["player"],
+    },
+    GuildConfig: {
+      schema: {
+        createFee: "uint128",
+        maxMembers: "uint8",
+        cooldownTicks: "uint120",
+      },
+      key: [],
+    },
+    Guild: {
+      schema: {
+        id: "uint8",
+        status: "GuildStatus",
+        rank: "uint8",
+        number: "uint8",
+        registry: "uint16",
+        owner: "uint24", // memberId
+        silver: "uint256",
+      },
+      key: ["id"],
+    },
+    GuildName: {
+      schema: {
+        id: "uint8",
+        name: "string",
+      },
+      key: ["id"],
+    },
+    GuildMember: {
+      schema: {
+        memberId: "uint24",
+        role: "GuildRole",
+        grant: "GuildRole",
+        joinedAt: "uint64",
+        leftAt: "uint64",
+        addr: "address",
+      },
+      key: ["memberId"],
+    },
+    GuildHistory: {
+      schema: {
+        player: "address",
+        curMemberId: "uint24",
+        memberIds: "uint24[]",
+      },
+      key: ["player"],
+    },
+    GuildCandidate: {
+      schema: {
+        player: "address",
+        invitations: "uint8[]",
+        applications: "uint8[]",
       },
       key: ["player"],
     },
@@ -398,7 +462,7 @@ export default defineWorld({
     //     cooldown: "uint32",
     //     durable: "bool",
     //     reusable: "bool",
-    //     reqLevel: "uint8",
+    //     reqLevel: "uint16", // uint8 upbound | uint8 lowerbound, lowerbound <= planetLevel < upbound
     //     reqPopulation: "uint64",
     //     reqSilver: "uint64",
     //   },

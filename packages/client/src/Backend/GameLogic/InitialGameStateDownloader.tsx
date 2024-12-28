@@ -35,6 +35,7 @@ export interface InitialGameState {
   // allKardashevCoords: KardashevCoords[];
   pendingMoves: QueuedArrival[];
   touchedAndLocatedPlanets: Map<LocationId, Planet>;
+  artifacts: Map<ArtifactId, Artifact>;
   // artifactsOnVoyages: Artifact[];
   // myArtifacts: Artifact[];
   // heldArtifacts: Artifact[][];
@@ -121,6 +122,7 @@ export class InitialGameStateDownloader {
 
     const pendingMovesLoadingBar = this.makeProgressListener("Pending Moves");
     const planetsLoadingBar = this.makeProgressListener("Planets");
+    const artifactsLoadingBar = this.makeProgressListener("Artifacts");
     // const artifactsOnPlanetsLoadingBar = this.makeProgressListener(
     //   "Artifacts On Planets",
     // );
@@ -260,12 +262,18 @@ export class InitialGameStateDownloader {
       arrivals.set(arrival.eventId, arrival);
     }
 
-    const artifactIdsOnVoyages: ArtifactId[] = [];
-    for (const arrival of pendingMoves) {
-      if (arrival.artifactId) {
-        artifactIdsOnVoyages.push(arrival.artifactId);
-      }
-    }
+    const artifactIds = await contractsAPI.getTouchedArtifactIds();
+    const artifacts = await contractsAPI.bulkGetArtifacts(
+      artifactIds,
+      artifactsLoadingBar,
+    );
+
+    // const artifactIdsOnVoyages: ArtifactId[] = [];
+    // for (const arrival of pendingMoves) {
+    //   if (arrival.artifactId) {
+    //     artifactIdsOnVoyages.push(arrival.artifactId);
+    //   }
+    // }
 
     // const artifactsOnVoyages = await contractsAPI.bulkGetArtifacts(
     //   artifactIdsOnVoyages,
@@ -296,6 +304,7 @@ export class InitialGameStateDownloader {
       // allKardashevCoords,
       pendingMoves,
       touchedAndLocatedPlanets,
+      artifacts,
       // artifactsOnVoyages,
       // myArtifacts: await myArtifacts,
       // heldArtifacts: await heldArtifacts,

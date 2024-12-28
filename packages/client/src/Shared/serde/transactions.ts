@@ -1,10 +1,10 @@
 import type {
   Transaction,
   TxIntent,
-  UnconfirmedAcceptApplication,
-  UnconfirmedAcceptInvite,
+  UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
-  UnconfirmedAddMemberByAdmin,
+  UnconfirmedApplyToGuild,
+  UnconfirmedApproveApplication,
   UnconfirmedBlue,
   UnconfirmedBurn,
   UnconfirmedBuyArtifact,
@@ -12,38 +12,38 @@ import type {
   UnconfirmedBuyHat,
   UnconfirmedBuyPlanet,
   UnconfirmedBuySpaceship,
-  UnconfirmedCancelApplication,
-  UnconfirmedCancelInvite,
   UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
-  UnconfirmedChangeUnionName,
+  UnconfirmedChargeArtifact,
   UnconfirmedClaim,
-  UnconfirmedCreateUnion,
+  UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
-  UnconfirmedDisbandUnion,
+  UnconfirmedDisbandGuild,
   UnconfirmedDonate,
   UnconfirmedFindArtifact,
   UnconfirmedGetShips,
   UnconfirmedInit,
   UnconfirmedInvadePlanet,
-  UnconfirmedInviteMember,
+  UnconfirmedInviteToGuild,
   UnconfirmedKardashev,
   UnconfirmedKickMember,
-  UnconfirmedLeaveUnion,
-  UnconfirmedLevelUpUnion,
+  UnconfirmedLeaveGuild,
   UnconfirmedMove,
   UnconfirmedPink,
   UnconfirmedPlanetTransfer,
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
-  UnconfirmedRejectApplication,
   UnconfirmedReveal,
   UnconfirmedSendApplication,
   UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
   UnconfirmedSpendGPTTokens,
   UnconfirmedTransferLeaderRole,
+  UnconfirmedSetGrant,
+  UnconfirmedSetMemberRole,
+  UnconfirmedShutdownArtifact,
+  UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedUseKey,
   UnconfirmedWithdrawArtifact,
@@ -136,7 +136,19 @@ export function isUnconfirmedProspectPlanet(
 export function isUnconfirmedActivateArtifact(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedActivateArtifact {
-  return txIntent.methodName === "activateArtifact";
+  return txIntent.methodName === "df__activateArtifact";
+}
+
+export function isUnconfirmedShutdownArtifact(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedShutdownArtifact {
+  return txIntent.methodName === "df__shutdownArtifact";
+}
+
+export function isUnconfirmedChargeArtifact(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedChargeArtifact {
+  return txIntent.methodName === "df__chargeArtifact";
 }
 
 export function isUnconfirmedDeactivateArtifact(
@@ -235,94 +247,70 @@ export function isUnconfirmedUseKey(
   return txIntent.methodName === "useKey";
 }
 
-export function isUnconfirmedAddMemberByAdmin(
+export function isUnconfirmedCreateGuild(
   txIntent: TxIntent,
-): txIntent is UnconfirmedAddMemberByAdmin {
-  return txIntent.methodName === "addMemberByAdmin";
+): txIntent is UnconfirmedCreateGuild {
+  return txIntent.methodName === "df__createGuild";
 }
 
-export function isUnconfirmedCreateUnion(
+export function isUnconfirmedInviteToGuild(
   txIntent: TxIntent,
-): txIntent is UnconfirmedCreateUnion {
-  return txIntent.methodName === "createUnion";
+): txIntent is UnconfirmedInviteToGuild {
+  return txIntent.methodName === "df__inviteToGuild";
 }
 
-export function isUnconfirmedInviteMember(
+export function isUnconfirmedAcceptInvitation(
   txIntent: TxIntent,
-): txIntent is UnconfirmedInviteMember {
-  return txIntent.methodName === "inviteMember";
+): txIntent is UnconfirmedAcceptInvitation {
+  return txIntent.methodName === "df__acceptInvitation";
 }
 
-export function isUnconfirmedCancelInvite(
+export function isUnconfirmedApplyToGuild(
   txIntent: TxIntent,
-): txIntent is UnconfirmedCancelInvite {
-  return txIntent.methodName === "cancelInvite";
+): txIntent is UnconfirmedApplyToGuild {
+  return txIntent.methodName === "df__applyToGuild";
 }
 
-export function isUnconfirmedAcceptInvite(
+export function isUnconfirmedApproveApplication(
   txIntent: TxIntent,
-): txIntent is UnconfirmedAcceptInvite {
-  return txIntent.methodName === "acceptInvite";
+): txIntent is UnconfirmedApproveApplication {
+  return txIntent.methodName === "df__approveApplication";
 }
 
-export function isUnconfirmedSendApplication(
+export function isUnconfirmedLeaveGuild(
   txIntent: TxIntent,
-): txIntent is UnconfirmedSendApplication {
-  return txIntent.methodName === "sendApplication";
+): txIntent is UnconfirmedLeaveGuild {
+  return txIntent.methodName === "df__leaveGuild";
 }
 
-export function isUnconfirmedCancelApplication(
+export function isUnconfirmedTransferGuildLeadership(
   txIntent: TxIntent,
-): txIntent is UnconfirmedCancelApplication {
-  return txIntent.methodName === "cancelApplication";
+): txIntent is UnconfirmedTransferGuildLeadership {
+  return txIntent.methodName === "df__transferGuildLeadership";
 }
 
-export function isUnconfirmedRejectApplication(
+export function isUnconfirmedDisbandGuild(
   txIntent: TxIntent,
-): txIntent is UnconfirmedCancelApplication {
-  return txIntent.methodName === "rejectApplication";
+): txIntent is UnconfirmedDisbandGuild {
+  return txIntent.methodName === "df__disbandGuild";
 }
 
-export function isUnconfirmedAcceptApplication(
+export function isUnconfirmedSetGrant(
   txIntent: TxIntent,
-): txIntent is UnconfirmedAcceptApplication {
-  return txIntent.methodName === "acceptApplication";
+): txIntent is UnconfirmedSetGrant {
+  return txIntent.methodName === "df__setGrant";
 }
 
-export function isUnconfirmedLeaveUnion(
+export function isUnconfirmedSetMemberRole(
   txIntent: TxIntent,
-): txIntent is UnconfirmedLeaveUnion {
-  return txIntent.methodName === "leaveUnion";
+): txIntent is UnconfirmedSetMemberRole {
+  return txIntent.methodName === "df__setMemberRole";
 }
 
 export function isUnconfirmedKickMember(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedKickMember {
-  return txIntent.methodName === "kickMember";
-}
-
-export function isUnconfirmedTransferLeaderRole(
-  txIntent: TxIntent,
-): txIntent is UnconfirmedTransferLeaderRole {
-  return txIntent.methodName === "transferLeaderRole";
-}
-
-export function isUnconfirmedChangeUnionName(
-  txIntent: TxIntent,
-): txIntent is UnconfirmedChangeUnionName {
-  return txIntent.methodName === "changeUnionName";
-}
-
-export function isUnconfirmedDisbandUnion(
-  txIntent: TxIntent,
-): txIntent is UnconfirmedDisbandUnion {
-  return txIntent.methodName === "disbandUnion";
-}
-
-export function isUnconfirmedLevelUpUnion(
-  txIntent: TxIntent,
-): txIntent is UnconfirmedLevelUpUnion {
-  return txIntent.methodName === "levelUpUnion";
+  return txIntent.methodName === "df__kickMember";
 }
 
 export function isUnconfirmedBuyGPTTokens(
@@ -427,6 +415,18 @@ export function isUnconfirmedActivateArtifactTx(
   return isUnconfirmedActivateArtifact(tx.intent);
 }
 
+export function isUnconfirmedShutdownArtifactTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedShutdownArtifact> {
+  return isUnconfirmedShutdownArtifact(tx.intent);
+}
+
+export function isUnconfirmedChargeArtifactTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedChargeArtifact> {
+  return isUnconfirmedChargeArtifact(tx.intent);
+}
+
 export function isUnconfirmedDeactivateArtifactTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedDeactivateArtifact> {
@@ -523,94 +523,70 @@ export function isUnconfirmedDonateTx(
   return isUnconfirmedDonate(tx.intent);
 }
 
-export function isUnconfirmedAddMemberByAdminTx(
+export function isUnconfirmedCreateGuildTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedAddMemberByAdmin> {
-  return isUnconfirmedAddMemberByAdmin(tx.intent);
+): tx is Transaction<UnconfirmedCreateGuild> {
+  return isUnconfirmedCreateGuild(tx.intent);
 }
 
-export function isUnconfirmedCreateUnionTx(
+export function isUnconfirmedInviteToGuildTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedCreateUnion> {
-  return isUnconfirmedCreateUnion(tx.intent);
+): tx is Transaction<UnconfirmedInviteToGuild> {
+  return isUnconfirmedInviteToGuild(tx.intent);
 }
 
-export function isUnconfirmedInviteMemberTx(
+export function isUnconfirmedAcceptInvitationTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedInviteMember> {
-  return isUnconfirmedInviteMember(tx.intent);
+): tx is Transaction<UnconfirmedAcceptInvitation> {
+  return isUnconfirmedAcceptInvitation(tx.intent);
 }
 
-export function isUnconfirmedCancelInviteTx(
+export function isUnconfirmedApplyToGuildTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedCancelInvite> {
-  return isUnconfirmedCancelInvite(tx.intent);
+): tx is Transaction<UnconfirmedApplyToGuild> {
+  return isUnconfirmedApplyToGuild(tx.intent);
 }
 
-export function isUnconfirmedAcceptInviteTx(
+export function isUnconfirmedApproveApplicationTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedAcceptInvite> {
-  return isUnconfirmedAcceptInvite(tx.intent);
+): tx is Transaction<UnconfirmedApproveApplication> {
+  return isUnconfirmedApproveApplication(tx.intent);
 }
 
-export function isUnconfirmedSendApplicationTx(
+export function isUnconfirmedLeaveGuildTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedSendApplication> {
-  return isUnconfirmedSendApplication(tx.intent);
+): tx is Transaction<UnconfirmedLeaveGuild> {
+  return isUnconfirmedLeaveGuild(tx.intent);
 }
 
-export function isUnconfirmedCancelApplicationTx(
+export function isUnconfirmedTransferGuildLeadershipTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedCancelApplication> {
-  return isUnconfirmedCancelApplication(tx.intent);
+): tx is Transaction<UnconfirmedTransferGuildLeadership> {
+  return isUnconfirmedTransferGuildLeadership(tx.intent);
 }
 
-export function isUnconfirmedRejectApplicationTx(
+export function isUnconfirmedDisbandGuildTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedRejectApplication> {
-  return isUnconfirmedRejectApplication(tx.intent);
+): tx is Transaction<UnconfirmedDisbandGuild> {
+  return isUnconfirmedDisbandGuild(tx.intent);
 }
 
-export function isUnconfirmedAcceptApplicationTx(
+export function isUnconfirmedSetGrantTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedAcceptApplication> {
-  return isUnconfirmedAcceptApplication(tx.intent);
+): tx is Transaction<UnconfirmedSetGrant> {
+  return isUnconfirmedSetGrant(tx.intent);
 }
 
-export function isUnconfirmedLeaveUnionTx(
+export function isUnconfirmedSetMemberRoleTx(
   tx: Transaction,
-): tx is Transaction<UnconfirmedLeaveUnion> {
-  return isUnconfirmedLeaveUnion(tx.intent);
+): tx is Transaction<UnconfirmedSetMemberRole> {
+  return isUnconfirmedSetMemberRole(tx.intent);
 }
 
 export function isUnconfirmedKickMemberTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedKickMember> {
   return isUnconfirmedKickMember(tx.intent);
-}
-
-export function isUnconfirmedTransferLeaderRoleTx(
-  tx: Transaction,
-): tx is Transaction<UnconfirmedTransferLeaderRole> {
-  return isUnconfirmedTransferLeaderRole(tx.intent);
-}
-
-export function isUnconfirmedChangeUnionNameTx(
-  tx: Transaction,
-): tx is Transaction<UnconfirmedChangeUnionName> {
-  return isUnconfirmedChangeUnionName(tx.intent);
-}
-
-export function isUnconfirmedDisbandUnionTx(
-  tx: Transaction,
-): tx is Transaction<UnconfirmedDisbandUnion> {
-  return isUnconfirmedDisbandUnion(tx.intent);
-}
-
-export function isUnconfirmedLevelUpUnionTx(
-  tx: Transaction,
-): tx is Transaction<UnconfirmedLevelUpUnion> {
-  return isUnconfirmedLevelUpUnion(tx.intent);
 }
 
 export function isUnconfirmedBuyGPTTokensTx(

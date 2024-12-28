@@ -137,6 +137,9 @@ importers:
       '@spectrum-web-components/theme':
         specifier: 0.47.1
         version: 0.47.1
+      '@types/lodash-es':
+        specifier: 4.17.12
+        version: 4.17.12
       '@wagmi/core':
         specifier: 2.13.8
         version: 2.13.8(@tanstack/query-core@5.56.2)(@types/react@18.3.8)(react@18.3.1)(typescript@5.6.3)(viem@2.21.22(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))
@@ -194,6 +197,9 @@ importers:
       lit:
         specifier: 2.1.2
         version: 2.1.2
+      lodash-es:
+        specifier: 4.17.21
+        version: 4.17.21
       mnemonist:
         specifier: 0.39.8
         version: 0.39.8
@@ -275,7 +281,7 @@ importers:
         version: 8.4.41
       prettier-plugin-tailwindcss:
         specifier: 0.6.6
-        version: 0.6.6(prettier@3.3.3)
+        version: 0.6.6(prettier@3.2.5)
       prismjs:
         specifier: 1.29.0
         version: 1.29.0
@@ -4298,6 +4304,12 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+
+  '@types/lodash-es@4.17.12':
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
+
+  '@types/lodash@4.17.13':
+    resolution: {integrity: sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==}
 
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
@@ -16952,6 +16964,12 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
+  '@types/lodash-es@4.17.12':
+    dependencies:
+      '@types/lodash': 4.17.13
+
+  '@types/lodash@4.17.13': {}
+
   '@types/ms@0.7.34': {}
 
   '@types/node-fetch@2.6.12':
@@ -23241,9 +23259,9 @@ snapshots:
       semver: 7.6.3
       solidity-comments-extractor: 0.0.8
 
-  prettier-plugin-tailwindcss@0.6.6(prettier@3.3.3):
+  prettier-plugin-tailwindcss@0.6.6(prettier@3.2.5):
     dependencies:
-      prettier: 3.3.3
+      prettier: 3.2.5
 
   prettier@2.8.8:
     optional: true

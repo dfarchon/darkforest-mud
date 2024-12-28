@@ -81,6 +81,5 @@ export class LinkRenderer implements LinkRendererType {
     );
   }
 
-  // eslint-disable-next-line
   flush() {}
 }

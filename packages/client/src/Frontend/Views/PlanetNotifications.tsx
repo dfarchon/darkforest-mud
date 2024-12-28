@@ -1,3 +1,4 @@
+import type { GameManager } from "@backend/GameLogic/GameManager";
 import { isLocatable } from "@df/gamelogic";
 import type { EthAddress, Planet } from "@df/types";
 import React from "react";
@@ -26,13 +27,17 @@ const StyledPlanetNotifications = styled.div`
 export function getNotifsForPlanet(
   planet: Planet | undefined,
   account: EthAddress | undefined,
+  gameManager: GameManager,
 ): PlanetNotifType[] {
   const notifs: PlanetNotifType[] = [];
   if (!planet) {
     return notifs;
   }
 
-  if (planet?.owner === account && account !== undefined) {
+  if (
+    (planet?.owner === account && account !== undefined) ||
+    gameManager.checkDelegateCondition(planet?.owner, account)
+  ) {
     if (GameObjects.planetCanUpgrade(planet)) {
       notifs.push(PlanetNotifType.PlanetCanUpgrade);
     }

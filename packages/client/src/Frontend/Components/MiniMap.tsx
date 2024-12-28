@@ -225,8 +225,7 @@ function getPinkZones(options: {
   scaleFactor: number;
   radius: number;
 }): Zone[] {
-  return [];
-  // return Array.from(df.getPinkZones()).map((zone) => mapZone(zone, options));
+  return Array.from(df.getPinkZones()).map((zone) => mapZone(zone, options));
 }
 
 function updateSpawnAreas({

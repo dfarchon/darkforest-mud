@@ -2,7 +2,7 @@ import { type Hex, numberToHex, padHex, parseEther, stringToHex } from "viem";
 
 export const MINIMUM_BALANCE = parseEther("0.000006");
 export const LOW_BALANCE_THRESHOLD = parseEther("0.00001");
-export const RECOMMENDED_BALANCE = parseEther("0.005");
+export const RECOMMENDED_BALANCE = parseEther("0.003");
 export const zeroAddress = padHex(numberToHex(0, { size: 4 }), {
   size: 20,
   dir: "right",

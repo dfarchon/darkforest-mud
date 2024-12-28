@@ -6,6 +6,7 @@ import type { Hook } from "../../_types/global/GlobalTypes";
 import { BorderlessPane, EmSpacer } from "../Components/CoreUI";
 import { DFZIndex } from "../Utils/constants";
 import {
+  TOGGLE_GUILD_PANE,
   TOGGLE_HELP_PANE,
   TOGGLE_PLUGINS_PANE,
   TOGGLE_SETTINGS_PANE,
@@ -28,6 +29,7 @@ export function SidebarPane({
   yourArtifactsHook,
   planetdexHook,
   transactionLogHook,
+  guildHook,
 }: {
   aiChatHook: Hook<boolean>;
   walletHook: Hook<boolean>;
@@ -38,6 +40,7 @@ export function SidebarPane({
   yourArtifactsHook: Hook<boolean>;
   planetdexHook: Hook<boolean>;
   transactionLogHook: Hook<boolean>;
+  guildHook: Hook<boolean>;
 }) {
   const [sidebarHovered, setSidebarHovered] = useState<boolean>(false);
 
@@ -135,6 +138,16 @@ export function SidebarPane({
           size="stretch"
           shortcutKey={TOGGLE_TRANSACTIONS_PANE}
           shortcutText={sidebarHovered ? TOGGLE_TRANSACTIONS_PANE : undefined}
+        />
+
+        <EmSpacer height={0.5} />
+        <ModalToggleButton
+          modal={ModalName.GuildContextPane}
+          hook={guildHook}
+          text={sidebarHovered ? "Guild" : undefined}
+          size="stretch"
+          shortcutKey={TOGGLE_GUILD_PANE}
+          shortcutText={sidebarHovered ? TOGGLE_GUILD_PANE : undefined}
         />
       </BorderlessPane>
     </WindowTogglesPaneContainer>

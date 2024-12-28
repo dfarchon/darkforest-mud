@@ -35,6 +35,10 @@ import {
   webSocket,
 } from "viem";
 
+import {
+  syncFilters as extraSyncFilters,
+  tables as extraTables,
+} from "./extraTables";
 import { getNetworkConfig } from "./getNetworkConfig";
 import { world } from "./world";
 
@@ -79,6 +83,7 @@ export async function setupNetwork() {
       publicClient,
       indexerUrl: networkConfig.indexerUrl,
       startBlock: BigInt(networkConfig.initialBlockNumber),
+      tables: extraTables,
     });
 
   // const {

@@ -98,6 +98,8 @@ contract TickSystem is System, Errors {
       return;
     }
     uint256 shrinkage = innerCircle.speed * tickCount;
-    InnerCircle.setRadius(shrinkage > innerCircle.radius ? 0 : uint64(innerCircle.radius - shrinkage));
+    innerCircle.radiusx1000 = shrinkage > innerCircle.radiusx1000 ? 0 : uint64(innerCircle.radiusx1000 - shrinkage);
+    innerCircle.radius = innerCircle.radiusx1000 / 1000;
+    InnerCircle.set(innerCircle);
   }
 }

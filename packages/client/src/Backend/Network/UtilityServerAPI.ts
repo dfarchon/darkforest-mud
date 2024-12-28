@@ -134,7 +134,6 @@ export async function callRegisterAndWaitForConfirmation(
     return { errorMessage: response.error, canRetry: false };
   }
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const statusResponse = await whitelistStatus(address);
     if (!statusResponse) {

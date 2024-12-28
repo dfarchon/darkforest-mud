@@ -4,6 +4,7 @@ import { monomitter } from "@df/events";
 import { hasOwner, isActivated, isLocatable } from "@df/gamelogic";
 import { TxCollection } from "@df/network";
 import {
+  artifactIdToDecStr,
   isUnconfirmedActivateArtifact,
   isUnconfirmedActivateArtifactTx,
   isUnconfirmedBlue,
@@ -17,6 +18,8 @@ import {
   isUnconfirmedCapturePlanetTx,
   isUnconfirmedChangeArtifactImageType,
   isUnconfirmedChangeArtifactImageTypeTx,
+  isUnconfirmedChargeArtifact,
+  isUnconfirmedChargeArtifactTx,
   isUnconfirmedClaim,
   isUnconfirmedClaimTx,
   isUnconfirmedDeactivateArtifact,
@@ -39,6 +42,8 @@ import {
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedReveal,
   isUnconfirmedRevealTx,
+  isUnconfirmedShutdownArtifact,
+  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedTransfer,
   isUnconfirmedTransferTx,
   isUnconfirmedUpgrade,
@@ -47,17 +52,21 @@ import {
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilver,
   isUnconfirmedWithdrawSilverTx,
+  locationIdFromHexStr,
+  locationIdToHexStr,
 } from "@df/serde";
 import type {
   Abstract,
   ArrivalWithTimer,
   Artifact,
   ArtifactId,
+  BurnedLocation,
   Chunk,
   EthAddress,
   Link,
   LocatablePlanet,
   LocationId,
+  PinkZone,
   Planet,
   QueuedArrival,
   Radii,
@@ -70,7 +79,9 @@ import type {
 } from "@df/types";
 import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
-import { ArtifactType, PlanetType, SpaceType } from "@df/types";
+import { ArtifactStatus, ArtifactType, PlanetType, SpaceType } from "@df/types";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import autoBind from "auto-bind";
 import { ethers } from "ethers";
@@ -86,6 +97,8 @@ import {
 } from "../../Frontend/Utils/EmitterUtils";
 import type { PlanetDiff } from "./ArrivalUtils";
 import { arrive, updatePlanetToTick } from "./ArrivalUtils";
+import { updateArtifactStatus } from "./ArtifactUtils";
+import { GuildUtils } from "./GuildUtils";
 import { LayeredMap } from "./LayeredMap";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
@@ -192,6 +205,7 @@ export class GameObjects {
   // private readonly claimedLocations: Map<LocationId, ClaimedLocation>;
   // private readonly burnedLocations: Map<LocationId, BurnedLocation>;
   // private readonly kardashevLocations: Map<LocationId, BurnedLocation>;
+  private readonly pinkZones: Map<ArtifactId, PinkZone>;
 
   /**
    * Some of the game's parameters are downloaded from the blockchain. This allows the client to be
@@ -239,7 +253,8 @@ export class GameObjects {
 
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
-
+  private components: ClientComponents;
+  private guildUtils: GuildUtils;
   constructor(
     address: EthAddress | undefined,
     touchedPlanets: Map<LocationId, Planet>,
@@ -266,13 +281,14 @@ export class GameObjects {
     // this.claimedLocations = claimedLocations;
     // this.burnedLocations = burnedLocations;
     // this.kardashevLocations = kardashevLocations;
+    this.pinkZones = new Map();
     this.artifacts = artifacts;
     this.myArtifacts = new Map();
     this.contractConstants = contractConstants;
     this.coordsToLocation = new Map();
     this.planetLocationMap = new Map();
-    const planetArrivalIds = new Map();
-    const arrivals = new Map();
+    this.planetArrivalIds = new Map();
+    this.arrivals = new Map();
     this.transactions = new TxCollection();
     this.links = new Map();
     this.layeredMap = new LayeredMap(worldRadius);
@@ -281,7 +297,9 @@ export class GameObjects {
       contractConstants: contractConstants,
     });
     this.tickerUtils = new TickerUtils({ components });
+    this.components = components;
 
+    this.guildUtils = new GuildUtils({ components });
     this.planetUpdated$ = monomitter();
     this.artifactUpdated$ = monomitter();
     this.myArtifactsUpdated$ = monomitter();
@@ -320,13 +338,13 @@ export class GameObjects {
           arrivalsForPlanet,
         );
 
-        planetArrivalIds.set(
+        this.planetArrivalIds.set(
           planetId,
           arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
         );
         for (const arrivalWithTimer of arrivalsWithTimers) {
           const arrivalId = arrivalWithTimer.arrivalData.eventId;
-          arrivals.set(arrivalId, arrivalWithTimer);
+          this.arrivals.set(arrivalId, arrivalWithTimer);
         }
         const planetLocation = this.planetLocationMap.get(planetId);
         if (planet && planetLocation) {
@@ -338,10 +356,6 @@ export class GameObjects {
         this.updateScore(planetId as LocationId);
       }
     });
-
-    this.arrivals = arrivals;
-
-    this.planetArrivalIds = planetArrivalIds;
 
     // for (const [_locId, claimedLoc] of claimedLocations) {
     //   this.updatePlanet(claimedLoc.hash, (p) => {
@@ -384,6 +398,14 @@ export class GameObjects {
   }
 
   public getArtifactById(artifactId?: ArtifactId): Artifact | undefined {
+    if (artifactId) {
+      const artifact = this.artifacts.get(artifactId);
+      if (artifact) {
+        const curTick = this.tickerUtils.getCurrentTick();
+        updateArtifactStatus(artifact, curTick);
+      }
+      return artifact;
+    }
     return artifactId ? this.artifacts.get(artifactId) : undefined;
   }
 
@@ -469,7 +491,7 @@ export class GameObjects {
     const localArtifact = this.artifacts.get(artifact.id);
     if (localArtifact) {
       artifact.transactions = localArtifact.transactions;
-      artifact.onPlanetId = localArtifact.onPlanetId;
+      // artifact.onPlanetId = localArtifact.onPlanetId;
     }
 
     this.setArtifact(artifact);
@@ -846,6 +868,28 @@ export class GameObjects {
         artifact.transactions?.addTransaction(tx);
         this.setArtifact(artifact);
       }
+    } else if (isUnconfirmedChargeArtifactTx(tx)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.addTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.addTransaction(tx);
+        this.setArtifact(artifact);
+      }
+    } else if (isUnconfirmedShutdownArtifactTx(tx)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.addTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.addTransaction(tx);
+        this.setArtifact(artifact);
+      }
     } else if (isUnconfirmedActivateArtifactTx(tx)) {
       const planet = this.getPlanetWithId(tx.intent.locationId);
       const artifact = this.getArtifactById(tx.intent.artifactId);
@@ -1035,6 +1079,28 @@ export class GameObjects {
         planet.transactions?.removeTransaction(tx);
         this.setPlanet(planet);
       }
+    } else if (isUnconfirmedChargeArtifact(tx.intent)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.removeTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.removeTransaction(tx);
+        this.setArtifact(artifact);
+      }
+    } else if (isUnconfirmedShutdownArtifact(tx.intent)) {
+      const planet = this.getPlanetWithId(tx.intent.locationId);
+      const artifact = this.getArtifactById(tx.intent.artifactId);
+      if (planet) {
+        planet.transactions?.removeTransaction(tx);
+        this.setPlanet(planet);
+      }
+      if (artifact) {
+        artifact.transactions?.removeTransaction(tx);
+        this.setArtifact(artifact);
+      }
     } else if (isUnconfirmedActivateArtifact(tx.intent)) {
       const planet = this.getPlanetWithId(tx.intent.locationId);
       const artifact = this.getArtifactById(tx.intent.artifactId);
@@ -1160,6 +1226,14 @@ export class GameObjects {
   //   this.burnedLocations.set(burnedLocation.hash, burnedLocation);
   // }
 
+  public getPinkZones(): Map<ArtifactId, PinkZone> {
+    return this.pinkZones;
+  }
+
+  public setPinkZone(pinkZone: PinkZone) {
+    this.pinkZones.set(pinkZone.artifactId, pinkZone);
+  }
+
   // public getKardashevLocations(): Map<LocationId, KardashevLocation> {
   //   return this.kardashevLocations;
   // }
@@ -1260,12 +1334,22 @@ export class GameObjects {
       artifact.artifactType === ArtifactType.Wormhole &&
       artifact.onPlanetId
     ) {
-      if (artifact.linkTo && isActivated(artifact)) {
-        this.links.set(artifact.id, {
-          from: artifact.onPlanetId,
-          to: artifact.linkTo,
-          artifactId: artifact.id,
-        });
+      if (artifact.status === ArtifactStatus.Active) {
+        const { Wormhole } = this.components;
+        const planetEntity = encodeEntity(
+          { from: "bytes32" },
+          {
+            from: locationIdToHexStr(artifact.onPlanetId) as `0x${string}`,
+          },
+        );
+        const wormholeRec = getComponentValue(Wormhole, planetEntity);
+        if (wormholeRec) {
+          this.links.set(artifact.id, {
+            from: artifact.onPlanetId,
+            to: locationIdFromHexStr(wormholeRec.to.toString()),
+            artifactId: artifact.id,
+          });
+        }
       } else {
         this.links.delete(artifact.id);
       }
@@ -1295,6 +1379,36 @@ export class GameObjects {
         });
       } else {
         this.links.delete(artifact.id);
+      }
+    }
+
+    if (artifact.artifactType === ArtifactType.Bomb && artifact.onPlanetId) {
+      if (isActivated(artifact)) {
+        const { PinkBomb } = this.components;
+        const artifactEntity = encodeEntity(PinkBomb.metadata.keySchema, {
+          bombId: Number(artifactIdToDecStr(artifact.id)),
+        });
+        const bomb = getComponentValue(PinkBomb, artifactEntity);
+        if (!bomb) {
+          throw new Error("bomb launch data not found");
+        }
+        const targetLocation = this.getLocationOfPlanet(
+          locationIdFromHexStr(bomb.target.toString()),
+        );
+        if (targetLocation) {
+          this.setPinkZone({
+            locationId: targetLocation.hash,
+            coords: targetLocation.coords,
+            operator: artifact.currentOwner,
+            radius: Number(artifact.rarity) * 500,
+            artifactId: artifact.id,
+            launchTick: Number(bomb.departureTick),
+            arrivalTick: Number(bomb.arrivalTick),
+            launchPlanet: artifact.onPlanetId,
+          });
+        }
+      } else {
+        this.pinkZones.delete(artifact.id);
       }
     }
 
@@ -1331,12 +1445,29 @@ export class GameObjects {
     if (previous.owner === this.address && current.owner !== this.address) {
       notifManager.planetLost(current as LocatablePlanet);
     }
+
+    const inSameGuild = this.guildUtils.inSameGuildAtTick(
+      arrival.player,
+      this.address,
+      arrival.arrivalTick,
+    );
+
     if (
+      inSameGuild === false &&
       arrival.player !== this.address &&
       current.owner === this.address &&
       arrival.energyArriving !== 0
     ) {
       notifManager.planetAttacked(current as LocatablePlanet);
+    }
+
+    if (
+      inSameGuild &&
+      arrival.player !== this.address &&
+      current.owner === this.address &&
+      arrival.energyArriving !== 0
+    ) {
+      notifManager.planetSupportedByGuild(current as LocatablePlanet);
     }
   }
 
@@ -1372,6 +1503,7 @@ export class GameObjects {
       arrival,
       this.getArtifactById(arrival.artifactId),
       this.contractConstants,
+      this.guildUtils,
     );
 
     this.removeArrival(planetId, update.arrival.eventId);
@@ -1383,6 +1515,7 @@ export class GameObjects {
     arrivals: QueuedArrival[],
   ): ArrivalWithTimer[] {
     const planet = this.planets.get(planetId);
+
     if (!planet) {
       console.error(
         `attempted to process arrivals for planet not in memory: ${planetId}`,
@@ -1396,6 +1529,7 @@ export class GameObjects {
     arrivals.sort((a, b) => a.arrivalTick - b.arrivalTick);
 
     const nowTick = this.tickerUtils.getCurrentTick();
+
     for (const arrival of arrivals) {
       try {
         if (nowTick - arrival.arrivalTick > 0) {
@@ -1406,9 +1540,11 @@ export class GameObjects {
             arrival,
             this.getArtifactById(arrival.artifactId),
             this.contractConstants,
+            this.guildUtils,
           );
 
           this.removeArrival(planetId, update.arrival.eventId);
+
           this.emitArrivalNotifications(update);
         } else {
           // otherwise, set a timer to do this arrival in the future

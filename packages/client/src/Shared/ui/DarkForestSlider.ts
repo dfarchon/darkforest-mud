@@ -54,21 +54,21 @@ export class DarkForestSlider extends Slider {
     try {
       return super.handlePointerdown(event);
     } catch {
-      // eslint-disable-line no-empty
+      console.log("error");
     }
   }
   public handlePointerup(event: PointerEvent): void {
     try {
       return super.handlePointerup(event);
     } catch {
-      // eslint-disable-line no-empty
+      console.log("error");
     }
   }
   public handlePointermove(event: PointerEvent): void {
     try {
       return super.handlePointermove(event);
     } catch {
-      // eslint-disable-line no-empty
+      console.log("error");
     }
   }
 

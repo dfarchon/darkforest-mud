@@ -3,4 +3,4 @@ pragma solidity >=0.8.24;
 
 uint8 constant ARTIFACT_INDEX = 5;
 
-bytes16 constant WORMHOLE_TABLE_NAME = "wormhole";
+bytes16 constant WORMHOLE_TABLE_NAME = "Wormhole";

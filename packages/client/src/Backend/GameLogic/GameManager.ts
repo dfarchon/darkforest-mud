@@ -35,6 +35,7 @@ import {
   isUnconfirmedBuySpaceshipTx,
   isUnconfirmedCapturePlanetTx,
   isUnconfirmedChangeArtifactImageTypeTx,
+  isUnconfirmedChargeArtifactTx,
   isUnconfirmedClaimTx,
   isUnconfirmedDeactivateArtifactTx,
   isUnconfirmedDepositArtifactTx,
@@ -51,12 +52,20 @@ import {
   isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
   isUnconfirmedSpendGPTTokensTx,
+  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
+  locationIdFromHexStr,
   locationIdToDecStr,
+  locationIdToHexStr,
 } from "@df/serde";
+import type {
+  RevealInput,
+  RevealSnarkContractCallArgs,
+  SnarkProof,
+} from "@df/snarks";
 import type {
   Artifact,
   ArtifactId,
@@ -87,7 +96,10 @@ import type {
   SignedMessage,
   Transaction,
   TxIntent,
+  UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
+  UnconfirmedApplyToGuild,
+  UnconfirmedApproveApplication,
   UnconfirmedBlue,
   UnconfirmedBurn,
   UnconfirmedBuyArtifact,
@@ -97,23 +109,33 @@ import type {
   UnconfirmedBuySpaceship,
   UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
+  UnconfirmedChargeArtifact,
   UnconfirmedClaim,
+  UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
+  UnconfirmedDisbandGuild,
   UnconfirmedDonate,
   UnconfirmedFindArtifact,
   UnconfirmedInit,
   UnconfirmedInvadePlanet,
+  UnconfirmedInviteToGuild,
   UnconfirmedKardashev,
+  UnconfirmedKickMember,
+  UnconfirmedLeaveGuild,
   UnconfirmedMove,
   UnconfirmedPink,
   UnconfirmedPlanetTransfer,
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSetGrant,
+  UnconfirmedSetMemberRole,
   UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
   UnconfirmedSpendGPTTokens,
+  UnconfirmedShutdownArtifact,
+  UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawSilver,
@@ -122,9 +144,12 @@ import type {
   WorldCoords,
   WorldLocation,
 } from "@df/types";
+import type { Guild, GuildId } from "@df/types";
 import {
   ArtifactRarity,
   ArtifactType,
+  GuildRole,
+  GuildStatus,
   HatType,
   PlanetMessageType,
   PlanetType,
@@ -132,13 +157,19 @@ import {
   SpaceType,
 } from "@df/types";
 import type { NumberType } from "@latticexyz/recs";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
+import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 import delay from "delay";
 import type { Contract, ContractInterface, providers } from "ethers";
 import { BigNumber } from "ethers";
+import { utils } from "ethers";
 import { EventEmitter } from "events";
+import type { Hex } from "viem";
+import { encodeFunctionData, toBytes } from "viem";
 
 import type {
   ContractConstants,
@@ -196,18 +227,19 @@ import {
   verifyTwitterHandle,
 } from "../Network/UtilityServerAPI";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
-import PersistentChunkStore from "../Storage/PersistentChunkStore";
+import type PersistentChunkStore from "../Storage/PersistentChunkStore";
 import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
-import SnarkArgsHelper from "../Utils/SnarkArgsHelper";
+import type SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
+import { prospectExpired } from "./ArrivalUtils";
 // import { getEmojiMessage } from "./ArrivalUtils";
 import type { CaptureZonesGeneratedEvent } from "./CaptureZoneGenerator";
 import { CaptureZoneGenerator } from "./CaptureZoneGenerator";
 import type { ContractsAPI } from "./ContractsAPI";
 import { makeContractsAPI } from "./ContractsAPI";
+import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
 import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
-
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -220,10 +252,11 @@ export enum GameManagerEvent {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class GameManager extends EventEmitter {
+  private readonly components: ClientComponents;
   /**
    * This variable contains the internal state of objects that live in the game world.
    */
-  private readonly entityStore: GameObjects;
+  public readonly entityStore: GameObjects;
 
   /**
    * Kind of hacky, but we store a reference to the terminal that the player sees when the initially
@@ -249,6 +282,15 @@ export class GameManager extends EventEmitter {
   private readonly players: Map<string, Player>;
 
   /**
+   * Map from guild IDs to Guild objects. This isn't stored in {@link GameObjects},
+   * because it's not technically an entity that exists in the world. A player just controls planets
+   * and artifacts that do exist in the world.
+   *
+   * @todo move this into a new `Guild` class.
+   */
+  private readonly guilds: Map<GuildId, Guild>;
+
+  /**
    * Allows us to make contract calls, and execute transactions. Be careful about how you use this
    * guy. You don't want to cause your client to send an excessive amount of traffic to whatever
    * node you're connected to.
@@ -262,7 +304,7 @@ export class GameManager extends EventEmitter {
    *   {@link ContractCaller} and transactions (writes to the blockchain on behalf of the player),
    *   implemented by {@link TxExecutor} via two separately tuned {@link ThrottledConcurrentQueue}s.
    */
-  private readonly contractsAPI: ContractsAPI;
+  public readonly contractsAPI: ContractsAPI;
 
   /**
    * An object that syncs any newly added or deleted chunks to the player's IndexedDB.
@@ -270,7 +312,7 @@ export class GameManager extends EventEmitter {
    * @todo it also persists other game data to IndexedDB. This class needs to be renamed `GameSaver`
    * or something like that.
    */
-  private readonly persistentChunkStore: PersistentChunkStore;
+  public readonly persistentChunkStore: PersistentChunkStore;
 
   /**
    * Responsible for generating snark proofs.
@@ -330,6 +372,11 @@ export class GameManager extends EventEmitter {
    * Whenever we refresh the players twitter accounts or scores, we publish an event here.
    */
   public readonly playersUpdated$: Monomitter<void>;
+
+  /**
+   * Whenever we refresh the guilds, we publish an event here.
+   */
+  public readonly guildsUpdated$: Monomitter<void>;
 
   /**
    * Handle to an interval that periodically uploads diagnostic information from this client.
@@ -433,7 +480,7 @@ export class GameManager extends EventEmitter {
    */
   // private captureZoneGenerator: CaptureZoneGenerator | undefined;
 
-  private constructor(
+  public constructor(
     terminal: React.MutableRefObject<TerminalHandle | undefined>,
     mainAccount: EthAddress | undefined,
     players: Map<string, Player>,
@@ -475,6 +522,7 @@ export class GameManager extends EventEmitter {
       width: 0,
       height: 0,
     };
+    this.components = components;
     this.terminal = terminal;
     this.account = mainAccount;
     this.players = players;
@@ -483,6 +531,7 @@ export class GameManager extends EventEmitter {
     this.paused$ = monomitter(true);
     // this.halfPrice$ = monomitter(true);
     this.playersUpdated$ = monomitter();
+    this.guildsUpdated$ = monomitter();
 
     // if (contractConstants.CAPTURE_ZONES_ENABLED) {
     //   this.captureZoneGenerator = new CaptureZoneGenerator(
@@ -616,6 +665,9 @@ export class GameManager extends EventEmitter {
     );
 
     this.contractsAPI = contractsAPI;
+
+    this.guilds = this.getInitGuilds();
+
     this.persistentChunkStore = persistentChunkStore;
     this.snarkHelper = snarkHelper;
     this.useMockHash = useMockHash;
@@ -644,6 +696,7 @@ export class GameManager extends EventEmitter {
       if (this.account) {
         this.hardRefreshPlayer(this.account);
         // this.hardRefreshPlayerSpaceships(this.account);
+        this.updateMinerManagerInnerRadius();
       }
     }, 10_000);
 
@@ -855,492 +908,17 @@ export class GameManager extends EventEmitter {
     components: ClientComponents;
     spectate: boolean;
   }): Promise<GameManager> {
-    if (!terminal.current) {
-      throw new Error("you must pass in a handle to a terminal");
-    }
-
-    const account = spectate
-      ? <EthAddress>"0x0000000000000000000000000000000000000001"
-      : mainAccount; // connection.getAddress();
-
-    if (!account) {
-      throw new Error("no account on eth connection");
-    }
-
-    const gameStateDownloader = new InitialGameStateDownloader(
-      terminal.current,
-    );
-    const contractsAPI = await makeContractsAPI({
-      connection,
-      contractAddress,
-      components,
-    });
-
-    terminal.current?.println("Loading game data from disk...");
-
-    const persistentChunkStore = await PersistentChunkStore.create({
-      account,
-      contractAddress,
-    });
-
-    terminal.current?.println("Downloading data from Ethereum blockchain...");
-    terminal.current?.println(
-      "(the contract is very big. this may take a while)",
-    );
-    terminal.current?.newline();
-
-    const initialState = await gameStateDownloader.download(
-      contractsAPI,
-      persistentChunkStore,
-    );
-
-    const possibleHomes = await persistentChunkStore.getHomeLocations();
-
-    terminal.current?.println("");
-    terminal.current?.println("Building Index...");
-
-    await persistentChunkStore.saveTouchedPlanetIds(
-      initialState.allTouchedPlanetIds,
-    );
-    await persistentChunkStore.saveRevealedCoords(
-      initialState.allRevealedCoords,
-    );
-    // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
-
-    const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
-
-    for (let i = 0; i < initialState.loadedPlanets.length; i++) {
-      const planet = initialState.touchedAndLocatedPlanets.get(
-        initialState.loadedPlanets[i],
-      );
-
-      if (!planet) {
-        continue;
-      }
-
-      // planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
-
-      // for (const heldArtifact of initialState.heldArtifacts[i]) {
-      //   knownArtifacts.set(heldArtifact.id, heldArtifact);
-      // }
-    }
-
-    // for (const myArtifact of initialState.myArtifacts) {
-    //   knownArtifacts.set(myArtifact.id, myArtifact);
-    // }
-
-    // for (const artifact of initialState.artifactsOnVoyages) {
-    //   knownArtifacts.set(artifact.id, artifact);
-    // }
-
-    // figure out what's my home planet
-    let homeLocation: WorldLocation | undefined = undefined;
-    for (const loc of possibleHomes) {
-      if (initialState.allTouchedPlanetIds.includes(loc.hash)) {
-        homeLocation = loc;
-        await persistentChunkStore.confirmHomeLocation(loc);
-        break;
-      }
-    }
-
-    const hashConfig: HashConfig = {
-      planetHashKey: initialState.contractConstants.PLANETHASH_KEY,
-      spaceTypeKey: initialState.contractConstants.SPACETYPE_KEY,
-      biomebaseKey: initialState.contractConstants.BIOMEBASE_KEY,
-      perlinLengthScale: initialState.contractConstants.PERLIN_LENGTH_SCALE,
-      perlinMirrorX: initialState.contractConstants.PERLIN_MIRROR_X,
-      perlinMirrorY: initialState.contractConstants.PERLIN_MIRROR_Y,
-      planetRarity: initialState.contractConstants.PLANET_RARITY,
-    };
-
-    const useMockHash = initialState.contractConstants.DISABLE_ZK_CHECKS;
-    const snarkHelper = SnarkArgsHelper.create(
-      hashConfig,
-      terminal,
-      useMockHash,
-    );
-
-    const gameManager = new GameManager(
-      terminal,
+    return GameManagerFactory.create({
       mainAccount,
-      initialState.players,
-      initialState.touchedAndLocatedPlanets,
-      new Set(Array.from(initialState.allTouchedPlanetIds)),
-      initialState.revealedCoordsMap,
-      // initialState.claimedCoordsMap
-      //   ? initialState.claimedCoordsMap
-      //   : new Map<LocationId, ClaimedCoords>(),
-      // initialState.burnedCoordsMap
-      //   ? initialState.burnedCoordsMap
-      //   : new Map<LocationId, BurnedCoords>(),
-      // initialState.kardashevCoordsMap
-      //   ? initialState.kardashevCoordsMap
-      //   : new Map<LocationId, KardashevCoords>(),
-      initialState.worldRadius,
-      initialState.arrivals,
-      initialState.planetVoyageIdMap,
-      contractsAPI,
-      initialState.contractConstants,
-      persistentChunkStore,
-      snarkHelper,
-      homeLocation,
-      useMockHash,
-      knownArtifacts,
       connection,
-      initialState.paused,
-      // initialState.halfPrice,
-      components,
-    );
-
-    // gameManager.setPlayerTwitters(initialState.twitters);
-
-    const config = {
+      terminal,
       contractAddress,
-      account: gameManager.getEthConnection().getAddress(),
-    };
-    pollSetting(config, Setting.AutoApproveNonPurchaseTransactions);
-
-    persistentChunkStore.setDiagnosticUpdater(gameManager);
-    contractsAPI.setDiagnosticUpdater(gameManager);
-
-    // important that this happens AFTER we load the game state from the blockchain. Otherwise our
-    // 'loading game state' contract calls will be competing with events from the blockchain that
-    // are happening now, which makes no sense.
-
-    contractsAPI.setupEventListeners();
-
-    // get twitter handles
-    // gameManager.refreshTwitters();
-
-    // gameManager.listenForNewBlock();
-
-    // set up listeners: whenever ContractsAPI reports some game state update, do some logic
-    gameManager.contractsAPI
-      .on(ContractsAPIEvent.TickRateUpdate, async (newtickRate: number) => {
-        const contractConstants = contractsAPI.getConstants();
-        gameManager.updateContractConstants(contractConstants);
-      })
-      .on(ContractsAPIEvent.ArtifactUpdate, async (artifactId: ArtifactId) => {
-        // await gameManager.hardRefreshArtifact(artifactId);
-        gameManager.emit(GameManagerEvent.ArtifactUpdate, artifactId);
-      })
-      .on(
-        ContractsAPIEvent.PlanetTransferred,
-        async (planetId: LocationId, newOwner: EthAddress) => {
-          await gameManager.hardRefreshPlanet(planetId);
-          const planetAfter = gameManager.getPlanetWithId(planetId);
-
-          if (planetAfter && newOwner === gameManager.account) {
-            NotificationManager.getInstance().receivedPlanet(planetAfter);
-          }
-        },
-      )
-      .on(ContractsAPIEvent.PlayerUpdate, async (playerId: EthAddress) => {
-        await gameManager.hardRefreshPlayer(playerId);
-      })
-      .on(ContractsAPIEvent.PauseStateChanged, async (paused: boolean) => {
-        gameManager.paused = paused;
-        gameManager.paused$.publish(paused);
-      })
-      // .on(ContractsAPIEvent.HalfPriceChanged, async (halfPrice: boolean) => {
-      //   gameManager.halfPrice = halfPrice;
-      //   gameManager.halfPrice$.publish(halfPrice);
-      // })
-      .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
-        // PUNK
-        console.log("handle ContractsAPI.PlanetUpdate");
-        console.log(planetId);
-
-        // don't reload planets that you don't have in your map. once a planet
-        // is in your map it will be loaded from the contract.
-        const localPlanet = gameManager.entityStore.getPlanetWithId(planetId);
-        if (localPlanet && isLocatable(localPlanet)) {
-          gameManager.hardRefreshPlanet(planetId);
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        }
-        await gameManager.refreshServerPlanetStates([planetId]);
-      })
-      .on(
-        ContractsAPIEvent.ArrivalQueued,
-        async (_arrivalId: VoyageId, fromId: LocationId, toId: LocationId) => {
-          // PUNK
-          console.log("handle ContractsAPIEvent.ArrivalQueued");
-          console.log("arrivalId", _arrivalId);
-          console.log("fromId", fromId);
-          console.log("toId", toId);
-
-          // only reload planets if the toPlanet is in the map
-          const localToPlanet = gameManager.entityStore.getPlanetWithId(toId);
-          if (localToPlanet && isLocatable(localToPlanet)) {
-            gameManager.bulkHardRefreshPlanets([fromId, toId]);
-            gameManager.emit(GameManagerEvent.PlanetUpdate);
-          }
-        },
-      )
-      .on(
-        ContractsAPIEvent.LocationRevealed,
-        async (planetId: LocationId, _revealer: EthAddress) => {
-          // TODO: hook notifs or emit event to UI if you want
-          await gameManager.hardRefreshPlanet(planetId);
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        },
-      )
-      .on(
-        ContractsAPIEvent.LocationClaimed,
-        async (planetId: LocationId, _revealer: EthAddress) => {
-          // TODO: hook notifs or emit event to UI if you want
-
-          // console.log('[testInfo]: ContractsAPIEvent.LocationClaimed');
-          await gameManager.hardRefreshPlanet(planetId);
-          gameManager.emit(GameManagerEvent.PlanetUpdate);
-        },
-      )
-      .on(ContractsAPIEvent.TxQueued, (tx: Transaction) => {
-        gameManager.entityStore.onTxIntent(tx);
-      })
-      .on(ContractsAPIEvent.TxSubmitted, (tx: Transaction) => {
-        gameManager.persistentChunkStore.onEthTxSubmit(tx);
-        gameManager.onTxSubmit(tx);
-      })
-      .on(ContractsAPIEvent.TxConfirmed, async (tx: Transaction) => {
-        if (!tx.hash) {
-          return;
-        } // this should never happen
-        gameManager.persistentChunkStore.onEthTxComplete(tx.hash);
-
-        if (isUnconfirmedRevealTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBurnTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-          // await gameManager.hardRefreshPinkZones();
-        } else if (isUnconfirmedPinkTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        }
-        //  else if (isUnconfirmedKardashevTx(tx)) {
-        //   await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        //   // await gameManager.hardRefreshBlueZones();
-        // } else if (isUnconfirmedBlueTx(tx)) {
-        //   const centerPlanetId = gameManager.getBlueZoneCenterPlanetId(
-        //     tx.intent.locationId,
-        //   );
-        //   if (centerPlanetId) {
-        //     await gameManager.bulkHardRefreshPlanets([
-        //       tx.intent.locationId,
-        //       centerPlanetId,
-        //     ]);
-        //   } else {
-        //     // notice: this should never happen
-        //     await gameManager.bulkHardRefreshPlanets([tx.intent.locationId]);
-        //   }
-
-        //   gameManager.emit(GameManagerEvent.PlanetUpdate);
-        // }
-        //
-        //
-        // PUNK
-        // todo add isUnconfirmedSendGPTTokensTx , isUnconfirmedSpendGPTTokensTx , isUnconfirmedBuyGPTTokensTx
-        //
-        //
-        else if (isUnconfirmedInitTx(tx)) {
-          terminal.current?.println("Loading Home Planet from Blockchain...");
-          const retries = 5;
-          for (let i = 0; i < retries; i++) {
-            const planet = gameManager.contractsAPI.getPlanetById(
-              tx.intent.locationId,
-            );
-            if (planet) {
-              break;
-            } else if (i === retries - 1) {
-              console.error("couldn't load player's home planet");
-            } else {
-              await delay(2000);
-            }
-          }
-          gameManager.hardRefreshPlanet(tx.intent.locationId);
-          // mining manager should be initialized already via joinGame, but just in case...
-          gameManager.initMiningManager(tx.intent.location.coords, 4);
-        } else if (isUnconfirmedMoveTx(tx)) {
-          const promises = [
-            gameManager.bulkHardRefreshPlanets([tx.intent.from, tx.intent.to]),
-          ];
-          if (tx.intent.artifact) {
-            // promises.push(gameManager.hardRefreshArtifact(tx.intent.artifact));
-          }
-          await Promise.all(promises);
-        } else if (isUnconfirmedUpgradeTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedRefreshPlanetTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBuyHatTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBuyPlanetTx(tx)) {
-          //todo
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedBuySpaceshipTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedFindArtifactTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.planetId);
-        } else if (isUnconfirmedDepositArtifactTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedWithdrawArtifactTx(tx)) {
-          await Promise.all([
-            await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedProspectPlanetTx(tx)) {
-          await gameManager.softRefreshPlanet(tx.intent.planetId);
-        } else if (isUnconfirmedActivateArtifactTx(tx)) {
-          let refreshFlag = true;
-          const fromPlanet = await gameManager.getPlanetWithId(
-            tx.intent.locationId,
-          );
-          const artifact = await gameManager.getArtifactWithId(
-            tx.intent.artifactId,
-          );
-
-          if (artifact?.artifactType === ArtifactType.FireLink) {
-            if (fromPlanet && fromPlanet.locationId && tx.intent.linkTo) {
-              const toPlanet = await gameManager.getPlanetWithId(
-                tx.intent.linkTo,
-              );
-              if (toPlanet) {
-                const activeArtifactOnToPlanet =
-                  await gameManager.getActiveArtifact(toPlanet);
-                if (
-                  activeArtifactOnToPlanet &&
-                  activeArtifactOnToPlanet.artifactType ===
-                    ArtifactType.IceLink &&
-                  activeArtifactOnToPlanet.linkTo
-                ) {
-                  const toLinkPlanet = await gameManager.getPlanetWithId(
-                    activeArtifactOnToPlanet.linkTo,
-                  );
-                  if (toLinkPlanet) {
-                    await Promise.all([
-                      gameManager.bulkHardRefreshPlanets([
-                        fromPlanet.locationId,
-                        toPlanet.locationId,
-                        toLinkPlanet.locationId,
-                      ]),
-                      // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-                    ]);
-                    refreshFlag = false;
-                  }
-                }
-              }
-            }
-          }
-
-          if (refreshFlag) {
-            if (tx.intent.linkTo) {
-              await Promise.all([
-                gameManager.bulkHardRefreshPlanets([
-                  tx.intent.locationId,
-                  tx.intent.linkTo,
-                ]),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            } else {
-              await Promise.all([
-                gameManager.hardRefreshPlanet(tx.intent.locationId),
-                // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-              ]);
-            }
-          }
-        } else if (isUnconfirmedDeactivateArtifactTx(tx)) {
-          // console.log(tx);
-          if (tx.intent.linkTo) {
-            await Promise.all([
-              gameManager.bulkHardRefreshPlanets([
-                tx.intent.locationId,
-                tx.intent.linkTo,
-              ]),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-            ]);
-          } else {
-            await Promise.all([
-              gameManager.hardRefreshPlanet(tx.intent.locationId),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-            ]);
-          }
-        } else if (isUnconfirmedChangeArtifactImageTypeTx(tx)) {
-          await Promise.all([
-            await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedBuyArtifactTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
-          ]);
-        } else if (isUnconfirmedWithdrawSilverTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedCapturePlanetTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlayer(gameManager.getAccount()),
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-          ]);
-        } else if (isUnconfirmedSetPlanetEmojiTx(tx)) {
-          await gameManager.hardRefreshPlanet(tx.intent.locationId);
-        } else if (isUnconfirmedInvadePlanetTx(tx)) {
-          await Promise.all([
-            gameManager.hardRefreshPlayer(gameManager.getAccount()),
-            gameManager.hardRefreshPlanet(tx.intent.locationId),
-          ]);
-        } else if (isUnconfirmedClaimTx(tx)) {
-          // gameManager.entityStore.updatePlanet(
-          //   tx.intent.locationId,
-          //   (p) => (p.claimer = gameManager.getAccount()),
-          // );
-        }
-        gameManager.entityStore.clearUnconfirmedTxIntent(tx);
-        gameManager.onTxConfirmed(tx);
-      })
-      .on(ContractsAPIEvent.TxErrored, async (tx: Transaction) => {
-        gameManager.entityStore.clearUnconfirmedTxIntent(tx);
-        if (tx.hash) {
-          gameManager.persistentChunkStore.onEthTxComplete(tx.hash);
-        }
-        gameManager.onTxReverted(tx);
-      })
-      .on(ContractsAPIEvent.TxCancelled, async (tx: Transaction) => {
-        gameManager.onTxCancelled(tx);
-      })
-      .on(ContractsAPIEvent.RadiusUpdated, async () => {
-        const newRadius = gameManager.contractsAPI.getWorldRadius();
-        gameManager.setRadius(newRadius);
-      });
-
-    const unconfirmedTxs =
-      await persistentChunkStore.getUnconfirmedSubmittedEthTxs();
-    const confirmationQueue = new ThrottledConcurrentQueue({
-      invocationIntervalMs: 1000,
-      maxInvocationsPerIntervalMs: 10,
-      maxConcurrency: 1,
+      components,
+      spectate,
     });
-
-    for (const unconfirmedTx of unconfirmedTxs) {
-      confirmationQueue.add(async () => {
-        const tx =
-          gameManager.contractsAPI.txExecutor.waitForTransaction(unconfirmedTx);
-        gameManager.contractsAPI.emitTransactionEvents(tx);
-        return tx.confirmedPromise;
-      });
-    }
-
-    // we only want to initialize the mining manager if the player has already joined the game
-    // if they haven't, we'll do this once the player has joined the game
-    if (!!homeLocation && initialState.players.has(account as string)) {
-      gameManager.initMiningManager(homeLocation.coords);
-    }
-
-    return gameManager;
   }
 
-  private hardRefreshPlayer(address?: EthAddress): void {
+  public hardRefreshPlayer(address?: EthAddress): void {
     if (!address) {
       return;
     }
@@ -1356,6 +934,13 @@ export class GameManager extends EventEmitter {
 
     this.players.set(address, playerFromBlockchain);
     this.playersUpdated$.publish();
+  }
+
+  public updateMinerManagerInnerRadius() {
+    if (this.minerManager) {
+      console.log("updateMinerManagerInnerRadius", this.getInnerRadius());
+      this.minerManager.setInnerRadius(this.getInnerRadius());
+    }
   }
 
   // private async hardRefreshPlayerSpaceships(
@@ -1432,10 +1017,17 @@ export class GameManager extends EventEmitter {
   }
 
   public hardRefreshPlanet(planetId: LocationId): void {
-    const planet = this.contractsAPI.getPlanetById(planetId);
+    let planet = this.contractsAPI.getPlanetById(planetId);
 
     if (!planet) {
-      return;
+      // in some cases, the planet is not entirely initialized in the contract, but only some crucial table fields are set
+      // in this case, we still need to generate the planet from contract side and update it into the entity store
+      const location = this.entityStore.getLocationOfPlanet(planetId);
+      if (location) {
+        planet = this.contractsAPI.getDefaultPlanetByLocation(location);
+      } else {
+        return;
+      }
     }
 
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
@@ -1520,7 +1112,7 @@ export class GameManager extends EventEmitter {
     this.entityStore.replacePlanetFromContractData(
       planet,
       arrivals,
-      undefined, // artifactsOnPlanet.map((a) => a.id),
+      planet.heldArtifactIds, // artifactsOnPlanet.map((a) => a.id),
       revealedLocation,
       // claimedCoords?.claimer,
       // burnedCoords?.operator,
@@ -1532,12 +1124,10 @@ export class GameManager extends EventEmitter {
     // effects of this type of move is that the active photoid canon deactivates upon a move
     // meaning we need to reload its data from the blockchain.
 
-    // artifactsOnPlanet.forEach((a) =>
-    //   this.entityStore.replaceArtifactFromContractData(a),
-    // );
+    planet.heldArtifactIds.forEach((a) => this.hardRefreshArtifact(a));
   }
 
-  private bulkHardRefreshPlanets(planetIds: LocationId[]): void {
+  public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
     const allVoyages = this.contractsAPI.getAllArrivals(planetIds);
@@ -1584,13 +1174,14 @@ export class GameManager extends EventEmitter {
     // }
   }
 
-  // public async hardRefreshArtifact(artifactId: ArtifactId): Promise<void> {
-  //   const artifact = await this.contractsAPI.getArtifactById(artifactId);
-  //   if (!artifact) {
-  //     return;
-  //   }
-  //   this.entityStore.replaceArtifactFromContractData(artifact);
-  // }
+  public hardRefreshArtifact(artifactId: ArtifactId): void {
+    const artifacts = this.contractsAPI.bulkGetArtifacts([artifactId]);
+    const artifact = artifacts.get(artifactId);
+    if (!artifact) {
+      return;
+    }
+    this.entityStore.replaceArtifactFromContractData(artifact);
+  }
 
   //mytodo: test more
   // public async hardRefreshPinkZones(): Promise<void> {
@@ -1642,7 +1233,7 @@ export class GameManager extends EventEmitter {
   //   }
   // }
 
-  private onTxSubmit(tx: Transaction): void {
+  public onTxSubmit(tx: Transaction): void {
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
       TerminalTextStyle.Blue,
@@ -1657,7 +1248,7 @@ export class GameManager extends EventEmitter {
     this.terminal.current?.println(`) submitted`, TerminalTextStyle.Blue);
   }
 
-  private onTxConfirmed(tx: Transaction) {
+  public onTxConfirmed(tx: Transaction) {
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
       TerminalTextStyle.Green,
@@ -1672,7 +1263,7 @@ export class GameManager extends EventEmitter {
     this.terminal.current?.println(`) confirmed`, TerminalTextStyle.Green);
   }
 
-  private onTxReverted(tx: Transaction) {
+  public onTxReverted(tx: Transaction) {
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
       TerminalTextStyle.Red,
@@ -1688,7 +1279,7 @@ export class GameManager extends EventEmitter {
     this.terminal.current?.println(`) reverted`, TerminalTextStyle.Red);
   }
 
-  private onTxCancelled(tx: Transaction) {
+  public onTxCancelled(tx: Transaction) {
     this.entityStore.clearUnconfirmedTxIntent(tx);
     this.terminal.current?.print(
       `${tx.intent.methodName} transaction (`,
@@ -1887,6 +1478,10 @@ export class GameManager extends EventEmitter {
     return this.worldRadius;
   }
 
+  public getInnerRadius(): number {
+    return this.contractsAPI.getCurrentInnerRadius();
+  }
+
   /**
    * Gets the total amount of silver that lives on a planet that somebody owns.
    */
@@ -1973,7 +1568,7 @@ export class GameManager extends EventEmitter {
   //   return this.contractConstants.PLANET_LEVEL_JUNK[level];
   // }
 
-  private initMiningManager(homeCoords: WorldCoords, cores?: number): void {
+  public initMiningManager(homeCoords: WorldCoords, cores?: number): void {
     if (this.minerManager) {
       return;
     }
@@ -1987,6 +1582,7 @@ export class GameManager extends EventEmitter {
       this.persistentChunkStore,
       myPattern,
       this.worldRadius,
+      this.getInnerRadius(),
       this.planetRarity,
       this.hashConfig,
       this.useMockHash,
@@ -2316,6 +1912,15 @@ export class GameManager extends EventEmitter {
   //   return this.entityStore.getBurnedLocations();
   // }
 
+  getPinkZones(): Set<PinkZone> {
+    const pinkZonesMap = this.entityStore.getPinkZones();
+    return new Set(pinkZonesMap.values());
+  }
+
+  getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined {
+    return this.entityStore.getPinkZones().get(artifactId);
+  }
+
   // getKardashevLocations(): Map<LocationId, BurnedLocation> {
   //   return this.entityStore.getKardashevLocations();
   // }
@@ -2490,7 +2095,7 @@ export class GameManager extends EventEmitter {
     }
   }
 
-  private setRadius(worldRadius: number) {
+  public setRadius(worldRadius: number) {
     this.worldRadius = worldRadius;
 
     if (this.minerManager) {
@@ -2941,6 +2546,12 @@ export class GameManager extends EventEmitter {
   //   return blueZones || new Set();
   // }
 
+  private transformRevealArgs(
+    args: RevealSnarkContractCallArgs,
+  ): [SnarkProof, RevealInput] {
+    return [[args[0], args[1], args[2]], args[3]];
+  }
+
   /**
    * Reveals a planet's location on-chain.
    */
@@ -2986,7 +2597,7 @@ export class GameManager extends EventEmitter {
 
       // this is shitty. used for the popup window
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-revealLocationId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-revealLocationId`,
         planetId,
       );
 
@@ -3099,7 +2710,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-claimLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-claimLocationId`,
   //       planetId,
   //     );
 
@@ -3229,7 +2840,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-burnLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-burnLocationId`,
   //       planetId,
   //     );
 
@@ -3271,31 +2882,41 @@ export class GameManager extends EventEmitter {
   //     throw e;
   //   }
   // }
+  public checkPlanetCanPink(planetId: LocationId): {
+    canPink: boolean;
+    artifactId?: ArtifactId;
+  } {
+    if (!this.account) {
+      return { canPink: false };
+    }
+    const planet = this.getPlanetWithId(planetId);
+    if (!planet) {
+      return { canPink: false };
+    }
+    if (!isLocatable(planet)) {
+      return { canPink: false };
+    }
+    const pinkZones = this.getPinkZones();
+    const curTick = this.getCurrentTick();
+    for (const pinkZone of pinkZones) {
+      if (
+        pinkZone.arrivalTick === 0 ||
+        curTick < pinkZone.arrivalTick ||
+        curTick >= pinkZone.arrivalTick + 300
+      ) {
+        continue;
+      }
+      const coords = pinkZone.coords;
+      const radius = pinkZone.radius;
 
-  // public checkPlanetCanPink(planetId: LocationId): boolean {
-  //   if (!this.account) {
-  //     return false;
-  //   }
-  //   const planet = this.getPlanetWithId(planetId);
-  //   if (!planet) {
-  //     return false;
-  //   }
-  //   if (!isLocatable(planet)) {
-  //     return false;
-  //   }
-  //   const myPinkZones = this.getMyPinkZones();
-  //   for (const pinkZone of myPinkZones) {
-  //     const coords = pinkZone.coords;
-  //     const radius = pinkZone.radius;
+      const dis = this.getDistCoords(coords, planet.location.coords);
 
-  //     const dis = this.getDistCoords(coords, planet.location.coords);
-
-  //     if (dis <= radius) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
+      if (dis <= radius) {
+        return { canPink: true, artifactId: pinkZone.artifactId };
+      }
+    }
+    return { canPink: false };
+  }
 
   /**
    * return isCurrentlyPinking
@@ -3307,99 +2928,107 @@ export class GameManager extends EventEmitter {
    * pinkLocation reveals a planet's location on-chain.
    */
 
-  // public async pinkLocation(
-  //   planetId: LocationId,
-  // ): Promise<Transaction<UnconfirmedPink>> {
-  //   try {
-  //     if (!this.account) {
-  //       throw new Error("no account set");
-  //     }
+  public async pinkLocation(
+    planetId: LocationId,
+  ): Promise<Transaction<UnconfirmedPink>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account set");
+      }
 
-  //     if (this.checkGameHasEnded()) {
-  //       throw new Error("game has ended");
-  //     }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error("game has ended");
+      // }
 
-  //     const planet = this.entityStore.getPlanetWithId(planetId);
+      const planet = this.entityStore.getPlanetWithId(planetId);
 
-  //     if (!planet) {
-  //       throw new Error("you can't pink a planet you haven't discovered");
-  //     }
+      if (!planet) {
+        throw new Error("you can't pink a planet you haven't discovered");
+      }
 
-  //     if (!isLocatable(planet)) {
-  //       throw new Error(
-  //         "you can't pink a planet whose coordinates you don't know",
-  //       );
-  //     }
+      if (!isLocatable(planet)) {
+        throw new Error(
+          "you can't pink a planet whose coordinates you don't know",
+        );
+      }
 
-  //     if (planet.destroyed || planet.frozen) {
-  //       throw new Error("you can't pink destroyed/frozen planets");
-  //     }
+      if (planet.destroyed || planet.frozen) {
+        throw new Error("you can't pink destroyed/frozen planets");
+      }
 
-  //     // if (planet.operator !== undefined && planet.operator !== EMPTY_ADDRESS) {
-  //     //   throw new Error('someone already burn this planet');
-  //     // }
+      // if (planet.operator !== undefined && planet.operator !== EMPTY_ADDRESS) {
+      //   throw new Error('someone already burn this planet');
+      // }
 
-  //     if (planet.transactions?.hasTransaction(isUnconfirmedPinkTx)) {
-  //       throw new Error("you're already pinking this planet's location 1");
-  //     }
+      if (planet.transactions?.hasTransaction(isUnconfirmedPinkTx)) {
+        throw new Error("you're already pinking this planet's location 1");
+      }
 
-  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx)) {
-  //       throw new Error("you're already pinking this planet's location 2");
-  //     }
+      if (this.entityStore.transactions.hasTransaction(isUnconfirmedPinkTx)) {
+        throw new Error("you're already pinking this planet's location 2");
+      }
 
-  //     // const myLastBurnTimestamp = this.players.get(this.account)?.lastBurnTimestamp;
+      // const myLastBurnTimestamp = this.players.get(this.account)?.lastBurnTimestamp;
 
-  //     // if (myLastBurnTimestamp && Date.now() < this.getNextBurnAvailableTimestamp()) {
-  //     //   throw new Error('still on cooldown for burning');
-  //     // }
-  //     if (!this.checkPlanetCanPink(planet.locationId)) {
-  //       throw new Error("this planet don't in your pink zones");
-  //     }
+      // if (myLastBurnTimestamp && Date.now() < this.getNextBurnAvailableTimestamp()) {
+      //   throw new Error('still on cooldown for burning');
+      // }
+      const { canPink, artifactId } = this.checkPlanetCanPink(
+        planet.locationId,
+      );
+      if (!canPink || !artifactId) {
+        throw new Error("this planet don't in your pink zones");
+      }
 
-  //     // this is shitty. used for the popup window
-  //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
-  //       planetId,
-  //     );
+      // this is shitty. used for the popup window
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-pinkLocationId`,
+        planetId,
+      );
 
-  //     const getArgs = async () => {
-  //       const revealArgs = await this.snarkHelper.getRevealArgs(
-  //         planet.location.coords.x,
-  //         planet.location.coords.y,
-  //       );
-  //       this.terminal.current?.println(
-  //         "REVEAL: calculated SNARK with args:",
-  //         TerminalTextStyle.Sub,
-  //       );
-  //       this.terminal.current?.println(
-  //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
-  //         TerminalTextStyle.Sub,
-  //       );
-  //       this.terminal.current?.newline();
+      const getArgs = async () => {
+        const revealArgs = await this.snarkHelper.getRevealArgs(
+          planet.location.coords.x,
+          planet.location.coords.y,
+        );
+        this.terminal.current?.println(
+          "REVEAL: calculated SNARK with args:",
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.println(
+          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.newline();
 
-  //       return revealArgs;
-  //     };
+        return this.transformRevealArgs(revealArgs);
+      };
 
-  //     const txIntent: UnconfirmedPink = {
-  //       methodName: "pinkLocation",
-  //       locationId: planetId,
-  //       location: planet.location,
-  //       contract: this.contractsAPI.contract,
-  //       args: getArgs(),
-  //     };
+      const txIntent: UnconfirmedPink = {
+        methodName: "destroy",
+        locationId: planetId,
+        location: planet.location,
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          artifactIdToDecStr(artifactId),
+          ...(await getArgs()),
+        ]),
+        artifactId: artifactId,
+        delegator: this.getAccount(),
+      };
 
-  //     // Always await the submitTransaction so we can catch rejections
-  //     const tx = await this.contractsAPI.submitTransaction(txIntent);
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent);
 
-  //     return tx;
-  //   } catch (e) {
-  //     this.getNotificationsManager().txInitError(
-  //       "pinkLocation",
-  //       (e as Error).message,
-  //     );
-  //     throw e;
-  //   }
-  // }
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "pinkLocation",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
 
   // public async kardashev(
   //   planetId: LocationId,
@@ -3489,7 +3118,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-kardashevLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-kardashevLocationId`,
   //       planetId,
   //     );
 
@@ -3639,7 +3268,7 @@ export class GameManager extends EventEmitter {
 
   //     // this is shitty. used for the popup window
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-blueLocationId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-blueLocationId`,
   //       planetId,
   //     );
 
@@ -3715,7 +3344,7 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-invadePlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-invadePlanet`,
   //       locationId,
   //     );
 
@@ -3794,7 +3423,7 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-capturePlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-capturePlanet`,
   //       locationId,
   //     );
 
@@ -3902,13 +3531,13 @@ export class GameManager extends EventEmitter {
       // to resolve that error. if the asynchronous `beforeRetry` function returns
       // true, retry initializing the player. if it returns false, or if the
       // `beforeRetry` is undefined, then don't retry and throw an exception.
-      // eslint-disable-next-line no-constant-condition
+
       while (true) {
         try {
           const entryFee = 0; //await this.contractsAPI.getEntryFee();
           console.log("entry fee: ", entryFee.toString());
           localStorage.setItem(
-            `${this.getAccount()?.toLowerCase()}-entryFee`,
+            `${this.ethConnection.getAddress()?.toLowerCase()}-entryFee`,
             entryFee.toString(),
           );
 
@@ -4115,6 +3744,7 @@ export class GameManager extends EventEmitter {
         chunkStore,
         pattern,
         this.worldRadius,
+        this.getInnerRadius(),
         this.planetRarity,
         this.hashConfig,
         this.useMockHash,
@@ -4217,6 +3847,7 @@ export class GameManager extends EventEmitter {
               planetPerlin < initPerlinMax &&
               planetPerlin >= initPerlinMin &&
               distFromOrigin < this.worldRadius &&
+              distFromOrigin >= this.getInnerRadius() &&
               // distFromOrigin >= spawnInnerRadius &&
               distFromOrigin >= requireRadiusMin &&
               // distFromOrigin < requireRadiusMax &&
@@ -4265,23 +3896,25 @@ export class GameManager extends EventEmitter {
       }
 
       if (!bypassChecks) {
-        if (this.checkGameHasEnded()) {
-          throw new Error("game ended");
-        }
+        // if (this.checkGameHasEnded()) {
+        //   throw new Error("game ended");
+        // }
 
         if (!planet) {
           throw new Error("you can't prospect a planet you haven't discovered");
-        }
-
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("you can't prospect a planet you don't own");
         }
 
         if (!isLocatable(planet)) {
           throw new Error("you don't know this planet's location");
         }
 
-        if (planet.prospectedBlockNumber !== undefined) {
+        if (
+          planet.prospectedBlockNumber !== undefined &&
+          !prospectExpired(
+            this.ethConnection.getCurrentBlockNumber(),
+            planet.prospectedBlockNumber,
+          )
+        ) {
           throw new Error("someone already prospected this planet");
         }
 
@@ -4297,15 +3930,30 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-prospectPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-prospectPlanet`,
         planetId,
       );
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
 
       const txIntent: UnconfirmedProspectPlanet = {
         methodName: "df__prospectPlanet",
         contract: this.contractsAPI.contract,
         planetId: planetId,
         args: Promise.resolve([locationIdToDecStr(planetId)]),
+        delegator: delegator,
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -4347,13 +3995,9 @@ export class GameManager extends EventEmitter {
       }
 
       if (!bypassChecks) {
-        if (this.checkGameHasEnded()) {
-          throw new Error("game has ended");
-        }
-
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("you can't find artifacts on planets you don't own");
-        }
+        // if (this.checkGameHasEnded()) {
+        //   throw new Error("game has ended");
+        // }
 
         if (planet.hasTriedFindingArtifact) {
           throw new Error(
@@ -4372,9 +4016,23 @@ export class GameManager extends EventEmitter {
 
       // this is shitty. used for the popup window
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-findArtifactOnPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-findArtifactOnPlanet`,
         planetId,
       );
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
 
       const txIntent: UnconfirmedFindArtifact = {
         methodName: "df__findArtifact",
@@ -4384,6 +4042,7 @@ export class GameManager extends EventEmitter {
           planet.location.coords.x,
           planet.location.coords.y,
         ),
+        delegator: delegator,
       };
 
       const tx =
@@ -4441,11 +4100,11 @@ export class GameManager extends EventEmitter {
   ): Promise<Transaction<UnconfirmedDepositArtifact>> {
     try {
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-depositPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-depositPlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-depositArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-depositArtifact`,
         artifactId,
       );
 
@@ -4509,11 +4168,11 @@ export class GameManager extends EventEmitter {
 
       // this is shitty. used for the popup window
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-withdrawPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawPlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-withdrawArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawArtifact`,
         artifactId,
       );
 
@@ -4547,6 +4206,148 @@ export class GameManager extends EventEmitter {
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "withdrawArtifact",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async chargeArtifact(
+    locationId: LocationId,
+    artifactId: ArtifactId,
+    data: Hex,
+  ): Promise<Transaction<UnconfirmedChargeArtifact>> {
+    try {
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-chargeArtifact`,
+        artifactId,
+      );
+      const artifact = this.getArtifactWithId(artifactId);
+      if (!artifact) {
+        throw new Error("artifact not found");
+      }
+      const getArgs = async () => {
+        if (artifact.artifactType !== ArtifactType.Bomb) {
+          return "";
+        }
+        const targetPlanet = this.entityStore.getPlanetWithId(
+          locationIdFromHexStr(data),
+        );
+        if (!targetPlanet) {
+          throw new Error("target planet not found");
+        }
+        if (!isLocatable(targetPlanet)) {
+          throw new Error("target planet not locatable");
+        }
+        const revealArgs = await this.snarkHelper.getRevealArgs(
+          targetPlanet.location.coords.x,
+          targetPlanet.location.coords.y,
+        );
+
+        this.terminal.current?.println(
+          "REVEAL: calculated SNARK with args:",
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.println(
+          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.newline();
+
+        const encoded = encodeFunctionData({
+          abi: PlanetRevealSystemAbi,
+          functionName: "revealLocation",
+          args: this.transformRevealArgs(revealArgs),
+        });
+        return `0x${encoded.slice(10)}` as Hex;
+      };
+
+      const planet = this.getPlanetWithId(locationId);
+
+      if (!planet) {
+        throw Error("no planet");
+      }
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
+      const txIntent: UnconfirmedChargeArtifact = {
+        methodName: "df__chargeArtifact",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          artifactIdToDecStr(artifactId),
+          await getArgs(),
+        ]),
+        delegator: delegator,
+        locationId,
+        artifactId,
+      };
+      return this.contractsAPI.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__chargeArtifact",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async shutdownArtifact(
+    locationId: LocationId,
+    artifactId: ArtifactId,
+  ): Promise<Transaction<UnconfirmedShutdownArtifact>> {
+    try {
+      localStorage.setItem(
+        `${this.getAccount()?.toLowerCase()}-shutdownArtifact`,
+        artifactId,
+      );
+
+      const planet = this.getPlanetWithId(locationId);
+      if (!planet) {
+        throw Error("no planet");
+      }
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
+      const txIntent: UnconfirmedShutdownArtifact = {
+        methodName: "df__shutdownArtifact",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          artifactIdToDecStr(artifactId),
+        ]),
+        delegator: delegator,
+        locationId,
+        artifactId,
+      };
+      return this.contractsAPI.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__shutdownArtifact",
         (e as Error).message,
       );
       throw e;
@@ -4593,21 +4394,92 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-activatePlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-activatePlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-activateArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-activateArtifact`,
         artifactId,
       );
 
+      console.log(
+        "activateArtifact",
+        locationId,
+        artifactId,
+        linkTo ? locationIdToHexStr(linkTo) : "",
+      );
+
+      const artifact = this.getArtifactWithId(artifactId);
+      if (!artifact) {
+        throw new Error("artifact not found");
+      }
+
+      const getArgs = async () => {
+        if (artifact.artifactType === ArtifactType.Wormhole) {
+          if (!linkTo) {
+            throw new Error("linkTo not found");
+          }
+          return locationIdToHexStr(linkTo);
+        } else if (artifact.artifactType !== ArtifactType.Bomb) {
+          return "";
+        }
+        const launchPlanet = this.entityStore.getPlanetWithId(locationId);
+        if (!launchPlanet) {
+          throw new Error("launch planet not found");
+        }
+        if (!isLocatable(launchPlanet)) {
+          throw new Error("launch planet not locatable");
+        }
+        const revealArgs = await this.snarkHelper.getRevealArgs(
+          launchPlanet.location.coords.x,
+          launchPlanet.location.coords.y,
+        );
+
+        this.terminal.current?.println(
+          "REVEAL: calculated SNARK with args:",
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.println(
+          JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
+          TerminalTextStyle.Sub,
+        );
+        this.terminal.current?.newline();
+
+        const encoded = encodeFunctionData({
+          abi: PlanetRevealSystemAbi,
+          functionName: "revealLocation",
+          args: this.transformRevealArgs(revealArgs),
+        });
+        return `0x${encoded.slice(10)}` as Hex;
+      };
+
+      const planet = this.getPlanetWithId(locationId);
+      if (!planet) {
+        throw Error("no planet");
+      }
+
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedActivateArtifact = {
-        methodName: "activateArtifact",
+        methodName: "df__activateArtifact",
         contract: this.contractsAPI.contract,
+        delegator: delegator,
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
-          linkTo ? locationIdToDecStr(linkTo) : "0",
+          await getArgs(),
         ]),
         locationId,
         artifactId,
@@ -4620,7 +4492,7 @@ export class GameManager extends EventEmitter {
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
-        "activateArtifact",
+        "df__activateArtifact",
         (e as Error).message,
       );
       throw e;
@@ -4642,11 +4514,11 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-deactivatePlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-deactivatePlanet`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-deactivateArtifact`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-deactivateArtifact`,
         artifactId,
       );
 
@@ -4689,15 +4561,15 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-changeArtifactImageType-locationId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-changeArtifactImageType-locationId`,
         locationId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-changeArtifactImageType-artifactId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-changeArtifactImageType-artifactId`,
         artifactId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-changeArtifactImageType-newImageType`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-changeArtifactImageType-newImageType`,
         newImageType.toString(),
       );
 
@@ -4745,26 +4617,26 @@ export class GameManager extends EventEmitter {
   //     const halfPrice = this.getHalfPrice();
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyArtifactOnPlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifactOnPlanet`,
   //       locationId,
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyArtifactType`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifactType`,
   //       Number(type).toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyArtifactRarity`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifactRarity`,
   //       Number(rarity).toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
-  //     // localStorage.setItem(`${this.getAccount()?.toLowerCase()}-buyArtifact`, artifactId);
+  //     // localStorage.setItem(`${this.ethConnection.getAddress()?.toLowerCase()}-buyArtifact`, artifactId);
 
   //     // eslint-disable-next-line no-inner-declarations
   //     function random256Id() {
@@ -4878,62 +4750,58 @@ export class GameManager extends EventEmitter {
   public async withdrawSilver(
     locationId: LocationId,
     amount: number,
-    bypassChecks = false,
   ): Promise<Transaction<UnconfirmedWithdrawSilver>> {
     try {
-      if (!bypassChecks) {
-        if (!this.account) {
-          throw new Error("no account");
-        }
-        // if (this.checkGameHasEnded()) {
-        //   throw new Error('game has ended');
-        // }
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to withdraw silver from an unknown planet");
-        }
-        if (planet.planetType !== PlanetType.TRADING_POST) {
-          throw new Error("can only withdraw silver from spacetime rips");
-        }
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("can only withdraw silver from a planet you own");
-        }
-        if (
-          planet.transactions?.hasTransaction(isUnconfirmedWithdrawSilverTx)
-        ) {
-          throw new Error(
-            "a withdraw silver action is already in progress for this planet",
-          );
-        }
-        if (amount > planet.silver) {
-          throw new Error("not enough silver to withdraw!");
-        }
-
-        if (amount * 5 < planet.silverCap) {
-          throw new Error("require silverAmount >= silverCap * 0.2");
-        }
-
-        if (amount === 0) {
-          throw new Error("must withdraw more than 0 silver!");
-        }
-
-        // if (planet.destroyed || planet.frozen) {
-        //   throw new Error(
-        //     "can't withdraw silver from a destroyed/frozen planet",
-        //   );
-        // }
+      if (!this.account) {
+        throw new Error("no account");
+      }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to withdraw silver from an unknown planet");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("can only withdraw silver from spacetime rips");
+      }
+      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
+        throw new Error("can only withdraw silver from a planet you own");
+      }
+      if (planet.transactions?.hasTransaction(isUnconfirmedWithdrawSilverTx)) {
+        throw new Error(
+          "a withdraw silver action is already in progress for this planet",
+        );
+      }
+      if (amount > planet.silver) {
+        throw new Error("not enough silver to withdraw!");
       }
 
+      if (amount * 5 < planet.silverCap) {
+        throw new Error("require silverAmount >= silverCap * 0.2");
+      }
+
+      if (amount === 0) {
+        throw new Error("must withdraw more than 0 silver!");
+      }
+
+      // if (planet.destroyed || planet.frozen) {
+      //   throw new Error(
+      //     "can't withdraw silver from a destroyed/frozen planet",
+      //   );
+      // }
+
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-withdrawSilverPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawSilverPlanet`,
         locationId,
       );
 
-      const delegator = this.getAccount();
+      const delegator = planet.owner;
 
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
+
       const txIntent: UnconfirmedWithdrawSilver = {
         delegator: delegator,
         methodName: "df__withdrawSilver",
@@ -4962,46 +4830,46 @@ export class GameManager extends EventEmitter {
   public async setPlanetEmoji(
     locationId: LocationId,
     emoji: string,
-    bypassChecks = false,
   ): Promise<Transaction<UnconfirmedSetPlanetEmoji>> {
     try {
-      if (!bypassChecks) {
-        if (!this.account) {
-          throw new Error("no account");
-        }
-        // if (this.checkGameHasEnded()) {
-        //   throw new Error('game has ended');
-        // }
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to set emoji to an unknown planet");
-        }
+      if (!this.account) {
+        throw new Error("no account");
+      }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to set emoji to an unknown planet");
+      }
 
-        if (planet.owner !== this.getAccount()) {
-          throw new Error("can only set emoji to your planet");
-        }
-        if (
-          planet.transactions?.hasTransaction(isUnconfirmedSetPlanetEmojiTx)
-        ) {
-          throw new Error(
-            "a set emoji action is already in progress for this planet",
-          );
-        }
+      const canDelegate = this.checkDelegateCondition(
+        planet.owner,
+        this.getAccount(),
+      );
 
-        if (planet.destroyed || planet.frozen) {
-          throw new Error("can't set emoji to a destroyed/frozen planet");
-        }
+      if (planet.owner !== this.getAccount() && !canDelegate) {
+        throw new Error("can only set emoji to your planet");
+      }
+      if (planet.transactions?.hasTransaction(isUnconfirmedSetPlanetEmojiTx)) {
+        throw new Error(
+          "a set emoji action is already in progress for this planet",
+        );
+      }
+
+      if (planet.destroyed || planet.frozen) {
+        throw new Error("can't set emoji to a destroyed/frozen planet");
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-setPlanetEmoji-planetId`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-setPlanetEmoji-planetId`,
         locationId,
       );
 
-      const delegator = this.getAccount();
+      const delegator = planet.owner; //this.getAccount();
 
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
 
       const txIntent: UnconfirmedSetPlanetEmoji = {
@@ -5214,13 +5082,15 @@ export class GameManager extends EventEmitter {
     silver: number,
     artifactMoved?: ArtifactId,
     abandoning = false,
-    bypassChecks = false,
   ): Promise<Transaction<UnconfirmedMove>> {
     localStorage.setItem(
-      `${this.getAccount()?.toLowerCase()}-fromPlanet`,
+      `${this.ethConnection.getAddress()?.toLowerCase()}-fromPlanet`,
       from,
     );
-    localStorage.setItem(`${this.getAccount()?.toLowerCase()}-toPlanet`, to);
+    localStorage.setItem(
+      `${this.ethConnection.getAddress()?.toLowerCase()}-toPlanet`,
+      to,
+    );
 
     try {
       // if (!bypassChecks && this.checkGameHasEnded()) {
@@ -5266,13 +5136,24 @@ export class GameManager extends EventEmitter {
         throw new Error("attempted to move out of bounds");
       }
 
+      if (newX ** 2 + newY ** 2 < this.getInnerRadius() ** 2) {
+        throw new Error("attempted to move into inner circle");
+      }
+
       const oldPlanet = this.entityStore.getPlanetWithLocation(oldLocation);
 
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      if (!oldPlanet) {
+        throw new Error("no old planet");
+      }
+
       if (
-        ((!bypassChecks && !this.getAccount()) ||
-          !oldPlanet ||
-          oldPlanet.owner !== this.getAccount()) &&
-        !isSpaceShip(this.getArtifactWithId(artifactMoved)?.artifactType)
+        oldPlanet.owner !== this.getAccount() &&
+        !this.checkDelegateCondition(oldPlanet.owner, this.getAccount())
+        //  || !isSpaceShip(this.getArtifactWithId(artifactMoved)?.artifactType)
       ) {
         throw new Error("attempted to move from a planet not owned by player");
       }
@@ -5316,10 +5197,11 @@ export class GameManager extends EventEmitter {
         return args;
       };
 
-      const delegator = this.getAccount();
+      const delegator = oldPlanet?.owner; // this.getAccount();
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
+
       const txIntent: UnconfirmedMove = {
         delegator: delegator,
         methodName: "df__legacyMove",
@@ -5370,22 +5252,26 @@ export class GameManager extends EventEmitter {
   public async upgrade(
     planetId: LocationId,
     branch: number,
-    _bypassChecks = false,
   ): Promise<Transaction<UnconfirmedUpgrade>> {
     try {
       // this is shitty
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-upPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-upPlanet`,
         planetId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-branch`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-branch`,
         branch.toString(),
       );
 
-      const delegator = this.getAccount();
+      const planet = this.entityStore.getPlanetWithId(planetId);
+      if (!planet) {
+        throw new Error("planet not found");
+      }
+
+      const delegator = planet.owner; // this.getAccount();
       if (!delegator) {
-        throw Error("no main account");
+        throw Error("no delegator account");
       }
 
       const txIntent: UnconfirmedUpgrade = {
@@ -5422,7 +5308,7 @@ export class GameManager extends EventEmitter {
     try {
       // this is shitty
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-refreshPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-refreshPlanet`,
         planetId,
       );
 
@@ -5488,26 +5374,26 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatPlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatPlanet`,
   //       planetId,
   //     );
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatLevel`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatLevel`,
   //       planet.hatLevel.toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatType`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatType`,
   //       planet.hatType.toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-hatCostEth`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-hatCostEth`,
   //       hatCostEth.toString(),
   //     );
 
@@ -5655,17 +5541,17 @@ export class GameManager extends EventEmitter {
   //     };
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buyPlanet`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buyPlanet`,
   //       planetId,
   //     );
 
   //     // localStorage.setItem(
-  //     //   `${this.getAccount()?.toLowerCase()}-buyPlanetAmountBefore`,
+  //     //   `${this.ethConnection.getAddress()?.toLowerCase()}-buyPlanetAmountBefore`,
   //     //   player.buyPlanetAmount.toString()
   //     // );
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
@@ -5768,11 +5654,11 @@ export class GameManager extends EventEmitter {
   //     }
 
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-buySpaceshipOnPlanetId`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-buySpaceshipOnPlanetId`,
   //       planetId,
   //     );
   //     localStorage.setItem(
-  //       `${this.getAccount()?.toLowerCase()}-halfPrice`,
+  //       `${this.ethConnection.getAddress()?.toLowerCase()}-halfPrice`,
   //       halfPrice.toString(),
   //     );
 
@@ -5827,7 +5713,7 @@ export class GameManager extends EventEmitter {
       const fee = bigInt(1_000_000_000_000_000).multiply(amount).toString();
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-donateAmount`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-donateAmount`,
         amount.toString(),
       );
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
@@ -5867,11 +5753,11 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-transferPlanet`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-transferPlanet`,
         planetId,
       );
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-transferOwner`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-transferOwner`,
         newOwner,
       );
 
@@ -6020,14 +5906,25 @@ export class GameManager extends EventEmitter {
       );
     }
 
-    const wormholeFactors = this.getWormholeFactors(planetFrom, planetTo);
+    const { DistanceMultiplier } = this.components;
+    const [left, right] =
+      BigInt(locationIdToDecStr(fromId)) < BigInt(locationIdToDecStr(toId))
+        ? [fromId, toId]
+        : [toId, fromId];
+
+    const key = encodeEntity(DistanceMultiplier.metadata.keySchema, {
+      from: locationIdToHexStr(left) as `0x${string}`,
+      to: locationIdToHexStr(right) as `0x${string}`,
+    });
+    const value = getComponentValue(DistanceMultiplier, key);
+
     const distance = this.getDistCoords(
       planetFrom.location.coords,
       planetTo.location.coords,
     );
-    const distanceFactor = wormholeFactors ? wormholeFactors.distanceFactor : 1;
+    const distanceFactor = value ? value.multiplier / 1000 : 1;
 
-    return distance / distanceFactor;
+    return distance * distanceFactor;
   }
 
   /**
@@ -6089,18 +5986,30 @@ export class GameManager extends EventEmitter {
     toId: LocationId,
     arrivingEnergy: number,
     abandoning = false,
+    upgrade: Upgrade = {
+      energyCapMultiplier: 100,
+      energyGroMultiplier: 100,
+      rangeMultiplier: 100,
+      speedMultiplier: 100,
+      defMultiplier: 100,
+    },
   ): number {
     const from = this.getPlanetWithId(fromId);
     if (!from) {
       throw new Error("origin planet unknown");
     }
+    const upgradedPlanet = {
+      ...from,
+      range: (from.range * upgrade.rangeMultiplier) / 100,
+      energyCap: (from.energyCap * upgrade.energyCapMultiplier) / 100,
+    };
     const dist = this.getDist(fromId, toId);
-    const range = from.range * this.getRangeBuff(abandoning);
+    const range = upgradedPlanet.range * this.getRangeBuff(abandoning);
     const rangeSteps = dist / range;
 
-    const arrivingProp = arrivingEnergy / from.energyCap + 0.05;
+    const arrivingProp = arrivingEnergy / upgradedPlanet.energyCap + 0.05;
 
-    return arrivingProp * Math.pow(2, rangeSteps) * from.energyCap;
+    return arrivingProp * Math.pow(2, rangeSteps) * upgradedPlanet.energyCap;
   }
 
   /**
@@ -6127,14 +6036,14 @@ export class GameManager extends EventEmitter {
 
     const dist = (toId && this.getDist(fromId, toId)) || (distance as number);
 
-    if (to && toId) {
-      const wormholeFactors = this.getWormholeFactors(from, to);
-      if (wormholeFactors !== undefined) {
-        if (to.owner !== from.owner) {
-          return 0;
-        }
-      }
-    }
+    // if (to && toId) {
+    //   const wormholeFactors = this.getWormholeFactors(from, to);
+    //   if (wormholeFactors !== undefined) {
+    //     if (to.owner !== from.owner) {
+    //       return 0;
+    //     }
+    //   }
+    // }
 
     const range = from.range * this.getRangeBuff(abandoning);
     const scale = (1 / 2) ** (dist / range);
@@ -6149,9 +6058,9 @@ export class GameManager extends EventEmitter {
   /**
    * Gets the active artifact on this planet, if one exists.
    */
-  getActiveArtifact(planet: Planet): Artifact | undefined {
+  getActiveArtifacts(planet: Planet): Artifact[] {
     const artifacts = this.getArtifactsWithIds(planet.heldArtifactIds);
-    const active = artifacts.find((a) => a && isActivated(a));
+    const active = artifacts.filter((a) => a && isActivated(a)) as Artifact[];
 
     return active;
   }
@@ -6161,57 +6070,57 @@ export class GameManager extends EventEmitter {
    * is active and targetting the other planet, return the wormhole boost which is greater. Values
    * represent a multiplier.
    */
-  getWormholeFactors(
-    fromPlanet: Planet,
-    toPlanet: Planet,
-  ): { distanceFactor: number; speedFactor: number } | undefined {
-    const fromActiveArtifact = this.getActiveArtifact(fromPlanet);
-    const toActiveArtifact = this.getActiveArtifact(toPlanet);
+  // getWormholeFactors(
+  //   fromPlanet: Planet,
+  //   toPlanet: Planet,
+  // ): { distanceFactor: number; speedFactor: number } | undefined {
+  //   const fromActiveArtifact = this.getActiveArtifact(fromPlanet);
+  //   const toActiveArtifact = this.getActiveArtifact(toPlanet);
 
-    const fromHasActiveWormhole =
-      fromActiveArtifact?.artifactType === ArtifactType.Wormhole &&
-      fromActiveArtifact.linkTo === toPlanet.locationId;
-    const toHasActiveWormhole =
-      toActiveArtifact?.artifactType === ArtifactType.Wormhole &&
-      toActiveArtifact.linkTo === fromPlanet.locationId;
+  //   const fromHasActiveWormhole =
+  //     fromActiveArtifact?.artifactType === ArtifactType.Wormhole &&
+  //     fromActiveArtifact.linkTo === toPlanet.locationId;
+  //   const toHasActiveWormhole =
+  //     toActiveArtifact?.artifactType === ArtifactType.Wormhole &&
+  //     toActiveArtifact.linkTo === fromPlanet.locationId;
 
-    let greaterRarity: ArtifactRarity | undefined = undefined;
-    switch (true) {
-      // active wormhole on both from and to planets choose the biggest rarity
-      case fromHasActiveWormhole && toHasActiveWormhole: {
-        greaterRarity = Math.max(
-          fromActiveArtifact.rarity,
-          toActiveArtifact.rarity,
-        ) as ArtifactRarity;
-        break;
-      }
-      // only from planet has active wormhole, use that one
+  //   let greaterRarity: ArtifactRarity | undefined = undefined;
+  //   switch (true) {
+  //     // active wormhole on both from and to planets choose the biggest rarity
+  //     case fromHasActiveWormhole && toHasActiveWormhole: {
+  //       greaterRarity = Math.max(
+  //         fromActiveArtifact.rarity,
+  //         toActiveArtifact.rarity,
+  //       ) as ArtifactRarity;
+  //       break;
+  //     }
+  //     // only from planet has active wormhole, use that one
 
-      case fromHasActiveWormhole: {
-        greaterRarity = fromActiveArtifact.rarity;
-        break;
-      }
-      // only destination planet has active wormhole, use that one
-      case toHasActiveWormhole: {
-        greaterRarity = toActiveArtifact.rarity;
-        break;
-      }
-    }
+  //     case fromHasActiveWormhole: {
+  //       greaterRarity = fromActiveArtifact.rarity;
+  //       break;
+  //     }
+  //     // only destination planet has active wormhole, use that one
+  //     case toHasActiveWormhole: {
+  //       greaterRarity = toActiveArtifact.rarity;
+  //       break;
+  //     }
+  //   }
 
-    if (
-      greaterRarity === undefined ||
-      greaterRarity <= ArtifactRarity.Unknown
-    ) {
-      return undefined;
-    }
+  //   if (
+  //     greaterRarity === undefined ||
+  //     greaterRarity <= ArtifactRarity.Unknown
+  //   ) {
+  //     return undefined;
+  //   }
 
-    const rangeUpgradesPerRarity = [0, 2, 4, 6, 8, 10];
-    const speedUpgradesPerRarity = [0, 10, 20, 30, 40, 50];
-    return {
-      distanceFactor: rangeUpgradesPerRarity[greaterRarity],
-      speedFactor: speedUpgradesPerRarity[greaterRarity],
-    };
-  }
+  //   const rangeUpgradesPerRarity = [0, 2, 4, 6, 8, 10];
+  //   const speedUpgradesPerRarity = [0, 10, 20, 30, 40, 50];
+  //   return {
+  //     distanceFactor: rangeUpgradesPerRarity[greaterRarity],
+  //     speedFactor: speedUpgradesPerRarity[greaterRarity],
+  //   };
+  // }
 
   /**
    * Gets the amount of time, in seconds that a voyage between from the first to the
@@ -6289,7 +6198,7 @@ export class GameManager extends EventEmitter {
   /**
    * Returns constructors of classes that may be useful for developing plugins.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   public getConstructors() {
     return {
       MinerManager,
@@ -6570,6 +6479,11 @@ export class GameManager extends EventEmitter {
     return this.paused;
   }
 
+  public setPaused(paused: boolean) {
+    this.paused = paused;
+    this.paused$.publish(paused);
+  }
+
   public getPaused$(): Monomitter<boolean> {
     return this.paused$;
   }
@@ -6702,4 +6616,755 @@ export class GameManager extends EventEmitter {
   // public getHalfPrice$(): Monomitter<boolean> {
   //   return this.halfPrice$;
   // }
+
+  // Guild Stuff
+
+  public getGuild(guildId?: GuildId): Guild | undefined {
+    return this.contractsAPI.getGuildUtils().getGuildById(guildId);
+  }
+
+  public getPlayerGuildId(addr: EthAddress): GuildId | undefined {
+    return this.contractsAPI.getGuildUtils().getGuildIdByPlayer(addr);
+  }
+
+  public getAllGuildIds(): GuildId[] {
+    return this.contractsAPI.getGuildUtils().getGuildIds();
+  }
+
+  public getNextGuildId(): GuildId {
+    const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
+    const result: GuildId = (guildIds.length + 1) as GuildId;
+    return result;
+  }
+
+  public getAllGuilds(): Guild[] {
+    const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
+    const res: Guild[] = [];
+
+    for (let i = 0; i < guildIds.length; i++) {
+      const guildId = guildIds[i];
+      const guild = this.getGuild(guildId);
+      if (!guild) continue;
+      if (guild.status !== GuildStatus.ACTIVE) continue;
+      res.push(guild);
+    }
+    return res;
+  }
+
+  public getGuildRole(addr: EthAddress) {
+    return this.contractsAPI.getGuildUtils().getGuildRole(addr);
+  }
+
+  public getPlayerGrant(addr: EthAddress) {
+    return this.contractsAPI.getGuildUtils().getPlayerGrant(addr);
+  }
+
+  public getGrantedAddresses(account: EthAddress) {
+    const guildId = this.getPlayerGuildId(account);
+    if (!guildId) return [];
+
+    const guild = this.getGuild(guildId);
+    if (!guild) return [];
+
+    if (!account) return [];
+
+    const grant = this.getPlayerGrant(account);
+
+    if (grant === GuildRole.NONE) return [];
+
+    const result = [];
+
+    for (let i = 0; i < guild.members.length; i++) {
+      const member = guild.members[i];
+      const role = this.getGuildRole(member);
+
+      if (grant === GuildRole.NONE) continue;
+
+      if (grant === GuildRole.MEMBER) {
+        result.push(member);
+      } else if (grant === GuildRole.OFFICER) {
+        if (role === GuildRole.OFFICER || role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      } else if (grant === GuildRole.LEADER) {
+        if (role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public getAuthorizedByAddresses(account: EthAddress) {
+    const guildId = this.getPlayerGuildId(account);
+    if (!guildId) return [];
+    const guild = this.getGuild(guildId);
+    if (!guild) return [];
+    if (!account) return [];
+
+    const role = this.getGuildRole(account);
+
+    const result = [];
+
+    for (let i = 0; i < guild.members.length; i++) {
+      const member = guild.members[i];
+      const grant = this.getPlayerGrant(member);
+
+      if (grant === GuildRole.NONE) continue;
+
+      if (grant === GuildRole.MEMBER) {
+        result.push(member);
+      } else if (grant === GuildRole.OFFICER) {
+        if (role === GuildRole.OFFICER || role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      } else if (grant === GuildRole.LEADER) {
+        if (role === GuildRole.LEADER) {
+          result.push(member);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public checkDelegateCondition(delegator?: EthAddress, delegate?: EthAddress) {
+    if (!delegator || !delegate) return false;
+    return this.contractsAPI
+      .getGuildUtils()
+      .checkDelegateCondition(delegator, delegate);
+  }
+
+  public getPlayerGuildIdAtTick(
+    player: EthAddress,
+    tick: number,
+  ): GuildId | undefined {
+    return this.contractsAPI
+      .getGuildUtils()
+      .getPlayerGuildIdAtTick(player, tick);
+  }
+
+  public inSameGuildAtTick(
+    player1: EthAddress,
+    player2: EthAddress,
+    tick: number,
+  ) {
+    return this.contractsAPI
+      .getGuildUtils()
+      .inSameGuildAtTick(player1, player2, tick);
+  }
+
+  public inSameGuildRightNow(
+    player1?: EthAddress,
+    player2?: EthAddress,
+  ): boolean {
+    if (!player1 || !player2) return false;
+    return this.contractsAPI
+      .getGuildUtils()
+      .inSameGuildRightNow(player1, player2);
+  }
+
+  public getGuildRejoinCooldownTicks(): number {
+    return this.contractsAPI.getGuildUtils().getGuildRejoinCooldownTicks();
+  }
+
+  public getGuildRejoinCooldownTime(): number {
+    const cooldownTicks = this.getGuildRejoinCooldownTicks();
+    return Math.ceil(cooldownTicks / this.getCurrentTickerRate());
+  }
+
+  public timeUntilNextApplyGuildAvaiable(_account?: EthAddress) {
+    const account = _account ?? this.account;
+    if (!account) {
+      throw new Error("no account set");
+    }
+
+    const myLastLeaveGuildTick = this.contractsAPI
+      .getGuildUtils()
+      .getPlayerLastLeaveGuildTick(account);
+
+    const myLastLeaveGuildTimestamp = myLastLeaveGuildTick
+      ? Math.ceil(this.convertTickToMs(myLastLeaveGuildTick) / 1000)
+      : undefined;
+
+    if (!myLastLeaveGuildTimestamp) return 0;
+
+    const cooldownTicks = this.contractsAPI
+      .getGuildUtils()
+      .getGuildRejoinCooldownTicks();
+
+    const cooldownDuration = Math.ceil(
+      cooldownTicks / this.getCurrentTickerRate(),
+    );
+
+    return (myLastLeaveGuildTimestamp + cooldownDuration) * 1000 - Date.now();
+  }
+
+  public getNextApplyGuildAvailableTimestamp(_account?: EthAddress) {
+    const account = _account ?? this.account;
+    const _ = this.timeUntilNextApplyGuildAvaiable(account);
+    return Date.now() + _;
+  }
+
+  public getInitGuilds(): Map<GuildId, Guild> {
+    const guildIds = this.contractsAPI.getGuildUtils().getGuildIds();
+    const res: Map<GuildId, Guild> = new Map();
+    for (let i = 0; i < guildIds.length; i++) {
+      const guildId = guildIds[i];
+      const guild = this.getGuild(guildId);
+      if (!guild) continue;
+      res.set(guildId, guild);
+    }
+    return res;
+  }
+
+  public hardRefreshGuild(guildId?: GuildId): void {
+    if (!guildId) return;
+
+    const guildFromBlockchain = this.contractsAPI
+      .getGuildUtils()
+      .getGuildById(guildId);
+    if (!guildFromBlockchain) return;
+
+    this.guilds.set(guildId, guildFromBlockchain);
+
+    this.guildsUpdated$.publish();
+  }
+
+  public getGuildCreateFee(): number {
+    const result = this.contractsAPI.getGuildUtils().getCreateGuildFee();
+    if (!result) throw Error("Create Fee Error");
+    return Number(result);
+  }
+
+  public async createGuild(
+    guildName: string,
+  ): Promise<Transaction<UnconfirmedCreateGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (guildId) throw Error("you are already in a guild");
+
+      const unionCreationFee = this.getGuildCreateFee();
+
+      const unionCreationFeeETH = utils.formatEther(unionCreationFee);
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-guildName`,
+        guildName,
+      );
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-fee`,
+        unionCreationFeeETH.toString(),
+      );
+
+      console.log(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-createGuild-unionName`,
+      );
+      console.log(guildName);
+      console.log(unionCreationFeeETH);
+
+      const delegator = this.getAccount();
+      if (!delegator) {
+        throw Error("no main account");
+      }
+
+      const txIntent: UnconfirmedCreateGuild = {
+        delegator: delegator,
+        methodName: "df__createGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([guildName]),
+        name: guildName,
+        guildId: this.getNextGuildId(),
+      };
+
+      const tx = await this.submitTransaction(txIntent, {
+        value: unionCreationFee.toString(),
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__createGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async inviteToGuild(
+    invitee: EthAddress,
+  ): Promise<Transaction<UnconfirmedInviteToGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+      const inviter = this.account;
+
+      const inviterGuildId = this.getPlayerGuildId(inviter);
+      if (!inviterGuildId) throw Error("no inviter guildId");
+
+      const inviterRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(inviter);
+
+      if (inviterRole === GuildRole.NONE || inviterRole === GuildRole.MEMBER)
+        throw Error("no inviter role");
+
+      const inviteePlayer = this.getPlayer(invitee);
+      if (!inviteePlayer) throw Error("no invitee player");
+
+      const invitee_guildId = this.getPlayerGuildId(invitee);
+
+      if (invitee_guildId) throw Error("invitee is already in a guild");
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}--inviteToGuild-guildId`,
+        inviterGuildId.toString(),
+      );
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}--inviteToGuild-invitee`,
+        invitee.toString(),
+      );
+
+      const txIntent: UnconfirmedInviteToGuild = {
+        delegator: this.account,
+        methodName: "df__inviteToGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([invitee]),
+        guildId: inviterGuildId,
+        invitee: invitee,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__inviteToGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async acceptInvitation(
+    guildId: GuildId,
+  ): Promise<Transaction<UnconfirmedAcceptInvitation>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const playerGuildId = this.getPlayerGuildId(this.account);
+      if (playerGuildId) throw Error("you are already in a guild");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const maxMembers = this.contractsAPI.getGuildUtils().getMaxGuildMembers();
+      if (!maxMembers) throw Error("no max members");
+      if (guild.number >= maxMembers) {
+        throw Error("guild member limit reached");
+      }
+
+      const isInvited = this.contractsAPI
+        .getGuildUtils()
+        .isInvitedToGuild(this.account, guildId);
+      if (!isInvited) throw Error("you are not invited to this guild");
+
+      const isOnLeaveCooldown = this.contractsAPI
+        .getGuildUtils()
+        .checkGuildLeaveCooldown(this.account);
+      if (!isOnLeaveCooldown) throw Error("you are on leave cooldown");
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}---acceptInvitation-guildId`,
+        guildId.toString(),
+      );
+
+      const txIntent: UnconfirmedAcceptInvitation = {
+        delegator: this.account,
+        methodName: "df__acceptInvitation",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([guildId]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__acceptInvitation",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async applyToGuild(
+    guildId: GuildId,
+  ): Promise<Transaction<UnconfirmedApplyToGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const playerGuild = this.getPlayerGuildId(this.account);
+      if (playerGuild) throw Error("you are already in a guild");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const isOnLeaveCooldown = this.contractsAPI
+        .getGuildUtils()
+        .checkGuildLeaveCooldown(this.account);
+      if (!isOnLeaveCooldown) throw Error("you are on leave cooldown");
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}---applyToGuild-guildId`,
+        guildId.toString(),
+      );
+
+      const txIntent: UnconfirmedApplyToGuild = {
+        delegator: this.account,
+        methodName: "df__applyToGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([guildId]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__applyToGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async approveApplication(
+    player: EthAddress,
+  ): Promise<Transaction<UnconfirmedApproveApplication>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const operator = this.account;
+      const operatorInfo = this.getPlayer(operator);
+      if (!operatorInfo) throw Error("no operatorInfo");
+
+      const playerInfo = this.getPlayer(player);
+      if (!playerInfo) throw Error("no playerInfo");
+
+      const guildId = this.getPlayerGuildId(operator);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const maxMembers = this.contractsAPI.getGuildUtils().getMaxGuildMembers();
+      if (!maxMembers) throw Error("no max members");
+      if (guild.number >= maxMembers) {
+        throw Error("guild member limit reached");
+      }
+
+      const guildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(operator);
+
+      if (guildRole !== GuildRole.OFFICER && guildRole !== GuildRole.LEADER)
+        throw Error("not an officer or leader");
+
+      const playerGuild = this.getPlayerGuildId(player);
+      if (playerGuild) throw Error("you are already in a guild");
+
+      const txIntent: UnconfirmedApproveApplication = {
+        delegator: operator,
+        methodName: "df__approveApplication",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([player]),
+        guildId: guildId,
+        applicant: player,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__approveApplication",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async leaveGuild(): Promise<Transaction<UnconfirmedLeaveGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(this.account);
+      if (guildRole === GuildRole.NONE || guildRole === GuildRole.LEADER)
+        throw Error("guild role unexpected");
+
+      const txIntent: UnconfirmedLeaveGuild = {
+        delegator: this.account,
+        methodName: "df__leaveGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__leaveGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async transferGuildLeadership(
+    newOwner: EthAddress,
+  ): Promise<Transaction<UnconfirmedTransferGuildLeadership>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const newOwnerPlayer = this.getPlayer(newOwner);
+      if (!newOwnerPlayer) throw Error("no newOwnerPlayer");
+
+      const newOwnerGuildId = this.getPlayerGuildId(newOwner);
+      if (!newOwnerGuildId) throw Error("no newOwnerGuildId");
+
+      if (newOwnerGuildId !== guildId)
+        throw Error("newOwner is not in the guild");
+
+      const txIntent: UnconfirmedTransferGuildLeadership = {
+        delegator: this.account,
+        methodName: "df__transferGuildLeadership",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([newOwner]),
+        guildId: guildId,
+        newOwner: newOwner,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__transferGuildLeadership",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async disbandGuild(): Promise<Transaction<UnconfirmedDisbandGuild>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+
+      if (guild.status === GuildStatus.DISBANDED)
+        throw Error("guild is disbanded");
+
+      if (guild.number > 1) {
+        throw Error("guild has members");
+      }
+
+      if (guild.owner !== this.account) {
+        throw Error("not the guild leader");
+      }
+
+      alert(
+        "This is a dangerous operation. Are you sure you want to disband the guild?",
+      );
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}--disbandGuild-guildId`,
+        guildId.toString(),
+      );
+
+      const txIntent: UnconfirmedDisbandGuild = {
+        delegator: this.account,
+        methodName: "df__disbandGuild",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([]),
+        guildId: guildId,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__disbandGuild",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async setGrant(
+    newGrant: GuildRole,
+  ): Promise<Transaction<UnconfirmedSetGrant>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const guild = this.getGuild(guildId);
+      if (!guild) throw Error("no guild");
+      if (guild.status !== GuildStatus.ACTIVE)
+        throw Error("guild is not active");
+
+      const txIntent: UnconfirmedSetGrant = {
+        delegator: this.account,
+        methodName: "df__setGrant",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([newGrant]),
+        guildId: guildId,
+        newGrant: newGrant,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__setGrant",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async setMemberRole(
+    member: EthAddress,
+    newRole: GuildRole,
+  ): Promise<Transaction<UnconfirmedSetMemberRole>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const memberPlayer = this.getPlayer(member);
+      if (!memberPlayer) throw Error("no memberPlayer");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const memberGuildId = this.getPlayerGuildId(member);
+      if (!memberGuildId) throw Error("no memberGuildId");
+
+      if (memberGuildId !== guildId) throw Error("member is not in the guild");
+
+      const operatorGuildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(this.account);
+      if (operatorGuildRole !== GuildRole.LEADER) throw Error("not a leader");
+
+      const memberGuildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(member);
+      if (memberGuildRole === GuildRole.NONE)
+        throw Error("member is not in the guild");
+
+      if (newRole === GuildRole.LEADER || newRole === GuildRole.NONE)
+        throw Error("new role unexpected");
+
+      if (memberGuildRole === GuildRole.LEADER)
+        throw Error("cannot change role of current leader");
+
+      const txIntent: UnconfirmedSetMemberRole = {
+        delegator: this.account,
+        methodName: "df__setMemberRole",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([member, newRole]),
+        guildId: guildId,
+        member: member,
+        newRole: newRole,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__setMemberRole",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async kickMember(
+    member: EthAddress,
+  ): Promise<Transaction<UnconfirmedKickMember>> {
+    try {
+      if (!this.account) throw new Error("no account");
+      const player = this.getPlayer(this.account);
+      if (!player) throw new Error("no player");
+
+      const memberPlayer = this.getPlayer(member);
+      if (!memberPlayer) throw Error("no memberPlayer");
+
+      const guildId = this.getPlayerGuildId(this.account);
+      if (!guildId) throw Error("no guildId");
+
+      const memberGuildId = this.getPlayerGuildId(member);
+      if (!memberGuildId) throw Error("no memberGuildId");
+
+      if (memberGuildId !== guildId) throw Error("member is not in the guild");
+
+      const operatorGuildRole = this.contractsAPI
+        .getGuildUtils()
+        .getGuildRole(this.account);
+      if (operatorGuildRole !== GuildRole.LEADER) throw Error("not a leader");
+
+      const txIntent: UnconfirmedKickMember = {
+        delegator: this.account,
+        methodName: "df__kickMember",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([member]),
+        guildId: guildId,
+        member: member,
+      };
+
+      return await this.submitTransaction(txIntent);
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__kickMember",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import Picker, { Theme, EmojiStyle, Emoji } from "emoji-picker-react";
+import Picker, { Emoji, EmojiStyle, Theme } from "emoji-picker-react";
 import React, { useState } from "react";
 import styled from "styled-components";
 

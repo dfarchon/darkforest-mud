@@ -67,12 +67,18 @@ function PlanetContextPaneContent({
   onToggleAbandon: () => void;
 }) {
   const account = useAccount(uiManager);
+  const gameManager = uiManager.getGameManager();
   const notifs = useMemo(
-    () => getNotifsForPlanet(planet.value, account),
-    [planet, account],
+    () => getNotifsForPlanet(planet.value, account, gameManager),
+    [planet, account, gameManager],
   );
 
-  const owned = planet.value?.owner === account;
+  const canDelegate = gameManager.checkDelegateCondition(
+    planet.value?.owner,
+    account,
+  );
+
+  const owned = planet.value?.owner === account || canDelegate;
 
   useEffect(() => {
     if (!planet.value) {
@@ -82,12 +88,12 @@ function PlanetContextPaneContent({
 
   const p = planet.value;
 
-  const burned =
-    p && p.burnOperator !== undefined && p.burnOperator !== EMPTY_ADDRESS;
-  const kardasheved =
-    p &&
-    p.kardashevOperator !== undefined &&
-    p.kardashevOperator !== EMPTY_ADDRESS;
+  // const burned =
+  //   p && p.burnOperator !== undefined && p.burnOperator !== EMPTY_ADDRESS;
+  // const kardasheved =
+  //   p &&
+  //   p.kardashevOperator !== undefined &&
+  //   p.kardashevOperator !== EMPTY_ADDRESS;
 
   const gt3 = p && p.planetLevel >= 3;
 
@@ -95,19 +101,19 @@ function PlanetContextPaneContent({
     return p && uiManager.checkPlanetCanPink(p.locationId);
   }, [p]);
 
-  const blueZonePassed = useMemo(() => {
-    return p && uiManager.checkPlanetCanBlue(p.locationId);
-  }, [p]);
+  // const blueZonePassed = useMemo(() => {
+  //   return p && uiManager.checkPlanetCanBlue(p.locationId);
+  // }, [p]);
 
-  let captureRow = null;
-  if (!p?.destroyed && !p?.frozen && uiManager.captureZonesEnabled) {
-    captureRow = (
-      <CapturePlanetButton
-        planetWrapper={planet}
-        key={PlanetPaneName.Capture}
-      />
-    );
-  }
+  // let captureRow = null;
+  // if (!p?.destroyed && !p?.frozen && uiManager.captureZonesEnabled) {
+  //   captureRow = (
+  //     <CapturePlanetButton
+  //       planetWrapper={planet}
+  //       key={PlanetPaneName.Capture}
+  //     />
+  //   );
+  // }
 
   let upgradeRow = null;
   if (
@@ -140,30 +146,30 @@ function PlanetContextPaneContent({
     />
   );
 
-  let hatRow = null;
-  if (!p?.destroyed && !p?.frozen && owned) {
-    hatRow = (
-      <OpenHatPaneButton
-        modal={modal}
-        planetId={p?.locationId}
-        key={PlanetPaneName.Hat}
-      />
-    );
-  }
+  // let hatRow = null;
+  // if (!p?.destroyed && !p?.frozen && owned) {
+  //   hatRow = (
+  //     <OpenHatPaneButton
+  //       modal={modal}
+  //       planetId={p?.locationId}
+  //       key={PlanetPaneName.Hat}
+  //     />
+  //   );
+  // }
 
-  let dropBombRow = null;
-  if (!p?.destroyed && !p?.frozen && owned && gt3 && !burned) {
-    dropBombRow = (
-      <OpenDropBombButton
-        modal={modal}
-        planetId={p?.locationId}
-        key={PlanetPaneName.DropBomb}
-      />
-    );
-  }
+  // let dropBombRow = null;
+  // if (!p?.destroyed && !p?.frozen && owned && gt3 && !burned) {
+  //   dropBombRow = (
+  //     <OpenDropBombButton
+  //       modal={modal}
+  //       planetId={p?.locationId}
+  //       key={PlanetPaneName.DropBomb}
+  //     />
+  //   );
+  // }
 
   let pinkRow = null;
-  if (!p?.destroyed && !p?.frozen && gt3 && pinkZonePassed) {
+  if (!p?.destroyed && !p?.frozen && pinkZonePassed) {
     pinkRow = (
       <OpenPinkButton
         modal={modal}
@@ -173,27 +179,27 @@ function PlanetContextPaneContent({
     );
   }
 
-  let kardashevRow = null;
-  if (!p?.destroyed && !p?.frozen && owned && gt3 && !kardasheved) {
-    kardashevRow = (
-      <OpenKardashevButton
-        modal={modal}
-        planetId={p?.locationId}
-        key={PlanetPaneName.Kardashev}
-      />
-    );
-  }
+  // let kardashevRow = null;
+  // if (!p?.destroyed && !p?.frozen && owned && gt3 && !kardasheved) {
+  //   kardashevRow = (
+  //     <OpenKardashevButton
+  //       modal={modal}
+  //       planetId={p?.locationId}
+  //       key={PlanetPaneName.Kardashev}
+  //     />
+  //   );
+  // }
 
-  let blueRow = null;
-  if (!p?.destroyed && !p?.frozen && gt3 && owned && blueZonePassed) {
-    blueRow = (
-      <OpenBlueButton
-        modal={modal}
-        planetId={p?.locationId}
-        key={PlanetPaneName.Blue}
-      />
-    );
-  }
+  // let blueRow = null;
+  // if (!p?.destroyed && !p?.frozen && gt3 && owned && blueZonePassed) {
+  //   blueRow = (
+  //     <OpenBlueButton
+  //       modal={modal}
+  //       planetId={p?.locationId}
+  //       key={PlanetPaneName.Blue}
+  //     />
+  //   );
+  // }
 
   // let buyArtifactRow = null;
   // if (!p?.destroyed && !p?.frozen && owned) {
@@ -234,16 +240,16 @@ function PlanetContextPaneContent({
     rows.push(infoRow);
   }
   // if (buyArtifactRow) rows.push(buyArtifactRow);
-  // if (artifactsRow) {
-  //   rows.push(artifactsRow);
-  // }
+  if (artifactsRow) {
+    rows.push(artifactsRow);
+  }
 
   // if (dropBombRow) {
   //   rows.push(dropBombRow);
   // }
-  // if (pinkRow) {
-  //   rows.push(pinkRow);
-  // }
+  if (pinkRow) {
+    rows.push(pinkRow);
+  }
   // if (kardashevRow) {
   //   rows.push(kardashevRow);
   // }
@@ -274,9 +280,8 @@ function PlanetContextPaneContent({
         onToggleAbandon={onToggleAbandon}
       />
 
-      {/* PUNK */}
-      {/* <MineArtifactButton planetWrapper={planet} /> */}
-      {captureRow}
+      <MineArtifactButton planetWrapper={planet} />
+      {/* {captureRow} */}
 
       <VerticalSplit>
         <>{leftRows}</>
@@ -402,6 +407,7 @@ export function PlanetContextPane({
   return (
     <ModalPane
       style={
+        // eslint-disable-next-line no-nested-ternary
         planet?.value?.destroyed
           ? snips.destroyedBackground
           : planet?.value?.frozen

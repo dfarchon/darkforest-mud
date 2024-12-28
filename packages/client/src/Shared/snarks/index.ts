@@ -54,6 +54,23 @@ export type RevealSnarkContractCallArgs = [
   [string, string, string, string, string, string, string, string, string], // locationId (BigInt), perlin, x (BigInt mod p), y (BigInt mod p), planetHashKey, spaceTypeKey, perlin lengthscale, perlin xmirror, perlin ymirror
 ];
 
+export type SnarkProof = [
+  [string, string],
+  [[string, string], [string, string]],
+  [string, string],
+];
+export type RevealInput = [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+];
+
 /**
  * Shape of a javascript object that must be passed into snarkJS `fullProve`
  * proof generation function for `init` circuit
