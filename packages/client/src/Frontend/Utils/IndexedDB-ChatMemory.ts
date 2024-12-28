@@ -54,17 +54,64 @@ export const loadConversationFromIndexedDB = async (): Promise<
   });
 };
 
-// Clear Chat History
+// // Clear Chat History
+// export const clearChatHistoryFromIndexedDB = async (): Promise<void> => {
+//   if (!db) {
+//     db = await openChatDatabase();
+//   }
+//   const transaction = db.transaction(STORE_NAME, "readwrite");
+//   const store = transaction.objectStore(STORE_NAME);
+
+//   return new Promise((resolve, reject) => {
+//     const request = store.clear();
+//     request.onsuccess = () => resolve();
+//     request.onerror = () => reject(new Error("Failed to clear chat history"));
+//   });
+// };
+
 export const clearChatHistoryFromIndexedDB = async (): Promise<void> => {
   if (!db) {
     db = await openChatDatabase();
   }
+
   const transaction = db.transaction(STORE_NAME, "readwrite");
   const store = transaction.objectStore(STORE_NAME);
 
   return new Promise((resolve, reject) => {
-    const request = store.clear();
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(new Error("Failed to clear chat history"));
+    const request = store.getAll(); // Fetch all chat history
+    request.onsuccess = () => {
+      const allMessages = request.result;
+
+      if (!allMessages || allMessages.length < 1) {
+        // Nothing to clear if less than one messages exist
+        resolve();
+        return;
+      }
+
+      const permanentMessages = allMessages.slice(0, 1); // Keep the first two messages
+      const transactionClear = db.transaction(STORE_NAME, "readwrite");
+      const clearStore = transactionClear.objectStore(STORE_NAME);
+      const clearRequest = clearStore.clear(); // Clear the entire store
+
+      clearRequest.onsuccess = () => {
+        const transactionAdd = db.transaction(STORE_NAME, "readwrite");
+        const addStore = transactionAdd.objectStore(STORE_NAME);
+
+        // Add back the first two permanent messages
+        permanentMessages.forEach((message) => {
+          addStore.add(message);
+        });
+
+        transactionAdd.oncomplete = () => resolve();
+        transactionAdd.onerror = () =>
+          reject(new Error("Failed to restore permanent messages"));
+      };
+
+      clearRequest.onerror = () =>
+        reject(new Error("Failed to clear chat history"));
+    };
+
+    request.onerror = () =>
+      reject(new Error("Failed to fetch chat history for clearing"));
   });
 };

@@ -510,6 +510,14 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.setPlanetEmoji(locationId, emoji);
   }
 
+  public buyGPTTokens(amount: number) {
+    this.gameManager.buyGPTTokens(amount);
+  }
+
+  public spendGPTTokens() {
+    this.gameManager.spendGPTTokens();
+  }
+
   public startLinkFrom(
     planet: LocatablePlanet,
     artifact: Artifact,

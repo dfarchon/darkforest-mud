@@ -6604,8 +6604,8 @@ export class GameManager extends EventEmitter {
         //  halfPrice
         // ? bigInt(500_000_000_000_000).toString()
         // : bigInt(1_000_000_000_000_000).toString(), //0.001eth
-        gasLimit: 2000000,
-        value: bigInt(1_000_000_000_000_000).toString(), //0.001eth
+        gasLimit: 3000000,
+        value: bigInt(500_000_000_000_000).toString(), //0.0005eth
       });
       return tx;
     } catch (e) {

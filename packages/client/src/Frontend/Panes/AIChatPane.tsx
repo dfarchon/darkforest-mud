@@ -1,8 +1,13 @@
+import { address } from "@df/serde";
 import { ModalName } from "@df/types";
 import { Btn } from "@frontend/Components/Btn";
 import { LoadingSpinner } from "@frontend/Components/LoadingSpinner";
 import dfstyles from "@frontend/Styles/dfstyles";
-import { type Entity, getComponentValue } from "@latticexyz/recs";
+import {
+  type Entity,
+  type EntityType,
+  getComponentValue,
+} from "@latticexyz/recs";
 import { useMUD } from "@mud/MUDContext";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
@@ -29,6 +34,21 @@ const CurrencyViewContainer = styled(Sub)`
   justify-content: space-between;
   align-items: center;
 `;
+export function addressToEntity(walletAddress: string): Entity {
+  // Remove the '0x' prefix if it's present
+  walletAddress = walletAddress.replace(/^0x/, "");
+
+  // Ensure the address is exactly 40 characters (20 bytes)
+  if (walletAddress.length !== 40) {
+    throw new Error("Invalid address length");
+  }
+
+  // Pad the address with zeros to make it 32 bytes
+  const paddedAddress = walletAddress.padStart(62, "0");
+
+  // Add '0x' prefix to the padded address
+  return ("0x" + "00" + paddedAddress) as Entity;
+}
 
 export function CurrencyView() {
   const {
@@ -36,17 +56,40 @@ export function CurrencyView() {
     components: components, //{ SyncProgress },
   } = useMUD();
   const { data: walletClient } = useWalletClient();
+  const mainAccount = address(walletClient.account.address);
   const { GPTTokens } = components;
+  const uiManager = useUIManager();
 
   const currentGptCredits =
-    getComponentValue(GPTTokens, playerEntity)?.amount || 0;
+    Number(getComponentValue(GPTTokens, playerEntity)?.amount || 0) +
+      Number(
+        getComponentValue(GPTTokens, addressToEntity(mainAccount))?.amount || 0,
+      ) || 0;
 
-  const currentCreditPrice = 0.001;
+  const currentCreditPrice = 0.0001;
 
-  const isBuyingCredits = false;
+  const [isBuyingCredits, setIsBuyingCredits] = useState(false);
 
   const [buyAmount, _setBuyAmount] = useState(5);
-  const buyMore = false;
+
+  // Function to handle buying credits
+  const buyMore = async () => {
+    try {
+      setIsBuyingCredits(true);
+      const tx = await uiManager.buyGPTTokens(buyAmount);
+
+      // Wait for transaction confirmation
+      await waitForTransaction(tx);
+
+      // Reload state after buying
+      console.log("Credits purchased successfully");
+      setIsBuyingCredits(false);
+    } catch (error) {
+      console.error("Error buying credits:", error);
+    } finally {
+      setIsBuyingCredits(false);
+    }
+  };
 
   return (
     <CurrencyViewContainer>
@@ -114,6 +157,9 @@ export function AIChatPane({
   visible: boolean;
   onClose: () => void;
 }) {
+  const {
+    network: { waitForTransaction },
+  } = useMUD();
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
   const player = usePlayer(uiManager).value;
@@ -172,6 +218,16 @@ export function AIChatPane({
       const userMessage = { message: input, isUser: true };
       setChatHistory((prev) => [...prev, userMessage]);
       saveMessageToIndexedDB(userMessage);
+
+      try {
+        const tx = await uiManager.spendGPTTokens();
+
+        // Wait for transaction confirmation
+        await waitForTransaction(tx);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+
       try {
         const response = await fetch(`${API_URL}/api/conversation/step`, {
           method: "POST",
