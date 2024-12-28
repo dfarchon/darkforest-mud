@@ -938,7 +938,7 @@ export class GameManager extends EventEmitter {
 
   public updateMinerManagerInnerRadius() {
     if (this.minerManager) {
-      console.log("updateMinerManagerInnerRadius", this.getInnerRadius());
+      // console.log("updateMinerManagerInnerRadius", this.getInnerRadius());
       this.minerManager.setInnerRadius(this.getInnerRadius());
     }
   }
@@ -6505,7 +6505,7 @@ export class GameManager extends EventEmitter {
       }
 
       localStorage.setItem(
-        `${this.getAccount()?.toLowerCase()}-buyGPTTokens-amount`,
+        `${this.ethConnection.getAddress()?.toLowerCase()}-buyGPTTokens-amount`,
         amount.toString(),
       );
 
