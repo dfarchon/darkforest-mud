@@ -66,7 +66,7 @@ export function CurrencyView() {
         getComponentValue(GPTTokens, addressToEntity(mainAccount))?.amount || 0,
       ) || 0;
 
-  const currentCreditPrice = 0.0001;
+  const currentCreditPrice = 0.00001;
 
   const [isBuyingCredits, setIsBuyingCredits] = useState(false);
 
@@ -176,6 +176,7 @@ export function AIChatPane({
           try {
             const response = await fetch(`${API_URL}/api/conversation/start`, {
               method: "POST",
+              // mode: "no-cors",
               headers: {
                 "Content-Type": "application/json",
               },
@@ -210,6 +211,52 @@ export function AIChatPane({
     }
   }, [visible]);
 
+  const initializeChatFunction = async () => {
+    // PUNK
+    console.log("test point 1");
+    const history = await loadConversationFromIndexedDB();
+    console.log("test point 2");
+
+    console.log(history);
+
+    if (history && history.length === 0) {
+      try {
+        console.log("test point 3");
+
+        const response = await fetch(`${API_URL}/api/conversation/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: player?.name,
+            message: "Hello!",
+            indexedHistory: history.map((h) => h.message).join("\n"),
+          }),
+        });
+
+        console.log("test point 4");
+        console.log(response);
+
+        if (response.ok) {
+          const aiResponse = await response.json();
+
+          const aiMessage = { message: aiResponse, isUser: false };
+          setChatHistory((prev) => [...prev, aiMessage]);
+          saveMessageToIndexedDB(aiMessage);
+        }
+      } catch (error) {
+        console.error("Error starting chat:", error);
+      }
+    } else if (history && history.length > 0) {
+      const loadChatHistory = async () => {
+        const historyIndexedDB = await loadConversationFromIndexedDB();
+        setChatHistory(historyIndexedDB || []);
+      };
+      loadChatHistory();
+    }
+  };
+
   const handleSend = async () => {
     if (input.trim()) {
       const userMessage = { message: input, isUser: true };
@@ -220,7 +267,7 @@ export function AIChatPane({
         const tx = await uiManager.spendGPTTokens();
 
         // Wait for transaction confirmation
-        await waitForTransaction(tx);
+        // await waitForTransaction(tx);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -271,6 +318,7 @@ export function AIChatPane({
       onClose={onClose}
       helpContent={HelpContent}
     >
+      {/* <button onClick={initializeChatFunction}> Start </button> */}
       <AIChatContent>
         {chatHistory.map((message, index) => (
           <ChatMessage key={index} isUser={message.isUser}>

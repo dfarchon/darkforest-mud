@@ -5219,16 +5219,14 @@ export class GameManager extends EventEmitter {
       if (artifactMoved) {
         const artifact = this.entityStore.getArtifactById(artifactMoved);
 
-        if (!bypassChecks) {
-          if (!artifact) {
-            throw new Error("couldn't find this artifact");
-          }
-          if (isActivated(artifact)) {
-            throw new Error("can't move an activated artifact");
-          }
-          if (!oldPlanet?.heldArtifactIds?.includes(artifactMoved)) {
-            throw new Error("that artifact isn't on this planet!");
-          }
+        if (!artifact) {
+          throw new Error("couldn't find this artifact");
+        }
+        if (isActivated(artifact)) {
+          throw new Error("can't move an activated artifact");
+        }
+        if (!oldPlanet?.heldArtifactIds?.includes(artifactMoved)) {
+          throw new Error("that artifact isn't on this planet!");
         }
       }
 
@@ -6518,7 +6516,7 @@ export class GameManager extends EventEmitter {
         amount,
       };
 
-      const price = BigInt(100_000_000_000_000);
+      const price = BigInt(10_000_000_000_000);
       const value = price * BigInt(amount);
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
         //  NOTE: when change gasLimit, need change the value in TxConfirmPopup.tsx
@@ -6527,7 +6525,7 @@ export class GameManager extends EventEmitter {
         // ? bigInt(500_000_000_000_000).toString()
         // : bigInt(1_000_000_000_000_000).toString(), //0.001eth
         gasLimit: 3000000,
-        value: value.toString(), //0.0005eth
+        value: value.toString(), //0.0000 5eth
       });
       return tx;
     } catch (e) {

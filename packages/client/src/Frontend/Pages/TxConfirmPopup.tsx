@@ -337,7 +337,7 @@ export function TxConfirmPopup() {
     `${account}-buyGPTTokens-amount`,
   );
   const buyGPTTokensCost: number =
-    method === "df__buyGPTTokens" ? Number(buyGPTTokenAmount) * 0.0001 : 0;
+    method === "df__buyGPTTokens" ? Number(buyGPTTokenAmount) * 0.00001 : 0;
 
   const getTxCost = () => {
     if (!isNaN(Number(gasFeeGwei))) {
