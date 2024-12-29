@@ -1772,13 +1772,14 @@ export class GameManager extends EventEmitter {
       return [];
     }
     const ownedByMe = this.entityStore.getArtifactsOwnedBy(this.account);
-    const onPlanetsOwnedByMe = this.entityStore
-      .getArtifactsOnPlanetsOwnedBy(this.account)
-      // filter out space ships because they always show up
-      // in the `ownedByMe` array.
-      .filter((a) => !isSpaceShip(a.artifactType));
+    return ownedByMe;
+    // const onPlanetsOwnedByMe = this.entityStore
+    //   .getArtifactsOnPlanetsOwnedBy(this.account)
+    //   // filter out space ships because they always show up
+    //   // in the `ownedByMe` array.
+    //   .filter((a) => !isSpaceShip(a.artifactType));
 
-    return [...ownedByMe, ...onPlanetsOwnedByMe];
+    // return [...ownedByMe, ...onPlanetsOwnedByMe];
   }
 
   /**

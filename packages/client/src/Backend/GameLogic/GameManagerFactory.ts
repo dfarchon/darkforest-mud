@@ -165,7 +165,7 @@ export class GameManagerFactory {
     );
     // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
-    const knownArtifacts: Map<ArtifactId, Artifact> = new Map();
+    const knownArtifacts = initialState.artifacts;
 
     for (let i = 0; i < initialState.loadedPlanets.length; i++) {
       const planet = initialState.touchedAndLocatedPlanets.get(
