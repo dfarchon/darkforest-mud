@@ -248,7 +248,7 @@ export function TopBar({
       >
         <TooltipTrigger
           name={TooltipName.Empty}
-          extraContent={<Text>Your burner wallet address.</Text>}
+          extraContent={<Text>Your main account. </Text>}
         >
           <AccountLabel includeAddressIfHasTwitter={true} width={"50px"} />
         </TooltipTrigger>
@@ -265,7 +265,7 @@ export function TopBar({
             <TooltipTrigger
               name={TooltipName.Empty}
               extraContent={
-                <Text>Connect your burner wallet to your twitter account.</Text>
+                <Text>Share your jounery with your friends on twitter.</Text>
               }
             >
               <ModalToggleButton

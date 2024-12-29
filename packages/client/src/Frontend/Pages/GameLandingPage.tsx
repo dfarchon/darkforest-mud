@@ -1800,6 +1800,7 @@ export function GameLandingPage() {
       advanceStateFromSpectating,
       ethConnection,
       browserCompatibleState,
+      syncSign,
     ],
   );
 
