@@ -97,9 +97,9 @@ g_max_total_level = 0x05050403         # [5, 5, 4, 3]
 h_silver_cost = 0x000000000064503c2814 # [100, 80, 60, 40, 20]
 
 [snark]
-a_planet_hash_key = 1010
-b_biome_base_key = 2283
-c_space_type_key = 4010
+a_planet_hash_key = 2025
+b_biome_base_key = 1294
+c_space_type_key = 2010
 d_perlin_length_scale = 8192
 e_perlin_mirror_x = 0
 f_perlin_mirror_y = 0
@@ -114,8 +114,9 @@ c_speed = 255
 
 [guild_config]
 a_create_fee = 2000000000000000  # 0.002 ETH
-b_max_members = 6
-c_cooldown_ticks = 60         # 60 seconds
+b_max_members = 5
+c_cooldown_ticks=14400  # 14400 seconds
+# c_cooldown_ticks = 60   # 60 seconds
 
 [test]
 set_planets = false
