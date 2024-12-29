@@ -225,6 +225,8 @@ export class GuildUtils {
     const member = getComponentValue(GuildMember, memberEntity);
     if (!member) return undefined;
 
+    if (member.kicked) return undefined;
+
     return member.leftAt;
   }
 
@@ -244,6 +246,7 @@ export class GuildUtils {
   ): number | undefined {
     const lastLeaveTick = this.getPlayerLastLeaveTick(playerAddr);
     if (!lastLeaveTick) return undefined;
+
     return Number(lastLeaveTick);
   }
 

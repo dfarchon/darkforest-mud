@@ -417,6 +417,7 @@ export default defineWorld({
         grant: "GuildRole",
         joinedAt: "uint64",
         leftAt: "uint64",
+        kicked: "bool",
         addr: "address",
       },
       key: ["memberId"],
