@@ -54,13 +54,15 @@ export class LineRenderer
 
     const { x: dX, y: dY } = this.getOffset(start, end);
 
+    // Calculate half-width for centered line
+    const halfWidth = width / 2;
     // note that width actually scales 2x - it goes 1, 3, 5, etc
-    for (let i = -width; i <= width; i++) {
+    for (let i = -halfWidth; i <= halfWidth; i++) {
       posA.setVertex(
         // prettier-ignore
         [
-          x1 + dX, y1 + dY, zIdx,
-          x2 + dX, y2 + dY, zIdx,
+          x1 + dX * i, y1 + dY * i, zIdx,
+          x2 + dX * i, y2 + dY * i, zIdx,
         ],
         this.verts,
       );

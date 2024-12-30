@@ -77,6 +77,7 @@ import type { GuildUtils } from "./GuildUtils";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
+import { isBroken } from "@df/gamelogic";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -103,6 +104,7 @@ export class GameUIManager extends EventEmitter {
   private mouseDownOverCoords: WorldCoords | undefined;
   private mouseHoveringOverPlanet: LocatablePlanet | undefined;
   private mouseHoveringOverCoords: WorldCoords | undefined;
+  private mouseHoveringOverArtifactId: ArtifactId | undefined;
   private sendingPlanet: LocatablePlanet | undefined;
   private sendingCoords: WorldCoords | undefined;
   private isSending = false;
@@ -852,6 +854,7 @@ export class GameUIManager extends EventEmitter {
     this.mouseDownOverCoords = undefined;
     this.setHoveringOverPlanet(undefined, true);
     this.mouseHoveringOverCoords = undefined;
+    this.mouseHoveringOverArtifactId = undefined;
   }
 
   public startExplore() {
@@ -1309,6 +1312,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public setHoveringOverArtifact(artifactId?: ArtifactId) {
+    this.mouseHoveringOverArtifactId = artifactId;
     this.hoverArtifactId$.publish(artifactId);
     this.hoverArtifact$.publish(
       artifactId ? this.getArtifactWithId(artifactId) : undefined,
@@ -1321,6 +1325,10 @@ export class GameUIManager extends EventEmitter {
 
   public getHoveringOverCoords(): WorldCoords | undefined {
     return this.mouseHoveringOverCoords;
+  }
+
+  public getHoveringOverArtifactId(): ArtifactId | undefined {
+    return this.mouseHoveringOverArtifactId;
   }
 
   public isSendingForces(): boolean {
@@ -1431,6 +1439,10 @@ export class GameUIManager extends EventEmitter {
 
   public getMyArtifacts(): Artifact[] {
     return this.gameManager.getMyArtifacts();
+  }
+
+  public getMyArtifactsNotBroken(): Artifact[] {
+    return this.getMyArtifacts().filter((a) => !isBroken(a));
   }
 
   public getMyArtifactsNotOnPlanet(): Artifact[] {

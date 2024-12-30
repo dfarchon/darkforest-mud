@@ -115,6 +115,13 @@ export function isActivated(artifact: Artifact | undefined) {
   );
 }
 
+export function isBroken(artifact: Artifact | undefined): boolean {
+  if (!artifact) {
+    return false;
+  }
+  return artifact.status === ArtifactStatus.Broken;
+}
+
 export function getActivatedArtifact(
   artifacts: Artifact[],
 ): Artifact | undefined {

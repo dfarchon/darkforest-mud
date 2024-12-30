@@ -138,6 +138,17 @@ export const tables = {
       to: "bytes32",
     },
   }),
+  WormholeDest: defineTable({
+    namespace: "atf.5",
+    namespaceLabel: "atf.5",
+    name: "WormholeDest",
+    label: "WormholeDest",
+    key: ["wormholeId"],
+    schema: {
+      wormholeId: "uint32",
+      to: "bytes32",
+    },
+  }),
   PinkBomb: defineTable({
     namespace: "atf.1",
     namespaceLabel: "atf.1",
