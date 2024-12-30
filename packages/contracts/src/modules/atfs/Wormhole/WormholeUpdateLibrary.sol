@@ -18,23 +18,25 @@ import { ArtifactRarity, ArtifactGenre } from "../../../codegen/common.sol";
 import { AtfInstallModule } from "../../../codegen/tables/AtfInstallModule.sol";
 import { ARTIFACT_INDEX } from "./constant.sol";
 import { _wormholeTableId, _wormholeDestTableId, _wormholeRecordTableId } from "./utils.sol";
+import { _artifactIndexToNamespace, _artifactProxySystemId } from "../utils.sol";
 
 /**
- * @notice Installs the Wormhole artifact into the game
+ * @notice Updates the Wormhole artifact
  */
-function installWormhole(address world) returns (uint256 index) {
-  // temp
-  ArtifactRegistry.set(bytes32(uint256(ARTIFACT_INDEX)), false);
-  // Get the artifact install module
-  address moduleAddr = AtfInstallModule.get();
-  require(moduleAddr != address(0), "ArtifactInstallModule not found");
-
+function updateWormhole(address world) returns (uint256 index) {
   WormholeSystemTemp artifactProxySystem = new WormholeSystemTemp();
-  // Install the ERC20 module with the provided args
-  IBaseWorld(world).installModule(
-    ArtifactInstallModule(moduleAddr),
-    abi.encode(new WormholeInstallLibrary(), artifactProxySystem)
-  );
+
+  bytes14 namespace = _artifactIndexToNamespace(ARTIFACT_INDEX);
+  // register wormhole dest table
+  ResourceId wormholeDestTableId = _wormholeDestTableId(namespace);
+  WormholeDest.register(wormholeDestTableId);
+
+  // register wormhole record table
+  ResourceId wormholeRecordTableId = _wormholeRecordTableId(namespace);
+  WormholeRecord.register(wormholeRecordTableId);
+
+  // Register artifact proxy system
+  IBaseWorld(world).registerSystem(_artifactProxySystemId(namespace), System(artifactProxySystem), true);
 
   // grant DistanceMultiplier access to the artifact proxy system
   IBaseWorld(world).grantAccess(DistanceMultiplier._tableId, address(artifactProxySystem));
@@ -48,9 +50,9 @@ contract WormholeInstallLibrary is BaseInstallLibrary {
   }
 
   function _install(IBaseWorld, bytes14 namespace) internal override {
-    // // register wormhole table
-    // ResourceId wormholeTableId = _wormholeTableId(namespace);
-    // Wormhole.register(wormholeTableId);
+    // register wormhole table
+    ResourceId wormholeTableId = _wormholeTableId(namespace);
+    Wormhole.register(wormholeTableId);
 
     // register wormhole dest table
     ResourceId wormholeDestTableId = _wormholeDestTableId(namespace);
@@ -60,8 +62,8 @@ contract WormholeInstallLibrary is BaseInstallLibrary {
     ResourceId wormholeRecordTableId = _wormholeRecordTableId(namespace);
     WormholeRecord.register(wormholeRecordTableId);
 
-    // // setup artifact metadata
-    // _setMetadata(namespace);
+    // setup artifact metadata
+    _setMetadata(namespace);
   }
 
   function _setMetadata(bytes14 namespace) internal {

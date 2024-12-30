@@ -15,7 +15,7 @@ import { Proof } from "../src/lib/SnarkProof.sol";
 import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { Planet as PlanetTable, Player, PlanetOwner, SnarkConfig } from "../src/codegen/index.sol";
 
-import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeUpdateLibrary.sol";
+import { updateWormhole } from "../src/modules/atfs/Wormhole/WormholeUpdateLibrary.sol";
 
 contract UpdateWormhole is WorldAddressHelper {
   /**
@@ -35,6 +35,6 @@ contract UpdateWormhole is WorldAddressHelper {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    installWormhole(worldAddress);
+    updateWormhole(worldAddress);
   }
 }
