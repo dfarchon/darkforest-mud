@@ -476,20 +476,49 @@ export default defineWorld({
     //     disabled: true,
     //   },
     // },
-    // Wormhole: {
-    //   schema: {
-    //     from: "bytes32",
-    //     to: "bytes32",
-    //   },
-    //   key: ["from"],
-    //   codegen: {
-    //     outputDirectory: "../modules/atfs/Wormhole/tables",
-    //     tableIdArgument: true,
-    //   },
-    //   deploy: {
-    //     disabled: true,
-    //   },
-    // },
+    Wormhole: {
+      schema: {
+        from: "bytes32",
+        to: "bytes32",
+      },
+      key: ["from"],
+      codegen: {
+        outputDirectory: "../modules/atfs/Wormhole/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
+    },
+    WormholeDest: {
+      schema: {
+        wormholeId: "uint32",
+        to: "bytes32",
+      },
+      key: ["wormholeId"],
+      codegen: {
+        outputDirectory: "../modules/atfs/Wormhole/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
+    },
+    WormholeRecord: {
+      schema: {
+        from: "bytes32",
+        to: "bytes32",
+        hasWormhole: "bool",
+      },
+      key: ["from", "to"],
+      codegen: {
+        outputDirectory: "../modules/atfs/Wormhole/tables",
+        tableIdArgument: true,
+      },
+      deploy: {
+        disabled: true,
+      },
+    },
     // PinkBomb: {
     //   schema: {
     //     bombId: "uint32",
