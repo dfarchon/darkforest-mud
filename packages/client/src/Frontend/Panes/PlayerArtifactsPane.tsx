@@ -3,7 +3,7 @@ import { ModalName } from "@df/types";
 import React from "react";
 
 import { Spacer } from "../Components/CoreUI";
-import { useMyArtifactsList, useUIManager } from "../Utils/AppHooks";
+import { useMyArtifactsNotBroken, useUIManager } from "../Utils/AppHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
 import { AllArtifacts } from "./ArtifactsList";
@@ -30,7 +30,7 @@ export function PlayerArtifactsPane({
   onClose: () => void;
 }) {
   const uiManager = useUIManager();
-  const artifacts = useMyArtifactsList(uiManager);
+  const artifacts = useMyArtifactsNotBroken(uiManager);
 
   const render = (handle: ModalHandle) => (
     <AllArtifacts modal={handle} artifacts={artifacts} />

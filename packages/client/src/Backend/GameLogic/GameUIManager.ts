@@ -77,6 +77,7 @@ import type { GuildUtils } from "./GuildUtils";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
+import { isBroken } from "@df/gamelogic";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -1438,6 +1439,10 @@ export class GameUIManager extends EventEmitter {
 
   public getMyArtifacts(): Artifact[] {
     return this.gameManager.getMyArtifacts();
+  }
+
+  public getMyArtifactsNotBroken(): Artifact[] {
+    return this.getMyArtifacts().filter((a) => !isBroken(a));
   }
 
   public getMyArtifactsNotOnPlanet(): Artifact[] {
