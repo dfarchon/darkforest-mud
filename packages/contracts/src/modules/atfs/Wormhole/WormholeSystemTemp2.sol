@@ -13,7 +13,7 @@ import { WormholeDest } from "./tables/WormholeDest.sol";
 import { WormholeRecord } from "./tables/WormholeRecord.sol";
 import { _wormholeTableId, _wormholeDestTableId, _wormholeRecordTableId } from "./utils.sol";
 
-contract WormholeSystemTemp is ArtifactProxySystem {
+contract WormholeSystemTemp2 is ArtifactProxySystem {
   error WormholeAlreadySet(); // 0x1fa9cff1
   error WormholeNotSet(); // 0xf337e05a
   error WormholeSetToSelf(); // 0x842ec8de
