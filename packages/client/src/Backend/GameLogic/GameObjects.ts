@@ -1459,11 +1459,12 @@ export class GameObjects {
       notifManager.planetLost(current as LocatablePlanet);
     }
 
-    const inSameGuild = this.guildUtils.inSameGuildAtTick(
-      arrival.player,
-      this.address,
-      arrival.arrivalTick,
-    );
+    const inSameGuild =
+      this.guildUtils.inSameGuildAtTick(
+        arrival.player,
+        this.address,
+        arrival.arrivalTick,
+      ) && arrival.player !== this.address;
 
     if (
       inSameGuild === false &&
