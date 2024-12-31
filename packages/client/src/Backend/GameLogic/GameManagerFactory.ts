@@ -305,8 +305,8 @@ export class GameManagerFactory {
       // })
       .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
         // PUNK
-        console.log("handle ContractsAPI.PlanetUpdate");
-        console.log(planetId);
+        // console.log("handle ContractsAPI.PlanetUpdate");
+        // console.log(planetId);
 
         // don't reload planets that you don't have in your map. once a planet
         // is in your map it will be loaded from the contract.
@@ -321,10 +321,10 @@ export class GameManagerFactory {
         ContractsAPIEvent.ArrivalQueued,
         async (_arrivalId: VoyageId, fromId: LocationId, toId: LocationId) => {
           // PUNK
-          console.log("handle ContractsAPIEvent.ArrivalQueued");
-          console.log("arrivalId", _arrivalId);
-          console.log("fromId", fromId);
-          console.log("toId", toId);
+          // console.log("handle ContractsAPIEvent.ArrivalQueued");
+          // console.log("arrivalId", _arrivalId);
+          // console.log("fromId", fromId);
+          // console.log("toId", toId);
 
           // only reload planets if the toPlanet is in the map
           const localToPlanet = gameManager.entityStore.getPlanetWithId(toId);
