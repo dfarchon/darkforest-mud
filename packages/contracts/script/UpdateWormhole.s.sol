@@ -68,6 +68,7 @@ contract UpdateWormhole is WorldAddressHelper {
       WormholeDest.get(_wormholeDestTableId(bytes14("atf.5")), uint32(artifact.id)) == 0,
       "WormholeDest already set"
     );
+    require(artifact.planetHash != planetId, "Should provide the connected planet");
 
     Wormhole.set(_wormholeTableId(bytes14("atf.5")), bytes32(artifact.planetHash), bytes32(planetId));
   }
