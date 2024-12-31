@@ -147,7 +147,9 @@ export function PlanetCard({
 
   const gameManager = uiManager.getGameManager();
   const player = gameManager.getPlayer(planet?.owner);
-  const guildId = gameManager.getPlayerGuildId(planet?.owner);
+
+  const account = planet?.owner;
+  const guildId = account ? gameManager.getPlayerGuildId(account) : undefined;
   const guild = gameManager.getGuild(guildId);
 
   if (!planet || !isLocatable(planet)) {
