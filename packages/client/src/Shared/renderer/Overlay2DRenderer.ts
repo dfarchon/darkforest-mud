@@ -387,8 +387,24 @@ export class Overlay2DRenderer {
     // Set the global alpha
     this.ctx.globalAlpha = textAlpha;
 
+    // Helper function to simplify emoji code
+    const simplifyEmojiCode = (code: string): string => {
+      // Remove variation selectors (fe0f)
+      let simplified = code.replace(/-fe0f/g, "");
+      // Remove zero-width joiner
+      simplified = simplified.replace(/-200d/g, "");
+      // Remove skin tone modifiers
+      simplified = simplified.replace(/-1f3f[b-f]/g, "");
+      // For compound emojis, use first part
+      if (simplified.includes("-")) {
+        simplified = simplified.split("-")[0];
+      }
+      return simplified;
+    };
+
     const img = new Image();
-    img.src = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${emojiData}.svg`;
+    const simplifiedEmojiData = simplifyEmojiCode(emojiData);
+    img.src = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${simplifiedEmojiData}.svg`;
 
     this.ctx.drawImage(
       img,
