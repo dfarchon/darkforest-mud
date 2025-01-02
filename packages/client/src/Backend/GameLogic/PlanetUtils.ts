@@ -7,7 +7,12 @@ import {
 } from "@df/constants";
 import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
-import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import {
+  address,
+  artifactIdFromHexStr,
+  locationIdToHexStr,
+  validLocationHash,
+} from "@df/serde";
 import type {
   Effect,
   EffectType,
@@ -154,6 +159,7 @@ export class PlanetUtils {
     if (!this._validateHash(planetId)) {
       throw new Error("not a valid location");
     }
+
     const {
       PlanetConstants,
       PlanetOwner,
@@ -412,12 +418,7 @@ export class PlanetUtils {
   }
 
   public _validateHash(locationId: LocationId): boolean {
-    const locationBI = bigInt(locationId.slice(2), 16);
-    if (locationBI.geq(LOCATION_ID_UB)) {
-      return false;
-      // throw new Error("not a valid location");
-    }
-    return true;
+    return validLocationHash(locationId);
   }
 
   // public _initPlanet(planet: Planet): Planet {
