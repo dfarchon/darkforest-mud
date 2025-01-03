@@ -103,12 +103,6 @@ import { LayeredMap } from "./LayeredMap";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
 
-type CoordsString = Abstract<string, "CoordString">;
-
-const getCoordsString = (coords: WorldCoords): CoordsString => {
-  return `${coords.x},${coords.y}` as CoordsString;
-};
-
 /**
  * Representation of the objects which exist in the world.
  */
@@ -216,12 +210,6 @@ export class GameObjects {
   private readonly contractConstants: ContractConstants;
 
   /**
-   * Map from a stringified representation of an x-y coordinate to an object that contains some more
-   * information about the world at that location.
-   */
-  private readonly coordsToLocation: Map<CoordsString, WorldLocation>;
-
-  /**
    * Transactions that are currently in flight.
    */
   public readonly transactions: TransactionCollection;
@@ -285,7 +273,6 @@ export class GameObjects {
     this.artifacts = artifacts;
     this.myArtifacts = new Map();
     this.contractConstants = contractConstants;
-    this.coordsToLocation = new Map();
     this.planetLocationMap = new Map();
     this.planetArrivalIds = new Map();
     this.arrivals = new Map();
@@ -628,14 +615,14 @@ export class GameObjects {
   // returns an empty planet if planet is not in contract
   // returns undefined if this isn't a planet, according to hash and coords
   public getPlanetWithCoords(coords: WorldCoords): LocatablePlanet | undefined {
-    const str = getCoordsString(coords);
-
-    const location = this.coordsToLocation.get(str);
-    if (!location) {
+    const locationId = getCoordsToLocationId(coords);
+    if (!locationId) {
       return undefined;
     }
 
-    return this.getPlanetWithLocation(location) as LocatablePlanet;
+    return this.getPlanetWithLocation(getWorldLocation(locationId)) as
+      | LocatablePlanet
+      | undefined;
   }
 
   // - returns an empty planet if planet is not in contract
@@ -692,11 +679,7 @@ export class GameObjects {
     );
 
     this.planetLocationMap.set(planetLocation.hash, planetLocation);
-    const str = getCoordsString(planetLocation.coords);
-
-    if (!this.coordsToLocation.has(str)) {
-      this.coordsToLocation.set(str, planetLocation);
-    }
+    setCoordsToLocationId(planetLocation.coords, planetLocation.hash);
 
     if (!this.planets.get(planetLocation.hash)) {
       this.setPlanet(this.defaultPlanetFromLocation(planetLocation));

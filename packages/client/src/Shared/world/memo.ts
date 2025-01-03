@@ -1,10 +1,9 @@
 import type { LocationId, Planet, WorldLocation } from "@df/types";
 
-type MemoItem = [
-  Planet | undefined,
-  WorldLocation | undefined,
-  boolean | undefined,
-];
+type MemoItem = {
+  planet: Planet;
+  location: WorldLocation;
+};
 
 const memo = new Map<LocationId, MemoItem>();
 
@@ -24,14 +23,13 @@ function set(
     touched?: boolean;
   },
 ) {
-  const oldValues = memo.get(locationId);
+  const item = memo.get(locationId) ?? ({} as MemoItem);
 
-  // use provided value or default to oldValue/undefined
-  const planet = values.planet ?? oldValues?.[0];
-  const location = values.location ?? oldValues?.[1];
-  const touched = values.touched ?? oldValues?.[2];
+  // use provided value or default to previous values / undefined
+  item.planet = values.planet ?? item.planet;
+  item.location = values.location ?? item.location;
 
-  memo.set(locationId, [planet, location, touched]);
+  memo.set(locationId, item);
 }
 
 export default {
