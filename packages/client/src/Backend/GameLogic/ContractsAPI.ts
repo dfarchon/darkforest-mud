@@ -1367,22 +1367,24 @@ export class ContractsAPI extends EventEmitter {
     const { Planet } = this.components;
     const planets = [...runQuery([Has(Planet)])];
     const nPlanets: number = planets.length;
-    const result = [];
 
-    const sleep = async (ms: number) =>
+    const sleep = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
 
     await sleep(1);
 
-    for (let i = 0; i < nPlanets; i++) {
+    const results = new Array(nPlanets);
+    for (let index = 0; index < nPlanets; index++) {
       // NOTE: may need serde function here
       const locationId = locationIdFromHexStr(
-        planets[i].toString(),
+        planets[index].toString(),
       ) as LocationId;
-      result.push(locationId);
-      onProgress && onProgress((i + 1) / nPlanets);
+      results[index] = locationId;
+
+      onProgress?.((index + 1) / nPlanets);
     }
-    return result;
+
+    return results;
   }
 
   public getRevealedCoordsByIdIfExists(
@@ -1426,23 +1428,22 @@ export class ContractsAPI extends EventEmitter {
   ): RevealedCoords[] {
     const { RevealedPlanet } = this.components;
     const planetIds = [...runQuery([Has(RevealedPlanet)])];
-    const result: RevealedCoords[] = [];
     const nPlanetIds = planetIds.length;
 
-    for (let i = 0; i < nPlanetIds; i++) {
-      const planetId = locationIdFromHexStr(planetIds[i].toString());
+    const results: RevealedCoords[] = new Array(nPlanetIds);
+    for (let index = 0; index < nPlanetIds; index++) {
+      const planetId = locationIdFromHexStr(planetIds[index].toString());
 
       const revealedCoords = this.getRevealedCoordsByIdIfExists(planetId);
       if (!revealedCoords) {
         continue;
       }
-      result.push(revealedCoords);
-      onProgressCoords && onProgressCoords((i + 1) / nPlanetIds);
+      results[index] = revealedCoords;
+      onProgressCoords?.((index + 1) / nPlanetIds);
     }
 
-    onProgressCoords && onProgressCoords(1);
-
-    return result;
+    onProgressCoords?.(1);
+    return results;
   }
 
   public getPlanetById(planetId: LocationId): Planet | undefined {

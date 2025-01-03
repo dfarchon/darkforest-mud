@@ -247,11 +247,9 @@ export class InitialGameStateDownloader {
       planetsLoadingBar,
     );
 
-    touchedAndLocatedPlanets.forEach((_planet, locId) => {
-      if (touchedAndLocatedPlanets.has(locId)) {
-        planetVoyageIdMap.set(locId, []);
-      }
-    });
+    for (const [locationId] of touchedAndLocatedPlanets) {
+      planetVoyageIdMap.set(locationId, []);
+    }
 
     for (const arrival of pendingMoves) {
       const voyageIds = planetVoyageIdMap.get(arrival.toPlanet);

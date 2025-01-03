@@ -124,7 +124,6 @@ class PersistentChunkStore implements ChunkStore {
     });
 
     await localStorageManager.loadChunks();
-
     return localStorageManager;
   }
 
@@ -211,10 +210,9 @@ class PersistentChunkStore implements ChunkStore {
         IDBKeyRange.bound(borders[idx], borders[idx + 1], false, true),
       );
 
-      bucketOfChunks.forEach((chunk: PersistedChunk) => {
+      for (const chunk of bucketOfChunks) {
         this.addChunk(toExploredChunk(chunk), false);
-      });
-
+      }
       chunkCount += bucketOfChunks.length;
     }
 

@@ -1,8 +1,10 @@
 import type { LocationId, RevealedLocation, WorldLocation } from "@df/types";
 
-import memo from "./memo";
+const memo = new Map<LocationId, WorldLocation>();
 
-export function toWorldLocation(location: WorldLocation): WorldLocation {
+export function toWorldLocation(
+  location: WorldLocation | RevealedLocation,
+): WorldLocation {
   return {
     hash: location.hash,
     coords: {
@@ -17,14 +19,14 @@ export function toWorldLocation(location: WorldLocation): WorldLocation {
 export function getWorldLocation(
   locationId: LocationId,
 ): WorldLocation | undefined {
-  return memo.get(locationId)?.location;
+  return memo.get(locationId);
 }
 
 export function setWorldLocation(
   locationId: LocationId,
   location: WorldLocation,
 ) {
-  memo.set(locationId, { location: toWorldLocation(location) });
+  memo.set(locationId, toWorldLocation(location));
 }
 
 export function isRevealedLocation(
