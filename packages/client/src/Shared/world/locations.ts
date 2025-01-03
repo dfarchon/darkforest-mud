@@ -51,7 +51,7 @@ export const locationsMap = new LocationsMap();
  * is added to the map, any code that references a world location by the given location id hash will
  * always get the same reference. This helps maintain consistency and prevents duplication.
  *
- * @param persistedLocation The persistet location to transform
+ * @param persistedLocation The persisted location to transform
  * @returns The immutable World Location reference
  */
 export function persistedLocationToWorldLocation(
@@ -87,7 +87,7 @@ export function persistedLocationToWorldLocation(
  * is added to the map, any code that references a world location by the given location id hash will
  * always get the same reference. This helps maintain consistency and prevents duplication.
  *
- * @param persistedLocation The persistet location to transform
+ * @param location The location to transform
  * @returns The immutable World Location reference
  */
 export function toWorldLocation(location: WorldLocation): WorldLocation {
