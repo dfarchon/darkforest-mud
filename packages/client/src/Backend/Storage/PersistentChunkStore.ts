@@ -20,7 +20,6 @@ import { openDB } from "idb";
 import type {
   ChunkId,
   ChunkStore,
-  PersistedChunk,
 } from "../../_types/darkforest/api/ChunkStoreTypes";
 import { MAX_CHUNK_SIZE } from "../../Frontend/Utils/constants";
 import {
@@ -124,7 +123,6 @@ class PersistentChunkStore implements ChunkStore {
     });
 
     await localStorageManager.loadChunks();
-
     return localStorageManager;
   }
 
@@ -211,10 +209,9 @@ class PersistentChunkStore implements ChunkStore {
         IDBKeyRange.bound(borders[idx], borders[idx + 1], false, true),
       );
 
-      bucketOfChunks.forEach((chunk: PersistedChunk) => {
+      for (const chunk of bucketOfChunks) {
         this.addChunk(toExploredChunk(chunk), false);
-      });
-
+      }
       chunkCount += bucketOfChunks.length;
     }
 
@@ -280,14 +277,17 @@ class PersistentChunkStore implements ChunkStore {
 
   public async getSavedRevealedCoords(): Promise<RevealedCoords[]> {
     const revealedPlanetIds = await this.getKey("revealedPlanetIds");
-
     if (revealedPlanetIds) {
       const parsed = JSON.parse(revealedPlanetIds);
+      const isRevealedCoord = (item: unknown): item is RevealedCoords =>
+        (item as RevealedCoords).coords !== undefined &&
+        (item as RevealedCoords).revealer !== undefined;
+
       // changed the type on 6/1/21 to include revealer field
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (parsed.length === 0 || !(parsed[0] as any).revealer) {
+      if (parsed.length === 0 || !isRevealedCoord(parsed[0])) {
         return [];
       }
+
       return parsed as RevealedCoords[];
     }
 

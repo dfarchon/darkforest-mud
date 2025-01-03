@@ -1,13 +1,12 @@
-import { LOCATION_ID_UB } from "@df/constants";
-import {
-  CONTRACT_PRECISION,
-  EMPTY_ADDRESS,
-  MAX_PLANET_LEVEL,
-  MIN_PLANET_LEVEL,
-} from "@df/constants";
-import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
+import { CONTRACT_PRECISION, EMPTY_ADDRESS } from "@df/constants";
+import { getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
-import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import {
+  address,
+  artifactIdFromHexStr,
+  locationIdToHexStr,
+  validLocationHash,
+} from "@df/serde";
 import type {
   Effect,
   EffectType,
@@ -17,22 +16,16 @@ import type {
   Planet,
   PlanetBonus,
   PlanetType,
-  Upgrade,
   UpgradeState,
   WorldLocation,
 } from "@df/types";
-import { Biome, PlanetFlagType, PlanetStatus, SpaceType } from "@df/types";
+import { Biome, PlanetFlagType, SpaceType } from "@df/types";
 import { PlanetLevel } from "@df/types";
-import {
-  type Entity,
-  getComponentValue,
-  getComponentValueStrict,
-  Has,
-  runQuery,
-} from "@latticexyz/recs";
-import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
+import { locationsRevealedMap } from "@df/world/locations";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
-import bigInt, { type BigInteger } from "big-integer";
+import bigInt from "big-integer";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 
@@ -55,15 +48,15 @@ export class PlanetUtils {
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
       id: locationIdToHexStr(planetId) as `0x${string}`,
     });
-    const planetRec = getComponentValue(PlanetConstants, planetEntity);
 
-    if (planetRec) {
-      // If planet is in contract, it is OK to input any value for perlin and distSquare
-      const planet: Planet = this.readPlanet(planetId, 0, 0);
-      return planet;
-    } else {
-      return undefined;
-    }
+    const hasPlanetRec = Boolean(
+      getComponentValue(PlanetConstants, planetEntity),
+    );
+
+    return hasPlanetRec
+      ? // Planet is in contract, and it's OK to input any value for perlin and distSquare
+        (this.readPlanet(planetId, 0, 0) as Planet)
+      : undefined;
   }
 
   public defaultPlanetFromLocation(location: WorldLocation): LocatablePlanet {
@@ -100,7 +93,7 @@ export class PlanetUtils {
       silverSpent: planet.silverSpent,
       isInContract: planet.isInContract,
       syncedWithContract: planet.syncedWithContract,
-      coordsRevealed: planet.coordsRevealed,
+
       bonus: planet.bonus,
       energyGroDoublers: planet.energyGroDoublers,
       silverGroDoublers: planet.silverGroDoublers,
@@ -117,8 +110,8 @@ export class PlanetUtils {
     };
   }
 
-  public getBiome(loc: WorldLocation): Biome {
-    const { perlin, biomebase, coords } = loc;
+  public getBiome(location: WorldLocation): Biome {
+    const { perlin, biomebase, coords } = location;
     const distSquare = coords.x ** 2 + coords.y ** 2;
     const universeZone = this._initZone(distSquare);
     const spaceType = this._initSpaceType(universeZone, perlin);
@@ -154,6 +147,7 @@ export class PlanetUtils {
     if (!this._validateHash(planetId)) {
       throw new Error("not a valid location");
     }
+
     const {
       PlanetConstants,
       PlanetOwner,
@@ -305,9 +299,7 @@ export class PlanetUtils {
       }
     }
 
-    const coordsRevealed = getComponentValue(RevealedPlanet, planetEntity)
-      ? true
-      : false;
+    const coordsRevealed = getComponentValue(RevealedPlanet, planetEntity);
 
     const prospectedPlanet = getComponentValue(ProspectedPlanet, planetEntity);
 
@@ -366,6 +358,13 @@ export class PlanetUtils {
       }
     }
 
+    if (coordsRevealed) {
+      locationsRevealedMap.setLocationRevealed(
+        planetId,
+        coordsRevealed.revealer as EthAddress,
+      );
+    }
+
     return {
       locationId: planetId,
       isHomePlanet: false,
@@ -389,7 +388,7 @@ export class PlanetUtils {
       upgradeState,
       lastUpdated: lastUpdateTick,
       isInContract,
-      coordsRevealed,
+      // coordsRevealed,
       silverSpent: this.calculateSilverSpent(upgradeState, silverCap),
       bonus,
       energyGroDoublers: 0,
@@ -412,12 +411,7 @@ export class PlanetUtils {
   }
 
   public _validateHash(locationId: LocationId): boolean {
-    const locationBI = bigInt(locationId.slice(2), 16);
-    if (locationBI.geq(LOCATION_ID_UB)) {
-      return false;
-      // throw new Error("not a valid location");
-    }
-    return true;
+    return validLocationHash(locationId);
   }
 
   // public _initPlanet(planet: Planet): Planet {

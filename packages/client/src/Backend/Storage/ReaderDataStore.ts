@@ -4,7 +4,6 @@ import { TickerUtils } from "@backend/GameLogic/TickerUtils";
 import { isLocatable } from "@df/gamelogic";
 import type { EthConnection } from "@df/network";
 import type {
-  ArtifactId,
   EthAddress,
   LocatablePlanet,
   LocationId,

@@ -9,7 +9,7 @@
     "dev": "wait-port localhost:8545 && vite",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "test": "echo 'tests not implemented'",
+    "test": "vitest run",
     "lint": "pnpm lint:eslint && pnpm lint:typecheck",
     "lint:eslint": "eslint .",
     "lint-fix": "pnpm lint-fix:eslint",
@@ -99,6 +99,7 @@
     "uuid": "3.3.2",
     "vite": "5.4.8",
     "vite-plugin-node-polyfills": "0.22.0",
+    "vitest": "2.1.8",
     "wait-port": "1.1.0"
   }
 }
