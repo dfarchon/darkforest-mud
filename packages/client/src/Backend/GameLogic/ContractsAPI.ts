@@ -1400,10 +1400,12 @@ export class ContractsAPI extends EventEmitter {
     const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
     return revealedPlanet
       ? {
-          x: revealedPlanet.x as number,
-          y: revealedPlanet.y as number,
-          revealer: revealedPlanet.revealer as EthAddress,
           hash: planetId as LocationId,
+          coords: {
+            x: revealedPlanet.x as number,
+            y: revealedPlanet.y as number,
+          },
+          revealer: revealedPlanet.revealer as EthAddress,
         }
       : undefined;
   }

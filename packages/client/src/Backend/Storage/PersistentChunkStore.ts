@@ -277,14 +277,17 @@ class PersistentChunkStore implements ChunkStore {
 
   public async getSavedRevealedCoords(): Promise<RevealedCoords[]> {
     const revealedPlanetIds = await this.getKey("revealedPlanetIds");
-
     if (revealedPlanetIds) {
       const parsed = JSON.parse(revealedPlanetIds);
+      const isRevealedCoord = (item: unknown): item is RevealedCoords =>
+        (item as RevealedCoords).coords !== undefined &&
+        (item as RevealedCoords).revealer !== undefined;
+
       // changed the type on 6/1/21 to include revealer field
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (parsed.length === 0 || !(parsed[0] as any).revealer) {
+      if (parsed.length === 0 || !isRevealedCoord(parsed[0])) {
         return [];
       }
+
       return parsed as RevealedCoords[];
     }
 
