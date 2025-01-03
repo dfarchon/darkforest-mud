@@ -484,8 +484,7 @@ export class GameManager extends EventEmitter {
     this.homeLocation = homeLocation;
 
     const revealedLocations: RevealedLocation[] = [];
-    for (const [locationId, coords] of revealedCoords) {
-      // NOTE: Not sure we really need the if(planet) check below.
+    for (const [locationId, item] of revealedCoords) {
       const planet = touchedPlanets.get(locationId);
       if (planet) {
         revealedLocations.push({
@@ -494,13 +493,13 @@ export class GameManager extends EventEmitter {
           location: toWorldLocation({
             hash: locationId,
             coords: {
-              x: coords.x,
-              y: coords.y,
+              x: item.coords.x,
+              y: item.coords.y,
             },
             perlin: planet.perlin,
-            biomebase: this.biomebasePerlin(coords, true),
+            biomebase: this.biomebasePerlin(item.coords, true),
           }),
-          revealer: coords.revealer,
+          revealer: item.revealer,
         });
       }
     }
