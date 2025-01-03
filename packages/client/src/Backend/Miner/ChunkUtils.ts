@@ -1,4 +1,5 @@
 import type { Chunk, Rectangle, WorldCoords, WorldLocation } from "@df/types";
+import { persistedLocationToWorldLocation } from "@df/world/locations";
 
 import type {
   BucketId,
@@ -59,12 +60,11 @@ export function toPersistedChunk(chunk: Chunk): PersistedChunk {
  * Converts from the persisted representation of a chunk to the in-game representation of a chunk.
  */
 export const toExploredChunk = (chunk: PersistedChunk): Chunk => {
-  const planetLocations = chunk.l.map((location) => ({
-    coords: { x: location.x, y: location.y },
-    hash: location.h,
-    perlin: location.p,
-    biomebase: location.b,
-  }));
+  const planetLocations = chunk.l.map((persistedLocation) =>
+    // NOTE: Uses persistedLocationToWorldLocation to ensure that we use the same
+    //       immutable world location reference throughout the code.
+    persistedLocationToWorldLocation(persistedLocation),
+  );
 
   return {
     chunkFootprint: {

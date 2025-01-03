@@ -51,8 +51,8 @@ import {
   isUnconfirmedRevealTx,
   isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
-  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedShutdownArtifactTx,
+  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
@@ -129,12 +129,12 @@ import type {
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
-  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
-  UnconfirmedSpendGPTTokens,
   UnconfirmedShutdownArtifact,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
@@ -156,6 +156,7 @@ import {
   Setting,
   SpaceType,
 } from "@df/types";
+import { toWorldLocation } from "@df/world/locations";
 import type { NumberType } from "@latticexyz/recs";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
@@ -568,8 +569,8 @@ export class GameManager extends EventEmitter {
           biomebase: this.biomebasePerlin(coords, true),
         };
         revealedLocations.set(locationId, {
-          ...location,
           revealer: coords.revealer,
+          location,
         });
       }
     }
@@ -1053,8 +1054,8 @@ export class GameManager extends EventEmitter {
 
     if (revealedCoords) {
       revealedLocation = {
-        ...this.locationFromCoords(revealedCoords),
         revealer: revealedCoords.revealer,
+        location: this.locationFromCoords(revealedCoords),
       };
     }
 
@@ -3646,12 +3647,16 @@ export class GameManager extends EventEmitter {
    */
 
   private locationFromCoords(coords: WorldCoords): WorldLocation {
-    return {
+    // TODO: Check in coordsToLocation if there's already a reference by coords
+
+    // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+    //       immutable world location reference throughout the code.
+    return toWorldLocation({
       coords,
       hash: locationIdFromBigInt(this.planetHashMimc(coords.x, coords.y)),
       perlin: this.spaceTypePerlin(coords, true),
       biomebase: this.biomebasePerlin(coords, true),
-    };
+    });
   }
 
   /**
