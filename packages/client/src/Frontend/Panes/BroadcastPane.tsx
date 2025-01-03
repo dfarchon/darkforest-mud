@@ -1,6 +1,6 @@
 import { isUnconfirmedRevealTx } from "@df/serde";
 import type { EthAddress, LocationId } from "@df/types";
-import { LocationsRevealedMap } from "@df/world/locations";
+import { locationsRevealedMap } from "@df/world/locations";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -90,7 +90,7 @@ export function BroadcastPane({
 
   const [account, setAccount] = useState<EthAddress | undefined>(undefined); // consider moving this one to parent
   const isRevealed = planet
-    ? LocationsRevealedMap.isLocationRevealed(planet.locationId)
+    ? locationsRevealedMap.isLocationRevealed(planet.locationId)
     : false;
   const broadcastCooldownPassed =
     uiManager.getNextBroadcastAvailableTimestamp() <= Date.now();

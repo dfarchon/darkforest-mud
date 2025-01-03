@@ -105,7 +105,7 @@ import {
   Setting,
   SpaceType,
 } from "@df/types";
-import { LocationsRevealedMap, toWorldLocation } from "@df/world/locations";
+import { locationsRevealedMap, toWorldLocation } from "@df/world/locations";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -489,13 +489,17 @@ export class GameManager extends EventEmitter {
       const planet = touchedPlanets.get(locationId);
       if (planet) {
         revealedLocations.push({
-          hash: locationId,
-          coords: {
-            x: coords.x,
-            y: coords.y,
-          },
-          perlin: planet.perlin,
-          biomebase: this.biomebasePerlin(coords, true),
+          // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+          //       immutable world location reference throughout the code.
+          location: toWorldLocation({
+            hash: locationId,
+            coords: {
+              x: coords.x,
+              y: coords.y,
+            },
+            perlin: planet.perlin,
+            biomebase: this.biomebasePerlin(coords, true),
+          }),
           revealer: coords.revealer,
         });
       }
@@ -968,7 +972,7 @@ export class GameManager extends EventEmitter {
 
     const revealedLocation: RevealedLocation | undefined = revealedCoords
       ? {
-          ...this.locationFromCoords(revealedCoords),
+          location: this.locationFromCoords(revealedCoords),
           revealer: revealedCoords.revealer,
         }
       : undefined;
@@ -2498,7 +2502,7 @@ export class GameManager extends EventEmitter {
         );
       }
 
-      if (LocationsRevealedMap.isLocationRevealed(planet.locationId)) {
+      if (locationsRevealedMap.isLocationRevealed(planet.locationId)) {
         throw new Error("this planet's location is already revealed");
       }
 

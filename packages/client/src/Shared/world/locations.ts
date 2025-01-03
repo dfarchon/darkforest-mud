@@ -1,23 +1,34 @@
-import type {
-  EthAddress,
-  LocationId,
-  RevealedLocation,
-  WorldLocation,
-} from "@df/types";
+import type { EthAddress, LocationId, WorldLocation } from "@df/types";
 
 import type { PersistedLocation } from "../../_types/darkforest/api/ChunkStoreTypes";
 
 ////////////////////////
 /// Locations Map
 ///////////////////////
+/**
+ * A class that manages a memoized Map, mapping locationId to WorldLocation.
+ *
+ * Maps from location id (unique id of each planet) to some information about the location at which
+ * the planet is located, if we happen to know the coordinates of the given locationId.
+ */
 class LocationsMap {
   #locations = new Map<LocationId, WorldLocation>();
 
+  /**
+   * Retrieves a world location by its ID.
+   * @param locationId - The ID of the location to retrieve.
+   * @returns The world location associated with the given ID, or undefined if not found.
+   */
   getWorldLocation(locationId: LocationId): WorldLocation | undefined {
     return this.#locations.get(locationId);
   }
 
-  setWorldLocation(locationId: LocationId, location: WorldLocation) {
+  /**
+   * Sets a world location for a given ID.
+   * @param locationId - The ID of the location to set.
+   * @param location - The world location to associate with the given location ID.
+   */
+  setWorldLocation(locationId: LocationId, location: WorldLocation): void {
     this.#locations.set(locationId, location);
   }
 }
@@ -28,24 +39,18 @@ export const locationsMap = new LocationsMap();
 /// Revealed locations
 ///////////////////////
 
-export class LocationsRevealedMap {
-  constructor() {
-    throw new Error("LocationsMap is a singleton and can't be initialized");
-  }
+class LocationsRevealedMap {
+  #locationsRevealed = new Map<LocationId, EthAddress>();
 
-  static #locationsRevealed = new Map<LocationId, EthAddress>();
-
-  static isLocationRevealed(locationId: LocationId): boolean {
+  isLocationRevealed(locationId: LocationId): boolean {
     return this.#locationsRevealed.has(locationId);
   }
 
-  static setLocationRevealed(locationId: LocationId, revealer: EthAddress) {
+  setLocationRevealed(locationId: LocationId, revealer: EthAddress) {
     this.#locationsRevealed.set(locationId, revealer);
   }
 
-  static getLocationRevealed(
-    locationId: LocationId,
-  ): WorldLocation | undefined {
+  getLocationRevealed(locationId: LocationId): WorldLocation | undefined {
     if (!this.isLocationRevealed(locationId)) {
       return undefined;
     }
@@ -60,15 +65,32 @@ export class LocationsRevealedMap {
     return location;
   }
 
-  static getLocationsRevealed(): Map<LocationId, EthAddress> {
+  getLocationsRevealed(): Map<LocationId, EthAddress> {
     return this.#locationsRevealed;
   }
 }
+
+export const locationsRevealedMap = new LocationsRevealedMap();
 
 ////////////////////////
 /// Helpers
 ///////////////////////
 
+/**
+ * Converts a persisted location into a world location if it has not already been added to the
+ * locations map.
+ *
+ * This function ensures that each location is only added once to the locations map. If the location
+ * is already present, it returns the existing reference. If not, it adds the location to the map and
+ * then returns the reference.
+ *
+ * The function will return an immutable world location reference. This means that once a location
+ * is added to the map, any code that references a world location by the given location id hash will
+ * always get the same reference. This helps maintain consistency and prevents duplication.
+ *
+ * @param persistedLocation The persisted location to transform
+ * @returns The immutable World Location reference
+ */
 export function persistedLocationToWorldLocation(
   persistedLocation: PersistedLocation,
 ): WorldLocation {
@@ -90,9 +112,22 @@ export function persistedLocationToWorldLocation(
   return worldLocation;
 }
 
-export function toWorldLocation(
-  location: WorldLocation | RevealedLocation,
-): WorldLocation {
+/**
+ * Converts a location into a world location if it has not already been added to the
+ * locations map.
+ *
+ * This function ensures that each location is only added once to the locations map. If the location
+ * is already present, it returns the existing reference. If not, it adds the location to the map and
+ * then returns the reference.
+ *
+ * The function will return an immutable world location reference. This means that once a location
+ * is added to the map, any code that references a world location by the given location id hash will
+ * always get the same reference. This helps maintain consistency and prevents duplication.
+ *
+ * @param location The location to transform
+ * @returns The immutable World Location reference
+ */
+export function toWorldLocation(location: WorldLocation): WorldLocation {
   let worldLocation = locationsMap.getWorldLocation(location.hash);
   if (!worldLocation) {
     worldLocation = {
@@ -108,25 +143,5 @@ export function toWorldLocation(
     locationsMap.setWorldLocation(worldLocation.hash, worldLocation);
   }
 
-  // update perlin and biomebase accross all world location references
-  // if (update) {
-  //   (worldLocation as WorldLocation & { perlin: number }).perlin =
-  //     location.perlin;
-  //   (worldLocation as WorldLocation & { biomebase: number }).biomebase =
-  //     location.biomebase;
-  // }
-
   return worldLocation;
-}
-
-export function isRevealedLocationType(
-  location: WorldLocation | RevealedLocation | PersistedLocation,
-): location is RevealedLocation {
-  return (location as RevealedLocation).revealer !== undefined;
-}
-
-export function isPersistedLocationType(
-  location: WorldLocation | RevealedLocation | PersistedLocation,
-): location is PersistedLocation {
-  return (location as PersistedLocation).h !== undefined;
 }

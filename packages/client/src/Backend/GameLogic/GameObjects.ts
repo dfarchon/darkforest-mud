@@ -82,7 +82,7 @@ import { ArtifactStatus, ArtifactType, PlanetType, SpaceType } from "@df/types";
 import { WorldCoordsMap } from "@df/world/coords";
 import {
   locationsMap,
-  LocationsRevealedMap,
+  locationsRevealedMap,
   toWorldLocation,
 } from "@df/world/locations";
 import { planetsMap } from "@df/world/planets";
@@ -301,11 +301,8 @@ export class GameObjects {
     }
 
     for (const revealedLocation of revealedLocations) {
-      LocationsRevealedMap.setLocationRevealed(
-        revealedLocation.hash,
-        revealedLocation.revealer,
-      );
-      this.addPlanetLocation(revealedLocation);
+      this.markLocationRevealed(revealedLocation);
+      this.addPlanetLocation(revealedLocation.location);
     }
 
     this.replaceArtifactsFromContractData(artifacts.values());
@@ -575,7 +572,8 @@ export class GameObjects {
     }
     // make planet Locatable if we know its location
     const location =
-      locationsMap.getWorldLocation(planet.locationId) ?? revealedLocation;
+      locationsMap.getWorldLocation(planet.locationId) ??
+      revealedLocation?.location;
     if (location) {
       (planet as LocatablePlanet).location = toWorldLocation(location);
       (planet as LocatablePlanet).biome = this.getBiome(location);
@@ -583,7 +581,7 @@ export class GameObjects {
 
     if (revealedLocation) {
       this.markLocationRevealed(revealedLocation);
-      this.addPlanetLocation(revealedLocation);
+      this.addPlanetLocation(revealedLocation.location);
     }
 
     // if (claimerEthAddress) {
@@ -701,8 +699,8 @@ export class GameObjects {
 
   // marks that a location is revealed on-chain
   public markLocationRevealed(revealedLocation: RevealedLocation): void {
-    LocationsRevealedMap.setLocationRevealed(
-      revealedLocation.hash,
+    locationsRevealedMap.setLocationRevealed(
+      revealedLocation.location.hash,
       revealedLocation.revealer,
     );
   }
@@ -1199,7 +1197,7 @@ export class GameObjects {
   }
 
   public getLocationsRevealed(): Map<LocationId, EthAddress> {
-    return LocationsRevealedMap.getLocationsRevealed();
+    return locationsRevealedMap.getLocationsRevealed();
   }
 
   // public getClaimedLocations(): Map<LocationId, ClaimedLocation> {
