@@ -76,7 +76,7 @@ export function persistedLocationToWorldLocation(
 }
 
 /**
- * Converts a location or revealed location into a world location if it has not already been added to the
+ * Converts a location into a world location if it has not already been added to the
  * locations map.
  *
  * This function ensures that each location is only added once to the locations map. If the location
