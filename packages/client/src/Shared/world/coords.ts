@@ -1,22 +1,22 @@
 import type { LocationId, WorldCoords } from "@df/types";
+export class WorldCoordsMap {
+  constructor() {
+    throw new Error("WorldCoordsMap is a singleton and can't be initialized");
+  }
 
-const coordsToLocationId = new Map<number, LocationId>();
+  static #coordsToLocationId = new Map<number, LocationId>();
 
-export function coordsToKey(coords: WorldCoords): number {
-  return coords.x * 300_001 + coords.y;
-}
+  static coordsToKey(coords: WorldCoords): number {
+    return coords.x * 300_001 + coords.y;
+  }
 
-export function setCoordsToLocationId(
-  coords: WorldCoords,
-  location: LocationId,
-) {
-  const key = coordsToKey(coords);
-  coordsToLocationId.set(key, location);
-}
+  static setCoordsToLocationId(coords: WorldCoords, location: LocationId) {
+    const key = this.coordsToKey(coords);
+    this.#coordsToLocationId.set(key, location);
+  }
 
-export function getCoordsToLocationId(
-  coords: WorldCoords,
-): LocationId | undefined {
-  const key = coordsToKey(coords);
-  return coordsToLocationId.get(key);
+  static getCoordsToLocationId(coords: WorldCoords): LocationId | undefined {
+    const key = this.coordsToKey(coords);
+    return this.#coordsToLocationId.get(key);
+  }
 }

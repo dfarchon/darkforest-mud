@@ -1,8 +1,7 @@
 import type { Biome, SpaceType } from "./game_types";
 import type { ArtifactId, EthAddress, LocationId } from "./identifier";
-import type { PlanetMessage } from "./planetmessage";
 import type { TransactionCollection } from "./transaction";
-import type { Upgrade, UpgradeState } from "./upgrade";
+import type { UpgradeState } from "./upgrade";
 import type { Abstract } from "./utility";
 import type { WorldLocation } from "./world";
 
@@ -168,7 +167,17 @@ export type Effect = {
   id: number;
 };
 
-export type Planet = {
+/**
+ * Represents a Dark Forest planet object (planets, asteroid fields, quasars,
+ * spacetime rips, and foundries). Note that some `Planet` fields (1) store
+ * client-specific data that the blockchain is not aware of, such as
+ * `unconfirmedDepartures` (tracks pending moves originating at this planet that
+ * have been submitted to the blockchain from a client), or (2) store derived
+ * data that is calculated separately client-side, such as `silverSpent` and
+ * `bonus`. So this object does not cleanly map to any single object in the
+ * DarkForest contract (or even any collection of objects).
+ */
+export interface Planet {
   locationId: LocationId; //planetHash
   perlin: number;
   spaceType: SpaceType;
@@ -212,7 +221,6 @@ export type Planet = {
   // unconfirmedClearEmoji: boolean;
   loadingServerState: boolean;
   needsServerRefresh: boolean;
-  lastLoadedServerState?: number;
 
   emojiBobAnimation?: DFAnimation;
   emojiZoopAnimation?: DFAnimation;
@@ -222,9 +230,7 @@ export type Planet = {
 
   isInContract: boolean;
   syncedWithContract: boolean;
-  coordsRevealed: boolean;
-  revealer?: EthAddress;
-  // claimer?: EthAddress;
+
   burnOperator?: EthAddress; //only record burn/pink operator
   burnStartTimestamp?: number;
   pinkOperator?: EthAddress;
@@ -246,90 +252,7 @@ export type Planet = {
 
   effects?: Effect[];
   flags?: bigint;
-};
-
-/**
- * Represents a Dark Forest planet object (planets, asteroid fields, quasars,
- * spacetime rips, and foundries). Note that some `Planet` fields (1) store
- * client-specific data that the blockchain is not aware of, such as
- * `unconfirmedDepartures` (tracks pending moves originating at this planet that
- * have been submitted to the blockchain from a client), or (2) store derived
- * data that is calculated separately client-side, such as `silverSpent` and
- * `bonus`. So this object does not cleanly map to any single object in the
- * DarkForest contract (or even any collection of objects).
- */
-// export type Planet = {
-//   locationId: LocationId;
-//   perlin: number;
-//   spaceType: SpaceType;
-//   owner: EthAddress; // should never be null; all unowned planets should have 0 address
-//   hatLevel: number;
-//   hatType: number;
-
-//   planetLevel: PlanetLevel;
-//   planetType: PlanetType;
-//   isHomePlanet: boolean;
-
-//   energyCap: number;
-//   energyGrowth: number;
-
-//   silverCap: number;
-//   silverGrowth: number;
-
-//   range: number;
-//   defense: number;
-//   speed: number;
-
-//   energy: number;
-//   silver: number;
-
-//   spaceJunk: number;
-
-//   lastUpdated: number;
-//   upgradeState: UpgradeState;
-//   hasTriedFindingArtifact: boolean;
-//   heldArtifactIds: ArtifactId[];
-//   adminProtect: boolean;
-//   destroyed: boolean;
-//   frozen: boolean;
-//   canShow: boolean;
-//   prospectedBlockNumber?: number;
-//   localPhotoidUpgrade?: Upgrade;
-
-//   transactions?: TransactionCollection;
-//   unconfirmedAddEmoji: boolean;
-//   unconfirmedClearEmoji: boolean;
-//   loadingServerState: boolean;
-//   needsServerRefresh: boolean;
-//   lastLoadedServerState?: number;
-
-//   emojiBobAnimation?: DFAnimation;
-//   emojiZoopAnimation?: DFAnimation;
-//   emojiZoopOutAnimation?: DFStatefulAnimation<string>;
-
-//   silverSpent: number;
-
-//   isInContract: boolean;
-//   syncedWithContract: boolean;
-//   coordsRevealed: boolean;
-//   revealer?: EthAddress;
-//   claimer?: EthAddress;
-//   burnOperator?: EthAddress; //only record burn/pink operator
-//   burnStartTimestamp?: number;
-//   pinkOperator?: EthAddress;
-//   kardashevOperator?: EthAddress;
-//   kardashevTimestamp?: number;
-
-//   messages?: PlanetMessage<unknown>[];
-
-//   bonus: PlanetBonus;
-//   pausers: number;
-//   energyGroDoublers: number;
-//   silverGroDoublers: number;
-//   invader?: EthAddress;
-//   capturer?: EthAddress;
-//   invadeStartBlock?: number;
-// };
+}
 
 /**
  * A planet whose coordinates are known to the client.

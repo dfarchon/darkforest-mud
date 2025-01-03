@@ -28,6 +28,7 @@ import type {
 } from "@df/types";
 import { Biome, PlanetFlagType, PlanetStatus, SpaceType } from "@df/types";
 import { PlanetLevel } from "@df/types";
+import { LocationsRevealedMap } from "@df/world/locations";
 import {
   type Entity,
   getComponentValue,
@@ -105,7 +106,7 @@ export class PlanetUtils {
       silverSpent: planet.silverSpent,
       isInContract: planet.isInContract,
       syncedWithContract: planet.syncedWithContract,
-      coordsRevealed: planet.coordsRevealed,
+
       bonus: planet.bonus,
       energyGroDoublers: planet.energyGroDoublers,
       silverGroDoublers: planet.silverGroDoublers,
@@ -311,9 +312,7 @@ export class PlanetUtils {
       }
     }
 
-    const coordsRevealed = getComponentValue(RevealedPlanet, planetEntity)
-      ? true
-      : false;
+    const coordsRevealed = getComponentValue(RevealedPlanet, planetEntity);
 
     const prospectedPlanet = getComponentValue(ProspectedPlanet, planetEntity);
 
@@ -372,6 +371,13 @@ export class PlanetUtils {
       }
     }
 
+    if (coordsRevealed) {
+      LocationsRevealedMap.setLocationRevealed(
+        planetId,
+        coordsRevealed.revealer as EthAddress,
+      );
+    }
+
     return {
       locationId: planetId,
       isHomePlanet: false,
@@ -395,7 +401,7 @@ export class PlanetUtils {
       upgradeState,
       lastUpdated: lastUpdateTick,
       isInContract,
-      coordsRevealed,
+      // coordsRevealed,
       silverSpent: this.calculateSilverSpent(upgradeState, silverCap),
       bonus,
       energyGroDoublers: 0,

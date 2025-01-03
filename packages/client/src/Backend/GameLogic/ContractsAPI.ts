@@ -1396,20 +1396,16 @@ export class ContractsAPI extends EventEmitter {
     const revealedPlanetId = encodeEntity(RevealedPlanet.metadata.keySchema, {
       id: locationIdToHexStr(planetId) as Hex,
     });
+
     const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
-
-    if (!revealedPlanet) {
-      return undefined;
-    }
-
-    const result: RevealedCoords = {
-      x: revealedPlanet.x as number,
-      y: revealedPlanet.y as number,
-      revealer: revealedPlanet.revealer as EthAddress,
-      hash: planetId as LocationId,
-    };
-
-    return result;
+    return revealedPlanet
+      ? {
+          x: revealedPlanet.x as number,
+          y: revealedPlanet.y as number,
+          revealer: revealedPlanet.revealer as EthAddress,
+          hash: planetId as LocationId,
+        }
+      : undefined;
   }
 
   public getIsPaused(): boolean {

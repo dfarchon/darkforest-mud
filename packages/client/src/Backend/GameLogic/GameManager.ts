@@ -1,7 +1,6 @@
 import {
   BLOCK_EXPLORER_URL,
   CONTRACT_PRECISION,
-  EMPTY_ADDRESS,
   MIN_PLANET_LEVEL,
 } from "@df/constants";
 import type { Monomitter, Subscription } from "@df/events";
@@ -10,51 +9,24 @@ import {
   getRange,
   isActivated,
   isLocatable,
-  isSpaceShip,
   timeUntilNextBroadcastAvailable,
 } from "@df/gamelogic";
 import { fakeHash, mimcHash, perlin } from "@df/hashing";
 import type { EthConnection } from "@df/network";
-import {
-  createContract,
-  ThrottledConcurrentQueue,
-  verifySignature,
-  weiToEth,
-} from "@df/network";
+import { createContract, weiToEth } from "@df/network";
 import { getPlanetName } from "@df/procedural";
 import {
-  address,
   artifactIdToDecStr,
   isUnconfirmedActivateArtifactTx,
-  isUnconfirmedBlueTx,
-  isUnconfirmedBurnTx,
-  isUnconfirmedBuyArtifactTx,
-  isUnconfirmedBuyGPTTokensTx,
-  isUnconfirmedBuyHatTx,
-  isUnconfirmedBuyPlanetTx,
-  isUnconfirmedBuySpaceshipTx,
-  isUnconfirmedCapturePlanetTx,
-  isUnconfirmedChangeArtifactImageTypeTx,
-  isUnconfirmedChargeArtifactTx,
-  isUnconfirmedClaimTx,
-  isUnconfirmedDeactivateArtifactTx,
-  isUnconfirmedDepositArtifactTx,
   isUnconfirmedDonateTx,
   isUnconfirmedFindArtifactTx,
-  isUnconfirmedInitTx,
-  isUnconfirmedInvadePlanetTx,
-  isUnconfirmedKardashevTx,
   isUnconfirmedMoveTx,
   isUnconfirmedPinkTx,
   isUnconfirmedProspectPlanetTx,
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
-  isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
-  isUnconfirmedSpendGPTTokensTx,
-  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedUpgradeTx,
-  isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdFromHexStr,
@@ -69,21 +41,12 @@ import type {
 import type {
   Artifact,
   ArtifactId,
-  Biome,
-  BurnedCoords,
-  BurnedLocation,
-  CaptureZone,
   Chunk,
-  ClaimedCoords,
-  ClaimedLocation,
   Diagnostics,
   EthAddress,
-  KardashevCoords,
-  KardashevLocation,
   Link,
   LocatablePlanet,
   LocationId,
-  NetworkHealthSummary,
   PinkZone,
   Planet,
   PlanetLevel,
@@ -93,24 +56,15 @@ import type {
   Rectangle,
   RevealedCoords,
   RevealedLocation,
-  SignedMessage,
   Transaction,
   TxIntent,
   UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
   UnconfirmedApplyToGuild,
   UnconfirmedApproveApplication,
-  UnconfirmedBlue,
-  UnconfirmedBurn,
-  UnconfirmedBuyArtifact,
   UnconfirmedBuyGPTTokens,
-  UnconfirmedBuyHat,
-  UnconfirmedBuyPlanet,
-  UnconfirmedBuySpaceship,
-  UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
   UnconfirmedChargeArtifact,
-  UnconfirmedClaim,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -118,9 +72,7 @@ import type {
   UnconfirmedDonate,
   UnconfirmedFindArtifact,
   UnconfirmedInit,
-  UnconfirmedInvadePlanet,
   UnconfirmedInviteToGuild,
-  UnconfirmedKardashev,
   UnconfirmedKickMember,
   UnconfirmedLeaveGuild,
   UnconfirmedMove,
@@ -129,12 +81,12 @@ import type {
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
-  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
-  UnconfirmedSpendGPTTokens,
   UnconfirmedShutdownArtifact,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
@@ -146,45 +98,33 @@ import type {
 } from "@df/types";
 import type { Guild, GuildId } from "@df/types";
 import {
-  ArtifactRarity,
   ArtifactType,
   GuildRole,
   GuildStatus,
-  HatType,
-  PlanetMessageType,
   PlanetType,
   Setting,
   SpaceType,
 } from "@df/types";
-import type { NumberType } from "@latticexyz/recs";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
-import delay from "delay";
 import type { Contract, ContractInterface, providers } from "ethers";
 import { BigNumber } from "ethers";
 import { utils } from "ethers";
 import { EventEmitter } from "events";
 import type { Hex } from "viem";
-import { encodeFunctionData, toBytes } from "viem";
+import { encodeFunctionData } from "viem";
 
 import type {
   ContractConstants,
   MoveArgs,
 } from "../../_types/darkforest/api/ContractsAPITypes";
-import {
-  ContractsAPIEvent,
-  ZKArgIdx,
-} from "../../_types/darkforest/api/ContractsAPITypes";
-import type { AddressTwitterMap } from "../../_types/darkforest/api/UtilityServerAPITypes";
+import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
 import type {
-  BurnCountdownInfo,
-  ClaimCountdownInfo,
   HashConfig,
-  KardashevCountdownInfo,
   RevealCountdownInfo,
 } from "../../_types/global/GlobalTypes";
 import NotificationManager from "../../Frontend/Game/NotificationManager";
@@ -197,7 +137,6 @@ import {
 import {
   getBooleanSetting,
   getNumberSetting,
-  pollSetting,
   setBooleanSetting,
   setSetting,
   settingChanged$,
@@ -216,16 +155,6 @@ import {
   TowardsCenterPattern,
   TowardsCenterPatternV2,
 } from "../Miner/MiningPatterns";
-import {
-  addMessage,
-  deleteMessages,
-  getMessagesOnPlanets,
-} from "../Network/MessageAPI";
-import {
-  disconnectTwitter,
-  getAllTwitters,
-  verifyTwitterHandle,
-} from "../Network/UtilityServerAPI";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
 import type PersistentChunkStore from "../Storage/PersistentChunkStore";
 import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
@@ -233,14 +162,12 @@ import type SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
 import { prospectExpired } from "./ArrivalUtils";
 // import { getEmojiMessage } from "./ArrivalUtils";
-import type { CaptureZonesGeneratedEvent } from "./CaptureZoneGenerator";
-import { CaptureZoneGenerator } from "./CaptureZoneGenerator";
 import type { ContractsAPI } from "./ContractsAPI";
-import { makeContractsAPI } from "./ContractsAPI";
 import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
-import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
-export enum GameManagerEvent {
+import { LocationsRevealedMap } from "@df/world/locations";
+
+export const enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
   DiscoveredNewChunk = "DiscoveredNewChunk",
   InitializedPlayer = "InitializedPlayer",
@@ -448,7 +375,6 @@ export class GameManager extends EventEmitter {
    * Emits whenever we load the network health summary from the webserver, which is derived from
    * diagnostics that the client sends up to the webserver as well.
    */
-  // public networkHealth$: Monomitter<NetworkHealthSummary>;
 
   public paused$: Monomitter<boolean>;
 
@@ -557,18 +483,19 @@ export class GameManager extends EventEmitter {
     this.contractConstants = contractConstants;
     this.homeLocation = homeLocation;
 
-    const revealedLocations = new Map<LocationId, RevealedLocation>();
+    const revealedLocations: RevealedLocation[] = [];
     for (const [locationId, coords] of revealedCoords) {
+      // NOTE: Not sure we really need the if(planet) check below.
       const planet = touchedPlanets.get(locationId);
       if (planet) {
-        const location: WorldLocation = {
+        revealedLocations.push({
           hash: locationId,
-          coords,
+          coords: {
+            x: coords.x,
+            y: coords.y,
+          },
           perlin: planet.perlin,
           biomebase: this.biomebasePerlin(coords, true),
-        };
-        revealedLocations.set(locationId, {
-          ...location,
           revealer: coords.revealer,
         });
       }
@@ -647,8 +574,8 @@ export class GameManager extends EventEmitter {
     //   }
     // }
 
-    this.entityStore = new GameObjects(
-      mainAccount,
+    this.entityStore = new GameObjects({
+      address: mainAccount,
       touchedPlanets,
       allTouchedPlanetIds,
       revealedLocations,
@@ -656,13 +583,13 @@ export class GameManager extends EventEmitter {
       // burnedLocations,
       // kardashevLocations,
       artifacts,
-      persistentChunkStore.allChunks(),
+      allChunks: persistentChunkStore.allChunks(),
       unprocessedArrivals,
       unprocessedPlanetArrivalIds,
       contractConstants,
       worldRadius,
       components,
-    );
+    });
 
     this.contractsAPI = contractsAPI;
 
@@ -1013,21 +940,21 @@ export class GameManager extends EventEmitter {
     if (!planet) {
       return;
     }
-    this.entityStore.replacePlanetFromContractData(planet);
+    this.entityStore.replacePlanetFromContractData({ planet });
   }
 
   public hardRefreshPlanet(planetId: LocationId): void {
     let planet = this.contractsAPI.getPlanetById(planetId);
 
+    // in some cases, the planet is not entirely initialized in the contract, but only some crucial table fields are set
+    // in this case, we still need to generate the planet from contract side and update it into the entity store
     if (!planet) {
-      // in some cases, the planet is not entirely initialized in the contract, but only some crucial table fields are set
-      // in this case, we still need to generate the planet from contract side and update it into the entity store
       const location = this.entityStore.getLocationOfPlanet(planetId);
-      if (location) {
-        planet = this.contractsAPI.getDefaultPlanetByLocation(location);
-      } else {
+      if (!location) {
         return;
       }
+
+      planet = this.contractsAPI.getDefaultPlanetByLocation(location);
     }
 
     const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
@@ -1039,25 +966,22 @@ export class GameManager extends EventEmitter {
     const revealedCoords =
       this.contractsAPI.getRevealedCoordsByIdIfExists(planetId);
 
+    const revealedLocation: RevealedLocation | undefined = revealedCoords
+      ? {
+          ...this.locationFromCoords(revealedCoords),
+          revealer: revealedCoords.revealer,
+        }
+      : undefined;
+
     // const claimedCoords =
     //   await this.contractsAPI.getClaimedCoordsByIdIfExists(planetId);
     // const burnedCoords =
     //   await this.contractsAPI.getBurnedCoordsByIdIfExists(planetId);
     // const kardashevCoords =
     //   await this.contractsAPI.getKardashevCoordsByIdIfExists(planetId);
-
-    let revealedLocation: RevealedLocation | undefined;
     // let claimedLocation: ClaimedLocation | undefined;
     // let burnedLocation: BurnedLocation | undefined;
     // let kardashevLocation: KardashevLocation | undefined;
-
-    if (revealedCoords) {
-      revealedLocation = {
-        ...this.locationFromCoords(revealedCoords),
-        revealer: revealedCoords.revealer,
-      };
-    }
-
     // if (claimedCoords) {
     //   claimedLocation = {
     //     ...this.locationFromCoords(claimedCoords),
@@ -1109,22 +1033,20 @@ export class GameManager extends EventEmitter {
     //   this.getGameObjects().setKardashevLocation(kardashevLocation);
     // }
 
-    this.entityStore.replacePlanetFromContractData(
+    this.entityStore.replacePlanetFromContractData({
       planet,
-      arrivals,
-      planet.heldArtifactIds, // artifactsOnPlanet.map((a) => a.id),
+      updatedArrivals: arrivals,
+      updatedArtifactsOnPlanet: planet.heldArtifactIds, // artifactsOnPlanet.map((a) => a.id),
       revealedLocation,
-      // claimedCoords?.claimer,
-      // burnedCoords?.operator,
-      // kardashevCoords?.operator,
-    );
+    });
 
     // it's important that we reload the artifacts that are on the planet after the move
     // completes because this move could have been a photoid canon move. one of the side
     // effects of this type of move is that the active photoid canon deactivates upon a move
     // meaning we need to reload its data from the blockchain.
-
-    planet.heldArtifactIds.forEach((a) => this.hardRefreshArtifact(a));
+    for (const artifact of planet.heldArtifactIds) {
+      this.hardRefreshArtifact(artifact);
+    }
   }
 
   public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
@@ -1161,11 +1083,11 @@ export class GameManager extends EventEmitter {
 
       const voyagesForPlanet = planetVoyageMap.get(planet.locationId);
       if (voyagesForPlanet) {
-        this.entityStore.replacePlanetFromContractData(
+        this.entityStore.replacePlanetFromContractData({
           planet,
-          voyagesForPlanet,
-          undefined, //  artifactsOnPlanets[i].map((a) => a.id),
-        );
+          updatedArrivals: voyagesForPlanet,
+          updatedArtifactsOnPlanet: undefined, //  artifactsOnPlanets[i].map((a) => a.id),
+        });
       }
     }
 
@@ -1893,10 +1815,10 @@ export class GameManager extends EventEmitter {
   }
 
   /**
-   * Gets a map of all location IDs whose coords have been publically revealed
+   * Gets a map of all location IDs and revealers whose coords have been publically revealed
    */
-  getRevealedLocations(): Map<LocationId, RevealedLocation> {
-    return this.entityStore.getRevealedLocations();
+  getLocationsRevealed(): Map<LocationId, EthAddress> {
+    return this.entityStore.getLocationsRevealed();
   }
 
   /**
@@ -2576,7 +2498,7 @@ export class GameManager extends EventEmitter {
         );
       }
 
-      if (planet.coordsRevealed) {
+      if (LocationsRevealedMap.isLocationRevealed(planet.locationId)) {
         throw new Error("this planet's location is already revealed");
       }
 
@@ -3645,9 +3567,14 @@ export class GameManager extends EventEmitter {
    * very slow since it actually calculates the hash; do not use in render loop
    */
 
-  private locationFromCoords(coords: WorldCoords): WorldLocation {
+  private locationFromCoords(
+    coords: WorldCoords | RevealedCoords,
+  ): WorldLocation {
     return {
-      coords,
+      coords: {
+        x: coords.x,
+        y: coords.y,
+      },
       hash: locationIdFromBigInt(this.planetHashMimc(coords.x, coords.y)),
       perlin: this.spaceTypePerlin(coords, true),
       biomebase: this.biomebasePerlin(coords, true),
@@ -4903,7 +4830,7 @@ export class GameManager extends EventEmitter {
    * This function loads the planet states which live on the server. Plays nicely with our
    * notifications system and sets the appropriate loading state values on the planet.
    */
-  public async refreshServerPlanetStates(planetIds: LocationId[]) {
+  public refreshServerPlanetStates(planetIds: LocationId[]) {
     const planets = this.getPlanetsWithIds(planetIds);
 
     planetIds.forEach((id) =>

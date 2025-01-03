@@ -303,7 +303,7 @@ export class GameManagerFactory {
       //   gameManager.halfPrice = halfPrice;
       //   gameManager.halfPrice$.publish(halfPrice);
       // })
-      .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
+      .on(ContractsAPIEvent.PlanetUpdate, (planetId: LocationId) => {
         // PUNK
         // console.log("handle ContractsAPI.PlanetUpdate");
         // console.log(planetId);
@@ -315,7 +315,7 @@ export class GameManagerFactory {
           gameManager.hardRefreshPlanet(planetId);
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         }
-        await gameManager.refreshServerPlanetStates([planetId]);
+        gameManager.refreshServerPlanetStates([planetId]);
       })
       .on(
         ContractsAPIEvent.ArrivalQueued,

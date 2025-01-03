@@ -38,7 +38,7 @@ export class ViewportEntities {
   public startRefreshing() {
     setInterval(() => {
       this.loadPlanetMessages();
-    }, 10 * 1000);
+    }, 10_000);
   }
 
   public getPlanetsAndChunks() {
@@ -88,7 +88,7 @@ export class ViewportEntities {
     this.cachedExploredChunks = chunks;
   }
 
-  private async loadPlanetMessages() {
+  private loadPlanetMessages() {
     const planetIds = [];
     for (const p of this.cachedPlanets.values()) {
       // by definition, only planets that are owned can have planet messages on them, so they must
@@ -98,7 +98,7 @@ export class ViewportEntities {
       }
     }
 
-    await this.gameManager.refreshServerPlanetStates(planetIds);
+    this.gameManager.refreshServerPlanetStates(planetIds);
   }
 
   private recalculateViewportPlanets(viewport: Viewport) {
