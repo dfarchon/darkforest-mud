@@ -105,6 +105,7 @@ import {
   Setting,
   SpaceType,
 } from "@df/types";
+import { LocationsRevealedMap, toWorldLocation } from "@df/world/locations";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -165,7 +166,6 @@ import { prospectExpired } from "./ArrivalUtils";
 import type { ContractsAPI } from "./ContractsAPI";
 import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
-import { LocationsRevealedMap } from "@df/world/locations";
 
 export const enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
@@ -3570,7 +3570,9 @@ export class GameManager extends EventEmitter {
   private locationFromCoords(
     coords: WorldCoords | RevealedCoords,
   ): WorldLocation {
-    return {
+    // NOTE: Ensure to wrap via toWorldLocation to get the same world location
+    //       references accross the code
+    return toWorldLocation({
       coords: {
         x: coords.x,
         y: coords.y,
@@ -3578,7 +3580,7 @@ export class GameManager extends EventEmitter {
       hash: locationIdFromBigInt(this.planetHashMimc(coords.x, coords.y)),
       perlin: this.spaceTypePerlin(coords, true),
       biomebase: this.biomebasePerlin(coords, true),
-    };
+    });
   }
 
   /**

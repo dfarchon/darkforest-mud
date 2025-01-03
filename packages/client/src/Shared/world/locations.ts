@@ -5,24 +5,24 @@ import type {
   WorldLocation,
 } from "@df/types";
 
+import type { PersistedLocation } from "../../_types/darkforest/api/ChunkStoreTypes";
+
 ////////////////////////
 /// Locations Map
 ///////////////////////
-export class LocationsMap {
-  constructor() {
-    throw new Error("LocationsMap is a singleton and can't be initialized");
-  }
+class LocationsMap {
+  #locations = new Map<LocationId, WorldLocation>();
 
-  static #locations = new Map<LocationId, WorldLocation>();
-
-  static getWorldLocation(locationId: LocationId): WorldLocation | undefined {
+  getWorldLocation(locationId: LocationId): WorldLocation | undefined {
     return this.#locations.get(locationId);
   }
 
-  static setWorldLocation(locationId: LocationId, location: WorldLocation) {
-    this.#locations.set(locationId, toWorldLocation(location));
+  setWorldLocation(locationId: LocationId, location: WorldLocation) {
+    this.#locations.set(locationId, location);
   }
 }
+
+export const locationsMap = new LocationsMap();
 
 ////////////////////////
 /// Revealed locations
@@ -50,7 +50,7 @@ export class LocationsRevealedMap {
       return undefined;
     }
 
-    const location = LocationsMap.getWorldLocation(locationId);
+    const location = locationsMap.getWorldLocation(locationId);
     if (!location) {
       console.warn(
         `Could not find stored world location for revealed location: ${locationId}`,
@@ -69,22 +69,64 @@ export class LocationsRevealedMap {
 /// Helpers
 ///////////////////////
 
+export function persistedLocationToWorldLocation(
+  persistedLocation: PersistedLocation,
+): WorldLocation {
+  let worldLocation = locationsMap.getWorldLocation(persistedLocation.h);
+  if (!worldLocation) {
+    worldLocation = {
+      hash: persistedLocation.h,
+      coords: {
+        x: persistedLocation.x,
+        y: persistedLocation.y,
+      },
+      perlin: persistedLocation.p,
+      biomebase: persistedLocation.p,
+    };
+
+    locationsMap.setWorldLocation(worldLocation.hash, worldLocation);
+  }
+
+  return worldLocation;
+}
+
 export function toWorldLocation(
   location: WorldLocation | RevealedLocation,
 ): WorldLocation {
-  return {
-    hash: location.hash,
-    coords: {
-      x: location.coords.x,
-      y: location.coords.y,
-    },
-    perlin: location.perlin,
-    biomebase: location.biomebase,
-  };
+  let worldLocation = locationsMap.getWorldLocation(location.hash);
+  if (!worldLocation) {
+    worldLocation = {
+      hash: location.hash,
+      coords: {
+        x: location.coords.x,
+        y: location.coords.y,
+      },
+      perlin: location.perlin,
+      biomebase: location.biomebase,
+    };
+
+    locationsMap.setWorldLocation(worldLocation.hash, worldLocation);
+  }
+
+  // update perlin and biomebase accross all world location references
+  // if (update) {
+  //   (worldLocation as WorldLocation & { perlin: number }).perlin =
+  //     location.perlin;
+  //   (worldLocation as WorldLocation & { biomebase: number }).biomebase =
+  //     location.biomebase;
+  // }
+
+  return worldLocation;
 }
 
 export function isRevealedLocationType(
-  location: WorldLocation | RevealedLocation,
+  location: WorldLocation | RevealedLocation | PersistedLocation,
 ): location is RevealedLocation {
   return (location as RevealedLocation).revealer !== undefined;
+}
+
+export function isPersistedLocationType(
+  location: WorldLocation | RevealedLocation | PersistedLocation,
+): location is PersistedLocation {
+  return (location as PersistedLocation).h !== undefined;
 }

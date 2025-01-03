@@ -20,7 +20,6 @@ import { openDB } from "idb";
 import type {
   ChunkId,
   ChunkStore,
-  PersistedChunk,
 } from "../../_types/darkforest/api/ChunkStoreTypes";
 import { MAX_CHUNK_SIZE } from "../../Frontend/Utils/constants";
 import {

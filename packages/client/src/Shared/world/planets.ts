@@ -1,25 +1,26 @@
 import type { LocationId, Planet } from "@df/types";
 
-export class PlanetsMap {
-  constructor() {
-    throw new Error("PlanetsMap is a singleton and can't be initialized");
-  }
+////////////////////////
+/// Planets Map
+///////////////////////
+class PlanetsMap {
+  #planets = new Map<LocationId, Planet>();
 
-  static #planets = new Map<LocationId, Planet>();
-
-  static hasPlanet(locationId: LocationId): boolean {
+  hasPlanet(locationId: LocationId): boolean {
     return this.#planets.has(locationId);
   }
 
-  static getPlanet(locationId: LocationId): Planet | undefined {
+  getPlanet(locationId: LocationId): Planet | undefined {
     return this.#planets.get(locationId);
   }
 
-  static setPlanet(locationId: LocationId, planet: Planet) {
+  setPlanet(locationId: LocationId, planet: Planet) {
     this.#planets.set(locationId, planet);
   }
 
-  static getPlanetMap(): Map<LocationId, Planet> {
+  getPlanetMap(): Map<LocationId, Planet> {
     return this.#planets;
   }
 }
+
+export const planetsMap = new PlanetsMap();
