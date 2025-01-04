@@ -224,9 +224,7 @@ export class PluginManager {
       // The `@vite-ignore` makes vite webpack skip over this dynamic `import` call
       // so it won't be transformed directly by vite since these are dynamic plugins
       // @see https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitations
-      const { default: Plugin } = await import(
-        /* @vite-ignore: true */ moduleUrl
-      );
+      const { default: Plugin } = await import(/* @vite-ignore */ moduleUrl);
       if (this.pluginProcesses[id] === undefined) {
         // instantiate the plugin and attach it to the process list
         this.pluginProcesses[id] = new Plugin();

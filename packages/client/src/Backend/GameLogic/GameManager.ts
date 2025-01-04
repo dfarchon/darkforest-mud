@@ -406,31 +406,49 @@ export class GameManager extends EventEmitter {
    */
   // private captureZoneGenerator: CaptureZoneGenerator | undefined;
 
-  public constructor(
-    terminal: React.MutableRefObject<TerminalHandle | undefined>,
-    mainAccount: EthAddress | undefined,
-    players: Map<string, Player>,
-    touchedPlanets: Map<LocationId, Planet>,
-    allTouchedPlanetIds: Set<LocationId>,
-    revealedCoords: Map<LocationId, RevealedCoords>,
+  public constructor({
+    terminal,
+    mainAccount,
+    players,
+    touchedPlanets,
+    revealedCoords,
+    worldRadius,
+    unprocessedArrivals,
+    unprocessedPlanetArrivalIds,
+    contractsAPI,
+    contractConstants,
+    persistentChunkStore,
+    snarkHelper,
+    homeLocation,
+    useMockHash,
+    artifacts,
+    ethConnection,
+    paused,
+    components,
+  }: {
+    terminal: React.MutableRefObject<TerminalHandle | undefined>;
+    mainAccount: EthAddress | undefined;
+    players: Map<string, Player>;
+    touchedPlanets: Map<LocationId, Planet>;
+    revealedCoords: Map<LocationId, RevealedCoords>;
     // claimedCoords: Map<LocationId, ClaimedCoords>,
     // burnedCoords: Map<LocationId, BurnedCoords>,
     // kardashevCoords: Map<LocationId, KardashevCoords>,
-    worldRadius: number,
-    unprocessedArrivals: Map<VoyageId, QueuedArrival>,
-    unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>,
-    contractsAPI: ContractsAPI,
-    contractConstants: ContractConstants,
-    persistentChunkStore: PersistentChunkStore,
-    snarkHelper: SnarkArgsHelper,
-    homeLocation: WorldLocation | undefined,
-    useMockHash: boolean,
-    artifacts: Map<ArtifactId, Artifact>,
-    ethConnection: EthConnection,
-    paused: boolean,
-    // halfPrice: boolean,
-    components: ClientComponents,
-  ) {
+    worldRadius: number;
+    unprocessedArrivals: Map<VoyageId, QueuedArrival>;
+    unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>;
+    contractsAPI: ContractsAPI;
+    contractConstants: ContractConstants;
+    persistentChunkStore: PersistentChunkStore;
+    snarkHelper: SnarkArgsHelper;
+    homeLocation?: WorldLocation;
+    useMockHash: boolean;
+    artifacts: Map<ArtifactId, Artifact>;
+    ethConnection: EthConnection;
+    paused: boolean;
+    // halfPrice: boolean;
+    components: ClientComponents;
+  }) {
     super();
 
     this.diagnostics = {
@@ -580,7 +598,6 @@ export class GameManager extends EventEmitter {
     this.entityStore = new GameObjects({
       address: mainAccount,
       touchedPlanets,
-      allTouchedPlanetIds,
       revealedLocations,
       // claimedLocations,
       // burnedLocations,

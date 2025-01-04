@@ -218,37 +218,26 @@ export class GameManagerFactory {
       useMockHash,
     );
 
-    const gameManager = new GameManager(
+    const gameManager = new GameManager({
       terminal,
       mainAccount,
-      initialState.players,
-      initialState.touchedAndLocatedPlanets,
-      new Set(Array.from(initialState.allTouchedPlanetIds)),
-      initialState.revealedCoordsMap,
-      // initialState.claimedCoordsMap
-      //   ? initialState.claimedCoordsMap
-      //   : new Map<LocationId, ClaimedCoords>(),
-      // initialState.burnedCoordsMap
-      //   ? initialState.burnedCoordsMap
-      //   : new Map<LocationId, BurnedCoords>(),
-      // initialState.kardashevCoordsMap
-      //   ? initialState.kardashevCoordsMap
-      //   : new Map<LocationId, KardashevCoords>(),
-      initialState.worldRadius,
-      initialState.arrivals,
-      initialState.planetVoyageIdMap,
+      players: initialState.players,
+      touchedPlanets: initialState.touchedAndLocatedPlanets,
+      revealedCoords: initialState.revealedCoordsMap,
+      worldRadius: initialState.worldRadius,
+      unprocessedArrivals: initialState.arrivals,
+      unprocessedPlanetArrivalIds: initialState.planetVoyageIdMap,
       contractsAPI,
-      initialState.contractConstants,
+      contractConstants: initialState.contractConstants,
       persistentChunkStore,
       snarkHelper,
       homeLocation,
       useMockHash,
-      knownArtifacts,
-      connection,
-      initialState.paused,
-      // initialState.halfPrice,
+      artifacts: knownArtifacts,
+      ethConnection: connection,
+      paused: initialState.paused,
       components,
-    );
+    });
 
     // gameManager.setPlayerTwitters(initialState.twitters);
 

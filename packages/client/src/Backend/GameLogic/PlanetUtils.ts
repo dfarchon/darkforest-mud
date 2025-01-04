@@ -97,8 +97,7 @@ export class PlanetUtils {
       bonus: planet.bonus,
       energyGroDoublers: planet.energyGroDoublers,
       silverGroDoublers: planet.silverGroDoublers,
-      universeZone: planet.universeZone,
-      distSquare: planet.distSquare,
+      // universeZone: planet.universeZone,
 
       prospectedBlockNumber: planet.prospectedBlockNumber,
       hasTriedFindingArtifact: planet.hasTriedFindingArtifact,
@@ -374,7 +373,7 @@ export class PlanetUtils {
       spaceType,
       planetType,
       planetLevel,
-      universeZone,
+      // universeZone,
       distSquare,
       range,
       speed,

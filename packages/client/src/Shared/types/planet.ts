@@ -177,30 +177,42 @@ export type Effect = {
  * `bonus`. So this object does not cleanly map to any single object in the
  * DarkForest contract (or even any collection of objects).
  */
-export interface Planet {
+export type Planet = Readonly<{
   locationId: LocationId; //planetHash
+
+  // planet properties
+  biome: Biome;
   perlin: number;
+  planetLevel: PlanetLevel;
+  planetType: PlanetType;
   spaceType: SpaceType;
+
   owner: EthAddress; // should never be null; all unowned planets should have 0 address
   // hatLevel: number;
   // hatType: number;
 
-  planetLevel: PlanetLevel;
-  planetType: PlanetType;
   isHomePlanet: boolean; // NOTE: default is false
+  destroyed: boolean;
+  frozen: boolean;
+  loadingServerState: boolean;
+  isInContract: boolean;
+  syncedWithContract: boolean;
+  // needsServerRefresh: boolean;
 
+  energy: number;
   energyCap: number;
   energyGrowth: number;
+  energyGroDoublers: number;
+
+  defense: number;
+  range: number;
+  speed: number;
 
   silverCap: number;
   silverGrowth: number;
-
-  range: number;
-  defense: number;
-  speed: number;
-
-  energy: number;
   silver: number;
+  silverSpent: number;
+  silverGroDoublers: number;
 
   // spaceJunk: number;
 
@@ -210,49 +222,37 @@ export interface Planet {
   prospectedBlockNumber?: number;
   heldArtifactIds: ArtifactId[];
   // adminProtect: boolean;
-  destroyed: boolean;
-  frozen: boolean;
   // canShow: boolean;
-
   // localPhotoidUpgrade?: Upgrade;
 
   transactions?: TransactionCollection;
   // unconfirmedAddEmoji: boolean;
   // unconfirmedClearEmoji: boolean;
-  loadingServerState: boolean;
-  needsServerRefresh: boolean;
 
+  emoji?: string;
   emojiBobAnimation?: DFAnimation;
   emojiZoopAnimation?: DFAnimation;
   emojiZoopOutAnimation?: DFStatefulAnimation<string>;
 
-  silverSpent: number;
-
-  isInContract: boolean;
-  syncedWithContract: boolean;
-
-  burnOperator?: EthAddress; //only record burn/pink operator
-  burnStartTimestamp?: number;
-  pinkOperator?: EthAddress;
+  // burnOperator?: EthAddress; //only record burn/pink operator
+  // burnStartTimestamp?: number;
+  // pinkOperator?: EthAddress;
   // kardashevOperator?: EthAddress;
   // kardashevTimestamp?: number;
 
   // messages?: PlanetMessage<unknown>[];
-  emoji?: string;
 
   bonus: PlanetBonus;
   // pausers: number;
-  energyGroDoublers: number;
-  silverGroDoublers: number;
   // invader?: EthAddress;
   // capturer?: EthAddress;
   // invadeStartBlock?: number;
-  universeZone: number;
-  distSquare: number;
+  // universeZone: number;
+  // distSquare: number;
 
   effects?: Effect[];
   flags?: bigint;
-}
+}>;
 
 /**
  * A planet whose coordinates are known to the client.

@@ -239,7 +239,6 @@ export class GameObjects {
   constructor({
     address,
     touchedPlanets,
-    allTouchedPlanetIds,
     revealedLocations,
     artifacts,
     allChunks,
@@ -251,7 +250,6 @@ export class GameObjects {
   }: {
     address: EthAddress | undefined;
     touchedPlanets: Map<LocationId, Planet>;
-    allTouchedPlanetIds: Set<LocationId>;
     revealedLocations: RevealedLocation[];
     // claimedLocations: Map<LocationId, ClaimedLocation>;
     // burnedLocations: Map<LocationId, BurnedLocation>;
@@ -268,7 +266,7 @@ export class GameObjects {
 
     this.address = address;
     this.myPlanets = new Map();
-    this.touchedPlanetIds = allTouchedPlanetIds;
+    this.touchedPlanetIds = new Set(touchedPlanets.keys());
     // this.claimedLocations = claimedLocations;
     // this.burnedLocations = burnedLocations;
     // this.kardashevLocations = kardashevLocations;
@@ -653,6 +651,7 @@ export class GameObjects {
   }
 
   public isPlanetInContract(planetId: LocationId): boolean {
+    // TODO: use `planetsMap.getPlanet(planetId)?.isInContract` instead
     return this.touchedPlanetIds.has(planetId);
   }
 
