@@ -95,9 +95,9 @@ export class VoyageRenderer implements VoyageRendererType {
         voyage.arrivalTick,
       );
 
-      console.log("PUNK");
-      console.log("supportMove");
-      console.log(supportMove);
+      // console.log("PUNK");
+      // console.log("supportMove");
+      // console.log(supportMove);
 
       const now = nowMs / 1000;
 

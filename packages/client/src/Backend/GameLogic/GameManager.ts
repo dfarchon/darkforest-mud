@@ -884,11 +884,11 @@ export class GameManager extends EventEmitter {
 
   public updateContractConstants(contractConstants: ContractConstants) {
     // PUNK
-    console.log("update contract constants");
-    console.log(
-      "new cooldown time:",
-      contractConstants.LOCATION_REVEAL_COOLDOWN,
-    );
+    // console.log("update contract constants");
+    // console.log(
+    //   "new cooldown time:",
+    //   contractConstants.LOCATION_REVEAL_COOLDOWN,
+    // );
 
     this.contractConstants = contractConstants;
   }
@@ -2635,7 +2635,7 @@ export class GameManager extends EventEmitter {
         args: getArgs(),
       };
 
-      console.log(txIntent);
+      // console.log(txIntent);
 
       // Always await the submitTransaction so we can catch rejections
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -3536,7 +3536,7 @@ export class GameManager extends EventEmitter {
       while (true) {
         try {
           const entryFee = 0; //await this.contractsAPI.getEntryFee();
-          console.log("entry fee: ", entryFee.toString());
+          // console.log("entry fee: ", entryFee.toString());
           localStorage.setItem(
             `${this.ethConnection.getAddress()?.toLowerCase()}-entryFee`,
             entryFee.toString(),
@@ -5193,8 +5193,8 @@ export class GameManager extends EventEmitter {
         if (artifactMoved) {
           args[6] = artifactIdToDecStr(artifactMoved);
         }
-        console.log("move args");
-        console.log(args);
+        // console.log("move args");
+        // console.log(args);
         return args;
       };
 

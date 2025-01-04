@@ -708,7 +708,6 @@ export function GameLandingPage() {
           await ethConnection.loadBalance(playerAddress),
         );
 
-
         if (balance < 0.00001) {
           terminal.current?.print(`   Your account: `);
           terminal.current?.println(
@@ -983,7 +982,7 @@ export function GameLandingPage() {
             args: getArgs(),
           };
 
-          console.log(txIntent);
+          // console.log(txIntent);
           const tx = await contractsAPI.submitTransaction(txIntent);
           console.log(tx);
 

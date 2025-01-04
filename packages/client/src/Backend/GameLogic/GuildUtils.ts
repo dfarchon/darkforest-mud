@@ -191,7 +191,7 @@ export class GuildUtils {
     if (!candidate) return false;
 
     // PUNK check here
-    console.log(candidate.invitations);
+    // console.log(candidate.invitations);
     return candidate.invitations.includes(guildId);
   }
 

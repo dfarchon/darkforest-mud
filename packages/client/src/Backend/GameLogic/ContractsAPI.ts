@@ -298,8 +298,9 @@ export class ContractsAPI extends EventEmitter {
   ) {
     // NOTE: remove /event
     // eventLogger.logEvent(EventType.Transaction, txDiagnosticInfo);
-    console.log("-- afterTransaction --");
-    console.log(txDiagnosticInfo);
+    // PUNK
+    // console.log("-- afterTransaction --");
+    // console.log(txDiagnosticInfo);
   }
 
   public destroy(): void {
@@ -423,8 +424,8 @@ export class ContractsAPI extends EventEmitter {
         const entity = update.entity;
 
         // PUNK
-        console.log("set planet emoji subscription");
-        console.log(locationIdFromHexStr(entity.toString()));
+        // console.log("set planet emoji subscription");
+        // console.log(locationIdFromHexStr(entity.toString()));
 
         this.emit(
           ContractsAPIEvent.PlanetUpdate,
