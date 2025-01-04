@@ -5219,16 +5219,14 @@ export class GameManager extends EventEmitter {
       if (artifactMoved) {
         const artifact = this.entityStore.getArtifactById(artifactMoved);
 
-        if (!bypassChecks) {
-          if (!artifact) {
-            throw new Error("couldn't find this artifact");
-          }
-          if (isActivated(artifact)) {
-            throw new Error("can't move an activated artifact");
-          }
-          if (!oldPlanet?.heldArtifactIds?.includes(artifactMoved)) {
-            throw new Error("that artifact isn't on this planet!");
-          }
+        if (!artifact) {
+          throw new Error("couldn't find this artifact");
+        }
+        if (isActivated(artifact)) {
+          throw new Error("can't move an activated artifact");
+        }
+        if (!oldPlanet?.heldArtifactIds?.includes(artifactMoved)) {
+          throw new Error("that artifact isn't on this planet!");
         }
       }
 
