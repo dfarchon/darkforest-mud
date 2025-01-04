@@ -218,6 +218,7 @@ export function AIChatPane({
     console.log("test point 2");
 
     console.log(history);
+
     if (history && history.length === 0) {
       try {
         console.log("test point 3");
@@ -236,6 +237,7 @@ export function AIChatPane({
 
         console.log("test point 4");
         console.log(response);
+
         if (response.ok) {
           const aiResponse = await response.json();
 

@@ -708,6 +708,7 @@ export function GameLandingPage() {
           await ethConnection.loadBalance(playerAddress),
         );
 
+
         if (balance < 0.00001) {
           terminal.current?.print(`   Your account: `);
           terminal.current?.println(

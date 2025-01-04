@@ -7,6 +7,7 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { BaseInstallLibrary } from "../BaseInstallLibrary.sol";
 import { WormholeSystem } from "./WormholeSystem.sol";
 import { WormholeSystemTemp } from "./WormholeSystemTemp.sol";
+import { WormholeSystemTemp2 } from "./WormholeSystemTemp2.sol";
 import { ArtifactInstallModule } from "../ArtifactInstallModule.sol";
 import { ArtifactMetadata, ArtifactMetadataData } from "../tables/ArtifactMetadata.sol";
 import { Wormhole } from "./tables/Wormhole.sol";
@@ -23,6 +24,20 @@ import { _artifactIndexToNamespace, _artifactProxySystemId } from "../utils.sol"
 /**
  * @notice Updates the Wormhole artifact
  */
+function updateWormhole2(address world) returns (uint256 index) {
+  WormholeSystemTemp2 artifactProxySystem = new WormholeSystemTemp2();
+
+  bytes14 namespace = _artifactIndexToNamespace(ARTIFACT_INDEX);
+
+  // Register artifact proxy system
+  IBaseWorld(world).registerSystem(_artifactProxySystemId(namespace), System(artifactProxySystem), true);
+
+  // grant DistanceMultiplier access to the artifact proxy system
+  IBaseWorld(world).grantAccess(DistanceMultiplier._tableId, address(artifactProxySystem));
+
+  return ARTIFACT_INDEX;
+}
+
 function updateWormhole(address world) returns (uint256 index) {
   WormholeSystemTemp artifactProxySystem = new WormholeSystemTemp();
 
