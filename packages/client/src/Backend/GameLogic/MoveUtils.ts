@@ -87,18 +87,15 @@ export class MoveUtils {
   }
 
   public getAllArrivals(
-    planetsToLoad: LocationId[],
+    planetIds: LocationId[],
     onProgress?: (fractionCompleted: number) => void,
   ): QueuedArrival[] {
-    const res: QueuedArrival[] = [];
-    for (let i = 0; i < planetsToLoad.length; i++) {
-      const planetId = locationIdFromHexStr(planetsToLoad[i]);
-
-      res.push(...this.getArrivalsForPlanet(planetId));
-      if (onProgress) {
-        onProgress((i + 1) / planetsToLoad.length);
-      }
+    const arrivals: QueuedArrival[] = [];
+    for (let index = 0; index < planetIds.length; index++) {
+      const planetId = planetIds[index];
+      arrivals.push(...this.getArrivalsForPlanet(planetId));
+      onProgress?.((index + 1) / planetIds.length);
     }
-    return res;
+    return arrivals;
   }
 }

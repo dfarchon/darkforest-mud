@@ -47,15 +47,14 @@ export class PlanetUtils {
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
       id: locationIdToHexStr(planetId) as `0x${string}`,
     });
-    const planetRec = getComponentValue(PlanetConstants, planetEntity);
+    const planetInContract = Boolean(
+      getComponentValue(PlanetConstants, planetEntity),
+    );
 
-    if (planetRec) {
-      // If planet is in contract, it is OK to input any value for perlin and distSquare
-      const planet: Planet = this.readPlanet(planetId, 0, 0);
-      return planet;
-    } else {
-      return undefined;
-    }
+    return planetInContract
+      ? // If planet is in contract, it is OK to input any value for perlin and distSquare
+        this.readPlanet(planetId, 0, 0)
+      : undefined;
   }
 
   public defaultPlanetFromLocation(location: WorldLocation): LocatablePlanet {

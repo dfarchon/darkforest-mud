@@ -6,7 +6,7 @@ import type { PersistedLocation } from "../../_types/darkforest/api/ChunkStoreTy
 /// Locations Map
 ///////////////////////
 /**
- * A class that manages a memoized Map, mapping locationId to WorldLocation.
+ * A class that manages a memoized location Map, mapping locationId to WorldLocation.
  *
  * Maps from location id (unique id of each planet) to some information about the location at which
  * the planet is located, if we happen to know the coordinates of the given locationId.
@@ -30,6 +30,20 @@ class LocationsMap {
    */
   setWorldLocation(locationId: LocationId, location: WorldLocation): void {
     this.#locations.set(locationId, location);
+  }
+
+  /**
+   * Get the size of the locations map
+   */
+  get size() {
+    return this.#locations.size;
+  }
+
+  /**
+   * Get iterator for locationId to WorldLocation
+   */
+  entries(): MapIterator<[LocationId, WorldLocation]> {
+    return this.#locations.entries();
   }
 }
 
