@@ -89,11 +89,12 @@ export class VoyageRenderer implements VoyageRendererType {
       // can draw a ring around dest, but don't know source location
       const myMove = voyage.player === gameUIManager.getAccount();
       const shipMove = voyage.player === EMPTY_ADDRESS;
-      const supportMove = gameUIManager.inSameGuildAtTick(
-        voyage.player,
-        toPlanet.owner,
-        voyage.arrivalTick,
-      );
+      const supportMove =
+        gameUIManager.inSameGuildAtTick(
+          voyage.player,
+          toPlanet.owner,
+          voyage.arrivalTick,
+        ) && voyage.player !== toPlanet.owner;
 
       // console.log("PUNK");
       // console.log("supportMove");
@@ -248,11 +249,13 @@ export class VoyageRenderer implements VoyageRendererType {
 
         const toPlanet = gameUIManager.getPlanetWithId(voyage.toPlanet);
 
-        const isSupportVoyage = gameUIManager.inSameGuildAtTick(
-          voyage.player,
-          toPlanet.owner,
-          voyage.arrivalTick,
-        );
+        if (!toPlanet) continue;
+        const isSupportVoyage =
+          gameUIManager.inSameGuildAtTick(
+            voyage.player,
+            toPlanet.owner,
+            voyage.arrivalTick,
+          ) && voyage.player !== toPlanet.owner;
 
         this.drawVoyagePath(
           voyage.fromPlanet,
