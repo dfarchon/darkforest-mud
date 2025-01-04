@@ -449,6 +449,7 @@ export function PlanetCard({
             </SpreadApart>
 
             {player && <InfoHead>{player.name}</InfoHead>}
+
             {guild && (
               <InfoHead>
                 {guild.name && guild.name.length !== 0

@@ -1,6 +1,7 @@
 import { mimcHash, perlin } from "@df/hashing";
 import { locationIdFromBigInt } from "@df/serde";
 import type { Chunk, PerlinConfig, Rectangle, WorldLocation } from "@df/types";
+import { toWorldLocation } from "@df/world/locations";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
 
@@ -64,12 +65,16 @@ const exploreChunk = (
         if (count % totalWorkers === workerIndex) {
           const hash: BigInteger = planetHashFn(x, y);
           if (hash.lesser(LOCATION_ID_UB.divide(planetRarityBI))) {
-            planetLocations.push({
-              coords: { x, y },
-              hash: locationIdFromBigInt(hash),
-              perlin: perlin({ x, y }, spaceTypePerlinOpts),
-              biomebase: perlin({ x, y }, biomebasePerlinOpts),
-            });
+            planetLocations.push(
+              // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+              //       immutable world location reference throughout the code.
+              toWorldLocation({
+                coords: { x, y },
+                hash: locationIdFromBigInt(hash),
+                perlin: perlin({ x, y }, spaceTypePerlinOpts),
+                biomebase: perlin({ x, y }, biomebasePerlinOpts),
+              }),
+            );
           }
         }
         count += 1;

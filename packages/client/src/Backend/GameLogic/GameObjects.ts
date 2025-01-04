@@ -60,7 +60,6 @@ import type {
   ArrivalWithTimer,
   Artifact,
   ArtifactId,
-  BurnedLocation,
   Chunk,
   EthAddress,
   Link,
@@ -80,6 +79,7 @@ import type {
 import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
 import { ArtifactStatus, ArtifactType, PlanetType, SpaceType } from "@df/types";
+import { locationsMap, toWorldLocation } from "@df/world/locations";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -190,12 +190,6 @@ export class GameObjects {
   private readonly planetArrivalIds: Map<LocationId, VoyageId[]>;
 
   /**
-   * Map from location id (unique id of each planet) to some information about the location at which
-   * this planet is located, if this client happens to know the coordinates of this planet.
-   */
-  private readonly planetLocationMap: Map<LocationId, WorldLocation>;
-
-  /**
    * Map from location ids to, if that location id has been revealed on-chain, the world coordinates
    * of that location id, as well as some extra information regarding the circumstances of the
    * revealing of this planet.
@@ -286,7 +280,6 @@ export class GameObjects {
     this.myArtifacts = new Map();
     this.contractConstants = contractConstants;
     this.coordsToLocation = new Map();
-    this.planetLocationMap = new Map();
     this.planetArrivalIds = new Map();
     this.arrivals = new Map();
     this.transactions = new TxCollection();
@@ -311,9 +304,9 @@ export class GameObjects {
       }
     }
 
-    for (const location of revealedLocations.values()) {
-      this.markLocationRevealed(location);
-      this.addPlanetLocation(location);
+    for (const revealedLocation of revealedLocations.values()) {
+      this.markLocationRevealed(revealedLocation);
+      this.addPlanetLocation(revealedLocation.location);
     }
 
     this.replaceArtifactsFromContractData(artifacts.values());
@@ -346,7 +339,7 @@ export class GameObjects {
           const arrivalId = arrivalWithTimer.arrivalData.eventId;
           this.arrivals.set(arrivalId, arrivalWithTimer);
         }
-        const planetLocation = this.planetLocationMap.get(planetId);
+        const planetLocation = locationsMap.getWorldLocation(planetId);
         if (planet && planetLocation) {
           (planet as LocatablePlanet).location = planetLocation;
           (planet as LocatablePlanet).biome = this.getBiome(planetLocation);
@@ -580,15 +573,19 @@ export class GameObjects {
       planet.heldArtifactIds = updatedArtifactsOnPlanet;
     }
     // make planet Locatable if we know its location
-    const loc =
-      this.planetLocationMap.get(planet.locationId) || revealedLocation;
-    if (loc) {
-      (planet as LocatablePlanet).location = loc;
-      (planet as LocatablePlanet).biome = this.getBiome(loc);
+    const location =
+      locationsMap.getWorldLocation(planet.locationId) ||
+      revealedLocation?.location;
+    if (location) {
+      (planet as LocatablePlanet).location =
+        // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+        //       immutable world location reference throughout the code.
+        toWorldLocation(location);
+      (planet as LocatablePlanet).biome = this.getBiome(location);
     }
     if (revealedLocation) {
       this.markLocationRevealed(revealedLocation);
-      this.addPlanetLocation(revealedLocation);
+      this.addPlanetLocation(revealedLocation?.location);
       planet.coordsRevealed = true;
       planet.revealer = revealedLocation.revealer;
     }
@@ -691,7 +688,7 @@ export class GameObjects {
         ),
     );
 
-    this.planetLocationMap.set(planetLocation.hash, planetLocation);
+    locationsMap.setWorldLocation(planetLocation.hash, planetLocation);
     const str = getCoordsString(planetLocation.coords);
 
     if (!this.coordsToLocation.has(str)) {
@@ -705,18 +702,24 @@ export class GameObjects {
     const planet = this.planets.get(planetLocation.hash);
 
     if (planet) {
-      (planet as LocatablePlanet).location = planetLocation;
+      (planet as LocatablePlanet).location =
+        // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+        //       immutable world location reference throughout the code.
+        toWorldLocation(planetLocation);
       (planet as LocatablePlanet).biome = this.getBiome(planetLocation);
     }
   }
 
   // marks that a location is revealed on-chain
   public markLocationRevealed(revealedLocation: RevealedLocation): void {
-    this.revealedLocations.set(revealedLocation.hash, revealedLocation);
+    this.revealedLocations.set(
+      revealedLocation.location.hash,
+      revealedLocation,
+    );
   }
 
   public getLocationOfPlanet(planetId: LocationId): WorldLocation | undefined {
-    return this.planetLocationMap.get(planetId) || undefined;
+    return locationsMap.getWorldLocation(planetId);
   }
 
   /**

@@ -250,6 +250,7 @@ export class VoyageRenderer implements VoyageRendererType {
         const toPlanet = gameUIManager.getPlanetWithId(voyage.toPlanet);
 
         if (!toPlanet) continue;
+
         const isSupportVoyage =
           gameUIManager.inSameGuildAtTick(
             voyage.player,

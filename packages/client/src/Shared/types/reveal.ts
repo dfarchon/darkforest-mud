@@ -9,6 +9,7 @@ export type RevealedCoords = WorldCoords & {
   revealer: EthAddress;
 };
 
-export type RevealedLocation = WorldLocation & {
+export type RevealedLocation = Readonly<{
   revealer: EthAddress;
-};
+  location: WorldLocation;
+}>;

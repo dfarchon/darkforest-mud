@@ -1,7 +1,6 @@
 import {
   BLOCK_EXPLORER_URL,
   CONTRACT_PRECISION,
-  EMPTY_ADDRESS,
   MIN_PLANET_LEVEL,
 } from "@df/constants";
 import type { Monomitter, Subscription } from "@df/events";
@@ -10,51 +9,24 @@ import {
   getRange,
   isActivated,
   isLocatable,
-  isSpaceShip,
   timeUntilNextBroadcastAvailable,
 } from "@df/gamelogic";
 import { fakeHash, mimcHash, perlin } from "@df/hashing";
 import type { EthConnection } from "@df/network";
-import {
-  createContract,
-  ThrottledConcurrentQueue,
-  verifySignature,
-  weiToEth,
-} from "@df/network";
+import { createContract, weiToEth } from "@df/network";
 import { getPlanetName } from "@df/procedural";
 import {
-  address,
   artifactIdToDecStr,
   isUnconfirmedActivateArtifactTx,
-  isUnconfirmedBlueTx,
-  isUnconfirmedBurnTx,
-  isUnconfirmedBuyArtifactTx,
-  isUnconfirmedBuyGPTTokensTx,
-  isUnconfirmedBuyHatTx,
-  isUnconfirmedBuyPlanetTx,
-  isUnconfirmedBuySpaceshipTx,
-  isUnconfirmedCapturePlanetTx,
-  isUnconfirmedChangeArtifactImageTypeTx,
-  isUnconfirmedChargeArtifactTx,
-  isUnconfirmedClaimTx,
-  isUnconfirmedDeactivateArtifactTx,
-  isUnconfirmedDepositArtifactTx,
   isUnconfirmedDonateTx,
   isUnconfirmedFindArtifactTx,
-  isUnconfirmedInitTx,
-  isUnconfirmedInvadePlanetTx,
-  isUnconfirmedKardashevTx,
   isUnconfirmedMoveTx,
   isUnconfirmedPinkTx,
   isUnconfirmedProspectPlanetTx,
   isUnconfirmedRefreshPlanetTx,
   isUnconfirmedRevealTx,
-  isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
-  isUnconfirmedSpendGPTTokensTx,
-  isUnconfirmedShutdownArtifactTx,
   isUnconfirmedUpgradeTx,
-  isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdFromHexStr,
@@ -69,21 +41,12 @@ import type {
 import type {
   Artifact,
   ArtifactId,
-  Biome,
-  BurnedCoords,
-  BurnedLocation,
-  CaptureZone,
   Chunk,
-  ClaimedCoords,
-  ClaimedLocation,
   Diagnostics,
   EthAddress,
-  KardashevCoords,
-  KardashevLocation,
   Link,
   LocatablePlanet,
   LocationId,
-  NetworkHealthSummary,
   PinkZone,
   Planet,
   PlanetLevel,
@@ -93,24 +56,15 @@ import type {
   Rectangle,
   RevealedCoords,
   RevealedLocation,
-  SignedMessage,
   Transaction,
   TxIntent,
   UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
   UnconfirmedApplyToGuild,
   UnconfirmedApproveApplication,
-  UnconfirmedBlue,
-  UnconfirmedBurn,
-  UnconfirmedBuyArtifact,
   UnconfirmedBuyGPTTokens,
-  UnconfirmedBuyHat,
-  UnconfirmedBuyPlanet,
-  UnconfirmedBuySpaceship,
-  UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
   UnconfirmedChargeArtifact,
-  UnconfirmedClaim,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -118,9 +72,7 @@ import type {
   UnconfirmedDonate,
   UnconfirmedFindArtifact,
   UnconfirmedInit,
-  UnconfirmedInvadePlanet,
   UnconfirmedInviteToGuild,
-  UnconfirmedKardashev,
   UnconfirmedKickMember,
   UnconfirmedLeaveGuild,
   UnconfirmedMove,
@@ -129,12 +81,12 @@ import type {
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
-  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
-  UnconfirmedSpendGPTTokens,
   UnconfirmedShutdownArtifact,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
@@ -146,45 +98,34 @@ import type {
 } from "@df/types";
 import type { Guild, GuildId } from "@df/types";
 import {
-  ArtifactRarity,
   ArtifactType,
   GuildRole,
   GuildStatus,
-  HatType,
-  PlanetMessageType,
   PlanetType,
   Setting,
   SpaceType,
 } from "@df/types";
-import type { NumberType } from "@latticexyz/recs";
+import { toWorldLocation } from "@df/world/locations";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
-import delay from "delay";
 import type { Contract, ContractInterface, providers } from "ethers";
 import { BigNumber } from "ethers";
 import { utils } from "ethers";
 import { EventEmitter } from "events";
 import type { Hex } from "viem";
-import { encodeFunctionData, toBytes } from "viem";
+import { encodeFunctionData } from "viem";
 
 import type {
   ContractConstants,
   MoveArgs,
 } from "../../_types/darkforest/api/ContractsAPITypes";
-import {
-  ContractsAPIEvent,
-  ZKArgIdx,
-} from "../../_types/darkforest/api/ContractsAPITypes";
-import type { AddressTwitterMap } from "../../_types/darkforest/api/UtilityServerAPITypes";
+import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
 import type {
-  BurnCountdownInfo,
-  ClaimCountdownInfo,
   HashConfig,
-  KardashevCountdownInfo,
   RevealCountdownInfo,
 } from "../../_types/global/GlobalTypes";
 import NotificationManager from "../../Frontend/Game/NotificationManager";
@@ -197,7 +138,6 @@ import {
 import {
   getBooleanSetting,
   getNumberSetting,
-  pollSetting,
   setBooleanSetting,
   setSetting,
   settingChanged$,
@@ -216,30 +156,15 @@ import {
   TowardsCenterPattern,
   TowardsCenterPatternV2,
 } from "../Miner/MiningPatterns";
-import {
-  addMessage,
-  deleteMessages,
-  getMessagesOnPlanets,
-} from "../Network/MessageAPI";
-import {
-  disconnectTwitter,
-  getAllTwitters,
-  verifyTwitterHandle,
-} from "../Network/UtilityServerAPI";
 import type { SerializedPlugin } from "../Plugins/SerializedPlugin";
 import type PersistentChunkStore from "../Storage/PersistentChunkStore";
 import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
 import type SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
 import { prospectExpired } from "./ArrivalUtils";
-// import { getEmojiMessage } from "./ArrivalUtils";
-import type { CaptureZonesGeneratedEvent } from "./CaptureZoneGenerator";
-import { CaptureZoneGenerator } from "./CaptureZoneGenerator";
 import type { ContractsAPI } from "./ContractsAPI";
-import { makeContractsAPI } from "./ContractsAPI";
 import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
-import { InitialGameStateDownloader } from "./InitialGameStateDownloader";
 export enum GameManagerEvent {
   PlanetUpdate = "PlanetUpdate",
   DiscoveredNewChunk = "DiscoveredNewChunk",
@@ -561,15 +486,16 @@ export class GameManager extends EventEmitter {
     for (const [locationId, coords] of revealedCoords) {
       const planet = touchedPlanets.get(locationId);
       if (planet) {
-        const location: WorldLocation = {
-          hash: locationId,
-          coords,
-          perlin: planet.perlin,
-          biomebase: this.biomebasePerlin(coords, true),
-        };
         revealedLocations.set(locationId, {
-          ...location,
           revealer: coords.revealer,
+          // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+          //       immutable world location reference throughout the code.
+          location: toWorldLocation({
+            hash: locationId,
+            coords,
+            perlin: planet.perlin,
+            biomebase: this.biomebasePerlin(coords, true),
+          }),
         });
       }
     }
@@ -1053,8 +979,8 @@ export class GameManager extends EventEmitter {
 
     if (revealedCoords) {
       revealedLocation = {
-        ...this.locationFromCoords(revealedCoords),
         revealer: revealedCoords.revealer,
+        location: this.locationFromCoords(revealedCoords),
       };
     }
 
@@ -3188,23 +3114,6 @@ export class GameManager extends EventEmitter {
    * return isCurrentlyBlueing
    */
   // public isCurrentlyBlueing(): boolean {
-  //   return !!this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx);
-  // }
-
-  /**
-   * blueLocation reveals a planet's location on-chain.
-   */
-
-  // public async blueLocation(
-  //   planetId: LocationId,
-  // ): Promise<Transaction<UnconfirmedBlue>> {
-  //   try {
-  //     if (!this.account) {
-  //       throw new Error("no account set");
-  //     }
-
-  //     if (this.checkGameHasEnded()) {
-  //       throw new Error("game has ended");
   //     }
 
   //     const planet = this.entityStore.getPlanetWithId(planetId);
@@ -3259,28 +3168,8 @@ export class GameManager extends EventEmitter {
   //       throw new Error("center planet need to be yours");
   //     }
 
-  //     if (planet.transactions?.hasTransaction(isUnconfirmedBlueTx)) {
-  //       throw new Error("you're already blueing this planet's location 1");
-  //     }
-
-  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx)) {
-  //       throw new Error("you're already blueing this planet's location 2");
-  //     }
-
-  //     // this is shitty. used for the popup window
-  //     localStorage.setItem(
-  //       `${this.ethConnection.getAddress()?.toLowerCase()}-blueLocationId`,
-  //       planetId,
-  //     );
-
-  //     const getArgs = async () => {
-  //       const revealArgs = await this.snarkHelper.getRevealArgs(
-  //         planet.location.coords.x,
   //         planet.location.coords.y,
   //       );
-  //       this.terminal.current?.println(
-  //         "REVEAL: calculated SNARK with args:",
-  //         TerminalTextStyle.Sub,
   //       );
   //       this.terminal.current?.println(
   //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
@@ -3646,12 +3535,16 @@ export class GameManager extends EventEmitter {
    */
 
   private locationFromCoords(coords: WorldCoords): WorldLocation {
-    return {
+    // TODO: Check in coordsToLocation if there's already a reference by coords
+
+    // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+    //       immutable world location reference throughout the code.
+    return toWorldLocation({
       coords,
       hash: locationIdFromBigInt(this.planetHashMimc(coords.x, coords.y)),
       perlin: this.spaceTypePerlin(coords, true),
       biomebase: this.biomebasePerlin(coords, true),
-    };
+    });
   }
 
   /**
