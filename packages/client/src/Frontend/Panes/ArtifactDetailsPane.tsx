@@ -500,6 +500,8 @@ function NewArtifactDescription({
   const [expanded, setExpanded] = useState(!collapsable);
   const uiManager = useUIManager();
 
+  const wormholeShrinkLevels = [0, 2, 4, 8, 16, 32];
+
   if (!expanded) {
     return (
       <Text>
@@ -542,8 +544,12 @@ function NewArtifactDescription({
       {artifact.artifactType === ArtifactType.Wormhole && (
         <div>
           <Green>Description:</Green> A device that creates a portal between two
-          planets, allowing instant travel between them. When activated, it
-          allows instant travel between the two linked locations.
+          planets, allowing instant travel between them. When activated, the
+          distance between the two connected planets is reduced by a factor of{" "}
+          <span style={{ color: "#ffff00" }}>
+            {wormholeShrinkLevels[artifact.rarity]}
+          </span>
+          x.
         </div>
       )}
 

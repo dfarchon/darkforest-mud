@@ -176,6 +176,7 @@ export function AIChatPane({
           try {
             const response = await fetch(`${API_URL}/api/conversation/start`, {
               method: "POST",
+              // mode: "no-cors",
               headers: {
                 "Content-Type": "application/json",
               },
@@ -215,10 +216,12 @@ export function AIChatPane({
     console.log("test point 1");
     const history = await loadConversationFromIndexedDB();
     console.log("test point 2");
+
     console.log(history);
     if (history && history.length === 0) {
       try {
         console.log("test point 3");
+
         const response = await fetch(`${API_URL}/api/conversation/start`, {
           method: "POST",
           headers: {
@@ -230,10 +233,12 @@ export function AIChatPane({
             indexedHistory: history.map((h) => h.message).join("\n"),
           }),
         });
+
         console.log("test point 4");
         console.log(response);
         if (response.ok) {
           const aiResponse = await response.json();
+
           const aiMessage = { message: aiResponse, isUser: false };
           setChatHistory((prev) => [...prev, aiMessage]);
           saveMessageToIndexedDB(aiMessage);
