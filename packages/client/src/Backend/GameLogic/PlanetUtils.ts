@@ -1,13 +1,12 @@
-import { LOCATION_ID_UB } from "@df/constants";
-import {
-  CONTRACT_PRECISION,
-  EMPTY_ADDRESS,
-  MAX_PLANET_LEVEL,
-  MIN_PLANET_LEVEL,
-} from "@df/constants";
-import { bonusFromHex, getBytesFromHex } from "@df/hexgen";
+import { CONTRACT_PRECISION, EMPTY_ADDRESS } from "@df/constants";
+import { getBytesFromHex } from "@df/hexgen";
 import { TxCollection } from "@df/network";
-import { address, artifactIdFromHexStr, locationIdToHexStr } from "@df/serde";
+import {
+  address,
+  artifactIdFromHexStr,
+  locationIdToHexStr,
+  validLocationHash,
+} from "@df/serde";
 import type {
   Effect,
   EffectType,
@@ -17,22 +16,15 @@ import type {
   Planet,
   PlanetBonus,
   PlanetType,
-  Upgrade,
   UpgradeState,
   WorldLocation,
 } from "@df/types";
-import { Biome, PlanetFlagType, PlanetStatus, SpaceType } from "@df/types";
+import { Biome, PlanetFlagType, SpaceType } from "@df/types";
 import { PlanetLevel } from "@df/types";
-import {
-  type Entity,
-  getComponentValue,
-  getComponentValueStrict,
-  Has,
-  runQuery,
-} from "@latticexyz/recs";
-import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
-import bigInt, { type BigInteger } from "big-integer";
+import bigInt from "big-integer";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 
@@ -154,6 +146,7 @@ export class PlanetUtils {
     if (!this._validateHash(planetId)) {
       throw new Error("not a valid location");
     }
+
     const {
       PlanetConstants,
       PlanetOwner,
@@ -412,12 +405,7 @@ export class PlanetUtils {
   }
 
   public _validateHash(locationId: LocationId): boolean {
-    const locationBI = bigInt(locationId.slice(2), 16);
-    if (locationBI.geq(LOCATION_ID_UB)) {
-      return false;
-      // throw new Error("not a valid location");
-    }
-    return true;
+    return validLocationHash(locationId);
   }
 
   // public _initPlanet(planet: Planet): Planet {
