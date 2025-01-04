@@ -150,6 +150,7 @@ export function PlanetCard({
 
   const account = planet?.owner;
   const guildId = account ? gameManager.getPlayerGuildId(account) : undefined;
+
   const guild = gameManager.getGuild(guildId);
 
   if (!planet || !isLocatable(planet)) {
