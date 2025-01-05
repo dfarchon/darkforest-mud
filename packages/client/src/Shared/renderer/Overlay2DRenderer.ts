@@ -403,8 +403,7 @@ export class Overlay2DRenderer {
     };
 
     const img = new Image();
-    const simplifiedEmojiData = simplifyEmojiCode(emojiData);
-    img.src = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${simplifiedEmojiData}.svg`;
+    img.src = `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${simplifyEmojiCode(emojiData)}.svg`;
 
     this.ctx.drawImage(
       img,

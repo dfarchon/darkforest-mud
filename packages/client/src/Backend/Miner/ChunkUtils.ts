@@ -62,8 +62,8 @@ export function toPersistedChunk(chunk: Chunk): PersistedChunk {
  */
 export function toExploredChunk(chunk: PersistedChunk): Chunk {
   const planetLocations = chunk.l.map((persistedLocation) =>
-    // NOTE: Uses persistedLocationToWorldLocation to ensure same that we use immutable
-    //       world location reference across the code.
+    // NOTE: Uses persistedLocationToWorldLocation to ensure that we use the same
+    //       immutable world location reference throughout the code.
     persistedLocationToWorldLocation(persistedLocation),
   );
 

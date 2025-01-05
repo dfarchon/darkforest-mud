@@ -61,6 +61,7 @@ import type {
   Artifact,
   ArtifactId,
   Chunk,
+  DFAnimation,
   EthAddress,
   Link,
   LocatablePlanet,
@@ -431,7 +432,8 @@ export class GameObjects {
       if (updateIfStale) {
         this.updatePlanetIfStale(planet);
       }
-      planet.owner = planet.owner.toLowerCase() as EthAddress;
+      (planet as Planet & { owner?: EthAddress }).owner =
+        planet.owner.toLowerCase() as EthAddress;
       return planet;
     }
     const loc = this.getLocationOfPlanet(planetId);
@@ -541,7 +543,7 @@ export class GameObjects {
       const {
         transactions,
         loadingServerState,
-        needsServerRefresh,
+        // needsServerRefresh,
         // lastLoadedServerState,
         emojiBobAnimation,
         emojiZoopAnimation,
@@ -549,31 +551,45 @@ export class GameObjects {
         // messages,
         emoji,
       } = localPlanet;
-      planet.transactions = transactions;
-      planet.loadingServerState = loadingServerState;
-      planet.needsServerRefresh = needsServerRefresh;
+      (
+        planet as Planet & { transactions?: TransactionCollection }
+      ).transactions = transactions;
+      (planet as Planet & { loadingServerState: boolean }).loadingServerState =
+        loadingServerState;
+      // planet.needsServerRefresh = needsServerRefresh;
       // planet.lastLoadedServerState = lastLoadedServerState;
-      planet.emojiBobAnimation = emojiBobAnimation;
-      planet.emojiZoopAnimation = emojiZoopAnimation;
-      planet.emojiZoopOutAnimation = emojiZoopOutAnimation;
+      (
+        planet as Planet & { emojiBobAnimation?: DFAnimation }
+      ).emojiBobAnimation = emojiBobAnimation;
+      (
+        planet as Planet & { emojiZoopAnimation?: DFAnimation }
+      ).emojiZoopAnimation = emojiZoopAnimation;
+      (
+        planet as Planet & { emojiZoopOutAnimation?: DFAnimation }
+      ).emojiZoopOutAnimation = emojiZoopOutAnimation;
       // planet.messages = messages;
-      planet.emoji = emoji;
+      (planet as Planet & { emoji?: string }).emoji = emoji;
 
       // Possibly non updated props
-      planet.heldArtifactIds = localPlanet.heldArtifactIds;
+      (planet as Planet & { heldArtifactIds?: ArtifactId[] }).heldArtifactIds =
+        localPlanet.heldArtifactIds;
     } else {
       planetsMap.setPlanet(planet.locationId, planet);
     }
 
     if (updatedArtifactsOnPlanet) {
-      planet.heldArtifactIds = updatedArtifactsOnPlanet;
+      (planet as Planet & { heldArtifactIds?: ArtifactId[] }).heldArtifactIds =
+        updatedArtifactsOnPlanet;
     }
     // make planet Locatable if we know its location
     const location =
       locationsMap.getWorldLocation(planet.locationId) ??
       revealedLocation?.location;
     if (location) {
-      (planet as LocatablePlanet).location = toWorldLocation(location);
+      (planet as LocatablePlanet).location =
+        // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+        //       immutable world location reference throughout the code.
+        toWorldLocation(location);
       (planet as LocatablePlanet).biome = this.getBiome(location);
     }
 
@@ -691,7 +707,10 @@ export class GameObjects {
 
     const planet = planetsMap.getPlanet(planetLocation.hash);
     if (planet) {
-      (planet as LocatablePlanet).location = planetLocation;
+      (planet as LocatablePlanet).location =
+        // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+        //       immutable world location reference throughout the code.
+        toWorldLocation(planetLocation);
       (planet as LocatablePlanet).biome = this.getBiome(planetLocation);
     }
   }
@@ -1813,6 +1832,7 @@ export class GameObjects {
     if (!planet) {
       return;
     }
-    planet.silverSpent = this.calculateSilverSpent(planet);
+    (planet as Planet & { silverSpent: number }).silverSpent =
+      this.calculateSilverSpent(planet);
   }
 }

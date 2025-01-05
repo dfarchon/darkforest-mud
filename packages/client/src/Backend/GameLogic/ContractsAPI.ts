@@ -423,7 +423,7 @@ export class ContractsAPI extends EventEmitter {
       this.components.PlanetEmoji.update$.subscribe((update) => {
         const entity = update.entity;
 
-        // // PUNK
+        // PUNK
         // console.log("set planet emoji subscription");
         // console.log(locationIdFromHexStr(entity.toString()));
 

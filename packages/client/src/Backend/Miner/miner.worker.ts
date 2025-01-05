@@ -66,8 +66,8 @@ const exploreChunk = (
           const hash: BigInteger = planetHashFn(x, y);
           if (hash.lesser(LOCATION_ID_UB.divide(planetRarityBI))) {
             planetLocations.push(
-              // NOTE: Ensure to wrap via toWorldLocation to get the same world location
-              //       references accross the code
+              // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+              //       immutable world location reference throughout the code.
               toWorldLocation({
                 coords: { x, y },
                 hash: locationIdFromBigInt(hash),

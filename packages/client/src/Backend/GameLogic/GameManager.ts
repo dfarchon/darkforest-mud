@@ -162,7 +162,6 @@ import { easeInAnimation, emojiEaseOutAnimation } from "../Utils/Animation";
 import type SnarkArgsHelper from "../Utils/SnarkArgsHelper";
 import { hexifyBigIntNestedArray } from "../Utils/Utils";
 import { prospectExpired } from "./ArrivalUtils";
-// import { getEmojiMessage } from "./ArrivalUtils";
 import type { ContractsAPI } from "./ContractsAPI";
 import { GameManagerFactory } from "./GameManagerFactory";
 import { GameObjects } from "./GameObjects";
@@ -986,7 +985,7 @@ export class GameManager extends EventEmitter {
     const revealedCoords =
       this.contractsAPI.getRevealedCoordsByIdIfExists(planetId);
 
-    const revealedLocation: RevealedLocation | undefined = revealedCoords
+    let revealedLocation: RevealedLocation | undefined = revealedCoords
       ? {
           location: this.locationFromCoords(revealedCoords),
           revealer: revealedCoords.revealer,
@@ -1002,6 +1001,14 @@ export class GameManager extends EventEmitter {
     // let claimedLocation: ClaimedLocation | undefined;
     // let burnedLocation: BurnedLocation | undefined;
     // let kardashevLocation: KardashevLocation | undefined;
+
+    if (revealedCoords) {
+      revealedLocation = {
+        revealer: revealedCoords.revealer,
+        location: this.locationFromCoords(revealedCoords),
+      };
+    }
+
     // if (claimedCoords) {
     //   claimedLocation = {
     //     ...this.locationFromCoords(claimedCoords),
@@ -3130,23 +3137,6 @@ export class GameManager extends EventEmitter {
    * return isCurrentlyBlueing
    */
   // public isCurrentlyBlueing(): boolean {
-  //   return !!this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx);
-  // }
-
-  /**
-   * blueLocation reveals a planet's location on-chain.
-   */
-
-  // public async blueLocation(
-  //   planetId: LocationId,
-  // ): Promise<Transaction<UnconfirmedBlue>> {
-  //   try {
-  //     if (!this.account) {
-  //       throw new Error("no account set");
-  //     }
-
-  //     if (this.checkGameHasEnded()) {
-  //       throw new Error("game has ended");
   //     }
 
   //     const planet = this.entityStore.getPlanetWithId(planetId);
@@ -3201,28 +3191,8 @@ export class GameManager extends EventEmitter {
   //       throw new Error("center planet need to be yours");
   //     }
 
-  //     if (planet.transactions?.hasTransaction(isUnconfirmedBlueTx)) {
-  //       throw new Error("you're already blueing this planet's location 1");
-  //     }
-
-  //     if (this.entityStore.transactions.hasTransaction(isUnconfirmedBlueTx)) {
-  //       throw new Error("you're already blueing this planet's location 2");
-  //     }
-
-  //     // this is shitty. used for the popup window
-  //     localStorage.setItem(
-  //       `${this.ethConnection.getAddress()?.toLowerCase()}-blueLocationId`,
-  //       planetId,
-  //     );
-
-  //     const getArgs = async () => {
-  //       const revealArgs = await this.snarkHelper.getRevealArgs(
-  //         planet.location.coords.x,
   //         planet.location.coords.y,
   //       );
-  //       this.terminal.current?.println(
-  //         "REVEAL: calculated SNARK with args:",
-  //         TerminalTextStyle.Sub,
   //       );
   //       this.terminal.current?.println(
   //         JSON.stringify(hexifyBigIntNestedArray(revealArgs.slice(0, 3))),
@@ -3586,17 +3556,13 @@ export class GameManager extends EventEmitter {
    * computes the WorldLocation object corresponding to a set of coordinates
    * very slow since it actually calculates the hash; do not use in render loop
    */
+  private locationFromCoords(coords: WorldCoords): WorldLocation {
+    // TODO: Check in coordsToLocation if there's already a reference by coords
 
-  private locationFromCoords(
-    coords: WorldCoords | RevealedCoords,
-  ): WorldLocation {
-    // NOTE: Ensure to wrap via toWorldLocation to get the same world location
-    //       references accross the code
+    // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
+    //       immutable world location reference throughout the code.
     return toWorldLocation({
-      coords: {
-        x: coords.x,
-        y: coords.y,
-      },
+      coords,
       hash: locationIdFromBigInt(this.planetHashMimc(coords.x, coords.y)),
       perlin: this.spaceTypePerlin(coords, true),
       biomebase: this.biomebasePerlin(coords, true),
