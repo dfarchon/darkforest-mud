@@ -262,6 +262,7 @@ export function AIChatPane({
       const userMessage = { message: input, isUser: true };
       setChatHistory((prev) => [...prev, userMessage]);
       saveMessageToIndexedDB(userMessage);
+      const history = await loadConversationFromIndexedDB();
 
       try {
         const tx = await uiManager.spendGPTTokens();
@@ -281,6 +282,7 @@ export function AIChatPane({
           body: JSON.stringify({
             username: player?.name,
             message: input,
+            indexedHistory: history.map((h) => h.message).join("\n"),
           }),
         });
 
