@@ -1,3 +1,4 @@
+import type { GameManager } from "@backend/GameLogic/GameManager";
 import type { ModalId } from "@df/types";
 import { ModalName, Setting } from "@df/types";
 import { useCallback, useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import {
   WindowWrapper,
 } from "../Components/GameWindowComponents";
 import ControllableCanvas from "../Game/ControllableCanvas";
+import { AIChatPane } from "../Panes/AIChatPane";
 import { ArtifactHoverPane } from "../Panes/ArtifactHoverPane";
 import { CoordsPane } from "../Panes/CoordsPane";
 import { DiagnosticsPane } from "../Panes/DiagnosticsPane";
@@ -32,7 +34,6 @@ import { TransactionLogPane } from "../Panes/TransactionLogPane";
 import { TutorialPane } from "../Panes/TutorialPane";
 import { TwitterVerifyPane } from "../Panes/TwitterVerifyPane";
 import { WalletPane } from "../Panes/WalletPane";
-import { AIChatPane } from "../Panes/AIChatPane";
 import { ZoomPane } from "../Panes/ZoomPane";
 import { useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
@@ -58,9 +59,11 @@ import { TopBar } from "./TopBar";
 export function GameWindowLayout({
   terminalVisible,
   setTerminalVisible,
+  gameManager,
 }: {
   terminalVisible: boolean;
   setTerminalVisible: (visible: boolean) => void;
+  gameManager: GameManager;
 }) {
   const uiManager = useUIManager();
   const modalManager = uiManager.getModalManager();
@@ -365,6 +368,7 @@ export function GameWindowLayout({
         <AIChatPane
           visible={aiChatVisible}
           onClose={() => setAIChatVisible(false)}
+          gameManager={gameManager}
         />
 
         <WalletPane

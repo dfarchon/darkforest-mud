@@ -1,22 +1,11 @@
-import { address } from "@df/serde";
-import { ModalName } from "@df/types";
+import type { GameManager } from "@backend/GameLogic/GameManager";
+import { type ArtifactId, type LocationId, ModalName } from "@df/types";
 import { Btn } from "@frontend/Components/Btn";
-import { LoadingSpinner } from "@frontend/Components/LoadingSpinner";
-import dfstyles from "@frontend/Styles/dfstyles";
-import {
-  type Entity,
-  type EntityType,
-  getComponentValue,
-} from "@latticexyz/recs";
-import { useMUD } from "@mud/MUDContext";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { zeroAddress } from "viem";
-import { useWalletClient } from "wagmi";
 
 import { Spacer } from "../Components/CoreUI";
 import { TextInput } from "../Components/Input";
-import { Blue, Green, Red, Sub, White } from "../Components/Text";
 import { useAccount, usePlayer, useUIManager } from "../Utils/AppHooks";
 import {
   clearChatHistoryFromIndexedDB,
@@ -24,94 +13,9 @@ import {
   saveMessageToIndexedDB,
 } from "../Utils/IndexedDB-ChatMemory";
 import { ModalPane } from "../Views/ModalPane";
+import { CurrencyView } from "./AIChatTokensBar";
 
 const API_URL = import.meta.env.VITE_AI_API_URL;
-
-// Styled component for Currency View
-const CurrencyViewContainer = styled(Sub)`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`;
-export function addressToEntity(walletAddress: string): Entity {
-  // Remove the '0x' prefix if it's present
-  walletAddress = walletAddress.replace(/^0x/, "");
-
-  // Ensure the address is exactly 40 characters (20 bytes)
-  if (walletAddress.length !== 40) {
-    throw new Error("Invalid address length");
-  }
-
-  // Pad the address with zeros to make it 32 bytes
-  const paddedAddress = walletAddress.padStart(62, "0");
-
-  // Add '0x' prefix to the padded address
-  return ("0x" + "00" + paddedAddress) as Entity;
-}
-
-export function CurrencyView() {
-  const {
-    network: { playerEntity, waitForTransaction },
-    components: components, //{ SyncProgress },
-  } = useMUD();
-  const { data: walletClient } = useWalletClient();
-  const mainAccount = address(walletClient.account.address);
-  const { GPTTokens } = components;
-  const uiManager = useUIManager();
-
-  const currentGptCredits =
-    Number(getComponentValue(GPTTokens, playerEntity)?.amount || 0) +
-      Number(
-        getComponentValue(GPTTokens, addressToEntity(mainAccount))?.amount || 0,
-      ) || 0;
-
-  const currentCreditPrice = 0.00001;
-
-  const [isBuyingCredits, setIsBuyingCredits] = useState(false);
-
-  const [buyAmount, _setBuyAmount] = useState(5);
-
-  // Function to handle buying credits
-  const buyMore = async () => {
-    try {
-      setIsBuyingCredits(true);
-      await uiManager.buyGPTTokens(buyAmount);
-
-      // Reload state after buying
-      console.log("Credits purchased successfully");
-      setIsBuyingCredits(false);
-    } catch (error) {
-      console.error("Error buying credits:", error);
-    } finally {
-      setIsBuyingCredits(false);
-    }
-  };
-
-  return (
-    <CurrencyViewContainer>
-      <span>
-        You have{" "}
-        {currentGptCredits === 0 ? (
-          <Red>0</Red>
-        ) : (
-          <Green>{currentGptCredits.toString()}</Green>
-        )}{" "}
-        credits
-      </span>
-      <span>
-        for Price: <Green>{currentCreditPrice.toString()} ETH each</Green>
-      </span>
-      <Btn onClick={buyMore} disabled={isBuyingCredits}>
-        {isBuyingCredits ? (
-          <LoadingSpinner initialText="buying credits..." />
-        ) : (
-          <span>Buy {buyAmount} Credits</span>
-        )}
-      </Btn>
-    </CurrencyViewContainer>
-  );
-}
 
 const AIChatContent = styled.div`
   width: 500px;
@@ -135,6 +39,48 @@ const ChatMessage = styled.div<{ isUser: boolean }>`
       : "0px 4px 8px rgba(0, 0, 0, 0.2)"};
 `;
 
+const AIAgentContent = styled.div`
+  width: 550px;
+  height: 600px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const MultiLineTextInput = styled.textarea`
+  width: 100%;
+  height: calc(1.5em * 12 + 10px); /* 6 lines with padding */
+  padding: 8px;
+  resize: none; /* Prevent resizing */
+  border: 1px solid #777;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #151515;
+  color: #bbbbbb;
+  box-sizing: border-box;
+  line-height: 1.5;
+  overflow-y: auto; /* Add scrolling for large inputs */
+`;
+
+const AgentResponseContainer = styled.div`
+  flex: 0 0 30%; /* Flex shorthand to enforce fixed height of 30% */
+  max-height: 30%; /* Ensure it doesn't exceed 30% */
+  background-color: #2c2f33;
+  color: rgba(
+    255,
+    255,
+    255,
+    0.8
+  ); /* Slightly brighter text for better readability */
+  padding: 10px;
+  border: 1px solid #4a4a4d;
+  border-radius: 5px;
+  margin-bottom: 16px;
+  overflow-y: auto;
+  box-sizing: border-box; /* Ensures padding doesn't add to height */
+`;
+
 function HelpContent() {
   return (
     <div>
@@ -150,16 +96,18 @@ function HelpContent() {
 export function AIChatPane({
   visible,
   onClose,
+  gameManager,
 }: {
   visible: boolean;
   onClose: () => void;
+  gameManager: GameManager;
 }) {
-  const {
-    network: { waitForTransaction },
-  } = useMUD();
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
   const player = usePlayer(uiManager).value;
+
+  const [activeTab, setActiveTab] = useState<"chat" | "agent">("chat");
+  const [agentResponse, setAgentResponse] = useState<string>(""); // For AIAgentContent
 
   const [input, setInput] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<
@@ -167,6 +115,7 @@ export function AIChatPane({
   >([]);
 
   const [temp, setTemp] = useState(true);
+  // Initilized if visible
   useEffect(() => {
     if (visible && temp) {
       const initializeChat = async () => {
@@ -176,7 +125,6 @@ export function AIChatPane({
           try {
             const response = await fetch(`${API_URL}/api/conversation/start`, {
               method: "POST",
-              // mode: "no-cors",
               headers: {
                 "Content-Type": "application/json",
               },
@@ -210,53 +158,7 @@ export function AIChatPane({
       setTemp(false);
     }
   }, [visible]);
-
-  const initializeChatFunction = async () => {
-    // PUNK
-    console.log("test point 1");
-    const history = await loadConversationFromIndexedDB();
-    console.log("test point 2");
-
-    console.log(history);
-
-    if (history && history.length === 0) {
-      try {
-        console.log("test point 3");
-
-        const response = await fetch(`${API_URL}/api/conversation/start`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: player?.name,
-            message: "Hello!",
-            indexedHistory: history.map((h) => h.message).join("\n"),
-          }),
-        });
-
-        console.log("test point 4");
-        console.log(response);
-
-        if (response.ok) {
-          const aiResponse = await response.json();
-
-          const aiMessage = { message: aiResponse, isUser: false };
-          setChatHistory((prev) => [...prev, aiMessage]);
-          saveMessageToIndexedDB(aiMessage);
-        }
-      } catch (error) {
-        console.error("Error starting chat:", error);
-      }
-    } else if (history && history.length > 0) {
-      const loadChatHistory = async () => {
-        const historyIndexedDB = await loadConversationFromIndexedDB();
-        setChatHistory(historyIndexedDB || []);
-      };
-      loadChatHistory();
-    }
-  };
-
+  // Btn Send AIchat question
   const handleSend = async () => {
     if (input.trim()) {
       const userMessage = { message: input, isUser: true };
@@ -265,12 +167,10 @@ export function AIChatPane({
       const history = await loadConversationFromIndexedDB();
 
       try {
-        const tx = await uiManager.spendGPTTokens();
-
-        // Wait for transaction confirmation
-        // await waitForTransaction(tx);
+        await uiManager.spendGPTTokens();
       } catch (error) {
-        console.error("Error sending message:", error);
+        console.error("Error sending message tokens not spend:", error);
+        return;
       }
 
       try {
@@ -300,7 +200,7 @@ export function AIChatPane({
       setInput("");
     }
   };
-
+  // Btn Clear AIchat history
   const handleClearChat = async () => {
     try {
       await clearChatHistoryFromIndexedDB();
@@ -308,6 +208,124 @@ export function AIChatPane({
     } catch (error) {
       console.error("Error clearing chat history:", error);
     }
+  };
+  // Btn Send AIAgent request
+  const handleAgentSend = async () => {
+    if (input.trim()) {
+      try {
+        const response = await fetch(`${API_URL}/api/agent/agent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: player?.name,
+            message: input,
+          }),
+        });
+
+        if (response.ok) {
+          const { aiResponse } = await response.json();
+          // Validate and filter df_fcName and args
+
+          const { df_fcName, args } = aiResponse;
+          if (!df_fcName || !Array.isArray(args)) {
+            console.error(
+              "Invalid AI response: missing function name or arguments.",
+            );
+            setAgentResponse(
+              "The agent's response was invalid. Please try again.",
+            );
+            return;
+          }
+
+          // Client-side execution of the validated function
+          try {
+            executeClientFunction(df_fcName, args);
+          } catch (error) {
+            console.error(
+              `Error executing client function: ${df_fcName}`,
+              error,
+            );
+            setAgentResponse(
+              `An error occurred while executing the function: ${df_fcName}.`,
+            );
+          }
+        } else {
+          console.error("Failed to fetch agent response:", response.statusText);
+          setAgentResponse("The server failed to process your request.");
+        }
+      } catch (error) {
+        console.error("Error in AIAgentContent:", error);
+        setAgentResponse("An error occurred while processing your request.");
+      }
+
+      // setInput("");
+    }
+  };
+
+  /**
+   * Executes a client function based on the agent's response.
+   * @param {string} functionName - The name of the client function to call.
+   * @param {any[]} args - The arguments to pass to the function.
+   */
+  const executeClientFunction = (functionName: string, args: never[]) => {
+    const clientFunctions: Record<string, (...args: never[]) => void> = {
+      move: (
+        arg1: LocationId,
+        arg2: LocationId,
+        arg3: number,
+        arg4: number,
+        arg5: ArtifactId,
+        arg6: boolean,
+      ) => {
+        // Example implementation
+        // from.locationId, to.locationId, forces, silver, artifact?.id, abandoning,
+        // arg1 , arg2 , arg3, arg4, arg5, arg6
+        if (arg5 == "null" || arg5 == "0") {
+          arg5 = null;
+        }
+        const agentAnswer = `Moving from ${arg1} to ${arg2} with forces: ${arg3} silver: ${arg4} artID: ${arg5} abandoning: ${arg6}`;
+        setAgentResponse(agentAnswer);
+        gameManager.move(arg1, arg2, arg3, arg4, arg5, arg6);
+      },
+      revealLocation: (arg1: LocationId) => {
+        const agentAnswer = `Revealing location: ${arg1}`;
+        setAgentResponse(agentAnswer);
+        gameManager.revealLocation(arg1);
+      },
+      upgradePlanet: (arg1: LocationId, arg2: number) => {
+        const agentAnswer = `Upgrading planet ${arg1} with branch ${arg2}`;
+        setAgentResponse(agentAnswer);
+        gameManager.upgrade(arg1, arg2);
+      },
+      setPlanetEmoji: (arg1: LocationId, arg2: string) => {
+        const agentAnswer = `Setting emoji ${arg2} for location ${arg1}`;
+        setAgentResponse(agentAnswer);
+        gameManager.setPlanetEmoji(arg1, arg2);
+      },
+      withdrawSilver: (arg1: LocationId, arg2: number) => {
+        const agentAnswer = `Withdrawing ${arg2} silver from ${arg1}`;
+        setAgentResponse(agentAnswer);
+        gameManager.withdrawSilver(arg1, arg2);
+      },
+      refreshPlanet: (arg1: LocationId) => {
+        const agentAnswer = `Refreshing planet ${arg1}`;
+        setAgentResponse(agentAnswer);
+        gameManager.refreshPlanet(arg1);
+      },
+    };
+
+    if (functionName in clientFunctions) {
+      clientFunctions[functionName](...args);
+    } else {
+      throw new Error(`Function ${functionName} is not defined.`);
+    }
+  };
+
+  // Btn Clear AIAGent history
+  const handleAgentTabOpen = () => {
+    setAgentResponse(""); // Clear agent response when switching to the Agent tab
   };
 
   if (!account || !player) return null;
@@ -320,24 +338,61 @@ export function AIChatPane({
       onClose={onClose}
       helpContent={HelpContent}
     >
-      {/* <button onClick={initializeChatFunction}> Start </button> */}
-      <AIChatContent>
-        {chatHistory.map((message, index) => (
-          <ChatMessage key={index} isUser={message.isUser}>
-            {message.message}
-          </ChatMessage>
-        ))}
-        <Spacer height={16} />
-        <TextInput
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message here..."
-        />
-        <div className="flex items-center justify-between p-2">
-          <Btn onClick={handleSend}>Send</Btn>
-          <Btn onClick={handleClearChat}>Clear</Btn>
-        </div>
-      </AIChatContent>
+      <div className="mb-4 flex items-center justify-between">
+        <Btn
+          onClick={() => {
+            setActiveTab("chat");
+          }}
+          disabled={activeTab === "chat"}
+        >
+          AI Chat
+        </Btn>
+        <Btn
+          onClick={() => {
+            setActiveTab("agent");
+            handleAgentTabOpen();
+          }}
+          disabled={activeTab === "agent"}
+        >
+          AI Agent
+        </Btn>
+      </div>
+      {activeTab === "chat" ? (
+        <AIChatContent>
+          {chatHistory.map((message, index) => (
+            <ChatMessage key={index} isUser={message.isUser}>
+              {message.message}
+            </ChatMessage>
+          ))}
+          <Spacer height={16} />
+          <TextInput
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message here..."
+          />
+          <div className="flex items-center justify-between p-2">
+            <Btn onClick={handleSend}>Send</Btn>
+            <Btn onClick={handleClearChat}>Clear</Btn>
+          </div>
+        </AIChatContent>
+      ) : (
+        <AIAgentContent>
+          <MultiLineTextInput
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Enter a command or query for the agent..."
+          />
+          <Spacer height={16} />
+          <AgentResponseContainer>
+            {agentResponse || "No response yet. Please enter a message."}
+          </AgentResponseContainer>
+
+          <div className="flex items-center justify-between p-2">
+            <Btn onClick={handleAgentSend}>Send</Btn>
+            <Btn onClick={() => setAgentResponse("")}>Clear</Btn>
+          </div>
+        </AIAgentContent>
+      )}
       <CurrencyView />
     </ModalPane>
   );
