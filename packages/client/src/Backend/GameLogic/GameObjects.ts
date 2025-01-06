@@ -80,7 +80,7 @@ import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
 import { ArtifactStatus, ArtifactType, PlanetType, SpaceType } from "@df/types";
 import { locationsMap, toWorldLocation } from "@df/world/locations";
-import { coordsToLocationId } from "@df/world/planets";
+import { coordsToLocationId, planetsMap } from "@df/world/planets";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -121,24 +121,6 @@ export class GameObjects {
    * new field: {@code player: PlayerInfo}
    */
   private readonly address: EthAddress | undefined;
-
-  /**
-   * Cached index of all known planet data.
-   *
-   * Warning!
-   *
-   * This should NEVER be set to directly! Any time you want to update a planet, you must call the
-   * {@link GameObjects#setPlanet()} function. Following this rule enables us to reliably notify
-   * other parts of the client when a particular object has been updated. TODO: what is the best way
-   * to do this?
-   *
-   * @todo extract the pattern we're using for the field tuples
-   *   - {planets, myPlanets, myPlanetsUpdated, planetUpdated$}
-   *   - {artifacts, myArtifacts, myArtifactsUpdated, artifactUpdated$}
-   *
-   *   into some sort of class.
-   */
-  private readonly planets: Map<LocationId, Planet>;
 
   /**
    * Cached index of planets owned by the player.
@@ -237,6 +219,7 @@ export class GameObjects {
   // Only for debugging purposes
   public _locationsMap = locationsMap;
   public _coordsToLocationId = coordsToLocationId;
+  public _planetsMap = planetsMap;
 
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
@@ -271,7 +254,6 @@ export class GameObjects {
     autoBind(this);
 
     this.address = address;
-    this.planets = touchedPlanets;
     this.myPlanets = new Map();
     this.touchedPlanetIds = new Set(touchedPlanets.keys());
     this.revealedLocations = revealedLocations;
@@ -315,34 +297,33 @@ export class GameObjects {
 
     for (const [planetId, planet] of touchedPlanets.entries()) {
       const arrivalIds = unprocessedPlanetArrivalIds.get(planetId);
-      if (!arrivalIds) {
-        continue;
+      if (arrivalIds) {
+        const arrivalsForPlanetNull: (QueuedArrival | undefined)[] =
+          arrivalIds.map((arrivalId) => unprocessedArrivals.get(arrivalId));
+        const arrivalsForPlanet: QueuedArrival[] = arrivalsForPlanetNull.filter(
+          (x) => !!x,
+        ) as QueuedArrival[];
+
+        const revealedLocation = revealedLocations.get(planetId);
+        if (revealedLocation) {
+          planet.coordsRevealed = true;
+          planet.revealer = revealedLocation.revealer;
+        }
+        const arrivalsWithTimers = this.processArrivalsForPlanet(
+          planet.locationId,
+          arrivalsForPlanet,
+        );
+
+        this.planetArrivalIds.set(
+          planetId,
+          arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
+        );
+        for (const arrivalWithTimer of arrivalsWithTimers) {
+          const arrivalId = arrivalWithTimer.arrivalData.eventId;
+          this.arrivals.set(arrivalId, arrivalWithTimer);
+        }
       }
 
-      const arrivalsForPlanetNull: (QueuedArrival | undefined)[] =
-        arrivalIds.map((arrivalId) => unprocessedArrivals.get(arrivalId));
-      const arrivalsForPlanet: QueuedArrival[] = arrivalsForPlanetNull.filter(
-        (x) => !!x,
-      ) as QueuedArrival[];
-
-      const revealedLocation = revealedLocations.get(planetId);
-      if (revealedLocation) {
-        planet.coordsRevealed = true;
-        planet.revealer = revealedLocation.revealer;
-      }
-      const arrivalsWithTimers = this.processArrivalsForPlanet(
-        planet.locationId,
-        arrivalsForPlanet,
-      );
-
-      this.planetArrivalIds.set(
-        planetId,
-        arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
-      );
-      for (const arrivalWithTimer of arrivalsWithTimers) {
-        const arrivalId = arrivalWithTimer.arrivalData.eventId;
-        this.arrivals.set(arrivalId, arrivalWithTimer);
-      }
       const planetLocation = locationsMap.getWorldLocation(planetId);
       if (planet && planetLocation) {
         (planet as LocatablePlanet).location = planetLocation;
@@ -416,7 +397,7 @@ export class GameObjects {
   }
 
   public getPlanetArtifacts(planetId: LocationId): Artifact[] {
-    return (this.planets.get(planetId)?.heldArtifactIds || [])
+    return (planetsMap.getPlanet(planetId)?.heldArtifactIds || [])
       .map((id) => this.artifacts.get(id))
       .filter((a) => !!a) as Artifact[];
   }
@@ -439,7 +420,7 @@ export class GameObjects {
     planetId: LocationId,
     updateIfStale = true,
   ): Planet | undefined {
-    const planet = this.planets.get(planetId);
+    const planet = planetsMap.getPlanet(planetId);
     if (planet) {
       if (updateIfStale) {
         this.updatePlanetIfStale(planet);
@@ -458,7 +439,7 @@ export class GameObjects {
   // returns undefined if this planet is neither in contract nor in known chunks
   // fast query that doesn't update planet if stale
   public getPlanetLevel(planetId: LocationId): PlanetLevel | undefined {
-    const planet = this.planets.get(planetId);
+    const planet = planetsMap.getPlanet(planetId);
     if (planet) {
       return planet.planetLevel;
     }
@@ -468,7 +449,7 @@ export class GameObjects {
   // returns undefined if this planet is neither in contract nor in known chunks
   // fast query that doesn't update planet if stale
   public getPlanetDetailLevel(planetId: LocationId): number | undefined {
-    const planet = this.planets.get(planetId);
+    const planet = planetsMap.getPlanet(planetId);
     if (planet) {
       let detailLevel = planet.planetLevel as number;
       if (hasOwner(planet)) {
@@ -543,7 +524,7 @@ export class GameObjects {
     this.touchedPlanetIds.add(planet.locationId);
     // does not modify unconfirmed txs
     // that is handled by onTxConfirm
-    const localPlanet = this.planets.get(planet.locationId);
+    const localPlanet = planetsMap.getPlanet(planet.locationId);
     if (localPlanet) {
       const {
         transactions,
@@ -569,7 +550,7 @@ export class GameObjects {
       // Possibly non updated props
       planet.heldArtifactIds = localPlanet.heldArtifactIds;
     } else {
-      this.planets.set(planet.locationId, planet);
+      planetsMap.setPlanet(planet.locationId, planet);
     }
 
     if (updatedArtifactsOnPlanet) {
@@ -648,7 +629,7 @@ export class GameObjects {
       return undefined;
     }
 
-    const planet = this.planets.get(location.hash);
+    const planet = planetsMap.getPlanet(location.hash);
     if (planet) {
       this.updatePlanetIfStale(planet);
       return planet;
@@ -699,11 +680,11 @@ export class GameObjects {
       planetLocation.hash,
     );
 
-    if (!this.planets.get(planetLocation.hash)) {
+    if (!planetsMap.getPlanet(planetLocation.hash)) {
       this.setPlanet(this.defaultPlanetFromLocation(planetLocation));
     }
 
-    const planet = this.planets.get(planetLocation.hash);
+    const planet = planetsMap.getPlanet(planetLocation.hash);
 
     if (planet) {
       (planet as LocatablePlanet).location =
@@ -734,7 +715,7 @@ export class GameObjects {
    * @tutorial For plugin developers!
    */
   public getAllPlanets(): Iterable<Planet> {
-    return this.planets.values();
+    return planetsMap.getPlanets().values();
   }
 
   /**
@@ -744,18 +725,20 @@ export class GameObjects {
    * @see Warning in {@link GameObjects.getAllPlanets()}
    */
   public getAllPlanetsMap(): Map<LocationId, Planet> {
-    return this.planets;
+    return planetsMap.getPlanets();
   }
 
   /**
    * Returns all the planets in the game which this client is aware of that have an owner, as a map
    * from their id to the planet
    *
+   * This is not performant for large maps.
+   *
    * @tutorial For plugin developers!
    * @see Warning in {@link GameObjects.getAllPlanets()}
    */
   public getAllOwnedPlanets(): Planet[] {
-    return Array.from(this.planets.values()).filter(hasOwner);
+    return Array.from(planetsMap.getPlanets().values()).filter(hasOwner);
   }
 
   /**
@@ -1198,7 +1181,7 @@ export class GameObjects {
   }
 
   public getPlanetMap(): Map<LocationId, Planet> {
-    return this.planets;
+    return planetsMap.getPlanets();
   }
 
   public getArtifactMap(): Map<ArtifactId, Artifact> {
@@ -1318,8 +1301,9 @@ export class GameObjects {
       this.layeredMap.insertPlanet(planet.location, planet.planetLevel);
     }
 
+    planetsMap.setPlanet(planet.locationId, planet);
     setObjectSyncState<Planet, LocationId>(
-      this.planets,
+      new Map(),
       this.myPlanets,
       this.address,
       this.planetUpdated$,
@@ -1511,7 +1495,7 @@ export class GameObjects {
   }
 
   public updateArrival(planetId: LocationId, arrival: QueuedArrival): void {
-    const planet = this.planets.get(planetId);
+    const planet = planetsMap.getPlanet(planetId);
     if (!planet) {
       console.error(
         `attempted to process arrivals for planet not in memory: ${planetId}`,
@@ -1535,7 +1519,7 @@ export class GameObjects {
     planetId: LocationId,
     arrivals: QueuedArrival[],
   ): ArrivalWithTimer[] {
-    const planet = this.planets.get(planetId);
+    const planet = planetsMap.getPlanet(planetId);
 
     if (!planet) {
       console.error(
@@ -1825,7 +1809,7 @@ export class GameObjects {
   }
 
   private updateScore(planetId: LocationId) {
-    const planet = this.planets.get(planetId);
+    const planet = planetsMap.getPlanet(planetId);
     if (!planet) {
       return;
     }

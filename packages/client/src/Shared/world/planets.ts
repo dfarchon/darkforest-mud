@@ -1,4 +1,4 @@
-import type { CoordsId, LocationId, WorldCoords } from "@df/types";
+import type { CoordsId, LocationId, Planet, WorldCoords } from "@df/types";
 
 const coordsToCoordsId = (coords: WorldCoords): CoordsId =>
   `${coords.x},${coords.y}` as CoordsId;
@@ -42,3 +42,47 @@ class CoordsToLocationId {
 }
 
 export const coordsToLocationId = new CoordsToLocationId();
+
+////////////////////////
+/// Planets Map
+///////////////////////
+/**
+ * A class that manages a collection of planets mapped by their location IDs.
+ */
+class PlanetsMap {
+  #memo = new Map<LocationId, Planet>();
+
+  /**
+   * Retrieves a planet by its location ID.
+   * @param locationId - The ID of the location to retrieve the planet from.
+   * @returns The planet associated with the given location ID, or `undefined` if not found.
+   */
+  getPlanet(locationId: LocationId): Planet | undefined {
+    return this.#memo.get(locationId);
+  }
+
+  /**
+   * Adds or updates a planet in the map with the given location ID.
+   * @param locationId - The ID of the location to associate with the planet.
+   * @param planet - The planet to be added or updated.
+   */
+  setPlanet(locationId: LocationId, planet: Planet) {
+    this.#memo.set(locationId, planet);
+  }
+
+  /**
+   * Retrieves the entire map of planets.
+   */
+  getPlanets(): Map<LocationId, Planet> {
+    return this.#memo;
+  }
+
+  /**
+   * Gets the number of planets in the map.
+   */
+  get size(): number {
+    return this.#memo.size;
+  }
+}
+
+export const planetsMap = new PlanetsMap();
