@@ -8,6 +8,11 @@ import type { Abstract } from "./utility";
 export type VoyageId = Abstract<string, "VoyageId">;
 
 /**
+ * Stringified representation of an x-y coordinate in the universe
+ */
+export type CoordsId = Abstract<string, "CoordsId">;
+
+/**
  * a unique identifier for a location in the universe (corresponding to some
  * underlying coordinates (x, y)). This is a 64-character lowercase hex string
  * not prefixed with 0x. LocationIDs should only be instantiated through

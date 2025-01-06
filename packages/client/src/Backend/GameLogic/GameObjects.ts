@@ -80,6 +80,7 @@ import type { PlanetLevel } from "@df/types";
 import type { Biome } from "@df/types";
 import { ArtifactStatus, ArtifactType, PlanetType, SpaceType } from "@df/types";
 import { locationsMap, toWorldLocation } from "@df/world/locations";
+import { coordsToLocationId } from "@df/world/planets";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -102,12 +103,6 @@ import { GuildUtils } from "./GuildUtils";
 import { LayeredMap } from "./LayeredMap";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
-
-type CoordsString = Abstract<string, "CoordString">;
-
-const getCoordsString = (coords: WorldCoords): CoordsString => {
-  return `${coords.x},${coords.y}` as CoordsString;
-};
 
 /**
  * Representation of the objects which exist in the world.
@@ -210,12 +205,6 @@ export class GameObjects {
   private readonly contractConstants: ContractConstants;
 
   /**
-   * Map from a stringified representation of an x-y coordinate to an object that contains some more
-   * information about the world at that location.
-   */
-  private readonly coordsToLocation: Map<CoordsString, WorldLocation>;
-
-  /**
    * Transactions that are currently in flight.
    */
   public readonly transactions: TransactionCollection;
@@ -246,7 +235,8 @@ export class GameObjects {
   public readonly myArtifactsUpdated$: Monomitter<Map<ArtifactId, Artifact>>;
 
   // Only for debugging purposes
-  public locationsMap = locationsMap;
+  public _locationsMap = locationsMap;
+  public _coordsToLocationId = coordsToLocationId;
 
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
@@ -292,7 +282,6 @@ export class GameObjects {
     this.artifacts = artifacts;
     this.myArtifacts = new Map();
     this.contractConstants = contractConstants;
-    this.coordsToLocation = new Map();
     this.planetArrivalIds = new Map();
     this.arrivals = new Map();
     this.transactions = new TxCollection();
@@ -639,14 +628,14 @@ export class GameObjects {
   // returns an empty planet if planet is not in contract
   // returns undefined if this isn't a planet, according to hash and coords
   public getPlanetWithCoords(coords: WorldCoords): LocatablePlanet | undefined {
-    const str = getCoordsString(coords);
-
-    const location = this.coordsToLocation.get(str);
-    if (!location) {
+    const locationId = coordsToLocationId.getLocationId(coords);
+    if (!locationId) {
       return undefined;
     }
 
-    return this.getPlanetWithLocation(location) as LocatablePlanet;
+    return this.getPlanetWithLocation(
+      locationsMap.getWorldLocation(locationId),
+    ) as LocatablePlanet;
   }
 
   // - returns an empty planet if planet is not in contract
@@ -705,11 +694,10 @@ export class GameObjects {
     );
 
     locationsMap.setWorldLocation(planetLocation.hash, planetLocation);
-    const str = getCoordsString(planetLocation.coords);
-
-    if (!this.coordsToLocation.has(str)) {
-      this.coordsToLocation.set(str, planetLocation);
-    }
+    coordsToLocationId.setLocationId(
+      planetLocation.coords,
+      planetLocation.hash,
+    );
 
     if (!this.planets.get(planetLocation.hash)) {
       this.setPlanet(this.defaultPlanetFromLocation(planetLocation));

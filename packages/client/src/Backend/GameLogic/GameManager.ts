@@ -3550,8 +3550,6 @@ export class GameManager extends EventEmitter {
    */
 
   private locationFromCoords(coords: WorldCoords): WorldLocation {
-    // TODO: Check in coordsToLocation if there's already a reference by coords
-
     // NOTE: Ensure to wrap via toWorldLocation to ensure that we use the same
     //       immutable world location reference throughout the code.
     return toWorldLocation({

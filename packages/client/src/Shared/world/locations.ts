@@ -6,6 +6,7 @@ import type { PersistedLocation } from "../../_types/darkforest/api/ChunkStoreTy
 /// Locations Map
 ///////////////////////
 /**
+ * @deprecated Will be removed
  * A class that manages a memoized location Map, mapping locationId to WorldLocation.
  *
  * Maps from location id (unique id of each planet) to some information about the location at which
@@ -47,6 +48,7 @@ class LocationsMap {
   }
 }
 
+/** @deprecated will be removed in the future */
 export const locationsMap = new LocationsMap();
 
 ////////////////////////
@@ -54,6 +56,7 @@ export const locationsMap = new LocationsMap();
 ///////////////////////
 
 /**
+ * @deprecated Will be removed
  * Converts a persisted location into a world location if it has not already been added to the
  * locations map.
  *
@@ -90,6 +93,7 @@ export function persistedLocationToWorldLocation(
 }
 
 /**
+ * @deprecated Will be removed
  * Converts a location into a world location if it has not already been added to the
  * locations map.
  *
