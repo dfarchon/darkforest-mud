@@ -245,32 +245,45 @@ export class GameObjects {
    */
   public readonly myArtifactsUpdated$: Monomitter<Map<ArtifactId, Artifact>>;
 
+  // Only for debugging purposes
+  public locationsMap = locationsMap;
+
   private planetUtils: PlanetUtils;
   private tickerUtils: TickerUtils;
   private components: ClientComponents;
   private guildUtils: GuildUtils;
-  constructor(
-    address: EthAddress | undefined,
-    touchedPlanets: Map<LocationId, Planet>,
-    allTouchedPlanetIds: Set<LocationId>,
-    revealedLocations: Map<LocationId, RevealedLocation>,
+  constructor({
+    address,
+    touchedPlanets,
+    revealedLocations,
+    artifacts,
+    allChunks,
+    unprocessedArrivals,
+    unprocessedPlanetArrivalIds,
+    contractConstants,
+    worldRadius,
+    components,
+  }: {
+    address: EthAddress | undefined;
+    touchedPlanets: Map<LocationId, Planet>;
+    revealedLocations: Map<LocationId, RevealedLocation>;
     // claimedLocations: Map<LocationId, ClaimedLocation>,
     // burnedLocations: Map<LocationId, BurnedLocation>,
     // kardashevLocations: Map<LocationId, KardashevLocation>,
-    artifacts: Map<ArtifactId, Artifact>,
-    allChunks: Iterable<Chunk>,
-    unprocessedArrivals: Map<VoyageId, QueuedArrival>,
-    unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>,
-    contractConstants: ContractConstants,
-    worldRadius: number,
-    components: ClientComponents,
-  ) {
+    artifacts: Map<ArtifactId, Artifact>;
+    allChunks: Iterable<Chunk>;
+    unprocessedArrivals: Map<VoyageId, QueuedArrival>;
+    unprocessedPlanetArrivalIds: Map<LocationId, VoyageId[]>;
+    contractConstants: ContractConstants;
+    worldRadius: number;
+    components: ClientComponents;
+  }) {
     autoBind(this);
 
     this.address = address;
     this.planets = touchedPlanets;
     this.myPlanets = new Map();
-    this.touchedPlanetIds = allTouchedPlanetIds;
+    this.touchedPlanetIds = new Set(touchedPlanets.keys());
     this.revealedLocations = revealedLocations;
     // this.claimedLocations = claimedLocations;
     // this.burnedLocations = burnedLocations;
@@ -311,44 +324,45 @@ export class GameObjects {
 
     this.replaceArtifactsFromContractData(artifacts.values());
 
-    touchedPlanets.forEach((planet, planetId) => {
+    for (const [planetId, planet] of touchedPlanets.entries()) {
       const arrivalIds = unprocessedPlanetArrivalIds.get(planetId);
-
-      if (planet && arrivalIds) {
-        const arrivalsForPlanetNull: (QueuedArrival | undefined)[] =
-          arrivalIds.map((arrivalId) => unprocessedArrivals.get(arrivalId));
-        const arrivalsForPlanet: QueuedArrival[] = arrivalsForPlanetNull.filter(
-          (x) => !!x,
-        ) as QueuedArrival[];
-
-        const revealedLocation = revealedLocations.get(planetId);
-        if (revealedLocation) {
-          planet.coordsRevealed = true;
-          planet.revealer = revealedLocation.revealer;
-        }
-        const arrivalsWithTimers = this.processArrivalsForPlanet(
-          planet.locationId,
-          arrivalsForPlanet,
-        );
-
-        this.planetArrivalIds.set(
-          planetId,
-          arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
-        );
-        for (const arrivalWithTimer of arrivalsWithTimers) {
-          const arrivalId = arrivalWithTimer.arrivalData.eventId;
-          this.arrivals.set(arrivalId, arrivalWithTimer);
-        }
-        const planetLocation = locationsMap.getWorldLocation(planetId);
-        if (planet && planetLocation) {
-          (planet as LocatablePlanet).location = planetLocation;
-          (planet as LocatablePlanet).biome = this.getBiome(planetLocation);
-        }
-
-        this.setPlanet(planet);
-        this.updateScore(planetId as LocationId);
+      if (!arrivalIds) {
+        continue;
       }
-    });
+
+      const arrivalsForPlanetNull: (QueuedArrival | undefined)[] =
+        arrivalIds.map((arrivalId) => unprocessedArrivals.get(arrivalId));
+      const arrivalsForPlanet: QueuedArrival[] = arrivalsForPlanetNull.filter(
+        (x) => !!x,
+      ) as QueuedArrival[];
+
+      const revealedLocation = revealedLocations.get(planetId);
+      if (revealedLocation) {
+        planet.coordsRevealed = true;
+        planet.revealer = revealedLocation.revealer;
+      }
+      const arrivalsWithTimers = this.processArrivalsForPlanet(
+        planet.locationId,
+        arrivalsForPlanet,
+      );
+
+      this.planetArrivalIds.set(
+        planetId,
+        arrivalsWithTimers.map((arrival) => arrival.arrivalData.eventId),
+      );
+      for (const arrivalWithTimer of arrivalsWithTimers) {
+        const arrivalId = arrivalWithTimer.arrivalData.eventId;
+        this.arrivals.set(arrivalId, arrivalWithTimer);
+      }
+      const planetLocation = locationsMap.getWorldLocation(planetId);
+      if (planet && planetLocation) {
+        (planet as LocatablePlanet).location = planetLocation;
+        (planet as LocatablePlanet).biome = this.getBiome(planetLocation);
+      }
+
+      this.setPlanet(planet);
+      this.updateScore(planetId as LocationId);
+    }
 
     // for (const [_locId, claimedLoc] of claimedLocations) {
     //   this.updatePlanet(claimedLoc.hash, (p) => {
@@ -658,6 +672,8 @@ export class GameObjects {
     return defaultPlanet;
   }
 
+  // TODO: Instead lookup directly in the Planet instance rather than maintain a Set of planets
+  //       Doing a has(key) lookup in a large set is expensive
   public isPlanetInContract(planetId: LocationId): boolean {
     return this.touchedPlanetIds.has(planetId);
   }
