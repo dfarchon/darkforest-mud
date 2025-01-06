@@ -48,14 +48,13 @@ export class PlanetUtils {
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
       id: locationIdToHexStr(planetId) as `0x${string}`,
     });
-
-    const hasPlanetRec = Boolean(
+    const hasPlanetEntity = Boolean(
       getComponentValue(PlanetConstants, planetEntity),
     );
 
-    return hasPlanetRec
-      ? // Planet is in contract, and it's OK to input any value for perlin and distSquare
-        (this.readPlanet(planetId, 0, 0) as Planet)
+    return hasPlanetEntity
+      ? // If planet is in contract, it is OK to input any value for perlin and distSquare
+        this.readPlanet(planetId, 0, 0)
       : undefined;
   }
 

@@ -1,25 +1,11 @@
-import {
-  getRange,
-  isActivated,
-  isLocatable,
-  isSpaceShip,
-  timeUntilNextBroadcastAvailable,
-} from "@df/gamelogic";
+import { isLocatable } from "@df/gamelogic";
 import type { EthConnection } from "@df/network";
+import { ThrottledConcurrentQueue } from "@df/network";
 import {
-  createContract,
-  ThrottledConcurrentQueue,
-  verifySignature,
-  weiToEth,
-} from "@df/network";
-import {
-  address,
-  artifactIdToDecStr,
   isUnconfirmedAcceptInvitationTx,
   isUnconfirmedActivateArtifactTx,
   isUnconfirmedApplyToGuildTx,
   isUnconfirmedApproveApplicationTx,
-  isUnconfirmedBlueTx,
   isUnconfirmedBurnTx,
   isUnconfirmedBuyArtifactTx,
   isUnconfirmedBuyHatTx,
@@ -33,12 +19,10 @@ import {
   isUnconfirmedDeactivateArtifactTx,
   isUnconfirmedDepositArtifactTx,
   isUnconfirmedDisbandGuildTx,
-  isUnconfirmedDonateTx,
   isUnconfirmedFindArtifactTx,
   isUnconfirmedInitTx,
   isUnconfirmedInvadePlanetTx,
   isUnconfirmedInviteToGuildTx,
-  isUnconfirmedKardashevTx,
   isUnconfirmedKickMemberTx,
   isUnconfirmedLeaveGuildTx,
   isUnconfirmedMoveTx,
@@ -54,26 +38,15 @@ import {
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
-  locationIdFromBigInt,
-  locationIdToDecStr,
 } from "@df/serde";
 import type { EthAddress, GuildId, VoyageId } from "@df/types";
 import type {
-  Artifact,
   ArtifactId,
   LocationId,
   Transaction,
   WorldLocation,
 } from "@df/types";
-import {
-  ArtifactRarity,
-  ArtifactType,
-  HatType,
-  PlanetMessageType,
-  PlanetType,
-  Setting,
-  SpaceType,
-} from "@df/types";
+import { Setting } from "@df/types";
 import type { ClientComponents } from "@mud/createClientComponents";
 import delay from "delay";
 
@@ -157,31 +130,27 @@ export class GameManagerFactory {
     terminal.current?.println("");
     terminal.current?.println("Building Index...");
 
-    // await persistentChunkStore.saveTouchedPlanetIds(
-    //   initialState.allTouchedPlanetIds,
-    // );
-    // await persistentChunkStore.saveRevealedCoords(
-    //   initialState.allRevealedCoords,
-    // );
+    await persistentChunkStore.saveTouchedPlanetIds(
+      initialState.touchedPlanetIds,
+    );
+    await persistentChunkStore.saveRevealedCoords(
+      initialState.revealedPlanetCoords,
+    );
     // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
     const knownArtifacts = initialState.artifacts;
 
-    for (let i = 0; i < initialState.loadedPlanets.length; i++) {
-      const planet = initialState.touchedAndLocatedPlanets.get(
-        initialState.loadedPlanets[i],
-      );
+    // for (const planetId of initialState.touchedPlanetIds) {
+    //   const planet = initialState.touchedAndLocatedPlanets.get(planetId);
+    //   if (!planet) {
+    //     continue;
+    //   }
 
-      if (!planet) {
-        continue;
-      }
-
-      // planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
-
-      // for (const heldArtifact of initialState.heldArtifacts[i]) {
-      //   knownArtifacts.set(heldArtifact.id, heldArtifact);
-      // }
-    }
+    //   planet.heldArtifactIds = initialState.heldArtifacts[i].map((a) => a.id);
+    //   for (const heldArtifact of initialState.heldArtifacts[i]) {
+    //     knownArtifacts.set(heldArtifact.id, heldArtifact);
+    //   }
+    // }
 
     // for (const myArtifact of initialState.myArtifacts) {
     //   knownArtifacts.set(myArtifact.id, myArtifact);
@@ -193,10 +162,10 @@ export class GameManagerFactory {
 
     // figure out what's my home planet
     let homeLocation: WorldLocation | undefined = undefined;
-    for (const loc of possibleHomes) {
-      if (initialState.allTouchedPlanetIds.includes(loc.hash)) {
-        homeLocation = loc;
-        await persistentChunkStore.confirmHomeLocation(loc);
+    for (const location of possibleHomes) {
+      if (initialState.touchedPlanetIds.includes(location.hash)) {
+        homeLocation = location;
+        await persistentChunkStore.confirmHomeLocation(location);
         break;
       }
     }
@@ -224,6 +193,15 @@ export class GameManagerFactory {
       players: initialState.players,
       touchedPlanets: initialState.touchedAndLocatedPlanets,
       revealedCoords: initialState.revealedCoordsMap,
+      // initialState.claimedCoordsMap
+      //   ? initialState.claimedCoordsMap
+      //   : new Map<LocationId, ClaimedCoords>(),
+      // initialState.burnedCoordsMap
+      //   ? initialState.burnedCoordsMap
+      //   : new Map<LocationId, BurnedCoords>(),
+      // initialState.kardashevCoordsMap
+      //   ? initialState.kardashevCoordsMap
+      //   : new Map<LocationId, KardashevCoords>(),
       worldRadius: initialState.worldRadius,
       unprocessedArrivals: initialState.arrivals,
       unprocessedPlanetArrivalIds: initialState.planetVoyageIdMap,
@@ -236,6 +214,7 @@ export class GameManagerFactory {
       artifacts: knownArtifacts,
       ethConnection: connection,
       paused: initialState.paused,
+      // initialState.halfPrice,
       components,
     });
 
@@ -263,7 +242,7 @@ export class GameManagerFactory {
 
     // set up listeners: whenever ContractsAPI reports some game state update, do some logic
     gameManager.contractsAPI
-      .on(ContractsAPIEvent.TickRateUpdate, async (newtickRate: number) => {
+      .on(ContractsAPIEvent.TickRateUpdate, async (_newtickRate: number) => {
         const contractConstants = contractsAPI.getConstants();
         gameManager.updateContractConstants(contractConstants);
       })
@@ -292,7 +271,7 @@ export class GameManagerFactory {
       //   gameManager.halfPrice = halfPrice;
       //   gameManager.halfPrice$.publish(halfPrice);
       // })
-      .on(ContractsAPIEvent.PlanetUpdate, (planetId: LocationId) => {
+      .on(ContractsAPIEvent.PlanetUpdate, async (planetId: LocationId) => {
         // PUNK
         // console.log("handle ContractsAPI.PlanetUpdate");
         // console.log(planetId);
@@ -304,7 +283,7 @@ export class GameManagerFactory {
           gameManager.hardRefreshPlanet(planetId);
           gameManager.emit(GameManagerEvent.PlanetUpdate);
         }
-        gameManager.refreshServerPlanetStates([planetId]);
+        await gameManager.refreshServerPlanetStates([planetId]);
       })
       .on(
         ContractsAPIEvent.ArrivalQueued,

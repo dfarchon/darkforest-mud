@@ -445,7 +445,6 @@ export class GameManager extends EventEmitter {
     artifacts: Map<ArtifactId, Artifact>;
     ethConnection: EthConnection;
     paused: boolean;
-    // halfPrice: boolean;
     components: ClientComponents;
   }) {
     super();
@@ -598,9 +597,6 @@ export class GameManager extends EventEmitter {
       address: mainAccount,
       touchedPlanets,
       revealedLocations,
-      // claimedLocations,
-      // burnedLocations,
-      // kardashevLocations,
       artifacts,
       allChunks: persistentChunkStore.allChunks(),
       unprocessedArrivals,
@@ -2882,7 +2878,8 @@ export class GameManager extends EventEmitter {
     planetId: LocationId,
   ): Promise<Transaction<UnconfirmedPink>> {
     try {
-      if (!this.account) {
+      const account = this.getAccount();
+      if (!account) {
         throw new Error("no account set");
       }
 
@@ -2964,7 +2961,7 @@ export class GameManager extends EventEmitter {
           ...(await getArgs()),
         ]),
         artifactId: artifactId,
-        delegator: this.getAccount(),
+        delegator: account,
       };
 
       // Always await the submitTransaction so we can catch rejections

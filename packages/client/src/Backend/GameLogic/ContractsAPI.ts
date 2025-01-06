@@ -423,7 +423,6 @@ export class ContractsAPI extends EventEmitter {
       this.components.PlanetEmoji.update$.subscribe((update) => {
         const entity = update.entity;
 
-        // PUNK
         // console.log("set planet emoji subscription");
         // console.log(locationIdFromHexStr(entity.toString()));
 
@@ -1354,58 +1353,46 @@ export class ContractsAPI extends EventEmitter {
   }
 
   public getAllArrivals(
-    planetsToLoad: LocationId[],
+    planetIds: LocationId[],
     onProgress?: (fractionCompleted: number) => void,
   ): QueuedArrival[] {
-    return this.moveUtils.getAllArrivals(planetsToLoad, onProgress);
+    return this.moveUtils.getAllArrivals(planetIds, onProgress);
   }
 
-  public async getTouchedPlanetIds(
-    // startingAt: number,
+  public getTouchedPlanetIds(
     onProgress?: (fractionCompleted: number) => void,
-  ): Promise<LocationId[]> {
+  ): LocationId[] {
     const { Planet } = this.components;
-    const planets = [...runQuery([Has(Planet)])];
-    const nPlanets: number = planets.length;
+    const planetEntities = [...runQuery([Has(Planet)])];
+    const nPlanets: number = planetEntities.length;
 
-    const sleep = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
-
-    await sleep(1);
-
-    const results = new Array(nPlanets);
+    const planetIds = new Array(nPlanets);
     for (let index = 0; index < nPlanets; index++) {
-      // NOTE: may need serde function here
-      const locationId = locationIdFromHexStr(
-        planets[index].toString(),
-      ) as LocationId;
-      results[index] = locationId;
-
+      planetIds[index] = locationIdFromHexStr(planetEntities[index].toString());
       onProgress?.((index + 1) / nPlanets);
     }
 
-    return results;
+    return planetIds;
   }
 
   public getRevealedCoordsByIdIfExists(
     planetId: LocationId,
   ): RevealedCoords | undefined {
     const { RevealedPlanet } = this.components;
-    // console.log("revlead coords by Id if exists");
+    // console.log("revealad coords by Id if exists");
     // console.log(locationIdToHexStr(planetId));
     const revealedPlanetId = encodeEntity(RevealedPlanet.metadata.keySchema, {
       id: locationIdToHexStr(planetId) as Hex,
     });
-
     const revealedPlanet = getComponentValue(RevealedPlanet, revealedPlanetId);
     return revealedPlanet
       ? {
-          hash: planetId as LocationId,
           coords: {
             x: revealedPlanet.x as number,
             y: revealedPlanet.y as number,
           },
           revealer: revealedPlanet.revealer as EthAddress,
+          hash: planetId as LocationId,
         }
       : undefined;
   }
@@ -1425,23 +1412,24 @@ export class ContractsAPI extends EventEmitter {
     onProgressCoords?: (fractionCompleted: number) => void,
   ): RevealedCoords[] {
     const { RevealedPlanet } = this.components;
-    const planetIds = [...runQuery([Has(RevealedPlanet)])];
-    const nPlanetIds = planetIds.length;
+    const planetIdEntities = [...runQuery([Has(RevealedPlanet)])];
+    const nplanetIdEntities = planetIdEntities.length;
 
-    const results: RevealedCoords[] = new Array(nPlanetIds);
-    for (let index = 0; index < nPlanetIds; index++) {
-      const planetId = locationIdFromHexStr(planetIds[index].toString());
-
+    const result: RevealedCoords[] = [];
+    for (let index = 0; index < nplanetIdEntities; index++) {
+      const planetId = locationIdFromHexStr(planetIdEntities[index].toString());
       const revealedCoords = this.getRevealedCoordsByIdIfExists(planetId);
       if (!revealedCoords) {
         continue;
       }
-      results[index] = revealedCoords;
-      onProgressCoords?.((index + 1) / nPlanetIds);
+
+      result.push(revealedCoords);
+      onProgressCoords?.((index + 1) / nplanetIdEntities);
     }
 
     onProgressCoords?.(1);
-    return results;
+
+    return result;
   }
 
   public getPlanetById(planetId: LocationId): Planet | undefined {
@@ -1475,32 +1463,34 @@ export class ContractsAPI extends EventEmitter {
     const nPlanetIds: number = planetIds.length;
 
     const planets: Map<LocationId, Planet> = new Map();
-
-    for (let i = 0; i < nPlanetIds; i += 1) {
-      const planetId = planetIds[i];
+    for (let index = 0; index < nPlanetIds; index++) {
+      const planetId = planetIds[index];
       const planet = this.getPlanetById(planetId);
       if (planet) {
         planets.set(planet.locationId, planet);
       }
-      onProgressPlanet && onProgressPlanet((i + 1) / nPlanetIds);
+      onProgressPlanet?.((index + 1) / nPlanetIds);
     }
+
     return planets;
   }
 
-  public async getTouchedArtifactIds(
+  public getTouchedArtifactIds(
     onProgress?: (fractionCompleted: number) => void,
-  ): Promise<ArtifactId[]> {
+  ): ArtifactId[] {
     const { Artifact } = this.components;
-    const artifactIds = [...runQuery([Has(Artifact)])];
-    const nArtifactIds = artifactIds.length;
-    const result: ArtifactId[] = [];
+    const artifactEntities = [...runQuery([Has(Artifact)])];
+    const nArtifactEntities = artifactEntities.length;
 
-    for (let i = 0; i < nArtifactIds; i++) {
-      const artifactId = artifactIdFromHexStr(artifactIds[i].toString());
-      result.push(artifactId);
-      onProgress && onProgress((i + 1) / nArtifactIds);
+    const artifactIds: ArtifactId[] = new Array(nArtifactEntities);
+    for (let index = 0; index < nArtifactEntities; index++) {
+      artifactIds[index] = artifactIdFromHexStr(
+        artifactEntities[index].toString(),
+      );
+      onProgress?.((index + 1) / nArtifactEntities);
     }
-    return result;
+
+    return artifactIds;
   }
 
   public bulkGetArtifacts(
