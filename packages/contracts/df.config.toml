@@ -80,11 +80,11 @@ threshold2 = 17
 # 1: pink_bomb, 4: bloom_filter, 5: wormhole, 6: cannon
 [artifact]
 indexes = [1, 4, 5, 6]
-1 = [1024, 2048, 3072 ,4096] # common
-2 = [1024, 2048, 3072 ,4096] # rare
-3 = [1024, 2048, 3072 ,4096] # epic
-4 = [1024, 2048, 3072 ,4096] # legendary
-5 = [1024, 2048, 3072 ,4096] # mythic
+1 = [1024, 1024, 1024 ,1024] # common
+2 = [1024, 1024, 1024 ,1024] # rare
+3 = [1024, 1024, 1024 ,1024] # epic
+4 = [1024, 1024, 1024 ,1024] # legendary
+5 = [1024, 1024, 1024 ,1024] # mythic
 
 [upgrade_config]
 a_population_cap_multiplier = 120

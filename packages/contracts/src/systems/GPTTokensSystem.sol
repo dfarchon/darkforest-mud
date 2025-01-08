@@ -6,11 +6,11 @@ import { Errors } from "../interfaces/errors.sol";
 import { GPTTokens } from "../codegen/index.sol";
 
 contract GPTTokensSystem is System, Errors {
-  uint256 public creditPrice = 0.0001 ether; // Price for GPT tokens
+  uint256 public creditPrice = 0.00001 ether; // Price for GPT tokens
   event TokensSpent(address indexed user, uint256 amount);
 
   /**
-   * @notice Allows users to buy GPT tokens for 0.0001 ETH per token.
+   * @notice Allows users to buy GPT tokens for 0.00001 ETH per token.
    * @param amount Number of GPT tokens to buy
    */
   function buyGPTTokens(uint256 amount) public payable {

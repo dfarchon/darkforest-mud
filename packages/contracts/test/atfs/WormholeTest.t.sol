@@ -17,6 +17,9 @@ import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity } from "../../src
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as WORMHOLE_INDEX } from "../../src/modules/atfs/Wormhole/constant.sol";
 import { WormholeSystem } from "../../src/modules/atfs/Wormhole/WormholeSystem.sol";
+import { _artifactIndexToNamespace } from "../../src/modules/atfs/utils.sol";
+import { _wormholeTableId, _wormholeDestTableId, _wormholeRecordTableId } from "../../src/modules/atfs/Wormhole/utils.sol";
+import { WormholeRecord } from "../../src/modules/atfs/Wormhole/tables/WormholeRecord.sol";
 import "forge-std/console.sol";
 
 contract WormholeTest is MudTest {
@@ -86,6 +89,16 @@ contract WormholeTest is MudTest {
     vm.prank(address(2));
     IWorld(worldAddress).df__activateArtifact(2, 1, abi.encode(uint256(1)));
   }
+
+  // function testWormholeRecord() public {
+  //   // unexpected behavior
+  //   vm.startPrank(admin);
+  //   WormholeRecord.set(_wormholeRecordTableId(_artifactIndexToNamespace(WORMHOLE_INDEX)), bytes32(uint256(1)), bytes32(uint256(2)), true);
+  //   assertTrue(WormholeRecord.get(_wormholeRecordTableId(_artifactIndexToNamespace(WORMHOLE_INDEX)), bytes32(uint256(1)), bytes32(uint256(2))));
+  //   WormholeRecord.deleteRecord(_wormholeRecordTableId(_artifactIndexToNamespace(WORMHOLE_INDEX)), bytes32(uint256(1)), bytes32(uint256(2)));
+  //   assertFalse(WormholeRecord.get(_wormholeRecordTableId(_artifactIndexToNamespace(WORMHOLE_INDEX)), bytes32(uint256(1)), bytes32(uint256(2))));
+  //   vm.stopPrank();
+  // }
 
   function _move(
     uint256 from,

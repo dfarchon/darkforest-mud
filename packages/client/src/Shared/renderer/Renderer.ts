@@ -154,6 +154,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getSelectedPlanet(): LocatablePlanet | undefined;
   getHoveringOverPlanet(): Planet | undefined;
   getHoveringOverCoords(): WorldCoords | undefined;
+  getHoveringOverArtifactId(): ArtifactId | undefined;
   getSelectedCoords(): WorldCoords | undefined;
   getForcesSending(planetId: LocationId): number;
   getEnergyArrivingForMove(

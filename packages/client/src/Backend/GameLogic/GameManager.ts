@@ -884,11 +884,11 @@ export class GameManager extends EventEmitter {
 
   public updateContractConstants(contractConstants: ContractConstants) {
     // PUNK
-    console.log("update contract constants");
-    console.log(
-      "new cooldown time:",
-      contractConstants.LOCATION_REVEAL_COOLDOWN,
-    );
+    // console.log("update contract constants");
+    // console.log(
+    //   "new cooldown time:",
+    //   contractConstants.LOCATION_REVEAL_COOLDOWN,
+    // );
 
     this.contractConstants = contractConstants;
   }
@@ -1772,13 +1772,14 @@ export class GameManager extends EventEmitter {
       return [];
     }
     const ownedByMe = this.entityStore.getArtifactsOwnedBy(this.account);
-    const onPlanetsOwnedByMe = this.entityStore
-      .getArtifactsOnPlanetsOwnedBy(this.account)
-      // filter out space ships because they always show up
-      // in the `ownedByMe` array.
-      .filter((a) => !isSpaceShip(a.artifactType));
+    return ownedByMe;
+    // const onPlanetsOwnedByMe = this.entityStore
+    //   .getArtifactsOnPlanetsOwnedBy(this.account)
+    //   // filter out space ships because they always show up
+    //   // in the `ownedByMe` array.
+    //   .filter((a) => !isSpaceShip(a.artifactType));
 
-    return [...ownedByMe, ...onPlanetsOwnedByMe];
+    // return [...ownedByMe, ...onPlanetsOwnedByMe];
   }
 
   /**
@@ -2634,7 +2635,7 @@ export class GameManager extends EventEmitter {
         args: getArgs(),
       };
 
-      console.log(txIntent);
+      // console.log(txIntent);
 
       // Always await the submitTransaction so we can catch rejections
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -3535,7 +3536,7 @@ export class GameManager extends EventEmitter {
       while (true) {
         try {
           const entryFee = 0; //await this.contractsAPI.getEntryFee();
-          console.log("entry fee: ", entryFee.toString());
+          // console.log("entry fee: ", entryFee.toString());
           localStorage.setItem(
             `${this.ethConnection.getAddress()?.toLowerCase()}-entryFee`,
             entryFee.toString(),
@@ -5192,8 +5193,8 @@ export class GameManager extends EventEmitter {
         if (artifactMoved) {
           args[6] = artifactIdToDecStr(artifactMoved);
         }
-        console.log("move args");
-        console.log(args);
+        // console.log("move args");
+        // console.log(args);
         return args;
       };
 
@@ -5218,16 +5219,14 @@ export class GameManager extends EventEmitter {
       if (artifactMoved) {
         const artifact = this.entityStore.getArtifactById(artifactMoved);
 
-        if (!bypassChecks) {
-          if (!artifact) {
-            throw new Error("couldn't find this artifact");
-          }
-          if (isActivated(artifact)) {
-            throw new Error("can't move an activated artifact");
-          }
-          if (!oldPlanet?.heldArtifactIds?.includes(artifactMoved)) {
-            throw new Error("that artifact isn't on this planet!");
-          }
+        if (!artifact) {
+          throw new Error("couldn't find this artifact");
+        }
+        if (isActivated(artifact)) {
+          throw new Error("can't move an activated artifact");
+        }
+        if (!oldPlanet?.heldArtifactIds?.includes(artifactMoved)) {
+          throw new Error("that artifact isn't on this planet!");
         }
       }
 
@@ -6517,7 +6516,7 @@ export class GameManager extends EventEmitter {
         amount,
       };
 
-      const price = BigInt(100_000_000_000_000);
+      const price = BigInt(10_000_000_000_000);
       const value = price * BigInt(amount);
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
         //  NOTE: when change gasLimit, need change the value in TxConfirmPopup.tsx
@@ -6526,7 +6525,7 @@ export class GameManager extends EventEmitter {
         // ? bigInt(500_000_000_000_000).toString()
         // : bigInt(1_000_000_000_000_000).toString(), //0.001eth
         gasLimit: 3000000,
-        value: value.toString(), //0.0005eth
+        value: value.toString(), //0.0000 5eth
       });
       return tx;
     } catch (e) {

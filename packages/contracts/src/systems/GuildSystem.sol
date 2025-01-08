@@ -30,8 +30,8 @@ contract GuildSystem is System {
   error GuildNotInvited(); // 0x10d249a5
   error GuildNotApplied(); // 0x1a6d3a07
   error GuildHasMembers(); // 0xabb7f52d
-  error GuildLeaveCooldownNotExpired(); // 0x19e69be5
-  error GuildMemberLimitReached(); // 0x82c1f5c6
+  error GuildLeaveCooldownNotExpired(); // 0x293bd9fc
+  error GuildMemberLimitReached(); // 0x6c65c706
 
   function _requireOwner() internal view {
     AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
@@ -79,8 +79,31 @@ contract GuildSystem is System {
     return GuildMember.getLeftAt(memberIds[lastIndex]);
   }
 
+  function _getLastGuildIfKicked(address player) internal view returns (bool) {
+    uint24[] memory memberIds = GuildHistory.getMemberIds(player);
+    if (memberIds.length == 0) {
+      return false;
+    }
+
+    // Check the last guild membership (excluding current if any)
+    uint256 lastIndex = memberIds.length - 1;
+    if (GuildHistory.getCurMemberId(player) != 0) {
+      lastIndex--;
+    }
+
+    if (lastIndex < 0) {
+      return false;
+    }
+
+    return GuildMember.getKicked(memberIds[lastIndex]);
+  }
+
   function _checkGuildLeaveCooldown(address player) internal view {
     uint64 lastLeaveTick = _getLastGuildLeaveTick(player);
+    if (lastLeaveTick == 0) return;
+    bool kicked = _getLastGuildIfKicked(player);
+    if (kicked) return;
+
     uint64 currentTick = uint64(DFUtils.getCurrentTick());
     if (currentTick - lastLeaveTick < GuildConfig.getCooldownTicks()) {
       revert GuildLeaveCooldownNotExpired();
@@ -109,6 +132,7 @@ contract GuildSystem is System {
         grant: GuildRole.NONE,
         joinedAt: uint64(DFUtils.getCurrentTick()),
         leftAt: 0,
+        kicked: false,
         addr: owner
       })
     );
@@ -146,6 +170,7 @@ contract GuildSystem is System {
         grant: GuildRole.NONE,
         joinedAt: uint64(DFUtils.getCurrentTick()),
         leftAt: 0,
+        kicked: false,
         addr: player
       })
     );
@@ -517,5 +542,6 @@ contract GuildSystem is System {
 
     // Kick member from guild
     _leaveGuild(uint8(memberMemberId >> 16), memberMemberId, member);
+    GuildMember.setKicked((uint24(memberMemberId)), true);
   }
 }

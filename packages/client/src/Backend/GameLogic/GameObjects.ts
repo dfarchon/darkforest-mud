@@ -1335,7 +1335,7 @@ export class GameObjects {
       artifact.onPlanetId
     ) {
       if (artifact.status === ArtifactStatus.Active) {
-        const { Wormhole } = this.components;
+        const { Wormhole, WormholeDest } = this.components;
         const planetEntity = encodeEntity(
           { from: "bytes32" },
           {
@@ -1343,10 +1343,23 @@ export class GameObjects {
           },
         );
         const wormholeRec = getComponentValue(Wormhole, planetEntity);
-        if (wormholeRec) {
+        const artifactEntity = encodeEntity(
+          { wormholeId: "uint32" },
+          {
+            wormholeId: Number(artifactIdToDecStr(artifact.id)),
+          },
+        );
+        const wormholeDest = getComponentValue(WormholeDest, artifactEntity);
+        if (wormholeRec && !wormholeDest) {
           this.links.set(artifact.id, {
             from: artifact.onPlanetId,
             to: locationIdFromHexStr(wormholeRec.to.toString()),
+            artifactId: artifact.id,
+          });
+        } else if (wormholeDest) {
+          this.links.set(artifact.id, {
+            from: artifact.onPlanetId,
+            to: locationIdFromHexStr(wormholeDest.to.toString()),
             artifactId: artifact.id,
           });
         }
@@ -1446,11 +1459,12 @@ export class GameObjects {
       notifManager.planetLost(current as LocatablePlanet);
     }
 
-    const inSameGuild = this.guildUtils.inSameGuildAtTick(
-      arrival.player,
-      this.address,
-      arrival.arrivalTick,
-    );
+    const inSameGuild =
+      this.guildUtils.inSameGuildAtTick(
+        arrival.player,
+        this.address,
+        arrival.arrivalTick,
+      ) && arrival.player !== this.address;
 
     if (
       inSameGuild === false &&

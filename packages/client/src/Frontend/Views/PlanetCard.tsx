@@ -55,6 +55,13 @@ import {
   TitleBar,
 } from "./PlanetCardComponents";
 
+const InfoHead = styled.div`
+  text-align: center;
+  font-size: 120%;
+  font-weight: bold;
+  color: yellow;
+`;
+
 export function PlanetCardTitle({
   planet,
   small,
@@ -137,6 +144,14 @@ export function PlanetCard({
     uiManager.isAbandoning$,
     uiManager.isAbandoning(),
   );
+
+  const gameManager = uiManager.getGameManager();
+  const player = gameManager.getPlayer(planet?.owner);
+
+  const account = planet?.owner;
+  const guildId = account ? gameManager.getPlayerGuildId(account) : undefined;
+
+  const guild = gameManager.getGuild(guildId);
 
   if (!planet || !isLocatable(planet)) {
     return <></>;
@@ -432,6 +447,15 @@ export function PlanetCard({
                 />
               </Sub>
             </SpreadApart>
+
+            {player && <InfoHead>{player.name}</InfoHead>}
+            {guild && (
+              <InfoHead>
+                {guild.name && guild.name.length !== 0
+                  ? guild.name.toUpperCase() + " GUILD (ID:" + guild.id + ")"
+                  : "ANONYMOUS GUILD (ID:" + guild.id + ")"}
+              </InfoHead>
+            )}
             <SelectArtifactRow artifacts={artifacts} />
           </>
         )}

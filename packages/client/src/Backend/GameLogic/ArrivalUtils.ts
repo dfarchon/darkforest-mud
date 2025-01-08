@@ -203,11 +203,9 @@ export const arrive = (
     (a) => a.lastActivated > a.lastDeactivated,
   );
 
-  const inSameGuild = guildUtils.inSameGuildAtTick(
-    arrival.player,
-    toPlanet.owner,
-    arrivalTick,
-  );
+  const inSameGuild =
+    guildUtils.inSameGuildAtTick(arrival.player, toPlanet.owner, arrivalTick) &&
+    arrival.player !== toPlanet.owner;
 
   if (arrival.player !== toPlanet.owner && !inSameGuild) {
     if (

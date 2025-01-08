@@ -13,6 +13,7 @@ import { SortableTable } from "../Views/SortableTable";
 
 const GuildListContent = styled.div`
   width: 600px;
+  height: 450px;
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
@@ -24,6 +25,7 @@ const GuildListContent = styled.div`
 
 const TableContainer = styled.div`
   overflow-y: scroll;
+  height: 100%;
 `;
 
 type SetNumberFunction = (value: number) => void;
@@ -54,8 +56,8 @@ export function GuildListPane({
       <TextPreview
         style={{ color: dfstyles.colors.text }}
         text={guild.name}
-        focusedWidth={"75px"}
-        unFocusedWidth={"75px"}
+        focusedWidth={"125px"}
+        unFocusedWidth={"125px"}
       />
     ),
     //Leader
@@ -126,7 +128,7 @@ export function GuildListPane({
     content = (
       <TableContainer>
         <SortableTable
-          paginated={true}
+          paginated={false}
           rows={guilds}
           headers={headers}
           columns={columns}

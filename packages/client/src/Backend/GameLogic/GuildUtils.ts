@@ -191,7 +191,7 @@ export class GuildUtils {
     if (!candidate) return false;
 
     // PUNK check here
-    console.log(candidate.invitations);
+    // console.log(candidate.invitations);
     return candidate.invitations.includes(guildId);
   }
 
@@ -225,6 +225,8 @@ export class GuildUtils {
     const member = getComponentValue(GuildMember, memberEntity);
     if (!member) return undefined;
 
+    if (member.kicked) return undefined;
+
     return member.leftAt;
   }
 
@@ -244,6 +246,7 @@ export class GuildUtils {
   ): number | undefined {
     const lastLeaveTick = this.getPlayerLastLeaveTick(playerAddr);
     if (!lastLeaveTick) return undefined;
+
     return Number(lastLeaveTick);
   }
 

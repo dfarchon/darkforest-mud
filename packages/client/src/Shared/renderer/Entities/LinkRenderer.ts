@@ -4,6 +4,7 @@ import { ArtifactType, RendererType, RenderZIndex } from "@df/types";
 import { engineConsts } from "../EngineConsts";
 import type { Renderer } from "../Renderer";
 import type { GameGLManager } from "../WebGL/GameGLManager";
+import { isActivated } from "@df/gamelogic";
 const { purpleA, blueA, pinkA, sensaichaA } = engineConsts.colors;
 
 export class LinkRenderer implements LinkRendererType {
@@ -71,11 +72,22 @@ export class LinkRenderer implements LinkRendererType {
       lineColor = sensaichaA;
     }
 
+    let lineWidth = confirmed ? 2 : 1;
+    const hoveringArtifactId = gameUIManager.getHoveringOverArtifactId();
+    if (hoveringArtifactId && artifactId === hoveringArtifactId) {
+      if (
+        artifact.artifactType === ArtifactType.Wormhole &&
+        isActivated(artifact)
+      ) {
+        lineWidth = 8;
+      }
+    }
+
     this.renderer.lineRenderer.queueLineWorld(
       fromLoc.coords,
       toLoc.coords,
       lineColor,
-      confirmed ? 2 : 1,
+      lineWidth,
       RenderZIndex.Voyages,
       confirmed ? false : true,
     );

@@ -111,7 +111,7 @@ export function SidebarPane({
           shortcutText={sidebarHovered ? TOGGLE_PLUGINS_PANE : undefined}
         />
         <EmSpacer height={0.5} />
-        {/* <ModalToggleButton
+        <ModalToggleButton
           modal={ModalName.YourArtifacts}
           hook={yourArtifactsHook}
           text={sidebarHovered ? "Your Inventory" : undefined}
@@ -119,7 +119,7 @@ export function SidebarPane({
           shortcutKey={TOGGLE_YOUR_ARTIFACTS_PANE}
           shortcutText={sidebarHovered ? TOGGLE_YOUR_ARTIFACTS_PANE : undefined}
         />
-        <EmSpacer height={0.5} /> */}
+        <EmSpacer height={0.5} />
         <ModalToggleButton
           modal={ModalName.PlanetDex}
           hook={planetdexHook}
