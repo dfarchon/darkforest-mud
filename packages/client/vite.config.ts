@@ -32,4 +32,7 @@ export default defineConfig({
     devSourcemap: false,
   },
   assetsInclude: ["**/*.zkey", "**/*.wasm"],
+  define: {
+    "import.meta.env.DEV": false,
+  },
 });
