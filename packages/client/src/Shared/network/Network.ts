@@ -156,7 +156,7 @@ export function waitForTransaction(
       try {
         const receipt = await timeout(
           provider.getTransactionReceipt(txHash),
-          30 * 1000,
+          2 * 1000,
         );
 
         if (receipt) {
@@ -177,7 +177,7 @@ export function waitForTransaction(
       // TODO: Should we set maxRetryTime?
       retries: DEFAULT_MAX_CALL_RETRIES,
       minTimeout: 2000,
-      maxTimeout: 60_000,
+      maxTimeout: 10_000,
       factor: 1.5,
       onFailedAttempt(e) {
         console.log(

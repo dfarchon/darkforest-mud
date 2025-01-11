@@ -22,7 +22,7 @@ export const CONTRACT_PRECISION = 1000 as const;
 /**
  * By default, the various {@link ContractCaller} will retry a blockchain read this many times.
  */
-export const DEFAULT_MAX_CALL_RETRIES = 12 as const;
+export const DEFAULT_MAX_CALL_RETRIES = 6 as const;
 
 /**
  * The upper-bounds of a LocationID.

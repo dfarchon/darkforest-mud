@@ -18,7 +18,7 @@ import { Mutex } from "async-mutex";
 import type { providers } from "ethers";
 import { utils } from "ethers";
 import deferred from "p-defer";
-import timeout from "p-timeout";
+import timeout, { TimeoutError } from "p-timeout";
 
 import type { EthConnection } from "./EthConnection";
 import { waitForTransaction } from "./Network";
@@ -365,141 +365,176 @@ export class TxExecutor {
     let tx_hash: string | undefined = undefined;
 
     const time_exec_called = Date.now();
+    // console.log(`[TX ${tx.id}] Starting transaction execution`);
 
     try {
       tx.state = "Processing";
+      // console.log(`[TX ${tx.id}] State changed to Processing`);
 
       if (this.beforeTransaction) {
+        // console.log(`[TX ${tx.id}] Executing beforeTransaction hook`);
         await this.beforeTransaction(tx);
       }
 
+      console.log(`[TX ${tx.id}] Acquiring nonce mutex`);
       const releaseMutex = await this.nonceMutex.acquire();
 
-      const nonce = await this.getNonce();
+      try {
+        // console.log(`[TX ${tx.id}] Getting nonce`);
+        const nonce = await this.getNonce();
+        console.log(`[TX ${tx.id}] Got nonce: ${nonce}`);
 
-      const requestWithDefaults = Object.assign(
-        JSON.parse(JSON.stringify(this.defaultTxOptions)),
-        tx.overrides,
-      );
+        const requestWithDefaults = Object.assign(
+          JSON.parse(JSON.stringify(this.defaultTxOptions)),
+          tx.overrides,
+        );
+        // console.log(
+        //   `[TX ${tx.id}] Prepared transaction request:`,
+        //   requestWithDefaults,
+        // );
 
-      time_called = Date.now();
+        time_called = Date.now();
+        // console.log(`[TX ${tx.id}] Preparing contract call arguments`);
 
-      const args = await tx.intent.args;
-      const methodName = tx.intent.methodName;
+        const args = await tx.intent.args;
+        const methodName = tx.intent.methodName;
 
-      const functionName =
-        methodName.slice(0, 4) === "df__"
-          ? methodName.substring(4)
-          : methodName;
+        const functionName =
+          methodName.slice(0, 4) === "df__"
+            ? methodName.substring(4)
+            : methodName;
+        // console.log(`[TX ${tx.id}] Calling function: ${functionName}`);
 
-      const abi = get_ABI_from_FunctionName(functionName);
-      const systemId = get_SystemId_from_FunctionName(functionName);
+        const abi = get_ABI_from_FunctionName(functionName);
+        const systemId = get_SystemId_from_FunctionName(functionName);
 
-      const callFromArgs = encodeSystemCallFrom({
-        abi: abi,
-        from: addressToHex(tx.intent.delegator),
-        systemId: systemId,
-        functionName: functionName,
-        args: args,
-      });
+        const callFromArgs = encodeSystemCallFrom({
+          abi: abi,
+          from: addressToHex(tx.intent.delegator),
+          systemId: systemId,
+          functionName: functionName,
+          args: args,
+        });
+        // console.log(`[TX ${tx.id}] Encoded call arguments`);
 
-      const submitted = await timeout<providers.TransactionResponse>(
-        tx.intent.contract["callFrom"](...callFromArgs, {
-          ...requestWithDefaults,
-          nonce,
-        }),
-        TxExecutor.TX_SUBMIT_TIMEOUT,
-        `tx request ${tx.id} failed to submit: timed out`,
-      );
+        // console.log(`[TX ${tx.id}] Submitting transaction`);
+        const submitted = await timeout<providers.TransactionResponse>(
+          tx.intent.contract["callFrom"](...callFromArgs, {
+            ...requestWithDefaults,
+            nonce,
+          }),
+          TxExecutor.TX_SUBMIT_TIMEOUT,
+          `tx request ${tx.id} failed to submit: timed out`,
+        );
 
-      releaseMutex();
+        tx.state = "Submit";
+        tx.hash = submitted.hash;
+        // console.log(
+        //   `[TX ${tx.id}] Transaction submitted with hash: ${submitted.hash}`,
+        // );
 
-      tx.state = "Submit";
-      tx.hash = submitted.hash;
+        time_submitted = Date.now();
+        tx.lastUpdatedAt = time_submitted;
+        tx_hash = submitted.hash;
+        this.lastTransactionTimestamp = time_submitted;
+        tx.onTransactionResponse(submitted);
 
-      time_submitted = Date.now();
-      tx.lastUpdatedAt = time_submitted;
-      tx_hash = submitted.hash;
-      this.lastTransactionTimestamp = time_submitted;
-      tx.onTransactionResponse(submitted);
+        // console.log(`[TX ${tx.id}] Waiting for transaction confirmation`);
+        const confirmed = await this.ethConnection.waitForTransaction(
+          submitted.hash,
+        );
 
-      const confirmed = await this.ethConnection.waitForTransaction(
-        submitted.hash,
-      );
-
-      if (confirmed.status !== 1) {
-        time_errored = Date.now();
-        tx.lastUpdatedAt = time_errored;
-        tx.state = "Fail";
-        await this.resetNonce();
-        throw new Error("transaction reverted");
-      } else {
-        tx.state = "Confirm";
-        time_confirmed = Date.now();
-        tx.lastUpdatedAt = time_confirmed;
-        tx.onTransactionReceipt(confirmed);
+        if (confirmed.status !== 1) {
+          time_errored = Date.now();
+          tx.lastUpdatedAt = time_errored;
+          tx.state = "Fail";
+          // console.log(`[TX ${tx.id}] Transaction reverted`);
+          await this.resetNonce();
+          throw new Error("transaction reverted");
+        } else {
+          tx.state = "Confirm";
+          time_confirmed = Date.now();
+          tx.lastUpdatedAt = time_confirmed;
+          // console.log(`[TX ${tx.id}] Transaction confirmed successfully`);
+          tx.onTransactionReceipt(confirmed);
+        }
+      } finally {
+        console.log(`[TX ${tx.id}] Releasing nonce mutex`);
+        releaseMutex();
       }
     } catch (e) {
-      console.error(e);
-      tx.state = "Fail";
       error = e as Error;
+      // console.error(`[TX ${tx.id}] Transaction execution error:`, error);
+
+      tx.state = "Fail";
 
       if (!time_submitted) {
-        await this.resetNonce();
+        // console.log(`[TX ${tx.id}] Failed before submission`);
         time_errored = Date.now();
+        await this.resetNonce();
         tx.onSubmissionError(error);
       } else {
-        // Ran out of retries, set nonce to undefined to refresh it
+        // console.log(`[TX ${tx.id}] Failed after submission`);
         if (!time_errored) {
-          await this.resetNonce();
           time_errored = Date.now();
+          await this.resetNonce();
         }
         tx.lastUpdatedAt = time_errored;
         tx.onReceiptError(error);
       }
     } finally {
-      this.diagnosticsUpdater?.updateDiagnostics((d) => {
-        d.totalTransactions++;
-      });
-    }
-
-    const logEvent: NetworkEvent = {
-      tx_to: tx.intent.contract.address,
-      tx_type: tx.intent.methodName,
-      auto_gas_price_setting: tx.autoGasPriceSetting,
-      time_exec_called,
-      tx_hash,
-    };
-
-    if (time_called && time_submitted) {
-      logEvent.wait_submit = time_submitted - time_called;
-      if (time_confirmed) {
-        logEvent.wait_confirm = time_confirmed - time_called;
-      }
-    }
-
-    if (error && time_errored) {
-      logEvent.error = error.message || JSON.stringify(error);
-      logEvent.wait_error = time_errored - time_exec_called;
-
       try {
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        if ((error as any).body) {
-          logEvent.parsed_error = String.fromCharCode.apply(
-            null,
-            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-            (error as any).body || [],
-          );
+        // console.log(`[TX ${tx.id}] Updating diagnostics and logging`);
+        this.diagnosticsUpdater?.updateDiagnostics((d) => {
+          d.totalTransactions++;
+        });
+
+        const logEvent: NetworkEvent = {
+          tx_to: tx.intent.contract.address,
+          tx_type: tx.intent.methodName,
+          auto_gas_price_setting: tx.autoGasPriceSetting,
+          time_exec_called,
+          tx_hash,
+        };
+
+        if (time_called && time_submitted) {
+          logEvent.wait_submit = time_submitted - time_called;
+          if (time_confirmed) {
+            logEvent.wait_confirm = time_confirmed - time_called;
+          }
         }
-      } catch (e) {
-        // EMPTY
+
+        if (error && time_errored) {
+          logEvent.error = error.message || JSON.stringify(error);
+          logEvent.wait_error = time_errored - time_exec_called;
+
+          try {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+            if ((error as any).body) {
+              logEvent.parsed_error = String.fromCharCode.apply(
+                null,
+                /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                (error as any).body || [],
+              );
+            }
+          } catch (e) {
+            // EMPTY
+          }
+        }
+
+        logEvent.rpc_endpoint = this.ethConnection.getRpcEndpoint();
+        logEvent.user_address = this.ethConnection.getAddress();
+
+        // console.log(`[TX ${tx.id}] Executing afterTransaction hook`);
+        if (this.afterTransaction) {
+          await this.afterTransaction(tx, logEvent);
+        }
+
+        // console.log(`[TX ${tx.id}] Transaction processing completed`);
+      } catch (finallyError) {
+        console.error(`[TX ${tx.id}] Error in finally block:`, finallyError);
       }
     }
-
-    logEvent.rpc_endpoint = this.ethConnection.getRpcEndpoint();
-    logEvent.user_address = this.ethConnection.getAddress();
-
-    this.afterTransaction && this.afterTransaction(tx, logEvent);
   };
 
   public setDiagnosticUpdater(diagnosticUpdater?: DiagnosticUpdater) {
