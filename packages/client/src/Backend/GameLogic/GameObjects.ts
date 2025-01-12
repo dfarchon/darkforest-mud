@@ -748,7 +748,13 @@ export class GameObjects {
    * @see Warning in {@link GameObjects.getAllPlanets()}
    */
   public getAllOwnedPlanets(): Planet[] {
-    return Array.from(this.planets.values()).filter(hasOwner);
+    const ownedPlanet = [];
+    for (const planet of this.planets.values()) {
+      if (hasOwner(planet)) {
+        ownedPlanet.push(planet);
+      }
+    }
+    return ownedPlanet;
   }
 
   /**
