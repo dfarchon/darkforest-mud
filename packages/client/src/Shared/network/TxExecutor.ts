@@ -445,18 +445,26 @@ export class TxExecutor {
         );
 
         if (confirmed.status !== 1) {
+          console.log(`[TX ${tx.id}] Transaction status check failed`);
           time_errored = Date.now();
           tx.lastUpdatedAt = time_errored;
           tx.state = "Fail";
-          // console.log(`[TX ${tx.id}] Transaction reverted`);
+          console.log(`[TX ${tx.id}] Transaction reverted`);
+          console.log(`[TX ${tx.id}] Releasing mutex before nonce reset`);
+          releaseMutex();
+          console.log(`[TX ${tx.id}] About to reset nonce`);
           await this.resetNonce();
+          console.log(`[TX ${tx.id}] About to throw error`);
           throw new Error("transaction reverted");
         } else {
+          console.log(`[TX ${tx.id}] Transaction status check passed`);
           tx.state = "Confirm";
           time_confirmed = Date.now();
           tx.lastUpdatedAt = time_confirmed;
-          // console.log(`[TX ${tx.id}] Transaction confirmed successfully`);
+          console.log(`[TX ${tx.id}] Transaction confirmed successfully`);
           tx.onTransactionReceipt(confirmed);
+          console.log(`[TX ${tx.id}] Releasing mutex after success`);
+          releaseMutex();
         }
       } finally {
         console.log(`[TX ${tx.id}] Releasing nonce mutex`);
