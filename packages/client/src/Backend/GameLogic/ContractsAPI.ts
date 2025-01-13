@@ -1873,6 +1873,61 @@ export class ContractsAPI extends EventEmitter {
   public getGuildUtils() {
     return this.guildUtils;
   }
+
+  /**
+   * Get the TxExecutor instance
+   */
+  public getTxExecutor(): TxExecutor {
+    return this.txExecutor;
+  }
+
+  /**
+   * Cancel all queued transactions with detailed logging
+   */
+  public clearQueuedTransactions(): void {
+    const queuedTransactions = this.txExecutor.getQueuedTransactions();
+
+    console.log("\n====== Clearing Transaction Queue ======");
+    console.log(`Found ${queuedTransactions.length} transactions to clear`);
+
+    queuedTransactions.forEach((tx, index) => {
+      console.log(`\n[${index + 1}/${queuedTransactions.length}] Cancelling:`, {
+        id: tx.id,
+        method: tx.intent.methodName,
+        state: tx.state,
+        hash: tx.hash || "Not submitted",
+      });
+      this.cancelTransaction(tx);
+    });
+
+    console.log("\n✓ Queue successfully cleared");
+    console.log("====== End Queue Clearing ======\n");
+  }
+
+  /**
+   * Print detailed information about all transactions in queue
+   */
+  public printQueueInformation(): void {
+    const queuedTransactions = this.txExecutor.getQueuedTransactions();
+
+    console.log("\n====== Transaction Queue Information ======");
+    console.log(`Total transactions in queue: ${queuedTransactions.length}`);
+
+    queuedTransactions.forEach((tx, index) => {
+      console.log(
+        `\n[${index + 1}/${queuedTransactions.length}] Transaction:`,
+        {
+          id: tx.id,
+          method: tx.intent.methodName,
+          state: tx.state,
+          hash: tx.hash || "Not submitted",
+          lastUpdated: new Date(tx.lastUpdatedAt).toISOString(),
+        },
+      );
+    });
+
+    console.log("\n====== End Queue Information ======\n");
+  }
 }
 
 export async function makeContractsAPI({

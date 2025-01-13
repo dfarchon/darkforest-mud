@@ -357,6 +357,9 @@ export class TxExecutor {
    * purpose for `this` purposes.
    */
   private execute = async (tx: Transaction) => {
+    console.log(`[TX ${tx.id}] ====== Starting execute ======`);
+    console.log(`[TX ${tx.id}] Transaction type: ${tx.intent.methodName}`);
+
     let time_called: number | undefined = undefined;
     let error: Error | undefined = undefined;
     let time_submitted: number | undefined = undefined;
@@ -365,36 +368,53 @@ export class TxExecutor {
     let tx_hash: string | undefined = undefined;
 
     const time_exec_called = Date.now();
+    console.log(
+      `[TX ${tx.id}] Execution started at: ${new Date(time_exec_called).toISOString()}`,
+    );
 
     try {
       tx.state = "Processing";
+      console.log(`[TX ${tx.id}] State changed to Processing`);
 
       if (this.beforeTransaction) {
+        console.log(`[TX ${tx.id}] Running beforeTransaction hook`);
         await this.beforeTransaction(tx);
       }
 
+      console.log(`[TX ${tx.id}] Acquiring nonce mutex`);
       const releaseMutex = await this.nonceMutex.acquire();
+      console.log(`[TX ${tx.id}] Acquired nonce mutex`);
 
       const nonce = await this.getNonce();
+      console.log(`[TX ${tx.id}] Got nonce: ${nonce}`);
 
       const requestWithDefaults = Object.assign(
         JSON.parse(JSON.stringify(this.defaultTxOptions)),
         tx.overrides,
       );
+      console.log(`[TX ${tx.id}] Request options:`, requestWithDefaults);
 
       time_called = Date.now();
+      console.log(
+        `[TX ${tx.id}] Preparing transaction call at: ${new Date(time_called).toISOString()}`,
+      );
 
       const args = await tx.intent.args;
+      console.log(`[TX ${tx.id}] Got transaction args`);
+
       const methodName = tx.intent.methodName;
+      console.log(`[TX ${tx.id}] Method name: ${methodName}`);
 
       const functionName =
         methodName.slice(0, 4) === "df__"
           ? methodName.substring(4)
           : methodName;
 
+      console.log(`[TX ${tx.id}] Getting ABI and SystemId`);
       const abi = get_ABI_from_FunctionName(functionName);
       const systemId = get_SystemId_from_FunctionName(functionName);
 
+      console.log(`[TX ${tx.id}] Encoding system call`);
       const callFromArgs = encodeSystemCallFrom({
         abi: abi,
         from: addressToHex(tx.intent.delegator),
@@ -403,6 +423,7 @@ export class TxExecutor {
         args: args,
       });
 
+      console.log(`[TX ${tx.id}] Submitting transaction`);
       const submitted = await timeout<providers.TransactionResponse>(
         tx.intent.contract["callFrom"](...callFromArgs, {
           ...requestWithDefaults,
@@ -412,41 +433,63 @@ export class TxExecutor {
         `tx request ${tx.id} failed to submit: timed out`,
       );
 
+      console.log(`[TX ${tx.id}] Releasing nonce mutex`);
       releaseMutex();
+      console.log(`[TX ${tx.id}] Released nonce mutex`);
 
       tx.state = "Submit";
       tx.hash = submitted.hash;
+      console.log(
+        `[TX ${tx.id}] Transaction submitted with hash: ${submitted.hash}`,
+      );
 
       time_submitted = Date.now();
       tx.lastUpdatedAt = time_submitted;
       tx_hash = submitted.hash;
       this.lastTransactionTimestamp = time_submitted;
+      console.log(
+        `[TX ${tx.id}] Submission time: ${new Date(time_submitted).toISOString()}`,
+      );
+
       tx.onTransactionResponse(submitted);
+      console.log(`[TX ${tx.id}] Waiting for confirmation`);
 
       const confirmed = await this.ethConnection.waitForTransaction(
         submitted.hash,
+      );
+      console.log(
+        `[TX ${tx.id}] Got confirmation, status: ${confirmed.status}`,
       );
 
       if (confirmed.status !== 1) {
         time_errored = Date.now();
         tx.lastUpdatedAt = time_errored;
         tx.state = "Fail";
+        console.log(
+          `[TX ${tx.id}] Transaction failed at: ${new Date(time_errored).toISOString()}`,
+        );
         await this.resetNonce();
         throw new Error("transaction reverted");
       } else {
         tx.state = "Confirm";
         time_confirmed = Date.now();
         tx.lastUpdatedAt = time_confirmed;
+        console.log(
+          `[TX ${tx.id}] Transaction confirmed at: ${new Date(time_confirmed).toISOString()}`,
+        );
         tx.onTransactionReceipt(confirmed);
       }
     } catch (e) {
-      console.error(e);
+      console.error(`[TX ${tx.id}] Error in execute:`, e);
       tx.state = "Fail";
       error = e as Error;
 
       if (!time_submitted) {
         await this.resetNonce();
         time_errored = Date.now();
+        console.log(
+          `[TX ${tx.id}] Submission error at: ${new Date(time_errored).toISOString()}`,
+        );
         tx.onSubmissionError(error);
       } else {
         // Ran out of retries, set nonce to undefined to refresh it
@@ -455,12 +498,16 @@ export class TxExecutor {
           time_errored = Date.now();
         }
         tx.lastUpdatedAt = time_errored;
+        console.log(
+          `[TX ${tx.id}] Receipt error at: ${new Date(time_errored).toISOString()}`,
+        );
         tx.onReceiptError(error);
       }
     } finally {
       this.diagnosticsUpdater?.updateDiagnostics((d) => {
         d.totalTransactions++;
       });
+      console.log(`[TX ${tx.id}] ====== Finished execute ======\n`);
     }
 
     const logEvent: NetworkEvent = {
@@ -504,5 +551,24 @@ export class TxExecutor {
 
   public setDiagnosticUpdater(diagnosticUpdater?: DiagnosticUpdater) {
     this.diagnosticsUpdater = diagnosticUpdater;
+  }
+
+  /**
+   * Get all transaction IDs currently in the queue
+   */
+  public getQueuedTransactionIds(): TransactionId[] {
+    const tasks = this.queue.getTaskQueue();
+    return tasks.map((task) => {
+      const tx = task.metadata as Transaction;
+      return tx.id;
+    });
+  }
+
+  /**
+   * Get all queued transactions
+   */
+  public getQueuedTransactions(): Transaction[] {
+    const queuedTasks = this.queue.getTaskQueue();
+    return queuedTasks.map((task) => task.metadata as Transaction);
   }
 }
