@@ -92,18 +92,23 @@ class SnarkProverQueue {
   ) {
     try {
       console.log(`proving ${task.taskId}`);
-      const res = await window.snarkjs.groth16.fullProve(
-        task.input,
+
+      const { wasmBuffer, zkeyBuffer } = await SnarkArgsHelper.loadCircuitFiles(
         task.circuit,
         task.zkey,
       );
+
+      const res = await window.snarkjs.groth16.fullProve(
+        task.input,
+        wasmBuffer,
+        zkeyBuffer,
+      );
+
       console.log(`proved ${task.taskId}`);
       cb(null, res);
     } catch (e) {
-      console.error("error while calculating SNARK proof:");
-      console.error(e);
-      // TODO handle cb
-      // cb(e, null);
+      console.error("error while calculating SNARK proof:", e);
+      cb(e as Error, null);
     }
   }
 }
@@ -122,6 +127,8 @@ class SnarkArgsHelper {
   private readonly biomebasePerlinOpts: PerlinConfig;
   private readonly planetHashMimc: (...inputs: number[]) => BigInteger;
   private moveSnarkCache: LRUMap<string, MoveSnarkContractCallArgs>;
+  private static wasmCache = new Map<string, ArrayBuffer>();
+  private static zkeyCache = new Map<string, ArrayBuffer>();
 
   private constructor(
     hashConfig: HashConfig,
@@ -448,6 +455,45 @@ class SnarkArgsHelper {
     return fakeProof(
       publicSignals.map((x) => modPBigIntNative(x).toString(10)),
     );
+  }
+
+  public static async loadCircuitFiles(wasmPath: string, zkeyPath: string) {
+    let wasmBuffer = this.wasmCache.get(wasmPath);
+    let zkeyBuffer = this.zkeyCache.get(zkeyPath);
+
+    try {
+      if (!wasmBuffer) {
+        console.log(`Loading WASM from ${wasmPath}`);
+        const wasmResponse = await fetch(wasmPath);
+        if (!wasmResponse.ok) {
+          throw new Error(`Failed to fetch WASM: ${wasmResponse.statusText}`);
+        }
+        wasmBuffer = await wasmResponse.arrayBuffer();
+        this.wasmCache.set(wasmPath, wasmBuffer);
+      }
+
+      if (!zkeyBuffer) {
+        console.log(`Loading ZKEY from ${zkeyPath}`);
+        const zkeyResponse = await fetch(zkeyPath);
+        if (!zkeyResponse.ok) {
+          throw new Error(`Failed to fetch ZKEY: ${zkeyResponse.statusText}`);
+        }
+        zkeyBuffer = await zkeyResponse.arrayBuffer();
+        this.zkeyCache.set(zkeyPath, zkeyBuffer);
+      }
+
+      // 将 ArrayBuffer 转换为 Uint8Array
+      const wasmUint8Array = new Uint8Array(wasmBuffer);
+      const zkeyUint8Array = new Uint8Array(zkeyBuffer);
+
+      return {
+        wasmBuffer: wasmUint8Array,
+        zkeyBuffer: zkeyUint8Array,
+      };
+    } catch (error) {
+      console.error("Error loading circuit files:", error);
+      throw error;
+    }
   }
 }
 

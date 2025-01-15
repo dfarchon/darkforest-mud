@@ -27,7 +27,7 @@ export const callWithRetry = async <T>(
     // TODO: Should we set maxRetryTime?
     retries: maxRetries,
     minTimeout: retryInterval,
-    maxTimeout: 60_000,
+    maxTimeout: 10_000,
     onFailedAttempt(e) {
       console.error(`error: ${e}`);
       console.log(`retrying (${e.attemptNumber + 1}/${maxRetries})...`);
@@ -156,7 +156,7 @@ export function waitForTransaction(
       try {
         const receipt = await timeout(
           provider.getTransactionReceipt(txHash),
-          30 * 1000,
+          2 * 1000,
         );
 
         if (receipt) {
