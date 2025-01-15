@@ -37,28 +37,24 @@ jobs:
         name: Install pnpm
         with:
           version: 9
+          run_install: false
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
-      ###
-      # Install all the dependencies in the monorepo
-      ##
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - name: 'Install dependencies'
         run: pnpm --loglevel=error install
 
-      ###
-      # Build Both Contracts + Client Code
-      ##
       - name: 'Build'
         run: pnpm run build
 
-      ###
-      # Run client tests
-      ##
       - name: 'Test'
         run: pnpm --filter "client" run test
