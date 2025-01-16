@@ -7,8 +7,8 @@ class MemoryMonitor {
   render(container) {
     const element = this.#element;
     element.insertAdjacentHTML("afterbegin", this.renderHTML());
-
     container.appendChild(element);
+
     this.runUpdate();
   }
 
