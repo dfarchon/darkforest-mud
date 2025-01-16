@@ -1830,7 +1830,7 @@ export function GameLandingPage() {
         <LoadingText>
           Step: {syncProgress.step}
           <br />
-          Progress: {syncProgress.percentage}%
+          Progress: {syncProgress.percentage.toFixed()}%
         </LoadingText>
         <LoadingNote>
           Please wait while the indexer syncs...
