@@ -1,4 +1,5 @@
 import type { PluginId } from "@df/types";
+import { startCase } from "@df/utils/string";
 
 /**
  * This interface represents an embedded plugin, which is stored in `embedded_plugins/`.
@@ -47,7 +48,8 @@ export async function getEmbeddedPlugins(
         const newFileName = cleanFilename(filename);
         return {
           id: newFileName as PluginId,
-          name: newFileName,
+          // Prettify name using startCase e.g. "MemoryMonitor" => "Memory Monitor".
+          name: startCase(newFileName),
           code,
         };
       }),
