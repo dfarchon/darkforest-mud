@@ -8,11 +8,6 @@ class MemoryMonitor {
     const element = this.#element;
     element.insertAdjacentHTML("afterbegin", this.renderHTML());
 
-    // style parent container and insert our element
-    // container.parentElement.style.minHeight = "unset";
-    // container.style.width = "300px";
-    // container.style.minHeight = "unset";
-
     container.appendChild(element);
     this.runUpdate();
   }
