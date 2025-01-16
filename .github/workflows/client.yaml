@@ -1,0 +1,60 @@
+name: Client
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'packages/client/**'
+  pull_request:
+    paths:
+      - 'packages/client/**'
+
+env:
+  CI: true
+  # Bypass husky commit hook for CI
+  HUSKY: 0
+
+jobs:
+  main:
+    timeout-minutes: 15
+    name: Main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: git submodule update --init --recursive
+
+      ########
+      # INSTALL PNPM + SETUP NODE
+      #   1. We need to run the pnpm/action before we run the action/setup-node,
+      #      otherwise it will fail.
+      #   2. The action/setup-node uses action/cache under the hood, setting
+      #      the cache-dependency-path ensures that we address all the pnpm lock
+      #      files in the repo.
+      #####
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: 'Install dependencies'
+        run: pnpm --loglevel=error install
+
+      - name: 'Build'
+        run: pnpm run build
+
+      - name: 'Test'
+        run: pnpm --filter "client" run test
