@@ -515,6 +515,7 @@ export type UnconfirmedBuyGPTTokens = TxIntent & {
  */
 export type UnconfirmedSpendGPTTokens = TxIntent & {
   methodName: "df__spendGPTTokens";
+  amount: number;
 };
 
 /**

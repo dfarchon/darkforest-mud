@@ -25,17 +25,17 @@ contract GPTTokensSystem is System, Errors {
   /**
    * @notice Allows users to spend 1 GPT token.
    */
-  function spendGPTTokens() public {
+  function spendGPTTokens(uint256 amount) public {
     address executor = _msgSender();
     uint256 executorAmount = GPTTokens.get(executor);
 
     // Check if the player has at least 1 GPT token
-    if (executorAmount < 1) revert Errors.NotEnoughGPTTokens();
+    if (executorAmount < amount) revert Errors.NotEnoughGPTTokens();
 
-    // Deduct 1 GPT token
-    GPTTokens.set(executor, executorAmount - 1);
+    // Minus from current amount
+    GPTTokens.set(executor, executorAmount - amount);
     // Emit event
-    emit TokensSpent(executor, 1);
+    emit TokensSpent(executor, amount);
   }
 
   /**

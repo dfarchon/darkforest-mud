@@ -6537,9 +6537,9 @@ export class GameManager extends EventEmitter {
     }
   }
 
-  public async spendGPTTokens(): Promise<
-    Transaction<UnconfirmedSpendGPTTokens>
-  > {
+  public async spendGPTTokens(
+    amount: number,
+  ): Promise<Transaction<UnconfirmedSpendGPTTokens>> {
     try {
       if (!this.account) {
         throw new Error("No account connected");
@@ -6554,7 +6554,8 @@ export class GameManager extends EventEmitter {
         delegator,
         methodName: "df__spendGPTTokens",
         contract: this.contractsAPI.contract,
-        args: Promise.resolve([]),
+        args: Promise.resolve([amount]),
+        amount,
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);

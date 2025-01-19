@@ -1,7 +1,15 @@
 import type { GameManager } from "@backend/GameLogic/GameManager";
-import { type ArtifactId, type LocationId, ModalName } from "@df/types";
+import { getPlanetName } from "@df/procedural";
+import {
+  type ArtifactId,
+  type LocationId,
+  ModalName,
+  type Planet,
+  type WorldCoords,
+} from "@df/types";
 import { Btn } from "@frontend/Components/Btn";
-import { useEffect, useState } from "react";
+import { predictTokenCost } from "@frontend/Utils/AI-Chat-PredictCost";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { Spacer } from "../Components/CoreUI";
@@ -14,8 +22,10 @@ import {
 } from "../Utils/IndexedDB-ChatMemory";
 import { ModalPane } from "../Views/ModalPane";
 import { CurrencyView } from "./AIChatTokensBar";
+import { LevelFilter } from "./LevelFilter";
 
 const API_URL = import.meta.env.VITE_AI_API_URL;
+const PLANET_LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const AIChatContent = styled.div`
   width: 500px;
@@ -84,15 +94,63 @@ const AgentResponseContainer = styled.div`
 function HelpContent() {
   return (
     <div>
-      <p>Chat with Sophon, your AI assistant in the Dark Forest universe.</p>
-      <Spacer height={8} />
       <p>
-        Ask questions, strategize, or explore the game's lore and mechanics.
+        {" "}
+        Chat with AI Sophon, your intelligent assistant and agent in the Dark
+        Forest universe.{" "}
+      </p>{" "}
+      <Spacer height={8} />{" "}
+      <p>
+        {" "}
+        Ask questions, plan strategies, or dive into the game's lore and
+        mechanics with ease.{" "}
+      </p>{" "}
+      <Spacer height={12} />{" "}
+      <p>
+        {" "}
+        To use the AI Sophon Agent, start by selecting the top-left corner of
+        your desired range using "Start Range Selection." Then, select the
+        bottom-right corner on the map. Planets within this range will be
+        automatically filtered and included in the input prompt.{" "}
+      </p>{" "}
+      <Spacer height={8} />{" "}
+      <p>
+        {" "}
+        Additionally, you can use the planet level filter bar to pre-select your
+        desired planet levels for more precise results.{" "}
       </p>
     </div>
   );
 }
+const drawRectangle = (ctx, viewport, selectedRange) => {
+  const begin = selectedRange.begin;
+  const end = selectedRange.end;
+  if (begin && end) {
+    // Calculate rectangle bounds in world coordinates
+    const beginX = Math.min(begin.x, end.x);
+    const beginY = Math.max(begin.y, end.y);
+    const endX = Math.max(begin.x, end.x);
+    const endY = Math.min(begin.y, end.y);
+    const width = endX - beginX;
+    const height = beginY - endY;
 
+    // Save the canvas state
+    ctx.save();
+    ctx.strokeStyle = "white"; // Set rectangle color
+    ctx.lineWidth = 1;
+
+    // Convert world coordinates to canvas coordinates
+    ctx.strokeRect(
+      viewport.worldToCanvasX(beginX),
+      viewport.worldToCanvasY(beginY),
+      viewport.worldToCanvasDist(width),
+      viewport.worldToCanvasDist(height),
+    );
+
+    // Restore the canvas state
+    ctx.restore();
+  }
+};
 export function AIChatPane({
   visible,
   onClose,
@@ -107,14 +165,48 @@ export function AIChatPane({
   const player = usePlayer(uiManager).value;
 
   const [activeTab, setActiveTab] = useState<"chat" | "agent">("chat");
-  const [agentResponse, setAgentResponse] = useState<string>(""); // For AIAgentContent
+  const [selectedRange, setSelectedRange] = useState<{
+    begin: WorldCoords | null;
+    end: WorldCoords | null;
+  }>({ begin: null, end: null });
 
+  const [planetsCount, setPlanetsCount] = useState<number>(0);
+  const [planetsFilteredCount, setPlanetsFilteredCount] = useState<number>(0);
+  const [selectedPlanets, setSelectedPlanets] = useState<Planet[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<number[]>([
+    3, 4, 5, 6, 7, 8, 9,
+  ]); // Default to 3-9 (all levels)
+  const [predictedCost, setPredictedCost] = useState<{
+    aItokens: number;
+    cost: number;
+    credits: number;
+  }>({
+    aItokens: 0,
+    cost: 0,
+    credits: 0,
+  });
+  const [agentResponse, setAgentResponse] = useState<string>(""); // For AIAgentContent
+  const [isSelectionActive, setIsSelectionActive] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<
     { message: string; isUser: boolean }[]
   >([]);
 
   const [temp, setTemp] = useState(true);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      const viewport = uiManager.getViewport();
+
+      if (ctx && viewport) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        drawRectangle(ctx, viewport, selectedRange);
+      }
+    }
+  }, [selectedRange, uiManager]);
   // Initilized if visible
   useEffect(() => {
     if (visible && temp) {
@@ -158,8 +250,229 @@ export function AIChatPane({
       setTemp(false);
     }
   }, [visible]);
-  // Btn Send AIchat question
-  const handleSend = async () => {
+  // any change for selectedLevels, selectedRange, uiManager, gameManager, input
+  // do a refresh of filtered planets per planet level filter bar & range selection
+  useEffect(() => {
+    if (selectedRange.begin && selectedRange.end) {
+      const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
+      const chunksAsArray = Array.from(chunks);
+
+      // Filter chunks within the selected range all planets in inpacted chunks
+      const filteredChunks = chunksAsArray.filter((chunk) => {
+        if (!chunk.chunkFootprint || !chunk.chunkFootprint.bottomLeft) {
+          console.warn("Invalid chunk structure:", chunk);
+          return false;
+        }
+
+        const chunkLeft = chunk.chunkFootprint.bottomLeft.x;
+        const chunkRight = chunkLeft + chunk.chunkFootprint.sideLength;
+        const chunkBottom = chunk.chunkFootprint.bottomLeft.y;
+        const chunkTop = chunkBottom + chunk.chunkFootprint.sideLength;
+        if (selectedRange.begin && selectedRange.end)
+          return (
+            chunkRight > selectedRange.begin.x &&
+            chunkLeft < selectedRange.end.x &&
+            chunkBottom < selectedRange.begin.y &&
+            chunkTop > selectedRange.end.y
+          );
+      });
+
+      // Generate planet hashes for the selected range only planets
+      const planetData = filteredChunks.flatMap((chunk) =>
+        chunk.planetLocations
+          .filter((planet) => {
+            if (selectedRange.begin && selectedRange.end) {
+              const planetX = planet.coords.x;
+              const planetY = planet.coords.y;
+
+              return (
+                planetX >
+                  Math.min(selectedRange.begin.x, selectedRange.end.x) &&
+                planetX <
+                  Math.max(selectedRange.begin.x, selectedRange.end.x) &&
+                planetY <
+                  Math.max(selectedRange.begin.y, selectedRange.end.y) &&
+                planetY > Math.min(selectedRange.begin.y, selectedRange.end.y)
+              );
+            }
+            return false;
+          })
+          .map((planet) => ({
+            hash: planet.hash,
+            coords: planet.coords,
+          })),
+      );
+      // Set selected planet count
+      setPlanetsCount(planetData.length);
+
+      // Filter planets by selected levels
+      const filteredPlanets = gameManager
+        .getPlanetsWithIds(planetData.map((planet) => planet.hash))
+        .filter(
+          (planet) =>
+            planet.planetLevel >= Math.min(...selectedLevels) &&
+            planet.planetLevel <= Math.max(...selectedLevels),
+        );
+      // Set filtered planets as selected planets
+      setSelectedPlanets(filteredPlanets);
+      // Set filtered planet count
+      setPlanetsFilteredCount(filteredPlanets.length);
+      // Transform planets for cost calculation
+      const reducedPlanets = reducePlanets(filteredPlanets);
+      const forCost = {
+        username: player?.name,
+        message: input,
+        selectedPlanets: reducedPlanets,
+      };
+      // Repair issue with big number for JSON
+      const stringForCost = JSON.stringify(forCost, (key, value) =>
+        typeof value === "bigint" ? value.toString() : value,
+      );
+
+      //console.log("String:", stringForCost);
+      // Predict cost for default input + selected filtered planets + msg input
+      const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
+      setPredictedCost(predictedCost_);
+    }
+  }, [selectedLevels, selectedRange, uiManager, gameManager, input]);
+
+  // Function step by step for Btn Start Range selection and handlers
+  const handleStartSelection = () => {
+    // Set disable for btn
+    setIsSelectionActive(true);
+    // Reset the selected range before starting a new selection
+    setSelectedRange({ begin: null, end: null });
+
+    // Define the click handler for Start Range Selection
+    const handleClick = (event: MouseEvent) => {
+      const coords = uiManager.getHoveringOverCoords();
+      if (coords) {
+        setSelectedRange((prev) => {
+          if (!prev.begin) {
+            console.log("Begin coordinates set:", coords);
+            const updatedRange = { ...prev, begin: coords };
+            return updatedRange;
+          } else if (!prev.end) {
+            console.log("End coordinates set:", coords);
+            const updatedRange = { ...prev, end: coords };
+
+            // Call generatePlanetArray with the selected range once both begin and end are set
+            if (updatedRange.begin && updatedRange.end) {
+              console.log("Both begin and end are filled. Stopping listener.");
+              window.removeEventListener("click", handleClick);
+
+              const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
+              const chunksAsArray = Array.from(chunks);
+
+              // Filter whole player map chunks
+              const filteredChunks = chunksAsArray.filter((chunk) => {
+                // Validate chunk structure
+                if (!chunk.chunkFootprint || !chunk.chunkFootprint.bottomLeft) {
+                  console.warn("Invalid chunk structure:", chunk);
+                  return false;
+                }
+
+                const chunkLeft = chunk.chunkFootprint.bottomLeft.x;
+                const chunkRight = chunkLeft + chunk.chunkFootprint.sideLength;
+                const chunkBottom = chunk.chunkFootprint.bottomLeft.y;
+                const chunkTop = chunkBottom + chunk.chunkFootprint.sideLength;
+                if (updatedRange.begin && updatedRange.end)
+                  return (
+                    chunkRight >
+                      Math.min(updatedRange.begin.x, updatedRange.end.x) &&
+                    chunkLeft <
+                      Math.max(updatedRange.begin.x, updatedRange.end.x) &&
+                    chunkBottom <
+                      Math.max(updatedRange.begin.y, updatedRange.end.y) &&
+                    chunkTop >
+                      Math.min(updatedRange.begin.y, updatedRange.end.y)
+                  );
+              });
+
+              // Generate planet hashes for the selected range
+              const planetData = filteredChunks.flatMap((chunk) =>
+                chunk.planetLocations
+                  .filter((planet) => {
+                    if (updatedRange.begin && updatedRange.end) {
+                      const planetX = planet.coords.x;
+                      const planetY = planet.coords.y;
+
+                      return (
+                        planetX >
+                          Math.min(updatedRange.begin.x, updatedRange.end.x) &&
+                        planetX <
+                          Math.max(updatedRange.begin.x, updatedRange.end.x) &&
+                        planetY <
+                          Math.max(updatedRange.begin.y, updatedRange.end.y) &&
+                        planetY >
+                          Math.min(updatedRange.begin.y, updatedRange.end.y)
+                      );
+                    }
+                    return false;
+                  })
+                  .map((planet) => ({
+                    hash: planet.hash,
+                    coords: planet.coords,
+                  })),
+              );
+
+              // console.log("Filtered Planet Hashes:", planetData);
+
+              setPlanetsCount(planetData.length);
+
+              // Fetch full planet data filtered by level filter bar
+              const filteredPlanets = gameManager
+                .getPlanetsWithIds(planetData.map((planet) => planet.hash))
+                .filter(
+                  (planet) =>
+                    planet.planetLevel >= Math.min(...selectedLevels) &&
+                    planet.planetLevel <= Math.max(...selectedLevels),
+                );
+              //     console.log("NOT-Filtered Planets:", planetsFullData);
+
+              // console.log("Filtered Planets:", filteredPlanets);
+              setSelectedPlanets(filteredPlanets);
+              setPlanetsFilteredCount(filteredPlanets.length);
+
+              // Transform planets for cost calculation
+              const reducedPlanets = reducePlanets(filteredPlanets);
+              // Buld forCost constant for prediction function
+              const forCost = {
+                username: player?.name,
+                message: input,
+                selectedPlanets: reducedPlanets,
+              };
+
+              const stringForCost = JSON.stringify(forCost, (key, value) =>
+                typeof value === "bigint" ? value.toString() : value,
+              );
+              // console.log("String:", stringForCost);
+              // Predict cost for default input + selected filtered planets + msg input
+              const predictedCost_ = predictTokenCost(
+                stringForCost,
+                "gpt-3.5-turbo",
+              );
+              //console.log("Price:", predictedCost_);
+              setPredictedCost(predictedCost_);
+            }
+            setIsSelectionActive(false);
+            return updatedRange;
+          }
+
+          return prev;
+        });
+      }
+    };
+
+    console.log("Map selection started.");
+
+    // Clean up any previous event listener before adding a new one
+    window.removeEventListener("click", handleClick);
+    window.addEventListener("click", handleClick);
+  };
+
+  // Btn Send AIchat Assistan Q.
+  const handleSendChat = async () => {
     if (input.trim()) {
       const userMessage = { message: input, isUser: true };
       setChatHistory((prev) => [...prev, userMessage]);
@@ -167,7 +480,7 @@ export function AIChatPane({
       const history = await loadConversationFromIndexedDB();
 
       try {
-        await uiManager.spendGPTTokens();
+        await uiManager.spendGPTTokens(1);
       } catch (error) {
         console.error("Error sending message tokens not spend:", error);
         return;
@@ -209,10 +522,90 @@ export function AIChatPane({
       console.error("Error clearing chat history:", error);
     }
   };
+  // Function to reduce the selectedPlanets to minized chat tokens needs
+  function reducePlanets(selectedPlanets: Planet[]) {
+    return selectedPlanets.map((planet) => [
+      planet.locationId,
+      getPlanetName(planet), // Extract name using the provided function
+      planet.isHomePlanet ? 1 : 0,
+      //planet.syncedWithContract ? 1 : 0,
+      //planet.perlin,
+      planet.owner === "0x0000000000000000000000000000000000000000"
+        ? "0x0"
+        : planet.owner, // Simplify owner field
+      planet.ownerName === "0x0000000000000000000000000000000000000000"
+        ? "0x0"
+        : gameManager.getPlayer(planet.owner)?.name || "", // Simplify owner field
+      planet.spaceType,
+      planet.planetType,
+      planet.planetLevel,
+      planet.universeZone,
+      planet.distSquare,
+      planet.range,
+      planet.speed,
+      planet.defense,
+      planet.energy,
+      planet.energyCap,
+      planet.energyGrowth,
+      planet.silver,
+      planet.silverCap,
+      planet.silverGrowth,
+      planet.upgradeState,
+      // planet.lastUpdated,
+      // planet.isInContract ? 1 : 0,
+      planet.coordsRevealed ? 1 : 0,
+      planet.silverSpent,
+      planet.bonus.map((b) => (b ? 1 : 0)),
+      planet.energyGroDoublers,
+      planet.silverGroDoublers,
+      planet.hasTriedFindingArtifact ? 1 : 0,
+      planet.heldArtifactIds,
+      planet.destroyed ? 1 : 0,
+      planet.frozen ? 1 : 0,
+      planet.effects,
+      planet.flags,
+      planet.transactions,
+      planet.location.coords.x,
+      planet.location.coords.y,
+      // planet.location.hash,
+      // planet.location.perlin,
+      // planet.location.biomebase,
+      planet.biome,
+      // planet.loadingServerState ? 1 : 0,
+      // planet.needsServerRefresh ? 1 : 0,
+    ]);
+  }
   // Btn Send AIAgent request
   const handleAgentSend = async () => {
     if (input.trim()) {
+      const reducedPlanets = reducePlanets(selectedPlanets);
+
       try {
+        const forCost = {
+          username: player?.name,
+          message: input,
+          selectedPlanets: reducedPlanets,
+        };
+
+        const stringForCost = JSON.stringify(forCost, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        );
+
+        const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
+
+        await uiManager.spendGPTTokens(predictedCost_.credits);
+      } catch (error) {
+        console.error("Error sending message tokens not spend:", error);
+        setAgentResponse("Error sending message tokens not spend.");
+        return;
+      }
+
+      try {
+        const stringReducedPlanets = JSON.stringify(
+          reducedPlanets,
+          (key, value) =>
+            typeof value === "bigint" ? value.toString() : value,
+        );
         const response = await fetch(`${API_URL}/api/agent/agent`, {
           method: "POST",
           headers: {
@@ -221,6 +614,7 @@ export function AIChatPane({
           body: JSON.stringify({
             username: player?.name,
             message: input,
+            selectedPlanets: stringReducedPlanets,
           }),
         });
 
@@ -259,8 +653,10 @@ export function AIChatPane({
         console.error("Error in AIAgentContent:", error);
         setAgentResponse("An error occurred while processing your request.");
       }
-
+      // Punk
       // setInput("");
+    } else {
+      setAgentResponse("Put some input msg Sophon agent!");
     }
   };
 
@@ -285,27 +681,27 @@ export function AIChatPane({
         if (arg5 == "null" || arg5 == "0") {
           arg5 = null;
         }
-        const agentAnswer = `Moving from ${arg1} to ${arg2} with forces: ${arg3} silver: ${arg4} artID: ${arg5} abandoning: ${arg6}`;
+        const agentAnswer = `Moving from ${getPlanetName(gameManager.getPlanetWithId(arg1))} to ${getPlanetName(gameManager.getPlanetWithId(arg2))} with forces: ${arg3} silver: ${arg4} artID: ${arg5} abandoning: ${arg6}`;
         setAgentResponse(agentAnswer);
         gameManager.move(arg1, arg2, arg3, arg4, arg5, arg6);
       },
       revealLocation: (arg1: LocationId) => {
-        const agentAnswer = `Revealing location: ${arg1}`;
+        const agentAnswer = `Revealing location: ${getPlanetName(gameManager.getPlanetWithId(arg1))}`;
         setAgentResponse(agentAnswer);
         gameManager.revealLocation(arg1);
       },
       upgradePlanet: (arg1: LocationId, arg2: number) => {
-        const agentAnswer = `Upgrading planet ${arg1} with branch ${arg2}`;
+        const agentAnswer = `Upgrading planet ${getPlanetName(gameManager.getPlanetWithId(arg1))} with branch ${arg2}`;
         setAgentResponse(agentAnswer);
         gameManager.upgrade(arg1, arg2);
       },
       setPlanetEmoji: (arg1: LocationId, arg2: string) => {
-        const agentAnswer = `Setting emoji ${arg2} for location ${arg1}`;
+        const agentAnswer = `Setting emoji ${arg2} for location ${getPlanetName(gameManager.getPlanetWithId(arg1))}`;
         setAgentResponse(agentAnswer);
         gameManager.setPlanetEmoji(arg1, arg2);
       },
       withdrawSilver: (arg1: LocationId, arg2: number) => {
-        const agentAnswer = `Withdrawing ${arg2} silver from ${arg1}`;
+        const agentAnswer = `Withdrawing ${arg2} silver from ${getPlanetName(gameManager.getPlanetWithId(arg1))}`;
         setAgentResponse(agentAnswer);
         gameManager.withdrawSilver(arg1, arg2);
       },
@@ -345,8 +741,10 @@ export function AIChatPane({
           }}
           disabled={activeTab === "chat"}
         >
-          AI Chat
+          AI Assistant
         </Btn>
+        {/* Add AIRangeOfMap to the header for range selection */}
+
         <Btn
           onClick={() => {
             setActiveTab("agent");
@@ -371,26 +769,72 @@ export function AIChatPane({
             placeholder="Type your message here..."
           />
           <div className="flex items-center justify-between p-2">
-            <Btn onClick={handleSend}>Send</Btn>
+            <Btn onClick={handleSendChat}>Send</Btn>
             <Btn onClick={handleClearChat}>Clear</Btn>
           </div>
         </AIChatContent>
       ) : (
         <AIAgentContent>
+          <div>
+            <div className="flex items-center justify-between">
+              {/* Column 1: Begin and End Text */}
+              <div className="flex flex-col items-start justify-center">
+                <Btn
+                  onClick={handleStartSelection}
+                  disabled={isSelectionActive}
+                >
+                  Start Range Selection
+                </Btn>
+              </div>
+
+              {/* Column 2: Button Centered */}
+              <div className="flex flex-col items-center justify-center p-1">
+                <div>
+                  Begin:{" "}
+                  {selectedRange.begin
+                    ? `(${selectedRange.begin.x}, ${selectedRange.begin.y})`
+                    : "Not Set. Click #1"}
+                </div>
+                <div>
+                  End:{" "}
+                  {selectedRange.end
+                    ? `(${selectedRange.end.x}, ${selectedRange.end.y})`
+                    : "Not Set. Click #2"}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div> Selected Planets: {planetsCount} </div>{" "}
+              <div>
+                {" "}
+                Cost: {predictedCost.cost.toFixed(8)} ChatTokens:
+                {predictedCost.aItokens.toFixed(0)} Credits:
+                {predictedCost.credits.toFixed(0)}{" "}
+              </div>
+              <div> Filtered Planets: {planetsFilteredCount} </div>
+            </div>
+
+            <LevelFilter
+              levels={PLANET_LEVELS}
+              selectedLevels={selectedLevels}
+              onSelectLevel={(levels) => {
+                setSelectedLevels(levels);
+              }}
+            />
+          </div>
           <MultiLineTextInput
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Enter a command or query for the agent..."
           />
-          <Spacer height={16} />
-          <AgentResponseContainer>
-            {agentResponse || "No response yet. Please enter a message."}
-          </AgentResponseContainer>
-
           <div className="flex items-center justify-between p-2">
             <Btn onClick={handleAgentSend}>Send</Btn>
             <Btn onClick={() => setAgentResponse("")}>Clear</Btn>
           </div>
+          <AgentResponseContainer>
+            {agentResponse || "No response yet. Please enter a message."}
+          </AgentResponseContainer>
         </AIAgentContent>
       )}
       <CurrencyView />
