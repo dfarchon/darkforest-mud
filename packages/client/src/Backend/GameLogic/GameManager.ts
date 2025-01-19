@@ -412,11 +412,6 @@ export class GameManager extends EventEmitter {
   // private blueZoneInterval: ReturnType<typeof setInterval>;
 
   /**
-   * Handle to an interval that periodically monitors memory usage.
-   */
-  private memoryMonitorInterval: ReturnType<typeof setInterval>;
-
-  /**
    * Manages the process of mining new space territory.
    */
   private minerManager?: MinerManager;
@@ -705,22 +700,6 @@ export class GameManager extends EventEmitter {
       }
     }, 10_000);
 
-    this.memoryMonitorInterval = setInterval(() => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const memory = (performance as any).memory;
-      const usedMB = Math.round(memory.usedJSHeapSize / (1024 * 1024));
-      const totalMB = Math.round(memory.totalJSHeapSize / (1024 * 1024));
-      const limitMB = Math.round(memory.jsHeapSizeLimit / (1024 * 1024));
-      console.log("-------------------------------------");
-      console.log("[memory] used: ", `${usedMB}MB`);
-      console.log("[memory] total: ", `${totalMB}MB`);
-      console.log("[memory] limit: ", `${limitMB}MB`);
-      console.log(
-        "[memory] usage: ",
-        `${Math.round((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100)}%`,
-      );
-    }, 200);
-
     this.hashRate = 0;
 
     this.settingsSubscription = settingChanged$.subscribe(
@@ -893,7 +872,6 @@ export class GameManager extends EventEmitter {
     this.contractsAPI.destroy();
     this.persistentChunkStore.destroy();
     clearInterval(this.playerInterval);
-    clearInterval(this.memoryMonitorInterval);
     // NOTE: event
     // clearInterval(this.diagnosticsInterval);
     // clearInterval(this.scoreboardInterval);
