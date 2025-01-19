@@ -412,11 +412,6 @@ export class GameManager extends EventEmitter {
   // private blueZoneInterval: ReturnType<typeof setInterval>;
 
   /**
-   * Handle to an interval that periodically monitors memory usage.
-   */
-  private memoryMonitorInterval: ReturnType<typeof setInterval>;
-
-  /**
    * Manages the process of mining new space territory.
    */
   private minerManager?: MinerManager;
@@ -877,7 +872,6 @@ export class GameManager extends EventEmitter {
     this.contractsAPI.destroy();
     this.persistentChunkStore.destroy();
     clearInterval(this.playerInterval);
-    clearInterval(this.memoryMonitorInterval);
     // NOTE: event
     // clearInterval(this.diagnosticsInterval);
     // clearInterval(this.scoreboardInterval);
