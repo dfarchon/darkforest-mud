@@ -85,6 +85,7 @@ import type {
   LocationId,
   NetworkHealthSummary,
   PinkZone,
+  AIZone,
   Planet,
   PlanetLevel,
   Player,
@@ -1916,6 +1917,17 @@ export class GameManager extends EventEmitter {
   getPinkZones(): Set<PinkZone> {
     const pinkZonesMap = this.entityStore.getPinkZones();
     return new Set(pinkZonesMap.values());
+  }
+
+  getAIZones(): Set<AIZone> {
+    const _: AIZone = {
+      beginCoords: { x: 0, y: 0 },
+      endCoords: { x: 1000, y: 1000 },
+    };
+    // DEV TODO: get aizones from contract
+    // const aizones = this.entityStore.getAIZones();
+
+    return new Set([_]);
   }
 
   getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined {

@@ -1586,6 +1586,10 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getPinkZones();
   }
 
+  public getAIZones() {
+    return this.gameManager.getAIZones();
+  }
+
   public getPinkZoneByArtifactId(artifactId: ArtifactId) {
     return this.gameManager.getPinkZoneByArtifactId(artifactId);
   }
