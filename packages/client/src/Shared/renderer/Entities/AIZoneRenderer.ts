@@ -1,15 +1,10 @@
 import {
-  type PinkZone,
   type AIZoneRendererType,
   RendererType,
   RenderZIndex,
-  type RGBAVec,
-  TextAlign,
-  TextAnchor,
   type WorldCoords,
 } from "@df/types";
 
-import { engineConsts } from "../EngineConsts";
 import type { Renderer, RendererGameContext } from "../Renderer";
 import type { GameGLManager } from "../WebGL/GameGLManager";
 
@@ -28,22 +23,26 @@ export class AIZoneRenderer implements AIZoneRendererType {
   queueAIZones(): void {
     const { rectRenderer: rR } = this.renderer;
 
-    const AIZones = this.context.getAIZones();
+    const aiZone = JSON.parse(localStorage.getItem("aiselectedRange"));
+    const vissible = localStorage.getItem("iaselectedRangeVissible");
 
-    for (const zone of AIZones) {
+    if (!aiZone || vissible != "1") {
+      return;
+    }
+    if (aiZone.begin != undefined && aiZone.end != undefined) {
       const center: WorldCoords = {
-        x: (zone.beginCoords.x + zone.endCoords.x) / 2,
-        y: (zone.beginCoords.y + zone.endCoords.y) / 2,
+        x: (aiZone.begin.x + aiZone.end.x) / 2,
+        y: (aiZone.begin.y + aiZone.end.y) / 2,
       };
 
-      const width = Math.abs(zone.endCoords.x - zone.beginCoords.x);
-      const height = Math.abs(zone.endCoords.y - zone.beginCoords.y);
+      const width = Math.abs(aiZone.end.x - aiZone.begin.x);
+      const height = Math.abs(aiZone.end.y - aiZone.begin.y);
 
       rR.queueRectCenterWorld(
         center,
         width,
         height,
-        [255, 192, 203],
+        [212, 212, 212],
         2,
         RenderZIndex.Voyages,
       );

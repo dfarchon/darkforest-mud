@@ -1918,14 +1918,15 @@ export class GameManager extends EventEmitter {
     const pinkZonesMap = this.entityStore.getPinkZones();
     return new Set(pinkZonesMap.values());
   }
-
+  // getAIZones(begin: WorldCoords, end: WorldCoords): Set<AIZone> {
   getAIZones(): Set<AIZone> {
+    const savedRange = localStorage.getItem("aiselectedRange");
+
+    const selectedCoords = JSON.parse(savedRange);
     const _: AIZone = {
-      beginCoords: { x: 0, y: 0 },
-      endCoords: { x: 1000, y: 1000 },
+      beginCoords: selectedCoords.begin,
+      endCoords: selectedCoords.end,
     };
-    // DEV TODO: get aizones from contract
-    // const aizones = this.entityStore.getAIZones();
 
     return new Set([_]);
   }

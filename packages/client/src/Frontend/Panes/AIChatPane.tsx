@@ -23,7 +23,6 @@ import {
 import { ModalPane } from "../Views/ModalPane";
 import { CurrencyView } from "./AIChatTokensBar";
 import { LevelFilter } from "./LevelFilter";
-
 const API_URL = import.meta.env.VITE_AI_API_URL;
 const PLANET_LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -122,35 +121,20 @@ function HelpContent() {
     </div>
   );
 }
-const drawRectangle = (ctx, viewport, selectedRange) => {
-  const begin = selectedRange.begin;
-  const end = selectedRange.end;
-  if (begin && end) {
-    // Calculate rectangle bounds in world coordinates
-    const beginX = Math.min(begin.x, end.x);
-    const beginY = Math.max(begin.y, end.y);
-    const endX = Math.max(begin.x, end.x);
-    const endY = Math.min(begin.y, end.y);
-    const width = endX - beginX;
-    const height = beginY - endY;
-
-    // Save the canvas state
-    ctx.save();
-    ctx.strokeStyle = "white"; // Set rectangle color
-    ctx.lineWidth = 1;
-
-    // Convert world coordinates to canvas coordinates
-    ctx.strokeRect(
-      viewport.worldToCanvasX(beginX),
-      viewport.worldToCanvasY(beginY),
-      viewport.worldToCanvasDist(width),
-      viewport.worldToCanvasDist(height),
-    );
-
-    // Restore the canvas state
-    ctx.restore();
+// PUNK! for fun - could be setup in option
+const speak = (text: string) => {
+  if ("speechSynthesis" in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US"; // Set language (change as needed)
+    utterance.pitch = 0; // Range: 0 to 2 - 1.5 / 0 / 1
+    utterance.rate = 0.6; // Range: 0.1 to 10 - 0.7 / 0 / 0.75
+    utterance.voice = speechSynthesis.getVoices()[0]; // Choose a specific voice 1 / 0 / 2
+    speechSynthesis.speak(utterance);
+  } else {
+    console.error("Speech synthesis not supported in this browser.");
   }
 };
+//speak("hello, how are you today?");
 export function AIChatPane({
   visible,
   onClose,
@@ -194,19 +178,6 @@ export function AIChatPane({
 
   const [temp, setTemp] = useState(true);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext("2d");
-      const viewport = uiManager.getViewport();
-
-      if (ctx && viewport) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-        drawRectangle(ctx, viewport, selectedRange);
-      }
-    }
-  }, [selectedRange, uiManager]);
   // Initilized if visible
   useEffect(() => {
     if (visible && temp) {
@@ -246,8 +217,21 @@ export function AIChatPane({
         }
       };
 
+      const intializeSelectedRange = async () => {
+        const aiZone = JSON.parse(localStorage.getItem("aiselectedRange"));
+        if (!aiZone) {
+          return;
+        }
+        setSelectedRange({ begin: aiZone.begin, end: aiZone.end });
+      };
       initializeChat();
+      intializeSelectedRange();
       setTemp(false);
+    }
+    if (visible) {
+      localStorage.setItem("iaselectedRangeVissible", "1");
+    } else {
+      localStorage.setItem("iaselectedRangeVissible", "0");
     }
   }, [visible]);
   // any change for selectedLevels, selectedRange, uiManager, gameManager, input
@@ -351,16 +335,21 @@ export function AIChatPane({
           if (!prev.begin) {
             console.log("Begin coordinates set:", coords);
             const updatedRange = { ...prev, begin: coords };
+            speak("Nice! now select bottom right corner");
             return updatedRange;
           } else if (!prev.end) {
             console.log("End coordinates set:", coords);
             const updatedRange = { ...prev, end: coords };
-
+            speak("Perfect! now you can use Sophon Agent");
             // Call generatePlanetArray with the selected range once both begin and end are set
             if (updatedRange.begin && updatedRange.end) {
               console.log("Both begin and end are filled. Stopping listener.");
               window.removeEventListener("click", handleClick);
-
+              localStorage.setItem(
+                "aiselectedRange",
+                JSON.stringify(updatedRange),
+              );
+              uiManager.getAIZones();
               const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
               const chunksAsArray = Array.from(chunks);
 
@@ -465,7 +454,7 @@ export function AIChatPane({
     };
 
     console.log("Map selection started.");
-
+    speak("Map selection started.");
     // Clean up any previous event listener before adding a new one
     window.removeEventListener("click", handleClick);
     window.addEventListener("click", handleClick);
@@ -480,13 +469,10 @@ export function AIChatPane({
       const history = await loadConversationFromIndexedDB();
 
       try {
-        await uiManager.spendGPTTokens(1);
-      } catch (error) {
-        console.error("Error sending message tokens not spend:", error);
-        return;
-      }
+        // Spend tokens and handle fetch within the same try block
+        const responseSpendGPTTokens = await gameManager.spendGPTTokens(1);
+        await responseSpendGPTTokens.confirmedPromise;
 
-      try {
         const response = await fetch(`${API_URL}/api/conversation/step`, {
           method: "POST",
           headers: {
@@ -501,18 +487,21 @@ export function AIChatPane({
 
         if (response.ok) {
           const aiResponse = await response.json();
-
           const aiMessage = { message: aiResponse, isUser: false };
           setChatHistory((prev) => [...prev, aiMessage]);
           saveMessageToIndexedDB(aiMessage);
+          speak(aiResponse);
+        } else {
+          console.error("Error fetching AI response:", response.statusText);
         }
       } catch (error) {
-        console.error("Error sending message:", error);
+        console.error("Error in AI chat process:", error);
+      } finally {
+        setInput(""); // Clear input regardless of outcome
       }
-
-      setInput("");
     }
   };
+
   // Btn Clear AIchat history
   const handleClearChat = async () => {
     try {
@@ -544,24 +533,24 @@ export function AIChatPane({
       planet.range,
       planet.speed,
       planet.defense,
-      planet.energy,
+      planet.energy.toFixed(0),
       planet.energyCap,
       planet.energyGrowth,
-      planet.silver,
+      planet.silver.toFixed(0),
       planet.silverCap,
       planet.silverGrowth,
       planet.upgradeState,
       // planet.lastUpdated,
       // planet.isInContract ? 1 : 0,
       planet.coordsRevealed ? 1 : 0,
-      planet.silverSpent,
+      //planet.silverSpent,
       planet.bonus.map((b) => (b ? 1 : 0)),
       planet.energyGroDoublers,
       planet.silverGroDoublers,
       planet.hasTriedFindingArtifact ? 1 : 0,
       planet.heldArtifactIds,
       planet.destroyed ? 1 : 0,
-      planet.frozen ? 1 : 0,
+      // planet.frozen ? 1 : 0,
       planet.effects,
       planet.flags,
       planet.transactions,
@@ -575,6 +564,7 @@ export function AIChatPane({
       // planet.needsServerRefresh ? 1 : 0,
     ]);
   }
+
   // Btn Send AIAgent request
   const handleAgentSend = async () => {
     if (input.trim()) {
@@ -593,7 +583,11 @@ export function AIChatPane({
 
         const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
 
-        await uiManager.spendGPTTokens(predictedCost_.credits);
+        // Spend tokens and handle fetch within the same try block
+        const responseSpendGPTTokens = await gameManager.spendGPTTokens(
+          predictedCost_.credits,
+        );
+        await responseSpendGPTTokens.confirmedPromise;
       } catch (error) {
         console.error("Error sending message tokens not spend:", error);
         setAgentResponse("Error sending message tokens not spend.");
@@ -613,6 +607,7 @@ export function AIChatPane({
           },
           body: JSON.stringify({
             username: player?.name,
+            ownerAddress: player?.address,
             message: input,
             selectedPlanets: stringReducedPlanets,
           }),
@@ -638,11 +633,11 @@ export function AIChatPane({
             executeClientFunction(df_fcName, args);
           } catch (error) {
             console.error(
-              `Error executing client function: ${df_fcName}`,
+              ` Error executing client function: ${df_fcName}`,
               error,
             );
             setAgentResponse(
-              `An error occurred while executing the function: ${df_fcName}.`,
+              ` An error occurred while executing the function: ${df_fcName}.`,
             );
           }
         } else {
@@ -652,14 +647,100 @@ export function AIChatPane({
       } catch (error) {
         console.error("Error in AIAgentContent:", error);
         setAgentResponse("An error occurred while processing your request.");
+      } finally {
+        //setInput(""); // Clear input regardless of outcome
       }
-      // Punk
-      // setInput("");
     } else {
       setAgentResponse("Put some input msg Sophon agent!");
     }
   };
 
+  //   if (input.trim()) {
+  //     const reducedPlanets = reducePlanets(selectedPlanets);
+
+  //     const forCost = {
+  //       username: player?.name,
+  //       message: input,
+  //       selectedPlanets: reducedPlanets,
+  //     };
+
+  //     const stringForCost = JSON.stringify(forCost, (key, value) =>
+  //       typeof value === "bigint" ? value.toString() : value,
+  //     );
+
+  //     const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
+
+  //     uiManager
+  //       .spendGPTTokens(predictedCost_.credits)
+  //       .then(async () => {
+  //         try {
+  //           const stringReducedPlanets = JSON.stringify(
+  //             reducedPlanets,
+  //             (key, value) =>
+  //               typeof value === "bigint" ? value.toString() : value,
+  //           );
+  //           const response = await fetch(`${API_URL}/api/agent/agent`, {
+  //             method: "POST",
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //             },
+  //             body: JSON.stringify({
+  //               username: player?.name,
+  //               message: input,
+  //               selectedPlanets: stringReducedPlanets,
+  //             }),
+  //           });
+
+  //           if (response.ok) {
+  //             const { aiResponse } = await response.json();
+  //             // Validate and filter df_fcName and args
+
+  //             const { df_fcName, args } = aiResponse;
+  //             if (!df_fcName || !Array.isArray(args)) {
+  //               console.error(
+  //                 "Invalid AI response: missing function name or arguments.",
+  //               );
+  //               setAgentResponse(
+  //                 "The agent's response was invalid. Please try again.",
+  //               );
+  //               return;
+  //             }
+
+  //             // Client-side execution of the validated function
+  //             try {
+  //               executeClientFunction(df_fcName, args);
+  //             } catch (error) {
+  //               console.error(
+  //                 `Error executing client function: ${df_fcName}`,
+  //                 error,
+  //               );
+  //               setAgentResponse(
+  //                 `An error occurred while executing the function: ${df_fcName}.`,
+  //               );
+  //             }
+  //           } else {
+  //             console.error(
+  //               "Failed to fetch agent response:",
+  //               response.statusText,
+  //             );
+  //             setAgentResponse("The server failed to process your request.");
+  //           }
+  //         } catch (error) {
+  //           console.error("Error in AIAgentContent:", error);
+  //           setAgentResponse(
+  //             "An error occurred while processing your request.",
+  //           );
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error spending GPT tokens:", error);
+  //       });
+
+  //     setInput("");
+  //   } else {
+  //     setAgentResponse("Put some input msg Sophon agent!");
+  //   }
+  // };
   /**
    * Executes a client function based on the agent's response.
    * @param {string} functionName - The name of the client function to call.
@@ -670,20 +751,27 @@ export function AIChatPane({
       move: (
         arg1: LocationId,
         arg2: LocationId,
-        arg3: number,
-        arg4: number,
-        arg5: ArtifactId,
+        arg3: number | string,
+        arg4: number | string,
+        arg5: ArtifactId | undefined,
         arg6: boolean,
       ) => {
         // Example implementation
         // from.locationId, to.locationId, forces, silver, artifact?.id, abandoning,
         // arg1 , arg2 , arg3, arg4, arg5, arg6
+
         if (arg5 == "null" || arg5 == "0") {
-          arg5 = null;
+          arg5 = undefined;
+        }
+        if (arg3 == typeof "string") {
+          arg3 = Number(arg3);
+        }
+        if (arg4 == typeof "string") {
+          arg4 = Number(arg4);
         }
         const agentAnswer = `Moving from ${getPlanetName(gameManager.getPlanetWithId(arg1))} to ${getPlanetName(gameManager.getPlanetWithId(arg2))} with forces: ${arg3} silver: ${arg4} artID: ${arg5} abandoning: ${arg6}`;
         setAgentResponse(agentAnswer);
-        gameManager.move(arg1, arg2, arg3, arg4, arg5, arg6);
+        gameManager.move(arg1, arg2, Number(arg3), Number(arg4), arg5, false);
       },
       revealLocation: (arg1: LocationId) => {
         const agentAnswer = `Revealing location: ${getPlanetName(gameManager.getPlanetWithId(arg1))}`;
@@ -729,7 +817,7 @@ export function AIChatPane({
   return (
     <ModalPane
       id={ModalName.AIChat}
-      title={"AI Chat"}
+      title={"AI Sophons"}
       visible={visible}
       onClose={onClose}
       helpContent={HelpContent}
