@@ -149,12 +149,34 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     if (!burnerWalletClient || !walletClient) {
       return;
     }
-    const value = state.burnerBalance;
     try {
+      // Get gas price
+      const gasPrice = await burnerWalletClient.transport.request({
+        method: "eth_gasPrice",
+      });
+
+      // Convert hex gasPrice to BigInt
+      const gasPriceBigInt = BigInt(gasPrice);
+      const gasLimit = BigInt(21000);
+      const gasCost = gasPriceBigInt * gasLimit;
+
+      // Ensure balance is BigInt
+      const balance = BigInt(state.burnerBalance);
+
+      // Calculate max amount
+      if (balance <= gasCost) {
+        console.error("Insufficient funds to cover gas");
+        return;
+      }
+
+      const maxAmount = balance - gasCost;
+
       const hash = await burnerWalletClient.sendTransaction({
         to: walletClient.account?.address,
-        value,
+        value: maxAmount,
+        gasLimit,
       });
+      console.log("tx hash", hash);
       await waitForTransaction(hash);
 
       // Update balance after transaction is confirmed
@@ -167,7 +189,7 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
         5000,
       );
     } catch (err) {
-      console.error("Error sending transaction:", err);
+      console.error("Error draining burner wallet:", err);
     }
   };
 
