@@ -247,9 +247,14 @@ class PersistentChunkStore implements ChunkStore {
     let parsed: WorldLocation[] = [];
     if (homeLocations) {
       parsed = JSON.parse(homeLocations) as WorldLocation[];
+      return parsed;
     }
-
-    return parsed;
+    const backupData = localStorage.getItem("homeLocations");
+    if (backupData) {
+      parsed = JSON.parse(backupData) as WorldLocation[];
+      return parsed;
+    }
+    return [];
   }
 
   public async addHomeLocation(location: WorldLocation): Promise<void> {
@@ -261,10 +266,12 @@ class PersistentChunkStore implements ChunkStore {
     }
     locationList = Array.from(new Set(locationList));
     await this.setKey("homeLocations", JSON.stringify(locationList));
+    localStorage.setItem("homeLocations", JSON.stringify([location]));
   }
 
   public async confirmHomeLocation(location: WorldLocation): Promise<void> {
     await this.setKey("homeLocations", JSON.stringify([location]));
+    localStorage.setItem("homeLocations", JSON.stringify([location]));
   }
 
   public async getSavedTouchedPlanetIds(): Promise<LocationId[]> {
