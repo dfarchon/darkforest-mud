@@ -23,7 +23,10 @@ export const WalletButton: React.FC = () => {
     const networkConfig = getNetworkConfig();
     const chain = networkConfig.chain;
     (chain.blockExplorers = {
-      default: { name: "Etherscan", url: "https://etherscan.io" },
+      default: {
+        name: "Redstone Explorer",
+        url: "https://explorer.redstone.xyz",
+      },
     }),
       externalWalletClient?.addChain({ chain: chain });
   };
