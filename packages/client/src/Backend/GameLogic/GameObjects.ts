@@ -1830,4 +1830,52 @@ export class GameObjects {
     }
     planet.silverSpent = this.calculateSilverSpent(planet);
   }
+
+  /**
+   * Called when we want to remove a planet's location from memory, when clearing chunks or map data.
+   * Removes a WorldLocation from the planetLocationMap, making it unknown to the player locally.
+   * IMPORTANT: This is the only way a LocatablePlanet gets removed
+   * IMPORTANT: Idempotent
+   */
+  public deletePlanetLocation(planetLocation: WorldLocation): void {
+    const planet = this.planets.get(planetLocation.hash);
+
+    // Skip if planet's coords are revealed on-chain
+    if (planet?.coordsRevealed) {
+      return;
+    }
+
+    //###############
+    //  MAP ALGO
+    //###############
+    const planetX = planetLocation.coords.x;
+    const planetY = planetLocation.coords.y;
+    const distFromOrigin = Math.sqrt(planetX ** 2 + planetY ** 2);
+
+    this.layeredMap.removePlanet(
+      planetLocation,
+      this.getPlanetWithId(planetLocation.hash, false)?.planetLevel ??
+        this.planetLevelFromHexPerlin(
+          planetLocation.hash,
+          planetLocation.perlin,
+          distFromOrigin,
+        ),
+    );
+
+    // Remove from location maps
+    this.planetLocationMap.delete(planetLocation.hash);
+    const str = getCoordsString(planetLocation.coords);
+    this.coordsToLocation.delete(str);
+
+    // Update planet data
+    if (planet) {
+      // If planet exists in contract, just mark as unlocatable
+      if (this.touchedPlanetIds.has(planetLocation.hash)) {
+        // PUNK TODO: think about this
+      } else {
+        // If planet doesn't exist in contract, remove it entirely
+        this.planets.delete(planetLocation.hash);
+      }
+    }
+  }
 }

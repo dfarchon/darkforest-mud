@@ -883,13 +883,6 @@ export class GameManager extends EventEmitter {
   }
 
   public updateContractConstants(contractConstants: ContractConstants) {
-    // PUNK
-    // console.log("update contract constants");
-    // console.log(
-    //   "new cooldown time:",
-    //   contractConstants.LOCATION_REVEAL_COOLDOWN,
-    // );
-
     this.contractConstants = contractConstants;
   }
 
@@ -5833,6 +5826,30 @@ export class GameManager extends EventEmitter {
     return this;
   }
 
+  /**
+   * Removes a chunk from the game manager's awareness - which includes its location, size,
+   * and all planets contained within that chunk. This does not delete the planets' data
+   * from the blockchain, only from the client's local storage.
+   */
+  deleteChunk(chunk: Chunk): GameManager {
+    // Remove chunk from persistent storage
+    this.persistentChunkStore.deleteChunk(chunk, true);
+
+    // Remove planet locations from entity store
+    for (const planetLocation of chunk.planetLocations) {
+      this.entityStore.deletePlanetLocation(planetLocation);
+
+      // PUNK TODO: think about this
+      // If the planet exists in contract, we might want to keep its data
+      // but mark it as not discovered/visible
+      // if (this.entityStore.isPlanetInContract(planetLocation.hash)) {
+      //   this.entityStore.markPlanetNotDiscovered(planetLocation.hash);
+      // }
+    }
+
+    return this;
+  }
+
   // listenForNewBlock() {
   //   this.getEthConnection().blockNumber$.subscribe((blockNumber) => {
   //     if (this.captureZoneGenerator) {
@@ -5866,6 +5883,46 @@ export class GameManager extends EventEmitter {
       TerminalTextStyle.Sub,
     );
     this.bulkHardRefreshPlanets(planetIdsToUpdate);
+  }
+
+  /**
+   * To delete multiple chunks at once, use this function rather than `deleteChunk`, in order
+   * to handle all of the associated planet data cleanup in an efficient manner.
+   */
+  async bulkDeleteChunks(chunks: Chunk[]): Promise<void> {
+    this.terminal.current?.println(
+      "DELETING CHUNKS: if you are deleting a large area, this may take a while...",
+    );
+
+    const planetIdsToUpdate: LocationId[] = [];
+
+    // First pass: collect all planet IDs and remove chunks
+    for (const chunk of chunks) {
+      this.persistentChunkStore.deleteChunk(chunk, true);
+
+      for (const planetLocation of chunk.planetLocations) {
+        this.entityStore.deletePlanetLocation(planetLocation);
+        // if (this.entityStore.isPlanetInContract(planetLocation.hash)) {
+        //   // For planets in contract, we'll update their visibility status
+        //   planetIdsToUpdate.push(planetLocation.hash);
+        // }
+      }
+    }
+
+    if (planetIdsToUpdate.length > 0) {
+      this.terminal.current?.println(
+        `updating visibility for ${planetIdsToUpdate.length} planets...`,
+        TerminalTextStyle.Sub,
+      );
+    }
+
+    // Update game state and UI
+    this.terminal.current?.println(
+      `successfully deleted ${chunks.length} chunks...`,
+      TerminalTextStyle.Sub,
+    );
+
+    // this.bulkHardRefreshPlanets(planetIdsToUpdate);
   }
 
   // utils - scripting only
