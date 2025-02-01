@@ -1121,6 +1121,10 @@ export class GameManager extends EventEmitter {
   }
 
   public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
+    for (const planetId of planetIds) {
+      this.hardRefreshPlanet(planetId);
+    }
+    return;
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
     const allVoyages = this.contractsAPI.getAllArrivals(planetIds);

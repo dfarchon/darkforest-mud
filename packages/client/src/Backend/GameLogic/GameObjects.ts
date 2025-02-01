@@ -1869,13 +1869,33 @@ export class GameObjects {
 
     // Update planet data
     if (planet) {
-      // If planet exists in contract, just mark as unlocatable
-      if (this.touchedPlanetIds.has(planetLocation.hash)) {
-        // PUNK TODO: think about this
-      } else {
-        // If planet doesn't exist in contract, remove it entirely
-        this.planets.delete(planetLocation.hash);
+      const planetId = planetLocation.hash;
+      // 1. Clear all arrivals related to this planet
+      const arrivalIds = this.planetArrivalIds.get(planetId);
+      if (arrivalIds) {
+        for (const arrivalId of arrivalIds) {
+          this.arrivals.delete(arrivalId);
+        }
+        this.planetArrivalIds.delete(planetId);
       }
+      // 2. Clear all artifacts on this planet
+      const artifacts = this.getPlanetArtifacts(planetId);
+      for (const artifact of artifacts) {
+        if (artifact.onPlanetId === planetId) {
+          this.artifacts.delete(artifact.id);
+          this.artifactUpdated$.publish(artifact.id);
+        }
+      }
+      // 3. Remove from myPlanets if owned
+      if (this.myPlanets.has(planetId)) {
+        this.myPlanets.delete(planetId);
+        this.myPlanetsUpdated$.publish(this.myPlanets);
+      }
+
+      // 4. Remove from planets map
+      this.planets.delete(planetId);
+      // 5. Notify subscribers
+      this.planetUpdated$.publish(planetId);
     }
   }
 }
