@@ -196,6 +196,36 @@ class Plugin {
     }
   };
 
+  onClearMap = async () => {
+    try {
+      let chunks = this.generateMap();
+
+      if (
+        !confirm(
+          `Are you sure you want to delete ${chunks.length} chunks from the map?`,
+        )
+      ) {
+        return;
+      }
+
+      this.status.innerText = "Clearing map, this may take a while...";
+      this.status.style.color = "white";
+
+      await df.bulkDeleteChunks(chunks);
+
+      this.beginCoords = null;
+      this.beginXY.innerText = "Begin: ???";
+      this.endCoords = null;
+      this.endXY.innerText = "";
+
+      this.status.innerText = "Map cleared successfully!";
+    } catch (err) {
+      console.error(err);
+      this.status.innerText = "Failed to clear map.";
+      this.status.style.color = "red";
+    }
+  };
+
   render(container) {
     container.parentElement.style.minHeight = "unset";
     container.style.minHeight = "unset";
@@ -235,9 +265,24 @@ class Plugin {
     wrapper2.appendChild(downloadButton);
     wrapper2.appendChild(uploadButton);
 
+    let wrapper3 = document.createElement("div");
+    wrapper3.style.display = "flex";
+    wrapper3.style.justifyContent = "center";
+    wrapper3.style.marginTop = "10px";
+
+    let clearMapButton = document.createElement("button");
+    clearMapButton.innerText = "Clear Selected Map";
+    clearMapButton.style.backgroundColor = "#ff4444";
+    clearMapButton.style.color = "white";
+    clearMapButton.style.padding = "8px 16px";
+    clearMapButton.onclick = this.onClearMap;
+
+    wrapper3.appendChild(clearMapButton);
+
     container.appendChild(this.xyWrapper);
     container.appendChild(wrapper);
     container.appendChild(wrapper2);
+    container.appendChild(wrapper3);
     container.appendChild(this.status);
   }
 

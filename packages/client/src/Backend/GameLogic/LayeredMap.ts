@@ -58,6 +58,35 @@ export class LayeredMap {
   }
 
   /**
+   * Removes the record of a planet at the given world location from the layered map.
+   */
+  public removePlanet(location: WorldLocation, planetLevel: number) {
+    if (!this.insertedLocations.has(location.hash)) {
+      return;
+    }
+
+    const quadTree = this.perLevelPlanetQuadtrees.get(planetLevel);
+
+    // Find and remove the point from the quadtree
+    const points = quadTree?.query(
+      new Circle(location.coords.x, location.coords.y, 0.01),
+    );
+
+    if (points && points.length > 0) {
+      for (const point of points) {
+        const pointData = point.data as PlanetPointData;
+        if (pointData.locationId === location.hash) {
+          quadTree?.remove(point);
+          break;
+        }
+      }
+    }
+
+    // Remove from inserted locations set
+    this.insertedLocations.delete(location.hash);
+  }
+
+  /**
    * Gets all the planets within the given world radius of a world location.
    */
   public getPlanetsInCircle(
