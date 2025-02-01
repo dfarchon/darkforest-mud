@@ -1121,9 +1121,24 @@ export class GameManager extends EventEmitter {
   }
 
   public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
+    const total = planetIds.length;
+    let completed = 0;
+    let lastProgressShown = 0; // Track last shown progress
+
     for (const planetId of planetIds) {
       this.hardRefreshPlanet(planetId);
+      completed++;
+      // Calculate current progress
+      const progress = Math.floor((completed / total) * 100);
+
+      // Show progress every 10%
+      if (progress >= lastProgressShown + 10) {
+        console.log(`Bulk refresh planets progress: ${progress}%`);
+        lastProgressShown = progress;
+      }
     }
+    console.log("Bulk refresh planets completed: 100%");
+
     return;
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
