@@ -8,13 +8,14 @@ import { BaseInstallLibrary } from "../BaseInstallLibrary.sol";
 import { WormholeSystem } from "./WormholeSystem.sol";
 import { ArtifactInstallModule } from "../ArtifactInstallModule.sol";
 import { ArtifactMetadata, ArtifactMetadataData } from "../tables/ArtifactMetadata.sol";
-import { Wormhole } from "./tables/Wormhole.sol";
+import { WormholeDest } from "./tables/WormholeDest.sol";
+import { WormholeRecord } from "./tables/WormholeRecord.sol";
 import { _artifactMetadataTableId } from "../utils.sol";
 import { DistanceMultiplier } from "../../../codegen/index.sol";
 import { ArtifactRarity, ArtifactGenre } from "../../../codegen/common.sol";
 import { AtfInstallModule } from "../../../codegen/tables/AtfInstallModule.sol";
 import { ARTIFACT_INDEX } from "./constant.sol";
-import { _wormholeTableId } from "./utils.sol";
+import { _wormholeDestTableId, _wormholeRecordTableId } from "./utils.sol";
 
 /**
  * @notice Installs the Wormhole artifact into the game
@@ -43,9 +44,13 @@ contract WormholeInstallLibrary is BaseInstallLibrary {
   }
 
   function _install(IBaseWorld, bytes14 namespace) internal override {
-    // register wormhole table
-    ResourceId wormholeTableId = _wormholeTableId(namespace);
-    Wormhole.register(wormholeTableId);
+    // register wormhole dest table
+    ResourceId wormholeDestTableId = _wormholeDestTableId(namespace);
+    WormholeDest.register(wormholeDestTableId);
+
+    // register wormhole record table
+    ResourceId wormholeRecordTableId = _wormholeRecordTableId(namespace);
+    WormholeRecord.register(wormholeRecordTableId);
 
     // setup artifact metadata
     _setMetadata(namespace);

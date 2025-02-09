@@ -476,20 +476,6 @@ export default defineWorld({
     //     disabled: true,
     //   },
     // },
-    // Wormhole: {
-    //   schema: {
-    //     from: "bytes32",
-    //     to: "bytes32",
-    //   },
-    //   key: ["from"],
-    //   codegen: {
-    //     outputDirectory: "../modules/atfs/Wormhole/tables",
-    //     tableIdArgument: true,
-    //   },
-    //   deploy: {
-    //     disabled: true,
-    //   },
-    // },
     // WormholeDest: {
     //   schema: {
     //     wormholeId: "uint32",

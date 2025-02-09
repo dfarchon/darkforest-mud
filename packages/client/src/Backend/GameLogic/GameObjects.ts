@@ -1341,14 +1341,7 @@ export class GameObjects {
       artifact.onPlanetId
     ) {
       if (artifact.status === ArtifactStatus.Active) {
-        const { Wormhole, WormholeDest } = this.components;
-        const planetEntity = encodeEntity(
-          { from: "bytes32" },
-          {
-            from: locationIdToHexStr(artifact.onPlanetId) as `0x${string}`,
-          },
-        );
-        const wormholeRec = getComponentValue(Wormhole, planetEntity);
+        const { WormholeDest } = this.components;
         const artifactEntity = encodeEntity(
           { wormholeId: "uint32" },
           {
@@ -1356,13 +1349,7 @@ export class GameObjects {
           },
         );
         const wormholeDest = getComponentValue(WormholeDest, artifactEntity);
-        if (wormholeRec && !wormholeDest) {
-          this.links.set(artifact.id, {
-            from: artifact.onPlanetId,
-            to: locationIdFromHexStr(wormholeRec.to.toString()),
-            artifactId: artifact.id,
-          });
-        } else if (wormholeDest) {
+        if (wormholeDest) {
           this.links.set(artifact.id, {
             from: artifact.onPlanetId,
             to: locationIdFromHexStr(wormholeDest.to.toString()),

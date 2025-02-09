@@ -18,7 +18,7 @@ import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as WORMHOLE_INDEX } from "../../src/modules/atfs/Wormhole/constant.sol";
 import { WormholeSystem } from "../../src/modules/atfs/Wormhole/WormholeSystem.sol";
 import { _artifactIndexToNamespace } from "../../src/modules/atfs/utils.sol";
-import { _wormholeTableId, _wormholeDestTableId, _wormholeRecordTableId } from "../../src/modules/atfs/Wormhole/utils.sol";
+import { _wormholeDestTableId, _wormholeRecordTableId } from "../../src/modules/atfs/Wormhole/utils.sol";
 import { WormholeRecord } from "../../src/modules/atfs/Wormhole/tables/WormholeRecord.sol";
 import "forge-std/console.sol";
 

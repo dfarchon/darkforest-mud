@@ -8,8 +8,9 @@ import { ArtifactStatus, ArtifactRarity } from "../../../codegen/common.sol";
 import { DistanceMultiplier } from "../../../codegen/index.sol";
 import { ArtifactProxySystem } from "../ArtifactProxySystem.sol";
 import { ARTIFACT_INDEX } from "./constant.sol";
-import { Wormhole } from "./tables/Wormhole.sol";
-import { _wormholeTableId } from "./utils.sol";
+import { WormholeDest } from "./tables/WormholeDest.sol";
+import { WormholeRecord } from "./tables/WormholeRecord.sol";
+import { _wormholeDestTableId, _wormholeRecordTableId } from "./utils.sol";
 
 contract WormholeSystem is ArtifactProxySystem {
   error WormholeAlreadySet(); // 0x1fa9cff1
@@ -25,9 +26,10 @@ contract WormholeSystem is ArtifactProxySystem {
   function _shutdown(Planet memory planet, Artifact memory artifact) internal virtual override {
     super._shutdown(planet, artifact);
 
-    ResourceId wormholeTableId = _wormholeTableId(_namespace());
+    ResourceId wormholeDestTableId = _wormholeDestTableId(_namespace());
+    ResourceId wormholeRecordTableId = _wormholeRecordTableId(_namespace());
     bytes32 from = bytes32(planet.planetHash);
-    bytes32 to = Wormhole.get(wormholeTableId, from);
+    bytes32 to = WormholeDest.get(wormholeDestTableId, uint32(artifact.id));
     if (to == 0) {
       revert WormholeNotSet();
     }
@@ -37,7 +39,8 @@ contract WormholeSystem is ArtifactProxySystem {
       multiplier = (multiplier * 1000) / _distanceMultipliers[uint8(artifact.rarity)];
       DistanceMultiplier.set(left, right, uint32(multiplier));
     }
-    Wormhole.deleteRecord(_wormholeTableId(_namespace()), bytes32(planet.planetHash));
+    WormholeDest.deleteRecord(wormholeDestTableId, uint32(artifact.id));
+    WormholeRecord.set(wormholeRecordTableId, left, right, false);
   }
 
   function _activate(Planet memory planet, Artifact memory artifact, bytes memory inputData) internal virtual override {
@@ -49,8 +52,9 @@ contract WormholeSystem is ArtifactProxySystem {
       revert WormholeSetToSelf();
     }
     (bytes32 left, bytes32 right) = from < to ? (from, to) : (to, from);
-    ResourceId wormholeTableId = _wormholeTableId(_namespace());
-    if (Wormhole.get(wormholeTableId, left) != 0 || Wormhole.get(wormholeTableId, right) != 0) {
+    ResourceId wormholeDestTableId = _wormholeDestTableId(_namespace());
+    ResourceId wormholeRecordTableId = _wormholeRecordTableId(_namespace());
+    if (WormholeRecord.get(wormholeRecordTableId, left, right)) {
       revert WormholeAlreadySet();
     }
     uint256 multiplier = DistanceMultiplier.get(left, right);
@@ -60,6 +64,7 @@ contract WormholeSystem is ArtifactProxySystem {
       multiplier = (multiplier * _distanceMultipliers[uint8(artifact.rarity)]) / 1000;
     }
     DistanceMultiplier.set(left, right, uint32(multiplier));
-    Wormhole.set(wormholeTableId, from, to);
+    WormholeDest.set(wormholeDestTableId, uint32(artifact.id), to);
+    WormholeRecord.set(wormholeRecordTableId, left, right, true);
   }
 }
