@@ -6,7 +6,7 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
-import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
+import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner, Round } from "../../src/codegen/index.sol";
 import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker, TempConfigSet } from "../../src/codegen/index.sol";
 import { Move, MoveData } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
@@ -29,6 +29,8 @@ contract CannonTest is MudTest {
   function setUp() public virtual override {
     super.setUp();
     vm.startPrank(admin);
+    // set round number 0
+    Round.set(0);
     // skip snark check
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();

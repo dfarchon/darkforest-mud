@@ -2,10 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { Errors } from "../interfaces/errors.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { BiomebaseInput } from "../lib/VerificationInput.sol";
 import { Planet } from "../lib/Planet.sol";
 import { Artifact } from "../lib/Artifact.sol";
 import { Counter, AtfInstallModule, ArtifactRegistry } from "../codegen/index.sol";
@@ -66,19 +63,4 @@ contract ArtifactSystem is System, Errors {
     artifact.writeToStore();
     planet.writeToStore();
   }
-
-  // function deactivateArtifact(uint256 planetHash, uint256 artifactId) public {
-  //   address worldAddress = _world();
-  //   DFUtils.tick(worldAddress);
-
-  //   Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-  //   Artifact memory artifact = planet.mustGetArtifact(artifactId);
-  //   if (planet.owner != _msgSender()) {
-  //     revert Errors.NotPlanetOwner();
-  //   }
-  //   (planet, artifact) = planet.deactivateArtifact(artifact, _world());
-
-  //   artifact.writeToStore();
-  //   planet.writeToStore();
-  // }
 }
