@@ -29,7 +29,7 @@ contract ArtifactCreateSystem is System, Errors {
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, input.planetHash);
     Artifact memory artifact = planet.findArtifact(_msgSender());
 
-    Counter.setArtifact(uint32(artifact.id));
+    Counter.setArtifact(uint24(artifact.id));
     artifact.writeToStore();
     planet.writeToStore();
   }
