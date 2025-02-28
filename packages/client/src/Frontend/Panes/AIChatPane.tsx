@@ -335,12 +335,10 @@ export function AIChatPane({
           if (!prev.begin) {
             console.log("Begin coordinates set:", coords);
             const updatedRange = { ...prev, begin: coords };
-            speak("Nice! now select bottom right corner");
             return updatedRange;
           } else if (!prev.end) {
             console.log("End coordinates set:", coords);
             const updatedRange = { ...prev, end: coords };
-            speak("Perfect! now you can use Sophon Agent");
             // Call generatePlanetArray with the selected range once both begin and end are set
             if (updatedRange.begin && updatedRange.end) {
               console.log("Both begin and end are filled. Stopping listener.");
@@ -454,7 +452,6 @@ export function AIChatPane({
     };
 
     console.log("Map selection started.");
-    speak("Map selection started.");
     // Clean up any previous event listener before adding a new one
     window.removeEventListener("click", handleClick);
     window.addEventListener("click", handleClick);
@@ -616,7 +613,7 @@ export function AIChatPane({
         if (response.ok) {
           const { aiResponse } = await response.json();
           // Validate and filter df_fcName and args
-
+          console.log("response:", aiResponse);
           const { df_fcName, args } = aiResponse;
           if (!df_fcName || !Array.isArray(args)) {
             console.error(
@@ -655,92 +652,6 @@ export function AIChatPane({
     }
   };
 
-  //   if (input.trim()) {
-  //     const reducedPlanets = reducePlanets(selectedPlanets);
-
-  //     const forCost = {
-  //       username: player?.name,
-  //       message: input,
-  //       selectedPlanets: reducedPlanets,
-  //     };
-
-  //     const stringForCost = JSON.stringify(forCost, (key, value) =>
-  //       typeof value === "bigint" ? value.toString() : value,
-  //     );
-
-  //     const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
-
-  //     uiManager
-  //       .spendGPTTokens(predictedCost_.credits)
-  //       .then(async () => {
-  //         try {
-  //           const stringReducedPlanets = JSON.stringify(
-  //             reducedPlanets,
-  //             (key, value) =>
-  //               typeof value === "bigint" ? value.toString() : value,
-  //           );
-  //           const response = await fetch(`${API_URL}/api/agent/agent`, {
-  //             method: "POST",
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //             },
-  //             body: JSON.stringify({
-  //               username: player?.name,
-  //               message: input,
-  //               selectedPlanets: stringReducedPlanets,
-  //             }),
-  //           });
-
-  //           if (response.ok) {
-  //             const { aiResponse } = await response.json();
-  //             // Validate and filter df_fcName and args
-
-  //             const { df_fcName, args } = aiResponse;
-  //             if (!df_fcName || !Array.isArray(args)) {
-  //               console.error(
-  //                 "Invalid AI response: missing function name or arguments.",
-  //               );
-  //               setAgentResponse(
-  //                 "The agent's response was invalid. Please try again.",
-  //               );
-  //               return;
-  //             }
-
-  //             // Client-side execution of the validated function
-  //             try {
-  //               executeClientFunction(df_fcName, args);
-  //             } catch (error) {
-  //               console.error(
-  //                 `Error executing client function: ${df_fcName}`,
-  //                 error,
-  //               );
-  //               setAgentResponse(
-  //                 `An error occurred while executing the function: ${df_fcName}.`,
-  //               );
-  //             }
-  //           } else {
-  //             console.error(
-  //               "Failed to fetch agent response:",
-  //               response.statusText,
-  //             );
-  //             setAgentResponse("The server failed to process your request.");
-  //           }
-  //         } catch (error) {
-  //           console.error("Error in AIAgentContent:", error);
-  //           setAgentResponse(
-  //             "An error occurred while processing your request.",
-  //           );
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error spending GPT tokens:", error);
-  //       });
-
-  //     setInput("");
-  //   } else {
-  //     setAgentResponse("Put some input msg Sophon agent!");
-  //   }
-  // };
   /**
    * Executes a client function based on the agent's response.
    * @param {string} functionName - The name of the client function to call.
@@ -771,16 +682,25 @@ export function AIChatPane({
         }
         const agentAnswer = `Moving from ${getPlanetName(gameManager.getPlanetWithId(arg1))} to ${getPlanetName(gameManager.getPlanetWithId(arg2))} with forces: ${arg3} silver: ${arg4} artID: ${arg5} abandoning: ${arg6}`;
         setAgentResponse(agentAnswer);
+        //speak(agentAnswer);
         gameManager.move(arg1, arg2, Number(arg3), Number(arg4), arg5, false);
       },
       revealLocation: (arg1: LocationId) => {
         const agentAnswer = `Revealing location: ${getPlanetName(gameManager.getPlanetWithId(arg1))}`;
         setAgentResponse(agentAnswer);
+        //speak(agentAnswer);
         gameManager.revealLocation(arg1);
+      },
+      upgrade: (arg1: LocationId, arg2: number) => {
+        const agentAnswer = `Upgrading planet ${getPlanetName(gameManager.getPlanetWithId(arg1))} with branch ${arg2}`;
+        setAgentResponse(agentAnswer);
+        // speak(agentAnswer);
+        gameManager.upgrade(arg1, arg2);
       },
       upgradePlanet: (arg1: LocationId, arg2: number) => {
         const agentAnswer = `Upgrading planet ${getPlanetName(gameManager.getPlanetWithId(arg1))} with branch ${arg2}`;
         setAgentResponse(agentAnswer);
+        // speak(agentAnswer);
         gameManager.upgrade(arg1, arg2);
       },
       setPlanetEmoji: (arg1: LocationId, arg2: string) => {
@@ -791,6 +711,7 @@ export function AIChatPane({
       withdrawSilver: (arg1: LocationId, arg2: number) => {
         const agentAnswer = `Withdrawing ${arg2} silver from ${getPlanetName(gameManager.getPlanetWithId(arg1))}`;
         setAgentResponse(agentAnswer);
+        //speak(agentAnswer);
         gameManager.withdrawSilver(arg1, arg2);
       },
       refreshPlanet: (arg1: LocationId) => {

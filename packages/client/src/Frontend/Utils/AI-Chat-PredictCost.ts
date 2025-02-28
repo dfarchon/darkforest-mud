@@ -27,7 +27,7 @@ export function predictTokenCost(
   model: "gpt-3.5-turbo" | "gpt-4",
 ): { aItokens: number; cost: number; credits: number } {
   // Approximate the token count + default prompt length by AI server
-  const aItokens = approximateTokenCount(prompt) + 2426;
+  const aItokens = approximateTokenCount(prompt) + 549;
 
   // Calculate the cost based on the model's per-token pricing
   const costPerToken = TOKEN_COSTS[model] / 1000; // Cost per token in USD
