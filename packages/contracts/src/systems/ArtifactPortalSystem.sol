@@ -30,6 +30,9 @@ contract ArtifactPortalSystem is System, Errors {
     if (artifact.status != ArtifactStatus.DEFAULT) {
       revert Errors.ArtifactInUse();
     }
+    if (uint8(artifact.rarity) >= planet.level) {
+      revert Errors.ArtifactRarityTooHigh();
+    }
     planet.removeArtifact(artifactId);
 
     planet.writeToStore();
@@ -61,6 +64,9 @@ contract ArtifactPortalSystem is System, Errors {
     }
     IArtifactNFT nft = IArtifactNFT(ArtifactNFT.get());
     (uint8 index, uint8 rarity) = nft.getArtifact(artifactId);
+    if (uint8(rarity) >= planet.level) {
+      revert Errors.ArtifactRarityTooHigh();
+    }
     Artifact memory artifact = ArtifactLib.NewArtifactFromNFT(artifactId, planetHash, index, rarity);
     if (planet.hasArtifactSlot()) {
       planet.pushArtifact(artifact.id);
@@ -68,7 +74,7 @@ contract ArtifactPortalSystem is System, Errors {
       revert Errors.ArtifactStorageFull();
     }
 
-    nft.transferFrom(_msgSender(), worldAddress, artifactId);
+    nft.depositFrom(worldAddress, artifactId, _msgSender());
     artifact.writeToStore();
     planet.writeToStore();
   }

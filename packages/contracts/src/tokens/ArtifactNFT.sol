@@ -34,9 +34,15 @@ contract ArtifactNFT is Ownable, ERC721Enumerable, IArtifactNFT {
   event DFUpdated(uint8 indexed round, address indexed world);
   event Minted(address indexed to, uint256 indexed tokenId);
 
-  modifier onlyDF(uint256 tokenId) {
+  modifier onlyDFCanMint(uint256 tokenId) {
     uint8 round = uint8(tokenId >> 24);
-    require(_getDFArtifactSystemAddress(dfs[round]) == msg.sender, "NotDF");
+    require(_getDFArtifactSystemAddress(dfs[round]) == msg.sender, "mint: not artifact portal system");
+    _;
+  }
+
+  modifier onlyDFCanDeposit(address world) {
+    require(isDF[world], "depositFrom: to non-df address");
+    require(_getDFArtifactSystemAddress(world) == msg.sender, "depositFrom: not artifact portal system");
     _;
   }
 
@@ -49,10 +55,23 @@ contract ArtifactNFT is Ownable, ERC721Enumerable, IArtifactNFT {
    * @param artifactIndex index of the artifact
    * @param artifactRarity rarity of the artifact
    */
-  function mint(address to, uint256 tokenId, uint8 artifactIndex, uint8 artifactRarity) public onlyDF(tokenId) {
+  function mint(address to, uint256 tokenId, uint8 artifactIndex, uint8 artifactRarity) public onlyDFCanMint(tokenId) {
     _safeMint(to, tokenId);
     artifacts[tokenId] = Artifact({ index: artifactIndex, rarity: artifactRarity });
     emit Minted(to, tokenId);
+  }
+
+  /**
+   * Deposit function for depositing Artifact NFTs from player's wallet to df world
+   * Only DF artifact portal system can deposit player's NFTs to df world.
+   * Players don't need to approve NFTs to the portal system contract.
+   * @param to df world address
+   * @param tokenId tokenId of the deposited NFT
+   * @param from player's address
+   */
+  function depositFrom(address to, uint256 tokenId, address from) public onlyDFCanDeposit(to) {
+    // df world not implements {IERC721Receiver-onERC721Received}
+    _transfer(from, to, tokenId);
   }
 
   function setDF(uint8 round, address world) public onlyOwner {

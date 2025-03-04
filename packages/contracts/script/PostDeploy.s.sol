@@ -21,7 +21,7 @@ import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
 import { GuildConfig, GuildConfigData } from "../src/codegen/index.sol";
 import { Round } from "../src/codegen/index.sol";
-import { ArtifactNFT } from "../src/codegen/index.sol";
+import { ArtifactNFT as ArtifactNFTTable } from "../src/codegen/index.sol";
 import { AtfInstallModule } from "../src/codegen/index.sol";
 import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
 import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
@@ -29,6 +29,8 @@ import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLi
 import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeInstallLibrary.sol";
 import { installBloomFilter } from "../src/modules/atfs/BloomFilter/BloomFilterInstallLibrary.sol";
 import { installPinkBomb } from "../src/modules/atfs/PinkBomb/PinkBombInstallLibrary.sol";
+import { IArtifactNFT } from "../src/tokens/IArtifactNFT.sol";
+import { ArtifactNFT } from "../src/tokens/ArtifactNFT.sol";
 contract PostDeploy is Script {
   using stdToml for string;
   using Strings for uint256;
@@ -71,10 +73,15 @@ contract PostDeploy is Script {
       string memory key = string.concat(".artifact.", i.toString());
       ArtifactConfig.set(ArtifactRarity(i), indexes, abi.decode(toml.parseRaw(key), (uint16[])));
     }
-    Round.set(abi.decode(toml.parseRaw(".round.number"), (uint8)));
+    uint8 roundNum = abi.decode(toml.parseRaw(".round.number"), (uint8));
+    Round.set(roundNum);
     address artifactNftAddress = abi.decode(toml.parseRaw(".artifact_nft.address"), (address));
-    if (artifactNftAddress != address(0)) {
-      ArtifactNFT.set(artifactNftAddress);
+    if (artifactNftAddress == address(0)) {
+      artifactNftAddress = address(new ArtifactNFT());
+    }
+    ArtifactNFTTable.set(artifactNftAddress);
+    if (toml.readBool(".artifact_nft.set_current_round")) {
+      IArtifactNFT(artifactNftAddress).setDF(roundNum, worldAddress);
     }
 
     // deploy artifact install module
