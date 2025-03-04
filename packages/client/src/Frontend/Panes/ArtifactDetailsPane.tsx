@@ -242,37 +242,22 @@ export function ArtifactDetailsBody({
     }
   };
 
-  let readyInStr = undefined;
+  // let readyInStr = undefined;
 
-  if (
-    artifact.artifactType === ArtifactType.PhotoidCannon &&
-    isActivated(artifact)
-  ) {
-    readyInStr = (
-      <TimeUntil
-        timestamp={
-          artifact.lastActivated * 1000 +
-          contractConstants.PHOTOID_ACTIVATION_DELAY * 1000
-        }
-        ifPassed={"now!"}
-      />
-    );
-  }
-
-  if (
-    artifact.artifactType === ArtifactType.StellarShield &&
-    isActivated(artifact)
-  ) {
-    readyInStr = (
-      <TimeUntil
-        timestamp={
-          artifact.lastActivated * 1000 +
-          contractConstants.STELLAR_ACTIVATION_DELAY * 1000
-        }
-        ifPassed={"now!"}
-      />
-    );
-  }
+  // if (
+  //   (artifact.artifactType === ArtifactType.PhotoidCannon ||
+  //     artifact.artifactType === ArtifactType.Bomb) &&
+  //   isActivated(artifact)
+  // ) {
+  //   readyInStr = (
+  //     <TimeUntil
+  //       timestamp={uiManager.convertTickToMs(
+  //         artifact.chargeTick + artifact.charge,
+  //       )}
+  //       ifPassed={"now!"}
+  //     />
+  //   );
+  // }
 
   // // about activate artifact block limit pane
   // //myTodo: 2 min 1 artifact
@@ -405,6 +390,11 @@ export function ArtifactDetailsBody({
           <TextPreview text={artifact.id} />
         </div>
 
+        <div className="row">
+          <span>Round</span>
+          <TextPreview text={(BigInt("0x" + artifact.id) >> 24n).toString()} />
+        </div>
+
         {artifact.controller !== EMPTY_ADDRESS && (
           <div className="row">
             <span>Controller</span>
@@ -413,12 +403,13 @@ export function ArtifactDetailsBody({
             </span>
           </div>
         )}
-        {readyInStr && (
+        {/* no need for ready in str anymore since we display the time left in the artifact actions */}
+        {/* {readyInStr && (
           <div className="row">
             <span>Ready In</span>
             <span>{readyInStr}</span>
           </div>
-        )}
+        )} */}
 
         <ArtifactChangeImageType
           artifactId={artifactWrapper.value?.id}

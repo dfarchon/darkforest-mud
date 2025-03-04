@@ -3,6 +3,7 @@
 import type { EthConnection } from "@df/network";
 import { createContract, createEthConnection } from "@df/network";
 import diamondContractAbiUrl from "contracts/out/IWorld.sol/IWorld.abi.json";
+import ArtifactNFTAbi from "contracts/out/ArtifactNFT.sol/ArtifactNFT.abi.json";
 import type { Contract, providers, Wallet } from "ethers";
 
 /**
@@ -16,6 +17,14 @@ export async function loadDiamondContract<T extends Contract>(
   const abi = diamondContractAbiUrl; //;await fetch(diamondContractAbiUrl).then((r) => r.json());
 
   return createContract<T>(address, abi, provider, signer);
+}
+
+export async function loadArtifactNFTContract<T extends Contract>(
+  address: string,
+  provider: providers.JsonRpcProvider,
+  signer?: Wallet,
+): Promise<T> {
+  return createContract<T>(address, ArtifactNFTAbi, provider, signer);
 }
 
 export function getEthConnection(): Promise<EthConnection> {

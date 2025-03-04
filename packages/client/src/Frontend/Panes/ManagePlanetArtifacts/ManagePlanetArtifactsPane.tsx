@@ -61,7 +61,6 @@ export function ManagePlanetArtifactsPane({
   const planet = usePlanet(uiManager, planetId).value;
   const myArtifacts = useMyArtifactsList(uiManager);
   const onPlanet = uiManager.getArtifactsWithIds(planet?.heldArtifactIds || []);
-
   const artifactsInWallet = [];
   for (const a of myArtifacts) {
     if (!a.onPlanetId) {
