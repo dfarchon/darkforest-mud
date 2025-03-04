@@ -90,6 +90,12 @@ contract ArtifactNFTTest is MudTest {
     ArtifactTable.setStatus(uint32(1), ArtifactStatus.DEFAULT);
 
     vm.prank(address(1));
+    vm.expectRevert(Errors.ArtifactRarityTooHigh.selector);
+    IWorld(worldAddress).df__withdrawArtifact(1, 1);
+
+    vm.prank(admin);
+    PlanetConstants.setLevel(bytes32(uint256(1)), 6);
+    vm.prank(address(1));
     IWorld(worldAddress).df__withdrawArtifact(1, 1);
     assertEq(nft.ownerOf(1), address(1));
     artifact = PlanetArtifact.getArtifacts(bytes32(uint256(1)));
@@ -110,6 +116,8 @@ contract ArtifactNFTTest is MudTest {
     IWorld(worldAddress).df__findingArtifact(proof, input);
     vm.prank(admin);
     PlanetConstants.setPlanetType(bytes32(uint256(1)), PlanetType.SPACETIME_RIP);
+    vm.prank(admin);
+    PlanetConstants.setLevel(bytes32(uint256(1)), 6);
     vm.prank(address(1));
     IWorld(worldAddress).df__withdrawArtifact(1, 1);
 
