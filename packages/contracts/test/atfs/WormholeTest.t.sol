@@ -6,7 +6,7 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
-import { Counter, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
+import { Counter, PlanetArtifact, ArtifactOwner, Round } from "../../src/codegen/index.sol";
 import { Planet as PlanetTable, Move, MoveData, Ticker, TickerData } from "../../src/codegen/index.sol";
 import { Artifact as ArtifactTable, ArtifactData, TempConfigSet, DistanceMultiplier } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
@@ -29,6 +29,8 @@ contract WormholeTest is MudTest {
   function setUp() public virtual override {
     super.setUp();
     vm.startPrank(admin);
+    // set round number 0
+    Round.set(0);
     // skip snark check
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();

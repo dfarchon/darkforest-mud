@@ -4127,6 +4127,27 @@ export class GameManager extends EventEmitter {
       //   throw error;
       // }
 
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to deposit on unknown planet");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("tried to deposit on a non-trading post planet");
+      }
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedDepositArtifact = {
         methodName: "depositArtifact",
         contract: this.contractsAPI.contract,
@@ -4136,6 +4157,7 @@ export class GameManager extends EventEmitter {
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
         ]),
+        delegator,
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -4163,20 +4185,18 @@ export class GameManager extends EventEmitter {
   public async withdrawArtifact(
     locationId: LocationId,
     artifactId: ArtifactId,
-    bypassChecks = true,
   ): Promise<Transaction<UnconfirmedWithdrawArtifact>> {
+    console.log("withdrawArtifact", locationId, artifactId);
+    const planet = this.entityStore.getPlanetWithId(locationId);
     try {
-      if (!bypassChecks) {
-        // if (this.checkGameHasEnded()) {
-        //   throw new Error('game has ended');
-        // }
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to withdraw from unknown planet");
-        }
-        if (!artifactId) {
-          throw new Error("must supply an artifact id");
-        }
+      if (!planet) {
+        throw new Error("tried to withdraw from unknown planet");
+      }
+      if (!artifactId) {
+        throw new Error("must supply an artifact id");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("tried to withdraw from a non-trading post planet");
       }
 
       // this is shitty. used for the popup window
@@ -4189,6 +4209,20 @@ export class GameManager extends EventEmitter {
         artifactId,
       );
 
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedWithdrawArtifact = {
         methodName: "withdrawArtifact",
         contract: this.contractsAPI.contract,
@@ -4198,6 +4232,7 @@ export class GameManager extends EventEmitter {
         ]),
         locationId,
         artifactId,
+        delegator,
       };
 
       this.terminal.current?.println(

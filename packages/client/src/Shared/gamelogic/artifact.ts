@@ -342,7 +342,7 @@ export function canWithdrawArtifact(
     !planet.frozen &&
     planet.owner === account &&
     planet.planetType === PlanetType.TRADING_POST &&
-    !isActivated(artifact) &&
+    artifact.status === ArtifactStatus.Default &&
     !isSpaceShip(artifact.artifactType)
   );
 }

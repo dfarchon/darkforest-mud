@@ -14,6 +14,7 @@ import {
 } from "@df/network";
 import {
   address,
+  addressToHex,
   artifactIdToDecStr,
   isUnconfirmedAcceptInvitationTx,
   isUnconfirmedActivateArtifactTx,
@@ -76,6 +77,12 @@ import {
 } from "@df/types";
 import type { ClientComponents } from "@mud/createClientComponents";
 import delay from "delay";
+import { getComponentValue } from "@latticexyz/recs";
+import {
+  decodeEntity,
+  encodeEntity,
+  singletonEntity,
+} from "@latticexyz/store-sync/recs";
 
 import { ContractsAPIEvent } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { HashConfig } from "../../_types/global/GlobalTypes";
@@ -166,6 +173,10 @@ export class GameManagerFactory {
     // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
     const knownArtifacts = initialState.artifacts;
+    const artifactsInWallet = await contractsAPI.getArtifactsInWallet(account);
+    for (const artifact of artifactsInWallet.values()) {
+      knownArtifacts.set(artifact.id, artifact);
+    }
 
     for (let i = 0; i < initialState.loadedPlanets.length; i++) {
       const planet = initialState.touchedAndLocatedPlanets.get(

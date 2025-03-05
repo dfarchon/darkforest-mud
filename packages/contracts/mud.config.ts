@@ -75,6 +75,12 @@ export default defineWorld({
   },
   excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem", "PinkBombSystem"],
   tables: {
+    Round: {
+      schema: {
+        num: "uint8",
+      },
+      key: [],
+    },
     Counter: {
       schema: {
         player: "uint32",
@@ -158,6 +164,12 @@ export default defineWorld({
       key: [],
     },
     ArtifactRegistry: "bool",
+    ArtifactNFT: {
+      schema: {
+        addr: "address",
+      },
+      key: [],
+    },
     ArtifactConfig: {
       schema: {
         rarity: "ArtifactRarity",
