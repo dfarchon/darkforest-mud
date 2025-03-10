@@ -3,9 +3,10 @@ pragma solidity >=0.8.24;
 
 import { DelegationControl } from "@latticexyz/world/src/DelegationControl.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
-import { Player, BurnerToPlayer } from "../codegen/index.sol";
-import { GuildUtils } from "../lib/GuildUtils.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { Player } from "codegen/tables/Player.sol";
+import { BurnerToPlayer } from "codegen/tables/BurnerToPlayer.sol";
+import { GuildUtils } from "libraries/GuildUtils.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
 
 contract DfDelegationControlSystem is DelegationControl {
   /**

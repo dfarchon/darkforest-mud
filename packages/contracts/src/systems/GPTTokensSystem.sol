@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { GPTTokens } from "../codegen/index.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { GPTTokens } from "codegen/index.sol";
 
-contract GPTTokensSystem is System, Errors {
+contract GPTTokensSystem is BaseSystem {
   uint256 public creditPrice = 0.00001 ether; // Price for GPT tokens
+
   event TokensSpent(address indexed user, uint256 amount);
 
   /**
@@ -15,7 +15,7 @@ contract GPTTokensSystem is System, Errors {
    */
   function buyGPTTokens(uint256 amount) public payable {
     // Check if enough ETH is sent
-    if (_msgValue() < amount * creditPrice) revert Errors.NotEnoughETH();
+    if (_msgValue() < amount * creditPrice) revert NotEnoughETH();
 
     // Update the player's GPT token balance
     address executor = _msgSender();
@@ -30,7 +30,7 @@ contract GPTTokensSystem is System, Errors {
     uint256 executorAmount = GPTTokens.get(executor);
 
     // Check if the player has at least 1 GPT token
-    if (executorAmount < 1) revert Errors.NotEnoughGPTTokens();
+    if (executorAmount < 1) revert NotEnoughGPTTokens();
 
     // Deduct 1 GPT token
     GPTTokens.set(executor, executorAmount - 1);
@@ -48,7 +48,7 @@ contract GPTTokensSystem is System, Errors {
     uint256 executorAmount = GPTTokens.get(executor);
 
     // Check if the sender has enough tokens
-    if (executorAmount < amount) revert Errors.NotEnoughGPTTokens();
+    if (executorAmount < amount) revert NotEnoughGPTTokens();
 
     // Deduct tokens from the sender and add to the recipient
     GPTTokens.set(executor, executorAmount - amount);

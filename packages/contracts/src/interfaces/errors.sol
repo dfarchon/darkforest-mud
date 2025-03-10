@@ -75,4 +75,7 @@ interface Errors {
   // GPTToken system
   error NotEnoughETH(); // 0x932b84b0
   error NotEnoughGPTTokens(); // 0x134712e2
+
+  // BaseSystem
+  error InsufficientEntryFee(uint256 required); // 0xe270e71a
 }

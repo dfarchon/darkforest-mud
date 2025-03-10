@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { IWorld } from "../codegen/world/IWorld.sol";
-import { PlanetType, SpaceType, PlanetStatus } from "../codegen/common.sol";
-import { Planet as PlanetTable, PlanetOwner, PlanetConstants, Ticker, RevealedPlanet } from "../codegen/index.sol";
-import { Planet } from "../lib/Planet.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { SpawnInput } from "../lib/VerificationInput.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
-import { GPTTokens } from "../codegen/index.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { IWorld } from "codegen/world/IWorld.sol";
+import { PlanetType, SpaceType, PlanetStatus } from "codegen/common.sol";
+import { Planet as PlanetTable } from "codegen/tables/Planet.sol";
+import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
+import { PlanetConstants } from "codegen/tables/PlanetConstants.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { RevealedPlanet } from "codegen/tables/RevealedPlanet.sol";
+import { Planet } from "libraries/Planet.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { SpawnInput } from "libraries/VerificationInput.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
+import { GPTTokens } from "codegen/index.sol";
 
-contract TestOnlySystem is System, Errors {
+contract TestOnlySystem is BaseSystem {
   function createPlanet(
     uint256 planetHash,
     address owner,

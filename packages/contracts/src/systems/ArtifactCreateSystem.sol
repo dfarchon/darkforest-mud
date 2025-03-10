@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { BiomebaseInput } from "../lib/VerificationInput.sol";
-import { Planet } from "../lib/Planet.sol";
-import { Artifact } from "../lib/Artifact.sol";
-import { Counter } from "../codegen/index.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { BiomebaseInput } from "libraries/VerificationInput.sol";
+import { Planet } from "libraries/Planet.sol";
+import { Artifact } from "libraries/Artifact.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
 
-contract ArtifactCreateSystem is System, Errors {
-  function prospectPlanet(uint256 planetHash) public {
+contract ArtifactCreateSystem is BaseSystem {
+  function prospectPlanet(uint256 planetHash) public entryFee {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -20,7 +19,7 @@ contract ArtifactCreateSystem is System, Errors {
     planet.writeToStore();
   }
 
-  function findingArtifact(Proof memory proof, BiomebaseInput memory input) public {
+  function findingArtifact(Proof memory proof, BiomebaseInput memory input) public entryFee {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

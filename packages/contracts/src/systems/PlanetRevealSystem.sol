@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { Ticker, RevealedPlanet, LastReveal, TempConfigSet } from "../codegen/index.sol";
-import { Planet } from "../lib/Planet.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { RevealInput } from "../lib/VerificationInput.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { RevealedPlanet } from "codegen/tables/RevealedPlanet.sol";
+import { LastReveal } from "codegen/tables/LastReveal.sol";
+import { TempConfigSet } from "codegen/tables/TempConfigSet.sol";
+import { Planet } from "libraries/Planet.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { RevealInput } from "libraries/VerificationInput.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
 
-contract PlanetRevealSystem is System, Errors {
-  function revealLocation(Proof memory proof, RevealInput memory input) public {
+contract PlanetRevealSystem is BaseSystem {
+  function revealLocation(Proof memory proof, RevealInput memory input) public entryFee {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -22,7 +24,7 @@ contract PlanetRevealSystem is System, Errors {
     if (LastReveal.get(player) == 0 || LastReveal.get(player) + TempConfigSet.getRevealCd() <= currentTick) {
       LastReveal.set(player, uint64(currentTick));
     } else {
-      revert Errors.RevealTooOften();
+      revert RevealTooOften();
     }
 
     int256 x = _getIntFromUintCoords(input.x);

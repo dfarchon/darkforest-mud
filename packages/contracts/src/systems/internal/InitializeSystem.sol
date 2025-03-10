@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { PlanetMetadata, PlanetMetadataData } from "../codegen/index.sol";
-import { PlanetInitialResource, PlanetInitialResourceData } from "../codegen/index.sol";
-import { SpaceType, PlanetType } from "../codegen/common.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
+import { PlanetInitialResource, PlanetInitialResourceData } from "codegen/tables/PlanetInitialResource.sol";
+import { SpaceType, PlanetType } from "codegen/common.sol";
 
-contract InitializeSystem is System {
+contract InitializeSystem is BaseSystem {
   function setPlanetMetadata(
     uint8 level,
     PlanetMetadataData memory metadata,

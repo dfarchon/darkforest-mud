@@ -1,28 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { GuildStatus, GuildRole } from "../codegen/common.sol";
-import { Counter } from "../codegen/tables/Counter.sol";
-import { Guild, GuildData } from "../codegen/tables/Guild.sol";
-import { GuildName } from "../codegen/tables/GuildName.sol";
-import { GuildMember, GuildMemberData } from "../codegen/tables/GuildMember.sol";
-import { GuildHistory } from "../codegen/tables/GuildHistory.sol";
-import { GuildCandidate } from "../codegen/tables/GuildCandidate.sol";
-import { Planet } from "../lib/Planet.sol";
-import { SpaceType, PlanetType } from "../codegen/common.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
-import { GuildConfig } from "../codegen/tables/GuildConfig.sol";
-import { Player } from "../codegen/index.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { GuildStatus, GuildRole } from "codegen/common.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { Guild, GuildData } from "codegen/tables/Guild.sol";
+import { GuildName } from "codegen/tables/GuildName.sol";
+import { GuildMember, GuildMemberData } from "codegen/tables/GuildMember.sol";
+import { GuildHistory } from "codegen/tables/GuildHistory.sol";
+import { GuildCandidate } from "codegen/tables/GuildCandidate.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
+import { GuildConfig } from "codegen/tables/GuildConfig.sol";
+import { Player } from "codegen/tables/Player.sol";
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { Balances } from "@latticexyz/world/src/codegen/tables/Balances.sol";
-import { PlayerWithdrawSilver } from "../codegen/tables/PlayerWithdrawSilver.sol";
+import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
 
-contract GuildSystem is System {
+contract GuildSystem is BaseSystem {
   error NeedFundsToCreateGuild(); // 0xce43bd9e
   error GuildIdOverflow(); // 0x46aea226
   error GuildRoleUnexpected(); // 0x26f8cb41
@@ -213,7 +209,7 @@ contract GuildSystem is System {
 
     // Check if the player is registered
     if (!_isPlayerRegistered(owner)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check if creator is already in another guild
@@ -239,7 +235,7 @@ contract GuildSystem is System {
 
     // Check if the inviter is registered
     if (!_isPlayerRegistered(inviter)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Get inviter's guild role
@@ -250,7 +246,7 @@ contract GuildSystem is System {
 
     // Check if invited player is registered
     if (!_isPlayerRegistered(invitee)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check if invited player is already in a guild
@@ -268,7 +264,7 @@ contract GuildSystem is System {
 
     // Check if the player is registered
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check if player is already in another guild
@@ -302,7 +298,7 @@ contract GuildSystem is System {
 
     // Check if the player is registered
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check player is not already in a guild
@@ -325,11 +321,11 @@ contract GuildSystem is System {
     address operator = _msgSender();
 
     if (!_isPlayerRegistered(operator)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check operator has permission
@@ -369,7 +365,7 @@ contract GuildSystem is System {
     address player = _msgSender();
 
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check player is in a guild and not the owner
@@ -386,11 +382,11 @@ contract GuildSystem is System {
     address player = _msgSender();
 
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     if (!_isPlayerRegistered(newOwner)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     (GuildRole role, uint256 memberId) = _getGuildRole(player);
@@ -417,7 +413,7 @@ contract GuildSystem is System {
     address player = _msgSender();
 
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     (GuildRole role, uint256 memberId) = _getGuildRole(player);
@@ -444,7 +440,7 @@ contract GuildSystem is System {
 
     // Check if player is registered
     if (!_isPlayerRegistered(player)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Get player's current guild role and memberId
@@ -471,12 +467,12 @@ contract GuildSystem is System {
 
     // Check if operator is registered
     if (!_isPlayerRegistered(operator)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check if target member is registered
     if (!_isPlayerRegistered(member)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Get operator's role and memberId
@@ -515,12 +511,12 @@ contract GuildSystem is System {
 
     // Check if operator is registered
     if (!_isPlayerRegistered(operator)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Check if target member is registered
     if (!_isPlayerRegistered(member)) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     // Get operator's role and memberId

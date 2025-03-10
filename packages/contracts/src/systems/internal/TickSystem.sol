@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
-import { Ticker, TickerData, InnerCircle, InnerCircleData } from "../codegen/index.sol";
-import { Errors } from "../interfaces/errors.sol";
+import { Ticker, TickerData } from "codegen/tables/Ticker.sol";
+import { InnerCircle, InnerCircleData } from "codegen/tables/InnerCircle.sol";
 
-contract TickSystem is System, Errors {
+contract TickSystem is BaseSystem {
   /**
    * @notice Tick. Serves for universal updates.
    * Imagine there is a core game variable which should be updated for each game operation.
@@ -23,7 +23,7 @@ contract TickSystem is System, Errors {
   function tick() public {
     TickerData memory ticker = Ticker.get();
     if (ticker.paused) {
-      revert Errors.Paused();
+      revert Paused();
     }
     _tick(ticker);
     Ticker.set(ticker);
@@ -33,7 +33,7 @@ contract TickSystem is System, Errors {
     _requireOwner();
     TickerData memory ticker = Ticker.get();
     if (ticker.paused) {
-      revert Errors.Paused();
+      revert Paused();
     }
     _tick(ticker);
     _pause(ticker);
@@ -44,7 +44,7 @@ contract TickSystem is System, Errors {
     _requireOwner();
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
-      revert Errors.NotPaused();
+      revert NotPaused();
     }
     _unpause(ticker);
     Ticker.set(ticker);

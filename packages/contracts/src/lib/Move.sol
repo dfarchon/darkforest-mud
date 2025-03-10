@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { Errors } from "../interfaces/errors.sol";
-import { Move, MoveData, Ticker, PendingMove, PendingMoveData, Counter } from "../codegen/index.sol";
-import { Artifact as ArtifactTable, ArtifactOwner } from "../codegen/index.sol";
-import { PlanetType, ArtifactStatus } from "../codegen/common.sol";
-import { Planet } from "./Planet.sol";
+import { Errors } from "interfaces/errors.sol";
+import { Move, MoveData } from "codegen/tables/Move.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { PendingMove, PendingMoveData } from "codegen/tables/PendingMove.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { Artifact as ArtifactTable } from "codegen/tables/Artifact.sol";
+import { ArtifactOwner } from "codegen/tables/ArtifactOwner.sol";
+import { PlanetType, ArtifactStatus } from "codegen/common.sol";
+import { Planet } from "libraries/Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-import { GuildUtils } from "./GuildUtils.sol";
+import { GuildUtils } from "libraries/GuildUtils.sol";
 
 library MoveLib {
   function NewMove(Planet memory from, address captain) internal view returns (MoveData memory move) {

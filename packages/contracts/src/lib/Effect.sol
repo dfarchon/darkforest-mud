@@ -2,11 +2,11 @@
 pragma solidity >=0.8.24;
 
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-import { Planet } from "./Planet.sol";
-import { EffectType, ModifierType } from "../codegen/common.sol";
-import { _effectTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
-import { Effect as EffectTable, EffectData as EffectTableData } from "../modules/atfs/tables/Effect.sol";
-import { Errors } from "../interfaces/errors.sol";
+import { Planet } from "libraries/Planet.sol";
+import { EffectType, ModifierType } from "codegen/common.sol";
+import { _effectTableId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
+import { Effect as EffectTable, EffectData as EffectTableData } from "modules/atfs/tables/Effect.sol";
+import { Errors } from "interfaces/errors.sol";
 
 using EffectLib for Planet;
 

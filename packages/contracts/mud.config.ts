@@ -69,11 +69,21 @@ export default defineWorld({
     TestOnlySystem: {
       openAccess: false,
     },
+    PlanetWriteSystem: {
+      openAccess: false,
+    },
     DfDelegationControlSystem: {
       name: "DfDelegationCtrl",
     },
   },
-  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem", "PinkBombSystem"],
+  excludeSystems: [
+    "BaseSystem",
+    "ArtifactProxySystem",
+    "CannonSystem",
+    "WormholeSystem",
+    "BloomFilterSystem",
+    "PinkBombSystem",
+  ],
   tables: {
     Round: {
       schema: {
@@ -131,6 +141,12 @@ export default defineWorld({
         spawnPerlinMin: "uint8",
         spawnPerlinMax: "uint8",
         revealCd: "uint32",
+      },
+      key: [],
+    },
+    EntryFee: {
+      schema: {
+        fee: "uint256",
       },
       key: [],
     },
