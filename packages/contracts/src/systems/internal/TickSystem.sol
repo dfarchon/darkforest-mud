@@ -29,8 +29,7 @@ contract TickSystem is BaseSystem {
     Ticker.set(ticker);
   }
 
-  function pause() public {
-    _requireOwner();
+  function pause() public namespaceOwner {
     TickerData memory ticker = Ticker.get();
     if (ticker.paused) {
       revert Paused();
@@ -40,8 +39,7 @@ contract TickSystem is BaseSystem {
     Ticker.set(ticker);
   }
 
-  function unpause() public {
-    _requireOwner();
+  function unpause() public namespaceOwner {
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
       revert NotPaused();
@@ -50,8 +48,7 @@ contract TickSystem is BaseSystem {
     Ticker.set(ticker);
   }
 
-  function updateTickRate(uint256 tickRate) public {
-    _requireOwner();
+  function updateTickRate(uint256 tickRate) public namespaceOwner {
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
       _tick(ticker);
@@ -88,6 +85,7 @@ contract TickSystem is BaseSystem {
     AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
   }
 
+  // TODO: convert updates to system hooks
   function _globalUpdates(uint256 tickCount) internal {
     _shrinkInnerCircle(tickCount);
   }

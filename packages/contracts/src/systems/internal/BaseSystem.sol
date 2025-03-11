@@ -2,6 +2,8 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
+import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
+import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { EntryFee } from "codegen/tables/EntryFee.sol";
 import { Errors } from "interfaces/errors.sol";
 
@@ -9,13 +11,30 @@ contract BaseSystem is System, Errors {
   /**
    * @dev Used to ensure that the system is called with the correct entry fee.
    * We could not implement this via system hooks because hooks won't be given the msg.value.
-   * @notice The entry fee is set in the EntryFee table.
    */
   modifier entryFee() {
     uint256 fee = EntryFee.getFee();
     if (_msgValue() < fee) {
       revert InsufficientEntryFee(fee);
     }
+    _;
+  }
+
+  /**
+   * @dev Used to ensure that the system is called by the namespace owner.
+   * @notice It equals to make a system with close access.
+   */
+  modifier namespaceOwner() {
+    AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
+    _;
+  }
+
+  /**
+   * @dev Used to ensure that the system is called by a user with access to the namespace
+   * or this system.
+   */
+  modifier hasAccess() {
+    AccessControl.requireAccess(SystemRegistry.get(address(this)), _msgSender());
     _;
   }
 

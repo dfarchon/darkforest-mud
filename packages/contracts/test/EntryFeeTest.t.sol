@@ -58,4 +58,15 @@ contract EntryFeeTest is MudTest {
     );
     assertTrue(success);
   }
+
+  function testUpdateEntryFee() public {
+    vm.expectRevert();
+    IWorld(worldAddress).df__updateEntryFee(2 ether);
+
+    vm.startPrank(admin);
+    IWorld(worldAddress).df__updateEntryFee(2 ether);
+    vm.stopPrank();
+
+    assertEq(EntryFee.getFee(), 2 ether);
+  }
 }
