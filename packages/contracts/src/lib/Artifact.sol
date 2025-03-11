@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "../codegen/common.sol";
-import { Counter, Ticker, Artifact as ArtifactTable, ArtifactData, PlanetArtifact } from "../codegen/index.sol";
-import { ArtifactConfig, ArtifactConfigData } from "../codegen/index.sol";
-import { PlanetArtifact, ArtifactOwner } from "../codegen/index.sol";
-import { Round } from "../codegen/tables/Round.sol";
-import { ArtifactMetadata, ArtifactMetadataData } from "../modules/atfs/tables/ArtifactMetadata.sol";
-import { _artifactMetadataTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
+import { Errors } from "interfaces/errors.sol";
+import { PlanetType, SpaceType, Biome, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "codegen/common.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { Artifact as ArtifactTable, ArtifactData } from "codegen/tables/Artifact.sol";
+import { ArtifactConfig, ArtifactConfigData } from "codegen/tables/ArtifactConfig.sol";
+import { PlanetArtifact } from "codegen/tables/PlanetArtifact.sol";
+import { ArtifactOwner } from "codegen/tables/ArtifactOwner.sol";
+import { Round } from "codegen/tables/Round.sol";
+import { ArtifactMetadata, ArtifactMetadataData } from "modules/atfs/tables/ArtifactMetadata.sol";
+import { _artifactMetadataTableId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
 
 using ArtifactStorageLib for ArtifactStorage global;
 

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { GuildHistory } from "../codegen/tables/GuildHistory.sol";
-import { GuildMember, GuildMemberData } from "../codegen/tables/GuildMember.sol";
-import { GuildRole } from "../codegen/common.sol";
+import { GuildHistory } from "codegen/tables/GuildHistory.sol";
+import { GuildMember, GuildMemberData } from "codegen/tables/GuildMember.sol";
+import { GuildRole } from "codegen/common.sol";
 
 library GuildUtils {
   /**

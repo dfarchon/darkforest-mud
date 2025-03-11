@@ -4,15 +4,16 @@ pragma solidity >=0.8.24;
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { TickSystem } from "../systems/TickSystem.sol";
-import { IPlanetReadSystem } from "../codegen/world/IPlanetReadSystem.sol";
-import { VerifySystem } from "../systems/VerifySystem.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "../lib/VerificationInput.sol";
-import { Planet } from "../lib/Planet.sol";
-import { Ticker, TickerData } from "../codegen/tables/Ticker.sol";
-import { PlanetStatus } from "../codegen/common.sol";
-import { Errors } from "../interfaces/errors.sol";
+import { TickSystem } from "systems/internal/TickSystem.sol";
+import { IPlanetReadSystem } from "codegen/world/IPlanetReadSystem.sol";
+import { IPlanetWriteSystem } from "codegen/world/IPlanetWriteSystem.sol";
+import { VerifySystem } from "systems/internal/VerifySystem.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "libraries/VerificationInput.sol";
+import { Planet } from "libraries/Planet.sol";
+import { Ticker, TickerData } from "codegen/tables/Ticker.sol";
+import { PlanetStatus } from "codegen/common.sol";
+import { Errors } from "interfaces/errors.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 bytes14 constant DF_NAMESPACE = "df";
@@ -110,6 +111,13 @@ library DFUtils {
     if (planet.status != PlanetStatus.DEFAULT) {
       revert Errors.PlanetNotAvailable();
     }
+  }
+
+  /**
+   * Used to write a planet to storage.
+   */
+  function writePlanet(address worldAddress, Planet memory planet) internal {
+    IPlanetWriteSystem(worldAddress).df__writePlanet(planet);
   }
 
   /**

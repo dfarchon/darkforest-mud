@@ -31,6 +31,8 @@ import { installBloomFilter } from "../src/modules/atfs/BloomFilter/BloomFilterI
 import { installPinkBomb } from "../src/modules/atfs/PinkBomb/PinkBombInstallLibrary.sol";
 import { IArtifactNFT } from "../src/tokens/IArtifactNFT.sol";
 import { ArtifactNFT } from "../src/tokens/ArtifactNFT.sol";
+import { EntryFee } from "codegen/tables/EntryFee.sol";
+
 contract PostDeploy is Script {
   using stdToml for string;
   using Strings for uint256;
@@ -83,6 +85,10 @@ contract PostDeploy is Script {
     if (toml.readBool(".artifact_nft.set_current_round")) {
       IArtifactNFT(artifactNftAddress).setDF(roundNum, worldAddress);
     }
+
+    // set entry fee
+    uint256 entryFee = toml.readUint(".entry_fee.value");
+    if (entryFee > 0) EntryFee.set(entryFee);
 
     // deploy artifact install module
     ArtifactInstallModule artifactInstallModule = new ArtifactInstallModule();

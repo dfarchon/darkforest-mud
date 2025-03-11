@@ -5,6 +5,9 @@ b_radius = 150000
 [round]
 number = 6
 
+[entry_fee]
+value = 0
+
 [artifact_nft]
 address = "0x0000000000000000000000000000000000000000"
 set_current_round = true # if true,should be deployed by nft contract owner

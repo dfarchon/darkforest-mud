@@ -1490,6 +1490,10 @@ export class GameUIManager extends EventEmitter {
     return this.getPlanetWithId(artifact.onPlanetId);
   }
 
+  public getArtifactWithdrawalDisabled(): boolean {
+    return this.gameManager.getArtifactWithdrawalDisabled();
+  }
+
   public getPlanetLevel(planetId: LocationId): PlanetLevel | undefined {
     return this.gameManager.getPlanetLevel(planetId);
   }

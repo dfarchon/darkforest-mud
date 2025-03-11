@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { IEffectSystem } from "../codegen/world/IEffectSystem.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { MoveInput } from "../lib/VerificationInput.sol";
-import { Planet } from "../lib/Planet.sol";
-import { MoveData, Counter } from "../codegen/index.sol";
-import { MoveLib } from "../lib/Move.sol";
-import { UniverseLib } from "../lib/Universe.sol";
-import { EffectLib } from "../lib/Effect.sol";
-import { Artifact } from "../lib/Artifact.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { IEffectSystem } from "codegen/world/IEffectSystem.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { MoveInput } from "libraries/VerificationInput.sol";
+import { Planet } from "libraries/Planet.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { MoveData } from "codegen/tables/Move.sol";
+import { MoveLib } from "libraries/Move.sol";
+import { UniverseLib } from "libraries/Universe.sol";
+import { EffectLib } from "libraries/Effect.sol";
+import { Artifact } from "libraries/Artifact.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
 
-contract MoveSystem is System, Errors {
+contract MoveSystem is BaseSystem {
   using MoveLib for MoveData;
 
   /**
@@ -32,7 +32,7 @@ contract MoveSystem is System, Errors {
     uint256 _population,
     uint256 _silver,
     uint256 _artifact
-  ) public {
+  ) public entryFee {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
     DFUtils.verify(worldAddress, _proof, _input);
@@ -40,7 +40,7 @@ contract MoveSystem is System, Errors {
     // new planet instances in memory
     Planet memory fromPlanet = DFUtils.readInitedPlanet(worldAddress, _input.fromPlanetHash);
     if (_input.toPlanetHash == _input.fromPlanetHash) {
-      revert Errors.MoveToSamePlanet();
+      revert MoveToSamePlanet();
     }
     Planet memory toPlanet = DFUtils.readAnyPlanet(
       worldAddress,
@@ -66,8 +66,8 @@ contract MoveSystem is System, Errors {
 
     // write back to storage
     Counter.setMove(shipping.id);
-    fromPlanet.writeToStore();
-    toPlanet.writeToStore();
+    DFUtils.writePlanet(worldAddress, fromPlanet);
+    DFUtils.writePlanet(worldAddress, toPlanet);
   }
 
   /**

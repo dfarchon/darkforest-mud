@@ -69,11 +69,21 @@ export default defineWorld({
     TestOnlySystem: {
       openAccess: false,
     },
+    PlanetWriteSystem: {
+      openAccess: false,
+    },
     DfDelegationControlSystem: {
       name: "DfDelegationCtrl",
     },
   },
-  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem", "PinkBombSystem"],
+  excludeSystems: [
+    "BaseSystem",
+    "ArtifactProxySystem",
+    "CannonSystem",
+    "WormholeSystem",
+    "BloomFilterSystem",
+    "PinkBombSystem",
+  ],
   tables: {
     Round: {
       schema: {
@@ -134,6 +144,12 @@ export default defineWorld({
       },
       key: [],
     },
+    EntryFee: {
+      schema: {
+        fee: "uint256",
+      },
+      key: [],
+    },
     UniverseConfig: {
       schema: {
         sparsity: "uint64",
@@ -164,6 +180,12 @@ export default defineWorld({
       key: [],
     },
     ArtifactRegistry: "bool",
+    ArtifactWithdrawal: {
+      schema: {
+        disabled: "bool",
+      },
+      key: [],
+    },
     ArtifactNFT: {
       schema: {
         addr: "address",

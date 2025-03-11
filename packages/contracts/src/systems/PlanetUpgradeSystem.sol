@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Planet } from "../lib/Planet.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { Planet } from "libraries/Planet.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
 
-contract PlanetUpgradeSystem is System {
+contract PlanetUpgradeSystem is BaseSystem {
   /**
    * @notice Upgrade a planet. Supports fast upgrading.
    * @param planetHash Planet hash
@@ -19,7 +19,7 @@ contract PlanetUpgradeSystem is System {
     uint256 rangeUpgrades,
     uint256 speedUpgrades,
     uint256 defenseUpgrades
-  ) public {
+  ) public entryFee {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

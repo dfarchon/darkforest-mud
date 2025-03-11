@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { Ticker, MoveData } from "../codegen/index.sol";
-import { Planet } from "../lib/Planet.sol";
-import { MoveLib } from "../lib/Move.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { MoveData } from "codegen/tables/Move.sol";
+import { Planet } from "libraries/Planet.sol";
+import { MoveLib } from "libraries/Move.sol";
 
-contract PlanetReadSystem is System, Errors {
+contract PlanetReadSystem is BaseSystem {
   using MoveLib for MoveData;
 
   /**

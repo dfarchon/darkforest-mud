@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { TempConfigSet, TempConfigSetData, UniverseConfig, SnarkConfig, SnarkConfigData } from "../codegen/index.sol";
-import { InnerCircle } from "../codegen/index.sol";
-import { Errors } from "../interfaces/errors.sol";
+import { TempConfigSet, TempConfigSetData } from "codegen/tables/TempConfigSet.sol";
+import { UniverseConfig } from "codegen/tables/UniverseConfig.sol";
+import { SnarkConfig, SnarkConfigData } from "codegen/tables/SnarkConfig.sol";
+import { InnerCircle } from "codegen/tables/InnerCircle.sol";
+import { Errors } from "interfaces/errors.sol";
 
 using MoveInputLib for MoveInput global;
 

@@ -61,6 +61,7 @@ export function ArtifactActions({
   const onPlanetWrapper = usePlanet(uiManager, artifact?.onPlanetId);
   const depositPlanet = depositPlanetWrapper.value;
   const onPlanet = onPlanetWrapper.value;
+  const artifactWithdrawalDisabled = uiManager.getArtifactWithdrawalDisabled();
 
   const otherArtifactsOnPlanet = usePlanetArtifacts(onPlanetWrapper, uiManager);
 
@@ -250,7 +251,9 @@ export function ArtifactActions({
     );
   }
 
-  if (canWithdrawArtifact(account, artifact, onPlanet)) {
+  if (
+    canWithdrawArtifact(account, artifact, onPlanet, artifactWithdrawalDisabled)
+  ) {
     actions.unshift({
       name: TooltipName.WithdrawArtifact,
       extraContent: !canHandleWithdraw && (
