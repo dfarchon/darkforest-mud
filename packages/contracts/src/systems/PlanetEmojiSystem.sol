@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
-import { IWorld } from "codegen/world/IWorld.sol";
 import { Planet } from "libraries/Planet.sol";
 import { PlanetEmoji } from "codegen/index.sol";
 import { DFUtils } from "libraries/DFUtils.sol";

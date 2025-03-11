@@ -7,6 +7,7 @@ import { Artifact } from "libraries/Artifact.sol";
 import { ArtifactNFT } from "codegen/tables/ArtifactNFT.sol";
 import { Artifact as ArtifactTable } from "codegen/tables/Artifact.sol";
 import { ArtifactOwner } from "codegen/tables/ArtifactOwner.sol";
+import { ArtifactWithdrawal } from "codegen/tables/ArtifactWithdrawal.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { PlanetType, ArtifactStatus } from "codegen/common.sol";
 import { IArtifactNFT } from "tokens/IArtifactNFT.sol";
@@ -32,6 +33,7 @@ contract ArtifactPortalSystem is BaseSystem {
     if (uint8(artifact.rarity) >= planet.level) {
       revert ArtifactRarityTooHigh();
     }
+    if (ArtifactWithdrawal.getDisabled()) revert ArtifactWithdrawalDisabled();
     planet.removeArtifact(artifactId);
 
     planet.writeToStore();

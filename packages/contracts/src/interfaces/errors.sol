@@ -66,6 +66,7 @@ interface Errors {
   error ArtifactIdOverflow(); // 0x0c491e00
   error ArtifactOutOfControl(); // 0xf90edd80
   error ArtifactRarityTooHigh(); // 0xaefde1a6
+  error ArtifactWithdrawalDisabled(); // 0xed2ec822
 
   // planet withdraw silver system
   error InvalidPlanetType(); // 0xcfb7f825

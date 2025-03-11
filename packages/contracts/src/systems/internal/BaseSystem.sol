@@ -22,7 +22,6 @@ contract BaseSystem is System, Errors {
 
   /**
    * @dev Used to ensure that the system is called by the namespace owner.
-   * @notice It equals to make a system with close access.
    */
   modifier namespaceOwner() {
     AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
@@ -32,6 +31,7 @@ contract BaseSystem is System, Errors {
   /**
    * @dev Used to ensure that the system is called by a user with access to the namespace
    * or this system.
+   * @notice It equals to make a system with close access.
    */
   modifier hasAccess() {
     AccessControl.requireAccess(SystemRegistry.get(address(this)), _msgSender());

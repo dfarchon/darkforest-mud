@@ -158,7 +158,7 @@ import {
 } from "@df/types";
 import type { NumberType } from "@latticexyz/recs";
 import { getComponentValue } from "@latticexyz/recs";
-import { encodeEntity } from "@latticexyz/store-sync/recs";
+import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
@@ -4101,6 +4101,12 @@ export class GameManager extends EventEmitter {
 
   getContractConstants(): ContractConstants {
     return this.contractConstants;
+  }
+
+  public getArtifactWithdrawalDisabled(): boolean {
+    const { ArtifactWithdrawal } = this.components;
+    const value = getComponentValue(ArtifactWithdrawal, singletonEntity);
+    return value?.disabled ?? false;
   }
 
   /**

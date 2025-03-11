@@ -141,4 +141,28 @@ contract ArtifactNFTTest is MudTest {
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 0);
     assertEq(ArtifactOwner.get(uint32(1)), bytes32(0));
   }
+
+  function testDisableNFTMinting() public {
+    // mint artifact nft
+    vm.roll(1000);
+    vm.prank(address(1));
+    IWorld(worldAddress).df__prospectPlanet(1);
+    Proof memory proof;
+    BiomebaseInput memory input;
+    input.planetHash = 1;
+    vm.roll(1100);
+    vm.prank(address(1));
+    IWorld(worldAddress).df__findingArtifact(proof, input);
+    vm.prank(admin);
+    PlanetConstants.setPlanetType(bytes32(uint256(1)), PlanetType.SPACETIME_RIP);
+    vm.prank(admin);
+    PlanetConstants.setLevel(bytes32(uint256(1)), 6);
+
+    // disable nft minting
+    vm.prank(admin);
+    IWorld(worldAddress).df__disableArtifactWithdrawal();
+    vm.prank(address(1));
+    vm.expectRevert(Errors.ArtifactWithdrawalDisabled.selector);
+    IWorld(worldAddress).df__withdrawArtifact(1, 1);
+  }
 }

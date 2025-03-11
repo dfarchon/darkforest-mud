@@ -180,6 +180,12 @@ export default defineWorld({
       key: [],
     },
     ArtifactRegistry: "bool",
+    ArtifactWithdrawal: {
+      schema: {
+        disabled: "bool",
+      },
+      key: [],
+    },
     ArtifactNFT: {
       schema: {
         addr: "address",
