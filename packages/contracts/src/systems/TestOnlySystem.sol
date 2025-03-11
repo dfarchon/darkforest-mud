@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
-import { IWorld } from "codegen/world/IWorld.sol";
 import { PlanetType, SpaceType, PlanetStatus } from "codegen/common.sol";
 import { Planet as PlanetTable } from "codegen/tables/Planet.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
