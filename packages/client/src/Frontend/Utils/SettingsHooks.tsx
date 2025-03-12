@@ -81,6 +81,8 @@ const defaultSettings: Record<Setting, string> = {
   [Setting.ForceReloadEmbeddedPlugins]: "false",
   [Setting.PaneVisible]: "true",
   [Setting.BottomHotkeyVisible]: "true",
+  [Setting.BackgroundMusicVolume]: "0.5",
+  [Setting.BackgroundMusicEnabled]: "true",
 };
 
 interface SettingStorageConfig {

@@ -212,6 +212,9 @@ importers:
       p-timeout:
         specifier: 4.1.0
         version: 4.1.0
+      react-howler:
+        specifier: ^5.2.0
+        version: 5.2.0
       rxjs:
         specifier: 7.5.5
         version: 7.5.5
@@ -249,6 +252,9 @@ importers:
       '@types/react-dom':
         specifier: 18.3.0
         version: 18.3.0
+      '@types/react-howler':
+        specifier: ^5.2.3
+        version: 5.2.3
       '@types/react-timeago':
         specifier: 4.1.7
         version: 4.1.7
@@ -4287,6 +4293,9 @@ packages:
   '@types/hoist-non-react-statics@3.3.6':
     resolution: {integrity: sha512-lPByRJUer/iN/xa4qpyL0qmL11DqNW81iU/IG1S3uvRUq4oKagz8VCxZjiWkumgt66YT3vOdDgZ0o32sGKtCEw==}
 
+  '@types/howler@2.2.12':
+    resolution: {integrity: sha512-hy769UICzOSdK0Kn1FBk4gN+lswcj1EKRkmiDtMkUGvFfYJzgaDXmVXkSShS2m89ERAatGIPnTUlp2HhfkVo5g==}
+
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
 
@@ -4337,6 +4346,9 @@ packages:
 
   '@types/react-dom@18.3.0':
     resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
+
+  '@types/react-howler@5.2.3':
+    resolution: {integrity: sha512-0XJ+vHLgobVcc8G8f3jlnfIv3FVnUvEuxOyq3TwW9qNBeko7EhHDc9QYtY7mUTcrT86mPTAVCKWitY+TyzHWZw==}
 
   '@types/react-timeago@4.1.7':
     resolution: {integrity: sha512-ogD4Ror/hDG+pQggCX+TgPgJ8W2jeeUxsgNU485Qpm0Ma+E2TND2EJuKwK5+sxlkDXDEgsHradO0zWBkTgLzNg==}
@@ -7182,6 +7194,9 @@ packages:
     resolution: {integrity: sha512-KTsH9hb+YZHH0IIRf22y0X8mPw8j521W5xRAUeaUlGNBDsf44ixE7ZeyXbUHd/nQ1n04UEhi2ja05/QVOS/CgQ==}
     engines: {node: '>=10.0.0'}
 
+  howler@2.2.4:
+    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
+
   http-assert@1.5.0:
     resolution: {integrity: sha512-uPpH7OKX4H25hBmU6G1jWNaqJGpTXxey+YOUizJUAgu0AjLUeC8D73hTrhvDS5D+GJN1DN1+hhc/eF/wpxtp0w==}
     engines: {node: '>= 0.8'}
@@ -8072,6 +8087,7 @@ packages:
 
   lodash.isequal@4.5.0:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
 
   lodash.isinteger@4.0.4:
     resolution: {integrity: sha512-DBwtEWN2caHQ9/imiNeEA5ys1JoRtRfY3d7V9wkqtbycnAmTvRRmbHKDV4a0EYc678/dia0jrte4tjYwVBaZUA==}
@@ -9560,6 +9576,9 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
+
+  react-howler@5.2.0:
+    resolution: {integrity: sha512-oDK+zML0MHf3nVNM4lMxh+re87NDa7fHowea2WK8197yqnMiZfPVHoMXtfb/PtuoOsWLO06vmEAtovwTRWpTFg==}
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -17148,6 +17167,8 @@ snapshots:
       '@types/react': 18.3.8
       hoist-non-react-statics: 3.3.2
 
+  '@types/howler@2.2.12': {}
+
   '@types/http-cache-semantics@4.0.4': {}
 
   '@types/http-proxy@1.17.15':
@@ -17197,6 +17218,11 @@ snapshots:
 
   '@types/react-dom@18.3.0':
     dependencies:
+      '@types/react': 18.3.8
+
+  '@types/react-howler@5.2.3':
+    dependencies:
+      '@types/howler': 2.2.12
       '@types/react': 18.3.8
 
   '@types/react-timeago@4.1.7':
@@ -20117,7 +20143,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.17.0(eslint@9.16.0(jiti@2.4.1))(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0)(eslint@9.16.0(jiti@2.4.1)))(eslint@9.16.0(jiti@2.4.1)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.17.0(eslint@9.16.0(jiti@2.4.1))(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0)(eslint@9.16.0(jiti@2.4.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -20139,7 +20165,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.16.0(jiti@2.4.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.17.0(eslint@9.16.0(jiti@2.4.1))(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0)(eslint@9.16.0(jiti@2.4.1)))(eslint@9.16.0(jiti@2.4.1))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.17.0(eslint@9.16.0(jiti@2.4.1))(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.7.0)(eslint@9.16.0(jiti@2.4.1))
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -21132,6 +21158,8 @@ snapshots:
   hot-shots@10.1.1:
     optionalDependencies:
       unix-dgram: 2.0.6
+
+  howler@2.2.4: {}
 
   http-assert@1.5.0:
     dependencies:
@@ -23812,6 +23840,11 @@ snapshots:
   react-hook-form@7.53.2(react@18.3.1):
     dependencies:
       react: 18.3.1
+
+  react-howler@5.2.0:
+    dependencies:
+      howler: 2.2.4
+      prop-types: 15.8.1
 
   react-is@16.13.1: {}
 

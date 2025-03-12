@@ -12,6 +12,7 @@ import {
   WindowWrapper,
 } from "../Components/GameWindowComponents";
 import ControllableCanvas from "../Game/ControllableCanvas";
+import { AmbiencePane } from "../Panes/AmbiencePane";
 import { ArtifactHoverPane } from "../Panes/ArtifactHoverPane";
 import { CoordsPane } from "../Panes/CoordsPane";
 import { DiagnosticsPane } from "../Panes/DiagnosticsPane";
@@ -421,11 +422,10 @@ export function GameWindowLayout({
 
       <MainWindow>
         <CanvasContainer>
-          {paneVisible && (
-            <UpperLeft>
-              <ZoomPane />
-            </UpperLeft>
-          )}
+          <UpperLeft>
+            <AmbiencePane />
+            {paneVisible && <ZoomPane />}
+          </UpperLeft>
 
           {paneVisible && (
             <SidebarPane

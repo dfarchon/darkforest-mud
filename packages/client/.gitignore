@@ -4,3 +4,6 @@ dist
 .env
 
 .netlify
+
+
+public/sounds/
