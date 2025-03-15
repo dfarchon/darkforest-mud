@@ -7,6 +7,7 @@ import {
   type Planet,
   type WorldCoords,
 } from "@df/types";
+import { Setting } from "@df/types";
 import { Btn } from "@frontend/Components/Btn";
 import { predictTokenCost } from "@frontend/Utils/AI-Chat-PredictCost";
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +21,7 @@ import {
   loadConversationFromIndexedDB,
   saveMessageToIndexedDB,
 } from "../Utils/IndexedDB-ChatMemory";
+import { useBooleanSetting } from "../Utils/SettingsHooks";
 import { ModalPane } from "../Views/ModalPane";
 import { CurrencyView } from "./AIChatTokensBar";
 import { LevelFilter } from "./LevelFilter";
@@ -147,7 +149,10 @@ export function AIChatPane({
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
   const player = usePlayer(uiManager).value;
-
+  const [settingValue, setSettingValue] = useBooleanSetting(
+    uiManager,
+    Setting.ActiveAISpeak,
+  );
   const [activeTab, setActiveTab] = useState<"chat" | "agent">("chat");
   const [selectedRange, setSelectedRange] = useState<{
     begin: WorldCoords | null;
@@ -487,7 +492,9 @@ export function AIChatPane({
           const aiMessage = { message: aiResponse, isUser: false };
           setChatHistory((prev) => [...prev, aiMessage]);
           saveMessageToIndexedDB(aiMessage);
-          speak(aiResponse);
+          if (settingValue) {
+            speak(aiResponse);
+          }
         } else {
           console.error("Error fetching AI response:", response.statusText);
         }
@@ -785,7 +792,15 @@ export function AIChatPane({
       ) : (
         <AIAgentContent>
           <div>
-            <div className="flex items-center justify-between">
+            {" "}
+            <LevelFilter
+              levels={PLANET_LEVELS}
+              selectedLevels={selectedLevels}
+              onSelectLevel={(levels) => {
+                setSelectedLevels(levels);
+              }}
+            />
+            <div className="flex items-center justify-between border-b border-gray-600">
               {/* Column 1: Begin and End Text */}
               <div className="flex flex-col items-start justify-center">
                 <Btn
@@ -812,8 +827,7 @@ export function AIChatPane({
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-1">
               <div> Selected Planets: {planetsCount} </div>{" "}
               <div>
                 {" "}
@@ -823,27 +837,19 @@ export function AIChatPane({
               </div>
               <div> Filtered Planets: {planetsFilteredCount} </div>
             </div>
-
-            <LevelFilter
-              levels={PLANET_LEVELS}
-              selectedLevels={selectedLevels}
-              onSelectLevel={(levels) => {
-                setSelectedLevels(levels);
-              }}
+            <TextInput
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Enter a command or query for the agent..."
             />
+            <div className="flex items-center justify-between p-1">
+              <Btn onClick={handleAgentSend}>Send</Btn>
+              <Btn onClick={() => setAgentResponse("")}>Clear</Btn>
+            </div>{" "}
+            <AgentResponseContainer>
+              {agentResponse || "No response yet. Please enter a message."}
+            </AgentResponseContainer>{" "}
           </div>
-          <MultiLineTextInput
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Enter a command or query for the agent..."
-          />
-          <div className="flex items-center justify-between p-2">
-            <Btn onClick={handleAgentSend}>Send</Btn>
-            <Btn onClick={() => setAgentResponse("")}>Clear</Btn>
-          </div>
-          <AgentResponseContainer>
-            {agentResponse || "No response yet. Please enter a message."}
-          </AgentResponseContainer>
         </AIAgentContent>
       )}
       <CurrencyView />
