@@ -78,6 +78,7 @@ import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
 import { isBroken } from "@df/gamelogic";
+import { Howl } from "howler";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -375,6 +376,7 @@ export class GameUIManager extends EventEmitter {
     _selectedCoords: { x: number; y: number },
     spectate: boolean,
   ): Promise<void> {
+    this.playClickSound();
     return this.gameManager.joinGame(beforeRetry, _selectedCoords, spectate);
   }
 
@@ -423,14 +425,17 @@ export class GameUIManager extends EventEmitter {
       alert("This round has ended, and you can no longer find artifacts!");
       return;
     }
+    this.playClickSound();
     this.gameManager.prospectPlanet(planetId);
   }
 
   public withdrawArtifact(locationId: LocationId, artifactId: ArtifactId) {
+    this.playClickSound();
     this.gameManager.withdrawArtifact(locationId, artifactId);
   }
 
   public depositArtifact(locationId: LocationId, artifactId: ArtifactId) {
+    this.playClickSound();
     this.gameManager.depositArtifact(locationId, artifactId);
   }
 
@@ -439,6 +444,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public chargeArtifact(locationId: LocationId, id: ArtifactId, data: Hex) {
+    this.playClickSound();
     this.gameManager.chargeArtifact(locationId, id, data);
   }
 
@@ -457,10 +463,12 @@ export class GameUIManager extends EventEmitter {
       return;
     }
 
+    this.playClickSound();
     this.gameManager.activateArtifact(locationId, id, linkTo);
   }
 
   public shutdownArtifact(locationId: LocationId, id: ArtifactId) {
+    this.playClickSound();
     this.gameManager.shutdownArtifact(locationId, id);
   }
 
@@ -477,7 +485,7 @@ export class GameUIManager extends EventEmitter {
     if (!confirm(confirmationText)) {
       return;
     }
-
+    this.playClickSound();
     this.gameManager.deactivateArtifact(locationId, artifactId, linkTo);
   }
 
@@ -486,6 +494,7 @@ export class GameUIManager extends EventEmitter {
     artifactId: ArtifactId,
     newImageType: number,
   ) {
+    this.playClickSound();
     this.gameManager.changeArtifactImageType(
       locationId,
       artifactId,
@@ -519,19 +528,23 @@ export class GameUIManager extends EventEmitter {
         return;
       }
     }
+    this.playClickSound();
 
     this.gameManager.withdrawSilver(locationId, amount);
   }
 
   public setPlanetEmoji(locationId: LocationId, emoji: string) {
+    this.playClickSound();
     this.gameManager.setPlanetEmoji(locationId, emoji);
   }
 
   public async buyGPTTokens(amount: number) {
+    this.playClickSound();
     await this.gameManager.buyGPTTokens(amount);
   }
 
   public async spendGPTTokens() {
+    this.playClickSound();
     await this.gameManager.spendGPTTokens();
   }
 
@@ -553,6 +566,7 @@ export class GameUIManager extends EventEmitter {
   }
 
   public revealLocation(locationId: LocationId) {
+    this.playClickSound();
     this.gameManager.revealLocation(locationId);
   }
 
@@ -576,6 +590,7 @@ export class GameUIManager extends EventEmitter {
 
   public pinkLocation(locationId: LocationId) {
     // TODO: fix here
+    this.playClickSound();
     this.gameManager.pinkLocation(locationId);
   }
 
@@ -817,6 +832,7 @@ export class GameUIManager extends EventEmitter {
           );
           const artifact = this.getArtifactSending(from.locationId);
 
+          this.playClickSound();
           this.gameManager.move(
             from.locationId,
             to.locationId,
@@ -1071,6 +1087,8 @@ export class GameUIManager extends EventEmitter {
     }
     uiEmitter.emit(UIEmitterEvent.GamePlanetSelected);
 
+    if (planet?.locationId) this.playClickSound();
+
     this.selectedPlanetId$.publish(planet?.locationId);
   }
 
@@ -1306,6 +1324,7 @@ export class GameUIManager extends EventEmitter {
     this.mouseHoveringOverPlanet = planet;
 
     if (lastHover?.locationId !== planet?.locationId) {
+      if (planet?.locationId) this.playHoverSound();
       this.hoverPlanetId$.publish(planet?.locationId);
       this.planetHoveringInRenderer = inRenderer;
     }
@@ -1708,6 +1727,7 @@ export class GameUIManager extends EventEmitter {
 
   public donate(amount: number): void {
     // this.terminal.current?.printShellLn(`df.donate('${amount}')`);
+    this.playClickSound();
     this.gameManager.donate(amount);
   }
 
@@ -2027,5 +2047,55 @@ export class GameUIManager extends EventEmitter {
     if (renderer) {
       renderer.removeCustomRenderer(customRenderer);
     }
+  }
+
+  public playHoverSound() {
+    const backgroundMusicEnabled = this.getBooleanSetting(
+      Setting.BackgroundMusicEnabled,
+    );
+
+    if (!backgroundMusicEnabled) return;
+
+    const backgroundMusicVolume = this.getStringSetting(
+      Setting.BackgroundMusicVolume,
+    );
+
+    const hoverSound = new Howl({
+      src: ["/public/sounds/hover.ogg"],
+      volume: Math.round(Number(backgroundMusicVolume) / 10),
+      html5: true,
+      onload: () => {
+        // console.log("Hover sound loaded");
+      },
+      onplay: () => {
+        // console.log("Hover sound playing");
+      },
+    });
+    hoverSound.play();
+  }
+
+  public playClickSound() {
+    const backgroundMusicEnabled = this.getBooleanSetting(
+      Setting.BackgroundMusicEnabled,
+    );
+
+    if (!backgroundMusicEnabled) return;
+
+    const backgroundMusicVolume = this.getStringSetting(
+      Setting.BackgroundMusicVolume,
+    );
+
+    const clickSound = new Howl({
+      src: ["/public/sounds/click.ogg"],
+      volume: Math.round(Number(backgroundMusicVolume) / 10),
+      html5: true,
+      onload: () => {
+        // console.log("Click sound loaded");
+      },
+      onplay: () => {
+        // console.log("Click sound playing");
+      },
+    });
+    clickSound.play();
   }
 }
