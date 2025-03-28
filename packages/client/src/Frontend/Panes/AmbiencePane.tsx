@@ -130,6 +130,27 @@ export function AmbiencePane() {
 
   const [loaded, setLoaded] = useState<boolean>(false);
   const [hovering, setHovering] = useState<boolean>(false);
+  const [isActuallyPlaying, setIsActuallyPlaying] = useState<boolean>(false);
+  const [universeLoaded, setUniverseLoaded] = useState<boolean>(false);
+
+  const handleOnEnd = () => {
+    setIsActuallyPlaying(false);
+    setTimeout(() => {
+      if (backgroundMusicEnabled) {
+        setIsActuallyPlaying(true);
+      }
+    }, 30000);
+  };
+
+  useEffect(() => {
+    setIsActuallyPlaying(backgroundMusicEnabled);
+  }, [backgroundMusicEnabled]);
+
+  useEffect(() => {
+    if (loaded && universeLoaded) {
+      setLoaded(true);
+    }
+  }, [loaded, universeLoaded]);
 
   const onScrollVolumeChange = (
     e: Event & React.ChangeEvent<HTMLInputElement>,
@@ -168,13 +189,24 @@ export function AmbiencePane() {
         />
       )}
       <ReactHowler
-        src="/public/sounds/interstellar-oasis.mp3"
-        playing={backgroundMusicEnabled}
-        loop={true}
+        src="/public/sounds/bgm-v3.ogg"
+        playing={isActuallyPlaying}
+        loop={false}
         html5={true}
         volume={0.1 * Number(backgroundMusicVolume)}
         onLoad={() => {
           setLoaded(true);
+        }}
+        onEnd={handleOnEnd}
+      />
+      <ReactHowler
+        src="/public/sounds/universe.ogg"
+        playing={backgroundMusicEnabled}
+        loop={true}
+        html5={true}
+        volume={0.05 * Number(backgroundMusicVolume)}
+        onLoad={() => {
+          setUniverseLoaded(true);
         }}
       />
     </StyledAmbiencePane>
