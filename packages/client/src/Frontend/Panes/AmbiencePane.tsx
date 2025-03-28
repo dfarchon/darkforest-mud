@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import ReactHowler from "react-howler";
 import { Slider } from "../Components/Slider";
@@ -10,6 +10,7 @@ import {
 } from "@frontend/Utils/SettingsHooks";
 import { useUIManager } from "@frontend/Utils/AppHooks";
 import { Setting } from "@df/types";
+import { DarkForestSliderHandle } from "@df/ui";
 
 const StyledAmbiencePane = styled.div`
   z-index: ${DFZIndex.MenuBar};
@@ -129,13 +130,24 @@ export function AmbiencePane() {
   );
 
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [mainMelodyLoaded, setMainMelodyLoaded] = useState<boolean>(false);
+  const [universeLoaded, setUniverseLoaded] = useState<boolean>(false);
+
   const [hovering, setHovering] = useState<boolean>(false);
   const [isActuallyPlaying, setIsActuallyPlaying] = useState<boolean>(false);
-  const [universeLoaded, setUniverseLoaded] = useState<boolean>(false);
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (mainMelodyLoaded && universeLoaded) {
+      setLoaded(true);
+    }
+  }, [mainMelodyLoaded, universeLoaded]);
 
   const handleOnEnd = () => {
     setIsActuallyPlaying(false);
-    setTimeout(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
       if (backgroundMusicEnabled) {
         setIsActuallyPlaying(true);
       }
@@ -143,14 +155,18 @@ export function AmbiencePane() {
   };
 
   useEffect(() => {
-    setIsActuallyPlaying(backgroundMusicEnabled);
+    if (backgroundMusicEnabled) {
+      setIsActuallyPlaying(true);
+    } else {
+      setIsActuallyPlaying(false);
+    }
   }, [backgroundMusicEnabled]);
 
   useEffect(() => {
-    if (loaded && universeLoaded) {
-      setLoaded(true);
-    }
-  }, [loaded, universeLoaded]);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const onScrollVolumeChange = (
     e: Event & React.ChangeEvent<HTMLInputElement>,
@@ -161,17 +177,14 @@ export function AmbiencePane() {
       setBackgroundMusicVolume(value);
     }
   };
+
   return (
     <StyledAmbiencePane
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
       {loaded ? (
-        <a
-          onClick={() => {
-            setBackgroundMusicEnabled(!backgroundMusicEnabled);
-          }}
-        >
+        <a onClick={() => setBackgroundMusicEnabled(!backgroundMusicEnabled)}>
           {backgroundMusicEnabled ? <IconPlaying /> : <IconMuted />}
         </a>
       ) : (
@@ -194,9 +207,7 @@ export function AmbiencePane() {
         loop={false}
         html5={true}
         volume={0.1 * Number(backgroundMusicVolume)}
-        onLoad={() => {
-          setLoaded(true);
-        }}
+        onLoad={() => setMainMelodyLoaded(true)}
         onEnd={handleOnEnd}
       />
       <ReactHowler
@@ -204,10 +215,8 @@ export function AmbiencePane() {
         playing={backgroundMusicEnabled}
         loop={true}
         html5={true}
-        volume={0.05 * Number(backgroundMusicVolume)}
-        onLoad={() => {
-          setUniverseLoaded(true);
-        }}
+        volume={0.1 * Number(backgroundMusicVolume)}
+        onLoad={() => setUniverseLoaded(true)}
       />
     </StyledAmbiencePane>
   );
