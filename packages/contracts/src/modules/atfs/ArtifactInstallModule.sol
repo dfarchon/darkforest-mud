@@ -12,7 +12,7 @@ import { IArtifactProxySystem } from "./IArtifactProxySystem.sol";
 import { _artifactIndexToNamespace, _artifactProxySystemId } from "./utils.sol";
 
 contract ArtifactInstallModule is Module {
-  function install(bytes memory encodedArgs) public {
+  function install(bytes memory encodedArgs) public override {
     // Require the module to not be installed with these args yet
     requireNotInstalled(__self, encodedArgs);
 
@@ -39,7 +39,7 @@ contract ArtifactInstallModule is Module {
     IArtifactSystem(address(world)).df__registerArtifact(index);
   }
 
-  function installRoot(bytes memory) public pure {
+  function installRoot(bytes memory) public pure override {
     revert Module_RootInstallNotSupported();
   }
 }
