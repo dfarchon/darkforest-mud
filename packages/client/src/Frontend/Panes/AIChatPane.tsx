@@ -14,7 +14,6 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { Spacer } from "../Components/CoreUI";
-import { TextInput } from "../Components/Input";
 import { useAccount, usePlayer, useUIManager } from "../Utils/AppHooks";
 import {
   clearChatHistoryFromIndexedDB,
@@ -28,12 +27,67 @@ import { LevelFilter } from "./LevelFilter";
 const API_URL = import.meta.env.VITE_AI_API_URL;
 const PLANET_LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+const AIChatWrapper = styled.div`
+  position: relative;
+  width: 550px;
+  height: 450px;
+`;
+
 const AIChatContent = styled.div`
-  width: 500px;
-  height: 600px;
+  width: 100%;
+  height: 72%;
   overflow-y: scroll;
+  padding-bottom: 80px; // to make room for input
   display: flex;
   flex-direction: column;
+  border-radius: 5px;
+`;
+//w-full resize-none rounded-md border border-gray-700 p-2
+const AIChatInputRows = styled.textarea`
+  width: 100%;
+  resize: none;
+  border: 1px solidrgba(59, 63, 70, 0.95); // Tailwind's gray-700
+  border-radius: 0.375rem; // Tailwind's rounded-md
+  padding: 0.5rem; // Tailwind's p-2
+  font-size: 1rem;
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.6);
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+  }
+`;
+
+const AIChatInput = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const AITextOutput = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .label {
+    font-size: 0.875rem; /* Tailwind's text-sm */
+    color: #6b7280; /* Tailwind's gray-500 */
+  }
+
+  .value {
+    align-items: center;
+    font-weight: 700; /* Tailwind's font-bold */
+    font-size: 1.125rem; /* Tailwind's text-lg */
+  }
 `;
 
 const ChatMessage = styled.div<{ isUser: boolean }>`
@@ -52,26 +106,11 @@ const ChatMessage = styled.div<{ isUser: boolean }>`
 
 const AIAgentContent = styled.div`
   width: 550px;
-  height: 600px;
+  height: 450px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-`;
-
-const MultiLineTextInput = styled.textarea`
-  width: 100%;
-  height: calc(1.5em * 12 + 10px); /* 6 lines with padding */
-  padding: 8px;
-  resize: none; /* Prevent resizing */
-  border: 1px solid #777;
-  border-radius: 5px;
-  font-size: 1rem;
-  background-color: #151515;
-  color: #bbbbbb;
-  box-sizing: border-box;
-  line-height: 1.5;
-  overflow-y: auto; /* Add scrolling for large inputs */
 `;
 
 const AgentResponseContainer = styled.div`
@@ -123,19 +162,7 @@ function HelpContent() {
     </div>
   );
 }
-// PUNK! for fun - could be setup in option
-const speak = (text: string) => {
-  if ("speechSynthesis" in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US"; // Set language (change as needed)
-    utterance.pitch = 0; // Range: 0 to 2 - 1.5 / 0 / 1
-    utterance.rate = 0.6; // Range: 0.1 to 10 - 0.7 / 0 / 0.75
-    utterance.voice = speechSynthesis.getVoices()[0]; // Choose a specific voice 1 / 0 / 2
-    speechSynthesis.speak(utterance);
-  } else {
-    console.error("Speech synthesis not supported in this browser.");
-  }
-};
+
 //speak("hello, how are you today?");
 export function AIChatPane({
   visible,
@@ -146,9 +173,27 @@ export function AIChatPane({
   onClose: () => void;
   gameManager: GameManager;
 }) {
+  // PUNK! for fun - could be setup in option
+  const speak = (text: string) => {
+    if (settingValue && mute) {
+      if ("speechSynthesis" in window) {
+        speechSynthesis.cancel(); // Optional: interrupt anything queued
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US"; // Set language (change as needed)
+        utterance.pitch = 0; // Range: 0 to 2 - 1.5 / 0 / 1
+        utterance.rate = 0.6; // Range: 0.1 to 10 - 0.7 / 0 / 0.75
+        utterance.voice = speechSynthesis.getVoices()[0]; // Choose a specific voice 1 / 0 / 2
+
+        speechSynthesis.speak(utterance);
+      }
+    } else {
+      console.error("Speech synthesis not supported in this browser.");
+    }
+  };
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
   const player = usePlayer(uiManager).value;
+  const [mute, setMute] = useState<boolean>(true);
   const [settingValue, setSettingValue] = useBooleanSetting(
     uiManager,
     Setting.ActiveAISpeak,
@@ -176,7 +221,8 @@ export function AIChatPane({
   });
   const [agentResponse, setAgentResponse] = useState<string>(""); // For AIAgentContent
   const [isSelectionActive, setIsSelectionActive] = useState<boolean>(false);
-  const [input, setInput] = useState<string>("");
+  const [inputChat, setInputChat] = useState<string>("");
+  const [inputAgent, setInputAgent] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<
     { message: string; isUser: boolean }[]
   >([]);
@@ -310,7 +356,7 @@ export function AIChatPane({
       const reducedPlanets = reducePlanets(filteredPlanets);
       const forCost = {
         username: player?.name,
-        message: input,
+        message: inputAgent,
         selectedPlanets: reducedPlanets,
       };
       // Repair issue with big number for JSON
@@ -323,7 +369,7 @@ export function AIChatPane({
       const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
       setPredictedCost(predictedCost_);
     }
-  }, [selectedLevels, selectedRange, uiManager, gameManager, input]);
+  }, [selectedLevels, selectedRange, uiManager, gameManager, inputAgent]);
 
   // Function step by step for Btn Start Range selection and handlers
   const handleStartSelection = () => {
@@ -331,7 +377,112 @@ export function AIChatPane({
     setIsSelectionActive(true);
     // Reset the selected range before starting a new selection
     setSelectedRange({ begin: null, end: null });
+    localStorage.setItem(
+      "aiselectedRange",
+      JSON.stringify({ begin: null, end: null }),
+    );
 
+    const handleHoverPreview = () => {
+      const coords = uiManager.getHoveringOverCoords();
+      const storedRange = JSON.parse(
+        localStorage.getItem("aiselectedRange") || "{}",
+      );
+
+      if (storedRange.begin && coords) {
+        const previewRange = { ...storedRange, end: coords };
+        localStorage.setItem("aiselectedRange", JSON.stringify(previewRange));
+
+        uiManager.getAIZones();
+        const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
+        const chunksAsArray = Array.from(chunks);
+        // Filter whole player map chunks
+        const filteredChunks = chunksAsArray.filter((chunk) => {
+          // Validate chunk structure
+          if (!chunk.chunkFootprint || !chunk.chunkFootprint.bottomLeft) {
+            console.warn("Invalid chunk structure:", chunk);
+            return false;
+          }
+
+          const chunkLeft = chunk.chunkFootprint.bottomLeft.x;
+          const chunkRight = chunkLeft + chunk.chunkFootprint.sideLength;
+          const chunkBottom = chunk.chunkFootprint.bottomLeft.y;
+          const chunkTop = chunkBottom + chunk.chunkFootprint.sideLength;
+          if (previewRange.begin && previewRange.end)
+            return (
+              chunkRight > Math.min(previewRange.begin.x, previewRange.end.x) &&
+              chunkLeft < Math.max(previewRange.begin.x, previewRange.end.x) &&
+              chunkBottom <
+                Math.max(previewRange.begin.y, previewRange.end.y) &&
+              chunkTop > Math.min(previewRange.begin.y, previewRange.end.y)
+            );
+        });
+
+        // Generate planet hashes for the selected range
+        const planetData = filteredChunks.flatMap((chunk) =>
+          chunk.planetLocations
+            .filter((planet) => {
+              if (previewRange.begin && previewRange.end) {
+                const planetX = planet.coords.x;
+                const planetY = planet.coords.y;
+
+                return (
+                  planetX >
+                    Math.min(previewRange.begin.x, previewRange.end.x) &&
+                  planetX <
+                    Math.max(previewRange.begin.x, previewRange.end.x) &&
+                  planetY <
+                    Math.max(previewRange.begin.y, previewRange.end.y) &&
+                  planetY > Math.min(previewRange.begin.y, previewRange.end.y)
+                );
+              }
+              return false;
+            })
+            .map((planet) => ({
+              hash: planet.hash,
+              coords: planet.coords,
+            })),
+        );
+
+        // console.log("Filtered Planet Hashes:", planetData);
+
+        setPlanetsCount(planetData.length);
+
+        // Fetch full planet data filtered by level filter bar
+        const filteredPlanets = gameManager
+          .getPlanetsWithIds(planetData.map((planet) => planet.hash))
+          .filter(
+            (planet) =>
+              planet.planetLevel >= Math.min(...selectedLevels) &&
+              planet.planetLevel <= Math.max(...selectedLevels),
+          );
+        //     console.log("NOT-Filtered Planets:", planetsFullData);
+
+        // console.log("Filtered Planets:", filteredPlanets);
+        setSelectedPlanets(filteredPlanets);
+        setPlanetsFilteredCount(filteredPlanets.length);
+
+        // Transform planets for cost calculation
+        const reducedPlanets = reducePlanets(filteredPlanets);
+        // Buld forCost constant for prediction function
+        const forCost = {
+          username: player?.name,
+          message: inputAgent,
+          selectedPlanets: reducedPlanets,
+        };
+
+        const stringForCost = JSON.stringify(forCost, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        );
+        // console.log("String:", stringForCost);
+        // Predict cost for default input + selected filtered planets + msg input
+        const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
+        //console.log("Price:", predictedCost_);
+        setPredictedCost(predictedCost_);
+        // Optional: trigger a render or visual overlay using this preview
+        // e.g. update state, draw to canvas, etc.
+      }
+    };
+    let hoverPreviewListenerAttached = false;
     // Define the click handler for Start Range Selection
     const handleClick = (event: MouseEvent) => {
       const coords = uiManager.getHoveringOverCoords();
@@ -340,9 +491,20 @@ export function AIChatPane({
           if (!prev.begin) {
             console.log("Begin coordinates set:", coords);
             const updatedRange = { ...prev, begin: coords };
+            localStorage.setItem(
+              "aiselectedRange",
+              JSON.stringify(updatedRange),
+            );
+            // After setting begin
+            if (!hoverPreviewListenerAttached) {
+              window.addEventListener("mousemove", handleHoverPreview);
+              hoverPreviewListenerAttached = true;
+            }
             return updatedRange;
           } else if (!prev.end) {
             console.log("End coordinates set:", coords);
+
+            localStorage.removeItem("aiselectedPreviewRange");
             const updatedRange = { ...prev, end: coords };
             // Call generatePlanetArray with the selected range once both begin and end are set
             if (updatedRange.begin && updatedRange.end) {
@@ -355,7 +517,8 @@ export function AIChatPane({
               uiManager.getAIZones();
               const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
               const chunksAsArray = Array.from(chunks);
-
+              window.removeEventListener("mousemove", handleHoverPreview);
+              hoverPreviewListenerAttached = false;
               // Filter whole player map chunks
               const filteredChunks = chunksAsArray.filter((chunk) => {
                 // Validate chunk structure
@@ -431,7 +594,7 @@ export function AIChatPane({
               // Buld forCost constant for prediction function
               const forCost = {
                 username: player?.name,
-                message: input,
+                message: inputAgent,
                 selectedPlanets: reducedPlanets,
               };
 
@@ -464,8 +627,8 @@ export function AIChatPane({
 
   // Btn Send AIchat Assistan Q.
   const handleSendChat = async () => {
-    if (input.trim()) {
-      const userMessage = { message: input, isUser: true };
+    if (inputChat.trim()) {
+      const userMessage = { message: inputChat, isUser: true };
       setChatHistory((prev) => [...prev, userMessage]);
       saveMessageToIndexedDB(userMessage);
       const history = await loadConversationFromIndexedDB();
@@ -482,7 +645,7 @@ export function AIChatPane({
           },
           body: JSON.stringify({
             username: player?.name,
-            message: input,
+            message: inputChat,
             indexedHistory: history.map((h) => h.message).join("\n"),
           }),
         });
@@ -501,7 +664,7 @@ export function AIChatPane({
       } catch (error) {
         console.error("Error in AI chat process:", error);
       } finally {
-        setInput(""); // Clear input regardless of outcome
+        setInputChat(""); // Clear input regardless of outcome
       }
     }
   };
@@ -515,6 +678,14 @@ export function AIChatPane({
       console.error("Error clearing chat history:", error);
     }
   };
+  // Btn Mute / Unmute
+  const handleMute = () => {
+    if (mute) {
+      speechSynthesis.cancel(); // Stop any ongoing speech when muting
+    }
+    setMute((prev) => !prev);
+  };
+
   // Function to reduce the selectedPlanets to minized chat tokens needs
   function reducePlanets(selectedPlanets: Planet[]) {
     return selectedPlanets.map((planet) => [
@@ -571,13 +742,13 @@ export function AIChatPane({
 
   // Btn Send AIAgent request
   const handleAgentSend = async () => {
-    if (input.trim()) {
+    if (inputAgent.trim()) {
       const reducedPlanets = reducePlanets(selectedPlanets);
 
       try {
         const forCost = {
           username: player?.name,
-          message: input,
+          message: inputAgent,
           selectedPlanets: reducedPlanets,
         };
 
@@ -612,7 +783,7 @@ export function AIChatPane({
           body: JSON.stringify({
             username: player?.name,
             ownerAddress: player?.address,
-            message: input,
+            message: inputAgent,
             selectedPlanets: stringReducedPlanets,
           }),
         });
@@ -652,7 +823,7 @@ export function AIChatPane({
         console.error("Error in AIAgentContent:", error);
         setAgentResponse("An error occurred while processing your request.");
       } finally {
-        //setInput(""); // Clear input regardless of outcome
+        setInputAgent(""); // Clear input regardless of outcome
       }
     } else {
       setAgentResponse("Put some input msg Sophon agent!");
@@ -772,27 +943,73 @@ export function AIChatPane({
         </Btn>
       </div>
       {activeTab === "chat" ? (
-        <AIChatContent>
-          {chatHistory.map((message, index) => (
-            <ChatMessage key={index} isUser={message.isUser}>
-              {message.message}
-            </ChatMessage>
-          ))}
-          <Spacer height={16} />
-          <TextInput
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message here..."
-          />
-          <div className="flex items-center justify-between p-2">
-            <Btn onClick={handleSendChat}>Send</Btn>
-            <Btn onClick={handleClearChat}>Clear</Btn>
-          </div>
-        </AIChatContent>
+        <AIChatWrapper>
+          <AIChatContent>
+            {chatHistory.map((message, index) => (
+              <ChatMessage key={index} isUser={message.isUser}>
+                {message.message}
+              </ChatMessage>
+            ))}
+            <Spacer height={16} />
+          </AIChatContent>
+
+          <AIChatInput>
+            <div className="border-t border-gray-700">
+              <AIChatInputRows
+                value={inputChat}
+                onChange={(e) => setInputChat(e.target.value)}
+                placeholder="Enter a command or query for the Sophon assistant..."
+                rows={2}
+              />
+            </div>
+            <div className="flex items-center justify-between p-1">
+              <Btn onClick={handleClearChat}>Clear</Btn>
+              <Btn onClick={handleMute}>{mute ? "🔊" : "🔇"}</Btn>
+              <Btn onClick={handleSendChat}>Send</Btn>
+            </div>
+          </AIChatInput>
+        </AIChatWrapper>
       ) : (
         <AIAgentContent>
           <div>
             {" "}
+            <div className="flex items-center justify-center border-gray-600">
+              {/* Column 1: Begin and End Text */}
+
+              {/* Column 2: Begin End left and rigth */}
+              <div className="flex flex-row items-start justify-center gap-10 p-1">
+                <AITextOutput>
+                  <span className="label">Begin:</span>
+                  <span className="value">
+                    {selectedRange.begin ? (
+                      `(${selectedRange.begin.x}, ${selectedRange.begin.y})`
+                    ) : (
+                      <span className="text-sm text-gray-500">
+                        Not Set. Click #1
+                      </span>
+                    )}
+                  </span>
+                </AITextOutput>
+                <Btn
+                  onClick={handleStartSelection}
+                  disabled={isSelectionActive}
+                >
+                  Select Range
+                </Btn>
+                <AITextOutput>
+                  <span className="label">End:</span>
+                  <span className="value">
+                    {selectedRange.end ? (
+                      `(${selectedRange.end.x}, ${selectedRange.end.y})`
+                    ) : (
+                      <span className="text-sm text-gray-500">
+                        Not Set. Click #2
+                      </span>
+                    )}
+                  </span>
+                </AITextOutput>
+              </div>
+            </div>
             <LevelFilter
               levels={PLANET_LEVELS}
               selectedLevels={selectedLevels}
@@ -800,51 +1017,49 @@ export function AIChatPane({
                 setSelectedLevels(levels);
               }}
             />
-            <div className="flex items-center justify-between border-b border-gray-600">
-              {/* Column 1: Begin and End Text */}
-              <div className="flex flex-col items-start justify-center">
-                <Btn
-                  onClick={handleStartSelection}
-                  disabled={isSelectionActive}
-                >
-                  Start Range Selection
-                </Btn>
+            <div className="flex items-center justify-between border-b border-t p-1">
+              <div className="rounded border p-1">
+                <AITextOutput>
+                  <span className="label">In range</span>
+                  <span className="value">{planetsCount}</span>
+                </AITextOutput>
               </div>
-
-              {/* Column 2: Button Centered */}
-              <div className="flex flex-col items-center justify-center p-1">
-                <div>
-                  Begin:{" "}
-                  {selectedRange.begin
-                    ? `(${selectedRange.begin.x}, ${selectedRange.begin.y})`
-                    : "Not Set. Click #1"}
-                </div>
-                <div>
-                  End:{" "}
-                  {selectedRange.end
-                    ? `(${selectedRange.end.x}, ${selectedRange.end.y})`
-                    : "Not Set. Click #2"}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-1">
-              <div> Selected Planets: {planetsCount} </div>{" "}
               <div>
-                {" "}
-                Cost: {predictedCost.cost.toFixed(8)} ChatTokens:
-                {predictedCost.aItokens.toFixed(0)} Credits:
-                {predictedCost.credits.toFixed(0)}{" "}
+                <AITextOutput>
+                  <span className="label">Cost $</span>
+                  <span className="value">{predictedCost.cost.toFixed(8)}</span>
+                </AITextOutput>
+                <AITextOutput>
+                  <span className="label">ChatTokens</span>
+                  <span className="value">
+                    {predictedCost.aItokens.toFixed(0)}
+                  </span>
+                </AITextOutput>
               </div>
-              <div> Filtered Planets: {planetsFilteredCount} </div>
+              <div>
+                <AITextOutput>
+                  <span className="label">Credits</span>
+                  <span className="value">
+                    {predictedCost.credits.toFixed(0)}
+                  </span>
+                </AITextOutput>
+                <AITextOutput>
+                  <span className="label">Selected Planets</span>
+                  <span className="value">{planetsFilteredCount}</span>
+                </AITextOutput>
+              </div>
             </div>
-            <TextInput
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter a command or query for the agent..."
-            />
             <div className="flex items-center justify-between p-1">
-              <Btn onClick={handleAgentSend}>Send</Btn>
+              <AIChatInputRows
+                value={inputAgent}
+                onChange={(e) => setInputAgent(e.target.value)}
+                placeholder="Enter a command or query for the Sophon agent..."
+                rows={3}
+              />
+            </div>
+            <div className="flex items-center justify-between p-1">
               <Btn onClick={() => setAgentResponse("")}>Clear</Btn>
+              <Btn onClick={handleAgentSend}>Send</Btn>
             </div>{" "}
             <AgentResponseContainer>
               {agentResponse || "No response yet. Please enter a message."}

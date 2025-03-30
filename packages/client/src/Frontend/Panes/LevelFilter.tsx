@@ -62,8 +62,6 @@ export const LevelFilter: React.FC<LevelFilterProps> = ({
 
   return (
     <div className="flex items-center justify-center">
-      {" "}
-      <div>Planet Lvls:</div>
       <LevelFilterContainer>
         {levels.map((level) => (
           <LevelButton
