@@ -43,10 +43,13 @@ const AIChatContent = styled.div`
   border-radius: 5px;
 `;
 //w-full resize-none rounded-md border border-gray-700 p-2
-const AIChatInputRows = styled.textarea`
+const AIChatInputRows = styled.textarea.attrs(() => ({
+  onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation(),
+  onKeyUp: (e: React.KeyboardEvent) => e.stopPropagation(),
+}))`
   width: 100%;
   resize: none;
-  border: 1px solidrgba(59, 63, 70, 0.95); // Tailwind's gray-700
+  border: 1px solid rgba(59, 63, 70, 0.95); // Tailwind's gray-700
   border-radius: 0.375rem; // Tailwind's rounded-md
   padding: 0.5rem; // Tailwind's p-2
   font-size: 1rem;
@@ -956,6 +959,8 @@ export function AIChatPane({
           <AIChatInput>
             <div className="border-t border-gray-700">
               <AIChatInputRows
+                onKeyDown={(e) => e.stopPropagation()}
+                onKeyUp={(e) => e.stopPropagation()}
                 value={inputChat}
                 onChange={(e) => setInputChat(e.target.value)}
                 placeholder="Enter a command or query for the Sophon assistant..."
@@ -1051,6 +1056,9 @@ export function AIChatPane({
             </div>
             <div className="flex items-center justify-between p-1">
               <AIChatInputRows
+                onKeyDown={(e) => e.stopPropagation()}
+                onKeyUp={(e) => e.stopPropagation()}
+                className="TextInput"
                 value={inputAgent}
                 onChange={(e) => setInputAgent(e.target.value)}
                 placeholder="Enter a command or query for the Sophon agent..."
