@@ -1102,6 +1102,7 @@ export class ContractsAPI extends EventEmitter {
     const upgradeConfig = getComponentValue(UpgradeConfig, singletonEntity);
     const snarkConfig = getComponentValue(SnarkConfig, singletonEntity);
     const ticker = getComponentValue(Ticker, singletonEntity);
+
     if (
       !adminAddress ||
       !tempConfigSet ||
