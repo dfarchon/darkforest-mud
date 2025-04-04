@@ -1,15 +1,114 @@
+import { Green, Red } from "@frontend/Components/Text";
+import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
+import { useMUD } from "@mud/MUDContext";
+import { zeroAddress } from "@wallet/utils";
+import { formatAddress } from "@wallet/utils";
+import { useEffect, useState } from "react";
+import styled from "styled-components";
+import { formatEther, type Hex, parseEther } from "viem";
 import {
   useAccount,
   useDisconnect,
-  useWalletClient,
   usePublicClient,
+  useWalletClient,
 } from "wagmi";
-import { useMUD } from "@mud/MUDContext";
-import { useEffect, useState } from "react";
-import { useBurnerBalance, useMainWalletBalance } from "@hooks/useBalance";
-import { zeroAddress } from "@wallet/utils";
-import { formatAddress } from "@wallet/utils";
-import { formatEther, parseEther, type Hex } from "viem";
+
+const PinkButton = styled.button`
+  background-color: #ff69b4;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 20px 40px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+  margin: 20px;
+  min-width: 200px;
+  outline: none;
+
+  &:hover {
+    background-color: #ff1493;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(255, 105, 180, 0.3);
+  }
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const NormalButton = styled.button`
+  background-color: #4a5568;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 20px 40px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
+  margin: 20px;
+  min-width: 200px;
+
+  &:hover {
+    background-color: #2d3748;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 85, 104, 0.4);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(74, 85, 104, 0.3);
+  }
+
+  &:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+`;
+
+const StyledInput = styled.input`
+  background-color: transparent;
+  color: white;
+  border: 2px solid #ff69b4;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+  outline: none;
+  width: 160px;
+  height: 50px;
+
+  &:focus {
+    border-color: #ff1493;
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+  }
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    opacity: 1;
+    background-color: #ff69b4;
+  }
+
+  &[type="number"] {
+    -moz-appearance: textfield;
+    &:hover,
+    &:focus {
+      -moz-appearance: number-input;
+    }
+  }
+`;
 
 export const BluePillBurnerWallet = () => {
   const { isConnected, address, chain } = useAccount();
@@ -33,6 +132,7 @@ export const BluePillBurnerWallet = () => {
 
   const [transferAmount, setTransferAmount] = useState("0.001");
   const [isCopied, setIsCopied] = useState(false);
+  const [registrationMessage, setRegistrationMessage] = useState("");
 
   const transferToBurner = async () => {
     if (!walletClient || !burnerWalletClient?.account?.address) return;
@@ -44,8 +144,20 @@ export const BluePillBurnerWallet = () => {
       await waitForTransaction(hash);
       refetchMainWalletBalance();
       refetchBurnerBalance();
+      setRegistrationMessage("Transfer to burner wallet successfully!");
+      // Set a timer to clear the message after 5 seconds
+      setTimeout(() => {
+        setRegistrationMessage("");
+      }, 5000);
     } catch (error) {
       console.error("Transfer failed:", error);
+      setRegistrationMessage(
+        "Transfer to burner wallet failed. Please try again.",
+      );
+      // Set a timer to clear the message after 5 seconds
+      setTimeout(() => {
+        setRegistrationMessage("");
+      }, 5000);
     }
   };
 
@@ -84,12 +196,24 @@ export const BluePillBurnerWallet = () => {
       console.log("hash", hash);
       refetchMainWalletBalance();
       refetchBurnerBalance();
+      setRegistrationMessage("Transfer to main wallet successfully!");
+      // Set a timer to clear the message after 5 seconds
+      setTimeout(() => {
+        setRegistrationMessage("");
+      }, 5000);
     } catch (error) {
       console.error("Transfer failed:", error);
+      setRegistrationMessage(
+        "Transfer to main wallet failed. Please try again.",
+      );
+      // Set a timer to clear the message after 5 seconds
+      setTimeout(() => {
+        setRegistrationMessage("");
+      }, 5000);
     }
   };
 
-  const copyBurnerAddress = async () => {
+  const copyBurnerPrivateKey = async () => {
     if (!burnerWalletClient?.account?.address) return;
 
     const privateKey = localStorage.getItem("mud:burnerWallet");
@@ -112,6 +236,39 @@ export const BluePillBurnerWallet = () => {
     fetchBalances();
   }, [refetchBurnerBalance, refetchMainWalletBalance]);
 
+  // Add input validation handler with max value check
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Allow empty input or valid numbers
+    if (value === "" || /^\d*\.?\d{0,5}$/.test(value)) {
+      // Convert empty string to '0'
+      const newValue = value === "" ? "0" : value;
+      // Prevent leading zeros
+      const formattedValue = newValue.replace(/^0+(?=\d)/, "");
+
+      // Check if value is less than or equal to 1
+      const numValue = parseFloat(formattedValue);
+      if (numValue <= 1) {
+        setTransferAmount(formattedValue);
+      }
+    }
+  };
+
+  const renderStatusMessages = () => (
+    <div>
+      {registrationMessage && (
+        <div>
+          {registrationMessage.includes("successful") ? (
+            <Green>{registrationMessage}</Green>
+          ) : (
+            <Red>{registrationMessage}</Red>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div>
       <div>
@@ -131,35 +288,29 @@ export const BluePillBurnerWallet = () => {
 
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <input
+          <StyledInput
             type="number"
             value={transferAmount}
-            onChange={(e) => setTransferAmount(e.target.value)}
-            className="rounded border px-2 py-1"
-            step="0.01"
+            onChange={handleInputChange}
+            step="0.0001"
             min="0"
+            max="1"
+            placeholder="0"
           />
-          <button
-            onClick={transferToBurner}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Send to Burner
-          </button>
+          <PinkButton onClick={transferToBurner}>
+            Send {transferAmount} ETH to Burner
+          </PinkButton>
         </div>
 
-        <button
-          onClick={withdrawAll}
-          className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-        >
-          Transfer All to Main
-        </button>
-
-        <button
-          onClick={copyBurnerAddress}
-          className="rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
-        >
-          {isCopied ? "Copied!" : "Copy Burner Address"}
-        </button>
+        <div>
+          <NormalButton onClick={withdrawAll}>
+            Transfer All to Main
+          </NormalButton>
+          <NormalButton onClick={copyBurnerPrivateKey}>
+            {isCopied ? "Copied!" : "Copy Burner Private Key"}
+          </NormalButton>
+        </div>
+        {renderStatusMessages()}
       </div>
     </div>
   );

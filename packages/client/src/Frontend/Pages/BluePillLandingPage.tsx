@@ -1,3 +1,4 @@
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@bluepill/utils";
 import {
   BLOCK_EXPLORER_URL,
   BLOCKCHAIN_BRIDGE,
@@ -25,7 +26,6 @@ import {
   singletonEntity,
 } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
-import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 import { utils, Wallet } from "ethers";
 import React, {
   useCallback,
@@ -115,32 +115,8 @@ type TerminalStateOptions = {
 import { BluePillBurnerWallet } from "@bluepill/BluePillBurnerWallet";
 import { BluePillRegisterPlayer } from "@bluepill/BluePillRegisterPlayer";
 import { BluePillWalletButton } from "@bluepill/BluePillWalletButton";
-
-const PinkButton = styled.button`
-  background-color: #ff69b4;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  padding: 20px 40px;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-  margin: 20px;
-  min-width: 200px;
-
-  &:hover {
-    background-color: #ff1493;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
-  }
-
-  &:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 10px rgba(255, 105, 180, 0.3);
-  }
-`;
+import { BluePillMapGuide } from "@bluepill/BluePillMapGuide";
+import { PinkButton } from "../../BluePill/PinkButton";
 
 export function BluePillLandingPage() {
   const navigate = useNavigate();
@@ -285,8 +261,8 @@ export function BluePillLandingPage() {
 
   const walletLinked = useMemo(() => {
     const account = walletClient?.account?.address;
-
     if (!account) return false;
+    if (walletClient.chain?.id !== burnerWalletClient.chain?.id) return false;
 
     return account !== zeroAddress;
   }, [walletClient]);
@@ -303,7 +279,7 @@ export function BluePillLandingPage() {
   }, [playerEntity, walletClient, Player, updateTrigger]);
 
   const burnerHasFunds = useMemo(() => {
-    return burnerBalanceValue > 0n;
+    return burnerBalanceValue > LOW_BALANCE_THRESHOLD;
   }, [burnerBalanceValue]);
 
   const spawnAreaSelected = useMemo(() => {
@@ -319,12 +295,8 @@ export function BluePillLandingPage() {
       (a) => a.address === selectedAddress,
     );
 
-    console.log("selectedAddress", selectedAddress);
-
-    console.log("account", account);
     if (!account) return;
 
-    console.log("setAccount");
     await ethConnection?.setAccount(account.privateKey);
 
     try {
@@ -338,109 +310,8 @@ export function BluePillLandingPage() {
 
       const balance = weiToEth(await ethConnection.loadBalance(playerAddress));
 
-      if (balance < 0.00001) {
-        terminal.current?.print(`   Your account: `);
-        terminal.current?.println(`${playerAddress}`, TerminalTextStyle.Green);
-
-        terminal.current?.print("    Private Key: ");
-        terminal.current?.printElement(
-          <TextMask
-            maskText="Click here to get private key"
-            text={ethConnection.getPrivateKey()}
-            noticeText="<= click here to copy private key"
-            unFocusedWidth={"150px"}
-            focusedWidth={"150px"}
-            style={{ color: "#00DC82" }}
-          />,
-        );
-
-        terminal.current?.println("");
-
-        terminal.current?.print(`   Your balance: `);
-        terminal.current?.print(
-          `${balance.toFixed(9)} ${TOKEN_NAME}`,
-          TerminalTextStyle.Red,
-        );
-
-        terminal.current?.println(" <= recommend depositing 0.001 ETH");
-
-        terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
-
-        terminal.current?.println(
-          "You can use bridge to transfer ETH to Redstone Mainnet",
-          TerminalTextStyle.Pink,
-        );
-
-        terminal.current?.print("   L2-L2 bridge: ");
-
-        terminal.current?.printLink(
-          BLOCKCHAIN_BRIDGE,
-          () => {
-            window.open(BLOCKCHAIN_BRIDGE);
-          },
-          TerminalTextStyle.Green,
-        );
-
-        terminal.current?.println(
-          " <= transfer ETH from L2 (e.g. optimism) to Redstone Mainnet",
-        );
-
-        terminal.current?.print("   Player guide: ");
-
-        terminal.current?.printLink(
-          "How to get ETH on the Redstone mainnet for your account",
-          () => {
-            window.open(HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE);
-          },
-          TerminalTextStyle.Green,
-        );
-        terminal.current?.println(
-          " <= New player please check this guide !!!",
-          TerminalTextStyle.Pink,
-        );
-
-        terminal.current?.println("");
-
-        terminal.current?.println(
-          "After your account get ETH on Redstone Mainet, press [enter] to continue.",
-          TerminalTextStyle.Pink,
-        );
-        const userInput = (await terminal.current?.getInput())?.trim() ?? "";
-        let showHelp = true;
-
-        // continue waiting for user input
-        switch (true) {
-          case userInput === "": {
-            advanceStateFromAccountSet(terminal);
-            return;
-          }
-          case userInput === "clear": {
-            terminal.current?.clear();
-            showHelp = false;
-            advanceStateFromCompatibilityPassed(terminal, {
-              showHelp,
-            });
-            break;
-          }
-          case userInput === "h" || userInput === "help": {
-            showHelp = true;
-            advanceStateFromCompatibilityPassed(terminal, {
-              showHelp,
-            });
-            break;
-          }
-          default: {
-            terminal.current?.println(
-              "Invalid option, please try press [help].",
-              TerminalTextStyle.Pink,
-            );
-            showHelp = false;
-            advanceStateFromCompatibilityPassed(terminal, {
-              showHelp,
-            });
-          }
-        }
-        return;
+      if (balance < LOW_BALANCE_THRESHOLD) {
+        terminalHandle.current?.printElement(<BluePillBurnerWallet />);
       }
 
       terminal.current?.println("");
@@ -615,11 +486,6 @@ export function BluePillLandingPage() {
     terminal.current?.println("Try running: df.getAccount()");
     terminal.current?.println("");
   };
-  // useEffect(() => {
-  //   if (indexerLoaded && walletLinked && playerRegistered && burnerHasFunds) {
-  //     setAccount();
-  //   }
-  // }, [indexerLoaded, walletLinked, playerRegistered, burnerHasFunds]);
 
   useEffect(() => {
     if (indexerLoaded && walletLinked && playerRegistered && burnerHasFunds) {
@@ -641,7 +507,16 @@ export function BluePillLandingPage() {
       burnerHasFunds &&
       spawnAreaSelected
     ) {
-      searchHomePlanet();
+      terminalHandle.current?.printElement(
+        <PinkButton
+          onClick={() => {
+            searchHomePlanet();
+          }}
+        >
+          Search Home Planet
+        </PinkButton>,
+      );
+      terminalHandle.current?.println("");
     }
   }, [
     indexerLoaded,
@@ -1081,7 +956,7 @@ export function BluePillLandingPage() {
             TerminalTextStyle.Red,
           );
 
-          terminal.current?.println(" <= recommend depositing 0.003 ETH");
+          terminal.current?.println(" <= recommend depositing 0.001 ETH");
 
           terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
 
@@ -1782,161 +1657,12 @@ export function BluePillLandingPage() {
           });
       } else {
         if (showHelp) {
-          terminal.current?.println(
-            "Select home planet.",
-            TerminalTextStyle.Green,
-          );
-          terminal.current?.print("Please ");
-          terminal.current?.print("left-click", TerminalTextStyle.Pink);
-          terminal.current?.print(" on ");
-          terminal.current?.print(
-            "blue squares on the map",
-            TerminalTextStyle.Blue,
-          );
-          terminal.current?.println(" to select your spawn area.");
-          terminal.current?.newline();
-          terminal.current?.print("After selecting your spawn area, ");
-          terminal.current?.print(
-            "left-click the below line",
-            TerminalTextStyle.Pink,
-          );
-          terminal.current?.println(", then press [enter].");
+          terminal.current?.printElement(<BluePillMapGuide />);
         }
 
         setMiniMapOn(true);
         // let the miniMap component mount
         await new Promise((resolve) => setTimeout(resolve, 100));
-
-        const userInput = ((await terminal.current?.getInput()) ?? "").trim();
-        const selectedSpawnArea = miniMapRef.current?.getSelectedSpawnArea();
-        switch (true) {
-          case userInput === "clear": {
-            terminal.current?.clear();
-            advanceStateFromNoHomePlanet(terminal, { showHelp: false });
-            return;
-          }
-          case userInput === "h" || userInput === "help": {
-            advanceStateFromNoHomePlanet(terminal, { showHelp: true });
-            return;
-          }
-          case userInput !== "": {
-            terminal.current?.println(
-              "Invalid option, please try press [help]",
-              TerminalTextStyle.Pink,
-            );
-            advanceStateFromNoHomePlanet(terminal, { showHelp: false });
-            return;
-          }
-        }
-
-        if (!selectedSpawnArea) {
-          terminal.current?.println(
-            "Please select a spawn area, then press [enter]",
-            TerminalTextStyle.Red,
-          );
-
-          advanceStateFromNoHomePlanet(terminal, { showHelp: false });
-          return;
-        }
-
-        // disable reselect of spawn posistion when we start searching
-        miniMapRef.current?.setSelectable(false);
-
-        const coords = selectedSpawnArea.worldPoint;
-        const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
-        terminal.current?.println(
-          `Spawn coordinates: (${coords.x.toFixed(0)}, ${coords.y.toFixed(
-            0,
-          )}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
-        );
-
-        gameUIManager
-          .getGameManager()
-          .on(GameManagerEvent.InitializedPlayer, () => {
-            setTimeout(() => {
-              setMiniMapOn(false);
-
-              terminal.current?.println("Initializing game...");
-              setStep(TerminalPromptStep.ALL_CHECKS_PASS);
-            });
-          });
-
-        gameUIManager
-          .joinGame(
-            async (e) => {
-              // TODO: Handle 2min timeout error
-              setMiniMapOn(false);
-
-              console.error(e);
-
-              terminal.current?.println("Error Joining Game:");
-              terminal.current?.println(e.message, TerminalTextStyle.Red);
-              terminal.current?.newline();
-
-              console.log(e.message.slice(0, 20));
-
-              if (e.message.slice(0, 20) === "Please enable popups") {
-                terminal.current?.print(
-                  "Player guide: ",
-                  TerminalTextStyle.Pink,
-                );
-
-                terminal.current?.printLink(
-                  "How to enable popups",
-                  () => {
-                    window.open(HOW_TO_ENABLE_POPUPS);
-                  },
-                  TerminalTextStyle.Green,
-                );
-                terminal.current?.println(
-                  " <= New player please check this guide!!!",
-                  TerminalTextStyle.Pink,
-                );
-
-                terminal.current?.println("");
-              } else if (e.message === "transaction reverted") {
-                terminal.current?.println(
-                  "Please refresh the client, choose another area and try again.",
-                  TerminalTextStyle.Pink,
-                );
-
-                terminal.current?.println("");
-              }
-
-              // terminal.current?.println(
-              //   "Don't worry :-) you can get more ETH on Redstone this way 😘",
-              //   TerminalTextStyle.Pink
-              // );
-
-              // terminal.current?.newline();
-              // terminal.current?.printLink(
-              //   'Deposit ETH to Redstone',
-              //   () => {
-              //     window.open(BLOCKCHAIN_BRIDGE);
-              //   },
-              //   TerminalTextStyle.Pink
-              // );
-              // terminal.current?.newline();
-              // terminal.current?.newline();
-
-              terminal.current?.println("Press [enter] to Try Again:");
-
-              await terminal.current?.getInput();
-              return true;
-            },
-            coords,
-            spectate,
-          )
-          .catch((error: Error) => {
-            terminal.current?.println(
-              `[ERROR] An error occurred: ${error.toString().slice(0, 10000)}`,
-              TerminalTextStyle.Red,
-            );
-            terminal.current?.println(
-              "please refresh client to try again.",
-              TerminalTextStyle.Pink,
-            );
-          });
       }
     },
     [ethConnection, spectate],
@@ -1949,60 +1675,14 @@ export function BluePillLandingPage() {
     ) => {
       if (showHelp) {
         terminal.current?.println("Enter game.", TerminalTextStyle.Green);
-        terminal.current?.println("Press [enter] to begin");
-        terminal.current?.println(
-          "Press [s] then [enter] to begin in SAFE MODE - plugins disabled",
-        );
+        terminal.current?.println("click [enter game] to begin");
       }
 
       terminal.current?.printElement(
-        <PinkButton onClick={enterGame}>Press Enter</PinkButton>,
+        <PinkButton onClick={enterGame}>Enter Game</PinkButton>,
       );
-      const input = (await terminal.current?.getInput())?.trim() ?? "";
 
-      switch (true) {
-        // set safe mode
-        case input === "s": {
-          const gameUIManager = gameUIManagerRef.current;
-          gameUIManager?.getGameManager()?.setSafeMode(true);
-          break;
-        }
-
-        // recursive advance
-        case input === "h" || input === "help": {
-          advanceStateFromAllChecksPass(terminal, true);
-          return;
-        }
-        case input === "clear": {
-          terminal.current?.clear();
-          advanceStateFromAllChecksPass(terminal, false);
-          return;
-        }
-        case input !== "": {
-          terminal.current?.println(
-            "Invalid option, please try again...",
-            TerminalTextStyle.Red,
-          );
-          advanceStateFromAllChecksPass(terminal, false);
-          return;
-        }
-      }
-
-      setStep(TerminalPromptStep.COMPLETE);
-      setInitRenderState(InitRenderState.COMPLETE);
-      terminal.current?.clear();
-
-      terminal.current?.println(
-        "Welcome to the Dark Forest MUD.",
-        TerminalTextStyle.Green,
-      );
-      terminal.current?.println("");
-      terminal.current?.println(
-        "This is the Dark Forest interactive JavaScript terminal. Only use this if you know exactly what you're doing.",
-      );
-      terminal.current?.println("");
-      terminal.current?.println("Try running: df.getAccount()");
-      terminal.current?.println("");
+      return;
     },
     [],
   );
@@ -2217,30 +1897,51 @@ export function BluePillLandingPage() {
           />
           <div>
             {!indexerLoaded && (
-              <div>
-                step: {syncProgress.step} percent: {syncProgress.percentage} %
+              <div
+                style={{
+                  padding: "20px",
+                  background: "rgba(0, 0, 0, 0.8)",
+                  borderRadius: "8px",
+                  border: "1px solid #ff69b4",
+                  color: "#fff",
+                  textAlign: "left",
+                  margin: "20px 0",
+                  width: "500px",
+                  maxWidth: "90%",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "24px",
+                    marginBottom: "15px",
+                    color: "#ff69b4",
+                  }}
+                >
+                  ⚡ INITIALIZING DARK FOREST MUD ⚡
+                </div>
+                <div style={{ marginBottom: "10px", fontSize: "18px" }}>
+                  🔄 Loading game data...
+                </div>
+                <div style={{ marginBottom: "10px", fontSize: "18px" }}>
+                  📊 Current step: {syncProgress.step}
+                </div>
+                <div style={{ marginBottom: "10px", fontSize: "18px" }}>
+                  🎯 Progress: {syncProgress.percentage}%
+                </div>
+                <div style={{ fontSize: "18px", color: "#ff69b4" }}>
+                  ⏳ Please wait, almost there...
+                </div>
               </div>
             )}
 
             {!walletLinked && <BluePillWalletButton />}
 
-            {!burnerHasFunds && <BluePillBurnerWallet />}
+            {walletLinked && !burnerHasFunds && <BluePillBurnerWallet />}
 
             {walletLinked && burnerHasFunds && !playerRegistered && (
               <BluePillRegisterPlayer />
             )}
-
-            {/* <div>
-              <button onClick={setAccount}>Set Account</button>
-            </div>
-            <div>
-              <button onClick={searchHomePlanet}>Search Home Planet</button>
-            </div>
-            <div>
-              <button onClick={enterGame}>Enter Game</button>
-            </div> */}
           </div>
-
           <Terminal
             ref={terminalHandle}
             promptCharacter={">"}

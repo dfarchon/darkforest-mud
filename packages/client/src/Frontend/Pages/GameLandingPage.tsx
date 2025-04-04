@@ -735,7 +735,7 @@ export function GameLandingPage() {
             TerminalTextStyle.Red,
           );
 
-          terminal.current?.println(" <= recommend depositing 0.003 ETH");
+          terminal.current?.println(" <= recommend depositing 0.001 ETH");
 
           terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
 
