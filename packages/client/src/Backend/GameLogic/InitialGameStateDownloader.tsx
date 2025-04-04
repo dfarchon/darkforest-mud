@@ -92,7 +92,7 @@ export class InitialGameStateDownloader {
     //TODO: fix this
     // await persistentChunkStore.getSavedKardashevCoords();
 
-    this.terminal.printElement(<DarkForestTips tips={tips} />);
+    // this.terminal.printElement(<DarkForestTips tips={tips} />);
     this.terminal.newline();
 
     const planetIdsLoadingBar = this.makeProgressListener("Planet IDs");

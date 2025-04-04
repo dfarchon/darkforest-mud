@@ -96,6 +96,7 @@ export function getNetworkConfig() {
    * Find the chain (unless it isn't in the list of supported chains).
    */
   const chain = getChain(chainId);
+
   if (!chain) {
     throw new Error(`Chain ${chainId} not found`);
   }

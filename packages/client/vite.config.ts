@@ -26,6 +26,7 @@ export default defineConfig({
       "@wallet": path.resolve(__dirname, "./src/wallet"),
       "@frontend": path.resolve(__dirname, "./src/Frontend"),
       "@backend": path.resolve(__dirname, "./src/Backend"),
+      "@bluepill": path.resolve(__dirname, "./src/BluePill"),
     },
   },
   css: {
