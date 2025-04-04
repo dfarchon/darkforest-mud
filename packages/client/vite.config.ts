@@ -1,8 +1,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import nodePath from "node:path";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import wasm from "@rollup/plugin-wasm";
+
+const dirname = process.cwd();
+
+function resolvePath(path: string) {
+  return nodePath.resolve(`${dirname}`, path);
+}
 
 export default defineConfig({
   plugins: [react(), nodePolyfills(), wasm()],
@@ -20,13 +26,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@df": path.resolve(__dirname, "./src/Shared"),
-      "@mud": path.resolve(__dirname, "./src/mud"),
-      "@hooks": path.resolve(__dirname, "./src/hooks"),
-      "@wallet": path.resolve(__dirname, "./src/wallet"),
-      "@frontend": path.resolve(__dirname, "./src/Frontend"),
-      "@backend": path.resolve(__dirname, "./src/Backend"),
-      "@bluepill": path.resolve(__dirname, "./src/BluePill"),
+      "@df": resolvePath("./src/Shared"),
+      "@mud": resolvePath("./src/mud"),
+      "@hooks": resolvePath("./src/hooks"),
+      "@wallet": resolvePath("./src/wallet"),
+      "@frontend": resolvePath("./src/Frontend"),
+      "@backend": resolvePath("./src/Backend"),
+      "@bluepill": resolvePath("./src/BluePill"),
     },
   },
   css: {
