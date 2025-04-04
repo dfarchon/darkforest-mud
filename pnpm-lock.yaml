@@ -230,9 +230,6 @@ importers:
       ts-dedent:
         specifier: 2.2.0
         version: 2.2.0
-      utils:
-        specifier: workspace:*
-        version: link:../utils
       viem:
         specifier: 2.21.22
         version: 2.21.22(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
@@ -296,7 +293,7 @@ importers:
         version: 8.4.41
       prettier-plugin-tailwindcss:
         specifier: 0.6.6
-        version: 0.6.6(prettier@3.2.5)
+        version: 0.6.6(prettier@3.3.3)
       prismjs:
         specifier: 1.29.0
         version: 1.29.0
@@ -376,8 +373,6 @@ importers:
       solhint-plugin-mud:
         specifier: 2.2.22-13071c45dd7d28c1860e703d12b07624c271f508
         version: 2.2.22-13071c45dd7d28c1860e703d12b07624c271f508
-
-  packages/utils: {}
 
 packages:
 
@@ -24007,9 +24002,9 @@ snapshots:
       semver: 7.6.3
       solidity-comments-extractor: 0.0.8
 
-  prettier-plugin-tailwindcss@0.6.6(prettier@3.2.5):
+  prettier-plugin-tailwindcss@0.6.6(prettier@3.3.3):
     dependencies:
-      prettier: 3.2.5
+      prettier: 3.3.3
 
   prettier@2.8.8:
     optional: true
