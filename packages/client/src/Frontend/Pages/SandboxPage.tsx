@@ -2,14 +2,13 @@
 // import { useMUD } from "../../MUDContext";
 // import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { getNetworkConfig } from "@mud/getNetworkConfig";
-import { hello } from "utils";
 
 export const SandboxPage = () => {
   const networkConfig = getNetworkConfig();
 
   return (
     <>
-      <div> {hello("Sandbox")}</div>
+      <div> {"Sandbox"}</div>
       <button
         onClick={() => {
           console.log(networkConfig);
