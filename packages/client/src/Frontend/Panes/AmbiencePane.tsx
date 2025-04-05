@@ -138,18 +138,18 @@ export function AmbiencePane() {
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    console.log("--------------------");
-    console.log("mainMelodyLoaded", mainMelodyLoaded);
-    console.log("universeLoaded", universeLoaded);
-    console.log("backgroundMusicEnabled", backgroundMusicEnabled);
-    console.log("isActuallyPlaying", isActuallyPlaying);
-  }, [
-    mainMelodyLoaded,
-    universeLoaded,
-    backgroundMusicEnabled,
-    isActuallyPlaying,
-  ]);
+  // useEffect(() => {
+  //   console.log("--------------------");
+  //   console.log("mainMelodyLoaded", mainMelodyLoaded);
+  //   console.log("universeLoaded", universeLoaded);
+  //   console.log("backgroundMusicEnabled", backgroundMusicEnabled);
+  //   console.log("isActuallyPlaying", isActuallyPlaying);
+  // }, [
+  //   mainMelodyLoaded,
+  //   universeLoaded,
+  //   backgroundMusicEnabled,
+  //   isActuallyPlaying,
+  // ]);
 
   useEffect(() => {
     if (mainMelodyLoaded && universeLoaded) {
