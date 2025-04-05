@@ -139,10 +139,28 @@ export function AmbiencePane() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    console.log("--------------------");
+    console.log("mainMelodyLoaded", mainMelodyLoaded);
+    console.log("universeLoaded", universeLoaded);
+    console.log("backgroundMusicEnabled", backgroundMusicEnabled);
+    console.log("isActuallyPlaying", isActuallyPlaying);
+  }, [
+    mainMelodyLoaded,
+    universeLoaded,
+    backgroundMusicEnabled,
+    isActuallyPlaying,
+  ]);
+
+  useEffect(() => {
     if (mainMelodyLoaded && universeLoaded) {
       setLoaded(true);
+      if (backgroundMusicEnabled) {
+        setIsActuallyPlaying(true);
+      } else {
+        setIsActuallyPlaying(false);
+      }
     }
-  }, [mainMelodyLoaded, universeLoaded]);
+  }, [mainMelodyLoaded, universeLoaded, backgroundMusicEnabled]);
 
   const handleOnEnd = () => {
     setIsActuallyPlaying(false);
@@ -153,14 +171,6 @@ export function AmbiencePane() {
       }
     }, 30000);
   };
-
-  useEffect(() => {
-    if (backgroundMusicEnabled) {
-      setIsActuallyPlaying(true);
-    } else {
-      setIsActuallyPlaying(false);
-    }
-  }, [backgroundMusicEnabled]);
 
   useEffect(() => {
     return () => {
