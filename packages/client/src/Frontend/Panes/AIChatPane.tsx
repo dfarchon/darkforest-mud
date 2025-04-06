@@ -222,6 +222,10 @@ export function AIChatPane({
     cost: 0,
     credits: 0,
   });
+  const [agentPreResponse, setAgentPreResponse] = useState<{
+    df_fcName: string;
+    args: never[];
+  } | null>(null); // For AIAgent DF function , args
   const [agentResponse, setAgentResponse] = useState<string>(""); // For AIAgentContent
   const [isSelectionActive, setIsSelectionActive] = useState<boolean>(false);
   const [inputChat, setInputChat] = useState<string>("");
@@ -744,10 +748,11 @@ export function AIChatPane({
   }
 
   // Btn Send AIAgent request
-  const handleAgentSend = async () => {
-    if (inputAgent.trim()) {
+  const handleAgentApprove = async () => {
+    if (agentPreResponse != null) {
       const reducedPlanets = reducePlanets(selectedPlanets);
 
+      executeClientFunction(agentPreResponse.df_fcName, agentPreResponse.args);
       try {
         const forCost = {
           username: player?.name,
@@ -771,6 +776,15 @@ export function AIChatPane({
         setAgentResponse("Error sending message tokens not spend.");
         return;
       }
+
+      setAgentPreResponse(null);
+    }
+  };
+
+  // Btn Send AIAgent request
+  const handleAgentSend = async () => {
+    if (inputAgent.trim()) {
+      const reducedPlanets = reducePlanets(selectedPlanets);
 
       try {
         const stringReducedPlanets = JSON.stringify(
@@ -801,14 +815,18 @@ export function AIChatPane({
               "Invalid AI response: missing function name or arguments.",
             );
             setAgentResponse(
-              "The agent's response was invalid. Please try again.",
+              "The agent's response was invalid: missing function name or arguments. Please try again.",
             );
             return;
           }
 
           // Client-side execution of the validated function
           try {
-            executeClientFunction(df_fcName, args);
+            setAgentPreResponse({ df_fcName, args });
+            setAgentResponse(
+              `Function: ${df_fcName}, Args: ${JSON.stringify(args)}`,
+            );
+            // executeClientFunction(df_fcName, args);
           } catch (error) {
             console.error(
               ` Error executing client function: ${df_fcName}`,
@@ -912,6 +930,7 @@ export function AIChatPane({
   // Btn Clear AIAGent history
   const handleAgentTabOpen = () => {
     setAgentResponse(""); // Clear agent response when switching to the Agent tab
+    setAgentPreResponse(null);
   };
 
   if (!account || !player) return null;
@@ -1066,11 +1085,24 @@ export function AIChatPane({
               />
             </div>
             <div className="flex items-center justify-between p-1">
-              <Btn onClick={() => setAgentResponse("")}>Clear</Btn>
+              <Btn
+                onClick={() => {
+                  setAgentResponse("");
+                  setAgentPreResponse(null);
+                }}
+              >
+                Clear
+              </Btn>
+              {agentPreResponse != null && (
+                <Btn onClick={handleAgentApprove}>Approve</Btn>
+              )}
               <Btn onClick={handleAgentSend}>Send</Btn>
             </div>{" "}
             <AgentResponseContainer>
-              {agentResponse || "No response yet. Please enter a message."}
+              {agentResponse
+                .split(",")
+                .map((line, index) => <div key={index}>{line.trim()}</div>) ||
+                "No response yet. Please enter a message."}
             </AgentResponseContainer>{" "}
           </div>
         </AIAgentContent>
