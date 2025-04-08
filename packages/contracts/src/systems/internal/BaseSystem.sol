@@ -6,6 +6,8 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { EntryFee } from "codegen/tables/EntryFee.sol";
 import { Errors } from "interfaces/errors.sol";
+import { RevenueStats } from "codegen/tables/RevenueStats.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 contract BaseSystem is System, Errors {
   /**
@@ -17,6 +19,10 @@ contract BaseSystem is System, Errors {
     if (_msgValue() < fee) {
       revert InsufficientEntryFee(fee);
     }
+    ResourceId resourceId = SystemRegistry.get(address(this));
+    bytes32 key = ResourceId.unwrap(resourceId);
+    uint256 amount = RevenueStats.get(key) + _msgValue();
+    RevenueStats.set(key, amount);
     _;
   }
 

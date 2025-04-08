@@ -886,6 +886,13 @@ export class GameManager extends EventEmitter {
     this.contractConstants = contractConstants;
   }
 
+  public getTransactionFee() {
+    const { EntryFee } = this.components;
+    const entryFee = getComponentValue(EntryFee, singletonEntity);
+    if (!entryFee) return 0n;
+    else return entryFee.fee;
+  }
+
   static async create({
     mainAccount,
     connection,
@@ -2649,8 +2656,12 @@ export class GameManager extends EventEmitter {
 
       // console.log(txIntent);
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -3969,7 +3980,11 @@ export class GameManager extends EventEmitter {
         delegator: delegator,
       };
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const transactionFee = this.getTransactionFee();
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       tx.confirmedPromise.then(() =>
         NotificationManager.getInstance().artifactProspected(
@@ -4058,9 +4073,14 @@ export class GameManager extends EventEmitter {
         delegator: delegator,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       const tx =
         await this.contractsAPI.submitTransaction<UnconfirmedFindArtifact>(
           txIntent,
+          {
+            value: transactionFee,
+          },
         );
 
       tx.confirmedPromise
@@ -4348,7 +4368,12 @@ export class GameManager extends EventEmitter {
         locationId,
         artifactId,
       };
-      return this.contractsAPI.submitTransaction(txIntent);
+
+      const transactionFee = this.getTransactionFee();
+
+      return this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__chargeArtifact",
@@ -4398,7 +4423,11 @@ export class GameManager extends EventEmitter {
         locationId,
         artifactId,
       };
-      return this.contractsAPI.submitTransaction(txIntent);
+
+      const transactionFee = this.getTransactionFee();
+      return this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__shutdownArtifact",
@@ -4540,8 +4569,12 @@ export class GameManager extends EventEmitter {
         linkTo,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -4868,8 +4901,12 @@ export class GameManager extends EventEmitter {
         amount,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -5283,8 +5320,12 @@ export class GameManager extends EventEmitter {
         }
       }
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -5338,8 +5379,12 @@ export class GameManager extends EventEmitter {
         upgradeBranch: branch,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(

@@ -17,6 +17,8 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { Balances } from "@latticexyz/world/src/codegen/tables/Balances.sol";
 import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
+import { RevenueStats } from "codegen/tables/RevenueStats.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 contract GuildSystem is BaseSystem {
   error NeedFundsToCreateGuild(); // 0xce43bd9e
@@ -228,6 +230,11 @@ contract GuildSystem is BaseSystem {
     _createGuild(guildId, owner);
 
     GuildName.set(uint8(guildId), name);
+
+    ResourceId resourceId = SystemRegistry.get(address(this));
+    bytes32 key = ResourceId.unwrap(resourceId);
+    uint256 amount = RevenueStats.get(key) + _msgValue();
+    RevenueStats.set(key, amount);
   }
 
   function inviteToGuild(address invitee) public {

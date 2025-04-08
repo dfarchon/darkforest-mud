@@ -189,6 +189,9 @@ export function TxConfirmPopup() {
 
   const gasLimit = getSetting(config, Setting.GasFeeLimit);
 
+  const msgValue = localStorage.getItem(`${account}-amountSent`);
+  const amountSentInEth = msgValue ? weiToEth(BigNumber.from(msgValue)) : 0;
+
   const fromPlanet = localStorage.getItem(`${account}-fromPlanet`);
   const toPlanet = localStorage.getItem(`${account}-toPlanet`);
   const halfPrice = localStorage.getItem(`${account}-halfPrice`);
@@ -348,15 +351,8 @@ export function TxConfirmPopup() {
       // console.log(weiToEth(gweiToWei(Number(gasLimit) * Number(gasFeeGwei))));
 
       const res: number =
-        hatCost +
-        buyArtifactCost +
-        joinGameCost +
-        buyPlanetCost +
-        buySpaceshipCost +
-        donationAmount +
-        buyGPTTokensCost +
-        createGuildFeeEth +
-        weiToEth(gweiToWei(Number(gasLimit) * Number(gasFeeGwei)));
+        weiToEth(gweiToWei(Number(gasLimit) * Number(gasFeeGwei))) +
+        amountSentInEth;
 
       return res.toFixed(18).toString();
     } else {
@@ -379,15 +375,9 @@ export function TxConfirmPopup() {
       }
 
       const res: number =
-        hatCost +
-        buyArtifactCost +
-        joinGameCost +
-        buyPlanetCost +
-        buySpaceshipCost +
         donationAmount +
-        buyGPTTokensCost +
-        createGuildFeeEth +
-        weiToEth(gweiToWei(Number(gasLimit) * Number(val)));
+        weiToEth(gweiToWei(Number(gasLimit) * Number(val))) +
+        amountSentInEth;
 
       return pre + res.toFixed(18).toString();
     }
@@ -680,6 +670,13 @@ export function TxConfirmPopup() {
         </Row>
 
         <Row>
+          <b>Amount Sent</b>
+          <span>
+            {amountSentInEth} ${TOKEN_NAME}
+          </span>
+        </Row>
+
+        <Row>
           <b>Max Transaction Cost</b>
           <span>
             {txCost} ${TOKEN_NAME}
@@ -723,7 +720,7 @@ export function TxConfirmPopup() {
         </Row>
         <Row className="mtop">
           <Checkbox
-            label="Auto-confirm all transactions except purchases. Currently, you can only purchase Hats, or anything 3rd party plugins offer."
+            label="Auto-confirm all transactions."
             checked={autoApproveChecked}
             onChange={(e: Event & React.ChangeEvent<DarkForestCheckbox>) =>
               setAutoApprovedChecked(e.target.checked)

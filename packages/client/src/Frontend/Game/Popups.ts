@@ -42,9 +42,17 @@ export async function openConfirmationWindowForTransaction({
     Setting.AutoApproveNonPurchaseTransactions,
   );
 
-  if (!autoApprove || isPurchase(overrides)) {
+  // if (!autoApprove || isPurchase(overrides)) {
+  if (!autoApprove) {
     localStorage.setItem(`${from}-gasFeeGwei`, gasFeeGwei.toString());
     localStorage.setItem(`${from}-gasFeeLimit`, gasFeeLimit.toString());
+
+    const amount =
+      overrides !== undefined && overrides.value !== undefined
+        ? overrides.value.toString()
+        : 0;
+    localStorage.setItem(`${from}-amountSent`, amount.toString());
+
     const account = connection.getAddress();
     if (!account) {
       throw new Error("no account");

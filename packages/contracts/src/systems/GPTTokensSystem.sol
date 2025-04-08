@@ -4,6 +4,10 @@ pragma solidity >=0.8.24;
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { GPTTokens } from "codegen/index.sol";
 
+import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
+import { RevenueStats } from "codegen/tables/RevenueStats.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+
 contract GPTTokensSystem is BaseSystem {
   uint256 public creditPrice = 0.00001 ether; // Price for GPT tokens
 
@@ -20,6 +24,11 @@ contract GPTTokensSystem is BaseSystem {
     // Update the player's GPT token balance
     address executor = _msgSender();
     GPTTokens.set(executor, GPTTokens.get(executor) + amount);
+
+    ResourceId resourceId = SystemRegistry.get(address(this));
+    bytes32 key = ResourceId.unwrap(resourceId);
+    uint256 amount = RevenueStats.get(key) + _msgValue();
+    RevenueStats.set(key, amount);
   }
 
   /**
