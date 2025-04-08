@@ -6,7 +6,7 @@ b_radius = 150000
 number = 6
 
 [entry_fee]
-value = 0
+value = 2000000000000
 
 [artifact_nft]
 address = "0x0000000000000000000000000000000000000000"

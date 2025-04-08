@@ -472,6 +472,13 @@ export default defineWorld({
       },
       key: ["player"],
     },
+    RevenueStats: {
+      schema: {
+        amount: "uint256",
+        systemId: "bytes32",
+      },
+      key: ["systemId"],
+    },
     // // artifact module
     // Effect: {
     //   schema: {
