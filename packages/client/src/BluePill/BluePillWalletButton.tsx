@@ -3,6 +3,7 @@ import { useMUD } from "@mud/MUDContext";
 // import { WalletPane } from "./WalletPane";
 import styled from "styled-components";
 import { useAccount, useDisconnect, useWalletClient } from "wagmi";
+import { useEffect } from "react";
 
 import { BluePillConnectButton } from "./BluePillConnectButton";
 import { formatAddress } from "./utils";
@@ -144,6 +145,12 @@ export const BluePillWalletButton: React.FC = () => {
 
     externalWalletClient?.addChain({ chain: networkConfigChain });
   };
+
+  useEffect(() => {
+    console.log("adding network");
+    addNetwork();
+    console.log("network added");
+  }, [isConnected, burnerWalletClient.chain?.id, chain?.id]);
 
   return (
     <div>

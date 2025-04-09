@@ -311,7 +311,7 @@ export const BluePillRegisterPlayer = () => {
           <div className="flex items-center gap-2">
             <StyledInput
               type="text"
-              placeholder="Please input name (max 16 chars)"
+              placeholder="eg: dfarchon"
               value={state.playerName}
               onChange={handlePlayerNameChange}
             />
@@ -336,7 +336,7 @@ export const BluePillRegisterPlayer = () => {
             >
               {state.playerName
                 ? `Register as "${state.playerName}"`
-                : "Enter Your Name to Register"}
+                : "Please Enter Your Name"}
             </PinkButton>
           </div>
         )}
