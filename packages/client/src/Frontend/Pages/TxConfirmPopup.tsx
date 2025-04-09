@@ -395,11 +395,10 @@ export function TxConfirmPopup() {
         <div>
           <b>The estimate here does not include the L1 gas fee.</b>
         </div>
-        <div>
+        {/* <div>
           <b>The estimate here does not include paid operations in plugins.</b>
-        </div>
+        </div> */}
         <div>
-          {" "}
           <b>Please check the blockchain explorer to know more.</b>
         </div>
       </div>

@@ -55,7 +55,6 @@ const NormalButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
-  margin: 20px;
   min-width: 200px;
 
   &:hover {
@@ -272,18 +271,49 @@ export const BluePillBurnerWallet = () => {
   return (
     <div>
       <div>
-        <span>Main Wallet: </span>
+        <span>Main Account: </span>
         <span>{(walletClient?.account?.address ?? zeroAddress) as Hex}</span>
         <br />
         <span>Balance: {formatEther(mainWalletBalanceValue)} ETH</span>
       </div>
       <div>
-        <span>Burner Wallet: </span>
+        <span>Game Account: </span>
         <span>
           {(burnerWalletClient?.account?.address ?? zeroAddress) as Hex}
         </span>
         <br />
         <span>Balance: {formatEther(burnerBalanceValue)} ETH</span>
+      </div>
+
+      <div
+        style={{
+          padding: "20px",
+          background: "rgba(0, 0, 0, 0.8)",
+          borderRadius: "8px",
+          border: "1px solid #ff69b4",
+          color: "#fff",
+          textAlign: "left",
+          margin: "20px 0",
+          width: "600px",
+          maxWidth: "90%",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "24px",
+            marginBottom: "15px",
+            color: "#ff69b4",
+          }}
+        >
+          ⚡ ⚠️ HEADS UP ⚡
+        </div>
+        <ul style={{ listStyleType: "none", padding: 0 }}>
+          <li>1. Your Game Wallet lives only in your browser.</li>
+          <li>2. It's never online — you're the only one who holds the key.</li>
+          <li>3. Just keep enough ETH for gas.</li>
+          <li>4. Don't clear your explorer cache during game.</li>
+          <li>5. Don't forget to back up your private key.</li>
+        </ul>
       </div>
 
       <div className="space-y-2">
@@ -298,16 +328,16 @@ export const BluePillBurnerWallet = () => {
             placeholder="0"
           />
           <PinkButton onClick={transferToBurner}>
-            Send {transferAmount} ETH to Burner
+            Send {transferAmount} ETH to Game Account
           </PinkButton>
         </div>
 
-        <div>
+        <div className="flex items-center space-x-2">
           <NormalButton onClick={withdrawAll}>
-            Transfer All to Main
+            Transfer All to Main Account
           </NormalButton>
           <NormalButton onClick={copyBurnerPrivateKey}>
-            {isCopied ? "Copied!" : "Copy Burner Private Key"}
+            {isCopied ? "Copied!" : "Copy Game Account Private Key"}
           </NormalButton>
         </div>
         {renderStatusMessages()}

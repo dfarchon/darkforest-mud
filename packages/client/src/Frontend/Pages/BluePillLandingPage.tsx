@@ -37,7 +37,7 @@ import React, {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { zeroAddress } from "viem";
-import { useWalletClient } from "wagmi";
+import { useWalletClient, useAccount } from "wagmi";
 
 import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
 import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
@@ -123,6 +123,7 @@ export function BluePillLandingPage() {
   const { contract } = useParams();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
+  const { chain } = useAccount();
   const { data: walletClient } = useWalletClient();
   const {
     network: {
@@ -262,6 +263,8 @@ export function BluePillLandingPage() {
   const walletLinked = useMemo(() => {
     const account = walletClient?.account?.address;
     if (!account) return false;
+
+    if (walletClient.chain?.id !== chain?.id) return false;
     if (walletClient.chain?.id !== burnerWalletClient.chain?.id) return false;
 
     return account !== zeroAddress;
@@ -308,7 +311,12 @@ export function BluePillLandingPage() {
       const terminal = terminalHandle;
       terminal.current?.println("Checking account balance... ");
 
-      const balance = weiToEth(await ethConnection.loadBalance(playerAddress));
+      const balance = BigInt(await ethConnection.loadBalance(playerAddress));
+
+      console.log("---------------------------------");
+      console.log(balance);
+      console.log(LOW_BALANCE_THRESHOLD);
+      console.log("---------------------------------");
 
       if (balance < LOW_BALANCE_THRESHOLD) {
         terminalHandle.current?.printElement(<BluePillBurnerWallet />);
@@ -366,9 +374,7 @@ export function BluePillLandingPage() {
 
     const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
     terminal.current?.println(
-      `Spawn coordinates: (${coords.x.toFixed(0)},
-      ${coords.y.toFixed(0)})
-      were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
+      `Spawn coordinates: (${coords.x.toFixed(0)},${coords.y.toFixed(0)}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
     );
 
     gameUIManager
