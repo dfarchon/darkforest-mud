@@ -154,6 +154,33 @@ export const BluePillWalletButton: React.FC = () => {
 
   return (
     <div>
+      <div
+        style={{
+          padding: "20px",
+          background: "rgba(0, 0, 0, 0.8)",
+          borderRadius: "8px",
+          border: "1px solid #ff69b4",
+          color: "#fff",
+          textAlign: "left",
+          margin: "20px 0",
+          width: "500px",
+          maxWidth: "90%",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "24px",
+            marginBottom: "15px",
+            color: "#ff69b4",
+          }}
+        >
+          ⚡ NOTICE ⚡
+        </div>
+        <div style={{ marginBottom: "10px", fontSize: "18px" }}>
+          Please use the same account to connect
+        </div>
+      </div>
+
       {/* Show connect button when wallet is not connected */}
       {!isConnected && <BluePillConnectButton />}
 
