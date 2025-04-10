@@ -2,15 +2,11 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
-
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Ticker, TickerData, InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
+import { BaseTest } from "./BaseTest.t.sol";
 
-contract MoveTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-
+contract MoveTest is BaseTest {
   function testTick() public {
     uint256 timestamp = block.timestamp;
     vm.warp(timestamp + 1000);

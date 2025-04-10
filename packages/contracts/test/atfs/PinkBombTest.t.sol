@@ -2,9 +2,8 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
+import { BaseTest } from "../BaseTest.t.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Math } from "openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
@@ -26,10 +25,9 @@ import { _artifactIndexToNamespace, _artifactProxySystemId } from "../../src/mod
 import { _pinkBombTableId } from "../../src/modules/atfs/PinkBomb/utils.sol";
 import "forge-std/console.sol";
 
-contract PinkBombTest is MudTest {
+contract PinkBombTest is BaseTest {
   using EffectLib for Planet;
 
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
   uint256 p = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
   function setUp() public virtual override {

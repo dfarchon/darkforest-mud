@@ -2,11 +2,11 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
+import { BaseTest } from "./BaseTest.t.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner, Round } from "../src/codegen/index.sol";
 import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants } from "../src/codegen/index.sol";
@@ -21,13 +21,11 @@ import { ArtifactNFT } from "../src/tokens/ArtifactNFT.sol";
 import { IArtifactNFT } from "../src/tokens/IArtifactNFT.sol";
 import { ArtifactNFT as ArtifactNFTTable } from "../src/codegen/tables/ArtifactNFT.sol";
 
-contract ArtifactNFTTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+contract ArtifactNFTTest is BaseTest {
   ArtifactNFT nft;
   address portalSystem;
 
   bytes16 constant ARTIFACT_PORTAL_SYSTEM_NAME = "ArtifactPortalSy";
-  bytes14 constant DF_NAMESPACE = "df";
 
   function setUp() public virtual override {
     super.setUp();
