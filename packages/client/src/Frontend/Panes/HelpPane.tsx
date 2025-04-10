@@ -1,7 +1,9 @@
 import {
   BLOCK_EXPLORER_URL,
+  BLOCKCHAIN_NAME,
   PLAYER_GUIDE,
   WIN_CONDITION_AND_PRIZES,
+  VERSION,
 } from "@df/constants";
 import { ModalName } from "@df/types";
 import React from "react";
@@ -121,7 +123,7 @@ export function HelpPane({
         {uiManager.isRoundOver() && (
           <Section>
             <SectionHeader>Dark Forest MUD Complete</SectionHeader>
-            Dark Forest MUD v0.1.2 is now complete! Scores are being compiled
+            Dark Forest MUD {VERSION} is now complete! Scores are being compiled
             and winners will be announced shortly. Also, Artifacts will no
             longer be mintable. Thanks for playing!
           </Section>
@@ -132,7 +134,7 @@ export function HelpPane({
         </Section>
 
         <Section>
-          <SectionHeader>Dark Forest MUD v0.1.2 🦑</SectionHeader>
+          <SectionHeader>Dark Forest MUD {VERSION} 🦑</SectionHeader>
           {/* The game is a vast universe, obfuscated by zero-knowledge cryptography. Your{' '}
           <White>explorer</White> (bottom left) explores the universe, searching for{' '}
           <White>Planets</White> and other players.
@@ -170,8 +172,8 @@ export function HelpPane({
               Dark Forest MUD
             </Link>{" "}
             on{" "}
-            <Link to={BLOCK_EXPLORER_URL} color={"rgb(243,66,66)"}>
-              Redstone
+            <Link to={BLOCK_EXPLORER_URL} color={"pink"}>
+              {BLOCKCHAIN_NAME}
             </Link>
             .
           </div>
