@@ -2,9 +2,7 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-
+import { BaseTest } from "../BaseTest.t.sol";
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 import { Counter, PlanetArtifact, ArtifactOwner, Round } from "../../src/codegen/index.sol";
 import { Planet as PlanetTable, Move, MoveData, Ticker, TickerData } from "../../src/codegen/index.sol";
@@ -22,8 +20,7 @@ import { _wormholeDestTableId, _wormholeRecordTableId } from "../../src/modules/
 import { WormholeRecord } from "../../src/modules/atfs/Wormhole/tables/WormholeRecord.sol";
 import "forge-std/console.sol";
 
-contract WormholeTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+contract WormholeTest is BaseTest {
   uint32[] wormholeMultipliers = [1000, 500, 250, 125, 62, 31];
 
   function setUp() public virtual override {

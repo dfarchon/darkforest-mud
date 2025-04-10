@@ -2,9 +2,7 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
-
+import { BaseTest } from "./BaseTest.t.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Ticker, TickerData, PendingMove, PendingMoveData, Move, MoveData } from "../src/codegen/index.sol";
 import { Planet as PlanetTable, Counter, TempConfigSet } from "../src/codegen/index.sol";
@@ -14,11 +12,7 @@ import { Proof } from "../src/lib/SnarkProof.sol";
 import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 
-contract MoveTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-  address user1 = address(1);
-  address user2 = address(2);
-
+contract MoveTest is BaseTest {
   function setUp() public override {
     super.setUp();
 

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
@@ -13,10 +12,9 @@ import { SpawnInput } from "../src/lib/VerificationInput.sol";
 import { PlayerSystem } from "../src/systems/PlayerSystem.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { PlanetType, SpaceType } from "../src/codegen/common.sol";
+import { BaseTest } from "./BaseTest.t.sol";
 
-contract PlayerTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-
+contract PlayerTest is BaseTest {
   function setUp() public override {
     super.setUp();
 

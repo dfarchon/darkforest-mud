@@ -2,9 +2,7 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
-
+import { BaseTest } from "./BaseTest.t.sol";
 import { IWorld } from "codegen/world/IWorld.sol";
 import { EntryFee, TempConfigSet, Ticker } from "codegen/index.sol";
 import { PlanetType, SpaceType } from "codegen/common.sol";
@@ -13,11 +11,7 @@ import { Proof } from "libraries/SnarkProof.sol";
 import { MoveInput } from "libraries/VerificationInput.sol";
 import { IMoveSystem } from "codegen/world/IMoveSystem.sol";
 
-contract EntryFeeTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-  address user1 = address(1);
-  address user2 = address(2);
-
+contract EntryFeeTest is BaseTest {
   function setUp() public override {
     super.setUp();
 
