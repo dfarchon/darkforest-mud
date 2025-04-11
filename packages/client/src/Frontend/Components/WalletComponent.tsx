@@ -160,8 +160,10 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
 
       // Convert hex gasPrice to BigInt
       const gasPriceBigInt = BigInt(gasPrice);
-      const gasLimit = BigInt(21000);
-      const gasCost = gasPriceBigInt * gasLimit;
+
+      // Increase gas limit from 21000 to 21500 to account for potential variations
+      const gasLimit = BigInt(21500);
+      const gasCost = (gasPriceBigInt * gasLimit * BigInt(12)) / BigInt(10); // Add 20% buffer
 
       // Ensure balance is BigInt
       const balance = BigInt(state.burnerBalance);

@@ -101,7 +101,7 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
 
     // Convert hex gasPrice to BigInt
     const gasPriceBigInt = BigInt(gasPrice);
-    const gasLimit = BigInt(21000);
+    const gasLimit = BigInt(21500);
     const gasCost = gasPriceBigInt * gasLimit;
 
     // Ensure balance is BigInt
@@ -123,6 +123,8 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
       });
       await waitForTransaction(hash);
       setTxSuccessful(true);
+      refetchMainWalletBalance();
+      refetchBurnerBalance();
       // fetchBalances(); // Refresh balances after transaction
       setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
     } catch (err) {
