@@ -212,7 +212,7 @@ export function AmbiencePane() {
         />
       )}
       <ReactHowler
-        src="/public/sounds/bgm-v3.ogg"
+        src="/sounds/bgm-v3.ogg"
         playing={isActuallyPlaying}
         loop={false}
         html5={true}
@@ -221,7 +221,7 @@ export function AmbiencePane() {
         onEnd={handleOnEnd}
       />
       <ReactHowler
-        src="/public/sounds/universe.ogg"
+        src="/sounds/universe.ogg"
         playing={backgroundMusicEnabled}
         loop={true}
         html5={true}
