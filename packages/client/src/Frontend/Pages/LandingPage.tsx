@@ -1,4 +1,4 @@
-import { PLAYER_GUIDE } from "@df/constants";
+import { PLAYER_GUIDE, VERSION } from "@df/constants";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -115,7 +115,7 @@ export const ClassicLandingPage = () => {
                     </span>
                     <br />
                     <span style={{ fontSize: "30px" }}>
-                      <Round3Title> v0.1.2 </Round3Title>
+                      <Round3Title> {VERSION}</Round3Title>
                     </span>
                   </div>
 

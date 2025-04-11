@@ -1,11 +1,13 @@
 import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@bluepill/utils";
 import {
   BLOCK_EXPLORER_URL,
+  BLOCKCHAIN_NAME,
   BLOCKCHAIN_BRIDGE,
   HOW_TO_ENABLE_POPUPS,
   HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   PLAYER_GUIDE,
   TOKEN_NAME,
+  VERSION,
 } from "@df/constants";
 import type { EthConnection } from "@df/network";
 import { neverResolves, weiToEth } from "@df/network";
@@ -301,6 +303,7 @@ export function BluePillLandingPage() {
     if (!account) return;
 
     await ethConnection?.setAccount(account.privateKey);
+    const terminal = terminalHandle;
 
     try {
       const playerAddress = ethConnection?.getAddress();
@@ -308,7 +311,6 @@ export function BluePillLandingPage() {
         throw new Error("not logged in");
       }
 
-      const terminal = terminalHandle;
       terminal.current?.println("Checking account balance... ");
 
       const balance = BigInt(await ethConnection.loadBalance(playerAddress));
@@ -967,7 +969,7 @@ export function BluePillLandingPage() {
           terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
 
           terminal.current?.println(
-            "You can use bridge to transfer ETH to Redstone Mainnet",
+            "You can use bridge to transfer ETH to " + BLOCKCHAIN_NAME,
             TerminalTextStyle.Pink,
           );
 
@@ -982,13 +984,15 @@ export function BluePillLandingPage() {
           );
 
           terminal.current?.println(
-            " <= transfer ETH from L2 (e.g. optimism) to Redstone Mainnet",
+            " <= transfer ETH from L2 (e.g. optimism) to " + BLOCKCHAIN_NAME,
           );
 
           terminal.current?.print("   Player guide: ");
 
           terminal.current?.printLink(
-            "How to get ETH on the Redstone mainnet for your account",
+            "How to get ETH on the " +
+              BLOCKCHAIN_NAME +
+              " mainnet for your account",
             () => {
               window.open(HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE);
             },
@@ -1002,7 +1006,9 @@ export function BluePillLandingPage() {
           terminal.current?.println("");
 
           terminal.current?.println(
-            "After your account get ETH on Redstone Mainet, press [enter] to continue.",
+            "After your account get ETH on " +
+              BLOCKCHAIN_NAME +
+              " Mainnet, press [enter] to continue.",
             TerminalTextStyle.Pink,
           );
           const userInput = (await terminal.current?.getInput())?.trim() ?? "";
@@ -1890,7 +1896,7 @@ export function BluePillLandingPage() {
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD v0.1.2`}
+            text={`Welcome To Dark Forest MUD ${VERSION}`}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:

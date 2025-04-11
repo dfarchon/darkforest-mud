@@ -14,6 +14,7 @@ import { White } from "../Components/Text";
 import dfstyles from "../Styles/dfstyles";
 import { useUIManager } from "../Utils/AppHooks";
 import { useBooleanSetting } from "../Utils/SettingsHooks";
+import { VERSION } from "@df/constants";
 
 function TutorialPaneContent({
   tutorialState,
@@ -257,7 +258,7 @@ function TutorialPaneContent({
         {/* Winners of each round of Dark Forest v0.6.x will receive a prize, and be added to the{' '}
         <Underline>Valhalla</Underline> universe. */}
         {/* Winners of each round of Dark Forest MUD v0.1 will get mysterious prizes 🎩 */}
-        Winners of each round of Dark Forest MUD v0.1.2 will get prizes 🎩
+        Winners of each round of Dark Forest MUD {VERSION} will get prizes 🎩
         <br />
         <br />
         To win, have the highest score (^:

@@ -189,7 +189,7 @@ export function HatPane({
 
         <div>
           <Link to={HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE}>
-            Guide: How to Get More ETH on Redstone
+            Guide: How to Get More ETH on {BLOCKCHAIN_NAME}
           </Link>
         </div>
 

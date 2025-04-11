@@ -59,7 +59,7 @@ export const App = () => {
                 <Navigate to={`/play/${defaultAddress}`} replace={true} />
               }
             />
-            <Route path="/play/:contract" element={<GameLandingPage />} />
+            <Route path="/play/:contract" element={<BluePillLandingPage />} />
 
             <Route
               path="/bluepill"
@@ -71,6 +71,15 @@ export const App = () => {
               path="/bluepill/:contract"
               element={<BluePillLandingPage />}
             />
+
+            <Route
+              path="/redpill"
+              element={
+                <Navigate to={`/redpill/${defaultAddress}`} replace={true} />
+              }
+            />
+            <Route path="/redpill/:contract" element={<GameLandingPage />} />
+
             <Route path="/" element={<ClassicLandingPage />} />
             {/* <Route path="/sandbox" element={<SandboxPage />} /> */}
             {/* <Route path="/welcome" element={<WelcomePage />} /> */}

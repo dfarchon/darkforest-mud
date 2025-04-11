@@ -1,10 +1,12 @@
 import {
   BLOCK_EXPLORER_URL,
   BLOCKCHAIN_BRIDGE,
+  BLOCKCHAIN_NAME,
   HOW_TO_ENABLE_POPUPS,
   HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   PLAYER_GUIDE,
   TOKEN_NAME,
+  VERSION,
 } from "@df/constants";
 import type { EthConnection } from "@df/network";
 import { neverResolves, weiToEth } from "@df/network";
@@ -740,7 +742,9 @@ export function GameLandingPage() {
           terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
 
           terminal.current?.println(
-            "You can use bridge to transfer ETH to Redstone Mainnet",
+            "You can use bridge to transfer ETH to " +
+              BLOCKCHAIN_NAME +
+              " Mainnet",
             TerminalTextStyle.Pink,
           );
 
@@ -755,13 +759,17 @@ export function GameLandingPage() {
           );
 
           terminal.current?.println(
-            " <= transfer ETH from L2 (e.g. optimism) to Redstone Mainnet",
+            " <= transfer ETH from L2 (e.g. optimism) to " +
+              BLOCKCHAIN_NAME +
+              " Mainnet",
           );
 
           terminal.current?.print("   Player guide: ");
 
           terminal.current?.printLink(
-            "How to get ETH on the Redstone mainnet for your account",
+            "How to get ETH on the " +
+              BLOCKCHAIN_NAME +
+              " mainnet for your account",
             () => {
               window.open(HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE);
             },
@@ -775,7 +783,9 @@ export function GameLandingPage() {
           terminal.current?.println("");
 
           terminal.current?.println(
-            "After your account get ETH on Redstone Mainet, press [enter] to continue.",
+            "After your account get ETH on " +
+              BLOCKCHAIN_NAME +
+              " Mainnet, press [enter] to continue.",
             TerminalTextStyle.Pink,
           );
           const userInput = (await terminal.current?.getInput())?.trim() ?? "";
@@ -1898,7 +1908,7 @@ export function GameLandingPage() {
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD v0.1.2`}
+            text={`Welcome To Dark Forest MUD ${VERSION} `}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:
