@@ -26,6 +26,9 @@ eth_rpc_url = "https://rpc.garnetchain.com"
 [profile.redstone]
 eth_rpc_url = "https://rpc.redstonechain.com"
 
+[profile.base-sepolia]
+eth_rpc_url = "https://sepolia.base.org"
+
 [fmt]
 line_length = 120
 tab_width = 2
