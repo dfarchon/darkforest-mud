@@ -321,7 +321,7 @@ export function BluePillLandingPage() {
       console.log("---------------------------------");
 
       if (balance < LOW_BALANCE_THRESHOLD) {
-        terminalHandle.current?.printElement(<BluePillBurnerWallet />);
+        terminal.current?.printElement(<BluePillBurnerWallet />);
       }
 
       terminal.current?.println("");
@@ -1948,14 +1948,16 @@ export function BluePillLandingPage() {
 
             {indexerLoaded && !walletLinked && <BluePillWalletButton />}
 
-            {indexerLoaded && walletLinked && !burnerHasFunds && (
-              <BluePillBurnerWallet />
-            )}
+            {indexerLoaded &&
+              walletLinked &&
+              !burnerHasFunds &&
+              !initRenderState && <BluePillBurnerWallet />}
 
             {indexerLoaded &&
               walletLinked &&
               burnerHasFunds &&
-              !playerRegistered && <BluePillRegisterPlayer />}
+              !playerRegistered &&
+              !initRenderState && <BluePillRegisterPlayer />}
           </div>
           <Terminal
             ref={terminalHandle}
