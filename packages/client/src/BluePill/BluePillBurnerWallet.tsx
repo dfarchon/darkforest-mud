@@ -172,7 +172,7 @@ export const BluePillBurnerWallet = () => {
 
       // Convert hex gasPrice to BigInt
       const gasPriceBigInt = BigInt(gasPrice);
-      const gasLimit = BigInt(21000);
+      const gasLimit = BigInt(21500);
       const gasCost = gasPriceBigInt * gasLimit;
 
       // Ensure balance is BigInt

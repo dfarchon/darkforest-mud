@@ -2061,7 +2061,7 @@ export class GameUIManager extends EventEmitter {
     );
 
     const hoverSound = new Howl({
-      src: ["/public/sounds/hover.ogg"],
+      src: ["/sounds/hover.ogg"],
       volume: Math.round(Number(backgroundMusicVolume) / 10),
       html5: true,
       onload: () => {
@@ -2086,7 +2086,7 @@ export class GameUIManager extends EventEmitter {
     );
 
     const clickSound = new Howl({
-      src: ["/public/sounds/click.ogg"],
+      src: ["/sounds/click.ogg"],
       volume: Math.round(Number(backgroundMusicVolume) / 10),
       html5: true,
       onload: () => {

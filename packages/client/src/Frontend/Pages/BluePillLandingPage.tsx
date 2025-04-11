@@ -270,7 +270,7 @@ export function BluePillLandingPage() {
     if (walletClient.chain?.id !== burnerWalletClient.chain?.id) return false;
 
     return account !== zeroAddress;
-  }, [walletClient]);
+  }, [walletClient, chain]);
 
   const playerRegistered = useMemo(() => {
     if (playerEntity && walletClient?.account) {
@@ -321,7 +321,7 @@ export function BluePillLandingPage() {
       console.log("---------------------------------");
 
       if (balance < LOW_BALANCE_THRESHOLD) {
-        terminalHandle.current?.printElement(<BluePillBurnerWallet />);
+        terminal.current?.printElement(<BluePillBurnerWallet />);
       }
 
       terminal.current?.println("");
@@ -1946,13 +1946,18 @@ export function BluePillLandingPage() {
               </div>
             )}
 
-            {!walletLinked && <BluePillWalletButton />}
+            {indexerLoaded && !walletLinked && <BluePillWalletButton />}
 
-            {walletLinked && !burnerHasFunds && <BluePillBurnerWallet />}
+            {indexerLoaded &&
+              walletLinked &&
+              !burnerHasFunds &&
+              !initRenderState && <BluePillBurnerWallet />}
 
-            {walletLinked && burnerHasFunds && !playerRegistered && (
-              <BluePillRegisterPlayer />
-            )}
+            {indexerLoaded &&
+              walletLinked &&
+              burnerHasFunds &&
+              !playerRegistered &&
+              !initRenderState && <BluePillRegisterPlayer />}
           </div>
           <Terminal
             ref={terminalHandle}
