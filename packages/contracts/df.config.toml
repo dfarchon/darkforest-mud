@@ -3,7 +3,7 @@ a_sparsity = 16384
 b_radius = 150000
 
 [round]
-number = 6
+number = 3
 
 [entry_fee]
 value = 2000000000000

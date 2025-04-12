@@ -31,6 +31,8 @@ import {
   locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
+  artifactIdFromDecStr,
+  artifactIdToDecStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -1965,6 +1967,37 @@ export class ContractsAPI extends EventEmitter {
     });
 
     console.log("\n====== End Queue Information ======\n");
+  }
+
+  public async getArtifactNFTInfo() {
+    const { ArtifactNFT } = this.components;
+    const result = getComponentValue(ArtifactNFT, singletonEntity);
+    if (!result) {
+      return;
+    }
+    const nftAddress = result.addr;
+    console.log(nftAddress);
+    const nftContract = this.ethConnection.getContract(nftAddress);
+    const amount = await nftContract.totalSupply();
+    console.log("total supply", amount.toNumber());
+
+    for (let i = 0; i < amount; i++) {
+      const rawTokenId = await nftContract.tokenByIndex(i);
+      const tokenId = artifactIdFromDecStr(rawTokenId.toString());
+      const tokenIdStr = artifactIdToDecStr(tokenId);
+      console.log("cnt ", i);
+      console.log("tokenId", tokenId);
+      console.log("tokenIdStr", tokenIdStr);
+      const tokenURI = await nftContract.tokenURI(rawTokenId);
+      console.log("tokenURI", tokenURI);
+      const result = await nftContract.getArtifact(rawTokenId);
+      console.log("result", result);
+
+      // const artifact = await this.artifactUtils.getArtifactById(tokenId);
+
+      // console.log("artifact", artifact);
+      console.log("--------------------------------");
+    }
   }
 }
 

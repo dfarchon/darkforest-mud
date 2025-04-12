@@ -51,7 +51,7 @@ contract ArtifactNFTTest is BaseTest {
 
   function testMint() public {
     vm.expectRevert("mint: not artifact portal system");
-    nft.mint(address(1), 1, 1, 1);
+    nft.mint(address(1), 1, 1, 1, 1);
 
     vm.roll(1000);
     vm.prank(address(1));

@@ -448,12 +448,12 @@ export class GameManagerFactory {
         } else if (isUnconfirmedDepositArtifactTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawArtifactTx(tx)) {
           await Promise.all([
             await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            await gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedProspectPlanetTx(tx)) {
           await gameManager.softRefreshPlanet(tx.intent.planetId);
@@ -463,6 +463,7 @@ export class GameManagerFactory {
           isUnconfirmedShutdownArtifactTx(tx)
         ) {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);
+          await gameManager.hardRefreshArtifact(tx.intent.artifactId);
           // } else if (isUnconfirmedActivateArtifactTx(tx)) {
           //   let refreshFlag = true;
           //   const fromPlanet = await gameManager.getPlanetWithId(
@@ -529,23 +530,23 @@ export class GameManagerFactory {
                 tx.intent.locationId,
                 tx.intent.linkTo,
               ]),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+              gameManager.hardRefreshArtifact(tx.intent.artifactId),
             ]);
           } else {
             await Promise.all([
               gameManager.hardRefreshPlanet(tx.intent.locationId),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+              gameManager.hardRefreshArtifact(tx.intent.artifactId),
             ]);
           }
         } else if (isUnconfirmedChangeArtifactImageTypeTx(tx)) {
           await Promise.all([
-            await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            gameManager.hardRefreshPlanet(tx.intent.locationId),
+            gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedBuyArtifactTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawSilverTx(tx)) {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);
