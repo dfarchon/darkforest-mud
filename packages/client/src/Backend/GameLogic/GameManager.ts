@@ -4137,7 +4137,6 @@ export class GameManager extends EventEmitter {
     locationId: LocationId,
     artifactId: ArtifactId,
   ): Promise<Transaction<UnconfirmedDepositArtifact>> {
-    console.log("depositArtifact", locationId, artifactId);
     try {
       localStorage.setItem(
         `${this.ethConnection.getAddress()?.toLowerCase()}-depositPlanet`,
