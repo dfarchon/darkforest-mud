@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
-import { Ticker, TickerData, InnerCircle, InnerCircleData } from "../codegen/index.sol";
-import { Errors } from "../interfaces/errors.sol";
+import { Ticker, TickerData } from "codegen/tables/Ticker.sol";
+import { InnerCircle, InnerCircleData } from "codegen/tables/InnerCircle.sol";
 
-contract TickSystem is System, Errors {
+contract TickSystem is BaseSystem {
   /**
    * @notice Tick. Serves for universal updates.
    * Imagine there is a core game variable which should be updated for each game operation.
@@ -23,35 +23,32 @@ contract TickSystem is System, Errors {
   function tick() public {
     TickerData memory ticker = Ticker.get();
     if (ticker.paused) {
-      revert Errors.Paused();
+      revert Paused();
     }
     _tick(ticker);
     Ticker.set(ticker);
   }
 
-  function pause() public {
-    _requireOwner();
+  function pause() public namespaceOwner {
     TickerData memory ticker = Ticker.get();
     if (ticker.paused) {
-      revert Errors.Paused();
+      revert Paused();
     }
     _tick(ticker);
     _pause(ticker);
     Ticker.set(ticker);
   }
 
-  function unpause() public {
-    _requireOwner();
+  function unpause() public namespaceOwner {
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
-      revert Errors.NotPaused();
+      revert NotPaused();
     }
     _unpause(ticker);
     Ticker.set(ticker);
   }
 
-  function updateTickRate(uint256 tickRate) public {
-    _requireOwner();
+  function updateTickRate(uint256 tickRate) public namespaceOwner {
     TickerData memory ticker = Ticker.get();
     if (!ticker.paused) {
       _tick(ticker);
@@ -88,6 +85,7 @@ contract TickSystem is System, Errors {
     AccessControl.requireOwner(SystemRegistry.get(address(this)), _msgSender());
   }
 
+  // TODO: convert updates to system hooks
   function _globalUpdates(uint256 tickCount) internal {
     _shrinkInnerCircle(tickCount);
   }

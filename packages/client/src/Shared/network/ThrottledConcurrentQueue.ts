@@ -282,4 +282,8 @@ export class ThrottledConcurrentQueue<U = unknown> implements Queue {
 
     this.concurrency--;
   }
+
+  public getTaskQueue(): Array<QueuedTask<unknown, U>> {
+    return [...this.taskQueue];
+  }
 }

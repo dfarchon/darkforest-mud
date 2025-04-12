@@ -55,7 +55,7 @@ export function SidebarPane({
         <ModalToggleButton
           modal={ModalName.AIChat}
           hook={aiChatHook}
-          text={sidebarHovered ? "AI Chat" : undefined}
+          text={sidebarHovered ? "Sophons" : undefined}
           size="stretch"
           shortcutKey={TOGGLE_AI_CHAT_PANE}
           shortcutText={sidebarHovered ? TOGGLE_AI_CHAT_PANE : undefined}

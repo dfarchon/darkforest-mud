@@ -39,14 +39,14 @@ function onlyInDevelopment(): string {
 
 const defaultSettings: Record<Setting, string> = {
   [Setting.OptOutMetrics]: onlyInDevelopment(),
-  [Setting.AutoApproveNonPurchaseTransactions]: "false", //onlyInDevelopment(),
+  [Setting.AutoApproveNonPurchaseTransactions]: "true", //onlyInDevelopment(),
   [Setting.PlanetDefaultEnergyLevelToSend]: "50",
   [Setting.PlanetDefaultEnergyLevelToSendReset]: "false",
   [Setting.DrawChunkBorders]: "false",
   [Setting.HighPerformanceRendering]: "false",
   [Setting.MoveNotifications]: "true",
   [Setting.HasAcceptedPluginRisk]: onlyInDevelopment(),
-  [Setting.GasFeeGwei]: Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("6"))
+  [Setting.GasFeeGwei]: Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("2"))
     .toFixed(FIXED_DIGIT_NUMBER)
     .toString(), // AutoGasSetting.Average,
   [Setting.GasFeeLimit]: "3000000",
@@ -81,6 +81,8 @@ const defaultSettings: Record<Setting, string> = {
   [Setting.ForceReloadEmbeddedPlugins]: "false",
   [Setting.PaneVisible]: "true",
   [Setting.BottomHotkeyVisible]: "true",
+  [Setting.BackgroundMusicVolume]: "0.5",
+  [Setting.BackgroundMusicEnabled]: "true",
 };
 
 interface SettingStorageConfig {

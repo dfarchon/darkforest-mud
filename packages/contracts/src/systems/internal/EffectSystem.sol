@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { Planet } from "../lib/Planet.sol";
-import { EffectLib } from "../lib/Effect.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { Planet } from "libraries/Planet.sol";
+import { EffectLib } from "libraries/Effect.sol";
 
-contract EffectSystem is System, Errors {
+contract EffectSystem is BaseSystem {
   /**
    * @notice Trigger before move effects.
    * @param planet Planet

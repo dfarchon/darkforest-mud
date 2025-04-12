@@ -159,7 +159,7 @@ import {
 } from "@df/types";
 import type { NumberType } from "@latticexyz/recs";
 import { getComponentValue } from "@latticexyz/recs";
-import { encodeEntity } from "@latticexyz/store-sync/recs";
+import { encodeEntity, singletonEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { BigInteger } from "big-integer";
 import bigInt from "big-integer";
@@ -884,14 +884,14 @@ export class GameManager extends EventEmitter {
   }
 
   public updateContractConstants(contractConstants: ContractConstants) {
-    // PUNK
-    // console.log("update contract constants");
-    // console.log(
-    //   "new cooldown time:",
-    //   contractConstants.LOCATION_REVEAL_COOLDOWN,
-    // );
-
     this.contractConstants = contractConstants;
+  }
+
+  public getTransactionFee() {
+    const { EntryFee } = this.components;
+    const entryFee = getComponentValue(EntryFee, singletonEntity);
+    if (!entryFee) return 0n;
+    else return entryFee.fee;
   }
 
   static async create({
@@ -1129,6 +1129,25 @@ export class GameManager extends EventEmitter {
   }
 
   public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
+    const total = planetIds.length;
+    let completed = 0;
+    let lastProgressShown = 0; // Track last shown progress
+
+    for (const planetId of planetIds) {
+      this.hardRefreshPlanet(planetId);
+      completed++;
+      // Calculate current progress
+      const progress = Math.floor((completed / total) * 100);
+
+      // Show progress every 10%
+      if (progress >= lastProgressShown + 10) {
+        console.log(`Bulk refresh planets progress: ${progress}%`);
+        lastProgressShown = progress;
+      }
+    }
+    console.log("Bulk refresh planets completed: 100%");
+
+    return;
     const planetVoyageMap: Map<LocationId, QueuedArrival[]> = new Map();
 
     const allVoyages = this.contractsAPI.getAllArrivals(planetIds);
@@ -2650,8 +2669,12 @@ export class GameManager extends EventEmitter {
 
       // console.log(txIntent);
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -3970,7 +3993,11 @@ export class GameManager extends EventEmitter {
         delegator: delegator,
       };
 
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const transactionFee = this.getTransactionFee();
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       tx.confirmedPromise.then(() =>
         NotificationManager.getInstance().artifactProspected(
@@ -4059,9 +4086,14 @@ export class GameManager extends EventEmitter {
         delegator: delegator,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       const tx =
         await this.contractsAPI.submitTransaction<UnconfirmedFindArtifact>(
           txIntent,
+          {
+            value: transactionFee,
+          },
         );
 
       tx.confirmedPromise
@@ -4104,6 +4136,12 @@ export class GameManager extends EventEmitter {
     return this.contractConstants;
   }
 
+  public getArtifactWithdrawalDisabled(): boolean {
+    const { ArtifactWithdrawal } = this.components;
+    const value = getComponentValue(ArtifactWithdrawal, singletonEntity);
+    return value?.disabled ?? false;
+  }
+
   /**
    * Submits a transaction to the blockchain to deposit an artifact on a given planet.
    * You must own the planet and you must own the artifact directly (can't be locked in contract)
@@ -4128,6 +4166,27 @@ export class GameManager extends EventEmitter {
       //   throw error;
       // }
 
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to deposit on unknown planet");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("tried to deposit on a non-trading post planet");
+      }
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedDepositArtifact = {
         methodName: "depositArtifact",
         contract: this.contractsAPI.contract,
@@ -4137,6 +4196,7 @@ export class GameManager extends EventEmitter {
           locationIdToDecStr(locationId),
           artifactIdToDecStr(artifactId),
         ]),
+        delegator,
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);
@@ -4164,20 +4224,18 @@ export class GameManager extends EventEmitter {
   public async withdrawArtifact(
     locationId: LocationId,
     artifactId: ArtifactId,
-    bypassChecks = true,
   ): Promise<Transaction<UnconfirmedWithdrawArtifact>> {
+    console.log("withdrawArtifact", locationId, artifactId);
+    const planet = this.entityStore.getPlanetWithId(locationId);
     try {
-      if (!bypassChecks) {
-        // if (this.checkGameHasEnded()) {
-        //   throw new Error('game has ended');
-        // }
-        const planet = this.entityStore.getPlanetWithId(locationId);
-        if (!planet) {
-          throw new Error("tried to withdraw from unknown planet");
-        }
-        if (!artifactId) {
-          throw new Error("must supply an artifact id");
-        }
+      if (!planet) {
+        throw new Error("tried to withdraw from unknown planet");
+      }
+      if (!artifactId) {
+        throw new Error("must supply an artifact id");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("tried to withdraw from a non-trading post planet");
       }
 
       // this is shitty. used for the popup window
@@ -4190,6 +4248,20 @@ export class GameManager extends EventEmitter {
         artifactId,
       );
 
+      const delegator = planet.owner;
+      const myAccount = this.getAccount();
+
+      if (!delegator || !myAccount) {
+        throw Error("account error");
+      }
+
+      if (
+        delegator !== myAccount &&
+        !this.checkDelegateCondition(delegator, myAccount)
+      ) {
+        throw new Error("delegation error");
+      }
+
       const txIntent: UnconfirmedWithdrawArtifact = {
         methodName: "withdrawArtifact",
         contract: this.contractsAPI.contract,
@@ -4199,6 +4271,7 @@ export class GameManager extends EventEmitter {
         ]),
         locationId,
         artifactId,
+        delegator,
       };
 
       this.terminal.current?.println(
@@ -4308,7 +4381,12 @@ export class GameManager extends EventEmitter {
         locationId,
         artifactId,
       };
-      return this.contractsAPI.submitTransaction(txIntent);
+
+      const transactionFee = this.getTransactionFee();
+
+      return this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__chargeArtifact",
@@ -4358,7 +4436,11 @@ export class GameManager extends EventEmitter {
         locationId,
         artifactId,
       };
-      return this.contractsAPI.submitTransaction(txIntent);
+
+      const transactionFee = this.getTransactionFee();
+      return this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__shutdownArtifact",
@@ -4500,8 +4582,12 @@ export class GameManager extends EventEmitter {
         linkTo,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -4828,8 +4914,12 @@ export class GameManager extends EventEmitter {
         amount,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -5243,8 +5333,12 @@ export class GameManager extends EventEmitter {
         }
       }
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
 
       return tx;
     } catch (e) {
@@ -5298,8 +5392,12 @@ export class GameManager extends EventEmitter {
         upgradeBranch: branch,
       };
 
+      const transactionFee = this.getTransactionFee();
+
       // Always await the submitTransaction so we can catch rejections
-      const tx = await this.contractsAPI.submitTransaction(txIntent);
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
       return tx;
     } catch (e) {
       this.getNotificationsManager().txInitError(
@@ -5846,6 +5944,30 @@ export class GameManager extends EventEmitter {
     return this;
   }
 
+  /**
+   * Removes a chunk from the game manager's awareness - which includes its location, size,
+   * and all planets contained within that chunk. This does not delete the planets' data
+   * from the blockchain, only from the client's local storage.
+   */
+  deleteChunk(chunk: Chunk): GameManager {
+    // Remove chunk from persistent storage
+    this.persistentChunkStore.deleteChunk(chunk, true);
+
+    // Remove planet locations from entity store
+    for (const planetLocation of chunk.planetLocations) {
+      this.entityStore.deletePlanetLocation(planetLocation);
+
+      // PUNK TODO: think about this
+      // If the planet exists in contract, we might want to keep its data
+      // but mark it as not discovered/visible
+      // if (this.entityStore.isPlanetInContract(planetLocation.hash)) {
+      //   this.entityStore.markPlanetNotDiscovered(planetLocation.hash);
+      // }
+    }
+
+    return this;
+  }
+
   // listenForNewBlock() {
   //   this.getEthConnection().blockNumber$.subscribe((blockNumber) => {
   //     if (this.captureZoneGenerator) {
@@ -5879,6 +6001,46 @@ export class GameManager extends EventEmitter {
       TerminalTextStyle.Sub,
     );
     this.bulkHardRefreshPlanets(planetIdsToUpdate);
+  }
+
+  /**
+   * To delete multiple chunks at once, use this function rather than `deleteChunk`, in order
+   * to handle all of the associated planet data cleanup in an efficient manner.
+   */
+  async bulkDeleteChunks(chunks: Chunk[]): Promise<void> {
+    this.terminal.current?.println(
+      "DELETING CHUNKS: if you are deleting a large area, this may take a while...",
+    );
+
+    const planetIdsToUpdate: LocationId[] = [];
+
+    // First pass: collect all planet IDs and remove chunks
+    for (const chunk of chunks) {
+      this.persistentChunkStore.deleteChunk(chunk, true);
+
+      for (const planetLocation of chunk.planetLocations) {
+        this.entityStore.deletePlanetLocation(planetLocation);
+        // if (this.entityStore.isPlanetInContract(planetLocation.hash)) {
+        //   // For planets in contract, we'll update their visibility status
+        //   planetIdsToUpdate.push(planetLocation.hash);
+        // }
+      }
+    }
+
+    if (planetIdsToUpdate.length > 0) {
+      this.terminal.current?.println(
+        `updating visibility for ${planetIdsToUpdate.length} planets...`,
+        TerminalTextStyle.Sub,
+      );
+    }
+
+    // Update game state and UI
+    this.terminal.current?.println(
+      `successfully deleted ${chunks.length} chunks...`,
+      TerminalTextStyle.Sub,
+    );
+
+    // this.bulkHardRefreshPlanets(planetIdsToUpdate);
   }
 
   // utils - scripting only

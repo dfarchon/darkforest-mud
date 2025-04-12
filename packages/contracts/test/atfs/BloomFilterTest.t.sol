@@ -2,11 +2,9 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-
+import { BaseTest } from "../BaseTest.t.sol";
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
-import { Counter, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
+import { Counter, PlanetArtifact, ArtifactOwner, Round } from "../../src/codegen/index.sol";
 import { Planet as PlanetTable, PlanetConstants, Move, MoveData, Ticker, TickerData } from "../../src/codegen/index.sol";
 import { Artifact as ArtifactTable, ArtifactData, TempConfigSet, DistanceMultiplier } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
@@ -19,13 +17,14 @@ import { ARTIFACT_INDEX as BLOOM_FILTER_INDEX } from "../../src/modules/atfs/Blo
 import { BloomFilterSystem } from "../../src/modules/atfs/BloomFilter/BloomFilterSystem.sol";
 import "forge-std/console.sol";
 
-contract BloomFilterTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+contract BloomFilterTest is BaseTest {
   uint8[] bloomFilterRequiredMaxLevels = [0, 2, 4, 6, 8, 9];
 
   function setUp() public virtual override {
     super.setUp();
     vm.startPrank(admin);
+    // set round number 0
+    Round.set(0);
     // skip snark check
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();

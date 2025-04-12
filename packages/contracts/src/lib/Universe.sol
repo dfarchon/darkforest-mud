@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { Planet } from "./Planet.sol";
-import { PlanetType } from "../codegen/common.sol";
-import { DistanceMultiplier } from "../codegen/index.sol";
+import { Planet } from "libraries/Planet.sol";
+import { PlanetType } from "codegen/common.sol";
+import { DistanceMultiplier } from "codegen/index.sol";
 
 library UniverseLib {
   // todo wormhole would affect the distance

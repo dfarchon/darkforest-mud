@@ -62,6 +62,11 @@ interface Errors {
   error ExistingArtifact(); // 0x11f0e4e4
   error OnlyCallableByArtifactInstallModule(); // 0xbf9f6704
   error EffectNumberExceeded(); // 0x8c954681
+  error ArtifactInUse(); // 0x1b996bf4
+  error ArtifactIdOverflow(); // 0x0c491e00
+  error ArtifactOutOfControl(); // 0xf90edd80
+  error ArtifactRarityTooHigh(); // 0xaefde1a6
+  error ArtifactWithdrawalDisabled(); // 0xed2ec822
 
   // planet withdraw silver system
   error InvalidPlanetType(); // 0xcfb7f825
@@ -71,4 +76,7 @@ interface Errors {
   // GPTToken system
   error NotEnoughETH(); // 0x932b84b0
   error NotEnoughGPTTokens(); // 0x134712e2
+
+  // BaseSystem
+  error InsufficientEntryFee(uint256 required); // 0xe270e71a
 }

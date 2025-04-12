@@ -2,11 +2,10 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+import { BaseTest } from "../BaseTest.t.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
-import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner } from "../../src/codegen/index.sol";
+import { Planet as PlanetTable, ProspectedPlanet, PlanetArtifact, ArtifactOwner, Round } from "../../src/codegen/index.sol";
 import { Counter, Artifact as ArtifactTable, ArtifactData, PlanetConstants, Ticker, TempConfigSet } from "../../src/codegen/index.sol";
 import { Move, MoveData } from "../../src/codegen/index.sol";
 import { Errors } from "../../src/interfaces/errors.sol";
@@ -21,14 +20,14 @@ import { CannonSystem } from "../../src/modules/atfs/PhotoidCannon/CannonSystem.
 
 import "forge-std/console.sol";
 
-contract CannonTest is MudTest {
+contract CannonTest is BaseTest {
   using EffectLib for Planet;
-
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
   function setUp() public virtual override {
     super.setUp();
     vm.startPrank(admin);
+    // set round number 0
+    Round.set(0);
     // skip snark check
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();

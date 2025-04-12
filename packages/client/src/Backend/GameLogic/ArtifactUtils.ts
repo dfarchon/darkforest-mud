@@ -2,6 +2,7 @@ import { EMPTY_ADDRESS } from "@df/constants";
 import { TxCollection } from "@df/network";
 import {
   address,
+  artifactIdFromDecStr,
   artifactIdToDecStr,
   locationIdFromHexStr,
   locationIdToHexStr,
@@ -135,6 +136,90 @@ export class ArtifactUtils {
       chargeTick: Number(artifactRec.chargeTick),
       activateTick: Number(artifactRec.activateTick),
       cooldownTick: Number(artifactRec.cooldownTick),
+      charge: metadata.charge,
+      cooldown: metadata.cooldown,
+      durable: metadata.durable,
+      reusable: metadata.reusable,
+      reqLevel: metadata.reqLevel,
+      reqPopulation: metadata.reqPopulation,
+      reqSilver: metadata.reqSilver,
+      chargeUpgrade,
+      activateUpgrade,
+      transactions: new TxCollection(),
+    };
+  }
+
+  public getArtifactByNFT(
+    tokenId: bigint,
+    owner: EthAddress,
+    index: number,
+    rarity: number,
+  ): Artifact | undefined {
+    const artifactId = artifactIdFromDecStr(tokenId.toString());
+    const {
+      PinkBombMetadata,
+      BloomFilterMetadata,
+      WormholeMetadata,
+      CannonMetadata,
+    } = this.components;
+
+    let metadata;
+    if (index === 1) {
+      metadata = getComponentValue(
+        PinkBombMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: rarity }),
+      );
+    } else if (index === 4) {
+      metadata = getComponentValue(
+        BloomFilterMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: rarity }),
+      );
+    } else if (index === 5) {
+      metadata = getComponentValue(
+        WormholeMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: rarity }),
+      );
+    } else if (index === 6) {
+      metadata = getComponentValue(
+        CannonMetadata,
+        encodeEntity({ rarity: "uint8" }, { rarity: rarity }),
+      );
+    }
+
+    if (!metadata) {
+      throw new Error(
+        `artifact metadata not found, artifact index: ${index}, rarity: ${rarity}`,
+      );
+    }
+
+    const artifactType = this.getArtifactType(index);
+    const { chargeUpgrade, activateUpgrade } = this.getArtifactUpgrade(
+      artifactType,
+      rarity as ArtifactRarity,
+    );
+
+    return {
+      isInititalized: false,
+      imageType: 0,
+      id: artifactId,
+      planetDiscoveredOn: "0" as LocationId,
+      rarity: rarity as ArtifactRarity,
+      planetBiome: 0 as Biome,
+      mintedAtTimestamp: 0,
+      discoverer: EMPTY_ADDRESS,
+      artifactType,
+      controller: owner,
+      currentOwner: owner,
+      activations: 0,
+      lastActivated: 0,
+      lastDeactivated: 0,
+      onPlanetId: undefined,
+      artifactIndex: index,
+      status: ArtifactStatus.Default,
+      genre: metadata.genre as ArtifactGenre,
+      chargeTick: 0,
+      activateTick: 0,
+      cooldownTick: 0,
       charge: metadata.charge,
       cooldown: metadata.cooldown,
       durable: metadata.durable,

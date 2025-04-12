@@ -61,6 +61,7 @@ export function ArtifactActions({
   const onPlanetWrapper = usePlanet(uiManager, artifact?.onPlanetId);
   const depositPlanet = depositPlanetWrapper.value;
   const onPlanet = onPlanetWrapper.value;
+  const artifactWithdrawalDisabled = uiManager.getArtifactWithdrawalDisabled();
 
   const otherArtifactsOnPlanet = usePlanetArtifacts(onPlanetWrapper, uiManager);
 
@@ -81,24 +82,24 @@ export function ArtifactActions({
   //   ? activateArtifactAmountInContract
   //   : 0;
 
-  // const withdraw = useCallback(
-  //   (artifact: Artifact) => {
-  //     onPlanet && uiManager.withdrawArtifact(onPlanet.locationId, artifact?.id);
-  //   },
-  //   [onPlanet, uiManager],
-  // );
+  const withdraw = useCallback(
+    (artifact: Artifact) => {
+      onPlanet && uiManager.withdrawArtifact(onPlanet.locationId, artifact?.id);
+    },
+    [onPlanet, uiManager],
+  );
 
-  // const deposit = useCallback(
-  //   (artifact: Artifact) => {
-  //     artifact &&
-  //       depositPlanetWrapper.value &&
-  //       uiManager.depositArtifact(
-  //         depositPlanetWrapper.value.locationId,
-  //         artifact?.id,
-  //       );
-  //   },
-  //   [uiManager, depositPlanetWrapper.value],
-  // );
+  const deposit = useCallback(
+    (artifact: Artifact) => {
+      artifact &&
+        depositPlanetWrapper.value &&
+        uiManager.depositArtifact(
+          depositPlanetWrapper.value.locationId,
+          artifact?.id,
+        );
+    },
+    [uiManager, depositPlanetWrapper.value],
+  );
 
   const charge = useCallback(
     async (artifact: Artifact) => {
@@ -163,39 +164,36 @@ export function ArtifactActions({
     [onPlanet, uiManager],
   );
 
-  const deactivate = useCallback(
-    (artifact: Artifact) => {
-      onPlanet &&
-        uiManager.deactivateArtifact(
-          onPlanet.locationId,
-          artifact.id,
-          artifact.linkTo,
-        );
-    },
-    [onPlanet, uiManager],
-  );
+  // const deactivate = useCallback(
+  //   (artifact: Artifact) => {
+  //     onPlanet &&
+  //       uiManager.deactivateArtifact(
+  //         onPlanet.locationId,
+  //         artifact.id,
+  //         artifact.linkTo,
+  //       );
+  //   },
+  //   [onPlanet, uiManager],
+  // );
 
-  // if (!artifact || (!onPlanet && !depositPlanet) || !account) {
-  //   return null;
-  // }
-  if (!artifact || !onPlanet || !account) {
+  if (!artifact || (!onPlanet && !depositPlanet) || !account) {
     return null;
   }
 
   const actions: TooltipTriggerProps[] = [];
 
-  // const withdrawing = artifact.transactions?.hasTransaction(
-  //   isUnconfirmedWithdrawArtifactTx,
-  // );
-  // const depositing = artifact.transactions?.hasTransaction(
-  //   isUnconfirmedDepositArtifactTx,
-  // );
+  const withdrawing = artifact.transactions?.hasTransaction(
+    isUnconfirmedWithdrawArtifactTx,
+  );
+  const depositing = artifact.transactions?.hasTransaction(
+    isUnconfirmedDepositArtifactTx,
+  );
   const activating = artifact.transactions?.hasTransaction(
     isUnconfirmedActivateArtifactTx,
   );
-  const deactivating = artifact.transactions?.hasTransaction(
-    isUnconfirmedDeactivateArtifactTx,
-  );
+  // const deactivating = artifact.transactions?.hasTransaction(
+  //   isUnconfirmedDeactivateArtifactTx,
+  // );
   const charging = artifact.transactions?.hasTransaction(
     isUnconfirmedChargeArtifactTx,
   );
@@ -203,68 +201,84 @@ export function ArtifactActions({
     isUnconfirmedShutdownArtifactTx,
   );
 
-  // const canHandleDeposit =
-  //   depositPlanetWrapper.value &&
-  //   depositPlanetWrapper.value.planetLevel > artifact.rarity;
-  // const canHandleWithdraw =
-  //   onPlanetWrapper.value &&
-  //   onPlanetWrapper.value.planetLevel > artifact.rarity;
+  const canHandleDeposit =
+    depositPlanetWrapper.value &&
+    depositPlanetWrapper.value.planetLevel > artifact.rarity;
+  const canHandleWithdraw =
+    onPlanetWrapper.value &&
+    onPlanetWrapper.value.planetLevel > artifact.rarity;
 
   // const wait = durationUntilArtifactAvailable(artifact);
 
-  // if (canDepositArtifact(account, artifact, depositPlanetWrapper.value)) {
-  //   actions.unshift({
-  //     name: TooltipName.DepositArtifact,
-  //     extraContent: !canHandleDeposit && (
-  //       <>
-  //         . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
-  //         {` artifacts can only be deposited on level ${artifact.rarity + 1}+ spacetime rips`}
-  //       </>
-  //     ),
-  //     children: (
-  //       <Btn
-  //         disabled={depositing}
-  //         onClick={(e) => {
-  //           e.stopPropagation();
-  //           canHandleDeposit && deposit(artifact);
-  //         }}
-  //       >
-  //         {depositing ? (
-  //           <LoadingSpinner initialText={"Depositing..."} />
-  //         ) : (
-  //           "Deposit"
-  //         )}
-  //       </Btn>
-  //     ),
-  //   });
-  // }
+  if (canDepositArtifact(account, artifact, depositPlanetWrapper.value)) {
+    actions.unshift({
+      name: TooltipName.DepositArtifact,
+      extraContent: !canHandleDeposit && (
+        <>
+          . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
+          {` artifacts can only be deposited on level ${artifact.rarity + 1}+ spacetime rips`}
+        </>
+      ),
+      children: (
+        <Btn
+          disabled={depositing}
+          onClick={(e) => {
+            e.stopPropagation();
+            canHandleDeposit && deposit(artifact);
+          }}
+        >
+          {depositing ? (
+            <LoadingSpinner initialText={"Depositing..."} />
+          ) : (
+            "Deposit"
+          )}
+        </Btn>
+      ),
+    });
+  }
 
-  // if (canWithdrawArtifact(account, artifact, onPlanet)) {
-  //   actions.unshift({
-  //     name: TooltipName.WithdrawArtifact,
-  //     extraContent: !canHandleWithdraw && (
-  //       <>
-  //         . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
-  //         {` artifacts can only be withdrawn from level ${artifact.rarity + 1}+ spacetime rips`}
-  //       </>
-  //     ),
-  //     children: (
-  //       <Btn
-  //         disabled={withdrawing}
-  //         onClick={(e) => {
-  //           e.stopPropagation();
-  //           canHandleWithdraw && withdraw(artifact);
-  //         }}
-  //       >
-  //         {withdrawing ? (
-  //           <LoadingSpinner initialText={"Withdrawing..."} />
-  //         ) : (
-  //           "Withdraw"
-  //         )}
-  //       </Btn>
-  //     ),
-  //   });
-  // }
+  if (!onPlanet) {
+    return (
+      <div>
+        {actions.length > 0 && <Spacer height={4} />}
+        {actions.map((a, i) => (
+          <span key={i}>
+            <TooltipTrigger {...a} />
+            <Spacer width={4} />
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  if (
+    canWithdrawArtifact(account, artifact, onPlanet, artifactWithdrawalDisabled)
+  ) {
+    actions.unshift({
+      name: TooltipName.WithdrawArtifact,
+      extraContent: !canHandleWithdraw && (
+        <>
+          . <ArtifactRarityLabelAnim rarity={artifact.rarity} />
+          {` artifacts can only be withdrawn from level ${artifact.rarity + 1}+ spacetime rips`}
+        </>
+      ),
+      children: (
+        <Btn
+          disabled={withdrawing}
+          onClick={(e) => {
+            e.stopPropagation();
+            canHandleWithdraw && withdraw(artifact);
+          }}
+        >
+          {withdrawing ? (
+            <LoadingSpinner initialText={"Withdrawing..."} />
+          ) : (
+            "Withdraw"
+          )}
+        </Btn>
+      ),
+    });
+  }
 
   const activateArtifactCooldownPassed = true; // uiManager.getNextActivateArtifactAvailableTimestamp() <= Date.now();
 

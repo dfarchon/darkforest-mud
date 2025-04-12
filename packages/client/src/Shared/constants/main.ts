@@ -3,10 +3,11 @@ import { ArtifactRarity, ArtifactType, Biome, PlanetLevel } from "@df/types";
 import bigInt, { type BigInteger } from "big-integer";
 
 export const TOKEN_NAME = "ETH";
-export const BLOCKCHAIN_NAME = "Redstone";
+export const BLOCKCHAIN_NAME = "Base";
 export const HOST_TEAM_NAME = "DF Archon";
+export const VERSION = "v0.1.3";
 
-export const GAS_ADJUST_DELTA = "0.00000005"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
+export const GAS_ADJUST_DELTA = "0.001"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
 
 export const FIXED_DIGIT_NUMBER = 9;
 
@@ -125,13 +126,13 @@ export const MAX_AUTO_GAS_PRICE_GWEI = 15 as const;
  * The URL to the block explorer for the chain being used. Prepended to transaction links, etc
  */
 // Careful, don't add a slash to the end of this.
-export const BLOCK_EXPLORER_URL = "https://explorer.redstone.xyz" as const;
+export const BLOCK_EXPLORER_URL = "https://basescan.org" as const;
 
 /**
  * The URL to the bridge for the chain being used. Prepended to transaction links, etc
  */
 
-export const BLOCKCHAIN_BRIDGE = "https://relay.link/bridge/redstone/" as const;
+export const BLOCKCHAIN_BRIDGE = "https://relay.link/bridge/base/" as const;
 /**
  * The amount of time between gas price refreshes when fetching prices from the oracle.
  */
@@ -184,7 +185,7 @@ export const MIN_HAT_TYPE = 1;
 export const MAX_HAT_TYPE = 10;
 
 // export const PICTURE_URL = 'http://localhost:8081';
-export const PICTURE_URL = "https://dfmud.xyz";
+export const PICTURE_URL = "https://base.dfmud.xyz";
 
 export const MIN_MEME_TYPE = 1;
 export const MAX_MEME_TYPE = 10;
@@ -202,13 +203,13 @@ export const THEGRAPH_API_URL =
   "https://api.thegraph.com/subgraphs/name/darkforest-eth/dark-forest-v06-round-5";
 
 export const PLAYER_GUIDE =
-  "https://dfares.notion.site/Dark-Forest-MUD-v0-1-2-165a4dc2343380a08ff9ddffd3608af4";
+  "https://dfares.notion.site/Dark-Forest-MUD-v0-1-3-player-guide-1cea4dc2343380feb449c3b621fd5640";
 
 export const HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE =
-  "https://dfares.notion.site/How-to-Transfer-ETH-from-L2-to-Redstone-Mainnet-165a4dc23433815bbecddf8b88202346";
+  "https://dfares.notion.site/How-to-Transfer-ETH-from-L2-to-Base-Mainnet-1d1a4dc23433809d8a3cc964c3db014d";
 
 export const HOW_TO_ENABLE_POPUPS =
-  "https://dfares.notion.site/How-to-Enable-Popups-165a4dc2343381d4855df6cc3b90e9cf";
+  "https://dfares.notion.site/How-to-Enable-Popups-1d1a4dc23433805094b9e7269f5ff9c5";
 
 export const WIN_CONDITION_AND_PRIZES =
-  "https://dfares.notion.site/1-1-Win-Conditions-Prizes-165a4dc234338105bc0ff1164ca83bbb";
+  "https://dfares.notion.site/1-1-Win-Conditions-Prizes-1d1a4dc234338082a9c6d3b8a664b349";

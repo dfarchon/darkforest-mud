@@ -20,6 +20,8 @@ import { SnarkConfig, SnarkConfigData, Ticker } from "../src/codegen/index.sol";
 import { InnerCircle, InnerCircleData } from "../src/codegen/index.sol";
 import { UpgradeConfig, UpgradeConfigData } from "../src/codegen/index.sol";
 import { GuildConfig, GuildConfigData } from "../src/codegen/index.sol";
+import { Round } from "../src/codegen/index.sol";
+import { ArtifactNFT as ArtifactNFTTable } from "../src/codegen/index.sol";
 import { AtfInstallModule } from "../src/codegen/index.sol";
 import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
 import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
@@ -27,6 +29,10 @@ import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLi
 import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeInstallLibrary.sol";
 import { installBloomFilter } from "../src/modules/atfs/BloomFilter/BloomFilterInstallLibrary.sol";
 import { installPinkBomb } from "../src/modules/atfs/PinkBomb/PinkBombInstallLibrary.sol";
+import { IArtifactNFT } from "../src/tokens/IArtifactNFT.sol";
+import { ArtifactNFT } from "../src/tokens/ArtifactNFT.sol";
+import { EntryFee } from "codegen/tables/EntryFee.sol";
+
 contract PostDeploy is Script {
   using stdToml for string;
   using Strings for uint256;
@@ -69,6 +75,21 @@ contract PostDeploy is Script {
       string memory key = string.concat(".artifact.", i.toString());
       ArtifactConfig.set(ArtifactRarity(i), indexes, abi.decode(toml.parseRaw(key), (uint16[])));
     }
+    uint8 roundNum = abi.decode(toml.parseRaw(".round.number"), (uint8));
+    Round.set(roundNum);
+    address artifactNftAddress = abi.decode(toml.parseRaw(".artifact_nft.address"), (address));
+    if (artifactNftAddress == address(0)) {
+      artifactNftAddress = address(new ArtifactNFT());
+      _setArtifactNFTConfig(artifactNftAddress);
+    }
+    ArtifactNFTTable.set(artifactNftAddress);
+    if (toml.readBool(".artifact_nft.set_current_round")) {
+      IArtifactNFT(artifactNftAddress).setDF(roundNum, worldAddress);
+    }
+
+    // set entry fee
+    uint256 entryFee = toml.readUint(".entry_fee.value");
+    if (entryFee > 0) EntryFee.set(entryFee);
 
     // deploy artifact install module
     ArtifactInstallModule artifactInstallModule = new ArtifactInstallModule();
@@ -183,5 +204,81 @@ contract PostDeploy is Script {
     console.log("Installed bloom filter with index", index);
     index = installPinkBomb(worldAddress);
     console.log("Installed pinkbomb with index", index);
+  }
+
+  function _setArtifactNFTConfig(address artifactNftAddress) internal {
+    require(artifactNftAddress != address(0), "artifactNftAddress is not set");
+    ArtifactNFT nft = ArtifactNFT(artifactNftAddress);
+    uint8[] memory artifactTypeIndexes = new uint8[](5);
+    string[] memory artifactTypeNames = new string[](5);
+
+    artifactTypeIndexes[3] = 1;
+    artifactTypeNames[3] = "Pink Bomb";
+
+    artifactTypeIndexes[1] = 5;
+    artifactTypeNames[1] = "Wormhole";
+
+    artifactTypeIndexes[2] = 4;
+    artifactTypeNames[2] = "Bloom Filter";
+
+    artifactTypeIndexes[0] = 6;
+    artifactTypeNames[0] = "Photoid Cannon";
+
+    nft.bulkSetArtifactTypeNames(artifactTypeIndexes, artifactTypeNames);
+
+    uint8[] memory artifactRarityIndexes = new uint8[](5);
+    string[] memory artifactRarityNames = new string[](5);
+
+    artifactRarityIndexes[0] = 1;
+    artifactRarityNames[0] = "COMMON";
+
+    artifactRarityIndexes[1] = 2;
+    artifactRarityNames[1] = "RARE";
+
+    artifactRarityIndexes[2] = 3;
+    artifactRarityNames[2] = "EPIC";
+
+    artifactRarityIndexes[3] = 4;
+    artifactRarityNames[3] = "LEGENDARY";
+
+    artifactRarityIndexes[4] = 5;
+    artifactRarityNames[4] = "MYTHIC";
+
+    nft.bulkSetArtifactRarityNames(artifactRarityIndexes, artifactRarityNames);
+
+    uint8[] memory biomeIndexes = new uint8[](10);
+    string[] memory biomeNames = new string[](10);
+
+    biomeIndexes[0] = 1;
+    biomeNames[0] = "OCEAN";
+
+    biomeIndexes[1] = 2;
+    biomeNames[1] = "FOREST";
+
+    biomeIndexes[2] = 3;
+    biomeNames[2] = "GRASSLAND";
+
+    biomeIndexes[3] = 4;
+    biomeNames[3] = "TUNDRA";
+
+    biomeIndexes[4] = 5;
+    biomeNames[4] = "SWAMP";
+
+    biomeIndexes[5] = 6;
+    biomeNames[5] = "DESERT";
+
+    biomeIndexes[6] = 7;
+    biomeNames[6] = "ICE";
+
+    biomeIndexes[7] = 8;
+    biomeNames[7] = "WASTELAND";
+
+    biomeIndexes[8] = 9;
+    biomeNames[8] = "LAVA";
+
+    biomeIndexes[9] = 10;
+    biomeNames[9] = "CORRUPTED";
+
+    nft.bulkSetBiomeNames(biomeIndexes, biomeNames);
   }
 }

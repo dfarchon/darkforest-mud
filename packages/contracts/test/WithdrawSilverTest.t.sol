@@ -2,9 +2,7 @@
 pragma solidity >=0.8.24;
 
 import "forge-std/Test.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
-
+import { BaseTest } from "./BaseTest.t.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { PlayerWithdrawSilver } from "../src/codegen/index.sol";
 import { Planet as PlanetTable } from "../src/codegen/index.sol";
@@ -13,9 +11,7 @@ import { Planet } from "../src/lib/Planet.sol";
 import { Ticker, TickerData } from "../src/codegen/index.sol";
 import { Errors } from "../src/interfaces/errors.sol";
 
-contract WithdrawSilverTest is MudTest {
-  address admin = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-  address user1 = address(1);
+contract WithdrawSilverTest is BaseTest {
   uint256 planetHash = type(uint256).max;
 
   function setUp() public override {

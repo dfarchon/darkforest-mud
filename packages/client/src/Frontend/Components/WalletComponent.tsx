@@ -104,7 +104,10 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     const networkConfig = getNetworkConfig();
     const chain = networkConfig.chain;
     chain.blockExplorers = {
-      default: { name: "Etherscan", url: "https://etherscan.io" },
+      default: {
+        name: "Redstone Explorer",
+        url: "https://explorer.redstone.xyz",
+      },
     };
     walletClient?.addChain({ chain: chain });
   };
@@ -149,12 +152,36 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
     if (!burnerWalletClient || !walletClient) {
       return;
     }
-    const value = state.burnerBalance;
     try {
+      // Get gas price
+      const gasPrice = await burnerWalletClient.transport.request({
+        method: "eth_gasPrice",
+      });
+
+      // Convert hex gasPrice to BigInt
+      const gasPriceBigInt = BigInt(gasPrice);
+
+      // Increase gas limit from 21000 to 21500 to account for potential variations
+      const gasLimit = BigInt(21500);
+      const gasCost = (gasPriceBigInt * gasLimit * BigInt(12)) / BigInt(10); // Add 20% buffer
+
+      // Ensure balance is BigInt
+      const balance = BigInt(state.burnerBalance);
+
+      // Calculate max amount
+      if (balance <= gasCost) {
+        console.error("Insufficient funds to cover gas");
+        return;
+      }
+
+      const maxAmount = balance - gasCost;
+
       const hash = await burnerWalletClient.sendTransaction({
         to: walletClient.account?.address,
-        value,
+        value: maxAmount,
+        gasLimit,
       });
+      console.log("tx hash", hash);
       await waitForTransaction(hash);
 
       // Update balance after transaction is confirmed
@@ -167,7 +194,7 @@ export const WalletComponent: React.FC<WalletComponentProps> = ({
         5000,
       );
     } catch (err) {
-      console.error("Error sending transaction:", err);
+      console.error("Error draining burner wallet:", err);
     }
   };
 

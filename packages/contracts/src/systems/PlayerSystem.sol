@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { Proof } from "../lib/SnarkProof.sol";
-import { SpawnInput } from "../lib/VerificationInput.sol";
-import { Player, Counter, TempConfigSet, SpawnPlanet, UniverseZoneConfig } from "../codegen/index.sol";
-import { NameToPlayer, BurnerToPlayer } from "../codegen/index.sol";
-import { Planet } from "../lib/Planet.sol";
-import { SpaceType, PlanetType } from "../codegen/common.sol";
-import { DFUtils } from "../lib/DFUtils.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { SpawnInput } from "libraries/VerificationInput.sol";
+import { Player } from "codegen/tables/Player.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { TempConfigSet } from "codegen/tables/TempConfigSet.sol";
+import { SpawnPlanet } from "codegen/tables/SpawnPlanet.sol";
+import { UniverseZoneConfig } from "codegen/tables/UniverseZoneConfig.sol";
+import { NameToPlayer } from "codegen/tables/NameToPlayer.sol";
+import { BurnerToPlayer } from "codegen/tables/BurnerToPlayer.sol";
+import { Planet } from "libraries/Planet.sol";
+import { SpaceType, PlanetType } from "codegen/common.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
 
-contract PlayerSystem is System {
+contract PlayerSystem is BaseSystem {
   /**
    * @notice Register a player.
    * @param name Player name.
@@ -20,22 +24,22 @@ contract PlayerSystem is System {
   function registerPlayer(string memory name, address burner) public {
     address player = _msgSender();
     if (Player.getIndex(player) != 0) {
-      revert Errors.AlreadyRegistered();
+      revert AlreadyRegistered();
     }
     bytes32 nameHash = keccak256(bytes(name));
     if (NameToPlayer.get(nameHash) != address(0)) {
-      revert Errors.NameAlreadyTaken();
+      revert NameAlreadyTaken();
     }
     if (BurnerToPlayer.get(bytes32(uint256(uint160(burner)))) != address(0)) {
-      revert Errors.BurnerAlreadyTaken();
+      revert BurnerAlreadyTaken();
     }
     if (BurnerToPlayer.get(bytes32(uint256(uint160(player)))) != address(0)) {
-      revert Errors.AlreadyRegisteredAsBurner();
+      revert AlreadyRegisteredAsBurner();
     }
 
     uint256 index = Counter.getPlayer() + 1;
     if (index > TempConfigSet.getPlayerLimit()) {
-      revert Errors.PlayerLimitReached();
+      revert PlayerLimitReached();
     }
 
     Counter.setPlayer(uint32(index));
@@ -51,11 +55,11 @@ contract PlayerSystem is System {
   function changePlayerName(string memory newName) public {
     address player = _msgSender();
     if (Player.getIndex(player) == 0) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
     bytes32 nameHash = keccak256(bytes(newName));
     if (NameToPlayer.get(nameHash) != address(0)) {
-      revert Errors.NameAlreadyTaken();
+      revert NameAlreadyTaken();
     }
 
     Player.setName(player, newName);
@@ -69,10 +73,10 @@ contract PlayerSystem is System {
   function changeBurnerWallet(address newBurner) public {
     address player = _msgSender();
     if (Player.getIndex(player) == 0) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
     if (BurnerToPlayer.get(bytes32(uint256(uint160(newBurner)))) != address(0)) {
-      revert Errors.BurnerAlreadyTaken();
+      revert BurnerAlreadyTaken();
     }
 
     BurnerToPlayer.set(bytes32(uint256(uint160(newBurner))), player);
@@ -95,11 +99,11 @@ contract PlayerSystem is System {
     address player = _msgSender();
 
     if (Player.getIndex(player) == 0) {
-      revert Errors.NotRegistered();
+      revert NotRegistered();
     }
 
     if (SpawnPlanet.get(player) != 0) {
-      revert Errors.AlreadySpawned();
+      revert AlreadySpawned();
     }
 
     // new planet instances in memory
@@ -114,7 +118,7 @@ contract PlayerSystem is System {
       planet.level > 0 ||
       planet.planetType != PlanetType.PLANET
     ) {
-      revert Errors.InvalidSpawnPlanet();
+      revert InvalidSpawnPlanet();
     }
 
     SpawnPlanet.set(player, planet.planetHash);

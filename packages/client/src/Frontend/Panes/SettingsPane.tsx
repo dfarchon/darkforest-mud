@@ -415,16 +415,14 @@ export function SettingsPane({
 
         <Section>
           <SectionHeader>Auto Confirm Transactions</SectionHeader>
-          Whether or not to auto-confirm all transactions, except purchases.
-          This will allow you to make moves, spend silver on upgrades, etc.
-          without requiring you to confirm each transaction. However, the client
-          WILL ask for confirmation before sending transactions that spend
-          wallet funds.
+          Whether or not to auto-confirm all transactions. This will allow you
+          to make moves, spend silver on upgrades, etc. without requiring you to
+          confirm each transaction.
           <Spacer height={16} />
           <BooleanSetting
             uiManager={uiManager}
             setting={Setting.AutoApproveNonPurchaseTransactions}
-            settingDescription={"auto confirm non-purchase transactions"}
+            settingDescription={"auto confirm transactions"}
           />
         </Section>
 

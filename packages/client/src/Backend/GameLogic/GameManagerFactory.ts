@@ -14,6 +14,7 @@ import {
 } from "@df/network";
 import {
   address,
+  addressToHex,
   artifactIdToDecStr,
   isUnconfirmedAcceptInvitationTx,
   isUnconfirmedActivateArtifactTx,
@@ -76,6 +77,12 @@ import {
 } from "@df/types";
 import type { ClientComponents } from "@mud/createClientComponents";
 import delay from "delay";
+import { getComponentValue } from "@latticexyz/recs";
+import {
+  decodeEntity,
+  encodeEntity,
+  singletonEntity,
+} from "@latticexyz/store-sync/recs";
 
 import { ContractsAPIEvent } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { HashConfig } from "../../_types/global/GlobalTypes";
@@ -166,6 +173,10 @@ export class GameManagerFactory {
     // await persistentChunkStore.saveClaimedCoords(initialState.allClaimedCoords);
 
     const knownArtifacts = initialState.artifacts;
+    const artifactsInWallet = await contractsAPI.getArtifactsInWallet(account);
+    for (const artifact of artifactsInWallet.values()) {
+      knownArtifacts.set(artifact.id, artifact);
+    }
 
     for (let i = 0; i < initialState.loadedPlanets.length; i++) {
       const planet = initialState.touchedAndLocatedPlanets.get(
@@ -437,12 +448,12 @@ export class GameManagerFactory {
         } else if (isUnconfirmedDepositArtifactTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawArtifactTx(tx)) {
           await Promise.all([
             await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            await gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedProspectPlanetTx(tx)) {
           await gameManager.softRefreshPlanet(tx.intent.planetId);
@@ -452,6 +463,7 @@ export class GameManagerFactory {
           isUnconfirmedShutdownArtifactTx(tx)
         ) {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);
+          await gameManager.hardRefreshArtifact(tx.intent.artifactId);
           // } else if (isUnconfirmedActivateArtifactTx(tx)) {
           //   let refreshFlag = true;
           //   const fromPlanet = await gameManager.getPlanetWithId(
@@ -518,23 +530,23 @@ export class GameManagerFactory {
                 tx.intent.locationId,
                 tx.intent.linkTo,
               ]),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+              gameManager.hardRefreshArtifact(tx.intent.artifactId),
             ]);
           } else {
             await Promise.all([
               gameManager.hardRefreshPlanet(tx.intent.locationId),
-              // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+              gameManager.hardRefreshArtifact(tx.intent.artifactId),
             ]);
           }
         } else if (isUnconfirmedChangeArtifactImageTypeTx(tx)) {
           await Promise.all([
-            await gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // await gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            gameManager.hardRefreshPlanet(tx.intent.locationId),
+            gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedBuyArtifactTx(tx)) {
           await Promise.all([
             gameManager.hardRefreshPlanet(tx.intent.locationId),
-            // gameManager.hardRefreshArtifact(tx.intent.artifactId),
+            gameManager.hardRefreshArtifact(tx.intent.artifactId),
           ]);
         } else if (isUnconfirmedWithdrawSilverTx(tx)) {
           await gameManager.hardRefreshPlanet(tx.intent.locationId);

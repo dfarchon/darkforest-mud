@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { Errors } from "../interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "../codegen/common.sol";
-import { Counter, Ticker, Artifact as ArtifactTable, ArtifactData, PlanetArtifact } from "../codegen/index.sol";
-import { ArtifactConfig, ArtifactConfigData } from "../codegen/index.sol";
-import { PlanetArtifact, ArtifactOwner } from "../codegen/index.sol";
-import { ArtifactMetadata, ArtifactMetadataData } from "../modules/atfs/tables/ArtifactMetadata.sol";
-import { _artifactMetadataTableId, _artifactIndexToNamespace } from "../modules/atfs/utils.sol";
+import { Errors } from "interfaces/errors.sol";
+import { PlanetType, SpaceType, Biome, ArtifactRarity, ArtifactGenre, ArtifactStatus } from "codegen/common.sol";
+import { Counter } from "codegen/tables/Counter.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { Artifact as ArtifactTable, ArtifactData } from "codegen/tables/Artifact.sol";
+import { ArtifactConfig, ArtifactConfigData } from "codegen/tables/ArtifactConfig.sol";
+import { PlanetArtifact } from "codegen/tables/PlanetArtifact.sol";
+import { ArtifactOwner } from "codegen/tables/ArtifactOwner.sol";
+import { Round } from "codegen/tables/Round.sol";
+import { ArtifactMetadata, ArtifactMetadataData } from "modules/atfs/tables/ArtifactMetadata.sol";
+import { _artifactMetadataTableId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
 
 using ArtifactStorageLib for ArtifactStorage global;
 
@@ -131,7 +135,7 @@ library ArtifactStorageLib {
 using ArtifactLib for Artifact global;
 
 struct Artifact {
-  uint256 id;
+  uint256 id; // uint8 round | uint24 internalId
   uint256 planetHash;
   // Table: Artifact
   ArtifactStatus status;
@@ -157,11 +161,26 @@ library ArtifactLib {
     uint256 planetHash,
     uint256 planetLevel
   ) internal view returns (Artifact memory artifact) {
-    uint256 id = Counter.getArtifact() + 1;
-    artifact.id = id;
+    uint256 round = Round.get();
+    uint256 internalId = Counter.getArtifact() + 1;
+    if (internalId > type(uint24).max) revert Errors.ArtifactIdOverflow();
+    artifact.id = (round << 24) + internalId;
     artifact.planetHash = planetHash;
     artifact._initRarity(seed, planetLevel);
     artifact._initType(seed);
+  }
+
+  function NewArtifactFromNFT(
+    uint256 tokenId,
+    uint256 planetHash,
+    uint256 index,
+    uint256 rarity,
+    uint256 biome
+  ) internal pure returns (Artifact memory artifact) {
+    artifact.id = tokenId;
+    artifact.planetHash = planetHash;
+    artifact.artifactIndex = index;
+    artifact.rarity = ArtifactRarity(rarity);
   }
 
   function readFromStore(Artifact memory artifact, uint256 curTick) internal view {

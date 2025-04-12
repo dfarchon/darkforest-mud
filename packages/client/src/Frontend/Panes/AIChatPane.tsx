@@ -246,6 +246,7 @@ export function AIChatPane({
           try {
             const response = await fetch(`${API_URL}/api/conversation/start`, {
               method: "POST",
+              // mode: "no-cors",
               headers: {
                 "Content-Type": "application/json",
               },
@@ -295,86 +296,88 @@ export function AIChatPane({
   // any change for selectedLevels, selectedRange, uiManager, gameManager, input
   // do a refresh of filtered planets per planet level filter bar & range selection
   useEffect(() => {
-    if (selectedRange.begin && selectedRange.end) {
-      const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
-      const chunksAsArray = Array.from(chunks);
+    if (gameManager) {
+      if (selectedRange.begin && selectedRange.end) {
+        const chunks = uiManager.getExploredChunks(); // Fetch explored chunks from the UI
+        const chunksAsArray = Array.from(chunks);
 
-      // Filter chunks within the selected range all planets in inpacted chunks
-      const filteredChunks = chunksAsArray.filter((chunk) => {
-        if (!chunk.chunkFootprint || !chunk.chunkFootprint.bottomLeft) {
-          console.warn("Invalid chunk structure:", chunk);
-          return false;
-        }
-
-        const chunkLeft = chunk.chunkFootprint.bottomLeft.x;
-        const chunkRight = chunkLeft + chunk.chunkFootprint.sideLength;
-        const chunkBottom = chunk.chunkFootprint.bottomLeft.y;
-        const chunkTop = chunkBottom + chunk.chunkFootprint.sideLength;
-        if (selectedRange.begin && selectedRange.end)
-          return (
-            chunkRight > selectedRange.begin.x &&
-            chunkLeft < selectedRange.end.x &&
-            chunkBottom < selectedRange.begin.y &&
-            chunkTop > selectedRange.end.y
-          );
-      });
-
-      // Generate planet hashes for the selected range only planets
-      const planetData = filteredChunks.flatMap((chunk) =>
-        chunk.planetLocations
-          .filter((planet) => {
-            if (selectedRange.begin && selectedRange.end) {
-              const planetX = planet.coords.x;
-              const planetY = planet.coords.y;
-
-              return (
-                planetX >
-                  Math.min(selectedRange.begin.x, selectedRange.end.x) &&
-                planetX <
-                  Math.max(selectedRange.begin.x, selectedRange.end.x) &&
-                planetY <
-                  Math.max(selectedRange.begin.y, selectedRange.end.y) &&
-                planetY > Math.min(selectedRange.begin.y, selectedRange.end.y)
-              );
-            }
+        // Filter chunks within the selected range all planets in inpacted chunks
+        const filteredChunks = chunksAsArray.filter((chunk) => {
+          if (!chunk.chunkFootprint || !chunk.chunkFootprint.bottomLeft) {
+            console.warn("Invalid chunk structure:", chunk);
             return false;
-          })
-          .map((planet) => ({
-            hash: planet.hash,
-            coords: planet.coords,
-          })),
-      );
-      // Set selected planet count
-      setPlanetsCount(planetData.length);
+          }
 
-      // Filter planets by selected levels
-      const filteredPlanets = gameManager
-        .getPlanetsWithIds(planetData.map((planet) => planet.hash))
-        .filter(
-          (planet) =>
-            planet.planetLevel >= Math.min(...selectedLevels) &&
-            planet.planetLevel <= Math.max(...selectedLevels),
+          const chunkLeft = chunk.chunkFootprint.bottomLeft.x;
+          const chunkRight = chunkLeft + chunk.chunkFootprint.sideLength;
+          const chunkBottom = chunk.chunkFootprint.bottomLeft.y;
+          const chunkTop = chunkBottom + chunk.chunkFootprint.sideLength;
+          if (selectedRange.begin && selectedRange.end)
+            return (
+              chunkRight > selectedRange.begin.x &&
+              chunkLeft < selectedRange.end.x &&
+              chunkBottom < selectedRange.begin.y &&
+              chunkTop > selectedRange.end.y
+            );
+        });
+
+        // Generate planet hashes for the selected range only planets
+        const planetData = filteredChunks.flatMap((chunk) =>
+          chunk.planetLocations
+            .filter((planet) => {
+              if (selectedRange.begin && selectedRange.end) {
+                const planetX = planet.coords.x;
+                const planetY = planet.coords.y;
+
+                return (
+                  planetX >
+                    Math.min(selectedRange.begin.x, selectedRange.end.x) &&
+                  planetX <
+                    Math.max(selectedRange.begin.x, selectedRange.end.x) &&
+                  planetY <
+                    Math.max(selectedRange.begin.y, selectedRange.end.y) &&
+                  planetY > Math.min(selectedRange.begin.y, selectedRange.end.y)
+                );
+              }
+              return false;
+            })
+            .map((planet) => ({
+              hash: planet.hash,
+              coords: planet.coords,
+            })),
         );
-      // Set filtered planets as selected planets
-      setSelectedPlanets(filteredPlanets);
-      // Set filtered planet count
-      setPlanetsFilteredCount(filteredPlanets.length);
-      // Transform planets for cost calculation
-      const reducedPlanets = reducePlanets(filteredPlanets);
-      const forCost = {
-        username: player?.name,
-        message: inputAgent,
-        selectedPlanets: reducedPlanets,
-      };
-      // Repair issue with big number for JSON
-      const stringForCost = JSON.stringify(forCost, (key, value) =>
-        typeof value === "bigint" ? value.toString() : value,
-      );
+        // Set selected planet count
+        setPlanetsCount(planetData.length);
 
-      //console.log("String:", stringForCost);
-      // Predict cost for default input + selected filtered planets + msg input
-      const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
-      setPredictedCost(predictedCost_);
+        // Filter planets by selected levels
+        const filteredPlanets = gameManager
+          .getPlanetsWithIds(planetData.map((planet) => planet.hash))
+          .filter(
+            (planet) =>
+              planet.planetLevel >= Math.min(...selectedLevels) &&
+              planet.planetLevel <= Math.max(...selectedLevels),
+          );
+        // Set filtered planets as selected planets
+        setSelectedPlanets(filteredPlanets);
+        // Set filtered planet count
+        setPlanetsFilteredCount(filteredPlanets.length);
+        // Transform planets for cost calculation
+        const reducedPlanets = reducePlanets(filteredPlanets);
+        const forCost = {
+          username: player?.name,
+          message: inputAgent,
+          selectedPlanets: reducedPlanets,
+        };
+        // Repair issue with big number for JSON
+        const stringForCost = JSON.stringify(forCost, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value,
+        );
+
+        //console.log("String:", stringForCost);
+        // Predict cost for default input + selected filtered planets + msg input
+        const predictedCost_ = predictTokenCost(stringForCost, "gpt-3.5-turbo");
+        setPredictedCost(predictedCost_);
+      }
     }
   }, [selectedLevels, selectedRange, uiManager, gameManager, inputAgent]);
 

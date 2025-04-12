@@ -68,4 +68,8 @@ export const Setting = {
   //round3
   PaneVisible: "PaneVisible" as Setting,
   BottomHotkeyVisible: "BottomHotkeyVisible" as Setting,
+
+  // Background Music Settings
+  BackgroundMusicVolume: "BackgroundMusicVolume" as Setting,
+  BackgroundMusicEnabled: "BackgroundMusicEnabled" as Setting,
 };

@@ -127,17 +127,6 @@ export const tables = {
       reqSilver: "uint64",
     },
   }),
-  Wormhole: defineTable({
-    namespace: "atf.5",
-    namespaceLabel: "atf.5",
-    name: "Wormhole",
-    label: "Wormhole",
-    key: ["from"],
-    schema: {
-      from: "bytes32",
-      to: "bytes32",
-    },
-  }),
   WormholeDest: defineTable({
     namespace: "atf.5",
     namespaceLabel: "atf.5",

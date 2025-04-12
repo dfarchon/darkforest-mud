@@ -247,9 +247,14 @@ class PersistentChunkStore implements ChunkStore {
     let parsed: WorldLocation[] = [];
     if (homeLocations) {
       parsed = JSON.parse(homeLocations) as WorldLocation[];
+      return parsed;
     }
-
-    return parsed;
+    const backupData = localStorage.getItem("homeLocations");
+    if (backupData) {
+      parsed = JSON.parse(backupData) as WorldLocation[];
+      return parsed;
+    }
+    return [];
   }
 
   public async addHomeLocation(location: WorldLocation): Promise<void> {
@@ -261,10 +266,12 @@ class PersistentChunkStore implements ChunkStore {
     }
     locationList = Array.from(new Set(locationList));
     await this.setKey("homeLocations", JSON.stringify(locationList));
+    localStorage.setItem("homeLocations", JSON.stringify([location]));
   }
 
   public async confirmHomeLocation(location: WorldLocation): Promise<void> {
     await this.setKey("homeLocations", JSON.stringify([location]));
+    localStorage.setItem("homeLocations", JSON.stringify([location]));
   }
 
   public async getSavedTouchedPlanetIds(): Promise<LocationId[]> {
@@ -577,6 +584,107 @@ class PersistentChunkStore implements ChunkStore {
       ObjectStore.MODAL_POS,
     );
     return new Map(winPos ? JSON.parse(winPos) : null);
+  }
+
+  /**
+   * Removes a chunk from the game. This function allows you to delete a chunk and optionally
+   * remove it from persistent storage.
+   *
+   * @param chunk The chunk to be deleted
+   * @param persistDelete Whether to delete from persistent storage, defaults to true
+   */
+  public deleteChunk(chunk: Chunk, persistDelete = true): void {
+    // 1. Check if the chunk exists
+    if (!this.hasMinedChunk(chunk.chunkFootprint)) {
+      return;
+    }
+
+    const tx: DBAction<ChunkId>[] = [];
+
+    if (persistDelete) {
+      // 2. Get all sub-chunks contained within this chunk
+      const containedSubChunks = this.getContainedSubChunks(chunk);
+      for (const subChunk of containedSubChunks) {
+        tx.push({
+          type: DBActionType.DELETE,
+          dbKey: getChunkKey(subChunk.chunkFootprint),
+        });
+      }
+    }
+
+    // 3. Remove the chunk from memory
+    const chunkKey = getChunkKey(chunk.chunkFootprint);
+    this.chunkMap.delete(chunkKey);
+
+    // 4. Add deletion transaction
+    tx.push({
+      type: DBActionType.DELETE,
+      dbKey: chunkKey,
+    });
+
+    // 5. Update diagnostic information
+    this.diagnosticUpdater?.updateDiagnostics((d) => {
+      d.totalChunks = this.chunkMap.size;
+    });
+
+    // 6. Return early if we don't need to persist the deletion
+    if (!persistDelete) {
+      return;
+    }
+
+    // 7. Queue the deletion operations
+    this.queuedChunkWrites.push(tx);
+
+    this.diagnosticUpdater?.updateDiagnostics((d) => {
+      d.chunkUpdates = this.queuedChunkWrites.length;
+    });
+
+    // 8. Recompute save throttle and execute save
+    this.recomputeSaveThrottleAfterUpdate();
+    this.throttledSaveChunkCacheToDisk();
+  }
+
+  /**
+   * Gets all smaller chunks contained within the specified chunk.
+   * This is used to ensure proper cleanup of sub-chunks when deleting a larger chunk.
+   *
+   * @param chunk The parent chunk to check for contained sub-chunks
+   * @returns Array of chunks contained within the specified chunk
+   */
+  private getContainedSubChunks(chunk: Chunk): Chunk[] {
+    const ret: Chunk[] = [];
+    const chunkKey = getChunkKey(chunk.chunkFootprint);
+
+    // Iterate through all possible sub-chunk sizes
+    for (
+      let subSize = 16;
+      subSize < chunk.chunkFootprint.sideLength;
+      subSize *= 2
+    ) {
+      // Iterate through all positions within the chunk's bounds
+      for (let x = 0; x < chunk.chunkFootprint.sideLength; x += subSize) {
+        for (let y = 0; y < chunk.chunkFootprint.sideLength; y += subSize) {
+          const subChunkLoc: Rectangle = {
+            bottomLeft: {
+              x: chunk.chunkFootprint.bottomLeft.x + x,
+              y: chunk.chunkFootprint.bottomLeft.y + y,
+            },
+            sideLength: subSize,
+          };
+
+          const subChunkKey = getChunkKey(subChunkLoc);
+          // Exclude the chunk itself
+          if (subChunkKey !== chunkKey) {
+            const subChunk = this.getChunkById(subChunkKey);
+            if (subChunk) {
+              ret.push(subChunk);
+            }
+          }
+        }
+      }
+    }
+
+    return ret;
   }
 }
 

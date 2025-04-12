@@ -58,7 +58,8 @@ export async function setupNetwork() {
    */
   const clientOptions = {
     chain: networkConfig.chain,
-    transport: transportObserver(fallback([webSocket(), http()])),
+    // transport: transportObserver(fallback([webSocket(), http()])),
+    transport: transportObserver(http(networkConfig.provider.jsonRpcUrl)),
     pollingInterval: 1000,
   } as const satisfies ClientConfig;
 
@@ -85,19 +86,6 @@ export async function setupNetwork() {
       startBlock: BigInt(networkConfig.initialBlockNumber),
       tables: extraTables,
     });
-
-  // const {
-  //   tables,
-  //   useStore,
-  //   latestBlock$: latestBlockZu$,
-  //   storedBlockLogs$: storedBlockLogsZu$,
-  //   waitForTransaction: waitForTransactionZu,
-  // } = await syncToZustand({
-  //   config: mudConfig,
-  //   address: networkConfig.worldAddress as Hex,
-  //   publicClient,
-  //   startBlock: BigInt(networkConfig.initialBlockNumber),
-  // });
 
   /*
    * Create a temporary wallet and a viem client for it
@@ -136,10 +124,5 @@ export async function setupNetwork() {
     waitForTransaction,
     worldContract,
     write$: write$.asObservable().pipe(share()),
-    // tables,
-    // useStore,
-    // latestBlockZu$,
-    // storedBlockLogsZu$,
-    // waitForTransactionZu,
   };
 }

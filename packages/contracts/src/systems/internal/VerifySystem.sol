@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { G1Point, G2Point, Proof, VerificationKey, Pairing } from "../lib/SnarkProof.sol";
-import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "../lib/VerificationInput.sol";
-import { TempConfigSet } from "../codegen/index.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { G1Point, G2Point, Proof, VerificationKey, Pairing } from "libraries/SnarkProof.sol";
+import { MoveInput, SpawnInput, RevealInput, BiomebaseInput } from "libraries/VerificationInput.sol";
+import { TempConfigSet } from "codegen/tables/TempConfigSet.sol";
 
 // todo store verification key in tables
-contract VerifySystem is System {
+contract VerifySystem is BaseSystem {
   function verify(uint256[] memory input, Proof memory proof, VerificationKey memory vk) internal view returns (bool) {
     uint256 snark_scalar_field = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     require(input.length + 1 == vk.IC.length, "verifier-bad-input");

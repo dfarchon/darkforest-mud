@@ -20,10 +20,10 @@
     "@commitlint/cli": "19.5.0",
     "@commitlint/config-conventional": "19.5.0",
     "@eslint/js": "9.16.0",
-    "@latticexyz/cli": "2.2.14",
-    "@latticexyz/common": "2.2.14",
-    "@latticexyz/explorer": "2.2.14",
-    "@latticexyz/store-indexer": "2.2.14",
+    "@latticexyz/cli": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
+    "@latticexyz/common": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
+    "@latticexyz/explorer": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
+    "@latticexyz/store-indexer": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
     "@types/debug": "4.1.12",
     "eslint": "9.16.0",
     "eslint-config-prettier": "9",
@@ -37,6 +37,8 @@
     "lint-staged": "15.2.10",
     "mprocs": "0.7.1",
     "prettier": "3.3.3",
+    "prettier-plugin-solidity": "1.3.1",
+    "prettier-plugin-tailwindcss": "0.6.6",
     "rimraf": "6.0.1",
     "typescript": "5.6.3",
     "typescript-eslint": "8.17.0"
@@ -50,7 +52,7 @@
     ]
   },
   "engines": {
-    "node": ">=20 <21",
-    "pnpm": ">=9.8.0 <=10.6.3"
+    "node": "20.19.0",
+    "pnpm": ">=10.7.1 <11.0.0"
   }
 }

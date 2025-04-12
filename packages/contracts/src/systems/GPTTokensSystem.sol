@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.24;
 
-import { System } from "@latticexyz/world/src/System.sol";
-import { Errors } from "../interfaces/errors.sol";
-import { GPTTokens } from "../codegen/index.sol";
+import { BaseSystem } from "systems/internal/BaseSystem.sol";
+import { GPTTokens } from "codegen/index.sol";
 
-contract GPTTokensSystem is System, Errors {
+import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
+import { RevenueStats } from "codegen/tables/RevenueStats.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+
+contract GPTTokensSystem is BaseSystem {
   uint256 public creditPrice = 0.00001 ether; // Price for GPT tokens
+
   event TokensSpent(address indexed user, uint256 amount);
 
   /**
@@ -15,11 +19,16 @@ contract GPTTokensSystem is System, Errors {
    */
   function buyGPTTokens(uint256 amount) public payable {
     // Check if enough ETH is sent
-    if (_msgValue() < amount * creditPrice) revert Errors.NotEnoughETH();
+    if (_msgValue() < amount * creditPrice) revert NotEnoughETH();
 
     // Update the player's GPT token balance
     address executor = _msgSender();
     GPTTokens.set(executor, GPTTokens.get(executor) + amount);
+
+    ResourceId resourceId = SystemRegistry.get(address(this));
+    bytes32 key = ResourceId.unwrap(resourceId);
+    uint256 amount = RevenueStats.get(key) + _msgValue();
+    RevenueStats.set(key, amount);
   }
 
   /**
@@ -30,7 +39,7 @@ contract GPTTokensSystem is System, Errors {
     uint256 executorAmount = GPTTokens.get(executor);
 
     // Check if the player has at least 1 GPT token
-    if (executorAmount < amount) revert Errors.NotEnoughGPTTokens();
+    if (executorAmount < 1) revert NotEnoughGPTTokens();
 
     // Minus from current amount
     GPTTokens.set(executor, executorAmount - amount);
@@ -48,7 +57,7 @@ contract GPTTokensSystem is System, Errors {
     uint256 executorAmount = GPTTokens.get(executor);
 
     // Check if the sender has enough tokens
-    if (executorAmount < amount) revert Errors.NotEnoughGPTTokens();
+    if (executorAmount < amount) revert NotEnoughGPTTokens();
 
     // Deduct tokens from the sender and add to the recipient
     GPTTokens.set(executor, executorAmount - amount);

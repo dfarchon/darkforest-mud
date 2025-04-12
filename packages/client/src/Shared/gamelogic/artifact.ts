@@ -335,6 +335,7 @@ export function canWithdrawArtifact(
   account: EthAddress,
   artifact: Artifact,
   planet?: Planet,
+  artifactWithdrawalDisabled?: boolean,
 ) {
   return (
     planet &&
@@ -342,8 +343,9 @@ export function canWithdrawArtifact(
     !planet.frozen &&
     planet.owner === account &&
     planet.planetType === PlanetType.TRADING_POST &&
-    !isActivated(artifact) &&
-    !isSpaceShip(artifact.artifactType)
+    artifact.status === ArtifactStatus.Default &&
+    !isSpaceShip(artifact.artifactType) &&
+    !artifactWithdrawalDisabled
   );
 }
 

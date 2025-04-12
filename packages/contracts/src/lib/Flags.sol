@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import { PlanetFlagType as FlagType } from "../codegen/common.sol";
+import { PlanetFlagType as FlagType } from "codegen/common.sol";
 
 type Flags is uint256;
 

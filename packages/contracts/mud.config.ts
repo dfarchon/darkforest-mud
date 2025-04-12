@@ -69,12 +69,28 @@ export default defineWorld({
     TestOnlySystem: {
       openAccess: false,
     },
+    PlanetWriteSystem: {
+      openAccess: false,
+    },
     DfDelegationControlSystem: {
       name: "DfDelegationCtrl",
     },
   },
-  excludeSystems: ["ArtifactProxySystem", "CannonSystem", "WormholeSystem", "BloomFilterSystem", "PinkBombSystem"],
+  excludeSystems: [
+    "BaseSystem",
+    "ArtifactProxySystem",
+    "CannonSystem",
+    "WormholeSystem",
+    "BloomFilterSystem",
+    "PinkBombSystem",
+  ],
   tables: {
+    Round: {
+      schema: {
+        num: "uint8",
+      },
+      key: [],
+    },
     Counter: {
       schema: {
         player: "uint32",
@@ -128,6 +144,12 @@ export default defineWorld({
       },
       key: [],
     },
+    EntryFee: {
+      schema: {
+        fee: "uint256",
+      },
+      key: [],
+    },
     UniverseConfig: {
       schema: {
         sparsity: "uint64",
@@ -158,6 +180,18 @@ export default defineWorld({
       key: [],
     },
     ArtifactRegistry: "bool",
+    ArtifactWithdrawal: {
+      schema: {
+        disabled: "bool",
+      },
+      key: [],
+    },
+    ArtifactNFT: {
+      schema: {
+        addr: "address",
+      },
+      key: [],
+    },
     ArtifactConfig: {
       schema: {
         rarity: "ArtifactRarity",
@@ -438,6 +472,13 @@ export default defineWorld({
       },
       key: ["player"],
     },
+    RevenueStats: {
+      schema: {
+        amount: "uint256",
+        systemId: "bytes32",
+      },
+      key: ["systemId"],
+    },
     // // artifact module
     // Effect: {
     //   schema: {
@@ -476,12 +517,27 @@ export default defineWorld({
     //     disabled: true,
     //   },
     // },
-    // Wormhole: {
+    // WormholeDest: {
+    //   schema: {
+    //     wormholeId: "uint32",
+    //     to: "bytes32",
+    //   },
+    //   key: ["wormholeId"],
+    //   codegen: {
+    //     outputDirectory: "../modules/atfs/Wormhole/tables",
+    //     tableIdArgument: true,
+    //   },
+    //   deploy: {
+    //     disabled: true,
+    //   },
+    // },
+    // WormholeRecord: {
     //   schema: {
     //     from: "bytes32",
     //     to: "bytes32",
+    //     hasWormhole: "bool",
     //   },
-    //   key: ["from"],
+    //   key: ["from", "to"],
     //   codegen: {
     //     outputDirectory: "../modules/atfs/Wormhole/tables",
     //     tableIdArgument: true,

@@ -1,6 +1,7 @@
 import type { GameManager } from "@backend/GameLogic/GameManager";
 import type { ModalId } from "@df/types";
 import { ModalName, Setting } from "@df/types";
+import { AmbiencePane } from "@frontend/Panes/AmbiencePane";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -425,11 +426,10 @@ export function GameWindowLayout({
 
       <MainWindow>
         <CanvasContainer>
-          {paneVisible && (
-            <UpperLeft>
-              <ZoomPane />
-            </UpperLeft>
-          )}
+          <UpperLeft>
+            <AmbiencePane />
+            {paneVisible && <ZoomPane />}
+          </UpperLeft>
 
           {paneVisible && (
             <SidebarPane

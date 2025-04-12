@@ -31,6 +31,8 @@ import {
   locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
+  artifactIdFromDecStr,
+  artifactIdToDecStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -73,7 +75,7 @@ import {
 } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractFunction, Event, providers } from "ethers";
-import { BigNumber as EthersBN } from "ethers";
+import { Contract, BigNumber as EthersBN } from "ethers";
 import { EventEmitter } from "events";
 import type { Subscription } from "rxjs";
 import type { Hex } from "viem";
@@ -89,12 +91,16 @@ import {
 import NotificationManager from "../../Frontend/Game/NotificationManager";
 import { openConfirmationWindowForTransaction } from "../../Frontend/Game/Popups";
 import { getSetting } from "../../Frontend/Utils/SettingsHooks";
-import { loadDiamondContract } from "../Network/Blockchain";
+import {
+  loadArtifactNFTContract,
+  loadDiamondContract,
+} from "../Network/Blockchain";
 import { ArtifactUtils, updateArtifactStatus } from "./ArtifactUtils";
 import { GuildUtils } from "./GuildUtils";
 import { MoveUtils } from "./MoveUtils";
 import { PlanetUtils } from "./PlanetUtils";
 import { TickerUtils } from "./TickerUtils";
+
 interface ContractsApiConfig {
   connection: EthConnection;
   contractAddress: EthAddress;
@@ -1098,6 +1104,7 @@ export class ContractsAPI extends EventEmitter {
     const upgradeConfig = getComponentValue(UpgradeConfig, singletonEntity);
     const snarkConfig = getComponentValue(SnarkConfig, singletonEntity);
     const ticker = getComponentValue(Ticker, singletonEntity);
+
     if (
       !adminAddress ||
       !tempConfigSet ||
@@ -1488,6 +1495,39 @@ export class ContractsAPI extends EventEmitter {
     return planets;
   }
 
+  public async getArtifactsInWallet(
+    walletAddress: EthAddress,
+  ): Promise<Map<ArtifactId, Artifact>> {
+    const { ArtifactNFT } = this.components;
+    const nftAddress = getComponentValue(ArtifactNFT, singletonEntity);
+    if (!nftAddress) {
+      return new Map();
+    }
+    const nftContract = this.ethConnection.getContract(nftAddress.addr);
+
+    const count = await nftContract.balanceOf(walletAddress);
+
+    const results: Map<ArtifactId, Artifact> = new Map();
+    for (let i = 0; i < count; i++) {
+      const artifactId: bigint = await nftContract.tokenOfOwnerByIndex(
+        walletAddress,
+        i,
+      );
+      const artifactData: { index: number; rarity: number } =
+        await nftContract.getArtifact(artifactId);
+      const artifact = this.artifactUtils.getArtifactByNFT(
+        artifactId,
+        walletAddress,
+        artifactData.index,
+        artifactData.rarity,
+      );
+      if (artifact) {
+        results.set(artifact.id, artifact);
+      }
+    }
+    return results;
+  }
+
   public async getTouchedArtifactIds(
     onProgress?: (fractionCompleted: number) => void,
   ): Promise<ArtifactId[]> {
@@ -1873,6 +1913,92 @@ export class ContractsAPI extends EventEmitter {
   public getGuildUtils() {
     return this.guildUtils;
   }
+
+  /**
+   * Get the TxExecutor instance
+   */
+  public getTxExecutor(): TxExecutor {
+    return this.txExecutor;
+  }
+
+  /**
+   * Cancel all queued transactions with detailed logging
+   */
+  public clearQueuedTransactions(): void {
+    const queuedTransactions = this.txExecutor.getQueuedTransactions();
+
+    console.log("\n====== Clearing Transaction Queue ======");
+    console.log(`Found ${queuedTransactions.length} transactions to clear`);
+
+    queuedTransactions.forEach((tx, index) => {
+      console.log(`\n[${index + 1}/${queuedTransactions.length}] Cancelling:`, {
+        id: tx.id,
+        method: tx.intent.methodName,
+        state: tx.state,
+        hash: tx.hash || "Not submitted",
+      });
+      this.cancelTransaction(tx);
+    });
+
+    console.log("\n✓ Queue successfully cleared");
+    console.log("====== End Queue Clearing ======\n");
+  }
+
+  /**
+   * Print detailed information about all transactions in queue
+   */
+  public printQueueInformation(): void {
+    const queuedTransactions = this.txExecutor.getQueuedTransactions();
+
+    console.log("\n====== Transaction Queue Information ======");
+    console.log(`Total transactions in queue: ${queuedTransactions.length}`);
+
+    queuedTransactions.forEach((tx, index) => {
+      console.log(
+        `\n[${index + 1}/${queuedTransactions.length}] Transaction:`,
+        {
+          id: tx.id,
+          method: tx.intent.methodName,
+          state: tx.state,
+          hash: tx.hash || "Not submitted",
+          lastUpdated: new Date(tx.lastUpdatedAt).toISOString(),
+        },
+      );
+    });
+
+    console.log("\n====== End Queue Information ======\n");
+  }
+
+  public async getArtifactNFTInfo() {
+    const { ArtifactNFT } = this.components;
+    const result = getComponentValue(ArtifactNFT, singletonEntity);
+    if (!result) {
+      return;
+    }
+    const nftAddress = result.addr;
+    console.log(nftAddress);
+    const nftContract = this.ethConnection.getContract(nftAddress);
+    const amount = await nftContract.totalSupply();
+    console.log("total supply", amount.toNumber());
+
+    for (let i = 0; i < amount; i++) {
+      const rawTokenId = await nftContract.tokenByIndex(i);
+      const tokenId = artifactIdFromDecStr(rawTokenId.toString());
+      const tokenIdStr = artifactIdToDecStr(tokenId);
+      console.log("cnt ", i);
+      console.log("tokenId", tokenId);
+      console.log("tokenIdStr", tokenIdStr);
+      const tokenURI = await nftContract.tokenURI(rawTokenId);
+      console.log("tokenURI", tokenURI);
+      const result = await nftContract.getArtifact(rawTokenId);
+      console.log("result", result);
+
+      // const artifact = await this.artifactUtils.getArtifactById(tokenId);
+
+      // console.log("artifact", artifact);
+      console.log("--------------------------------");
+    }
+  }
 }
 
 export async function makeContractsAPI({
@@ -1881,6 +2007,11 @@ export async function makeContractsAPI({
   components,
 }: ContractsApiConfig): Promise<ContractsAPI> {
   await connection.loadContract(contractAddress, loadDiamondContract);
+  const { ArtifactNFT } = components;
+  const nftAddress = getComponentValue(ArtifactNFT, singletonEntity);
+  if (nftAddress) {
+    await connection.loadContract(nftAddress.addr, loadArtifactNFTContract);
+  }
 
   return new ContractsAPI({ connection, contractAddress, components });
 }

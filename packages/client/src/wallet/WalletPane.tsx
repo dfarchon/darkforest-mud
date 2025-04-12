@@ -76,25 +76,6 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
     }
   };
 
-  const drainBurner = async () => {
-    if (!burnerWalletClient || !walletClient) {
-      return;
-    }
-    const value = burnerBalance;
-    try {
-      const hash = await burnerWalletClient.sendTransaction({
-        to: walletClient.account?.address,
-        value,
-      });
-      await waitForTransaction(hash);
-      setTxSuccessful(true);
-      // fetchBalances(); // Refresh balances after transaction
-      setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
-    } catch (err) {
-      console.error("Error sending transaction:", err);
-    }
-  };
-
   const copyPrivateKey = () => {
     if (walletClient?.account?.address ?? zeroAddress) {
       navigator.clipboard
@@ -106,6 +87,49 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
         .catch((err) => {
           console.error("Failed to copy PK:", err);
         });
+    }
+  };
+
+  const withdrawAll = async () => {
+    if (!burnerWalletClient || !walletClient) {
+      return;
+    }
+    // Get gas price
+    const gasPrice = await burnerWalletClient.transport.request({
+      method: "eth_gasPrice",
+    });
+
+    // Convert hex gasPrice to BigInt
+    const gasPriceBigInt = BigInt(gasPrice);
+    const gasLimit = BigInt(21500);
+    const gasCost = gasPriceBigInt * gasLimit;
+
+    // Ensure balance is BigInt
+    const balance = BigInt(burnerBalanceValue);
+
+    // Calculate max amount
+    if (balance <= gasCost) {
+      console.error("Insufficient funds to cover gas");
+      return;
+    }
+
+    const maxAmount = balance - gasCost;
+
+    try {
+      const hash = await burnerWalletClient.sendTransaction({
+        to: walletClient.account?.address,
+        value: maxAmount,
+        gasLimit,
+      });
+      await waitForTransaction(hash);
+      setTxSuccessful(true);
+      refetchMainWalletBalance();
+      refetchBurnerBalance();
+      // fetchBalances(); // Refresh balances after transaction
+      setTimeout(() => setTxSuccessful(false), 5000); // Remove message after 5 seconds
+    } catch (err) {
+      console.error("Error sending transaction:", err);
+      // You might want to add error state handling here
     }
   };
 
@@ -184,7 +208,7 @@ export const WalletPane = ({ onClose }: { onClose: () => void }) => {
           step="0.001" // Allows increments of 0.01 ETH for more precise control
           className="w-32 rounded border"
         />{" "}
-        <Btn onClick={drainBurner} disabled={(burnerBalanceValue ?? 0) <= 0}>
+        <Btn onClick={withdrawAll} disabled={(burnerBalanceValue ?? 0) <= 0}>
           Withdraw All
         </Btn>
       </div>

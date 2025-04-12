@@ -26,6 +26,8 @@ import { WelcomePage } from "./Frontend/Pages/WelcomePage";
 import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
 import { PlanetTestPage } from "./PlanetTest/PlanetTestPage";
+import { BluePillLandingPage } from "./Frontend/Pages/BluePillLandingPage";
+
 const GlobalStyle = createGlobalStyle`
 body {
   width: 100vw;
@@ -57,7 +59,27 @@ export const App = () => {
                 <Navigate to={`/play/${defaultAddress}`} replace={true} />
               }
             />
-            <Route path="/play/:contract" element={<GameLandingPage />} />
+            <Route path="/play/:contract" element={<BluePillLandingPage />} />
+
+            <Route
+              path="/bluepill"
+              element={
+                <Navigate to={`/bluepill/${defaultAddress}`} replace={true} />
+              }
+            />
+            <Route
+              path="/bluepill/:contract"
+              element={<BluePillLandingPage />}
+            />
+
+            <Route
+              path="/redpill"
+              element={
+                <Navigate to={`/redpill/${defaultAddress}`} replace={true} />
+              }
+            />
+            <Route path="/redpill/:contract" element={<GameLandingPage />} />
+
             <Route path="/" element={<ClassicLandingPage />} />
             {/* <Route path="/sandbox" element={<SandboxPage />} /> */}
             {/* <Route path="/welcome" element={<WelcomePage />} /> */}
