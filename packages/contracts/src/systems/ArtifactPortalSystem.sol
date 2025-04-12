@@ -42,7 +42,8 @@ contract ArtifactPortalSystem is BaseSystem {
     IArtifactNFT nft = IArtifactNFT(ArtifactNFT.get());
     (bool success, bytes memory data) = address(nft).call(abi.encodeWithSelector(IERC721.ownerOf.selector, artifactId));
     if (!success) {
-      nft.mint(planet.owner, artifactId, uint8(artifact.artifactIndex), uint8(artifact.rarity));
+      // PUNK: add artifact biome later
+      nft.mint(planet.owner, artifactId, uint8(artifact.artifactIndex), uint8(artifact.rarity), 1);
     } else {
       address owner = abi.decode(data, (address));
       if (owner != worldAddress) {
@@ -64,11 +65,11 @@ contract ArtifactPortalSystem is BaseSystem {
       revert NotPlanetOwner();
     }
     IArtifactNFT nft = IArtifactNFT(ArtifactNFT.get());
-    (uint8 index, uint8 rarity) = nft.getArtifact(artifactId);
+    (uint8 index, uint8 rarity, uint8 biome) = nft.getArtifact(artifactId);
     if (uint8(rarity) >= planet.level) {
       revert ArtifactRarityTooHigh();
     }
-    Artifact memory artifact = ArtifactLib.NewArtifactFromNFT(artifactId, planetHash, index, rarity);
+    Artifact memory artifact = ArtifactLib.NewArtifactFromNFT(artifactId, planetHash, index, rarity, biome);
     if (planet.hasArtifactSlot()) {
       planet.pushArtifact(artifact.id);
     } else {

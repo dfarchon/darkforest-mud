@@ -174,7 +174,8 @@ library ArtifactLib {
     uint256 tokenId,
     uint256 planetHash,
     uint256 index,
-    uint256 rarity
+    uint256 rarity,
+    uint256 biome
   ) internal pure returns (Artifact memory artifact) {
     artifact.id = tokenId;
     artifact.planetHash = planetHash;
