@@ -3898,9 +3898,7 @@ export class GameManager extends EventEmitter {
               // distFromOrigin < requireRadiusMax &&
               planetLevel === MIN_PLANET_LEVEL &&
               planetType === PlanetType.PLANET &&
-              (!planet || !planet.isInContract) && // init will fail if planet has been initialized in contract already
-              planet &&
-              planet.owner === EMPTY_ADDRESS
+              (!planet || !planet.isInContract) // init will fail if planet has been initialized in contract already
             ) {
               // valid home planet
               homePlanetFinder.stopExplore();
@@ -7551,5 +7549,9 @@ export class GameManager extends EventEmitter {
       );
       throw e;
     }
+  }
+  public printSpawnPlanet() {
+    const { SpawnPlanet } = this.components;
+    console.log(SpawnPlanet);
   }
 }
