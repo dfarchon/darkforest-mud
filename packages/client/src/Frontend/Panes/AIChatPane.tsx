@@ -170,11 +170,9 @@ function HelpContent() {
 export function AIChatPane({
   visible,
   onClose,
-  gameManager,
 }: {
   visible: boolean;
   onClose: () => void;
-  gameManager: GameManager;
 }) {
   // PUNK! for fun - could be setup in option
   const speak = (text: string) => {
@@ -194,6 +192,7 @@ export function AIChatPane({
     }
   };
   const uiManager = useUIManager();
+  const gameManager = uiManager.getGameManager();
   const account = useAccount(uiManager);
   const player = usePlayer(uiManager).value;
   const [mute, setMute] = useState<boolean>(true);

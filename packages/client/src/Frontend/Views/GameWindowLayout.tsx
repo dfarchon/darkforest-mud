@@ -60,11 +60,9 @@ import { TopBar } from "./TopBar";
 export function GameWindowLayout({
   terminalVisible,
   setTerminalVisible,
-  gameManager,
 }: {
   terminalVisible: boolean;
   setTerminalVisible: (visible: boolean) => void;
-  gameManager: GameManager;
 }) {
   const uiManager = useUIManager();
   const modalManager = uiManager.getModalManager();
@@ -369,7 +367,6 @@ export function GameWindowLayout({
         <AIChatPane
           visible={aiChatVisible}
           onClose={() => setAIChatVisible(false)}
-          gameManager={gameManager}
         />
 
         <WalletPane

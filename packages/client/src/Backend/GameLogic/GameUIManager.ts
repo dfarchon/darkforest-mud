@@ -544,9 +544,9 @@ export class GameUIManager extends EventEmitter {
     await this.gameManager.buyGPTTokens(amount);
   }
 
-  public async spendGPTTokens() {
+  public async spendGPTTokens(amount: number) {
     this.playClickSound();
-    await this.gameManager.spendGPTTokens();
+    await this.gameManager.spendGPTTokens(amount);
   }
 
   public startLinkFrom(

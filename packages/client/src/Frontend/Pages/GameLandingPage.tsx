@@ -1892,7 +1892,6 @@ export function GameLandingPage() {
                   <GameWindowLayout
                     terminalVisible={terminalVisible}
                     setTerminalVisible={setTerminalVisible}
-                    gameManager={gameManager}
                   />
                 </UIManagerProvider>
               </TopLevelDivProvider>

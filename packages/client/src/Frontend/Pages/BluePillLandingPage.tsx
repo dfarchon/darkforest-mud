@@ -1878,7 +1878,6 @@ export function BluePillLandingPage() {
                   <GameWindowLayout
                     terminalVisible={terminalVisible}
                     setTerminalVisible={setTerminalVisible}
-                    gameManager={gameManager}
                   />
                 </UIManagerProvider>
               </TopLevelDivProvider>

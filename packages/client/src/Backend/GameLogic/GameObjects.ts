@@ -1363,7 +1363,7 @@ export class GameObjects {
         if (wormholeDest) {
           this.links.set(artifact.id, {
             from: artifact.onPlanetId,
-            to: locationIdFromHexStr(wormholeRec.to.toString()),
+            to: locationIdFromHexStr(wormholeDest.to.toString()),
             artifactId: artifact.id,
           });
         }
