@@ -1323,6 +1323,14 @@ export class GameManager extends EventEmitter {
     return this.account;
   }
 
+  public getMainAccount(): EthAddress | undefined {
+    return this.account;
+  }
+
+  public getGameAccount(): EthAddress | undefined {
+    return this.ethConnection.getAddress();
+  }
+
   public isOwnedByMe(planet: Planet): boolean {
     return planet.owner === this.getAccount();
   }

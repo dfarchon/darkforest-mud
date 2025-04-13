@@ -60,9 +60,11 @@ import { TopBar } from "./TopBar";
 export function GameWindowLayout({
   terminalVisible,
   setTerminalVisible,
+  spectate,
 }: {
   terminalVisible: boolean;
   setTerminalVisible: (visible: boolean) => void;
+  spectate?: boolean;
 }) {
   const uiManager = useUIManager();
   const modalManager = uiManager.getModalManager();
@@ -416,10 +418,12 @@ export function GameWindowLayout({
         )}
       </div>
 
-      <OnboardingPane
-        visible={onboardingVisible}
-        onClose={() => setOnboardingVisible(false)}
-      />
+      {!spectate && (
+        <OnboardingPane
+          visible={onboardingVisible}
+          onClose={() => setOnboardingVisible(false)}
+        />
+      )}
 
       <MainWindow>
         <CanvasContainer>
@@ -469,7 +473,7 @@ export function GameWindowLayout({
 
           <HoverPlanetPane />
           <ArtifactHoverPane />
-          <TutorialPane tutorialHook={tutorialHook} />
+          {!spectate && <TutorialPane tutorialHook={tutorialHook} />}
         </CanvasContainer>
       </MainWindow>
     </WindowWrapper>

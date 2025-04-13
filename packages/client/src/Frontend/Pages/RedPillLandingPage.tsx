@@ -1,8 +1,7 @@
-import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@bluepill/utils";
 import {
   BLOCK_EXPLORER_URL,
-  BLOCKCHAIN_NAME,
   BLOCKCHAIN_BRIDGE,
+  BLOCKCHAIN_NAME,
   HOW_TO_ENABLE_POPUPS,
   HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE,
   PLAYER_GUIDE,
@@ -28,6 +27,7 @@ import {
   singletonEntity,
 } from "@latticexyz/store-sync/recs";
 import { useMUD } from "@mud/MUDContext";
+import { LOW_BALANCE_THRESHOLD, RECOMMENDED_BALANCE } from "@wallet/utils";
 import { utils, Wallet } from "ethers";
 import React, {
   useCallback,
@@ -39,7 +39,6 @@ import React, {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { zeroAddress } from "viem";
-import { useWalletClient, useAccount } from "wagmi";
 
 import { ZKArgIdx } from "../../_types/darkforest/api/ContractsAPITypes";
 import { makeContractsAPI } from "../../Backend/GameLogic/ContractsAPI";
@@ -85,7 +84,7 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
-
+import { RedPillRegisterPlayer } from "@redpill/RedPillRegisterPlayer";
 const enum TerminalPromptStep {
   NONE,
   COMPATIBILITY_CHECKS_PASSED,
@@ -113,26 +112,55 @@ type TerminalStateOptions = {
   showHelp: boolean;
 };
 
-// GM Blue Pill
-import { BluePillBurnerWallet } from "@bluepill/BluePillBurnerWallet";
-import { BluePillRegisterPlayer } from "@bluepill/BluePillRegisterPlayer";
-import { BluePillWalletButton } from "@bluepill/BluePillWalletButton";
-import { BluePillMapGuide } from "@bluepill/BluePillMapGuide";
-import { PinkButton } from "../../BluePill/PinkButton";
+const LoadingContent = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: ${dfstyles.colors.dfpink};
+  gap: 1em;
+`;
 
-export function BluePillLandingPage() {
+const LoadingText = styled.div`
+  font-size: 1.7em;
+  text-align: center;
+`;
+
+const LoadingNote = styled.div`
+  font-size: 1.5em;
+  color: ${dfstyles.colors.dfpink};
+  text-align: center;
+`;
+
+const Spinner = styled.div`
+  width: 50px;
+  height: 50px;
+  border: 4px solid ${dfstyles.colors.text};
+  border-top: 4px solid ${dfstyles.colors.dfpink};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px 0;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+export function RedPillLandingPage() {
   const navigate = useNavigate();
   const { contract } = useParams();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const { chain } = useAccount();
-  const { data: walletClient } = useWalletClient();
+  const queryParam = params.toString();
   const {
-    network: {
-      walletClient: burnerWalletClient,
-      playerEntity,
-      waitForTransaction,
-    },
+    network: { playerEntity, waitForTransaction },
     components: components, //{ SyncProgress },
   } = useMUD();
 
@@ -150,27 +178,12 @@ export function BluePillLandingPage() {
     },
   );
 
-  const mainAccount = walletClient?.account?.address ?? zeroAddress;
-  const gameAccount = burnerWalletClient.account?.address ?? zeroAddress;
-
   const terminalHandle = useRef<TerminalHandle>(null);
   const gameUIManagerRef = useRef<GameUIManager | null>(null);
   const topLevelContainer = useRef<HTMLDivElement>(null);
   const miniMapRef = useRef<MiniMapHandle>();
 
-  const { value: burnerBalanceValue, refetch: refetchBurnerBalance } =
-    useBurnerBalance();
-
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-
-  useEffect(() => {
-    const fetchBalances = async () => {
-      await refetchBurnerBalance();
-      setIsDataLoaded(true);
-    };
-
-    fetchBalances();
-  }, [refetchBurnerBalance]);
 
   const [gameManager, setGameManager] = useState<GameManager | undefined>();
   const [terminalVisible, setTerminalVisible] = useState(true);
@@ -193,33 +206,10 @@ export function BluePillLandingPage() {
   const contractAddress = contract ? address(contract) : address(zeroAddress);
   const isLobby = false; // NOTE: contractAddress !== address(CONTRACT_ADDRESS);
 
-  const [isPlayerRegistered, setIsPlayerRegistered] = useState(false);
-
   const syncSign = useMemo(() => {
     console.log(syncProgress.step, syncProgress.percentage);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
-
-  useEffect(() => {
-    const checkPlayerRegistration = async () => {
-      if (playerEntity && walletClient?.account) {
-        const mainAccount = address(walletClient.account.address);
-        const playerKey = encodeEntity(Player.metadata.keySchema, {
-          owner: addressToHex(mainAccount),
-        });
-        const rawPlayer = getComponentValue(Player, playerKey);
-        setIsPlayerRegistered(!!rawPlayer);
-      }
-    };
-
-    checkPlayerRegistration();
-
-    const intervalId = setInterval(() => {
-      checkPlayerRegistration();
-    }, 2000);
-
-    return () => clearInterval(intervalId);
-  }, [playerEntity, Player, walletClient]);
 
   useEffect(() => {
     getEthConnection()
@@ -236,7 +226,7 @@ export function BluePillLandingPage() {
       setBrowserIssues(issues);
       if (supported) {
         setBrowserCompatibleState("supported");
-        // setStep(TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED);
+        setStep(TerminalPromptStep.COMPATIBILITY_CHECKS_PASSED);
       } else {
         setBrowserCompatibleState("unsupported");
       }
@@ -244,292 +234,6 @@ export function BluePillLandingPage() {
   }, []);
 
   const isProd = import.meta.env.VITE_NODE_ENV === "production";
-
-  //GM Blue Pill
-
-  const [updateTrigger, setUpdateTrigger] = useState(0);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setUpdateTrigger((prev) => prev + 1);
-    }, 3000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const indexerLoaded = useMemo(() => {
-    console.log(syncProgress.step, syncProgress.percentage);
-    return syncProgress.step === "live" && syncProgress.percentage == 100;
-  }, [syncProgress]);
-
-  const walletLinked = useMemo(() => {
-    const account = walletClient?.account?.address;
-    if (!account) return false;
-
-    if (walletClient.chain?.id !== chain?.id) return false;
-    if (walletClient.chain?.id !== burnerWalletClient.chain?.id) return false;
-
-    return account !== zeroAddress;
-  }, [walletClient, chain]);
-
-  const playerRegistered = useMemo(() => {
-    if (playerEntity && walletClient?.account) {
-      const account = address(walletClient.account.address);
-      const playerKey = encodeEntity(Player.metadata.keySchema, {
-        owner: addressToHex(account),
-      });
-      const rawPlayer = getComponentValue(Player, playerKey);
-      return !!rawPlayer;
-    } else return false;
-  }, [playerEntity, walletClient, Player, updateTrigger]);
-
-  const burnerHasFunds = useMemo(() => {
-    return burnerBalanceValue > LOW_BALANCE_THRESHOLD;
-  }, [burnerBalanceValue]);
-
-  const spawnAreaSelected = useMemo(() => {
-    const selectedSpawnArea = miniMapRef.current?.getSelectedSpawnArea();
-    return selectedSpawnArea !== undefined;
-  }, [miniMapRef, updateTrigger]);
-
-  const setAccount = async () => {
-    console.log("setAccount");
-    console.log(gameAccount);
-    const privateKey = localStorage.getItem("mud:burnerWallet");
-
-    if (!privateKey) return;
-
-    await ethConnection?.setAccount(privateKey);
-    const terminal = terminalHandle;
-
-    try {
-      const playerAddress = ethConnection?.getAddress();
-      if (!playerAddress || !ethConnection) {
-        throw new Error("not logged in");
-      }
-
-      terminal.current?.println("Checking account balance... ");
-
-      const balance = BigInt(await ethConnection.loadBalance(playerAddress));
-
-      console.log("---------------------------------");
-      console.log(balance);
-      console.log(LOW_BALANCE_THRESHOLD);
-      console.log("---------------------------------");
-
-      if (balance < LOW_BALANCE_THRESHOLD) {
-        terminal.current?.printElement(<BluePillBurnerWallet />);
-      }
-
-      terminal.current?.println("");
-
-      terminal.current?.print("Checking if whitelisted... ");
-
-      const isWhitelisted = true;
-      // TODO(#2329): isWhitelisted should just check the contractOwner
-      // if (isWhitelisted || playerAddress === adminAddress) {
-      if (isWhitelisted) {
-        terminal.current?.println("Player whitelisted.");
-        terminal.current?.println("");
-        terminal.current?.println(`Welcome, player ${playerAddress}.`);
-
-        // TODO: Provide own env variable for this feature
-        if (!isProd) {
-          // in development, automatically get some ether from faucet
-          const balance = weiToEth(
-            await ethConnection?.loadBalance(playerAddress),
-          );
-          if (balance === 0) {
-            await requestDevFaucet(playerAddress);
-          }
-        }
-        setStep(TerminalPromptStep.FETCHING_ETH_DATA);
-      } else {
-        setStep(TerminalPromptStep.ASKING_HAS_WHITELIST_KEY);
-      }
-    } catch (e) {
-      console.error(`error connecting to whitelist: ${e}`);
-      terminal.current?.println(
-        "ERROR: Could not connect to whitelist contract. Please refresh and try again in a few minutes.",
-        TerminalTextStyle.Red,
-      );
-    }
-  };
-
-  const searchHomePlanet = async () => {
-    const terminal = terminalHandle;
-    const gameUIManager = gameUIManagerRef.current;
-
-    const selectedSpawnArea = miniMapRef.current?.getSelectedSpawnArea();
-
-    // disable reselect of spawn posistion when we start searching
-    miniMapRef.current?.setSelectable(false);
-
-    const coords = selectedSpawnArea?.worldPoint;
-
-    if (!terminal || !gameUIManager || !coords) {
-      return;
-    }
-
-    const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
-    terminal.current?.println(
-      `Spawn coordinates: (${coords.x.toFixed(0)},${coords.y.toFixed(0)}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
-    );
-
-    gameUIManager
-      .getGameManager()
-      .on(GameManagerEvent.InitializedPlayer, () => {
-        setTimeout(() => {
-          setMiniMapOn(false);
-
-          terminal.current?.println("Initializing game...");
-          setStep(TerminalPromptStep.ALL_CHECKS_PASS);
-        });
-      });
-
-    gameUIManager
-      .joinGame(
-        async (e) => {
-          // TODO: Handle 2min timeout error
-          setMiniMapOn(false);
-
-          console.error(e);
-
-          terminal.current?.println("Error Joining Game:");
-          terminal.current?.println(e.message, TerminalTextStyle.Red);
-          terminal.current?.newline();
-
-          console.log(e.message.slice(0, 20));
-
-          if (e.message.slice(0, 20) === "Please enable popups") {
-            terminal.current?.print("Player guide: ", TerminalTextStyle.Pink);
-
-            terminal.current?.printLink(
-              "How to enable popups",
-              () => {
-                window.open(HOW_TO_ENABLE_POPUPS);
-              },
-              TerminalTextStyle.Green,
-            );
-            terminal.current?.println(
-              " <= New player please check this guide!!!",
-              TerminalTextStyle.Pink,
-            );
-
-            terminal.current?.println("");
-          } else if (e.message === "transaction reverted") {
-            terminal.current?.println(
-              "Please refresh the client, choose another area and try again.",
-              TerminalTextStyle.Pink,
-            );
-
-            terminal.current?.println("");
-          }
-
-          // terminal.current?.println(
-          //   "Don't worry :-) you can get more ETH on Redstone this way 😘",
-          //   TerminalTextStyle.Pink
-          // );
-
-          // terminal.current?.newline();
-          // terminal.current?.printLink(
-          //   'Deposit ETH to Redstone',
-          //   () => {
-          //     window.open(BLOCKCHAIN_BRIDGE);
-          //   },
-          //   TerminalTextStyle.Pink
-          // );
-          // terminal.current?.newline();
-          // terminal.current?.newline();
-
-          terminal.current?.println("Press [enter] to Try Again:");
-
-          await terminal.current?.getInput();
-          return true;
-        },
-        coords,
-        spectate,
-      )
-      .catch((error: Error) => {
-        terminal.current?.println(
-          `[ERROR] An error occurred: ${error.toString().slice(0, 10000)}`,
-          TerminalTextStyle.Red,
-        );
-        terminal.current?.println(
-          "please refresh client to try again.",
-          TerminalTextStyle.Pink,
-        );
-      });
-  };
-
-  const enterGame = async () => {
-    const terminal = terminalHandle;
-    if (!terminal) return;
-
-    setMiniMapOn(false);
-
-    terminal.current?.println("Initializing game...");
-    terminal.current?.println("Enter game.", TerminalTextStyle.Green);
-    terminal.current?.println("Press [enter] to begin");
-    terminal.current?.println(
-      "Press [s] then [enter] to begin in SAFE MODE - plugins disabled",
-    );
-
-    setStep(TerminalPromptStep.COMPLETE);
-    setInitRenderState(InitRenderState.COMPLETE);
-    terminal.current?.clear();
-
-    terminal.current?.println(
-      "Welcome to the Dark Forest MUD.",
-      TerminalTextStyle.Green,
-    );
-    terminal.current?.println("");
-    terminal.current?.println(
-      "This is the Dark Forest interactive JavaScript terminal. Only use this if you know exactly what you're doing.",
-    );
-    terminal.current?.println("");
-    terminal.current?.println("Try running: df.getAccount()");
-    terminal.current?.println("");
-  };
-
-  useEffect(() => {
-    if (indexerLoaded && walletLinked && playerRegistered && burnerHasFunds) {
-      setAccount();
-    }
-  }, [indexerLoaded, walletLinked, playerRegistered, burnerHasFunds]);
-
-  useEffect(() => {
-    console.log("---------------------------------");
-    console.log("indexerLoaded", indexerLoaded);
-    console.log("walletLinked", walletLinked);
-    console.log("playerRegistered", playerRegistered);
-    console.log("burnerHasFunds", burnerHasFunds);
-    console.log("spawnAreaSelected", spawnAreaSelected);
-    if (
-      indexerLoaded &&
-      walletLinked &&
-      playerRegistered &&
-      burnerHasFunds &&
-      spawnAreaSelected
-    ) {
-      terminalHandle.current?.printElement(
-        <PinkButton
-          onClick={() => {
-            searchHomePlanet();
-          }}
-        >
-          Search Home Planet
-        </PinkButton>,
-      );
-      terminalHandle.current?.println("");
-    }
-  }, [
-    indexerLoaded,
-    walletLinked,
-    playerRegistered,
-    burnerHasFunds,
-    spawnAreaSelected,
-  ]);
 
   const advanceStateFromCompatibilityPassed = useCallback(
     async (
@@ -966,7 +670,9 @@ export function BluePillLandingPage() {
           terminal.current?.print(`           NOTE: `, TerminalTextStyle.Pink);
 
           terminal.current?.println(
-            "You can use bridge to transfer ETH to " + BLOCKCHAIN_NAME,
+            "You can use bridge to transfer ETH to " +
+              BLOCKCHAIN_NAME +
+              " Mainnet",
             TerminalTextStyle.Pink,
           );
 
@@ -981,7 +687,9 @@ export function BluePillLandingPage() {
           );
 
           terminal.current?.println(
-            " <= transfer ETH from L2 (e.g. optimism) to " + BLOCKCHAIN_NAME,
+            " <= transfer ETH from L2 (e.g. optimism) to " +
+              BLOCKCHAIN_NAME +
+              " Mainnet",
           );
 
           terminal.current?.print("   Player guide: ");
@@ -1365,12 +1073,10 @@ export function BluePillLandingPage() {
           throw new Error("no eth connection");
         }
 
-        if (!mainAccount || mainAccount === zeroAddress) {
-          throw new Error("no main account");
-        }
+        const mainAccount = ethConnection.getAddress();
 
         newGameManager = await GameManager.create({
-          mainAccount: address(mainAccount),
+          mainAccount: mainAccount,
           connection: ethConnection,
           terminal,
           contractAddress,
@@ -1417,6 +1123,12 @@ export function BluePillLandingPage() {
       terminal.current?.newline();
       terminal.current?.println("Welcome to DARK FOREST MUD.");
       terminal.current?.newline();
+
+      //register Player
+      terminal.current?.printElement(
+        <RedPillRegisterPlayer ethConnection={ethConnection} />,
+      );
+
       //NOTE: round 3 don't collect those information
       // terminal.current?.println('We collect a minimal set of statistics such as SNARK proving');
       // terminal.current?.println('times and average transaction times across browsers, to help ');
@@ -1451,7 +1163,7 @@ export function BluePillLandingPage() {
         setStep(TerminalPromptStep.ALL_CHECKS_PASS);
       }
     },
-    [ethConnection, contractAddress, mainAccount, spectate],
+    [ethConnection, contractAddress, spectate],
   );
 
   const advanceStateFromAskAddAccount = useCallback(
@@ -1489,7 +1201,9 @@ export function BluePillLandingPage() {
       if (gameUIManager) {
         try {
           if (spectate) {
-            if (await gameUIManager.addAccount({ x: 0, y: 0 })) {
+            const innerRadius = Math.ceil(gameUIManager.getInnerRadius());
+
+            if (await gameUIManager.addAccount({ x: innerRadius + 1, y: 0 })) {
               terminal.current?.println("Successfully added account.");
               terminal.current?.println("Initializing game...");
               setStep(TerminalPromptStep.ALL_CHECKS_PASS);
@@ -1574,7 +1288,9 @@ export function BluePillLandingPage() {
         const coords = { x: setX, y: setY };
         const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
         terminal.current?.println(
-          `Spawn coordinates: (${coords.x.toFixed(0)}, ${coords.y.toFixed(0)}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
+          `Spawn coordinates: (${coords.x.toFixed(0)}, ${coords.y.toFixed(
+            0,
+          )}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
         );
 
         gameUIManager
@@ -1666,12 +1382,161 @@ export function BluePillLandingPage() {
           });
       } else {
         if (showHelp) {
-          terminal.current?.printElement(<BluePillMapGuide />);
+          terminal.current?.println(
+            "Select home planet.",
+            TerminalTextStyle.Green,
+          );
+          terminal.current?.print("Please ");
+          terminal.current?.print("left-click", TerminalTextStyle.Pink);
+          terminal.current?.print(" on ");
+          terminal.current?.print(
+            "blue squares on the map",
+            TerminalTextStyle.Blue,
+          );
+          terminal.current?.println(" to select your spawn area.");
+          terminal.current?.newline();
+          terminal.current?.print("After selecting your spawn area, ");
+          terminal.current?.print(
+            "left-click the below line",
+            TerminalTextStyle.Pink,
+          );
+          terminal.current?.println(", then press [enter].");
         }
 
         setMiniMapOn(true);
         // let the miniMap component mount
         await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const userInput = ((await terminal.current?.getInput()) ?? "").trim();
+        const selectedSpawnArea = miniMapRef.current?.getSelectedSpawnArea();
+        switch (true) {
+          case userInput === "clear": {
+            terminal.current?.clear();
+            advanceStateFromNoHomePlanet(terminal, { showHelp: false });
+            return;
+          }
+          case userInput === "h" || userInput === "help": {
+            advanceStateFromNoHomePlanet(terminal, { showHelp: true });
+            return;
+          }
+          case userInput !== "": {
+            terminal.current?.println(
+              "Invalid option, please try press [help]",
+              TerminalTextStyle.Pink,
+            );
+            advanceStateFromNoHomePlanet(terminal, { showHelp: false });
+            return;
+          }
+        }
+
+        if (!selectedSpawnArea) {
+          terminal.current?.println(
+            "Please select a spawn area, then press [enter]",
+            TerminalTextStyle.Red,
+          );
+
+          advanceStateFromNoHomePlanet(terminal, { showHelp: false });
+          return;
+        }
+
+        // disable reselect of spawn posistion when we start searching
+        miniMapRef.current?.setSelectable(false);
+
+        const coords = selectedSpawnArea.worldPoint;
+        const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
+        terminal.current?.println(
+          `Spawn coordinates: (${coords.x.toFixed(0)}, ${coords.y.toFixed(
+            0,
+          )}) were selected, distance from center: ${distFromOrigin.toFixed(0)}.`,
+        );
+
+        gameUIManager
+          .getGameManager()
+          .on(GameManagerEvent.InitializedPlayer, () => {
+            setTimeout(() => {
+              setMiniMapOn(false);
+
+              terminal.current?.println("Initializing game...");
+              setStep(TerminalPromptStep.ALL_CHECKS_PASS);
+            });
+          });
+
+        gameUIManager
+          .joinGame(
+            async (e) => {
+              // TODO: Handle 2min timeout error
+              setMiniMapOn(false);
+
+              console.error(e);
+
+              terminal.current?.println("Error Joining Game:");
+              terminal.current?.println(e.message, TerminalTextStyle.Red);
+              terminal.current?.newline();
+
+              console.log(e.message.slice(0, 20));
+
+              if (e.message.slice(0, 20) === "Please enable popups") {
+                terminal.current?.print(
+                  "Player guide: ",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.printLink(
+                  "How to enable popups",
+                  () => {
+                    window.open(HOW_TO_ENABLE_POPUPS);
+                  },
+                  TerminalTextStyle.Green,
+                );
+                terminal.current?.println(
+                  " <= New player please check this guide!!!",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.println("");
+              } else if (e.message === "transaction reverted") {
+                terminal.current?.println(
+                  "Please refresh the client, choose another area and try again.",
+                  TerminalTextStyle.Pink,
+                );
+
+                terminal.current?.println("");
+              }
+
+              // terminal.current?.println(
+              //   "Don't worry :-) you can get more ETH on Redstone this way 😘",
+              //   TerminalTextStyle.Pink
+              // );
+
+              // terminal.current?.newline();
+              // terminal.current?.printLink(
+              //   'Deposit ETH to Redstone',
+              //   () => {
+              //     window.open(BLOCKCHAIN_BRIDGE);
+              //   },
+              //   TerminalTextStyle.Pink
+              // );
+              // terminal.current?.newline();
+              // terminal.current?.newline();
+
+              terminal.current?.println("Press [enter] to Try Again:");
+
+              await terminal.current?.getInput();
+              return true;
+            },
+            coords,
+            spectate,
+          )
+          .catch((error: Error) => {
+            terminal.current?.println(
+              `[ERROR] An error occurred: ${error.toString().slice(0, 10000)}`,
+              TerminalTextStyle.Red,
+            );
+            terminal.current?.println(
+              "please refresh client to try again.",
+              TerminalTextStyle.Pink,
+            );
+          });
       }
     },
     [ethConnection, spectate],
@@ -1684,14 +1549,56 @@ export function BluePillLandingPage() {
     ) => {
       if (showHelp) {
         terminal.current?.println("Enter game.", TerminalTextStyle.Green);
-        terminal.current?.println("click [enter game] to begin");
+        terminal.current?.println("Press [enter] to begin");
+        terminal.current?.println(
+          "Press [s] then [enter] to begin in SAFE MODE - plugins disabled",
+        );
       }
 
-      terminal.current?.printElement(
-        <PinkButton onClick={enterGame}>Enter Game</PinkButton>,
-      );
+      const input = (await terminal.current?.getInput())?.trim() ?? "";
+      switch (true) {
+        // set safe mode
+        case input === "s": {
+          const gameUIManager = gameUIManagerRef.current;
+          gameUIManager?.getGameManager()?.setSafeMode(true);
+          break;
+        }
 
-      return;
+        // recursive advance
+        case input === "h" || input === "help": {
+          advanceStateFromAllChecksPass(terminal, true);
+          return;
+        }
+        case input === "clear": {
+          terminal.current?.clear();
+          advanceStateFromAllChecksPass(terminal, false);
+          return;
+        }
+        case input !== "": {
+          terminal.current?.println(
+            "Invalid option, please try again...",
+            TerminalTextStyle.Red,
+          );
+          advanceStateFromAllChecksPass(terminal, false);
+          return;
+        }
+      }
+
+      setStep(TerminalPromptStep.COMPLETE);
+      setInitRenderState(InitRenderState.COMPLETE);
+      terminal.current?.clear();
+
+      terminal.current?.println(
+        "Welcome to the Dark Forest MUD.",
+        TerminalTextStyle.Green,
+      );
+      terminal.current?.println("");
+      terminal.current?.println(
+        "This is the Dark Forest interactive JavaScript terminal. Only use this if you know exactly what you're doing.",
+      );
+      terminal.current?.println("");
+      terminal.current?.println("Try running: df.getAccount()");
+      terminal.current?.println("");
     },
     [],
   );
@@ -1860,6 +1767,24 @@ export function BluePillLandingPage() {
     }
   }, [terminalHandle, topLevelContainer, advanceState]);
 
+  if (syncSign === false) {
+    return (
+      <LoadingContent>
+        <Spinner />
+        <LoadingText>
+          Step: {syncProgress.step}
+          <br />
+          Progress: {syncProgress.percentage.toFixed()}%
+        </LoadingText>
+        <LoadingNote>
+          Please wait while the indexer syncs...
+          <br />
+          This may take a few minutes
+        </LoadingNote>
+      </LoadingContent>
+    );
+  }
+
   return (
     <>
       <Wrapper initRender={initRenderState} terminalEnabled={terminalVisible}>
@@ -1875,6 +1800,7 @@ export function BluePillLandingPage() {
                   <GameWindowLayout
                     terminalVisible={terminalVisible}
                     setTerminalVisible={setTerminalVisible}
+                    spectate={spectate}
                   />
                 </UIManagerProvider>
               </TopLevelDivProvider>
@@ -1886,76 +1812,26 @@ export function BluePillLandingPage() {
           />
         </GameWindowWrapper>
 
-        {/** GM Blue Pill*/}
-
         <TerminalWrapper
           initRender={initRenderState}
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD ${VERSION}`}
+            text={`Welcome To Dark Forest MUD ${VERSION} `}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:
                 initRenderState !== InitRenderState.COMPLETE ? "block" : "none",
             }}
           />
+          <div>
+            step: {syncProgress.step} percent: {syncProgress.percentage} %
+          </div>
+
           <BrowserIssues
             issues={browserIssues}
             state={browserCompatibleState}
           />
-          <div>
-            {!indexerLoaded && (
-              <div
-                style={{
-                  padding: "20px",
-                  background: "rgba(0, 0, 0, 0.8)",
-                  borderRadius: "8px",
-                  border: "1px solid #ff69b4",
-                  color: "#fff",
-                  textAlign: "left",
-                  margin: "20px 0",
-                  width: "500px",
-                  maxWidth: "90%",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "24px",
-                    marginBottom: "15px",
-                    color: "#ff69b4",
-                  }}
-                >
-                  ⚡ INITIALIZING DARK FOREST MUD ⚡
-                </div>
-                <div style={{ marginBottom: "10px", fontSize: "18px" }}>
-                  🔄 Loading game data...
-                </div>
-                <div style={{ marginBottom: "10px", fontSize: "18px" }}>
-                  📊 Current step: {syncProgress.step}
-                </div>
-                <div style={{ marginBottom: "10px", fontSize: "18px" }}>
-                  🎯 Progress: {syncProgress.percentage}%
-                </div>
-                <div style={{ fontSize: "18px", color: "#ff69b4" }}>
-                  ⏳ Please wait, almost there...
-                </div>
-              </div>
-            )}
-
-            {indexerLoaded && !walletLinked && <BluePillWalletButton />}
-
-            {indexerLoaded &&
-              walletLinked &&
-              !burnerHasFunds &&
-              !initRenderState && <BluePillBurnerWallet />}
-
-            {indexerLoaded &&
-              walletLinked &&
-              burnerHasFunds &&
-              !playerRegistered &&
-              !initRenderState && <BluePillRegisterPlayer />}
-          </div>
           <Terminal
             ref={terminalHandle}
             promptCharacter={">"}

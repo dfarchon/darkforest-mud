@@ -27,7 +27,7 @@ import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
 import { PlanetTestPage } from "./PlanetTest/PlanetTestPage";
 import { BluePillLandingPage } from "./Frontend/Pages/BluePillLandingPage";
-
+import { RedPillLandingPage } from "./Frontend/Pages/RedPillLandingPage";
 const GlobalStyle = createGlobalStyle`
 body {
   width: 100vw;
@@ -78,7 +78,7 @@ export const App = () => {
                 <Navigate to={`/redpill/${defaultAddress}`} replace={true} />
               }
             />
-            <Route path="/redpill/:contract" element={<GameLandingPage />} />
+            <Route path="/redpill/:contract" element={<RedPillLandingPage />} />
 
             <Route path="/" element={<ClassicLandingPage />} />
             {/* <Route path="/sandbox" element={<SandboxPage />} /> */}

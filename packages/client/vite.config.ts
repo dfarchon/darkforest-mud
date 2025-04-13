@@ -33,6 +33,7 @@ export default defineConfig({
       "@frontend": resolvePath("./src/Frontend"),
       "@backend": resolvePath("./src/Backend"),
       "@bluepill": resolvePath("./src/BluePill"),
+      "@redpill": resolvePath("./src/RedPill"),
     },
   },
   css: {

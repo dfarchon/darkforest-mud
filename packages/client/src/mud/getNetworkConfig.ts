@@ -22,7 +22,7 @@
  * By default, there are only two chains here:
  */
 // import { Entity } from "@latticexyz/recs";
-import { addAccount } from "@backend/Network/AccountManager";
+// import { addAccount } from "@backend/Network/AccountManager";
 import worldsJson from "contracts/worlds.json";
 import { Wallet } from "ethers";
 
@@ -72,7 +72,7 @@ export const getBurnerWallet = () => {
 
   const burnerWallet = Wallet.createRandom();
   localStorage.setItem(storageKey, burnerWallet.privateKey);
-  addAccount(burnerWallet.privateKey);
+  // addAccount(burnerWallet.privateKey);
   return burnerWallet.privateKey;
 };
 
