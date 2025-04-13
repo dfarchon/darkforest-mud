@@ -126,7 +126,7 @@ export const MAX_AUTO_GAS_PRICE_GWEI = 15 as const;
  * The URL to the block explorer for the chain being used. Prepended to transaction links, etc
  */
 // Careful, don't add a slash to the end of this.
-export const BLOCK_EXPLORER_URL = "https://basescan.org" as const;
+export const BLOCK_EXPLORER_URL = "https://base.blockscout.com" as const;
 
 /**
  * The URL to the bridge for the chain being used. Prepended to transaction links, etc

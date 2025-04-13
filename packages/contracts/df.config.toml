@@ -14,7 +14,7 @@ set_current_round = true # if true,should be deployed by nft contract owner
 
 [temp]
 b_skip_proof_check = false
-c_player_limit = 100
+c_player_limit = 1800
 d_spawn_perlin_min = 1
 e_spawn_perlin_max = 31
 f_reveal_cd = 300
@@ -107,9 +107,9 @@ g_max_total_level = 0x05050403         # [5, 5, 4, 3]
 h_silver_cost = 0x000000000064503c2814 # [100, 80, 60, 40, 20]
 
 [snark]
-a_planet_hash_key = 2025
-b_biome_base_key = 1294
-c_space_type_key = 2010
+a_planet_hash_key = 2021
+b_biome_base_key = 1314
+c_space_type_key = 2008
 d_perlin_length_scale = 8192
 e_perlin_mirror_x = 0
 f_perlin_mirror_y = 0
@@ -120,7 +120,7 @@ rate = 1
 [inner_circle]
 a_radius = 110000
 b_radiusx1000 = 110000000
-c_speed = 255
+c_speed = 106
 
 [guild_config]
 a_create_fee = 2000000000000000  # 0.002 ETH
