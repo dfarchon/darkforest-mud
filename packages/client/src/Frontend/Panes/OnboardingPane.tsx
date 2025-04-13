@@ -51,6 +51,8 @@ function OnboardMoney({ advance }: { advance: () => void }) {
   const uiManager = useUIManager();
   const account = useAccount(uiManager);
 
+  const gameAccount = uiManager?.getGameAccount();
+
   const explorerAddressLink = `${BLOCK_EXPLORER_URL}/address/${account}`;
 
   return (
@@ -72,9 +74,16 @@ function OnboardMoney({ advance }: { advance: () => void }) {
         {/* and dripped 15c to it, courtesy of ${HOST_TEAM_NAME} Team, and ${BLOCKCHAIN_NAME}. */}
       </p>
       <p className="indent">
-        Your burner wallet address is: <br />
+        Your main wallet address is: <br />
         <White>
           <a onClick={() => window.open(explorerAddressLink)}>{account}</a>
+        </White>
+      </p>
+
+      <p className="indent">
+        Your game wallet address is: <br />
+        <White>
+          <a onClick={() => window.open(explorerAddressLink)}>{gameAccount}</a>
         </White>
       </p>
       <p>

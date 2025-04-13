@@ -988,6 +988,14 @@ export class GameUIManager extends EventEmitter {
     return this.gameManager.getAccount();
   }
 
+  public getMainAccount(): EthAddress | undefined {
+    return this.gameManager.getMainAccount();
+  }
+
+  public getGameAccount(): EthAddress | undefined {
+    return this.gameManager.getGameAccount();
+  }
+
   public isAdmin(): boolean {
     return this.gameManager.isAdmin();
   }
