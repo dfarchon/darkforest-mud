@@ -52,7 +52,7 @@ const defaultSettings: Record<Setting, string> = {
   [Setting.GasFeeLimit]: "3000000",
   [Setting.TerminalVisible]: "true",
   [Setting.TutorialOpen]: onlyInProduction(),
-
+  [Setting.ActiveAISpeak]: "true",
   [Setting.FoundPirates]: "false",
   [Setting.TutorialCompleted]: "false",
   [Setting.FoundSilver]: "false",

@@ -1,5 +1,7 @@
+import type { GameManager } from "@backend/GameLogic/GameManager";
 import type { ModalId } from "@df/types";
 import { ModalName, Setting } from "@df/types";
+import { AmbiencePane } from "@frontend/Panes/AmbiencePane";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -12,7 +14,7 @@ import {
   WindowWrapper,
 } from "../Components/GameWindowComponents";
 import ControllableCanvas from "../Game/ControllableCanvas";
-import { AmbiencePane } from "../Panes/AmbiencePane";
+import { AIChatPane } from "../Panes/AIChatPane";
 import { ArtifactHoverPane } from "../Panes/ArtifactHoverPane";
 import { CoordsPane } from "../Panes/CoordsPane";
 import { DiagnosticsPane } from "../Panes/DiagnosticsPane";
@@ -33,7 +35,6 @@ import { TransactionLogPane } from "../Panes/TransactionLogPane";
 import { TutorialPane } from "../Panes/TutorialPane";
 import { TwitterVerifyPane } from "../Panes/TwitterVerifyPane";
 import { WalletPane } from "../Panes/WalletPane";
-import { AIChatPane } from "../Panes/AIChatPane";
 import { ZoomPane } from "../Panes/ZoomPane";
 import { useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
 import { useOnUp } from "../Utils/KeyEmitters";

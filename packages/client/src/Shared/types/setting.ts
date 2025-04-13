@@ -35,7 +35,7 @@ export const Setting = {
   HasAcceptedPluginRisk: "HasAcceptedPluginRisk" as Setting,
   PlanetDefaultEnergyLevelToSend: "DefaultEnergySend" as Setting,
   PlanetDefaultEnergyLevelToSendReset: "DefaultEnergySendReset" as Setting,
-
+  ActiveAISpeak: "AISpeak" as Setting,
   FoundPirates: "FoundPirates" as Setting,
   TutorialCompleted: "TutorialCompleted" as Setting,
   FoundSilver: "FoundSilver" as Setting,

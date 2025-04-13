@@ -2,6 +2,7 @@ import { EMPTY_ADDRESS } from "@df/constants";
 import type { Monomitter } from "@df/events";
 import { monomitter } from "@df/events";
 import { biomeName, isLocatable, isSpaceShip } from "@df/gamelogic";
+import { isBroken } from "@df/gamelogic";
 import { planetHasBonus } from "@df/hexgen";
 import type { EthConnection } from "@df/network";
 import type { GameGLManager } from "@df/renderer";
@@ -27,6 +28,7 @@ import type {
   UnconfirmedActivateArtifact,
   UnconfirmedMove,
   UnconfirmedRefreshPlanet,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedUpgrade,
   Upgrade,
   UpgradeBranchName,
@@ -77,7 +79,6 @@ import type { GuildUtils } from "./GuildUtils";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
-import { isBroken } from "@df/gamelogic";
 import { Howl } from "howler";
 
 export const enum GameUIManagerEvent {
@@ -543,9 +544,9 @@ export class GameUIManager extends EventEmitter {
     await this.gameManager.buyGPTTokens(amount);
   }
 
-  public async spendGPTTokens() {
+  public async spendGPTTokens(amount: number) {
     this.playClickSound();
-    await this.gameManager.spendGPTTokens();
+    await this.gameManager.spendGPTTokens(amount);
   }
 
   public startLinkFrom(
@@ -1607,6 +1608,10 @@ export class GameUIManager extends EventEmitter {
 
   public getPinkZones() {
     return this.gameManager.getPinkZones();
+  }
+
+  public getAIZones() {
+    return this.gameManager.getAIZones();
   }
 
   public getPinkZoneByArtifactId(artifactId: ArtifactId) {

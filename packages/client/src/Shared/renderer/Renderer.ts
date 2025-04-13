@@ -29,6 +29,8 @@ import type {
   PerlinRendererType,
   PinkZone,
   PinkZoneRendererType,
+  AIZone,
+  AIZoneRendererType,
   Planet,
   PlanetLevel,
   PlanetRendererType,
@@ -72,6 +74,7 @@ import { MineBodyRenderer } from "./Entities/MineBodyRenderer";
 import { MineRenderer } from "./Entities/MineRenderer";
 import { PerlinRenderer } from "./Entities/PerlinRenderer";
 import { PinkZoneRenderer } from "./Entities/PinkZoneRenderer";
+import { AIZoneRenderer } from "./Entities/AIZoneRenderer";
 import { PlanetRenderer } from "./Entities/PlanetRenderer";
 import { PlanetRenderManager } from "./Entities/PlanetRenderManager";
 import { QuasarBodyRenderer } from "./Entities/QuasarBodyRenderer";
@@ -101,6 +104,7 @@ import {
   isMineRenderer,
   isPerlinRenderer,
   isPinkZoneRenderer,
+  isAIZoneRenderer,
   isPlanetRenderer,
   isPlanetRendererManager,
   isQuasarBodyRenderer,
@@ -185,6 +189,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getAbandonRangeChangePercent(): number;
   getCaptureZones(): Iterable<CaptureZone>;
   getPinkZones(): Iterable<PinkZone>;
+  getAIZones(): Iterable<AIZone>;
   getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined;
   getBlueZones(): Iterable<BlueZone>;
   inSameGuildAtTick(
@@ -236,6 +241,7 @@ export class Renderer {
   captureZoneRenderer: CaptureZoneRendererType;
   pinkZoneRenderer: PinkZoneRendererType;
   blueZoneRenderer: BlueZoneRendererType;
+  aizoneRenderer: AIZoneRendererType;
 
   //planet entities
   planetRenderer: PlanetRendererType;
@@ -323,6 +329,7 @@ export class Renderer {
       new CaptureZoneRenderer(this.glManager),
       new PinkZoneRenderer(this.glManager),
       new BlueZoneRenderer(this.glManager),
+      new AIZoneRenderer(this.glManager),
     ];
     for (const index in this.rendererStack) {
       this.setRenderer(this.rendererStack[index]);
@@ -449,6 +456,9 @@ export class Renderer {
 
     this.blueZoneRenderer.queueBlueZones();
     this.blueZoneRenderer.flush();
+
+    this.aizoneRenderer.queueAIZones();
+    this.aizoneRenderer.flush();
 
     this.uiRenderManager.queueSelectedRangeRing();
     this.uiRenderManager.queueSelectedRect();
@@ -719,6 +729,14 @@ export class Renderer {
           break;
         }
         console.log("Renderer is not a BlueZoneRenderer");
+        return false;
+
+      case RendererType.AIZone:
+        if (isAIZoneRenderer(renderer)) {
+          this.aizoneRenderer = renderer;
+          break;
+        }
+        console.log("Renderer is not an AIZoneRenderer");
         return false;
 
       default:

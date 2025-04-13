@@ -67,6 +67,7 @@ import type {
   LocatablePlanet,
   LocationId,
   PinkZone,
+  AIZone,
   Planet,
   QueuedArrival,
   Radii,
@@ -206,6 +207,8 @@ export class GameObjects {
   // private readonly burnedLocations: Map<LocationId, BurnedLocation>;
   // private readonly kardashevLocations: Map<LocationId, BurnedLocation>;
   private readonly pinkZones: Map<ArtifactId, PinkZone>;
+
+  private aiZones: Set<AIZone>;
 
   /**
    * Some of the game's parameters are downloaded from the blockchain. This allows the client to be
@@ -1238,6 +1241,14 @@ export class GameObjects {
 
   public setPinkZone(pinkZone: PinkZone) {
     this.pinkZones.set(pinkZone.artifactId, pinkZone);
+  }
+
+  public getAIZones(): Set<AIZone> {
+    return this.aiZones;
+  }
+
+  public setAIZone(aizones: Set<AIZone>) {
+    this.aiZones = aizones;
   }
 
   // public getKardashevLocations(): Map<LocationId, KardashevLocation> {

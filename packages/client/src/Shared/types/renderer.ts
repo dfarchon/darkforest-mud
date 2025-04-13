@@ -201,6 +201,7 @@ export const RendererType = {
   CaptureZone: 25 as RendererType,
   PinkZone: 26 as RendererType,
   BlueZone: 27 as RendererType,
+  AIZone: 28 as RendererType,
 };
 
 export interface PlanetRendererType {
@@ -1007,6 +1008,20 @@ export interface BlueZoneRendererType {
    * Queue all Blue Zones
    */
   queueBlueZones(): void;
+
+  /**
+   * Draw all Blue Zones
+   */
+  flush(): void;
+}
+
+export interface AIZoneRendererType {
+  rendererType: RendererType;
+
+  /**
+   * Queue all AI Zones
+   */
+  queueAIZones(): void;
 
   /**
    * Draw all Blue Zones

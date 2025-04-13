@@ -13,6 +13,7 @@ import type {
   MineRendererType,
   PerlinRendererType,
   PinkZoneRendererType,
+  AIZoneRendererType,
   PlanetRendererType,
   PlanetRenderManagerType,
   QuasarBodyRendererType,
@@ -197,4 +198,10 @@ export function isBlueZoneRenderer(
   renderer: BaseRenderer,
 ): renderer is BlueZoneRendererType {
   return renderer.rendererType === RendererType.BlueZone;
+}
+
+export function isAIZoneRenderer(
+  renderer: BaseRenderer,
+): renderer is AIZoneRendererType {
+  return renderer.rendererType === RendererType.AIZone;
 }

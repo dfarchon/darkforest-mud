@@ -611,6 +611,14 @@ export function SettingsPane({
             setting={Setting.ExperimentalFeatures}
             settingDescription="toggle expeirmental features"
           />
+          <SectionHeader>Enable Speak Features</SectionHeader>
+          Mute / Unmute AI chat response
+          <Spacer height={8} />
+          <BooleanSetting
+            uiManager={uiManager}
+            setting={Setting.ActiveAISpeak}
+            settingDescription="mute / unmute AI chat response"
+          />
         </Section>
 
         <Section>

@@ -85,6 +85,7 @@ import type {
   LocationId,
   NetworkHealthSummary,
   PinkZone,
+  AIZone,
   Planet,
   PlanetLevel,
   Player,
@@ -1935,6 +1936,18 @@ export class GameManager extends EventEmitter {
   getPinkZones(): Set<PinkZone> {
     const pinkZonesMap = this.entityStore.getPinkZones();
     return new Set(pinkZonesMap.values());
+  }
+  // getAIZones(begin: WorldCoords, end: WorldCoords): Set<AIZone> {
+  getAIZones(): Set<AIZone> {
+    const savedRange = localStorage.getItem("aiselectedRange");
+
+    const selectedCoords = JSON.parse(savedRange);
+    const _: AIZone = {
+      beginCoords: selectedCoords.begin,
+      endCoords: selectedCoords.end,
+    };
+
+    return new Set([_]);
   }
 
   getPinkZoneByArtifactId(artifactId: ArtifactId): PinkZone | undefined {
@@ -6699,9 +6712,9 @@ export class GameManager extends EventEmitter {
     }
   }
 
-  public async spendGPTTokens(): Promise<
-    Transaction<UnconfirmedSpendGPTTokens>
-  > {
+  public async spendGPTTokens(
+    amount: number,
+  ): Promise<Transaction<UnconfirmedSpendGPTTokens>> {
     try {
       if (!this.account) {
         throw new Error("No account connected");
@@ -6716,7 +6729,8 @@ export class GameManager extends EventEmitter {
         delegator,
         methodName: "df__spendGPTTokens",
         contract: this.contractsAPI.contract,
-        args: Promise.resolve([]),
+        args: Promise.resolve([amount]),
+        amount,
       };
 
       const tx = await this.contractsAPI.submitTransaction(txIntent);

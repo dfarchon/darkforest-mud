@@ -1,4 +1,3 @@
-
 # Dark Foret MUD (🦑,🪐)
 
 "These violent delights have violent ends."
@@ -13,21 +12,21 @@ Prior to the full launch of the project, periodic testing events will be held. W
 
 To run the project locally, ensure your environment is set up with Node 18 or Node 20.
 
-
-# Website 
+# Website
 
 v0.1.1 round: https://r1.dfmud.xyz/
 
 v0.1.2 round: https://r2.dfmud.xyz/
 
 # Local Development Setup
-1.	Navigate to the packages/client directory and copy .env.example to .env.
-2.	Navigate to the packages/eth directory and copy .env.example to .env.
-3.	Run pnpm install to install the dependencies.
-4.	Run pnpm dev to start the development environment.
+
+1. Navigate to the packages/client directory and copy .env.example to .env.
+2. Navigate to the packages/eth directory and copy .env.example to .env.
+3. Run pnpm install to install the dependencies.
+4. Run pnpm dev to start the development environment.
 
 # To-Do List
-1.	Continue to introduce new artifacts and complete the guild features, thereby enriching the game’s content and attracting a larger player base.
-2.	Optimize the user onboarding process and refine the delegation mechanism for user game accounts.
-3.	Develop a management queue for handling a high volume of onchain transactions.
 
+1. Continue to introduce new artifacts and complete the guild features, thereby enriching the game’s content and attracting a larger player base.
+2. Optimize the user onboarding process and refine the delegation mechanism for user game accounts.
+3. Develop a management queue for handling a high volume of onchain transactions.
