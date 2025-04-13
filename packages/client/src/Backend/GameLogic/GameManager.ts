@@ -3898,7 +3898,9 @@ export class GameManager extends EventEmitter {
               // distFromOrigin < requireRadiusMax &&
               planetLevel === MIN_PLANET_LEVEL &&
               planetType === PlanetType.PLANET &&
-              (!planet || !planet.isInContract) // init will fail if planet has been initialized in contract already
+              (!planet || !planet.isInContract) && // init will fail if planet has been initialized in contract already
+              planet &&
+              planet.owner === EMPTY_ADDRESS
             ) {
               // valid home planet
               homePlanetFinder.stopExplore();

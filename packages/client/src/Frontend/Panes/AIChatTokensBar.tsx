@@ -24,10 +24,14 @@ export function CurrencyView() {
     network: { playerEntity },
     components: components, //{ SyncProgress },
   } = useMUD();
-  const { data: walletClient } = useWalletClient();
-  const mainAccount = address(walletClient.account.address);
+
   const { GPTTokens } = components;
   const uiManager = useUIManager();
+  const mainAccount = uiManager.getMainAccount();
+
+  if (!mainAccount) {
+    return null;
+  }
 
   const currentGptCredits =
     Number(getComponentValue(GPTTokens, playerEntity)?.amount || 0) +
