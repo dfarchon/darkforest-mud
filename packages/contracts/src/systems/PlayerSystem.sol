@@ -16,6 +16,9 @@ import { SpaceType, PlanetType } from "codegen/common.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 
 contract PlayerSystem is BaseSystem {
+  // TODO: will move errors to each system that uses them. just like this one.
+  error PlanetAlreadyOwned(); // 0x4c322828
+
   /**
    * @notice Register a player.
    * @param name Player name.
@@ -108,6 +111,9 @@ contract PlayerSystem is BaseSystem {
 
     // new planet instances in memory
     Planet memory planet = DFUtils.readAnyPlanet(worldAddress, _input.planetHash, _input.perlin, _input.radiusSquare);
+    if (planet.owner != address(0)) {
+      revert PlanetAlreadyOwned();
+    }
     planet.changeOwner(player);
     planet.population = 50000; // initial population for player's home planet
 
