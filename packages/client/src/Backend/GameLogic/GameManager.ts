@@ -3509,6 +3509,13 @@ export class GameManager extends EventEmitter {
       // }
 
       const planet = await this.findRandomHomePlanet(_selectedCoords);
+
+      console.log(
+        "home coords:",
+        planet.location.coords.x,
+        planet.location.coords.y,
+      );
+
       this.homeLocation = planet.location;
       this.terminal.current?.println("");
       this.terminal.current?.println(
@@ -3609,6 +3616,29 @@ export class GameManager extends EventEmitter {
 
       // await this.getSpaceships();
       await this.hardRefreshPlanet(planet.locationId);
+
+      alert("download coords & game account private key");
+
+      // Auto download private key and home planet coordinates
+      const gameAccount = this.ethConnection.getAddress();
+
+      const privateKey = this.ethConnection.getPrivateKey();
+      const homePlanetCoords = this.homeLocation?.coords;
+
+      const txtContent = `Game Address:${gameAccount}\nPrivate Key: ${privateKey}\nHome Planet Coordinates: (${homePlanetCoords.x}, ${homePlanetCoords.y})`;
+      const element = document.createElement("a");
+      element.setAttribute(
+        "href",
+        "data:text/plain;charset=utf-8," + encodeURIComponent(txtContent),
+      );
+      element.setAttribute(
+        "download",
+        this.getMainAccount() + "privateKeyAndHomePlanetCoords.txt",
+      );
+      element.style.display = "none";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
 
       this.emit(GameManagerEvent.InitializedPlayer);
     } catch (e) {
