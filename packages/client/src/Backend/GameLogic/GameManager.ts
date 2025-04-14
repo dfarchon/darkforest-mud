@@ -3886,6 +3886,8 @@ export class GameManager extends EventEmitter {
             );
 
             const planet = this.getPlanetWithId(homePlanetLocation.hash);
+            console.log("possible home planet");
+            console.log(planet);
 
             if (
               spaceType === SpaceType.NEBULA && //only NEBULA
