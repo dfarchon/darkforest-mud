@@ -488,6 +488,19 @@ export class GameObjects {
   }
 
   /**
+   * This function is called when an artifact is missing from the contract.
+   * This is only caused by player's withdrawal of his artifact.
+   * In above case, we should set the artifact's onPlanetId to undefined.
+   */
+  public handleMissingArtifactOnChain(artifactId: ArtifactId): void {
+    const artifact = this.artifacts.get(artifactId);
+    if (artifact) {
+      artifact.onPlanetId = undefined;
+      this.setArtifact(artifact);
+    }
+  }
+
+  /**
    * received some artifact data from the contract. update our stores
    */
   public replaceArtifactFromContractData(artifact: Artifact): void {

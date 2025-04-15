@@ -343,12 +343,10 @@ export class ContractsAPI extends EventEmitter {
     this.artifactSubscription = this.components.Artifact.update$.subscribe(
       (update) => {
         const entity = update.entity;
-        const [nextValue] = update.value;
         const artifactId = artifactIdFromHexStr(entity.toString());
-
-        if (nextValue) {
-          this.emit(ContractsAPIEvent.ArtifactUpdate, artifactId);
-        }
+        // no matter the value exists or not, we emit the update event
+        // it includes the case where an artifact record is deleted from the contract
+        this.emit(ContractsAPIEvent.ArtifactUpdate, artifactId);
       },
     );
 
