@@ -54,13 +54,13 @@ contract BloomFilterInstallLibrary is BaseInstallLibrary {
       reqSilver: 0
     });
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.COMMON, metadata);
-    metadata.reqLevel = 0x0500; // 3 <= level < 5
+    metadata.reqLevel = 0x0503; // 3 <= level < 5
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.RARE, metadata);
-    metadata.reqLevel = 0x0700; // 5 <= level < 7
+    metadata.reqLevel = 0x0705; // 5 <= level < 7
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.EPIC, metadata);
-    metadata.reqLevel = 0x0900; // 7 <= level < 9
+    metadata.reqLevel = 0x0907; // 7 <= level < 9
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.LEGENDARY, metadata);
-    metadata.reqLevel = 0x0a00; // 9 <= level < 10
+    metadata.reqLevel = 0x0a09; // 9 <= level < 10
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.MYTHIC, metadata);
   }
 }
