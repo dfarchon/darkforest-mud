@@ -1198,6 +1198,7 @@ export class GameManager extends EventEmitter {
     const artifacts = this.contractsAPI.bulkGetArtifacts([artifactId]);
     const artifact = artifacts.get(artifactId);
     if (!artifact) {
+      this.entityStore.handleMissingArtifactOnChain(artifactId);
       return;
     }
     this.entityStore.replaceArtifactFromContractData(artifact);

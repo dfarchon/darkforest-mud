@@ -373,6 +373,13 @@ export class GameManagerFactory {
         gameManager.persistentChunkStore.onEthTxSubmit(tx);
         gameManager.onTxSubmit(tx);
       })
+      // Warning:
+      // Since we treat local mud table values as contract values and we rely on updates of
+      // tables to do core update logics, we should not listen on tx confirmations any more.
+      // Because there is a small delay between the tx confirmation and table updates from indexer.
+      // This delay causes some update triggered by tx confirmations use outdated table values.
+      // Of course, as long as we do update again when we receive table updates, there would
+      // be no big problem.
       .on(ContractsAPIEvent.TxConfirmed, async (tx: Transaction) => {
         if (!tx.hash) {
           return;
