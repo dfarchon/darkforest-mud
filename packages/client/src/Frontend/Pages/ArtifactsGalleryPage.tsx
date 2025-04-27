@@ -51,19 +51,20 @@ export function ArtifactsGallery() {
   }
   // Handle arrows left and right in modal
   const handlePrevArtifact = () => {
-    const currentIndex = artifacts.findIndex(
+    const currentIndex = filteredArtifacts.findIndex(
       (a) => a.id === selectedArtifact.id,
     );
-    const prevIndex = (currentIndex - 1 + artifacts.length) % artifacts.length;
-    setSelectedArtifact(artifacts[prevIndex]);
+    const prevIndex =
+      (currentIndex - 1 + filteredArtifacts.length) % filteredArtifacts.length;
+    setSelectedArtifact(filteredArtifacts[prevIndex]);
   };
 
   const handleNextArtifact = () => {
-    const currentIndex = artifacts.findIndex(
+    const currentIndex = filteredArtifacts.findIndex(
       (a) => a.id === selectedArtifact.id,
     );
-    const nextIndex = (currentIndex + 1) % artifacts.length;
-    setSelectedArtifact(artifacts[nextIndex]);
+    const nextIndex = (currentIndex + 1) % filteredArtifacts.length;
+    setSelectedArtifact(filteredArtifacts[nextIndex]);
   };
   // Read gallery contract per connected chain
   const DFARTAddress = getMarketplaceContract(chain?.id);
