@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { entityToAddress } from "./GamePage";
+import { MythicLabelText } from "@frontend/Components/Labels/MythicLabel";
 
 export function ArtifactsGallery() {
   const { isConnected, address, chain } = useAccount();
@@ -99,7 +100,7 @@ export function ArtifactsGallery() {
       Boolean,
     ),
   };
-  // Apply page filters about biomes , types , rarities
+  // Apply page filters from selected biomes , types , rarities
   const filteredArtifacts = artifacts.filter((a) => {
     return (
       (filters.biome ? a.biome === filters.biome : true) &&
@@ -117,17 +118,14 @@ export function ArtifactsGallery() {
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="flex-1 text-center text-3xl font-bold">
-          DF MUD Artifacts Gallery
+          <MythicLabelText
+            text={`DF MUD Artifacts Gallery`}
+            style={{
+              fontFamily: "'Start Press 2P', sans-serif",
+            }}
+          />
         </h1>
         <div className="ml-4 flex">
-          <MarketLink
-            href="https://opensea.io/collection/dfartifact"
-            imgSrc="https://opensea.io/static/images/logos/opensea-logo.svg"
-          />
-          <MarketLink
-            href="https://rarible.com/collection/base/0x14a11b17105cc70f154f84ede21e9b08dd832577/items"
-            imgSrc="../public/img/markets/rarible.png"
-          />
           <ConnectButton />
         </div>
       </div>
@@ -165,20 +163,31 @@ export function ArtifactsGallery() {
             <>
               <div className="col-span-full mb-4 grid grid-cols-3 items-center text-sm text-gray-400">
                 {/* Left spacer */}
-                <div></div>
-
-                {/* Center: Total Artifacts */}
-                <div className="text-center">
+                <div>
+                  {" "}
                   Total Artifacts: {filteredArtifacts.length} | Unique Holders:{" "}
                   {numberOfHolders}
                 </div>
 
-                {/* Right side: Filters */}
-                <div className="flex justify-end gap-4">
+                {/* Center: Total Artifacts */}
+                <div className="text-center">
                   <ArtifactFilters
                     filters={filters}
                     setFilters={setFilters}
                     options={options}
+                  />
+                </div>
+
+                {/* Right side: Filters */}
+                <div className="flex justify-end">
+                  {" "}
+                  <MarketLink
+                    href="https://opensea.io/collection/dfartifact"
+                    imgSrc="https://opensea.io/static/images/logos/opensea-logo.svg"
+                  />
+                  <MarketLink
+                    href="https://rarible.com/collection/base/0x14a11b17105cc70f154f84ede21e9b08dd832577/items"
+                    imgSrc="../public/img/markets/rarible.png"
                   />
                 </div>
               </div>

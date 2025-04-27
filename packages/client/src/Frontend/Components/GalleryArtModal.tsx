@@ -14,7 +14,7 @@ export function MarketLink({ href, imgSrc }: { href: string; imgSrc: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center rounded p-2 hover:bg-gray-800"
+      className="flex transform items-center justify-center rounded p-2 transition-transform duration-200 hover:scale-110 hover:text-gray-300"
     >
       <img src={imgSrc} alt="Market" className="h-5 w-5" />
     </a>
@@ -56,7 +56,7 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
           <h2 className="text-xl font-bold">{artifact.name}</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="transform text-gray-500 transition-transform duration-200 hover:scale-110 hover:text-gray-300 hover:text-gray-700"
           >
             &times;
           </button>
@@ -105,7 +105,7 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
         </div>
 
         <div className="text-4xl font-bold text-white">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 transform">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 transform transition-transform duration-200 hover:scale-110 hover:text-gray-300">
             <button
               onClick={onPrev}
               className="p-2 text-white hover:text-gray-300"
@@ -113,7 +113,7 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
               &#8592;
             </button>{" "}
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 transform">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 transform transition-transform duration-200 hover:scale-110 hover:text-gray-300">
             <button onClick={onNext} className="p-2 hover:text-gray-300">
               &#8594;
             </button>{" "}
