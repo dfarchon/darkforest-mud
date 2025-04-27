@@ -194,28 +194,6 @@ export function ArtifactsGallery() {
     }
   }
 
-  const options = {
-    biomes: Array.from(new Set(artifacts.map((a) => a.biome))).filter(Boolean),
-    types: Array.from(new Set(artifacts.map((a) => a.type))).filter(Boolean),
-    rarities: Array.from(new Set(artifacts.map((a) => a.rarity))).filter(
-      Boolean,
-    ),
-  };
-
-  const filteredArtifacts = artifacts.filter((a) => {
-    return (
-      (filters.biome ? a.biome === filters.biome : true) &&
-      (filters.type ? a.type === filters.type : true) &&
-      (filters.rarity ? a.rarity === filters.rarity : true)
-    );
-  });
-
-  const uniqueOwners = new Set(
-    filteredArtifacts.map((artifact) => artifact.owner.toLowerCase()),
-  );
-
-  const numberOfHolders = uniqueOwners.size;
-
   const ArtifactTypeNames = {
     [ArtifactType.Unknown]: "Unknown",
     [ArtifactType.Monolith]: "Monolith",
@@ -278,42 +256,42 @@ export function ArtifactsGallery() {
     return ArtifactRarity.Unknown; // not found
   }
 
-  const BiomeBackgroundColors = {
-    [Biome.UNKNOWN]: "#000000",
-    [Biome.OCEAN]: "#000e2d",
-    [Biome.FOREST]: "#06251d",
-    [Biome.GRASSLAND]: "#212617",
-    [Biome.TUNDRA]: "#260f17",
-    [Biome.SWAMP]: "#211b0e",
-    [Biome.DESERT]: "#302e0e",
-    [Biome.ICE]: "#0d212f",
-    [Biome.WASTELAND]: "#321b1b",
-    [Biome.LAVA]: "#321000",
-    [Biome.CORRUPTED]: "#15260D",
-  } as const;
+  // const BiomeBackgroundColors = {
+  //   [Biome.UNKNOWN]: "#000000",
+  //   [Biome.OCEAN]: "#000e2d",
+  //   [Biome.FOREST]: "#06251d",
+  //   [Biome.GRASSLAND]: "#212617",
+  //   [Biome.TUNDRA]: "#260f17",
+  //   [Biome.SWAMP]: "#211b0e",
+  //   [Biome.DESERT]: "#302e0e",
+  //   [Biome.ICE]: "#0d212f",
+  //   [Biome.WASTELAND]: "#321b1b",
+  //   [Biome.LAVA]: "#321000",
+  //   [Biome.CORRUPTED]: "#15260D",
+  // } as const;
 
-  const BiomeNames = {
-    [Biome.UNKNOWN]: "Unknown",
-    [Biome.OCEAN]: "OCEAN",
-    [Biome.FOREST]: "FOREST",
-    [Biome.GRASSLAND]: "GRASSLAND",
-    [Biome.TUNDRA]: "TUNDRA",
-    [Biome.SWAMP]: "SWAMP",
-    [Biome.DESERT]: "DESERT",
-    [Biome.ICE]: "ICE",
-    [Biome.WASTELAND]: "WASTELAND",
-    [Biome.LAVA]: "LAVA",
-    [Biome.CORRUPTED]: "CORRUPTED",
-  } as const;
+  // const BiomeNames = {
+  //   [Biome.UNKNOWN]: "Unknown",
+  //   [Biome.OCEAN]: "OCEAN",
+  //   [Biome.FOREST]: "FOREST",
+  //   [Biome.GRASSLAND]: "GRASSLAND",
+  //   [Biome.TUNDRA]: "TUNDRA",
+  //   [Biome.SWAMP]: "SWAMP",
+  //   [Biome.DESERT]: "DESERT",
+  //   [Biome.ICE]: "ICE",
+  //   [Biome.WASTELAND]: "WASTELAND",
+  //   [Biome.LAVA]: "LAVA",
+  //   [Biome.CORRUPTED]: "CORRUPTED",
+  // } as const;
 
-  function artifactBiomeFromName(name: string): Biome | undefined {
-    for (const [key, value] of Object.entries(BiomeNames)) {
-      if (value === name) {
-        return Number(key) as Biome;
-      }
-    }
-    return Biome.UNKNOWN; // not found
-  }
+  // function artifactBiomeFromName(name: string): Biome | undefined {
+  //   for (const [key, value] of Object.entries(BiomeNames)) {
+  //     if (value === name) {
+  //       return Number(key) as Biome;
+  //     }
+  //   }
+  //   return Biome.UNKNOWN; // not found
+  // }
 
   function getSpriteImageStyle(selectedArtifact) {
     const rarity = artifactRarityFromName(selectedArtifact.rarity);
@@ -331,7 +309,7 @@ export function ArtifactsGallery() {
 
     let boxShadow;
     if (rarity === ArtifactRarity.Mythic) {
-      boxShadow = "0 0 40px 10px #ff44b7"; // Mythic pink glow
+      boxShadow = `0 0 40px 10px ${RarityColors[ArtifactRarity.Mythic]}`; // Mythic pink glow
     } else if (rarity === ArtifactRarity.Legendary) {
       boxShadow = "0 0 20px 4px rgb(65, 40, 207)"; // Legendary gold glow inverted
     } else if (rarity === ArtifactRarity.Epic) {
@@ -349,40 +327,28 @@ export function ArtifactsGallery() {
       boxShadow, // dynamic glow here
     };
   }
-  // function getSpriteImageStyle(selectedArtifact) {
-  //   const rarity = artifactRarityFromName(selectedArtifact.rarity);
 
-  //   const totalDuration = 3; // seconds
-  //   const totalFrames = totalDuration * 60;
-  //   const now = performance.now() / 1000;
-  //   const nowFrame = Math.floor((now % totalDuration) * 60);
-  //   const shineValue = nowFrame / totalFrames; // [0,1]
+  const options = {
+    biomes: Array.from(new Set(artifacts.map((a) => a.biome))).filter(Boolean),
+    types: Array.from(new Set(artifacts.map((a) => a.type))).filter(Boolean),
+    rarities: Array.from(new Set(artifacts.map((a) => a.rarity))).filter(
+      Boolean,
+    ),
+  };
 
-  //   const brightness = rarity >= ArtifactRarity.Rare ? 1 + 1.5 * shineValue : 1;
-  //   const invert = rarity === ArtifactRarity.Legendary ? 1 : 0;
-  //   const mythic = rarity === ArtifactRarity.Mythic;
-
-  //   const baseFilter = `brightness(${brightness}) invert(${invert})`;
-  //   const baseFilter1 = `brightness(${brightness})`;
-
-  //   return {
-  //     objectFit: "contain",
-  //     // border: `2px solid ${RarityColors[rarity] || "#ffffff"}`,
-  //     borderRadius: "8px",
-  //     filter: baseFilter,
-  //     transition: "filter 0.1s linear", // smooth
-  //     boxShadow: mythic ? "0 0 12px 4px #ff44b7" : undefined, // glow for Mythics
-  //   };
-  // }
-
-  if (filteredArtifacts.length != 0) {
-    console.log(filteredArtifacts);
-    console.log(filteredArtifacts[0].rarity);
-    console.log(
-      BiomeBackgroundColors[artifactBiomeFromName(filteredArtifacts[0].biome)],
+  const filteredArtifacts = artifacts.filter((a) => {
+    return (
+      (filters.biome ? a.biome === filters.biome : true) &&
+      (filters.type ? a.type === filters.type : true) &&
+      (filters.rarity ? a.rarity === filters.rarity : true)
     );
-  }
+  });
 
+  const uniqueOwners = new Set(
+    filteredArtifacts.map((artifact) => artifact.owner.toLowerCase()),
+  );
+
+  const numberOfHolders = uniqueOwners.size;
   return (
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">
@@ -482,23 +448,6 @@ export function ArtifactsGallery() {
                           (e.currentTarget.src = "./icons/broadcast.svg")
                         }
                       />
-
-                      {/* <img
-                        src={`${ARTIFACT_URL}/${artifactTypeFromName(artifact.type)}.png`}
-                        alt={artifact.name}
-                        width={50}
-                        height={50}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
-                        style={{
-                          objectFit: "contain",
-                          // backgroundColor: ` ${BiomeBackgroundColors[artifactBiomeFromName(artifact.biome)]}`,
-                          border: `2px solid ${RarityColors[artifactRarityFromName(artifact.rarity)] || "#ffffff"}`,
-                          borderRadius: "8px",
-                        }}
-                        onError={(e) =>
-                          (e.currentTarget.src = "./icons/broadcast.svg")
-                        }
-                      /> */}
                     </div>
 
                     {/* TEXT OVER IMAGE */}
@@ -560,22 +509,7 @@ export function ArtifactsGallery() {
                 onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
               />
 
-              {/* Overlay small sprite */}
               {/* Overlay small sprite with color border */}
-              {/* <img
-                src={`${ARTIFACT_URL}/${artifactTypeFromName(selectedArtifact.type)}.png`}
-                alt={selectedArtifact.name}
-                width={128}
-                height={128}
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
-                style={{
-                  objectFit: "contain",
-                  backgroundColor: ` ${BiomeBackgroundColors[artifactBiomeFromName(selectedArtifact.biome)]}`,
-                  border: `2px solid ${RarityColors[artifactRarityFromName(selectedArtifact.rarity)] || "#ffffff"}`,
-                  borderRadius: "8px",
-                }}
-                onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
-              /> */}
               <img
                 src={`${ARTIFACT_URL}/${artifactTypeFromName(selectedArtifact.type)}.png`}
                 alt={selectedArtifact.name}
@@ -588,7 +522,7 @@ export function ArtifactsGallery() {
             </div>
 
             {/* Artifact Description */}
-            <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 text-center">
+            <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 translate-y-1/2 text-center">
               <p className="text-gray-700">{selectedArtifact.description}</p>
               <p className="text-sm text-gray-500">
                 Owner: {selectedArtifact.owner.slice(0, 6)}...
