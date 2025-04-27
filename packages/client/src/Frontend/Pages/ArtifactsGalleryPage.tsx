@@ -349,13 +349,43 @@ export function ArtifactsGallery() {
   );
 
   const numberOfHolders = uniqueOwners.size;
+
+  function hexToDecimal(hexString: string): number {
+    return parseInt(hexString, 16);
+  }
+
   return (
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="flex-1 text-center text-3xl font-bold">
           DF MUD Artifacts Gallery
         </h1>
-        <div className="ml-4">
+        <div className="ml-4 flex">
+          <a
+            href="https://opensea.io/collection/dfartifact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center rounded p-2 transition-colors hover:bg-gray-800"
+          >
+            <img
+              src="https://opensea.io/static/images/logos/opensea-logo.svg"
+              alt="OpenSea"
+              className="h-6 w-6"
+            />
+          </a>
+          <a
+            href="https://rarible.com/collection/base/0x14a11b17105cc70f154f84ede21e9b08dd832577/items"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center rounded p-2 transition-colors hover:bg-gray-800"
+          >
+            <img
+              src="../public/img/markets/rarible.png"
+              alt="OpenSea"
+              className="h-6 w-6"
+            />
+          </a>
+
           <ConnectButton />
         </div>
       </div>
@@ -368,7 +398,7 @@ export function ArtifactsGallery() {
         <TabsList className="mx-auto mb-6 grid w-1/3 grid-cols-3 gap-2 text-center">
           <TabsTrigger
             value="owned"
-            className="border-muted border-green border-2 data-[state=active]:bg-black"
+            className="border-muted border-2 border-[#808080] data-[state=active]:bg-black"
           >
             Owned
           </TabsTrigger>
@@ -380,7 +410,7 @@ export function ArtifactsGallery() {
           </TabsTrigger> */}
           <TabsTrigger
             value="all"
-            className="border-muted border-green border-2 data-[state=active]:bg-black"
+            className="border-muted border-2 border-[#808080] data-[state=active]:bg-black"
           >
             All
           </TabsTrigger>
@@ -419,13 +449,15 @@ export function ArtifactsGallery() {
                 <Card
                   key={artifact.id}
                   className="flex transform cursor-pointer flex-col items-center justify-between rounded transition-transform duration-300 hover:scale-110"
-                  onClick={() => {
-                    setSelectedArtifact(artifact);
-                    setIsModalOpen(true);
-                  }}
                 >
                   <CardContent className="flex flex-col items-center rounded">
-                    <div className="relative h-full w-full">
+                    <div
+                      className="relative h-full w-full"
+                      onClick={() => {
+                        setSelectedArtifact(artifact);
+                        setIsModalOpen(true);
+                      }}
+                    >
                       {/* Main background artifact image */}
                       <img
                         src={artifact.image}
@@ -451,7 +483,7 @@ export function ArtifactsGallery() {
                     </div>
 
                     {/* TEXT OVER IMAGE */}
-                    <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 text-center">
+                    <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 translate-y-1/4 text-center">
                       <h2 className="text-sm font-bold text-white drop-shadow-md">
                         {artifact.name.slice(10)}
                       </h2>
@@ -459,6 +491,7 @@ export function ArtifactsGallery() {
                         Owner: {artifact.owner.slice(0, 6)}...
                         {artifact.owner.slice(-4)}
                       </p>
+
                       {/* <div>
                         {tab === "all" && isConnected && (
                           <DF-Button
@@ -476,6 +509,32 @@ export function ArtifactsGallery() {
                           </p>
                         )}
                       </div> */}
+                      <div className="flex items-center justify-center text-center">
+                        <a
+                          href={`https://opensea.io/item/base/0x14a11b17105cc70f154f84ede21e9b08dd832577/${hexToDecimal(artifact.name.slice(10))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center rounded p-2 transition-colors hover:bg-gray-800"
+                        >
+                          <img
+                            src="https://opensea.io/static/images/logos/opensea-logo.svg"
+                            alt="OpenSea"
+                            className="h-5 w-5"
+                          />
+                        </a>
+                        <a
+                          href={`https://rarible.com/token/base/0x14a11b17105cc70f154f84ede21e9b08dd832577:${hexToDecimal(artifact.name.slice(10))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center rounded p-2 transition-colors hover:bg-gray-800"
+                        >
+                          <img
+                            src="../public/img/markets/rarible.png"
+                            alt="OpenSea"
+                            className="h-5 w-5"
+                          />
+                        </a>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -528,6 +587,33 @@ export function ArtifactsGallery() {
                 Owner: {selectedArtifact.owner.slice(0, 6)}...
                 {selectedArtifact.owner.slice(-4)}
               </p>
+            </div>
+
+            <div className="flex items-center justify-center text-center">
+              <a
+                href={`https://opensea.io/item/base/0x14a11b17105cc70f154f84ede21e9b08dd832577/${hexToDecimal(selectedArtifact.name.slice(10))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center rounded p-2 transition-colors hover:bg-gray-800"
+              >
+                <img
+                  src="https://opensea.io/static/images/logos/opensea-logo.svg"
+                  alt="OpenSea"
+                  className="h-5 w-5"
+                />
+              </a>
+              <a
+                href={`https://rarible.com/token/base/0x14a11b17105cc70f154f84ede21e9b08dd832577:${hexToDecimal(selectedArtifact.name.slice(10))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center rounded p-2 transition-colors hover:bg-gray-800"
+              >
+                <img
+                  src="../public/img/markets/rarible.png"
+                  alt="OpenSea"
+                  className="h-5 w-5"
+                />
+              </a>
             </div>
             {/* Navigation Arrows */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 transform">
