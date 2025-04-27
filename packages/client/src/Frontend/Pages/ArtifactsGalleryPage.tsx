@@ -25,9 +25,15 @@ import { ArtifactRarity, ArtifactType, Biome } from "@df/types";
 import { entityToAddress } from "./GamePage";
 import { ArtifactFilters } from "@frontend/Components/filters/ArtifactFilters";
 import { SpriteRenderer, WebGLManager } from "@df/renderer";
-import { ArtifactCanvas } from "@frontend/Components/ui/ArtifactCanvas";
-export default function ArtifactMarketplace() {
+
+import dfstyles from "@frontend/Styles/dfstyles";
+import styled, { css } from "styled-components";
+
+import { MythicLabelText } from "../Components/Labels/MythicLabel";
+
+export function ArtifactsGallery() {
   const { isConnected, address, chain } = useAccount();
+  const ARTIFACT_URL = "/df_ares_artifact_icons/";
 
   const {
     network: {
@@ -209,12 +215,179 @@ export default function ArtifactMarketplace() {
   );
 
   const numberOfHolders = uniqueOwners.size;
-  console.log(filteredArtifacts);
+
+  const ArtifactTypeNames = {
+    [ArtifactType.Unknown]: "Unknown",
+    [ArtifactType.Monolith]: "Monolith",
+    [ArtifactType.Colossus]: "Colossus",
+    [ArtifactType.Spaceship]: "Spaceship",
+    [ArtifactType.Pyramid]: "Pyramid",
+    [ArtifactType.Wormhole]: "Wormhole",
+    [ArtifactType.PlanetaryShield]: "Planetary Shield",
+    [ArtifactType.BlackDomain]: "Black Domain",
+    [ArtifactType.PhotoidCannon]: "Photoid Cannon",
+    [ArtifactType.BloomFilter]: "Bloom Filter",
+    [ArtifactType.IceLink]: "Ice Link",
+    [ArtifactType.FireLink]: "Fire Link",
+    [ArtifactType.Kardashev]: "Kardashev",
+    [ArtifactType.Bomb]: "Pink Bomb",
+    [ArtifactType.StellarShield]: "Stellar Shield",
+    [ArtifactType.BlindBox]: "Blind Box",
+    [ArtifactType.Avatar]: "Avatar",
+    [ArtifactType.ShipMothership]: "Mothership",
+    [ArtifactType.ShipCrescent]: "Crescent",
+    [ArtifactType.ShipWhale]: "Whale",
+    [ArtifactType.ShipGear]: "Gear",
+    [ArtifactType.ShipTitan]: "Titan",
+    [ArtifactType.ShipPink]: "Pinkship",
+  } as const;
+
+  const RarityColors = {
+    [ArtifactRarity.Unknown]: "#000000",
+    [ArtifactRarity.Common]: dfstyles.colors.subtext,
+    [ArtifactRarity.Rare]: "#6b68ff",
+    [ArtifactRarity.Epic]: "#c13cff",
+    [ArtifactRarity.Legendary]: "#f8b73e",
+    [ArtifactRarity.Mythic]: "#ff44b7",
+  } as const;
+
+  function artifactTypeFromName(name: string): ArtifactType | undefined {
+    for (const [key, value] of Object.entries(ArtifactTypeNames)) {
+      if (value === name) {
+        return Number(key) as ArtifactType;
+      }
+    }
+    return undefined; // not found
+  }
+  //ArtifactRarityNames
+  const ArtifactRarityNames = {
+    [ArtifactRarity.Unknown]: "Unknown",
+    [ArtifactRarity.Common]: "COMMON",
+    [ArtifactRarity.Rare]: "RARE",
+    [ArtifactRarity.Epic]: "EPIC",
+    [ArtifactRarity.Legendary]: "LEGENDARY",
+    [ArtifactRarity.Mythic]: "MYTHIC",
+  } as const;
+
+  function artifactRarityFromName(name: string): ArtifactRarity | undefined {
+    for (const [key, value] of Object.entries(ArtifactRarityNames)) {
+      if (value === name) {
+        return Number(key) as ArtifactRarity;
+      }
+    }
+    return ArtifactRarity.Unknown; // not found
+  }
+
+  const BiomeBackgroundColors = {
+    [Biome.UNKNOWN]: "#000000",
+    [Biome.OCEAN]: "#000e2d",
+    [Biome.FOREST]: "#06251d",
+    [Biome.GRASSLAND]: "#212617",
+    [Biome.TUNDRA]: "#260f17",
+    [Biome.SWAMP]: "#211b0e",
+    [Biome.DESERT]: "#302e0e",
+    [Biome.ICE]: "#0d212f",
+    [Biome.WASTELAND]: "#321b1b",
+    [Biome.LAVA]: "#321000",
+    [Biome.CORRUPTED]: "#15260D",
+  } as const;
+
+  const BiomeNames = {
+    [Biome.UNKNOWN]: "Unknown",
+    [Biome.OCEAN]: "OCEAN",
+    [Biome.FOREST]: "FOREST",
+    [Biome.GRASSLAND]: "GRASSLAND",
+    [Biome.TUNDRA]: "TUNDRA",
+    [Biome.SWAMP]: "SWAMP",
+    [Biome.DESERT]: "DESERT",
+    [Biome.ICE]: "ICE",
+    [Biome.WASTELAND]: "WASTELAND",
+    [Biome.LAVA]: "LAVA",
+    [Biome.CORRUPTED]: "CORRUPTED",
+  } as const;
+
+  function artifactBiomeFromName(name: string): Biome | undefined {
+    for (const [key, value] of Object.entries(BiomeNames)) {
+      if (value === name) {
+        return Number(key) as Biome;
+      }
+    }
+    return Biome.UNKNOWN; // not found
+  }
+
+  function getSpriteImageStyle(selectedArtifact) {
+    const rarity = artifactRarityFromName(selectedArtifact.rarity);
+
+    const totalDuration = 3; // seconds
+    const totalFrames = totalDuration * 60;
+    const now = performance.now() / 1000;
+    const nowFrame = Math.floor((now % totalDuration) * 60);
+    const shineValue = nowFrame / totalFrames; // [0,1]
+
+    const brightness = rarity >= ArtifactRarity.Rare ? 1 + 1.5 * shineValue : 1;
+    const invert = rarity === ArtifactRarity.Legendary ? 1 : 0;
+
+    const baseFilter = `brightness(${brightness}) invert(${invert})`;
+
+    let boxShadow;
+    if (rarity === ArtifactRarity.Mythic) {
+      boxShadow = "0 0 40px 10px #ff44b7"; // Mythic pink glow
+    } else if (rarity === ArtifactRarity.Legendary) {
+      boxShadow = "0 0 20px 4px rgb(65, 40, 207)"; // Legendary gold glow inverted
+    } else if (rarity === ArtifactRarity.Epic) {
+      boxShadow = "0 0 20px 4px rgb(104, 13, 209)"; // Epic violet glow
+    } else if (rarity === ArtifactRarity.Rare) {
+      boxShadow = "0 0 20px 4px rgb(65, 40, 207)"; // Rare Blue glow
+    } else {
+      boxShadow = undefined;
+    }
+
+    return {
+      objectFit: "contain",
+      filter: baseFilter,
+      transition: "filter 0.1s linear",
+      boxShadow, // dynamic glow here
+    };
+  }
+  // function getSpriteImageStyle(selectedArtifact) {
+  //   const rarity = artifactRarityFromName(selectedArtifact.rarity);
+
+  //   const totalDuration = 3; // seconds
+  //   const totalFrames = totalDuration * 60;
+  //   const now = performance.now() / 1000;
+  //   const nowFrame = Math.floor((now % totalDuration) * 60);
+  //   const shineValue = nowFrame / totalFrames; // [0,1]
+
+  //   const brightness = rarity >= ArtifactRarity.Rare ? 1 + 1.5 * shineValue : 1;
+  //   const invert = rarity === ArtifactRarity.Legendary ? 1 : 0;
+  //   const mythic = rarity === ArtifactRarity.Mythic;
+
+  //   const baseFilter = `brightness(${brightness}) invert(${invert})`;
+  //   const baseFilter1 = `brightness(${brightness})`;
+
+  //   return {
+  //     objectFit: "contain",
+  //     // border: `2px solid ${RarityColors[rarity] || "#ffffff"}`,
+  //     borderRadius: "8px",
+  //     filter: baseFilter,
+  //     transition: "filter 0.1s linear", // smooth
+  //     boxShadow: mythic ? "0 0 12px 4px #ff44b7" : undefined, // glow for Mythics
+  //   };
+  // }
+
+  if (filteredArtifacts.length != 0) {
+    console.log(filteredArtifacts);
+    console.log(filteredArtifacts[0].rarity);
+    console.log(
+      BiomeBackgroundColors[artifactBiomeFromName(filteredArtifacts[0].biome)],
+    );
+  }
+
   return (
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="flex-1 text-center text-3xl font-bold">
-          DF MUD Artifact Marketplace
+          DF MUD Artifacts Gallery
         </h1>
         <div className="ml-4">
           <ConnectButton />
@@ -229,19 +402,19 @@ export default function ArtifactMarketplace() {
         <TabsList className="mx-auto mb-6 grid w-1/3 grid-cols-3 gap-2 text-center">
           <TabsTrigger
             value="owned"
-            className="border-muted border-2 border-black data-[state=active]:bg-black"
+            className="border-muted border-green border-2 data-[state=active]:bg-black"
           >
             Owned
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="onSale"
             className="border-muted border-2 border-black data-[state=active]:bg-black"
           >
             OnSale
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger
             value="all"
-            className="border-muted border-2 border-black data-[state=active]:bg-black"
+            className="border-muted border-green border-2 data-[state=active]:bg-black"
           >
             All
           </TabsTrigger>
@@ -286,22 +459,50 @@ export default function ArtifactMarketplace() {
                   }}
                 >
                   <CardContent className="flex flex-col items-center rounded">
-                    <img
-                      src={artifact.image}
-                      alt={artifact.name}
-                      className="h-full w-full rounded object-contain shadow-md"
-                      onError={(e) =>
-                        (e.currentTarget.src = "./icons/broadcast.svg")
-                      }
-                    />
+                    <div className="relative h-full w-full">
+                      {/* Main background artifact image */}
+                      <img
+                        src={artifact.image}
+                        alt={artifact.name}
+                        className="h-full w-full rounded object-contain shadow-md"
+                        onError={(e) =>
+                          (e.currentTarget.src = "./icons/broadcast.svg")
+                        }
+                      />
 
-                    {/* <ArtifactCanvas
-                      type={artifact.type}
-                      biome={artifact.biome}
-                      rarity={artifact.rarity}
-                    /> */}
+                      {/* Overlay small sprite with color border */}
+                      <img
+                        src={`${ARTIFACT_URL}/${artifactTypeFromName(artifact.type)}.png`}
+                        alt={artifact.name}
+                        width={50}
+                        height={50}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+                        style={getSpriteImageStyle(artifact)}
+                        onError={(e) =>
+                          (e.currentTarget.src = "./icons/broadcast.svg")
+                        }
+                      />
+
+                      {/* <img
+                        src={`${ARTIFACT_URL}/${artifactTypeFromName(artifact.type)}.png`}
+                        alt={artifact.name}
+                        width={50}
+                        height={50}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+                        style={{
+                          objectFit: "contain",
+                          // backgroundColor: ` ${BiomeBackgroundColors[artifactBiomeFromName(artifact.biome)]}`,
+                          border: `2px solid ${RarityColors[artifactRarityFromName(artifact.rarity)] || "#ffffff"}`,
+                          borderRadius: "8px",
+                        }}
+                        onError={(e) =>
+                          (e.currentTarget.src = "./icons/broadcast.svg")
+                        }
+                      /> */}
+                    </div>
+
                     {/* TEXT OVER IMAGE */}
-                    <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 text-center">
+                    <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 text-center">
                       <h2 className="text-sm font-bold text-white drop-shadow-md">
                         {artifact.name.slice(10)}
                       </h2>
@@ -350,20 +551,50 @@ export default function ArtifactMarketplace() {
             </div>
 
             {/* Artifact Image */}
-            <img
-              src={selectedArtifact.image}
-              alt={selectedArtifact.name}
-              className="h-64 w-full rounded object-contain"
-              onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
-            />
+            <div className="relative h-full w-full">
+              {/* Main background artifact image */}
+              <img
+                src={selectedArtifact.image}
+                alt={selectedArtifact.name}
+                className="h-full w-full rounded object-contain shadow-md"
+                onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
+              />
+
+              {/* Overlay small sprite */}
+              {/* Overlay small sprite with color border */}
+              {/* <img
+                src={`${ARTIFACT_URL}/${artifactTypeFromName(selectedArtifact.type)}.png`}
+                alt={selectedArtifact.name}
+                width={128}
+                height={128}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+                style={{
+                  objectFit: "contain",
+                  backgroundColor: ` ${BiomeBackgroundColors[artifactBiomeFromName(selectedArtifact.biome)]}`,
+                  border: `2px solid ${RarityColors[artifactRarityFromName(selectedArtifact.rarity)] || "#ffffff"}`,
+                  borderRadius: "8px",
+                }}
+                onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
+              /> */}
+              <img
+                src={`${ARTIFACT_URL}/${artifactTypeFromName(selectedArtifact.type)}.png`}
+                alt={selectedArtifact.name}
+                width={128}
+                height={128}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+                style={getSpriteImageStyle(selectedArtifact)}
+                onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
+              />
+            </div>
 
             {/* Artifact Description */}
-            <p className="text-gray-700">{selectedArtifact.description}</p>
-            <p className="text-sm text-gray-500">
-              Owner: {selectedArtifact.owner.slice(0, 6)}...
-              {selectedArtifact.owner.slice(-4)}
-            </p>
-
+            <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 text-center">
+              <p className="text-gray-700">{selectedArtifact.description}</p>
+              <p className="text-sm text-gray-500">
+                Owner: {selectedArtifact.owner.slice(0, 6)}...
+                {selectedArtifact.owner.slice(-4)}
+              </p>
+            </div>
             {/* Navigation Arrows */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 transform">
               <button
