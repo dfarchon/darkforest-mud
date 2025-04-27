@@ -1,10 +1,10 @@
-export async function fetchArtifacts(marketplaceAddress: string) {
+export async function fetchArtifacts(DFARTAddress: string) {
   try {
     let allArtifacts = [];
     let nextParams = "";
 
     do {
-      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${marketplaceAddress}/instances${nextParams ? "?" + nextParams : ""}`;
+      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${DFARTAddress}/instances${nextParams ? "?" + nextParams : ""}`;
 
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error("Base API fetch failed");
@@ -42,17 +42,14 @@ export async function fetchArtifacts(marketplaceAddress: string) {
     return [];
   }
 }
-
-export async function fetchOwnedArtifacts(
-  marketplaceAddress: string,
-  owner: string,
-) {
+// Helper API function to read specific address tokens
+export async function fetchOwnedArtifacts(DFARTAddress: string, owner: string) {
   try {
     let artifacts = [];
     let nextParams = `holder_address_hash=${owner}`;
 
     while (nextParams) {
-      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${marketplaceAddress}/instances?${nextParams}`;
+      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${DFARTAddress}/instances?${nextParams}`;
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error("Blockscout API fetch failed");
 
@@ -80,29 +77,4 @@ export async function fetchOwnedArtifacts(
     console.error("Failed to fetch owned artifacts completely:", error);
     return [];
   }
-}
-
-export async function fetchOnSaleArtifacts(marketplaceAddress: string) {
-  //   const data = await publicClient.readContract({
-  //     address: marketplaceAddress,
-  //     abi: ABI,
-  //     functionName: "getOnSaleArtifacts",
-  //   });
-  //   return data;
-}
-
-export async function buyArtifact(
-  marketplaceAddress: string,
-  artifactId: number,
-) {
-  //   const tx = await walletClient.writeContract({
-  //     address: marketplaceAddress,
-  //     abi: ABI,
-  //     functionName: "buyArtifact",
-  //     args: [artifactId],
-  //     value: BigInt(0), // or artifact price if needed
-  //   });
-  //   return tx;
-
-  return;
 }
