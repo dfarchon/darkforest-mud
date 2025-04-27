@@ -101,10 +101,10 @@ export function getSpriteImageStyle(selectedArtifact) {
     baseFilter = `brightness(1) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Epic) {
     boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Epic]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Epic]}`; // Epic violet glow RarityColors rgb(104, 13, 209)
-    baseFilter = `brightness(1) invert(${invert})`;
+    baseFilter = `brightness(1.5) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Rare) {
     boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Rare]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Rare]}`; // Rare Blue glow
-    baseFilter = `brightness(0.9) invert(${invert})`;
+    baseFilter = `brightness(1) invert(${invert})`;
   } else {
     boxShadow = undefined;
   }
