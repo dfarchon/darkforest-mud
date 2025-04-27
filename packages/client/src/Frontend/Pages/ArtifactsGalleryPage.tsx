@@ -4,6 +4,7 @@ import {
   MarketLink,
 } from "@frontend/Components/GalleryArtModal";
 import { GalleryCardModal } from "@frontend/Components/GalleryCardModal";
+import { MythicLabelText } from "@frontend/Components/Labels/MythicLabel";
 import {
   Tabs,
   TabsContent,
@@ -22,7 +23,6 @@ import { useEffect, useRef, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { entityToAddress } from "./GamePage";
-import { MythicLabelText } from "@frontend/Components/Labels/MythicLabel";
 
 export function ArtifactsGallery() {
   const { isConnected, address, chain } = useAccount();
