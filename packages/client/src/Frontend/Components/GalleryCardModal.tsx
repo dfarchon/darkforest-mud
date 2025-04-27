@@ -37,7 +37,7 @@ export function GalleryCardModal({
             alt={artifact.name}
             width={50}
             height={50}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded transition-transform duration-500 hover:scale-110"
             style={getSpriteImageStyle(artifact)}
             onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
           />
