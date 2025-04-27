@@ -81,26 +81,31 @@ function decodeSVGBase64(base64String: string) {
 export function getSpriteImageStyle(selectedArtifact) {
   const rarity = artifactRarityFromName(selectedArtifact.rarity);
 
-  const totalDuration = 3; // seconds
-  const totalFrames = totalDuration * 60;
-  const now = performance.now() / 1000;
-  const nowFrame = Math.floor((now % totalDuration) * 60);
-  const shineValue = nowFrame / totalFrames; // [0,1]
+  // const totalDuration = 3; // seconds
+  // const totalFrames = totalDuration * 60;
+  // const now = performance.now() / 1000;
+  // const nowFrame = Math.floor((now % totalDuration) * 60);
+  // const shineValue = nowFrame / totalFrames; // [0,1]
 
-  const brightness = rarity >= ArtifactRarity.Rare ? 1 + 1.5 * shineValue : 1;
+  // const brightness = rarity >= ArtifactRarity.Rare ? 1 + 1.5 * shineValue : 1;
   const invert = rarity === ArtifactRarity.Legendary ? 1 : 0;
-
-  const baseFilter = `brightness(${brightness}) invert(${invert})`;
+  //brightness(${brightness})
+  let baseFilter = `brightness(1) invert(${invert})`;
 
   let boxShadow;
   if (rarity === ArtifactRarity.Mythic) {
-    boxShadow = `0 0 40px 10px ${RarityColors[ArtifactRarity.Mythic]}`; // Mythic pink glow
+    boxShadow = `0 0 30px 15px rgb(238, 40, 211), inset 0 0 20px 10px  rgb(238, 40, 211)`; // Mythic pink glow ${RarityColors[ArtifactRarity.Mythic]}
+    baseFilter = `brightness(4) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Legendary) {
-    boxShadow = "0 0 20px 4px rgb(65, 40, 207)"; // Legendary gold glow inverted
+    boxShadow =
+      "0 0 20px 10px rgb(65, 40, 207), inset 0 0 20px 10px  rgb(65, 40, 207)"; // Legendary gold glow inverted
+    baseFilter = `brightness(1) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Epic) {
-    boxShadow = "0 0 20px 4px rgb(104, 13, 209)"; // Epic violet glow
+    boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Epic]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Epic]}`; // Epic violet glow RarityColors rgb(104, 13, 209)
+    baseFilter = `brightness(1.5) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Rare) {
-    boxShadow = "0 0 20px 4px rgb(65, 40, 207)"; // Rare Blue glow
+    boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Rare]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Rare]}`; // Rare Blue glow
+    baseFilter = `brightness(1) invert(${invert})`;
   } else {
     boxShadow = undefined;
   }
