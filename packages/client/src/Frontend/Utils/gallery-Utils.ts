@@ -95,17 +95,16 @@ export function getSpriteImageStyle(selectedArtifact) {
   let boxShadow;
   if (rarity === ArtifactRarity.Mythic) {
     boxShadow = `0 0 30px 15px rgb(238, 40, 211), inset 0 0 20px 10px  rgb(238, 40, 211)`; // Mythic pink glow ${RarityColors[ArtifactRarity.Mythic]}
-    baseFilter = `brightness(4) invert(${invert})`;
+    baseFilter = `brightness(3) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Legendary) {
-    boxShadow =
-      "0 0 20px 10px rgb(65, 40, 207), inset 0 0 20px 10px  rgb(65, 40, 207)"; // Legendary gold glow inverted
+    boxShadow = `0 0 30px 15px ${RarityColors[ArtifactRarity.Rare]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Rare]}`; // Legendary gold glow inverted
     baseFilter = `brightness(1) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Epic) {
     boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Epic]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Epic]}`; // Epic violet glow RarityColors rgb(104, 13, 209)
-    baseFilter = `brightness(1.5) invert(${invert})`;
+    baseFilter = `brightness(1) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Rare) {
     boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Rare]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Rare]}`; // Rare Blue glow
-    baseFilter = `brightness(1) invert(${invert})`;
+    baseFilter = `brightness(0.9) invert(${invert})`;
   } else {
     boxShadow = undefined;
   }

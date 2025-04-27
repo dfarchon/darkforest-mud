@@ -27,7 +27,7 @@ export function GalleryCardModal({
           <img
             src={artifact.image}
             alt={artifact.name}
-            className="h-full w-full rounded object-contain shadow-md"
+            className="h-full w-full rounded object-contain"
             onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
           />
 
