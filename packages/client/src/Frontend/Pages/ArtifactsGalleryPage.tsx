@@ -485,7 +485,7 @@ export function ArtifactsGallery() {
                     {/* TEXT OVER IMAGE */}
                     <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 translate-y-1/4 text-center">
                       <h2 className="text-sm font-bold text-white drop-shadow-md">
-                        {artifact.name.slice(10)}
+                        {hexToDecimal(artifact.name.slice(10))}
                       </h2>
                       <p className="text-xs text-gray-400">
                         Owner: {artifact.owner.slice(0, 6)}...
@@ -582,6 +582,9 @@ export function ArtifactsGallery() {
 
             {/* Artifact Description */}
             <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 translate-y-1/2 text-center">
+              <h2 className="text-sm font-bold text-white drop-shadow-md">
+                {hexToDecimal(selectedArtifact.name.slice(10))}
+              </h2>
               <p className="text-gray-700">{selectedArtifact.description}</p>
               <p className="text-sm text-gray-500">
                 Owner: {selectedArtifact.owner.slice(0, 6)}...
