@@ -167,6 +167,7 @@ export function artifactRarityFromName(
   }
   return ArtifactRarity.Unknown; // not found
 }
+
 // preparation for Biome not included yet
 // const BiomeBackgroundColors = {
 //   [Biome.UNKNOWN]: "#000000",
@@ -204,5 +205,3 @@ export function artifactRarityFromName(
 //   }
 //   return Biome.UNKNOWN; // not found
 // }
-
-// Filter options list feed

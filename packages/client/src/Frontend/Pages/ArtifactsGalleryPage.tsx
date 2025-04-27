@@ -53,7 +53,7 @@ export function ArtifactsGallery() {
     console.error("No burner wallet address available");
     return;
   }
-
+  // Handle arrows left and right in modal
   const handlePrevArtifact = () => {
     const currentIndex = artifacts.findIndex(
       (a) => a.id === selectedArtifact.id,
@@ -69,9 +69,9 @@ export function ArtifactsGallery() {
     const nextIndex = (currentIndex + 1) % artifacts.length;
     setSelectedArtifact(artifacts[nextIndex]);
   };
-
+  // Read gallery contract per connected chain
   const DFARTAddress = getMarketplaceContract(chain?.id);
-
+  //  Use effect for opened modal keyboard control
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isModalOpen) return;
@@ -87,12 +87,12 @@ export function ArtifactsGallery() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isModalOpen, selectedArtifact, artifacts]);
-
+  // Default load artifacts call
   useEffect(() => {
     if (!DFARTAddress) return;
     loadArtifacts();
   }, [tab, DFARTAddress, walletClient]);
-
+  // main function to set page state about artifacts owned or all
   async function loadArtifacts() {
     if (tab === "all") {
       setArtifacts([]);
@@ -111,7 +111,7 @@ export function ArtifactsGallery() {
       }
     }
   }
-
+  // Filters - prepare options list from all possible text content from contract
   const options = {
     biomes: Array.from(new Set(artifacts.map((a) => a.biome))).filter(Boolean),
     types: Array.from(new Set(artifacts.map((a) => a.type))).filter(Boolean),
@@ -119,7 +119,7 @@ export function ArtifactsGallery() {
       Boolean,
     ),
   };
-
+  // Apply page filters about biomes , types , rarities
   const filteredArtifacts = artifacts.filter((a) => {
     return (
       (filters.biome ? a.biome === filters.biome : true) &&
@@ -127,11 +127,12 @@ export function ArtifactsGallery() {
       (filters.rarity ? a.rarity === filters.rarity : true)
     );
   });
-
+  // count unique Owners for filtred artifacts
   const uniqueOwners = new Set(
     filteredArtifacts.map((artifact) => artifact.owner.toLowerCase()),
   );
-
+  const numberOfHolders = uniqueOwners.size;
+  // Helper function to create market links
   function MarketLink({ href, imgSrc }: { href: string; imgSrc: string }) {
     return (
       <a
@@ -144,8 +145,6 @@ export function ArtifactsGallery() {
       </a>
     );
   }
-
-  const numberOfHolders = uniqueOwners.size;
 
   return (
     <div className="p-1">
