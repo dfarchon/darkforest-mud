@@ -1,24 +1,49 @@
+import type { Artifact } from "@df/types";
+import { ArtifactRarity, ArtifactType, Biome } from "@df/types";
 import { Card, CardContent } from "@frontend/Components/ui/card";
 import {
+  artifactBiomeFromName,
+  artifactRarityFromName,
   artifactTypeFromName,
-  getSpriteImageStyle,
   hexToDecimal,
 } from "@frontend/Utils/gallery-Utils";
 
+import { ArtifactImageMarket } from "./ArtifactImageMarket";
 import { MarketLink } from "./GalleryArtModal";
 
-const ARTIFACT_URL = "/df_ares_artifact_icons/";
+export function parseFormattedArtifact(artifact: {
+  type: string;
+  rarity: string;
+  biome: string;
+  id: string;
+  [key: string]: unknown;
+}) {
+  return {
+    ...artifact,
+    artifactType:
+      (artifactTypeFromName(artifact.type) as ArtifactType) ??
+      ArtifactType.Unknown,
+    artifactRarity: artifact.rarity,
+    rarity:
+      (artifactRarityFromName(artifact.rarity) as ArtifactRarity) ??
+      ArtifactRarity.Unknown,
+    planetBiome:
+      (artifactBiomeFromName(artifact.biome) as Biome) ?? Biome.UNKNOWN,
+  };
+}
 
 export function GalleryCardModal({
   artifact,
   onClick,
 }: {
-  artifact: never;
+  artifact: Artifact;
   onClick: () => void;
 }) {
+  const DFArtifactFormat = parseFormattedArtifact(artifact);
+
   return (
     <Card
-      className="flex transform cursor-pointer flex-col items-center justify-between rounded transition-transform duration-300 hover:scale-110"
+      className="flex transform cursor-pointer flex-col items-center justify-between rounded transition-transform duration-300 hover:z-10 hover:scale-110"
       onClick={onClick}
     >
       <CardContent className="flex flex-col items-center rounded">
@@ -31,16 +56,12 @@ export function GalleryCardModal({
             onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
           />
 
-          {/* Overlay small sprite with color border */}
-          <img
-            src={`${ARTIFACT_URL}/${artifactTypeFromName(artifact.type)}.png`}
-            alt={artifact.name}
-            width={50}
-            height={50}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded transition-transform duration-500 hover:scale-110"
-            style={getSpriteImageStyle(artifact)}
-            onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
-          />
+          <div className="absolute left-1/2 top-1/2 scale-150 rounded">
+            <ArtifactImageMarket
+              artifact={DFArtifactFormat as unknown as Artifact}
+              size={128}
+            />
+          </div>
         </div>
 
         {/* TEXT OVER IMAGE */}

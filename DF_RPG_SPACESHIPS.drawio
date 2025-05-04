@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e" scale="1" border="0" disableSvgWarning="true">
     <diagram id="5irtiVY76B5kkcP0oITd" name="Base DF MUD V3">
-        <mxGraphModel dx="2404" dy="1651" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#1A1A1A" math="1" shadow="0">
+        <mxGraphModel dx="2647" dy="1636" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#1A1A1A" math="1" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -82,22 +82,22 @@
                 <mxCell id="35" value="#2 Speed" style="hexagon;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" parent="31" vertex="1">
                     <mxGeometry x="9" y="90" width="162" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="8byimN1MKcKNS9rw0Z8--65" value="Marketplace page" style="group;rounded=1;spacingTop=-20;fontColor=light-dark(#ffffff, #ededed);strokeWidth=5;fontSize=19;" vertex="1" parent="31">
+                <mxCell id="8byimN1MKcKNS9rw0Z8--65" value="Marketplace page" style="group;rounded=1;spacingTop=-20;fontColor=light-dark(#ffffff, #ededed);strokeWidth=5;fontSize=19;" parent="31" vertex="1">
                     <mxGeometry y="320" width="180" height="200" as="geometry"/>
                 </mxCell>
-                <mxCell id="8byimN1MKcKNS9rw0Z8--66" value="use same connection wallet kit" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" vertex="1" parent="8byimN1MKcKNS9rw0Z8--65">
+                <mxCell id="8byimN1MKcKNS9rw0Z8--66" value="use same connection wallet kit" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" parent="8byimN1MKcKNS9rw0Z8--65" vertex="1">
                     <mxGeometry x="9" y="10" width="162" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="8byimN1MKcKNS9rw0Z8--67" value="as componnent ready for&#xa; game client pane" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" vertex="1" parent="8byimN1MKcKNS9rw0Z8--65">
+                <mxCell id="8byimN1MKcKNS9rw0Z8--67" value="as componnent ready for&#xa; game client pane" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" parent="8byimN1MKcKNS9rw0Z8--65" vertex="1">
                     <mxGeometry x="9" y="50" width="162" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="8byimN1MKcKNS9rw0Z8--68" value="Gallery view:&#xa;all , owned , on sold" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" vertex="1" parent="8byimN1MKcKNS9rw0Z8--65">
+                <mxCell id="8byimN1MKcKNS9rw0Z8--68" value="Gallery view:&#xa;all , owned , on sold" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" parent="8byimN1MKcKNS9rw0Z8--65" vertex="1">
                     <mxGeometry x="9" y="90" width="162" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="8byimN1MKcKNS9rw0Z8--69" value="Select able owned :&#xa; transfere to bulk , action sold " style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" vertex="1" parent="8byimN1MKcKNS9rw0Z8--65">
+                <mxCell id="8byimN1MKcKNS9rw0Z8--69" value="Select able owned :&#xa; transfere to bulk , action sold " style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" parent="8byimN1MKcKNS9rw0Z8--65" vertex="1">
                     <mxGeometry x="9" y="130" width="162" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="8byimN1MKcKNS9rw0Z8--70" value="Gallery filter panel : &#xa;Art type , Biome , Rarity" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" vertex="1" parent="8byimN1MKcKNS9rw0Z8--65">
+                <mxCell id="8byimN1MKcKNS9rw0Z8--70" value="Gallery filter panel : &#xa;Art type , Biome , Rarity" style="hexagon;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;" parent="8byimN1MKcKNS9rw0Z8--65" vertex="1">
                     <mxGeometry x="9" y="170" width="162" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="54" value="Biomes" style="group;rounded=1;spacingTop=-20;fontColor=light-dark(#ffffff, #ededed);strokeWidth=5;fontSize=19;fontStyle=1" parent="techStack" vertex="1">
@@ -253,7 +253,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="Base DF MUD V4" id="qi9AiscXyE7ZhiVMkn2A">
-        <mxGraphModel dx="3382" dy="2252" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#1A1A1A" math="1" shadow="0">
+        <mxGraphModel dx="2183" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#1A1A1A" math="1" shadow="0">
             <root>
                 <mxCell id="mezcCVU2EaI2xSkBNxZr-0"/>
                 <mxCell id="mezcCVU2EaI2xSkBNxZr-1" parent="mezcCVU2EaI2xSkBNxZr-0"/>

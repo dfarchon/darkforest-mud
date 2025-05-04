@@ -34,7 +34,8 @@ export function ArtifactsGallery() {
   const [artifacts, setArtifacts] = useState([]);
   const [selectedArtifact, setSelectedArtifact] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const ITEMS_PER_PAGE = 16;
+  const [currentPage, setCurrentPage] = useState(0);
   const { data: walletClient } = useWalletClient();
 
   const [filters, setFilters] = useState({
@@ -93,6 +94,9 @@ export function ArtifactsGallery() {
       }
     }
   }
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filters]);
   // Filters - prepare options list from all possible text content from contract
   const options = {
     biomes: Array.from(new Set(artifacts.map((a) => a.biome))).filter(Boolean),
@@ -114,7 +118,10 @@ export function ArtifactsGallery() {
     filteredArtifacts.map((artifact) => artifact.owner.toLowerCase()),
   );
   const numberOfHolders = uniqueOwners.size;
-
+  const paginatedArtifacts = filteredArtifacts.slice(
+    currentPage * ITEMS_PER_PAGE,
+    (currentPage + 1) * ITEMS_PER_PAGE,
+  );
   return (
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">
@@ -178,7 +185,6 @@ export function ArtifactsGallery() {
                     options={options}
                   />
                 </div>
-
                 {/* Right side: Filters */}
                 <div className="flex justify-end">
                   {" "}
@@ -191,9 +197,39 @@ export function ArtifactsGallery() {
                     imgSrc="../public/img/markets/rarible.png"
                   />
                 </div>
+                <div className="col-span-full my-4 flex justify-center gap-4">
+                  <button
+                    className="rounded bg-gray-700 px-4 py-1 text-white disabled:opacity-40"
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
+                    disabled={currentPage === 0}
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-sm text-gray-400">
+                    Page {currentPage + 1} of{" "}
+                    {Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE)}
+                  </span>
+                  <button
+                    className="rounded bg-gray-700 px-4 py-1 text-white disabled:opacity-40"
+                    onClick={() =>
+                      setCurrentPage((p) =>
+                        p + 1 <
+                        Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE)
+                          ? p + 1
+                          : p,
+                      )
+                    }
+                    disabled={
+                      currentPage + 1 >=
+                      Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE)
+                    }
+                  >
+                    Next →
+                  </button>
+                </div>
               </div>
               {/* Gallery from cards */}
-              {filteredArtifacts.map((artifact) => (
+              {paginatedArtifacts.map((artifact) => (
                 <GalleryCardModal
                   key={artifact.id}
                   artifact={artifact}

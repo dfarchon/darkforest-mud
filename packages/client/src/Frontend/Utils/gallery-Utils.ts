@@ -79,7 +79,12 @@ function decodeSVGBase64(base64String: string) {
 
 // Sprite for artifact img
 export function getSpriteImageStyle(selectedArtifact) {
-  const rarity = artifactRarityFromName(selectedArtifact.rarity);
+  let rarity = selectedArtifact.rarity;
+  if (typeof selectedArtifact.rarity === "string") {
+    rarity = artifactRarityFromName(selectedArtifact.rarity);
+  } else {
+    rarity = selectedArtifact.rarity;
+  }
 
   // const totalDuration = 3; // seconds
   // const totalFrames = totalDuration * 60;
@@ -90,34 +95,34 @@ export function getSpriteImageStyle(selectedArtifact) {
   // const brightness = rarity >= ArtifactRarity.Rare ? 1 + 1.5 * shineValue : 1;
   const invert = rarity === ArtifactRarity.Legendary ? 1 : 0;
   //brightness(${brightness})
-  let baseFilter = `brightness(1) invert(${invert})`;
+  // let baseFilter = `brightness(1) invert(${invert})`;
 
   let boxShadow;
   if (rarity === ArtifactRarity.Mythic) {
     boxShadow = `0 0 30px 15px rgb(238, 40, 211), inset 0 0 20px 10px  rgb(238, 40, 211)`; // Mythic pink glow ${RarityColors[ArtifactRarity.Mythic]}
-    baseFilter = `brightness(3) invert(${invert})`;
+    // baseFilter = `brightness(3) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Legendary) {
     boxShadow = `0 0 30px 15px ${RarityColors[ArtifactRarity.Rare]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Rare]}`; // Legendary gold glow inverted
-    baseFilter = `brightness(1) invert(${invert})`;
+    // baseFilter = `brightness(1) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Epic) {
     boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Epic]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Epic]}`; // Epic violet glow RarityColors rgb(104, 13, 209)
-    baseFilter = `brightness(1.5) invert(${invert})`;
+    // baseFilter = `brightness(1.5) invert(${invert})`;
   } else if (rarity === ArtifactRarity.Rare) {
     boxShadow = `0 0 20px 4px ${RarityColors[ArtifactRarity.Rare]}, inset 0 0 20px 10px ${RarityColors[ArtifactRarity.Rare]}`; // Rare Blue glow
-    baseFilter = `brightness(1) invert(${invert})`;
+    // baseFilter = `brightness(1) invert(${invert})`;
   } else {
     boxShadow = undefined;
   }
 
   return {
     objectFit: "contain",
-    filter: baseFilter,
+    // filter: baseFilter,
     transition: "filter 0.1s linear",
     boxShadow, // dynamic glow here
   };
 }
 // Special Art type conversion -* Bomb -> Pink Bomb against original @DF-types
-const ArtifactTypeNamesMarket = {
+export const ArtifactTypeNamesMarket = {
   [ArtifactType.Unknown]: "Unknown",
   [ArtifactType.Monolith]: "Monolith",
   [ArtifactType.Colossus]: "Colossus",
@@ -152,7 +157,7 @@ export function artifactTypeFromName(name: string): ArtifactType | undefined {
   return ArtifactType.Unknown; // not found
 }
 // Special Art rarity conversion -* BIG leters against original @DF-types
-const ArtifactRarityNamesMarket = {
+export const ArtifactRarityNamesMarket = {
   [ArtifactRarity.Unknown]: "Unknown",
   [ArtifactRarity.Common]: "COMMON",
   [ArtifactRarity.Rare]: "RARE",
@@ -187,25 +192,25 @@ export function artifactRarityFromName(
 //   [Biome.CORRUPTED]: "#15260D",
 // } as const;
 
-// const BiomeNames = {
-//   [Biome.UNKNOWN]: "Unknown",
-//   [Biome.OCEAN]: "OCEAN",
-//   [Biome.FOREST]: "FOREST",
-//   [Biome.GRASSLAND]: "GRASSLAND",
-//   [Biome.TUNDRA]: "TUNDRA",
-//   [Biome.SWAMP]: "SWAMP",
-//   [Biome.DESERT]: "DESERT",
-//   [Biome.ICE]: "ICE",
-//   [Biome.WASTELAND]: "WASTELAND",
-//   [Biome.LAVA]: "LAVA",
-//   [Biome.CORRUPTED]: "CORRUPTED",
-// } as const;
+export const BiomeNames = {
+  [Biome.UNKNOWN]: "Unknown",
+  [Biome.OCEAN]: "OCEAN",
+  [Biome.FOREST]: "FOREST",
+  [Biome.GRASSLAND]: "GRASSLAND",
+  [Biome.TUNDRA]: "TUNDRA",
+  [Biome.SWAMP]: "SWAMP",
+  [Biome.DESERT]: "DESERT",
+  [Biome.ICE]: "ICE",
+  [Biome.WASTELAND]: "WASTELAND",
+  [Biome.LAVA]: "LAVA",
+  [Biome.CORRUPTED]: "CORRUPTED",
+} as const;
 
-// function artifactBiomeFromName(name: string): Biome | undefined {
-//   for (const [key, value] of Object.entries(BiomeNames)) {
-//     if (value === name) {
-//       return Number(key) as Biome;
-//     }
-//   }
-//   return Biome.UNKNOWN; // not found
-// }
+export function artifactBiomeFromName(name: string): Biome | undefined {
+  for (const [key, value] of Object.entries(BiomeNames)) {
+    if (value === name) {
+      return Number(key) as Biome;
+    }
+  }
+  return Biome.UNKNOWN; // not found
+}
