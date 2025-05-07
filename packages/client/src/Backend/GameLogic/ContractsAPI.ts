@@ -343,7 +343,7 @@ export class ContractsAPI extends EventEmitter {
     this.artifactSubscription = this.components.Artifact.update$.subscribe(
       (update) => {
         const entity = update.entity;
-
+        
         const artifactId = artifactIdFromHexStr(entity.toString());
 
         // no matter the value exists or not, we emit the update event
