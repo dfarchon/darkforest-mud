@@ -10,6 +10,7 @@
     "deploy:local": "mud deploy",
     "deploy:redstone": "mud deploy --profile=redstone",
     "deploy:base-sepolia": "mud deploy --profile=base-sepolia",
+    "deploy:base": "mud deploy --profile=base",
     "dev": "mud dev-contracts",
     "lint": "pnpm run prettier && pnpm run solhint",
     "prettier": "prettier --write 'src/**/*.sol'",
