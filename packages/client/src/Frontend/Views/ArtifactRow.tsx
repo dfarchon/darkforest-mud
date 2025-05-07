@@ -32,15 +32,13 @@ const StyledArtifactThumb = styled.div<{ active: boolean; enemy: boolean }>`
     ${({ enemy }) =>
       enemy ? dfstyles.colors.dfred : dfstyles.colors.borderDark};
   border-radius: 4px;
-
+  transform-origin: center;
   &:last-child {
     margin-right: none;
   }
 
   display: inline-flex;
   flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
 
   background: ${dfstyles.colors.artifactBackground};
 
@@ -103,7 +101,9 @@ export function ArtifactThumb({
         uiManager?.setHoveringOverArtifact(undefined);
       }}
     >
-      <ArtifactImage artifact={artifact} thumb size={32} />
+      <div className="relative bottom-[2px] left-[2px]">
+        <ArtifactImage artifact={artifact} thumb size={36} />
+      </div>
     </StyledArtifactThumb>
   );
 }

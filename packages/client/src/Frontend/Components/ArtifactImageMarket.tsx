@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import { ArtifactRenderer } from "../Renderers/Artifacts/ArtifactRenderer";
 
-export function ArtifactImage({
+export function ArtifactImageMarket({
   artifact,
   size,
   thumb = true, // Not used but kept for API consistency
@@ -50,12 +50,13 @@ export function ArtifactImage({
   }, [artifact]);
 
   return (
-    <StyledCanvas className=" " ref={canvasRef} width={size} height={size} />
+    <StyledCanvas
+      className="mx-auto origin-center"
+      ref={canvasRef}
+      width={size}
+      height={size}
+    />
   );
 }
 
-const StyledCanvas = styled.canvas`
-  display: block;
-  margin: 0;
-  padding: 0;
-`;
+const StyledCanvas = styled.canvas``;

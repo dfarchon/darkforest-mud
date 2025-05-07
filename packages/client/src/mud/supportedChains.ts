@@ -17,8 +17,10 @@ import {
   mudFoundry,
   redstone,
 } from "@latticexyz/common/chains";
-
-import { baseSepolia as baseSepoliaConfig } from "viem/chains";
+import {
+  base as baseConfig,
+  baseSepolia as baseSepoliaConfig,
+} from "viem/chains";
 
 export const baseSepolia = {
   ...baseSepoliaConfig,
@@ -41,6 +43,24 @@ export const baseSepolia = {
   },
 } as MUDChain;
 
+export const base = {
+  ...baseConfig,
+  iconUrls: [""],
+  indexerUrl: "",
+  rpcUrls: {
+    ...baseConfig.rpcUrls,
+    default: {
+      http: baseConfig.rpcUrls.default.http,
+      webSocket: [baseConfig.rpcUrls.default.http[0].replace("https", "wss")], // Convert HTTP to WebSocket URL
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Base Explorer",
+      url: "https://basescan.org",
+    },
+  },
+} as MUDChain;
 /*
  * See https://mud.dev/guides/hello-world/add-chain-client
  * for instructions on how to add networks.
@@ -50,4 +70,5 @@ export const supportedChains: MUDChain[] = [
   redstone,
   garnet,
   baseSepolia,
+  base,
 ];

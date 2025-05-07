@@ -69,7 +69,9 @@ export function HotkeyThumbArtShips({
       disabled={selectedPlanetVisible.selectedPlanetVisible}
     >
       {hotkey.artifact ? (
-        <ArtifactImage artifact={hotkey.artifact} size={24} />
+        <div className="relative left-[2px]">
+          <ArtifactImage artifact={hotkey.artifact} size={24} />
+        </div>
       ) : (
         hotkey.key
       )}
