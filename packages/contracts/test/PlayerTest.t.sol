@@ -37,9 +37,11 @@ contract PlayerTest is BaseTest {
     vm.expectRevert(Errors.AlreadyRegistered.selector);
     IWorld(worldAddress).df__registerPlayer("test", address(2));
 
+    uint32 playerLimit = uint32(TempConfigSet.getPlayerLimit());
+
     vm.prank(admin);
     vm.warp(timestamp + 1000);
-    Counter.setPlayer(99);
+    Counter.setPlayer(uint32(playerLimit - 1));
     vm.prank(address(1));
     vm.expectRevert(Errors.NameAlreadyTaken.selector);
     IWorld(worldAddress).df__registerPlayer("test", address(2));
@@ -53,7 +55,7 @@ contract PlayerTest is BaseTest {
     IWorld(worldAddress).df__registerPlayer("test1", address(2));
     player = Player.get(address(11));
     assertEq(player.burner, address(2));
-    assertEq(player.index, 100);
+    assertEq(player.index, playerLimit);
     assertEq(player.createdAt, timestamp + 1000);
     assertEq(player.name, "test1");
 
