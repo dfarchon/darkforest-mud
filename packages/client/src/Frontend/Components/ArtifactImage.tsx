@@ -1,61 +1,85 @@
+import type { ArtifactFileColor } from "@df/gamelogic";
+import { artifactFileName } from "@df/gamelogic";
 import type { Artifact } from "@df/types";
-import { useEffect, useRef } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-import { ArtifactRenderer } from "../Renderers/Artifacts/ArtifactRenderer";
+import dfstyles from "../Styles/dfstyles";
+
+// export const ARTIFACT_URL = 'https://d2wspbczt15cqu.cloudfront.net/v0.6.0-artifacts/';
+export const ARTIFACT_URL = "/df_ares_artifact_icons/";
+
+// @ts-expect-error unused
+function getArtifactUrl(
+  thumb: boolean,
+  artifact: Artifact,
+  color: ArtifactFileColor,
+): string {
+  const fileName = artifactFileName(true, thumb, artifact, color);
+  return ARTIFACT_URL + fileName;
+}
 
 export function ArtifactImage({
   artifact,
   size,
-  thumb = true, // Not used but kept for API consistency
+  thumb: _thumb,
+  bgColor: _bgColor,
 }: {
-  artifact: Artifact | null;
+  artifact: Artifact;
   size: number;
   thumb?: boolean;
+  bgColor?: ArtifactFileColor;
 }) {
-  if (!artifact) return;
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rendererRef = useRef<ArtifactRenderer | null>(null);
-
-  useEffect(() => {
-    if (!artifact) return;
-    const canvas = canvasRef.current;
-    if (!canvas || !artifact) return;
-
-    const renderer = new ArtifactRenderer(canvas, false);
-    renderer.setVisible(true);
-    renderer.setArtifacts([artifact]);
-    rendererRef.current = renderer;
-    if (!renderer) return;
-    return () => {
-      renderer.destroy?.();
-      rendererRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!artifact) return;
-    const canvas = canvasRef.current;
-    if (!canvas || !artifact) return;
-
-    const renderer = new ArtifactRenderer(canvas, false);
-    renderer.setVisible(true);
-    renderer.setArtifacts([artifact]);
-    rendererRef.current = renderer;
-    if (!renderer) return;
-    return () => {
-      renderer.destroy?.();
-      rendererRef.current = null;
-    };
-  }, [artifact]);
+  // const url = getArtifactUrl(thumb || false, artifact, bgColor || ArtifactFileColor.BLUE);
+  // const image = isSpaceShip(artifact.artifactType) ? (
+  //   <img width={size} height={size} src={url} />
+  // ) : (
+  //   <video width={size} height={size} loop autoPlay key={artifact.id}>
+  //     <source src={url} type={'video/webm'} />
+  //   </video>
+  // );
 
   return (
-    <StyledCanvas className=" " ref={canvasRef} width={size} height={size} />
+    <Container width={size} height={size}>
+      {/* {image} */}
+      <img
+        width={size}
+        height={size}
+        src={ARTIFACT_URL + artifact.artifactType + ".png"}
+      />
+    </Container>
   );
 }
 
-const StyledCanvas = styled.canvas`
-  display: block;
-  margin: 0;
-  padding: 0;
+const Container = styled.div`
+  image-rendering: crisp-edges;
+
+  ${({ width, height }: { width: number; height: number }) => css`
+    width: ${width}px;
+    height: ${height}px;
+    min-width: ${width}px;
+    min-height: ${height}px;
+    background-color: ${dfstyles.colors.artifactBackground};
+    display: inline-block;
+  `}
 `;
+
+// const ArtifactImg = styled.div`
+//   background-position: -10px -10px;
+//   background-repeat: no-repeat;
+
+//   ${({ url, width, height }: { url: string; width: number; height: number }) => css`
+//     background: transparent url(${url});
+//     width: ${width}px;
+//     height: ${height}px;
+//   `}
+// `;
+
+// const ArtifactImg = styled.img`
+//   position: absolute;
+
+//   ${({ w, h }: { w: number; h: number }) => css`
+//     clip: rect(0, ${w}px, ${h}px, 0);
+//     width: 2048px;
+//     height: 2048px;
+//   `}
+// `;

@@ -17,9 +17,10 @@ import {
   mudFoundry,
   redstone,
 } from "@latticexyz/common/chains";
+
 import {
-  base as baseConfig,
   baseSepolia as baseSepoliaConfig,
+  base as baseConfig,
 } from "viem/chains";
 
 export const baseSepolia = {
@@ -61,6 +62,7 @@ export const base = {
     },
   },
 } as MUDChain;
+
 /*
  * See https://mud.dev/guides/hello-world/add-chain-client
  * for instructions on how to add networks.

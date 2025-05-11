@@ -20,7 +20,7 @@ import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
 import { GamePage } from "./Frontend/Pages/GamePage";
 import { HelloPage } from "./Frontend/Pages/HelloPage";
 import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
-import { ArtifactsGallery } from "./Frontend/Pages/ArtifactsGalleryPage";
+import { ArtifactsGallery } from "./Frontend/Gallery/Pages/ArtifactsGalleryPage";
 import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
 import { RedPillLandingPage } from "./Frontend/Pages/RedPillLandingPage";
 import { SandboxPage } from "./Frontend/Pages/SandboxPage";
@@ -88,7 +88,7 @@ export const App = () => {
             {/* <Route path="/game" element={<GamePage />} /> */}
             <Route path="/test" element={<PlanetTestPage />} />
 
-            <Route path="/Gallery" element={<ArtifactsGallery />} />
+            <Route path="/gallery" element={<ArtifactsGallery />} />
 
             {/* <Route path="/hello" element={<HelloPage />} /> */}
             <Route path="*" element={<NotFoundPage />} />

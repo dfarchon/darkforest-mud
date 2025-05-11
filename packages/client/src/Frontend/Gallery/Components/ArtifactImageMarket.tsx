@@ -2,7 +2,7 @@ import type { Artifact } from "@df/types";
 import { useEffect, useRef } from "react";
 import styled from "styled-components";
 
-import { ArtifactRenderer } from "../Renderers/Artifacts/ArtifactRenderer";
+import { ArtifactRenderer } from "../../Renderers/Artifacts/ArtifactRenderer";
 
 export function ArtifactImageMarket({
   artifact,

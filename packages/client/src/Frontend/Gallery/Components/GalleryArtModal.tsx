@@ -4,7 +4,7 @@ import {
   artifactTypeFromName,
   getSpriteImageStyle,
   hexToDecimal,
-} from "@frontend/Utils/gallery-Utils";
+} from "@frontend/Gallery/Utils/gallery-Utils";
 import { useEffect, useRef } from "react";
 
 const ARTIFACT_URL = "/df_ares_artifact_icons/";

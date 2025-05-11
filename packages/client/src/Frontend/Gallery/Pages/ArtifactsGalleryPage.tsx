@@ -1,28 +1,28 @@
-import { ArtifactFilters } from "@frontend/Components/filters/ArtifactFilters";
+import { ArtifactFilters } from "@frontend/Gallery/Components/filters/ArtifactFilters";
 import {
   GalleryArtModal,
   MarketLink,
-} from "@frontend/Components/GalleryArtModal";
-import { GalleryCardModal } from "@frontend/Components/GalleryCardModal";
+} from "@frontend/Gallery/Components/GalleryArtModal";
+import { GalleryCardModal } from "@frontend/Gallery/Components/GalleryCardModal";
 import { MythicLabelText } from "@frontend/Components/Labels/MythicLabel";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@frontend/Components/ui/tabs";
-import { formatArtifacts } from "@frontend/Utils/gallery-Utils";
+} from "@frontend/Gallery/Components/ui/tabs";
+import { formatArtifacts } from "@frontend/Gallery/Utils/gallery-Utils";
 import {
   fetchArtifacts,
   fetchOwnedArtifacts,
-} from "@frontend/Utils/galleryApi";
-import { getMarketplaceContract } from "@frontend/Utils/marketplaceConfig";
+} from "@frontend/Gallery/Utils/galleryApi";
+import { getMarketplaceContract } from "@frontend/Gallery/Utils/marketplaceConfig";
 import { useMUD } from "@mud/MUDContext";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
-import { entityToAddress } from "./GamePage";
+import { entityToAddress } from "../../Pages/GamePage";
 
 export function ArtifactsGallery() {
   const { isConnected, address, chain } = useAccount();

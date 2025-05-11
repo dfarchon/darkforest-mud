@@ -1,4 +1,4 @@
-import { cn } from "@frontend/Utils/Tabs-Utils";
+import { cn } from "@frontend/Gallery/Utils/Tabs-Utils";
 
 export function Card({
   className,

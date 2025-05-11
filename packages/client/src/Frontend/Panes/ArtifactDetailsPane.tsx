@@ -279,8 +279,8 @@ export function ArtifactDetailsBody({
 
   return (
     <div className="artifact-details-pane-body">
-      <div className="relative left-[2px]">
-        <ArtifactImage artifact={artifact} size={38} />
+      <div style={{ display: "inline-block" }}>
+        <ArtifactImage artifact={artifact} size={32} />
       </div>
       <Spacer width={8} />
       <div style={{ display: "inline-block" }}>

@@ -1,12 +1,12 @@
 import type { Artifact } from "@df/types";
 import { ArtifactRarity, ArtifactType, Biome } from "@df/types";
-import { Card, CardContent } from "@frontend/Components/ui/card";
+import { Card, CardContent } from "@frontend/Gallery/Components/ui/card";
 import {
   artifactBiomeFromName,
   artifactRarityFromName,
   artifactTypeFromName,
   hexToDecimal,
-} from "@frontend/Utils/gallery-Utils";
+} from "@frontend/Gallery/Utils/gallery-Utils";
 
 import { ArtifactImageMarket } from "./ArtifactImageMarket";
 import { MarketLink } from "./GalleryArtModal";
