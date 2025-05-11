@@ -1,4 +1,26 @@
-export function ArtifactFilters({ filters, setFilters, options }) {
+interface FilterOptions {
+  biomes: string[];
+  types: string[];
+  rarities: string[];
+}
+
+interface FilterState {
+  biome: string;
+  type: string;
+  rarity: string;
+}
+
+interface ArtifactFiltersProps {
+  filters: FilterState;
+  setFilters: (f: (prev: FilterState) => FilterState) => void;
+  options: FilterOptions;
+}
+
+export function ArtifactFilters({
+  filters,
+  setFilters,
+  options,
+}: ArtifactFiltersProps) {
   return (
     <div className="mt-4 flex flex-wrap justify-center gap-4 text-gray-400">
       {/* Biome */}

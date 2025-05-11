@@ -6,7 +6,7 @@ import styled, { css } from "styled-components";
 import { ArtifactImage } from "../Components/ArtifactImage";
 import { Spacer } from "../../Components/CoreUI";
 import dfstyles from "../../Styles/dfstyles";
-import { useUIManager } from "../../../Utils/AppHooks";
+import { useUIManager } from "../../Utils/AppHooks";
 
 const RowWrapper = styled.div`
   width: 100%;

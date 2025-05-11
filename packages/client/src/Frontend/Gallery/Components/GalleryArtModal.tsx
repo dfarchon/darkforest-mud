@@ -6,6 +6,23 @@ import {
   hexToDecimal,
 } from "@frontend/Gallery/Utils/gallery-Utils";
 import { useEffect, useRef } from "react";
+import { ArtifactRarity } from "@df/types";
+
+interface Artifact {
+  name: string;
+  image: string;
+  type: string;
+  rarity: string;
+  description: string;
+  owner: string;
+}
+
+interface GalleryArtModalProps {
+  artifact: Artifact | null;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}
 
 const ARTIFACT_URL = "/df_ares_artifact_icons/";
 export function MarketLink({ href, imgSrc }: { href: string; imgSrc: string }) {
@@ -21,17 +38,22 @@ export function MarketLink({ href, imgSrc }: { href: string; imgSrc: string }) {
   );
 }
 
-export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
-  const overlayRef = useRef(null);
+export function GalleryArtModal({
+  artifact,
+  onClose,
+  onPrev,
+  onNext,
+}: GalleryArtModalProps) {
+  const overlayRef = useRef<HTMLDivElement>(null);
   // Helper function to create market links
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    function handleClickOutside(event: MouseEvent) {
       if (overlayRef.current && event.target === overlayRef.current) {
         onClose();
       }
     }
-    function handleKeyDown(event) {
+    function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft") onPrev();
       if (event.key === "ArrowRight") onNext();
@@ -45,6 +67,9 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
   }, [onClose, onPrev, onNext]);
 
   if (!artifact) return null;
+
+  const rarity =
+    artifactRarityFromName(artifact.rarity) || ArtifactRarity.Unknown;
 
   return (
     <div
@@ -75,15 +100,17 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
             width={128}
             height={128}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
-            style={getSpriteImageStyle(artifact)}
+            style={{
+              objectFit: "contain" as const,
+              transition: "filter 0.1s linear",
+              boxShadow: getSpriteImageStyle(artifact).boxShadow,
+            }}
             onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
           />
         </div>
 
         <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 translate-y-1/2 text-center">
-          <ArtifactRarityLabelAnim
-            rarity={artifactRarityFromName(artifact.rarity)}
-          />
+          <ArtifactRarityLabelAnim rarity={rarity} />
           <h2 className="text-sm font-bold text-white drop-shadow-md">
             {hexToDecimal(artifact.name.slice(10))}
           </h2>
