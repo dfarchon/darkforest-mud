@@ -63,6 +63,12 @@ export class ArtifactRenderer extends WebGLManager {
     this.artifacts = artifacts;
   }
 
+  public renderOnce() {
+    this.setProjectionMatrix();
+    this.clear();
+    this.draw(); // this will call spriteRenderer.flush()
+  }
+
   private queueRarityColumn(rarity: ArtifactRarity, startX: number) {
     let col = 0;
     for (let type = 1; type <= 4; type++) {
@@ -106,6 +112,7 @@ export class ArtifactRenderer extends WebGLManager {
         rarity,
         artifactType: type,
       } as Artifact;
+
       const contains = this.containsArtifact(biome, rarity, type);
       const alpha = contains ? 255 : 70;
       this.spriteRenderer.queueArtifact(artifact, pos, thumbDim, alpha);

@@ -1,13 +1,10 @@
+import type { Artifact } from "@df/types";
 import { ArtifactRarityLabelAnim } from "@frontend/Components/Labels/ArtifactLabels";
-import {
-  artifactRarityFromName,
-  artifactTypeFromName,
-  getSpriteImageStyle,
-  hexToDecimal,
-} from "@frontend/Utils/gallery-Utils";
+import { hexToDecimal } from "@frontend/Utils/gallery-Utils";
 import { useEffect, useRef } from "react";
 
-const ARTIFACT_URL = "/df_ares_artifact_icons/";
+import { ArtifactImageMarket } from "./ArtifactImageMarket";
+
 export function MarketLink({ href, imgSrc }: { href: string; imgSrc: string }) {
   return (
     <a
@@ -69,7 +66,7 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
             className="h-full w-full rounded object-contain shadow-md"
             onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
           />
-          <img
+          {/* <img
             src={`${ARTIFACT_URL}/${artifactTypeFromName(artifact.type)}.png`}
             alt={artifact.name}
             width={128}
@@ -77,13 +74,18 @@ export function GalleryArtModal({ artifact, onClose, onPrev, onNext }) {
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
             style={getSpriteImageStyle(artifact)}
             onError={(e) => (e.currentTarget.src = "./icons/broadcast.svg")}
-          />
+          /> */}
+
+          <div className="absolute left-1/2 top-1/2 scale-150 rounded">
+            <ArtifactImageMarket
+              artifact={artifact as unknown as Artifact}
+              size={128}
+            />
+          </div>
         </div>
 
         <div className="absolute bottom-1/4 left-1/2 w-full -translate-x-1/2 translate-y-1/2 text-center">
-          <ArtifactRarityLabelAnim
-            rarity={artifactRarityFromName(artifact.rarity)}
-          />
+          <ArtifactRarityLabelAnim rarity={artifact.rarity} />
           <h2 className="text-sm font-bold text-white drop-shadow-md">
             {hexToDecimal(artifact.name.slice(10))}
           </h2>

@@ -1,3 +1,4 @@
+import sharedRenderer from "@frontend/Components/ArtifactRendererManager";
 import { ArtifactFilters } from "@frontend/Components/filters/ArtifactFilters";
 import {
   GalleryArtModal,
@@ -34,7 +35,7 @@ export function ArtifactsGallery() {
   const [artifacts, setArtifacts] = useState([]);
   const [selectedArtifact, setSelectedArtifact] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const ITEMS_PER_PAGE = 16;
+  const ITEMS_PER_PAGE = 15;
   const [currentPage, setCurrentPage] = useState(0);
   const { data: walletClient } = useWalletClient();
 
@@ -81,7 +82,9 @@ export function ArtifactsGallery() {
       setArtifacts([]);
       const artifactsList = await fetchArtifacts(DFARTAddress);
       if (artifactsList) {
-        setArtifacts(formatArtifacts(artifactsList));
+        const formated = formatArtifacts(artifactsList);
+        setArtifacts(formated);
+        await sharedRenderer.batchRender(formated); // PRE-RENDER
       }
     } else if (tab === "owned" && walletClient) {
       setArtifacts([]);
@@ -90,7 +93,9 @@ export function ArtifactsGallery() {
         walletClient?.account.address.toLocaleLowerCase(),
       );
       if (ownedArtifacts) {
-        setArtifacts(formatArtifacts(ownedArtifacts));
+        const formated = formatArtifacts(ownedArtifacts);
+        setArtifacts(formated);
+        await sharedRenderer.batchRender(formated); // PRE-RENDER
       }
     }
   }
@@ -99,18 +104,22 @@ export function ArtifactsGallery() {
   }, [filters]);
   // Filters - prepare options list from all possible text content from contract
   const options = {
-    biomes: Array.from(new Set(artifacts.map((a) => a.biome))).filter(Boolean),
-    types: Array.from(new Set(artifacts.map((a) => a.type))).filter(Boolean),
-    rarities: Array.from(new Set(artifacts.map((a) => a.rarity))).filter(
+    biomes: Array.from(
+      new Set(artifacts.map((a) => a.artifactBiomeStr)),
+    ).filter(Boolean),
+    types: Array.from(new Set(artifacts.map((a) => a.artifactTypeStr))).filter(
       Boolean,
     ),
+    rarities: Array.from(
+      new Set(artifacts.map((a) => a.artifactRarityStr)),
+    ).filter(Boolean),
   };
   // Apply page filters from selected biomes , types , rarities
   const filteredArtifacts = artifacts.filter((a) => {
     return (
-      (filters.biome ? a.biome === filters.biome : true) &&
-      (filters.type ? a.type === filters.type : true) &&
-      (filters.rarity ? a.rarity === filters.rarity : true)
+      (filters.biome ? a.artifactBiomeStr === filters.biome : true) &&
+      (filters.type ? a.artifactTypeStr === filters.type : true) &&
+      (filters.rarity ? a.artifactRarityStr === filters.rarity : true)
     );
   });
   // count unique Owners for filtred artifacts
@@ -122,6 +131,7 @@ export function ArtifactsGallery() {
     currentPage * ITEMS_PER_PAGE,
     (currentPage + 1) * ITEMS_PER_PAGE,
   );
+  // console.log(sharedRenderer);
   return (
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">

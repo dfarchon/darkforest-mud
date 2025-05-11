@@ -39,13 +39,14 @@ export function extractLastThreeLinesFromSVG(svgString: string) {
   }
 }
 // helper function - main format for Artifact state for gallery page
-export function formatArtifacts(rawArtifacts) {
+export function formatArtifacts(rawArtifacts: unknown[]): unknown[] {
   if (!rawArtifacts) return [];
 
   return rawArtifacts.map((artifact) => {
     let extractedText = ["", "", ""];
-    if (artifact.metadata?.image?.startsWith("data:image/svg+xml;base64,")) {
-      const base64Image = artifact.metadata.image;
+
+    const base64Image = artifact.metadata?.image;
+    if (base64Image?.startsWith("data:image/svg+xml;base64,")) {
       const svgContent = decodeSVGBase64(base64Image);
       if (svgContent) {
         extractedText = extractLastThreeLinesFromSVG(svgContent);
@@ -58,9 +59,29 @@ export function formatArtifacts(rawArtifacts) {
       description: artifact.metadata?.description || "Mystery Artifact",
       image: artifact.metadata?.image || "./icons/broadcast.svg",
       owner: artifact.owner || "",
-      type: extractedText[0] || "",
-      rarity: extractedText[1] || "",
-      biome: extractedText[2] || "",
+
+      // raw text extracted
+      artifactTypeStr: extractedText[0] || "",
+      artifactRarityStr: extractedText[1] || "",
+      artifactBiomeStr: extractedText[2] || "",
+
+      // enum-safe values
+      type:
+        (artifactTypeFromName(extractedText[0]) as ArtifactType) ??
+        ArtifactType.Unknown,
+      artifactType:
+        (artifactTypeFromName(extractedText[0]) as ArtifactType) ??
+        ArtifactType.Unknown,
+      artifactRarity:
+        (artifactRarityFromName(extractedText[1]) as ArtifactRarity) ??
+        ArtifactRarity.Unknown,
+      rarity:
+        (artifactRarityFromName(extractedText[1]) as ArtifactRarity) ??
+        ArtifactRarity.Unknown,
+      planetBiome:
+        (artifactBiomeFromName(extractedText[2]) as Biome) ?? Biome.UNKNOWN,
+      biome:
+        (artifactBiomeFromName(extractedText[2]) as Biome) ?? Biome.UNKNOWN,
     };
   });
 }

@@ -8,29 +8,11 @@ import {
   hexToDecimal,
 } from "@frontend/Utils/gallery-Utils";
 
-import { ArtifactImageMarket } from "./ArtifactImageMarket";
+import {
+  ArtifactImageMarket,
+  ArtifactImageMarket1,
+} from "./ArtifactImageMarket";
 import { MarketLink } from "./GalleryArtModal";
-
-export function parseFormattedArtifact(artifact: {
-  type: string;
-  rarity: string;
-  biome: string;
-  id: string;
-  [key: string]: unknown;
-}) {
-  return {
-    ...artifact,
-    artifactType:
-      (artifactTypeFromName(artifact.type) as ArtifactType) ??
-      ArtifactType.Unknown,
-    artifactRarity: artifact.rarity,
-    rarity:
-      (artifactRarityFromName(artifact.rarity) as ArtifactRarity) ??
-      ArtifactRarity.Unknown,
-    planetBiome:
-      (artifactBiomeFromName(artifact.biome) as Biome) ?? Biome.UNKNOWN,
-  };
-}
 
 export function GalleryCardModal({
   artifact,
@@ -39,8 +21,6 @@ export function GalleryCardModal({
   artifact: Artifact;
   onClick: () => void;
 }) {
-  const DFArtifactFormat = parseFormattedArtifact(artifact);
-
   return (
     <Card
       className="flex transform cursor-pointer flex-col items-center justify-between rounded transition-transform duration-300 hover:z-10 hover:scale-110"
@@ -58,7 +38,12 @@ export function GalleryCardModal({
 
           <div className="absolute left-1/2 top-1/2 scale-150 rounded">
             <ArtifactImageMarket
-              artifact={DFArtifactFormat as unknown as Artifact}
+              artifact={artifact as unknown as Artifact}
+              size={128}
+            />
+
+            <ArtifactImageMarket1
+              artifact={artifact as unknown as Artifact}
               size={128}
             />
           </div>

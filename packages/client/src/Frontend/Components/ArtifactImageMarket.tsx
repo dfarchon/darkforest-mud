@@ -1,17 +1,54 @@
 import type { Artifact } from "@df/types";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { ArtifactRenderer } from "../Renderers/Artifacts/ArtifactRenderer";
+import sharedRenderer from "./ArtifactRendererManager";
+
+export function ArtifactImageMarket1({
+  artifact,
+  size,
+}: {
+  artifact: Artifact;
+  size: number;
+}) {
+  const [imgSrc, setImgSrc] = useState<string | null>(
+    sharedRenderer.getDataURL(artifact.id) ?? null,
+  );
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!imgSrc) {
+      sharedRenderer.renderToDataURL(artifact).then((url) => {
+        if (mounted) setImgSrc(url);
+      });
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  console.log(imgSrc);
+  return imgSrc ? (
+    <img src={imgSrc} width={size} height={size} alt="Artifact Render" />
+  ) : (
+    <div
+      ref={containerRef}
+      style={{ width: size, height: size }}
+      className="animate-pulse rounded bg-gray-800"
+    />
+  );
+}
 
 export function ArtifactImageMarket({
   artifact,
   size,
-  thumb = true, // Not used but kept for API consistency
+  // Not used but kept for API consistency
 }: {
   artifact: Artifact | null;
   size: number;
-  thumb?: boolean;
 }) {
   if (!artifact) return;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -22,7 +59,7 @@ export function ArtifactImageMarket({
     const canvas = canvasRef.current;
     if (!canvas || !artifact) return;
 
-    const renderer = new ArtifactRenderer(canvas, false);
+    const renderer = new ArtifactRenderer(canvas, false); // use here ArtifactImageMarket not whole Artifact Render
     renderer.setVisible(true);
     renderer.setArtifacts([artifact]);
     rendererRef.current = renderer;
