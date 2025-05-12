@@ -15,19 +15,21 @@ import {
 import { createGlobalStyle } from "styled-components";
 
 import { Theme } from "./Frontend/Components/Theme";
+import { BluePillLandingPage } from "./Frontend/Pages/BluePillLandingPage";
 import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
 import { GamePage } from "./Frontend/Pages/GamePage";
 import { HelloPage } from "./Frontend/Pages/HelloPage";
 import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
+import { ArtifactsGallery } from "./Frontend/Gallery/Pages/ArtifactsGalleryPage";
 import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
+import { RedPillLandingPage } from "./Frontend/Pages/RedPillLandingPage";
 import { SandboxPage } from "./Frontend/Pages/SandboxPage";
 import { TxConfirmPopup } from "./Frontend/Pages/TxConfirmPopup";
 import { WelcomePage } from "./Frontend/Pages/WelcomePage";
 import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
 import { PlanetTestPage } from "./PlanetTest/PlanetTestPage";
-import { BluePillLandingPage } from "./Frontend/Pages/BluePillLandingPage";
-import { RedPillLandingPage } from "./Frontend/Pages/RedPillLandingPage";
+
 const GlobalStyle = createGlobalStyle`
 body {
   width: 100vw;
@@ -85,6 +87,9 @@ export const App = () => {
             {/* <Route path="/welcome" element={<WelcomePage />} /> */}
             {/* <Route path="/game" element={<GamePage />} /> */}
             <Route path="/test" element={<PlanetTestPage />} />
+
+            <Route path="/gallery" element={<ArtifactsGallery />} />
+
             {/* <Route path="/hello" element={<HelloPage />} /> */}
             <Route path="*" element={<NotFoundPage />} />
             <Route
