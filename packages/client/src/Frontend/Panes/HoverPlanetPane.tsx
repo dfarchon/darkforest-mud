@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { snips } from "../Styles/dfstyles";
 import {
@@ -18,56 +18,16 @@ export function HoverPlanetPane() {
   const hoverWrapper = useHoverPlanet(uiManager);
   const hovering = hoverWrapper.value;
   const selected = useSelectedPlanet(uiManager).value;
+
   const [sending, setSending] = useState<boolean>(false);
 
-  // State for debounced values
-  const [debouncedState, setDebouncedState] = useState<{
-    isVisible: boolean;
-    planetData: typeof hoverWrapper | null;
-  }>({
-    isVisible: false,
-    planetData: null,
-  });
-
-  // Ref for tracking updates
-  const updateRef = useRef({
-    timer: null as NodeJS.Timeout | null,
-    lastUpdate: 0,
-  });
-
-  // Update state with debounce
-  useEffect(() => {
-    const now = Date.now();
-
-    // Clear existing timer
-    if (updateRef.current.timer) {
-      clearTimeout(updateRef.current.timer);
-    }
-
-    // Calculate new state
-    const newVisible =
-      !!hovering &&
-      !sending &&
-      !uiManager.getMouseDownCoords() &&
-      (hovering.locationId !== selected?.locationId ||
-        !uiManager.getPlanetHoveringInRenderer());
-
-    // Set timer for state update
-    updateRef.current.timer = setTimeout(() => {
-      setDebouncedState({
-        isVisible: newVisible,
-        planetData: newVisible ? hoverWrapper : null,
-      });
-      updateRef.current.lastUpdate = now;
-    }, 500); // 500ms debounce
-
-    // Cleanup
-    return () => {
-      if (updateRef.current.timer) {
-        clearTimeout(updateRef.current.timer);
-      }
-    };
-  }, [hovering, selected, sending, uiManager, hoverWrapper]);
+  // Calculate visibility directly without debounce
+  const isVisible =
+    !!hovering &&
+    !sending &&
+    !uiManager.getMouseDownCoords() &&
+    (hovering.locationId !== selected?.locationId ||
+      !uiManager.getPlanetHoveringInRenderer());
 
   // Event listeners for sending state
   useEffect(() => {
@@ -90,19 +50,14 @@ export function HoverPlanetPane() {
     <HoverPane
       style={
         // eslint-disable-next-line no-nested-ternary
-        debouncedState.planetData?.value?.destroyed
+        hovering?.destroyed
           ? snips.destroyedBackground
-          : debouncedState.planetData?.value?.frozen
+          : hovering?.frozen
             ? snips.frozenBackground
             : undefined
       }
-      visible={debouncedState.isVisible}
-      element={
-        <PlanetCard
-          standalone
-          planetWrapper={debouncedState.planetData || hoverWrapper}
-        />
-      }
+      visible={isVisible}
+      element={<PlanetCard standalone planetWrapper={hoverWrapper} />}
     />
   );
 }
