@@ -22,6 +22,12 @@ export const enum UIEmitterEvent {
   ZoomIn = "ZoomIn",
   ZoomOut = "ZoomOut",
 
+  // Keyboard movement events
+  MoveUp = "MoveUp",
+  MoveDown = "MoveDown",
+  MoveLeft = "MoveLeft",
+  MoveRight = "MoveRight",
+
   SendInitiated = "SendInitiated",
   SendCancelled = "SendCancelled",
   SendCompleted = "SendCompleted",

@@ -158,6 +158,10 @@ export const SpecialKey = {
   Escape: "Escape",
   Control: "Control",
   Shift: "Shift",
+  ArrowUp: "ArrowUp",
+  ArrowDown: "ArrowDown",
+  ArrowLeft: "ArrowLeft",
+  ArrowRight: "ArrowRight",
 } as const;
 
 export const HAT_SIZES = [

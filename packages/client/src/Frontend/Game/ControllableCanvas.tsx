@@ -11,6 +11,13 @@ import {
 import styled from "styled-components";
 
 import { useUIManager } from "../Utils/AppHooks";
+import { useIsDown } from "../Utils/KeyEmitters";
+import {
+  MOVE_DOWN,
+  MOVE_LEFT,
+  MOVE_RIGHT,
+  MOVE_UP,
+} from "../Utils/ShortcutConstants";
 import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import Viewport from "./Viewport";
 
@@ -91,10 +98,8 @@ export default function ControllableCanvas() {
     // dep array gives eslint issues, but it's fine i tested it i swear - Alan
     canvasRef,
     doResize,
-    /* eslint-disable react-hooks/exhaustive-deps */
     canvasRef.current?.offsetWidth,
     canvasRef.current?.offsetHeight,
-    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   useEffect(() => {
@@ -216,6 +221,50 @@ export default function ControllableCanvas() {
       canvas.removeEventListener("mouseout", onMouseOut);
     };
   }, [evtRef]);
+
+  // Keyboard movement handlers with continuous movement supportAdd commentMore actions
+  const isUpPressed = useIsDown(MOVE_UP);
+  const isDownPressed = useIsDown(MOVE_DOWN);
+  const isLeftPressed = useIsDown(MOVE_LEFT);
+  const isRightPressed = useIsDown(MOVE_RIGHT);
+
+  // Continuous movement using animation frame
+  useEffect(() => {
+    let animationId: number;
+
+    const moveCamera = () => {
+      const uiEmitter = UIEmitter.getInstance();
+
+      if (isUpPressed) {
+        uiEmitter.emit(UIEmitterEvent.MoveUp);
+      }
+      if (isDownPressed) {
+        uiEmitter.emit(UIEmitterEvent.MoveDown);
+      }
+      if (isLeftPressed) {
+        uiEmitter.emit(UIEmitterEvent.MoveLeft);
+      }
+      if (isRightPressed) {
+        uiEmitter.emit(UIEmitterEvent.MoveRight);
+      }
+
+      // Continue the animation loop if any key is pressed
+      if (isUpPressed || isDownPressed || isLeftPressed || isRightPressed) {
+        animationId = requestAnimationFrame(moveCamera);
+      }
+    };
+
+    // Start movement if any key is pressed
+    if (isUpPressed || isDownPressed || isLeftPressed || isRightPressed) {
+      animationId = requestAnimationFrame(moveCamera);
+    }
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [isUpPressed, isDownPressed, isLeftPressed, isRightPressed]);
 
   return (
     <CanvasWrapper style={{ cursor: targeting ? "crosshair" : undefined }}>

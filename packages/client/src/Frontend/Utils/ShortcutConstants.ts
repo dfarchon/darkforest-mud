@@ -42,3 +42,9 @@ export const TOGGLE_HOTKEY_VISIBLE = ",";
 
 export const TOGGLE_WALLET_PANE = "p";
 export const TOGGLE_GUILD_PANE = "u";
+
+// Movement shortcuts
+export const MOVE_UP = SpecialKey.ArrowUp;
+export const MOVE_DOWN = SpecialKey.ArrowDown;
+export const MOVE_LEFT = SpecialKey.ArrowLeft;
+export const MOVE_RIGHT = SpecialKey.ArrowRight;
