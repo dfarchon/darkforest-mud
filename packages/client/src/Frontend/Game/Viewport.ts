@@ -179,6 +179,10 @@ class Viewport {
         .removeListener(UIEmitterEvent.CenterPlanet, viewport.centerPlanet)
         .removeListener(UIEmitterEvent.ZoomIn, viewport.zoomIn)
         .removeListener(UIEmitterEvent.ZoomOut, viewport.zoomOut)
+        .removeListener(UIEmitterEvent.MoveUp, viewport.moveUp)
+        .removeListener(UIEmitterEvent.MoveDown, viewport.moveDown)
+        .removeListener(UIEmitterEvent.MoveLeft, viewport.moveLeft)
+        .removeListener(UIEmitterEvent.MoveRight, viewport.moveRight)
         .removeAllListeners(UIEmitterEvent.SendInitiated)
         .removeAllListeners(UIEmitterEvent.SendCancelled)
         .removeAllListeners(UIEmitterEvent.SendCompleted)
@@ -227,6 +231,10 @@ class Viewport {
       .on(UIEmitterEvent.CenterPlanet, viewport.centerPlanet)
       .on(UIEmitterEvent.ZoomIn, viewport.zoomIn)
       .on(UIEmitterEvent.ZoomOut, viewport.zoomOut)
+      .on(UIEmitterEvent.MoveUp, viewport.moveUp)
+      .on(UIEmitterEvent.MoveDown, viewport.moveDown)
+      .on(UIEmitterEvent.MoveLeft, viewport.moveLeft)
+      .on(UIEmitterEvent.MoveRight, viewport.moveRight)
       .on(UIEmitterEvent.SendInitiated, viewport.onSendInit)
       .on(UIEmitterEvent.SendCancelled, viewport.onSendComplete)
       .on(UIEmitterEvent.SendCompleted, viewport.onSendComplete)
@@ -318,6 +326,27 @@ class Viewport {
 
   zoomOut(): void {
     this.onScroll(600, true);
+  }
+
+  // Keyboard movement methods
+  moveUp(): void {
+    const moveDistance = this.heightInWorldUnits * 0.005; // Move 0.5% of viewport height per frame for slower movement
+    this.centerWorldCoords.y += moveDistance;
+  }
+
+  moveDown(): void {
+    const moveDistance = this.heightInWorldUnits * 0.005;
+    this.centerWorldCoords.y -= moveDistance;
+  }
+
+  moveLeft(): void {
+    const moveDistance = this.widthInWorldUnits * 0.005; // Move 0.5% of viewport width per frame for slower movement
+    this.centerWorldCoords.x -= moveDistance;
+  }
+
+  moveRight(): void {
+    const moveDistance = this.widthInWorldUnits * 0.005;
+    this.centerWorldCoords.x += moveDistance;
   }
 
   // Event handlers
