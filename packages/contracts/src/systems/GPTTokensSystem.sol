@@ -27,8 +27,8 @@ contract GPTTokensSystem is BaseSystem {
 
     ResourceId resourceId = SystemRegistry.get(address(this));
     bytes32 key = ResourceId.unwrap(resourceId);
-    uint256 amount = RevenueStats.get(key) + _msgValue();
-    RevenueStats.set(key, amount);
+    uint256 newAmount = RevenueStats.get(key) + _msgValue();
+    RevenueStats.set(key, newAmount);
   }
 
   /**

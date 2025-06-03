@@ -85,7 +85,7 @@ contract ArtifactTest is BaseTest {
     assertEq(Counter.getArtifact(), 1);
     assertEq(ArtifactOwner.get(uint32(artifact)), bytes32(uint256(1)));
     ArtifactData memory data = ArtifactTable.get(uint32(artifact));
-    Artifact memory tArtifact = ArtifactLib.NewArtifact(seed, 1, 1);
+    Artifact memory tArtifact = ArtifactLib.NewArtifact(seed, 1, 1, SpaceType.NEBULA, 1); // PUNK: biomebase is 1
     assertEq(uint8(data.rarity), uint8(tArtifact.rarity));
     assertEq(uint8(data.artifactIndex), tArtifact.artifactIndex);
     assertEq(uint8(data.status), uint8(ArtifactStatus.DEFAULT));

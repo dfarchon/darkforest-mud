@@ -73,18 +73,18 @@ contract PinkBombInstallLibrary is BaseInstallLibrary {
       cooldown: 14400,
       durable: false,
       reusable: false,
-      reqLevel: 0x0300,
+      reqLevel: 0x0504,
       reqPopulation: 0,
       reqSilver: 0
     });
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.COMMON, metadata);
-    metadata.reqLevel = 0x0500;
+    metadata.reqLevel = 0x0604;
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.RARE, metadata);
-    metadata.reqLevel = 0x0700;
+    metadata.reqLevel = 0x0704;
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.EPIC, metadata);
-    metadata.reqLevel = 0x0900;
+    metadata.reqLevel = 0x0904;
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.LEGENDARY, metadata);
-    metadata.reqLevel = 0x0a00;
+    metadata.reqLevel = 0x0a04;
     ArtifactMetadata.set(metadataTableId, ArtifactRarity.MYTHIC, metadata);
   }
 
