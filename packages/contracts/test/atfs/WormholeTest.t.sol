@@ -11,7 +11,7 @@ import { Errors } from "../../src/interfaces/errors.sol";
 import { Proof } from "../../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../../src/lib/VerificationInput.sol";
 import { Planet } from "../../src/lib/Planet.sol";
-import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity } from "../../src/codegen/common.sol";
+import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, Biome } from "../../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as WORMHOLE_INDEX } from "../../src/modules/atfs/Wormhole/constant.sol";
 import { WormholeSystem } from "../../src/modules/atfs/Wormhole/WormholeSystem.sol";
@@ -36,7 +36,7 @@ contract WormholeTest is BaseTest {
     Counter.setArtifact(1);
     PlanetArtifact.set(bytes32(uint256(1)), 1);
     ArtifactOwner.set(1, bytes32(uint256(1)));
-    ArtifactTable.set(1, WORMHOLE_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
+    ArtifactTable.set(1, WORMHOLE_INDEX, ArtifactRarity.COMMON, Biome.CORRUPTED, ArtifactStatus.DEFAULT, 0, 0, 0);
     vm.stopPrank();
   }
 

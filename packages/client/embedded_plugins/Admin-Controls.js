@@ -138,8 +138,9 @@ async function createPlanet(coords, level, type) {
   //PUNK when dfares/types update, need to update here
   type++;
 
-  //PUNK add more spaceType later
-  const spaceType = 1; // Math.round(df.spaceTypePerlin(coords));
+  const perlin = Math.round(df.spaceTypePerlin(coords));
+  const distFromOrigin = Math.sqrt(coords.x ** 2 + coords.y ** 2);
+  const spaceType = df.spaceTypeFromPerlin(perlin, distFromOrigin);
 
   const args = Promise.resolve([
     location,

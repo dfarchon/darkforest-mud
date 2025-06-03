@@ -1,4 +1,6 @@
 import type {
+  AIZone,
+  AIZoneRendererType,
   Artifact,
   ArtifactId,
   ArtifactRarity,
@@ -29,8 +31,6 @@ import type {
   PerlinRendererType,
   PinkZone,
   PinkZoneRendererType,
-  AIZone,
-  AIZoneRendererType,
   Planet,
   PlanetLevel,
   PlanetRendererType,
@@ -61,6 +61,7 @@ import type {
 import { RendererType, Setting } from "@df/types";
 import autoBind from "auto-bind";
 
+import { AIZoneRenderer } from "./Entities/AIZoneRenderer";
 import { AsteroidRenderer } from "./Entities/AsteroidRenderer";
 import { BackgroundRenderer } from "./Entities/BackgroundRenderer";
 import { BeltRenderer } from "./Entities/BeltRenderer";
@@ -74,7 +75,6 @@ import { MineBodyRenderer } from "./Entities/MineBodyRenderer";
 import { MineRenderer } from "./Entities/MineRenderer";
 import { PerlinRenderer } from "./Entities/PerlinRenderer";
 import { PinkZoneRenderer } from "./Entities/PinkZoneRenderer";
-import { AIZoneRenderer } from "./Entities/AIZoneRenderer";
 import { PlanetRenderer } from "./Entities/PlanetRenderer";
 import { PlanetRenderManager } from "./Entities/PlanetRenderManager";
 import { QuasarBodyRenderer } from "./Entities/QuasarBodyRenderer";
@@ -91,6 +91,7 @@ import { UnminedRenderer } from "./Entities/UnminedRenderer";
 import { VoyageRenderer } from "./Entities/VoyageRenderer";
 import { Overlay2DRenderer } from "./Overlay2DRenderer";
 import {
+  isAIZoneRenderer,
   isAsteroidRenderer,
   isBackgroundRenderer,
   isBeltRenderer,
@@ -104,7 +105,6 @@ import {
   isMineRenderer,
   isPerlinRenderer,
   isPinkZoneRenderer,
-  isAIZoneRenderer,
   isPlanetRenderer,
   isPlanetRendererManager,
   isQuasarBodyRenderer,
@@ -142,7 +142,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   getAccount(): EthAddress | undefined;
   getCurrentTick(): number;
   convertTickToMs(tick: number): number;
-  tickerRangeToTime(left: number, right: number): number;
+  // tickerRangeToTime(left: number, right: number): number;
   getAllVoyages(): QueuedArrival[];
   getPlayer(address?: EthAddress): Player | undefined;
   getUnconfirmedMoves(): Transaction<UnconfirmedMove>[];

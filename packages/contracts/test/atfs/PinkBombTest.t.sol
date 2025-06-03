@@ -15,7 +15,7 @@ import { Proof } from "../../src/lib/SnarkProof.sol";
 import { RevealInput, MoveInput } from "../../src/lib/VerificationInput.sol";
 import { Planet } from "../../src/lib/Planet.sol";
 import { EffectLib } from "../../src/lib/Effect.sol";
-import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetStatus, PlanetFlagType } from "../../src/codegen/common.sol";
+import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetStatus, PlanetFlagType, Biome } from "../../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as PINK_BOMB_INDEX } from "../../src/modules/atfs/PinkBomb/constant.sol";
 import { GENERAL_ACTIVATE } from "../../src/modules/atfs/PinkBomb/constant.sol";
@@ -45,8 +45,8 @@ contract PinkBombTest is BaseTest {
     PlanetArtifact.set(bytes32(uint256(1)), (1 << 32) + 2);
     ArtifactOwner.set(1, bytes32(uint256(1)));
     ArtifactOwner.set(2, bytes32(uint256(1)));
-    ArtifactTable.set(1, PINK_BOMB_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
-    ArtifactTable.set(2, PINK_BOMB_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
+    ArtifactTable.set(1, PINK_BOMB_INDEX, ArtifactRarity.COMMON, Biome.CORRUPTED, ArtifactStatus.DEFAULT, 0, 0, 0);
+    ArtifactTable.set(2, PINK_BOMB_INDEX, ArtifactRarity.COMMON, Biome.CORRUPTED, ArtifactStatus.DEFAULT, 0, 0, 0);
     vm.stopPrank();
   }
 

@@ -43,7 +43,7 @@ contract ArtifactPortalSystem is BaseSystem {
     (bool success, bytes memory data) = address(nft).call(abi.encodeWithSelector(IERC721.ownerOf.selector, artifactId));
     if (!success) {
       // PUNK: add artifact biome later
-      nft.mint(planet.owner, artifactId, uint8(artifact.artifactIndex), uint8(artifact.rarity), 1);
+      nft.mint(planet.owner, artifactId, uint8(artifact.artifactIndex), uint8(artifact.rarity), uint8(artifact.biome));
     } else {
       address owner = abi.decode(data, (address));
       if (owner != worldAddress) {

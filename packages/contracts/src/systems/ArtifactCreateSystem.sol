@@ -26,7 +26,7 @@ contract ArtifactCreateSystem is BaseSystem {
     DFUtils.verify(worldAddress, proof, input);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, input.planetHash);
-    Artifact memory artifact = planet.findArtifact(_msgSender());
+    Artifact memory artifact = planet.findArtifact(_msgSender(), input.biomebase);
 
     Counter.setArtifact(uint24(artifact.id));
     artifact.writeToStore();

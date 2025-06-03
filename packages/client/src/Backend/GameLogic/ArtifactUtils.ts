@@ -120,7 +120,7 @@ export class ArtifactUtils {
       id: artifactId,
       planetDiscoveredOn: "0" as LocationId,
       rarity: artifactRec.rarity as ArtifactRarity,
-      planetBiome: 0 as Biome,
+      planetBiome: artifactRec.biome as Biome,
       mintedAtTimestamp: 0,
       discoverer: EMPTY_ADDRESS,
       artifactType,
@@ -154,6 +154,7 @@ export class ArtifactUtils {
     owner: EthAddress,
     index: number,
     rarity: number,
+    biome: number,
   ): Artifact | undefined {
     const artifactId = artifactIdFromDecStr(tokenId.toString());
     const {
@@ -204,7 +205,7 @@ export class ArtifactUtils {
       id: artifactId,
       planetDiscoveredOn: "0" as LocationId,
       rarity: rarity as ArtifactRarity,
-      planetBiome: 0 as Biome,
+      planetBiome: biome as Biome,
       mintedAtTimestamp: 0,
       discoverer: EMPTY_ADDRESS,
       artifactType,
