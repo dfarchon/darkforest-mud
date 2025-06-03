@@ -50,8 +50,15 @@ export class PlanetUtils {
     const planetRec = getComponentValue(PlanetConstants, planetEntity);
 
     if (planetRec) {
-      // If planet is in contract, it is OK to input any value for perlin and distSquare
-      const planet: Planet = this.readPlanet(planetId, 20, 0);
+      // NOTICE:
+      // When a planet is stored onchain, any provided Perlin value will be accepted.
+      // However, supplying an incorrect distSquare value may result in the planet's
+      // computed distSquare and universeZone being inaccurate.
+      //
+      // In this case, a distSquare value of 0 was provided as input.
+      // It should be noted that this may indicate the presence of invalid or corrupted data.
+
+      const planet: Planet = this.readPlanet(planetId, 0, 0);
       return planet;
     } else {
       return undefined;
