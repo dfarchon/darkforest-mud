@@ -51,7 +51,7 @@ export class PlanetUtils {
 
     if (planetRec) {
       // If planet is in contract, it is OK to input any value for perlin and distSquare
-      const planet: Planet = this.readPlanet(planetId, 0, 0);
+      const planet: Planet = this.readPlanet(planetId, 20, 0);
       return planet;
     } else {
       return undefined;
@@ -182,6 +182,7 @@ export class PlanetUtils {
       spaceType = planetRec.spaceType as SpaceType;
       planetType = planetRec.planetType as PlanetType;
       planetLevel = planetRec.level as PlanetLevel;
+      perlin = planetRec.perlin;
       universeZone = this._initZone(distSquare);
 
       const ownerInContract = getComponentValue(PlanetOwner, planetEntity);

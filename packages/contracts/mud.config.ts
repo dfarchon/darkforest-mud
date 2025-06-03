@@ -205,6 +205,7 @@ export default defineWorld({
         id: "uint32",
         artifactIndex: "uint8",
         rarity: "ArtifactRarity",
+        biome: "Biome",
         status: "ArtifactStatus",
         chargeTick: "uint64",
         activateTick: "uint64",

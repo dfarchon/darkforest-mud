@@ -13,7 +13,7 @@ import { Proof } from "../../src/lib/SnarkProof.sol";
 import { BiomebaseInput, MoveInput } from "../../src/lib/VerificationInput.sol";
 import { Planet } from "../../src/lib/Planet.sol";
 import { EffectLib } from "../../src/lib/Effect.sol";
-import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetFlagType } from "../../src/codegen/common.sol";
+import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetFlagType, Biome } from "../../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as CANNON_INDEX, COMMON_CHARGE, COMMON_ACTIVATE_BEFORE_MOVE, COMMON_ACTIVATE_STAT_BUFF } from "../../src/modules/atfs/PhotoidCannon/constant.sol";
 import { CannonSystem } from "../../src/modules/atfs/PhotoidCannon/CannonSystem.sol";
@@ -37,8 +37,8 @@ contract CannonTest is BaseTest {
     PlanetArtifact.set(bytes32(uint256(1)), (1 << 32) + 2);
     ArtifactOwner.set(1, bytes32(uint256(1)));
     ArtifactOwner.set(2, bytes32(uint256(1)));
-    ArtifactTable.set(1, CANNON_INDEX, ArtifactRarity.COMMON, ArtifactStatus.DEFAULT, 0, 0, 0);
-    ArtifactTable.set(2, CANNON_INDEX, ArtifactRarity.RARE, ArtifactStatus.DEFAULT, 0, 0, 0);
+    ArtifactTable.set(1, CANNON_INDEX, ArtifactRarity.COMMON, Biome.CORRUPTED, ArtifactStatus.DEFAULT, 0, 0, 0);
+    ArtifactTable.set(2, CANNON_INDEX, ArtifactRarity.RARE, Biome.CORRUPTED, ArtifactStatus.DEFAULT, 0, 0, 0);
     vm.stopPrank();
   }
 

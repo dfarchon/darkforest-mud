@@ -279,9 +279,19 @@ library PlanetLib {
     ProspectedPlanet.set(bytes32(planet.planetHash), uint64(block.number));
   }
 
-  function findArtifact(Planet memory planet, address executor) internal view returns (Artifact memory artifact) {
+  function findArtifact(
+    Planet memory planet,
+    address executor,
+    uint256 biomebase
+  ) internal view returns (Artifact memory artifact) {
     _validateFindingArtifact(planet, executor);
-    artifact = ArtifactLib.NewArtifact(_createArtifactSeed(planet), planet.planetHash, planet.level);
+    artifact = ArtifactLib.NewArtifact(
+      _createArtifactSeed(planet),
+      planet.planetHash,
+      planet.level,
+      planet.spaceType,
+      biomebase
+    );
     if (planet.hasArtifactSlot()) {
       planet.pushArtifact(artifact.id);
     } else {
@@ -741,6 +751,10 @@ library PlanetLib {
   }
 
   function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
+    if (planet.spaceType == SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
+
     uint256 res = uint8(planet.spaceType) * 3;
     PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
     if (biomeBase < config.threshold1) {

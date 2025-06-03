@@ -10,6 +10,9 @@ import { ArtifactConfig, ArtifactConfigData } from "codegen/tables/ArtifactConfi
 import { PlanetArtifact } from "codegen/tables/PlanetArtifact.sol";
 import { ArtifactOwner } from "codegen/tables/ArtifactOwner.sol";
 import { Round } from "codegen/tables/Round.sol";
+
+import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
+
 import { ArtifactMetadata, ArtifactMetadataData } from "modules/atfs/tables/ArtifactMetadata.sol";
 import { _artifactMetadataTableId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
 
@@ -140,6 +143,7 @@ struct Artifact {
   // Table: Artifact
   ArtifactStatus status;
   ArtifactRarity rarity;
+  Biome biome;
   uint256 artifactIndex;
   uint256 chargeTick;
   uint256 activateTick;
@@ -159,7 +163,9 @@ library ArtifactLib {
   function NewArtifact(
     uint256 seed,
     uint256 planetHash,
-    uint256 planetLevel
+    uint256 planetLevel,
+    SpaceType spaceType,
+    uint256 biomebase
   ) internal view returns (Artifact memory artifact) {
     uint256 round = Round.get();
     uint256 internalId = Counter.getArtifact() + 1;
@@ -168,6 +174,7 @@ library ArtifactLib {
     artifact.planetHash = planetHash;
     artifact._initRarity(seed, planetLevel);
     artifact._initType(seed);
+    artifact._initBiome(spaceType, biomebase);
   }
 
   function NewArtifactFromNFT(
@@ -181,11 +188,13 @@ library ArtifactLib {
     artifact.planetHash = planetHash;
     artifact.artifactIndex = index;
     artifact.rarity = ArtifactRarity(rarity);
+    artifact.biome = Biome(biome);
   }
 
   function readFromStore(Artifact memory artifact, uint256 curTick) internal view {
     ArtifactData memory data = ArtifactTable.get(uint32(artifact.id));
     artifact.rarity = data.rarity;
+    artifact.biome = data.biome;
     artifact.artifactIndex = data.artifactIndex;
     artifact.status = data.status;
     artifact.chargeTick = data.chargeTick;
@@ -208,6 +217,7 @@ library ArtifactLib {
       uint32(artifact.id),
       uint8(artifact.artifactIndex),
       artifact.rarity,
+      artifact.biome,
       artifact.status,
       uint64(artifact.chargeTick),
       uint64(artifact.activateTick),
@@ -269,5 +279,25 @@ library ArtifactLib {
       }
     }
     revert Errors.UnkonwnArtifactType();
+  }
+
+  function _initBiome(
+    Artifact memory artifact,
+    SpaceType spaceType,
+    uint256 biomeBase
+  ) internal view returns (Biome biome) {
+    if (spaceType == SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
+
+    uint256 res = uint8(spaceType) * 3;
+    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
+    if (biomeBase < config.threshold1) {
+      res -= 2;
+    } else if (biomeBase < config.threshold2) {
+      res -= 1;
+    }
+    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
+    artifact.biome = biome;
   }
 }
