@@ -43,7 +43,7 @@ export function ArtifactFilters({
         onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
         className="rounded border px-3 py-1 text-sm"
       >
-        <option value="">All Art types</option>
+        <option value="">All Types</option>
         {options.types.map((type) => (
           <option key={type} value={type}>
             {type}
