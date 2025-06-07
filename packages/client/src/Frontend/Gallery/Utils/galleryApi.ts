@@ -1,0 +1,127 @@
+export async function fetchArtifacts(DFARTAddress: string) {
+  try {
+    let allArtifacts = [];
+    let nextParams = "";
+
+    let cnt = 0;
+
+    do {
+      cnt++;
+      console.log("cnt", cnt);
+      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${DFARTAddress}/instances${nextParams ? "?" + nextParams : ""}`;
+
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error("Base API fetch failed");
+
+      const result = await response.json();
+      console.log("result", result);
+      if (!result.items) break; // no more items
+
+      // 0x83F67792A72B0b2dF543318162362f71376c08af
+      allArtifacts = allArtifacts.concat(
+        result.items
+          .filter(
+            (token: never) =>
+              token.owner?.hash?.toLowerCase() !==
+              "0x83f67792a72b0b2df543318162362f71376c08af",
+          )
+          .map((token: never) => ({
+            tokenId: token.id,
+            owner: token.owner?.hash || "...",
+            metadata: token.metadata || {},
+          })),
+      );
+
+      if (result.next_page_params) {
+        // build next params from response
+        const params = new URLSearchParams(result.next_page_params).toString();
+        nextParams = params;
+      } else {
+        nextParams = ""; // stop
+      }
+
+      // if (cnt > 0) break;
+    } while (nextParams);
+
+    return allArtifacts;
+  } catch (error) {
+    console.error("Failed to fetch all artifacts:", error);
+    return [];
+  }
+}
+// Helper API function to read specific address tokens
+export async function fetchOwnedArtifacts_backup(
+  DFARTAddress: string,
+  owner: string,
+) {
+  try {
+    let artifacts = [];
+    let nextParams = `holder_address_hash=${owner}`;
+
+    while (nextParams) {
+      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${DFARTAddress}/instances?${nextParams}`;
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error("Blockscout API fetch failed");
+
+      const result = await response.json();
+      if (!result.items) break;
+
+      artifacts = artifacts.concat(
+        result.items.map((token: never) => ({
+          tokenId: token.id,
+          owner: token.owner.hash || "...",
+          metadata: token.metadata || {},
+        })),
+      );
+
+      if (result.next_page_params) {
+        const { holder_address_hash, unique_token } = result.next_page_params;
+        nextParams = `holder_address_hash=${holder_address_hash}&unique_token=${unique_token}`;
+      } else {
+        nextParams = null;
+      }
+    }
+
+    return artifacts;
+  } catch (error) {
+    console.error("Failed to fetch owned artifacts completely:", error);
+    return [];
+  }
+}
+
+// Helper API function to read specific address tokens
+export async function fetchOwnedArtifacts(DFARTAddress: string, owner: string) {
+  try {
+    let artifacts = [];
+    let nextParams = `holder_address_hash=${owner}`;
+
+    while (nextParams) {
+      const apiUrl = `https://base.blockscout.com/api/v2/tokens/${DFARTAddress}/instances?${nextParams}`;
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error("Blockscout API fetch failed");
+
+      const result = await response.json();
+      if (!result.items) break;
+
+      artifacts = artifacts.concat(
+        result.items.map((token: never) => ({
+          tokenId: token.id,
+          owner: token.owner.hash || "...",
+          metadata: token.metadata || {},
+        })),
+      );
+
+      if (result.next_page_params) {
+        const { holder_address_hash, unique_token } = result.next_page_params;
+        nextParams = `holder_address_hash=${holder_address_hash}&unique_token=${unique_token}`;
+      } else {
+        nextParams = null;
+      }
+    }
+
+    return artifacts;
+  } catch (error) {
+    console.error("Failed to fetch owned artifacts completely:", error);
+    return [];
+  }
+}
