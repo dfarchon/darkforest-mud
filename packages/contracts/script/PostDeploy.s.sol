@@ -24,6 +24,7 @@ import { Round } from "../src/codegen/index.sol";
 import { ArtifactNFT as ArtifactNFTTable } from "../src/codegen/index.sol";
 import { AtfInstallModule } from "../src/codegen/index.sol";
 import { RevealedPlanet, PlanetBiomeConfig, PlanetBiomeConfigData, ArtifactConfig } from "../src/codegen/index.sol";
+import { JunkConfig, JunkConfigData } from "../src/codegen/index.sol";
 import { ArtifactInstallModule } from "../src/modules/atfs/ArtifactInstallModule.sol";
 import { installCannon } from "../src/modules/atfs/PhotoidCannon/CannonInstallLibrary.sol";
 import { installWormhole } from "../src/modules/atfs/Wormhole/WormholeInstallLibrary.sol";
@@ -75,6 +76,7 @@ contract PostDeploy is Script {
       string memory key = string.concat(".artifact.", i.toString());
       ArtifactConfig.set(ArtifactRarity(i), indexes, abi.decode(toml.parseRaw(key), (uint16[])));
     }
+    JunkConfig.set(abi.decode(toml.parseRaw(".junk_config"), (JunkConfigData)));
     uint8 roundNum = abi.decode(toml.parseRaw(".round.number"), (uint8));
     Round.set(roundNum);
     address artifactNftAddress = abi.decode(toml.parseRaw(".artifact_nft.address"), (address));

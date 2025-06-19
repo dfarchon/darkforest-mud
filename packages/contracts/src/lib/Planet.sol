@@ -7,6 +7,7 @@ import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagT
 import { Planet as PlanetTable, PlanetData } from "codegen/tables/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
+import { PlanetJunkOwner } from "codegen/tables/PlanetJunkOwner.sol";
 import { PlanetConstants, PlanetConstantsData } from "codegen/tables/PlanetConstants.sol";
 import { PlanetProps, PlanetPropsData } from "codegen/tables/PlanetProps.sol";
 import { PlanetEffects, PlanetEffectsData } from "codegen/tables/PlanetEffects.sol";
@@ -42,6 +43,7 @@ struct Planet {
   // Table: PlanetOwner
   bool ownerChanged;
   address owner;
+  address junkOwner;
   // Table: PlanetConstants
   bool isInitialized;
   uint256 perlin;
@@ -112,6 +114,9 @@ library PlanetLib {
     if (planet.ownerChanged) {
       PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
     }
+
+    PlanetJunkOwner.set(bytes32(planet.planetHash), planet.junkOwner);
+
     if (planet.updateProps) {
       planet.useProps = true;
       PlanetProps.set(
@@ -446,6 +451,7 @@ library PlanetLib {
 
   function _readPlanetData(Planet memory planet) internal view {
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
+    planet.junkOwner = PlanetJunkOwner.get(bytes32(planet.planetHash));
     PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
     planet.population = data.population;
