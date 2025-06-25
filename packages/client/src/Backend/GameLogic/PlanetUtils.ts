@@ -165,6 +165,8 @@ export class PlanetUtils {
       PlanetFlags,
       PlanetArtifact,
       PlanetEffects,
+      PlanetJunkOwner,
+      PlanetAddJunkTick,
     } = this.components;
 
     const planetEntity = encodeEntity(PlanetConstants.metadata.keySchema, {
@@ -367,6 +369,16 @@ export class PlanetUtils {
       }
     }
 
+    const junkOwnerData = getComponentValue(PlanetJunkOwner, planetEntity);
+    const junkOwner = junkOwnerData
+      ? address(junkOwnerData.value)
+      : EMPTY_ADDRESS;
+
+    const planetAddJunkTickData = getComponentValue(
+      PlanetAddJunkTick,
+      planetEntity,
+    );
+
     return {
       locationId: planetId,
       isHomePlanet: false,
@@ -409,6 +421,10 @@ export class PlanetUtils {
       effects: planetEffects,
       flags: planetFlags ? planetFlags.flags : 0n,
       transactions: new TxCollection(),
+      junkOwner: junkOwner,
+      addJunkTick: planetAddJunkTickData
+        ? Number(planetAddJunkTickData.value)
+        : 0,
     };
   }
 

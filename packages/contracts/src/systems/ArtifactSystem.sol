@@ -23,6 +23,9 @@ contract ArtifactSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     Artifact memory artifact = planet.mustGetArtifact(artifactId);
     if (planet.owner != _msgSender()) {
       revert NotPlanetOwner();
@@ -38,6 +41,9 @@ contract ArtifactSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     Artifact memory artifact = planet.mustGetArtifact(artifactId);
     if (planet.owner != _msgSender()) {
       revert NotPlanetOwner();
@@ -53,6 +59,9 @@ contract ArtifactSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     Artifact memory artifact = planet.mustGetArtifact(artifactId);
     if (planet.owner != _msgSender()) {
       revert NotPlanetOwner();

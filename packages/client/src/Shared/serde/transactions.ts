@@ -3,6 +3,7 @@ import type {
   TxIntent,
   UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
+  UnconfirmedAddJunk,
   UnconfirmedApplyToGuild,
   UnconfirmedApproveApplication,
   UnconfirmedBlue,
@@ -16,6 +17,7 @@ import type {
   UnconfirmedChangeArtifactImageType,
   UnconfirmedChargeArtifact,
   UnconfirmedClaim,
+  UnconfirmedClearJunk,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -173,6 +175,18 @@ export function isUnconfirmedWithdrawSilver(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedWithdrawSilver {
   return txIntent.methodName === "df__withdrawSilver";
+}
+
+export function isUnconfirmedAddJunk(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedAddJunk {
+  return txIntent.methodName === "df__addJunk";
+}
+
+export function isUnconfirmedClearJunk(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedClearJunk {
+  return txIntent.methodName === "df__clearJunk";
 }
 
 export function isUnconfirmedSetPlanetEmoji(
@@ -449,6 +463,18 @@ export function isUnconfirmedWithdrawSilverTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedWithdrawSilver> {
   return isUnconfirmedWithdrawSilver(tx.intent);
+}
+
+export function isUnconfirmedAddJunkTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedAddJunk> {
+  return isUnconfirmedAddJunk(tx.intent);
+}
+
+export function isUnconfirmedClearJunkTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedClearJunk> {
+  return isUnconfirmedClearJunk(tx.intent);
 }
 
 export function isUnconfirmedSetPlanetEmojiTx(

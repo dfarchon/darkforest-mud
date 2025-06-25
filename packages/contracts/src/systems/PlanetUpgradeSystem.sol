@@ -24,6 +24,9 @@ contract PlanetUpgradeSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     address executor = _msgSender();
     planet.upgrade(executor, rangeUpgrades, speedUpgrades, defenseUpgrades);
     planet.writeToStore();

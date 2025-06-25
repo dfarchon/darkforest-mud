@@ -42,6 +42,11 @@ contract MoveSystem is BaseSystem {
     if (_input.toPlanetHash == _input.fromPlanetHash) {
       revert MoveToSamePlanet();
     }
+
+    if (fromPlanet.owner != fromPlanet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
+
     Planet memory toPlanet = DFUtils.readAnyPlanet(
       worldAddress,
       _input.toPlanetHash,

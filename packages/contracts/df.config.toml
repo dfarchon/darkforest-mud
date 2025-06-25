@@ -164,9 +164,9 @@ l_upgrades = 0
 
 
 [junk_config]
-a_SPACE_JUNK_ENABLED = false
+a_SPACE_JUNK_ENABLED = true
 # Total amount of space junk a player can take on. This can be overridden at runtime by updating this value for a specific player in storage.
-b_SPACE_JUNK_LIMIT = 3000
+b_SPACE_JUNK_LIMIT = 6000
 # The speed boost a movement receives when abandoning a planet.
 c_ABANDON_SPEED_CHANGE_PERCENT = 150
 # The range boost a movement receives when abandoning a planet.

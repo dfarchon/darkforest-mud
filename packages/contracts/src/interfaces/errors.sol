@@ -29,6 +29,7 @@ interface Errors {
   error ReachMaxMoveToLimit(uint8 limit); // 0x0edddad6
   error ArtifactStorageFull(); // 0xb3643b72
   error ArtifactNotOnPlanet(); // 0x37a29a4e
+  error PlanetOwnershipMismatch(); //0xb43ec652
 
   // tick system
   error Paused(); // 0x9e87fac8

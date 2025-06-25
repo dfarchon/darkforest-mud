@@ -294,42 +294,42 @@ export interface ContractConstants {
 
   // ARTIFACT_POINT_VALUES: ArtifactPointValues;
   // Space Junk
-  // SPACE_JUNK_ENABLED: boolean;
+  SPACE_JUNK_ENABLED: boolean;
   /**
      Total amount of space junk a player can take on.
      This can be overridden at runtime by updating
      this value for a specific player in storage.
    */
-  // SPACE_JUNK_LIMIT: number;
+  SPACE_JUNK_LIMIT: number;
 
   /**
      The amount of junk that each level of planet
      gives the player when moving to it for the
      first time.
    */
-  // PLANET_LEVEL_JUNK: [
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  //   number,
-  // ];
+  PLANET_LEVEL_JUNK: [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ];
 
   /**
      The speed boost a movement receives when abandoning
      a planet.
    */
-  // ABANDON_SPEED_CHANGE_PERCENT: number;
+  ABANDON_SPEED_CHANGE_PERCENT: number;
   /**
      The range boost a movement receives when abandoning
      a planet.
    */
-  // ABANDON_RANGE_CHANGE_PERCENT: number;
+  ABANDON_RANGE_CHANGE_PERCENT: number;
 
   // Capture Zones
   // GAME_START_BLOCK: number;

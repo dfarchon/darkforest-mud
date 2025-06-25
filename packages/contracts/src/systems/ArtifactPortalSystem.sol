@@ -20,6 +20,10 @@ contract ArtifactPortalSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
+
     if (planet.planetType != PlanetType.SPACETIME_RIP) {
       revert InvalidPlanetType();
     }
@@ -58,6 +62,9 @@ contract ArtifactPortalSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     if (planet.planetType != PlanetType.SPACETIME_RIP) {
       revert InvalidPlanetType();
     }

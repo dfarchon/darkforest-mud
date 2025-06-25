@@ -25,7 +25,6 @@ contract PlanetJunkSystem is BaseSystem {
 
     bool SPACE_JUNK_ENABLED = JunkConfig.getSPACE_JUNK_ENABLED();
     uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
-
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
 
     address oldPlanetJunkOwner = planet.junkOwner;
@@ -72,7 +71,7 @@ contract PlanetJunkSystem is BaseSystem {
     planet.junkOwner = address(0);
 
     if (planet.owner == executor) {
-      planet.owner = address(0);
+      planet.changeOwner(address(0));
     }
 
     planet.writeToStore();

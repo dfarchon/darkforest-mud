@@ -18,6 +18,9 @@ contract PlanetEmojiSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     address executor = _msgSender();
 
     if (planet.owner != executor) revert NotPlanetOwner();

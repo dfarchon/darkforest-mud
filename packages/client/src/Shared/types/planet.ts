@@ -246,6 +246,8 @@ export type Planet = {
 
   effects?: Effect[];
   flags?: bigint;
+  junkOwner: EthAddress;
+  addJunkTick: number;
 };
 
 /**

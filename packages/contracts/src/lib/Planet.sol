@@ -170,22 +170,6 @@ library PlanetLib {
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
-    if (planet.owner == address(0)) {
-      return;
-    }
-
-    if (planet.owner != planet.junkOwner) {
-      return;
-    }
-
-    if (planet.lastUpdateTick >= untilTick) {
-      return;
-    }
-
-    if (planet.addJunkTick >= untilTick) {
-      return;
-    }
-
     if (planet.lastUpdateTick >= untilTick) {
       return;
     }
@@ -194,6 +178,14 @@ library PlanetLib {
     uint256 tickElapsed = untilTick - startTick;
 
     planet.lastUpdateTick = untilTick;
+
+    if (planet.owner == address(0)) {
+      return;
+    }
+
+    if (planet.owner != planet.junkOwner) {
+      return;
+    }
 
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);

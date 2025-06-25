@@ -15,6 +15,9 @@ contract ArtifactCreateSystem is BaseSystem {
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     planet.prospect(_msgSender());
     planet.writeToStore();
   }
@@ -26,6 +29,9 @@ contract ArtifactCreateSystem is BaseSystem {
     DFUtils.verify(worldAddress, proof, input);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, input.planetHash);
+    if (planet.owner != planet.junkOwner) {
+      revert PlanetOwnershipMismatch();
+    }
     Artifact memory artifact = planet.findArtifact(_msgSender(), input.biomebase);
 
     Counter.setArtifact(uint24(artifact.id));

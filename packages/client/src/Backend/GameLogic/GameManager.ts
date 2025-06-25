@@ -60,6 +60,8 @@ import {
   locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
+  isUnconfirmedAddJunkTx,
+  isUnconfirmedClearJunkTx,
 } from "@df/serde";
 import type {
   RevealInput,
@@ -144,6 +146,8 @@ import type {
   VoyageId,
   WorldCoords,
   WorldLocation,
+  UnconfirmedAddJunk,
+  UnconfirmedClearJunk,
 } from "@df/types";
 import type { Guild, GuildId } from "@df/types";
 import {
@@ -4966,6 +4970,172 @@ export class GameManager extends EventEmitter {
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__withdrawSilver",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async addJunk(
+    locationId: LocationId,
+  ): Promise<Transaction<UnconfirmedAddJunk>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("unknown planet");
+      }
+
+      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
+        throw new Error("can only add junk from a planet you own");
+      }
+
+      if (planet.transactions?.hasTransaction(isUnconfirmedAddJunkTx)) {
+        throw new Error(
+          "another add junk action is already in progress for this planet",
+        );
+      }
+
+      // if (planet.destroyed || planet.frozen) {
+      //   throw new Error(
+      //     "can't withdraw silver from a destroyed/frozen planet",
+      //   );
+      // }
+
+      if (!this.contractsAPI.getConstants().SPACE_JUNK_ENABLED) {
+        throw new Error("space junk is disabled");
+      }
+
+      if (planet.owner !== this.getAccount()) {
+        throw new Error("can only add junk to your own planet");
+      }
+
+      const player = this.getPlayer(this.getAccount());
+
+      if (!player) {
+        throw new Error("player not found");
+      }
+
+      if (
+        player.junk +
+          this.contractsAPI.getConstants().PLANET_LEVEL_JUNK[
+            planet.planetLevel
+          ] >
+        this.contractsAPI.getConstants().SPACE_JUNK_LIMIT
+      ) {
+        throw new Error("junk limit exceeded");
+      }
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-addJunkPlanet`,
+        locationId,
+      );
+
+      const delegator = planet.owner;
+
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedAddJunk = {
+        delegator: delegator,
+        methodName: "df__addJunk",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([locationIdToDecStr(locationId)]),
+        locationId,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__addJunk",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async clearJunk(
+    locationId: LocationId,
+  ): Promise<Transaction<UnconfirmedClearJunk>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("unknown planet");
+      }
+
+      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
+        throw new Error("can only clear junk from a planet you own");
+      }
+
+      if (planet.transactions?.hasTransaction(isUnconfirmedClearJunkTx)) {
+        throw new Error(
+          "another clearJunk action is already in progress for this planet",
+        );
+      }
+
+      // if (planet.destroyed || planet.frozen) {
+      //   throw new Error(
+      //     "can't withdraw silver from a destroyed/frozen planet",
+      //   );
+      // }
+
+      if (!this.contractsAPI.getConstants().SPACE_JUNK_ENABLED) {
+        throw new Error("space junk is disabled");
+      }
+
+      if (planet.junkOwner !== this.getAccount()) {
+        throw new Error("can only clear junk from your junk planet");
+      }
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-addJunkPlanet`,
+        locationId,
+      );
+
+      const delegator = planet.owner;
+
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedClearJunk = {
+        delegator: delegator,
+        methodName: "df__clearJunk",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([locationIdToDecStr(locationId)]),
+        locationId,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__clearJunk",
         (e as Error).message,
       );
       throw e;
