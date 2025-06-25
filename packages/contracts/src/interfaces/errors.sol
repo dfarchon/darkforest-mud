@@ -73,6 +73,12 @@ interface Errors {
   error InsufficientSilverOnPlanet(); // 0xfe845fce
   error WithdrawAmountTooLow(); // 0xba43ea37
 
+  // planet junk systemAdd commentMore actions
+  error SpaceJunkDisabled(); // 0x94486384
+  error JunkLimitExceeded(); // 0x711da309
+  error InvalidJunkOperation(); // 0xa94506f6
+  error NotJunkOwner(); // 0x438f2b77
+
   // GPTToken system
   error NotEnoughETH(); // 0x932b84b0
   error NotEnoughGPTTokens(); // 0x134712e2

@@ -603,5 +603,13 @@ export default defineWorld({
       key: [],
     },
     PlanetJunkOwner: "address",
+    PlanetAddJunkTick: "uint256",
+    PlayerJunk: {
+      schema: {
+        owner: "address",
+        junk: "uint256",
+      },
+      key: ["owner"],
+    },
   },
 });

@@ -8,6 +8,7 @@ import { Planet as PlanetTable, PlanetData } from "codegen/tables/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
 import { PlanetJunkOwner } from "codegen/tables/PlanetJunkOwner.sol";
+import { PlanetAddJunkTick } from "codegen/tables/PlanetAddJunkTick.sol";
 import { PlanetConstants, PlanetConstantsData } from "codegen/tables/PlanetConstants.sol";
 import { PlanetProps, PlanetPropsData } from "codegen/tables/PlanetProps.sol";
 import { PlanetEffects, PlanetEffectsData } from "codegen/tables/PlanetEffects.sol";
@@ -44,6 +45,7 @@ struct Planet {
   bool ownerChanged;
   address owner;
   address junkOwner;
+  uint256 addJunkTick;
   // Table: PlanetConstants
   bool isInitialized;
   uint256 perlin;
@@ -116,6 +118,7 @@ library PlanetLib {
     }
 
     PlanetJunkOwner.set(bytes32(planet.planetHash), planet.junkOwner);
+    PlanetAddJunkTick.set(bytes32(planet.planetHash), planet.addJunkTick);
 
     if (planet.updateProps) {
       planet.useProps = true;
@@ -167,14 +170,31 @@ library PlanetLib {
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
-    if (planet.lastUpdateTick >= untilTick) {
-      return;
-    }
-    uint256 tickElapsed = untilTick - planet.lastUpdateTick;
-    planet.lastUpdateTick = untilTick;
     if (planet.owner == address(0)) {
       return;
     }
+
+    if (planet.owner != planet.junkOwner) {
+      return;
+    }
+
+    if (planet.lastUpdateTick >= untilTick) {
+      return;
+    }
+
+    if (planet.addJunkTick >= untilTick) {
+      return;
+    }
+
+    if (planet.lastUpdateTick >= untilTick) {
+      return;
+    }
+
+    uint256 startTick = planet.addJunkTick > planet.lastUpdateTick ? planet.addJunkTick : planet.lastUpdateTick;
+    uint256 tickElapsed = untilTick - startTick;
+
+    planet.lastUpdateTick = untilTick;
+
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);
   }
@@ -454,6 +474,7 @@ library PlanetLib {
     planet.junkOwner = PlanetJunkOwner.get(bytes32(planet.planetHash));
     PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
+    planet.addJunkTick = PlanetAddJunkTick.get(bytes32(planet.planetHash));
     planet.population = data.population;
     planet.silver = data.silver;
     uint256 upgrades = data.upgrades;
