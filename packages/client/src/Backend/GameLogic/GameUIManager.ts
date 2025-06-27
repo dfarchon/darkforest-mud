@@ -534,6 +534,16 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.withdrawSilver(locationId, amount);
   }
 
+  public addJunk(locationId: LocationId) {
+    this.playClickSound();
+    this.gameManager.addJunk(locationId);
+  }
+
+  public clearJunk(locationId: LocationId) {
+    this.playClickSound();
+    this.gameManager.clearJunk(locationId);
+  }
+
   public setPlanetEmoji(locationId: LocationId, emoji: string) {
     this.playClickSound();
     this.gameManager.setPlanetEmoji(locationId, emoji);
@@ -1821,7 +1831,6 @@ export class GameUIManager extends EventEmitter {
   }
 
   public getSpaceJunkEnabled(): boolean {
-    return false;
     return this.contractConstants.SPACE_JUNK_ENABLED;
   }
 

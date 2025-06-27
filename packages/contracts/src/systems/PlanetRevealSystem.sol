@@ -30,9 +30,7 @@ contract PlanetRevealSystem is BaseSystem {
     int256 x = _getIntFromUintCoords(input.x);
     int256 y = _getIntFromUintCoords(input.y);
     Planet memory planet = DFUtils.readAnyPlanet(worldAddress, input.planetHash, input.perlin, uint256(x * x + y * y));
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
+
     RevealedPlanet.set(bytes32(input.planetHash), int32(x), int32(y), _msgSender());
     planet.writeToStore();
   }

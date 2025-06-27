@@ -90,7 +90,7 @@ library DFUtils {
     // Note.
     // Use World.call would cost more gas due to manually decoding the returned planet data.
     planet = IPlanetReadSystem(worldAddress).df__readPlanet(planetHash);
-    if (planet.isInitialized) {
+    if (!planet.isInitialized) {
       revert Errors.PlanetNotInitialized();
     }
     if (planet.status != PlanetStatus.DEFAULT) {

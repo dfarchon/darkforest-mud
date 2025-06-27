@@ -1572,15 +1572,14 @@ export class GameManager extends EventEmitter {
     return player?.silver;
   }
 
-  // public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
-  //   const player = this.players.get(addr);
-  //   return player?.spaceJunk;
-  // }
+  public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
+    const player = this.players.get(addr);
+    return player?.junk;
+  }
 
-  // public getPlayerSpaceJunkLimit(addr: EthAddress): number | undefined {
-  //   const player = this.players.get(addr);
-  //   return player?.spaceJunkLimit;
-  // }
+  public getPlayerSpaceJunkLimit(addr: EthAddress): number | undefined {
+    return this.contractConstants.SPACE_JUNK_LIMIT;
+  }
 
   // public getPlayerActivateArtifactAmount(addr: EthAddress): number | undefined {
   //   const player = this.players.get(addr);
@@ -5082,8 +5081,8 @@ export class GameManager extends EventEmitter {
         throw new Error("unknown planet");
       }
 
-      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
-        throw new Error("can only clear junk from a planet you own");
+      if (!this.checkDelegateCondition(planet.junkOwner, this.getAccount())) {
+        throw new Error("planet junk owner is not you");
       }
 
       if (planet.transactions?.hasTransaction(isUnconfirmedClearJunkTx)) {
@@ -5102,10 +5101,6 @@ export class GameManager extends EventEmitter {
         throw new Error("space junk is disabled");
       }
 
-      if (planet.junkOwner !== this.getAccount()) {
-        throw new Error("can only clear junk from your junk planet");
-      }
-
       localStorage.setItem(
         `${this.ethConnection.getAddress()?.toLowerCase()}-addJunkPlanet`,
         locationId,
@@ -5117,6 +5112,7 @@ export class GameManager extends EventEmitter {
         throw Error("no delegator account");
       }
 
+      console.log(locationIdToDecStr(locationId));
       const txIntent: UnconfirmedClearJunk = {
         delegator: delegator,
         methodName: "df__clearJunk",
