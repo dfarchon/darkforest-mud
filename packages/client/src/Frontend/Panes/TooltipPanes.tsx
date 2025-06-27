@@ -437,12 +437,19 @@ function DefenseTooltipPane() {
 
 function SpaceJunkTooltipPane() {
   return (
+    // <>
+    //   <White>Space Junk:</White> Planets are all filled with junk! Sending
+    //   energy to a planet with junk will remove the junk from that planet and add
+    //   it to your total junk. Once you reach your junk limit, you will not be
+    //   able to capture planets that have junk. Abandoning planets will reduce
+    //   your space junk and place it back on the planet.
+    // </>
     <>
-      <White>Space Junk:</White> Planets are all filled with junk! Sending
-      energy to a planet with junk will remove the junk from that planet and add
-      it to your total junk. Once you reach your junk limit, you will not be
-      able to capture planets that have junk. Abandoning planets will reduce
-      your space junk and place it back on the planet.
+      <White>Space Junk:</White> Before a player can interact with the planet,
+      the junk must be added to the player's total junk value. When a player
+      clears the junk, they automatically relinquish ownership of the planet.
+      Even if another player captures the planet, you can still clear the junk
+      value.
     </>
   );
 }
