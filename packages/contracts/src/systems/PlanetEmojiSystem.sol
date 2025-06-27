@@ -13,14 +13,11 @@ contract PlanetEmojiSystem is BaseSystem {
    * @param emoji Emoji you like
    */
 
-  function setPlanetEmoji(uint256 planetHash, string memory emoji) public {
+  function setPlanetEmoji(uint256 planetHash, string memory emoji) public requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
     address executor = _msgSender();
 
     if (planet.owner != executor) revert NotPlanetOwner();

@@ -18,14 +18,15 @@ contract ArtifactSystem is BaseSystem {
     ArtifactRegistry.set(bytes32(artifactId), true);
   }
 
-  function chargeArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public entryFee {
+  function chargeArtifact(
+    uint256 planetHash,
+    uint256 artifactId,
+    bytes memory data
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
     Artifact memory artifact = planet.mustGetArtifact(artifactId);
     if (planet.owner != _msgSender()) {
       revert NotPlanetOwner();
@@ -36,14 +37,14 @@ contract ArtifactSystem is BaseSystem {
     planet.writeToStore();
   }
 
-  function shutdownArtifact(uint256 planetHash, uint256 artifactId) public entryFee {
+  function shutdownArtifact(
+    uint256 planetHash,
+    uint256 artifactId
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
     Artifact memory artifact = planet.mustGetArtifact(artifactId);
     if (planet.owner != _msgSender()) {
       revert NotPlanetOwner();
@@ -54,14 +55,15 @@ contract ArtifactSystem is BaseSystem {
     planet.writeToStore();
   }
 
-  function activateArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public entryFee {
+  function activateArtifact(
+    uint256 planetHash,
+    uint256 artifactId,
+    bytes memory data
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
     Artifact memory artifact = planet.mustGetArtifact(artifactId);
     if (planet.owner != _msgSender()) {
       revert NotPlanetOwner();

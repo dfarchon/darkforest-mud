@@ -8,6 +8,9 @@ import { EntryFee } from "codegen/tables/EntryFee.sol";
 import { Errors } from "interfaces/errors.sol";
 import { RevenueStats } from "codegen/tables/RevenueStats.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+import { JunkConfig } from "codegen/tables/JunkConfig.sol";
+import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
+import { PlanetJunkOwner } from "codegen/tables/PlanetJunkOwner.sol";
 
 contract BaseSystem is System, Errors {
   /**
@@ -41,6 +44,15 @@ contract BaseSystem is System, Errors {
    */
   modifier hasAccess() {
     AccessControl.requireAccess(SystemRegistry.get(address(this)), _msgSender());
+    _;
+  }
+
+  modifier requireSameOwnerAndJunkOwner(uint256 planetHash) {
+    if (JunkConfig.getSPACE_JUNK_ENABLED()) {
+      if (PlanetOwner.get(bytes32(planetHash)) != PlanetJunkOwner.get(bytes32(planetHash))) {
+        revert NotSameOwnerAndJunkOwner();
+      }
+    }
     _;
   }
 

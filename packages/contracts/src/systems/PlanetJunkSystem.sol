@@ -10,11 +10,17 @@ import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 
 contract PlanetJunkSystem is BaseSystem {
+  modifier requireSpaceJunkEnabled() {
+    bool SPACE_JUNK_ENABLED = JunkConfig.getSPACE_JUNK_ENABLED();
+    if (!SPACE_JUNK_ENABLED) revert SpaceJunkDisabled();
+    _;
+  }
+
   /**
    * @notice add junk to player
    * @param planetHash Planet hash
    */
-  function addJunk(uint256 planetHash) public entryFee {
+  function addJunk(uint256 planetHash) public entryFee requireSpaceJunkEnabled {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -23,7 +29,6 @@ contract PlanetJunkSystem is BaseSystem {
 
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
 
-    bool SPACE_JUNK_ENABLED = JunkConfig.getSPACE_JUNK_ENABLED();
     uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
 
@@ -32,7 +37,6 @@ contract PlanetJunkSystem is BaseSystem {
     uint256 playerJunk = PlayerJunk.get(executor);
 
     if (planet.owner != executor) revert NotPlanetOwner();
-    if (!SPACE_JUNK_ENABLED) revert SpaceJunkDisabled();
     if (playerJunk + planetJunk > SPACE_JUNK_LIMIT) revert JunkLimitExceeded();
 
     if (oldPlanetJunkOwner != address(0)) {
@@ -50,7 +54,7 @@ contract PlanetJunkSystem is BaseSystem {
    * @notice clear junk
    * @param planetHash Planet hash
    */
-  function clearJunk(uint256 planetHash) public entryFee {
+  function clearJunk(uint256 planetHash) public entryFee requireSpaceJunkEnabled {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -59,9 +63,6 @@ contract PlanetJunkSystem is BaseSystem {
 
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
 
-    bool SPACE_JUNK_ENABLED = JunkConfig.getSPACE_JUNK_ENABLED();
-
-    if (!SPACE_JUNK_ENABLED) revert SpaceJunkDisabled();
     if (planet.junkOwner != executor) revert NotJunkOwner();
 
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];

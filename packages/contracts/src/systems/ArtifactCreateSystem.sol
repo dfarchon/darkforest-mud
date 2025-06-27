@@ -10,28 +10,25 @@ import { Counter } from "codegen/tables/Counter.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 
 contract ArtifactCreateSystem is BaseSystem {
-  function prospectPlanet(uint256 planetHash) public entryFee {
+  function prospectPlanet(uint256 planetHash) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
     planet.prospect(_msgSender());
     planet.writeToStore();
   }
 
-  function findingArtifact(Proof memory proof, BiomebaseInput memory input) public entryFee {
+  function findingArtifact(
+    Proof memory proof,
+    BiomebaseInput memory input
+  ) public entryFee requireSameOwnerAndJunkOwner(input.planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     DFUtils.verify(worldAddress, proof, input);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, input.planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
     Artifact memory artifact = planet.findArtifact(_msgSender(), input.biomebase);
 
     Counter.setArtifact(uint24(artifact.id));

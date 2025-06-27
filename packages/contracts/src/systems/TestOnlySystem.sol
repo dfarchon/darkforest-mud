@@ -14,6 +14,8 @@ import { Proof } from "libraries/SnarkProof.sol";
 import { SpawnInput } from "libraries/VerificationInput.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GPTTokens } from "codegen/index.sol";
+import { JunkConfig } from "codegen/tables/JunkConfig.sol";
+import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 
 contract TestOnlySystem is BaseSystem {
   function createPlanet(
@@ -33,14 +35,19 @@ contract TestOnlySystem is BaseSystem {
 
     PlanetOwner.set(bytes32(planetHash), owner);
 
-    setPlanetJunkOwner(planetHash, owner);
+    setPlanetJunkOwner(planetHash, owner, level);
 
     PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
   }
 
-  function setPlanetJunkOwner(uint256 planetHash, address junkOwner) public {
+  function setPlanetJunkOwner(uint256 planetHash, address junkOwner, uint256 level) public {
     DFUtils.tick(_world());
     PlanetJunkOwner.set(bytes32(planetHash), junkOwner);
+    uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
+    uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
+    uint256 planetJunk = PLANET_LEVEL_JUNK[level];
+    uint256 playerJunk = PlayerJunk.get(junkOwner);
+    PlayerJunk.set(junkOwner, playerJunk + planetJunk);
   }
 
   function revealPlanetByAdmin(uint256 planetHash, int256 x, int256 y) public {

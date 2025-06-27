@@ -47,7 +47,7 @@ struct Planet {
   address junkOwner;
   uint256 addJunkTick;
   // Table: PlanetConstants
-  bool isInitialized;
+  bool isInitializing;
   uint256 perlin;
   uint256 level;
   PlanetType planetType;
@@ -102,7 +102,7 @@ library PlanetLib {
   }
 
   function writeToStore(Planet memory planet) internal {
-    if (planet.isInitialized) {
+    if (planet.isInitializing) {
       PlanetConstants.set(
         bytes32(planet.planetHash),
         PlanetConstantsData({
@@ -349,7 +349,7 @@ library PlanetLib {
   }
 
   function _initPlanet(Planet memory planet) internal view {
-    planet.isInitialized = true;
+    planet.isInitializing = true;
     _initZone(planet);
     _initSpaceType(planet);
     _initLevel(planet);

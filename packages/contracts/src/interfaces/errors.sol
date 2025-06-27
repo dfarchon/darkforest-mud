@@ -79,6 +79,7 @@ interface Errors {
   error JunkLimitExceeded(); // 0x711da309
   error InvalidJunkOperation(); // 0xa94506f6
   error NotJunkOwner(); // 0x438f2b77
+  error NotSameOwnerAndJunkOwner(); // 0x1ff3ce95
 
   // GPTToken system
   error NotEnoughETH(); // 0x932b84b0

@@ -15,14 +15,15 @@ contract PlanetWithdrawSilverSystem is BaseSystem {
    * @param planetHash Planet hash
    * @param silverToWithdraw Silver amount to withdraw
    */
-  function withdrawSilver(uint256 planetHash, uint256 silverToWithdraw) public entryFee {
+  function withdrawSilver(
+    uint256 planetHash,
+    uint256 silverToWithdraw
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
-    if (planet.owner != planet.junkOwner) {
-      revert PlanetOwnershipMismatch();
-    }
+
     address executor = _msgSender();
     uint256 playerWithdrawSilverAmount = PlayerWithdrawSilver.get(executor);
 
