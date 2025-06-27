@@ -13,7 +13,7 @@ contract PlanetEmojiSystem is BaseSystem {
    * @param emoji Emoji you like
    */
 
-  function setPlanetEmoji(uint256 planetHash, string memory emoji) public {
+  function setPlanetEmoji(uint256 planetHash, string memory emoji) public requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

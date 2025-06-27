@@ -29,6 +29,7 @@ import {
   TOGGLE_SEND,
 } from "../Utils/ShortcutConstants";
 import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
+import { ManageJunkButton } from "../Views/ManageJunkButton";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
 import { PlanetCard, PlanetCardTitle } from "../Views/PlanetCard";
@@ -94,6 +95,23 @@ function PlanetContextPaneContent({
   //   p &&
   //   p.kardashevOperator !== undefined &&
   //   p.kardashevOperator !== EMPTY_ADDRESS;
+
+  const shouldShowAddJunkButton = useMemo(() => {
+    if (!p) {
+      return false;
+    }
+    if (p.junkOwner === EMPTY_ADDRESS && p.owner === account) return true;
+    else if (p.owner === account && p.junkOwner !== account) return true;
+    else return false;
+  }, [p, account]);
+
+  const showShowClearJunkButton = useMemo(() => {
+    if (!p) {
+      return false;
+    }
+    if (p.junkOwner === account) return true;
+    else return false;
+  }, [p, account]);
 
   const gt3 = p && p.planetLevel >= 3;
 
@@ -271,27 +289,39 @@ function PlanetContextPaneContent({
     rightRows.push(rows[i]);
   }
 
-  return (
-    <>
-      <PlanetCard planetWrapper={planet} />
-      <SendResources
-        planetWrapper={planet}
-        onToggleSendForces={onToggleSendForces}
-        onToggleAbandon={onToggleAbandon}
-      />
+  if (shouldShowAddJunkButton) {
+    return (
+      <>
+        <PlanetCard planetWrapper={planet} />
 
-      <MineArtifactButton planetWrapper={planet} />
-      {/* {captureRow} */}
+        <ManageJunkButton wrapper={planet} />
+      </>
+    );
+  } else {
+    return (
+      <>
+        <PlanetCard planetWrapper={planet} />
+        <SendResources
+          planetWrapper={planet}
+          onToggleSendForces={onToggleSendForces}
+          onToggleAbandon={onToggleAbandon}
+        />
 
-      <VerticalSplit>
-        <>{leftRows}</>
-        <>{rightRows}</>
-      </VerticalSplit>
+        <ManageJunkButton wrapper={planet} />
 
-      {withdrawRow}
-      {notifRow}
-    </>
-  );
+        <MineArtifactButton planetWrapper={planet} />
+        {/* {captureRow} */}
+
+        <VerticalSplit>
+          <>{leftRows}</>
+          <>{rightRows}</>
+        </VerticalSplit>
+
+        {withdrawRow}
+        {notifRow}
+      </>
+    );
+  }
 }
 
 export function SelectedPlanetHelpContent() {

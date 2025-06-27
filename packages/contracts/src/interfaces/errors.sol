@@ -29,6 +29,7 @@ interface Errors {
   error ReachMaxMoveToLimit(uint8 limit); // 0x0edddad6
   error ArtifactStorageFull(); // 0xb3643b72
   error ArtifactNotOnPlanet(); // 0x37a29a4e
+  error PlanetOwnershipMismatch(); //0xb43ec652
 
   // tick system
   error Paused(); // 0x9e87fac8
@@ -72,6 +73,13 @@ interface Errors {
   error InvalidPlanetType(); // 0xcfb7f825
   error InsufficientSilverOnPlanet(); // 0xfe845fce
   error WithdrawAmountTooLow(); // 0xba43ea37
+
+  // planet junk systemAdd commentMore actions
+  error SpaceJunkDisabled(); // 0x94486384
+  error JunkLimitExceeded(); // 0x711da309
+  error InvalidJunkOperation(); // 0xa94506f6
+  error NotJunkOwner(); // 0x438f2b77
+  error NotSameOwnerAndJunkOwner(); // 0x1ff3ce95
 
   // GPTToken system
   error NotEnoughETH(); // 0x932b84b0

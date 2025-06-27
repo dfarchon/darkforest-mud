@@ -10,7 +10,7 @@ import { Counter } from "codegen/tables/Counter.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 
 contract ArtifactCreateSystem is BaseSystem {
-  function prospectPlanet(uint256 planetHash) public entryFee {
+  function prospectPlanet(uint256 planetHash) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -19,7 +19,10 @@ contract ArtifactCreateSystem is BaseSystem {
     planet.writeToStore();
   }
 
-  function findingArtifact(Proof memory proof, BiomebaseInput memory input) public entryFee {
+  function findingArtifact(
+    Proof memory proof,
+    BiomebaseInput memory input
+  ) public entryFee requireSameOwnerAndJunkOwner(input.planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

@@ -19,11 +19,12 @@ contract PlanetUpgradeSystem is BaseSystem {
     uint256 rangeUpgrades,
     uint256 speedUpgrades,
     uint256 defenseUpgrades
-  ) public entryFee {
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+
     address executor = _msgSender();
     planet.upgrade(executor, rangeUpgrades, speedUpgrades, defenseUpgrades);
     planet.writeToStore();

@@ -592,5 +592,24 @@ export default defineWorld({
     //     disabled: true,
     //   },
     // },
+    JunkConfig: {
+      schema: {
+        SPACE_JUNK_ENABLED: "bool",
+        SPACE_JUNK_LIMIT: "uint256",
+        ABANDON_SPEED_CHANGE_PERCENT: "uint256",
+        ABANDON_RANGE_CHANGE_PERCENT: "uint256",
+        PLANET_LEVEL_JUNK: "uint256[]",
+      },
+      key: [],
+    },
+    PlanetJunkOwner: "address",
+    PlanetAddJunkTick: "uint256",
+    PlayerJunk: {
+      schema: {
+        owner: "address",
+        junk: "uint256",
+      },
+      key: ["owner"],
+    },
   },
 });

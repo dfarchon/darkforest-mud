@@ -161,11 +161,14 @@ export class ContractsAPI extends EventEmitter {
 
   private pausedStateSubscription: Subscription;
   private playerSubscription: Subscription;
+  private playerJunkSubscription: Subscription;
   private artifactSubscription: Subscription;
   private planetArtifactsSubscription: Subscription;
   private lastRevealSubscription: Subscription;
   private revealedPlanetSubscription: Subscription;
   private planetSubscription: Subscription;
+  private planetJunkOwnerSubscription: Subscription;
+  private planetAddJunkTickSubscription: Subscription;
   private moveSubscription: Subscription;
   private playerWithdrawSilverSubscription: Subscription;
   private tickerRateSubscription: Subscription;
@@ -340,10 +343,22 @@ export class ContractsAPI extends EventEmitter {
       },
     );
 
+    this.playerJunkSubscription = this.components.PlayerJunk.update$.subscribe(
+      (update) => {
+        const entity = update.entity;
+        const [nextValue] = update.value;
+        const playerAddr = hexToEthAddress(entity.toString() as Hex);
+
+        if (nextValue) {
+          this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
+        }
+      },
+    );
+
     this.artifactSubscription = this.components.Artifact.update$.subscribe(
       (update) => {
         const entity = update.entity;
-        
+
         const artifactId = artifactIdFromHexStr(entity.toString());
 
         // no matter the value exists or not, we emit the update event
@@ -396,6 +411,24 @@ export class ContractsAPI extends EventEmitter {
         );
       },
     );
+
+    this.planetJunkOwnerSubscription =
+      this.components.PlanetJunkOwner.update$.subscribe((update) => {
+        const entity = update.entity;
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
+      });
+
+    this.planetAddJunkTickSubscription =
+      this.components.PlanetAddJunkTick.update$.subscribe((update) => {
+        const entity = update.entity;
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
+      });
 
     this.moveSubscription = this.components.Move.update$.subscribe((update) => {
       const entity = update.entity;
@@ -913,11 +946,14 @@ export class ContractsAPI extends EventEmitter {
   public removeEventListeners(): void {
     this.pausedStateSubscription.unsubscribe();
     this.playerSubscription.unsubscribe();
+    this.playerJunkSubscription.unsubscribe();
     this.artifactSubscription.unsubscribe();
     this.planetArtifactsSubscription.unsubscribe();
     this.lastRevealSubscription.unsubscribe();
     this.revealedPlanetSubscription.unsubscribe();
     this.planetSubscription.unsubscribe();
+    this.planetJunkOwnerSubscription.unsubscribe();
+    this.planetAddJunkTickSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
     this.playerWithdrawSilverSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
@@ -1072,6 +1108,7 @@ export class ContractsAPI extends EventEmitter {
       UpgradeConfig,
       SnarkConfig,
       Ticker,
+      JunkConfig,
     } = this.components;
 
     const namespaceId =
@@ -1104,6 +1141,7 @@ export class ContractsAPI extends EventEmitter {
     const upgradeConfig = getComponentValue(UpgradeConfig, singletonEntity);
     const snarkConfig = getComponentValue(SnarkConfig, singletonEntity);
     const ticker = getComponentValue(Ticker, singletonEntity);
+    const junkConfig = getComponentValue(JunkConfig, singletonEntity);
 
     if (
       !adminAddress ||
@@ -1115,7 +1153,8 @@ export class ContractsAPI extends EventEmitter {
       !planetBiomeConfig ||
       !upgradeConfig ||
       !snarkConfig ||
-      !ticker
+      !ticker ||
+      !junkConfig
     ) {
       throw new Error("not set contracts constants yet");
     }
@@ -1260,14 +1299,41 @@ export class ContractsAPI extends EventEmitter {
       // planetCumulativeRarities: number[];
 
       SPACESHIPS: { GEAR: false },
+      SPACE_JUNK_ENABLED: junkConfig.SPACE_JUNK_ENABLED,
+      SPACE_JUNK_LIMIT: Number(junkConfig.SPACE_JUNK_LIMIT),
+      ABANDON_SPEED_CHANGE_PERCENT: Number(
+        junkConfig.ABANDON_SPEED_CHANGE_PERCENT,
+      ),
+      ABANDON_RANGE_CHANGE_PERCENT: Number(
+        junkConfig.ABANDON_RANGE_CHANGE_PERCENT,
+      ),
+      PLANET_LEVEL_JUNK: junkConfig.PLANET_LEVEL_JUNK.map((val) =>
+        Number(val),
+      ) as [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+      ],
     };
 
     return constants;
   }
 
   public getPlayerById(playerId: EthAddress): Player | undefined {
-    const { Player, SpawnPlanet, LastReveal, PlayerWithdrawSilver } =
-      this.components;
+    const {
+      Player,
+      SpawnPlanet,
+      LastReveal,
+      PlayerWithdrawSilver,
+      PlayerJunk,
+    } = this.components;
     const playerKey = encodeEntity(Player.metadata.keySchema, {
       owner: addressToHex(playerId),
     });
@@ -1290,6 +1356,11 @@ export class ContractsAPI extends EventEmitter {
       playerWithdrawSilverKey,
     );
 
+    const playerJunkKey = encodeEntity(PlayerJunk.metadata.keySchema, {
+      owner: addressToHex(playerId),
+    });
+    const playerJunk = getComponentValue(PlayerJunk, playerJunkKey);
+
     if (!rawPlayer) {
       return undefined;
     }
@@ -1306,6 +1377,7 @@ export class ContractsAPI extends EventEmitter {
       lastRevealTick: lastReveal ? Number(lastReveal.tickNumber) : 0,
       silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
       score: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
+      junk: playerJunk ? Number(playerJunk.junk) : 0,
     };
     return player;
   }
@@ -1513,13 +1585,14 @@ export class ContractsAPI extends EventEmitter {
         walletAddress,
         i,
       );
-      const artifactData: { index: number; rarity: number } =
+      const artifactData: { index: number; rarity: number; biome: number } =
         await nftContract.getArtifact(artifactId);
       const artifact = this.artifactUtils.getArtifactByNFT(
         artifactId,
         walletAddress,
         artifactData.index,
         artifactData.rarity,
+        artifactData.biome,
       );
       if (artifact) {
         results.set(artifact.id, artifact);

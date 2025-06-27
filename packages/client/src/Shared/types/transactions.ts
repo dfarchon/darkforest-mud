@@ -28,6 +28,8 @@ export type ContractMethodName =
   | "changeArtifactImageType"
   | "buyArtifact"
   | "df__withdrawSilver"
+  | "df__addJunk"
+  | "df__clearJunk"
   | "df__setPlanetEmoji"
   | "useKey"
   | "adminUseKey"
@@ -260,6 +262,22 @@ export type UnconfirmedWithdrawSilver = TxIntent & {
   methodName: "df__withdrawSilver";
   locationId: LocationId;
   amount: number;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedAddJunk = TxIntent & {
+  methodName: "df__addJunk";
+  locationId: LocationId;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedClearJunk = TxIntent & {
+  methodName: "df__clearJunk";
+  locationId: LocationId;
 };
 
 /**

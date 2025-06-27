@@ -15,11 +15,12 @@ import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { ArtifactLib } from "libraries/Artifact.sol";
 
 contract ArtifactPortalSystem is BaseSystem {
-  function withdrawArtifact(uint256 planetHash, uint256 artifactId) public {
+  function withdrawArtifact(uint256 planetHash, uint256 artifactId) public requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+
     if (planet.planetType != PlanetType.SPACETIME_RIP) {
       revert InvalidPlanetType();
     }
@@ -53,11 +54,12 @@ contract ArtifactPortalSystem is BaseSystem {
     }
   }
 
-  function depositArtifact(uint256 planetHash, uint256 artifactId) public {
+  function depositArtifact(uint256 planetHash, uint256 artifactId) public requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
+
     if (planet.planetType != PlanetType.SPACETIME_RIP) {
       revert InvalidPlanetType();
     }

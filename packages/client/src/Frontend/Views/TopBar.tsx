@@ -284,10 +284,10 @@ export function TopBar({
         )}
         {/* <BoardPlacement account={account} /> */}
         <PlayerSilver account={account} />
-      </AlignCenterHorizontally>
+        {/* </AlignCenterHorizontally>
       <AlignCenterHorizontally
         style={{ justifyContent: "space-around", width: "100%" }}
-      >
+      > */}
         {captureZones}
         {uiManager.getSpaceJunkEnabled() && (
           <>

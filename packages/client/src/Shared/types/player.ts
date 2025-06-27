@@ -10,6 +10,7 @@ export type Player = {
   lastRevealTick: number;
   silver: number;
   score: number;
+  junk: number;
 };
 
 /**

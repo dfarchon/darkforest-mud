@@ -18,7 +18,11 @@ contract ArtifactSystem is BaseSystem {
     ArtifactRegistry.set(bytes32(artifactId), true);
   }
 
-  function chargeArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public entryFee {
+  function chargeArtifact(
+    uint256 planetHash,
+    uint256 artifactId,
+    bytes memory data
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -33,7 +37,10 @@ contract ArtifactSystem is BaseSystem {
     planet.writeToStore();
   }
 
-  function shutdownArtifact(uint256 planetHash, uint256 artifactId) public entryFee {
+  function shutdownArtifact(
+    uint256 planetHash,
+    uint256 artifactId
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -48,7 +55,11 @@ contract ArtifactSystem is BaseSystem {
     planet.writeToStore();
   }
 
-  function activateArtifact(uint256 planetHash, uint256 artifactId, bytes memory data) public entryFee {
+  function activateArtifact(
+    uint256 planetHash,
+    uint256 artifactId,
+    bytes memory data
+  ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

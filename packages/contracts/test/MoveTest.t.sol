@@ -193,6 +193,9 @@ contract MoveTest is BaseTest {
 
   function _getPopulationAtTick(Planet memory planet, uint256 tick) internal pure returns (uint256) {
     uint256 tickElapsed = tick - planet.lastUpdateTick;
+
+    if (planet.owner != planet.junkOwner) tickElapsed = 0;
+
     if (tickElapsed == 0) {
       return planet.population;
     }

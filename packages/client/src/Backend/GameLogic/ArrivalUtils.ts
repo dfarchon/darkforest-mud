@@ -64,7 +64,11 @@ const getSilverOverTick = (
   if (planet.silver > planet.silverCap) {
     return planet.silverCap;
   }
-  const tickElapsed = endTick - startTick;
+
+  let tickElapsed = endTick - Math.max(startTick, planet.addJunkTick);
+  if (planet.owner != planet.junkOwner) {
+    tickElapsed = 0;
+  }
 
   return Math.max(
     Math.min(
@@ -89,7 +93,11 @@ const getEnergyAtTick = (planet: Planet, atTick: number): number => {
     }
   }
 
-  const tickElapsed = atTick - planet.lastUpdated;
+  let tickElapsed = atTick - Math.max(planet.lastUpdated, planet.addJunkTick);
+
+  if (planet.owner != planet.junkOwner) {
+    tickElapsed = 0;
+  }
 
   const denominator =
     Math.exp((-4 * planet.energyGrowth * tickElapsed) / planet.energyCap) *
@@ -107,6 +115,10 @@ export const updatePlanetToTick = (
   setPlanet: (p: Planet) => void = () => {},
 ): void => {
   if (atTick < planet.lastUpdated) {
+    return;
+  }
+
+  if (atTick <= planet.addJunkTick) {
     return;
   }
 

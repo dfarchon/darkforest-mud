@@ -7,6 +7,8 @@ import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagT
 import { Planet as PlanetTable, PlanetData } from "codegen/tables/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
+import { PlanetJunkOwner } from "codegen/tables/PlanetJunkOwner.sol";
+import { PlanetAddJunkTick } from "codegen/tables/PlanetAddJunkTick.sol";
 import { PlanetConstants, PlanetConstantsData } from "codegen/tables/PlanetConstants.sol";
 import { PlanetProps, PlanetPropsData } from "codegen/tables/PlanetProps.sol";
 import { PlanetEffects, PlanetEffectsData } from "codegen/tables/PlanetEffects.sol";
@@ -42,8 +44,10 @@ struct Planet {
   // Table: PlanetOwner
   bool ownerChanged;
   address owner;
+  address junkOwner;
+  uint256 addJunkTick;
   // Table: PlanetConstants
-  bool isInitialized;
+  bool isInitializing;
   uint256 perlin;
   uint256 level;
   PlanetType planetType;
@@ -98,7 +102,7 @@ library PlanetLib {
   }
 
   function writeToStore(Planet memory planet) internal {
-    if (planet.isInitialized) {
+    if (planet.isInitializing) {
       PlanetConstants.set(
         bytes32(planet.planetHash),
         PlanetConstantsData({
@@ -112,6 +116,10 @@ library PlanetLib {
     if (planet.ownerChanged) {
       PlanetOwner.set(bytes32(planet.planetHash), planet.owner);
     }
+
+    PlanetJunkOwner.set(bytes32(planet.planetHash), planet.junkOwner);
+    PlanetAddJunkTick.set(bytes32(planet.planetHash), planet.addJunkTick);
+
     if (planet.updateProps) {
       planet.useProps = true;
       PlanetProps.set(
@@ -165,11 +173,20 @@ library PlanetLib {
     if (planet.lastUpdateTick >= untilTick) {
       return;
     }
-    uint256 tickElapsed = untilTick - planet.lastUpdateTick;
+
+    uint256 startTick = planet.addJunkTick > planet.lastUpdateTick ? planet.addJunkTick : planet.lastUpdateTick;
+    uint256 tickElapsed = untilTick - startTick;
+
     planet.lastUpdateTick = untilTick;
+
     if (planet.owner == address(0)) {
       return;
     }
+
+    if (planet.owner != planet.junkOwner) {
+      return;
+    }
+
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);
   }
@@ -332,7 +349,7 @@ library PlanetLib {
   }
 
   function _initPlanet(Planet memory planet) internal view {
-    planet.isInitialized = true;
+    planet.isInitializing = true;
     _initZone(planet);
     _initSpaceType(planet);
     _initLevel(planet);
@@ -446,8 +463,10 @@ library PlanetLib {
 
   function _readPlanetData(Planet memory planet) internal view {
     planet.owner = PlanetOwner.get(bytes32(planet.planetHash));
+    planet.junkOwner = PlanetJunkOwner.get(bytes32(planet.planetHash));
     PlanetData memory data = PlanetTable.get(bytes32(planet.planetHash));
     planet.lastUpdateTick = data.lastUpdateTick;
+    planet.addJunkTick = PlanetAddJunkTick.get(bytes32(planet.planetHash));
     planet.population = data.population;
     planet.silver = data.silver;
     uint256 upgrades = data.upgrades;
