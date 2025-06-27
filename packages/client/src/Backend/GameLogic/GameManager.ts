@@ -5106,13 +5106,12 @@ export class GameManager extends EventEmitter {
         locationId,
       );
 
-      const delegator = planet.owner;
+      const delegator = this.getAccount();
 
       if (!delegator) {
         throw Error("no delegator account");
       }
 
-      console.log(locationIdToDecStr(locationId));
       const txIntent: UnconfirmedClearJunk = {
         delegator: delegator,
         methodName: "df__clearJunk",
