@@ -38,9 +38,9 @@ contract PinkBombTest is BaseTest {
     // skip snark check
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();
-    IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
-    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
-    IWorld(worldAddress).df__createPlanet(3, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(1, address(1), 0, 4, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 4, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(3, address(2), 0, 4, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     Counter.setArtifact(2);
     PlanetArtifact.set(bytes32(uint256(1)), (1 << 32) + 2);
     ArtifactOwner.set(1, bytes32(uint256(1)));

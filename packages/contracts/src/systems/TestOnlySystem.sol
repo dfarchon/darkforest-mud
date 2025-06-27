@@ -5,6 +5,7 @@ import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { PlanetType, SpaceType, PlanetStatus } from "codegen/common.sol";
 import { Planet as PlanetTable } from "codegen/tables/Planet.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
+import { PlanetJunkOwner } from "codegen/tables/PlanetJunkOwner.sol";
 import { PlanetConstants } from "codegen/tables/PlanetConstants.sol";
 import { Ticker } from "codegen/tables/Ticker.sol";
 import { RevealedPlanet } from "codegen/tables/RevealedPlanet.sol";
@@ -32,7 +33,14 @@ contract TestOnlySystem is BaseSystem {
 
     PlanetOwner.set(bytes32(planetHash), owner);
 
+    setPlanetJunkOwner(planetHash, owner);
+
     PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
+  }
+
+  function setPlanetJunkOwner(uint256 planetHash, address junkOwner) public {
+    DFUtils.tick(_world());
+    PlanetJunkOwner.set(bytes32(planetHash), junkOwner);
   }
 
   function revealPlanetByAdmin(uint256 planetHash, int256 x, int256 y) public {
