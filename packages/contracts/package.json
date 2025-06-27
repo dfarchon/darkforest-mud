@@ -18,11 +18,11 @@
     "test": "tsc --noEmit && mud test"
   },
   "dependencies": {
-    "@latticexyz/cli": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
-    "@latticexyz/schema-type": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
-    "@latticexyz/store": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
-    "@latticexyz/world": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
-    "@latticexyz/world-modules": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508"
+    "@latticexyz/cli": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f",
+    "@latticexyz/schema-type": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f",
+    "@latticexyz/store": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f",
+    "@latticexyz/world": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f",
+    "@latticexyz/world-modules": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",
@@ -30,7 +30,7 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "prettier-plugin-solidity": "1.3.1",
     "solhint": "4.5.4",
-    "solhint-config-mud": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508",
-    "solhint-plugin-mud": "2.2.22-13071c45dd7d28c1860e703d12b07624c271f508"
+    "solhint-config-mud": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f",
+    "solhint-plugin-mud": "2.2.23-e1c2958b99c9fe4c7189ab24938e0978ff85a75f"
   }
 }
