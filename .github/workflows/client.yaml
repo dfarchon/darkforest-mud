@@ -2,12 +2,12 @@ name: Client
 on:
   push:
     branches:
-      - 'main'
+      - "main"
     paths:
-      - 'packages/client/**'
+      - "packages/client/**"
   pull_request:
     paths:
-      - 'packages/client/**'
+      - "packages/client/**"
 
 env:
   CI: true
@@ -42,19 +42,19 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: 20.19.0
+          cache: "pnpm"
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
-      - name: 'Install dependencies'
+      - name: "Install dependencies"
         run: pnpm --loglevel=error install
 
-      - name: 'Build'
+      - name: "Build"
         run: pnpm run build
 
-      - name: 'Test'
+      - name: "Test"
         run: pnpm --filter "client" run test
