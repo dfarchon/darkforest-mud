@@ -1,20 +1,27 @@
 import { EMPTY_ADDRESS } from "@df/constants";
 import { isUnconfirmedAddJunkTx, isUnconfirmedClearJunkTx } from "@df/serde";
 import type { Planet } from "@df/types";
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import styled from "styled-components";
 
 import type { Wrapper } from "../../Backend/Utils/Wrapper";
-import { Btn } from "../Components/Btn";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
-import { Row } from "../Components/Row";
-import dfstyles from "../Styles/dfstyles";
+import { MaybeShortcutButton } from "../Components/MaybeShortcutButton";
 import { useUIManager } from "../Utils/AppHooks";
+import { TOGGLE_MANAGE_JUNK } from "../Utils/ShortcutConstants";
 
 const TextWrapper = styled.span`
-  width: 300px;
-  font-size: ${dfstyles.fontSizeXS};
   text-align: center;
+  display: block;
+  width: 100%;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 4px;
 `;
 
 export function ManageJunkButton({
@@ -69,31 +76,48 @@ export function ManageJunkButton({
     [wrapper],
   );
 
-  return (
-    <Row>
-      {preAddJunkCheck && (
-        <Btn onClick={addJunk} disabled={adding}>
-          <TextWrapper>
-            {adding ? (
-              <LoadingSpinner initialText="Adding Junk..." />
-            ) : (
-              "Add Junk"
-            )}
-          </TextWrapper>
-        </Btn>
-      )}
+  const handleAction = () => {
+    if (preAddJunkCheck) {
+      addJunk();
+    } else if (preClearJunkCheck) {
+      clearJunk();
+    }
+  };
 
-      {preClearJunkCheck && (
-        <Btn onClick={clearJunk} disabled={clearing}>
-          <TextWrapper>
-            {clearing ? (
-              <LoadingSpinner initialText="Clearing Junk..." />
-            ) : (
-              "Clear Junk"
-            )}
-          </TextWrapper>
-        </Btn>
-      )}
-    </Row>
-  );
+  if (!preAddJunkCheck && !preClearJunkCheck) {
+    return null;
+  } else {
+    return (
+      <ButtonContainer>
+        <MaybeShortcutButton
+          size="stretch"
+          shortcutKey={TOGGLE_MANAGE_JUNK}
+          shortcutText={TOGGLE_MANAGE_JUNK}
+          onClick={handleAction}
+          onShortcutPressed={handleAction}
+          disabled={adding || clearing}
+        >
+          {preAddJunkCheck && (
+            <TextWrapper>
+              {adding ? (
+                <LoadingSpinner initialText="Adding Junk..." />
+              ) : (
+                "Add Junk"
+              )}
+            </TextWrapper>
+          )}
+
+          {preClearJunkCheck && (
+            <TextWrapper>
+              {clearing ? (
+                <LoadingSpinner initialText="Clearing Junk..." />
+              ) : (
+                "Clear Junk"
+              )}
+            </TextWrapper>
+          )}
+        </MaybeShortcutButton>
+      </ButtonContainer>
+    );
+  }
 }

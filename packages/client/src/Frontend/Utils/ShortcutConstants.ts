@@ -3,6 +3,7 @@ import { SpecialKey } from "@df/constants";
 // planet context pane shortcuts
 export const EXIT_PANE = SpecialKey.Escape;
 export const TOGGLE_SEND = "q";
+export const TOGGLE_MANAGE_JUNK = "!";
 export const TOGGLE_ABANDON = "w";
 export const MINE_ARTIFACT = "e";
 export const TOGGLE_UPGRADES_PANE = "r";
