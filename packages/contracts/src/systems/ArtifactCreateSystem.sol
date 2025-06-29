@@ -8,9 +8,14 @@ import { Planet } from "libraries/Planet.sol";
 import { Artifact } from "libraries/Artifact.sol";
 import { Counter } from "codegen/tables/Counter.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract ArtifactCreateSystem is BaseSystem {
   function prospectPlanet(uint256 planetHash) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
+    GlobalStats.setProspectPlanetCount(GlobalStats.getProspectPlanetCount() + 1);
+    PlayerStats.setProspectPlanetCount(_msgSender(), PlayerStats.getProspectPlanetCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -23,6 +28,9 @@ contract ArtifactCreateSystem is BaseSystem {
     Proof memory proof,
     BiomebaseInput memory input
   ) public entryFee requireSameOwnerAndJunkOwner(input.planetHash) {
+    GlobalStats.setFindArtifactCount(GlobalStats.getFindArtifactCount() + 1);
+    PlayerStats.setFindArtifactCount(_msgSender(), PlayerStats.getFindArtifactCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

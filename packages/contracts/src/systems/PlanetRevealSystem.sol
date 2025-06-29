@@ -10,9 +10,14 @@ import { Planet } from "libraries/Planet.sol";
 import { Proof } from "libraries/SnarkProof.sol";
 import { RevealInput } from "libraries/VerificationInput.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract PlanetRevealSystem is BaseSystem {
   function revealLocation(Proof memory proof, RevealInput memory input) public entryFee {
+    GlobalStats.setRevealLocationCount(GlobalStats.getRevealLocationCount() + 1);
+    PlayerStats.setRevealLocationCount(_msgSender(), PlayerStats.getRevealLocationCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

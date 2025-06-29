@@ -1326,6 +1326,95 @@ export class ContractsAPI extends EventEmitter {
     return constants;
   }
 
+  public getAllRevenueStats(): Map<string, number> {
+    const { RevenueStats } = this.components;
+    const revenueStatsIds = [...runQuery([Has(RevenueStats)])];
+
+    const result = new Map<string, number>();
+    for (let i = 0; i < revenueStatsIds.length; i++) {
+      const entity = revenueStatsIds[i];
+      const revenueStats = getComponentValue(RevenueStats, entity);
+      if (revenueStats) {
+        const systemId = entity.toString();
+        const amount = Number(revenueStats.amount);
+        result.set(systemId, amount);
+      }
+    }
+
+    return result;
+  }
+
+  public getRevenueStatsBySystemId(systemId: string): number | undefined {
+    const { RevenueStats } = this.components;
+    const entity = systemId as Entity;
+    const revenueStats = getComponentValue(RevenueStats, entity);
+    if (!revenueStats) {
+      return undefined;
+    }
+    return Number(revenueStats.amount);
+  }
+
+  public getGlobalStats() {
+    const { GlobalStats } = this.components;
+
+    const globalStats = getComponentValue(GlobalStats, singletonEntity);
+    if (!globalStats) {
+      throw new Error("not set global stats yet");
+    }
+    return {
+      registerPlayerCount: Number(globalStats.registerPlayerCount),
+      spawnPlayerCount: Number(globalStats.spawnPlayerCount),
+      createGuildCount: Number(globalStats.createGuildCount),
+      prospectPlanetCount: Number(globalStats.prospectPlanetCount),
+      findArtifactCount: Number(globalStats.findArtifactCount),
+      withdrawArtifactCount: Number(globalStats.withdrawArtifactCount),
+      depositArtifactCount: Number(globalStats.depositArtifactCount),
+      chargeArtifactCount: Number(globalStats.chargeArtifactCount),
+      shutdownArtifactCount: Number(globalStats.shutdownArtifactCount),
+      activateArtifactCount: Number(globalStats.activateArtifactCount),
+      buyGPTTokensCount: Number(globalStats.buyGPTTokensCount),
+      spendGPTTokensCount: Number(globalStats.spendGPTTokensCount),
+      sendGPTTokensCount: Number(globalStats.sendGPTTokensCount),
+      moveCount: Number(globalStats.moveCount),
+      setPlanetEmojiCount: Number(globalStats.setPlanetEmojiCount),
+      addJunkCount: Number(globalStats.addJunkCount),
+      clearJunkCount: Number(globalStats.clearJunkCount),
+      revealLocationCount: Number(globalStats.revealLocationCount),
+      upgradePlanetCount: Number(globalStats.upgradePlanetCount),
+      withdrawSilverCount: Number(globalStats.withdrawSilverCount),
+    };
+  }
+
+  public getPlayerStats(playerId: EthAddress) {
+    const { PlayerStats } = this.components;
+    const playerKey = encodeEntity(PlayerStats.metadata.keySchema, {
+      player: addressToHex(playerId),
+    });
+    const playerStats = getComponentValue(PlayerStats, playerKey);
+    if (!playerStats) {
+      throw new Error("not set player stats yet");
+    }
+    return {
+      prospectPlanetCount: Number(playerStats.prospectPlanetCount),
+      findArtifactCount: Number(playerStats.findArtifactCount),
+      withdrawArtifactCount: Number(playerStats.withdrawArtifactCount),
+      depositArtifactCount: Number(playerStats.depositArtifactCount),
+      chargeArtifactCount: Number(playerStats.chargeArtifactCount),
+      shutdownArtifactCount: Number(playerStats.shutdownArtifactCount),
+      activateArtifactCount: Number(playerStats.activateArtifactCount),
+      buyGPTTokensCount: Number(playerStats.buyGPTTokensCount),
+      spendGPTTokensCount: Number(playerStats.spendGPTTokensCount),
+      sendGPTTokensCount: Number(playerStats.sendGPTTokensCount),
+      moveCount: Number(playerStats.moveCount),
+      setPlanetEmojiCount: Number(playerStats.setPlanetEmojiCount),
+      addJunkCount: Number(playerStats.addJunkCount),
+      clearJunkCount: Number(playerStats.clearJunkCount),
+      revealLocationCount: Number(playerStats.revealLocationCount),
+      upgradePlanetCount: Number(playerStats.upgradePlanetCount),
+      withdrawSilverCount: Number(playerStats.withdrawSilverCount),
+    };
+  }
+
   public getPlayerById(playerId: EthAddress): Player | undefined {
     const {
       Player,

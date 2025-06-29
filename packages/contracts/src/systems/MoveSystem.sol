@@ -13,6 +13,8 @@ import { UniverseLib } from "libraries/Universe.sol";
 import { EffectLib } from "libraries/Effect.sol";
 import { Artifact } from "libraries/Artifact.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract MoveSystem is BaseSystem {
   using MoveLib for MoveData;
@@ -33,6 +35,9 @@ contract MoveSystem is BaseSystem {
     uint256 _silver,
     uint256 _artifact
   ) public entryFee {
+    GlobalStats.setMoveCount(GlobalStats.getMoveCount() + 1);
+    PlayerStats.setMoveCount(_msgSender(), PlayerStats.getMoveCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
     DFUtils.verify(worldAddress, _proof, _input);
