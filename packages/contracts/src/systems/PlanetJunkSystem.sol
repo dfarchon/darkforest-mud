@@ -6,7 +6,8 @@ import { Planet } from "libraries/Planet.sol";
 import { PlanetType } from "codegen/common.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
-
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 
 contract PlanetJunkSystem is BaseSystem {
@@ -21,6 +22,9 @@ contract PlanetJunkSystem is BaseSystem {
    * @param planetHash Planet hash
    */
   function addJunk(uint256 planetHash) public entryFee requireSpaceJunkEnabled {
+    GlobalStats.setAddJunkCount(GlobalStats.getAddJunkCount() + 1);
+    PlayerStats.setAddJunkCount(_msgSender(), PlayerStats.getAddJunkCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
@@ -55,6 +59,9 @@ contract PlanetJunkSystem is BaseSystem {
    * @param planetHash Planet hash
    */
   function clearJunk(uint256 planetHash) public entryFee requireSpaceJunkEnabled {
+    GlobalStats.setClearJunkCount(GlobalStats.getClearJunkCount() + 1);
+    PlayerStats.setClearJunkCount(_msgSender(), PlayerStats.getClearJunkCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

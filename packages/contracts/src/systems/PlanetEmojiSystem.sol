@@ -5,6 +5,8 @@ import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { Planet } from "libraries/Planet.sol";
 import { PlanetEmoji } from "codegen/index.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract PlanetEmojiSystem is BaseSystem {
   /**
@@ -14,6 +16,9 @@ contract PlanetEmojiSystem is BaseSystem {
    */
 
   function setPlanetEmoji(uint256 planetHash, string memory emoji) public requireSameOwnerAndJunkOwner(planetHash) {
+    GlobalStats.setSetPlanetEmojiCount(GlobalStats.getSetPlanetEmojiCount() + 1);
+    PlayerStats.setSetPlanetEmojiCount(_msgSender(), PlayerStats.getSetPlanetEmojiCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

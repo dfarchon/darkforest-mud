@@ -19,6 +19,7 @@ import { Balances } from "@latticexyz/world/src/codegen/tables/Balances.sol";
 import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
 import { RevenueStats } from "codegen/tables/RevenueStats.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 
 contract GuildSystem is BaseSystem {
   error NeedFundsToCreateGuild(); // 0xce43bd9e
@@ -203,6 +204,8 @@ contract GuildSystem is BaseSystem {
 
   function createGuild(string memory name) public payable {
     address owner = _msgSender();
+
+    GlobalStats.setCreateGuildCount(GlobalStats.getCreateGuildCount() + 1);
 
     // Check if the creation fee is sufficient
     if (_msgValue() < GuildConfig.getCreateFee()) {

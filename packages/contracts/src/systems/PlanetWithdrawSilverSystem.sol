@@ -8,6 +8,8 @@ import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GuildUtils } from "libraries/GuildUtils.sol";
 import { Guild } from "codegen/tables/Guild.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract PlanetWithdrawSilverSystem is BaseSystem {
   /**
@@ -19,6 +21,9 @@ contract PlanetWithdrawSilverSystem is BaseSystem {
     uint256 planetHash,
     uint256 silverToWithdraw
   ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
+    GlobalStats.setWithdrawSilverCount(GlobalStats.getWithdrawSilverCount() + 1);
+    PlayerStats.setWithdrawSilverCount(_msgSender(), PlayerStats.getWithdrawSilverCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 

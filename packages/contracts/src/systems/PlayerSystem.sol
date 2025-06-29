@@ -14,6 +14,7 @@ import { BurnerToPlayer } from "codegen/tables/BurnerToPlayer.sol";
 import { Planet } from "libraries/Planet.sol";
 import { SpaceType, PlanetType } from "codegen/common.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 
 contract PlayerSystem is BaseSystem {
   // TODO: will move errors to each system that uses them. just like this one.
@@ -25,6 +26,8 @@ contract PlayerSystem is BaseSystem {
    * @param burner Burner wallet address.
    */
   function registerPlayer(string memory name, address burner) public {
+    GlobalStats.setRegisterPlayerCount(GlobalStats.getRegisterPlayerCount() + 1);
+
     address player = _msgSender();
     if (Player.getIndex(player) != 0) {
       revert AlreadyRegistered();
@@ -92,6 +95,8 @@ contract PlayerSystem is BaseSystem {
    * @param _input SpawnInput.
    */
   function spawnPlayer(Proof memory _proof, SpawnInput memory _input) public returns (uint256) {
+    GlobalStats.setSpawnPlayerCount(GlobalStats.getSpawnPlayerCount() + 1);
+
     address worldAddress = _world();
 
     // NOTE: allow spawnPlayer when game is paused

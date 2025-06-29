@@ -7,6 +7,8 @@ import { GPTTokens } from "codegen/index.sol";
 import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import { RevenueStats } from "codegen/tables/RevenueStats.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract GPTTokensSystem is BaseSystem {
   uint256 public creditPrice = 0.00001 ether; // Price for GPT tokens
@@ -18,6 +20,9 @@ contract GPTTokensSystem is BaseSystem {
    * @param amount Number of GPT tokens to buy
    */
   function buyGPTTokens(uint256 amount) public payable {
+    GlobalStats.setBuyGPTTokensCount(GlobalStats.getBuyGPTTokensCount() + 1);
+    PlayerStats.setBuyGPTTokensCount(_msgSender(), PlayerStats.getBuyGPTTokensCount(_msgSender()) + 1);
+
     // Check if enough ETH is sent
     if (_msgValue() < amount * creditPrice) revert NotEnoughETH();
 
@@ -35,6 +40,9 @@ contract GPTTokensSystem is BaseSystem {
    * @notice Allows users to spend 1 GPT token.
    */
   function spendGPTTokens(uint256 amount) public {
+    GlobalStats.setSpendGPTTokensCount(GlobalStats.getSpendGPTTokensCount() + 1);
+    PlayerStats.setSpendGPTTokensCount(_msgSender(), PlayerStats.getSpendGPTTokensCount(_msgSender()) + 1);
+
     address executor = _msgSender();
     uint256 executorAmount = GPTTokens.get(executor);
 
@@ -53,6 +61,9 @@ contract GPTTokensSystem is BaseSystem {
    * @param amount Number of GPT tokens to send
    */
   function sendGPTTokens(address player, uint256 amount) public {
+    GlobalStats.setSendGPTTokensCount(GlobalStats.getSendGPTTokensCount() + 1);
+    PlayerStats.setSendGPTTokensCount(_msgSender(), PlayerStats.getSendGPTTokensCount(_msgSender()) + 1);
+
     address executor = _msgSender();
     uint256 executorAmount = GPTTokens.get(executor);
 

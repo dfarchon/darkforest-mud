@@ -4,6 +4,8 @@ pragma solidity >=0.8.24;
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { Planet } from "libraries/Planet.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 contract PlanetUpgradeSystem is BaseSystem {
   /**
@@ -20,6 +22,9 @@ contract PlanetUpgradeSystem is BaseSystem {
     uint256 speedUpgrades,
     uint256 defenseUpgrades
   ) public entryFee requireSameOwnerAndJunkOwner(planetHash) {
+    GlobalStats.setUpgradePlanetCount(GlobalStats.getUpgradePlanetCount() + 1);
+    PlayerStats.setUpgradePlanetCount(_msgSender(), PlayerStats.getUpgradePlanetCount(_msgSender()) + 1);
+
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
