@@ -1326,8 +1326,37 @@ export class ContractsAPI extends EventEmitter {
     return constants;
   }
 
+  public getAllRevenueStats(): Map<string, number> {
+    const { RevenueStats } = this.components;
+    const revenueStatsIds = [...runQuery([Has(RevenueStats)])];
+
+    const result = new Map<string, number>();
+    for (let i = 0; i < revenueStatsIds.length; i++) {
+      const entity = revenueStatsIds[i];
+      const revenueStats = getComponentValue(RevenueStats, entity);
+      if (revenueStats) {
+        const systemId = entity.toString();
+        const amount = Number(revenueStats.amount);
+        result.set(systemId, amount);
+      }
+    }
+
+    return result;
+  }
+
+  public getRevenueStatsBySystemId(systemId: string): number | undefined {
+    const { RevenueStats } = this.components;
+    const entity = systemId as Entity;
+    const revenueStats = getComponentValue(RevenueStats, entity);
+    if (!revenueStats) {
+      return undefined;
+    }
+    return Number(revenueStats.amount);
+  }
+
   public getGlobalStats() {
     const { GlobalStats } = this.components;
+
     const globalStats = getComponentValue(GlobalStats, singletonEntity);
     if (!globalStats) {
       throw new Error("not set global stats yet");
