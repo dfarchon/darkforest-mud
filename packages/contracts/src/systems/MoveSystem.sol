@@ -15,6 +15,7 @@ import { Artifact } from "libraries/Artifact.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerStats } from "codegen/tables/PlayerStats.sol";
+import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 
 contract MoveSystem is BaseSystem {
   using MoveLib for MoveData;
@@ -48,7 +49,7 @@ contract MoveSystem is BaseSystem {
       revert MoveToSamePlanet();
     }
 
-    if (fromPlanet.owner != fromPlanet.junkOwner) {
+    if (JunkConfig.getSPACE_JUNK_ENABLED() && fromPlanet.owner != fromPlanet.junkOwner) {
       revert PlanetOwnershipMismatch();
     }
 
@@ -58,6 +59,11 @@ contract MoveSystem is BaseSystem {
       _input.toPerlin,
       _input.toRadiusSquare
     );
+
+    if (fromPlanet.owner != toPlanet.owner && toPlanet.owner != address(0)) {
+      GlobalStats.setAttackCount(GlobalStats.getAttackCount() + 1);
+      PlayerStats.setAttackCount(_msgSender(), PlayerStats.getAttackCount(_msgSender()) + 1);
+    }
 
     // trigger before move effects
     // Discussion: Do we need to implement it via system hooks?
