@@ -5,7 +5,7 @@ import bigInt, { type BigInteger } from "big-integer";
 export const TOKEN_NAME = "ETH";
 export const BLOCKCHAIN_NAME = "Base";
 export const HOST_TEAM_NAME = "DF Archon";
-export const VERSION = "v0.1.3";
+export const VERSION = "v0.1.4";
 
 export const GAS_ADJUST_DELTA = "0.001"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
 
@@ -189,7 +189,7 @@ export const MIN_HAT_TYPE = 1;
 export const MAX_HAT_TYPE = 10;
 
 // export const PICTURE_URL = 'http://localhost:8081';
-export const PICTURE_URL = "https://r3.dfmud.xyz";
+export const PICTURE_URL = "https://r4.dfmud.xyz";
 
 export const MIN_MEME_TYPE = 1;
 export const MAX_MEME_TYPE = 10;
@@ -207,13 +207,13 @@ export const THEGRAPH_API_URL =
   "https://api.thegraph.com/subgraphs/name/darkforest-eth/dark-forest-v06-round-5";
 
 export const PLAYER_GUIDE =
-  "https://dfares.notion.site/Dark-Forest-MUD-v0-1-3-player-guide-1cea4dc2343380feb449c3b621fd5640";
+  "https://dfares.notion.site/Dark-Forest-MUD-v0-1-4-player-guide-226a4dc234338094b74ec0679039a4dd";
 
 export const HOW_TO_TRANSFER_ETH_FROM_L2_TO_REDSTONE =
-  "https://dfares.notion.site/How-to-Transfer-ETH-from-L2-to-Base-Mainnet-1d1a4dc23433809d8a3cc964c3db014d";
+  "https://dfares.notion.site/How-to-Transfer-ETH-from-L2-to-Base-Mainnet-226a4dc234338145a9e4f42b6cbd077c";
 
 export const HOW_TO_ENABLE_POPUPS =
-  "https://dfares.notion.site/How-to-Enable-Popups-1d1a4dc23433805094b9e7269f5ff9c5";
+  "https://dfares.notion.site/How-to-Enable-Popups-226a4dc23433819b9805cacae5a99189";
 
 export const WIN_CONDITION_AND_PRIZES =
-  "https://dfares.notion.site/1-1-Win-Conditions-Prizes-1d1a4dc234338082a9c6d3b8a664b349";
+  "https://dfares.notion.site/1-1-Win-Conditions-Prizes-226a4dc2343381f8a9a6f9b5a5b63827";
