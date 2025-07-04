@@ -11,11 +11,13 @@ import { ARTIFACT_INDEX } from "./constant.sol";
 import { WormholeDest } from "./tables/WormholeDest.sol";
 import { WormholeRecord } from "./tables/WormholeRecord.sol";
 import { _wormholeDestTableId, _wormholeRecordTableId } from "./utils.sol";
+import { PlanetOwner } from "../../../codegen/index.sol";
 
 contract WormholeSystem is ArtifactProxySystem {
   error WormholeAlreadySet(); // 0x1fa9cff1
   error WormholeNotSet(); // 0xf337e05a
   error WormholeSetToSelf(); // 0x842ec8de
+  error WormholeRequiresSameOwner(); // 0x0da3b747
 
   uint32[6] private _distanceMultipliers = [1000, 500, 250, 125, 62, 31];
 
@@ -51,6 +53,11 @@ contract WormholeSystem is ArtifactProxySystem {
     if (from == to) {
       revert WormholeSetToSelf();
     }
+
+    if (PlanetOwner.get(to) != PlanetOwner.get(from)) {
+      revert WormholeRequiresSameOwner();
+    }
+
     (bytes32 left, bytes32 right) = from < to ? (from, to) : (to, from);
     ResourceId wormholeDestTableId = _wormholeDestTableId(_namespace());
     ResourceId wormholeRecordTableId = _wormholeRecordTableId(_namespace());
