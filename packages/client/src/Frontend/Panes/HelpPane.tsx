@@ -128,10 +128,6 @@ export function HelpPane({
             longer be mintable. Thanks for playing!
           </Section>
         )}
-        <Section>
-          <SectionHeader>Hotkeys Intro</SectionHeader>
-          <Table data={data} />
-        </Section>
 
         <Section>
           <SectionHeader>Dark Forest MUD {VERSION} 🦑</SectionHeader>
@@ -194,6 +190,11 @@ export function HelpPane({
             Win Conditions/Prizes
           </Link>{" "}
           to know the prizes.
+        </Section>
+
+        <Section>
+          <SectionHeader>Hotkeys Intro</SectionHeader>
+          <Table data={data} />
         </Section>
 
         <Section>
