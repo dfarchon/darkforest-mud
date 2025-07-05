@@ -31,6 +31,8 @@ contract PlanetJunkSystem is BaseSystem {
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
     address executor = _msgSender();
 
+    if (executor == planet.junkOwner) revert InvalidJunkOperation();
+
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
 
     uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
