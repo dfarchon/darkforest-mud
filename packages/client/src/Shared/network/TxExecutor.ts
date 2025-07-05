@@ -290,7 +290,7 @@ export class TxExecutor {
     // PUNK HIGHLIGHT
     const gasPrice = BigNumber.from(tx.overrides.gasPrice);
     tx.overrides.maxFeePerGas = gasPrice;
-    tx.overrides.maxPriorityFeePerGas = gasPrice.div(10);
+    tx.overrides.maxPriorityFeePerGas = gasPrice.div(2);
     tx.overrides.gasPrice = undefined;
 
     this.queue.add(() => {
