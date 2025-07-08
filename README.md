@@ -1,4 +1,4 @@
-# Dark Foret MUD (🦑,🪐)
+# Dark Forest MUD (🦑,🪐)
 
 "These violent delights have violent ends."
 
