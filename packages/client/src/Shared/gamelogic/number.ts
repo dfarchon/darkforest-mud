@@ -1,3 +1,5 @@
+import { formatUnits } from "ethers/lib/utils";
+
 // smallDec represents the decimals to show for small numbers
 export const formatNumber = (num: number, smallDec = 0): string => {
   if (num < 1000) {
@@ -30,3 +32,21 @@ export const formatNumber = (num: number, smallDec = 0): string => {
     return `${rem.toFixed(0)}E${log000 * 3}`;
   }
 };
+
+export function formatEtherToNumber(
+  value: string | bigint | number,
+  decimals = 18,
+): number {
+  try {
+    return parseFloat(formatUnits(value.toString(), decimals));
+  } catch {
+    return 0;
+  }
+}
+
+export function formatCompact(num: number): string {
+  return Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 2,
+  }).format(num);
+}

@@ -905,19 +905,18 @@ library PlanetLib {
       res -= 2; // lowest biome variant for this zone
     } else if (biomeBase < config.threshold2) {
       res -= 1; // middle biome variant
+    } else if (biomeBase >= config.threshold2) {
+      res = res;
     }
+    //(else: biomeBase >= threshold2, no change, highest variant)
 
-    // 4. Cast to Biome (ensure within range)
-    if (res > uint8(type(Biome).max)) {
-      // Clamp to max enum value if somehow out of range
-      res = uint8(type(Biome).max);
-    }
-    biome = Biome(res);
+    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
   }
 
   function getPlanetBiome(Planet memory planet) internal view returns (Biome) {
     // Compute biomebase deterministically from planet properties
     // Use a combination of planetHash and perlin to create a deterministic biomebase
+
     uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.perlin))) % 1000;
     return _getBiome(planet, biomeBase);
   }

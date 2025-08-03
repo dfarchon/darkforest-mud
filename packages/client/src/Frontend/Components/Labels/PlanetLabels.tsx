@@ -1,9 +1,17 @@
 import { EMPTY_ADDRESS } from "@df/constants";
-import { formatNumber } from "@df/gamelogic";
+import {
+  formatCompact,
+  formatEtherToNumber,
+  formatNumber,
+} from "@df/gamelogic";
 import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
 import type { MaterialType } from "@df/types";
 import { PlanetType, PlanetTypeNames } from "@df/types";
+import {
+  getMaterialColor,
+  getMaterialName,
+} from "@frontend/Panes/PlanetMaterialsPane";
 import React from "react";
 
 import { getPlanetRank } from "../../../Backend/Utils/Utils";
@@ -310,7 +318,7 @@ export function MaterialsText({
       {activeMaterials.map((mat, index) => (
         <span key={mat.materialId}>
           {index > 0 && ", "}
-          {getMaterialName(mat.materialId)}: {formatNumber(mat.amount)}
+          {getMaterialName(mat.materialId)}: {formatEtherToNumber(mat.amount)}
         </span>
       ))}
     </span>
@@ -369,42 +377,20 @@ export function MaterialsDisplay({
               border: `1px solid ${dfstyles.colors.borderDarker}`,
             }}
           >
-            <span style={{ color: dfstyles.colors.subtext }}>
+            <span style={{ color: getMaterialColor(mat.materialId) }}>
               {getMaterialName(mat.materialId)}
             </span>
             <span style={{ color: dfstyles.colors.text }}>
-              {formatNumber(mat.amount)}
+              {formatCompact(mat.amount / 1e18)} /{" "}
+              {formatCompact(mat.cap / 1e18)}
+            </span>
+
+            <span style={{ color: dfstyles.colors.text }}>
+              +{formatCompact(mat.growthRate / 1e18)}
             </span>
           </div>
         ))}
       </div>
     </div>
   );
-}
-
-function getMaterialName(materialId: MaterialType): string {
-  switch (materialId) {
-    case 1:
-      return "Water";
-    case 2:
-      return "Wood";
-    case 3:
-      return "Windsteel";
-    case 4:
-      return "Silver";
-    case 5:
-      return "Mycelium";
-    case 6:
-      return "Sunstone";
-    case 7:
-      return "Glacite";
-    case 8:
-      return "Scrapium";
-    case 9:
-      return "Pyrosteel";
-    case 10:
-      return "Blackalloy";
-    default:
-      return "Unknown";
-  }
 }

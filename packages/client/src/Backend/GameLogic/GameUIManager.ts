@@ -47,6 +47,7 @@ import {
 import autoBind from "auto-bind";
 import type { BigNumber } from "ethers";
 import EventEmitter from "events";
+import { Howl } from "howler";
 import deferred from "p-defer";
 import type React from "react";
 import type { Hex } from "viem";
@@ -79,7 +80,6 @@ import type { GuildUtils } from "./GuildUtils";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
-import { Howl } from "howler";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -2119,5 +2119,24 @@ export class GameUIManager extends EventEmitter {
       },
     });
     clickSound.play();
+  }
+
+  private materialSending = new Map<string, number>(); // key: `${locationId}-${materialId}`
+
+  public getMaterialSending(
+    locationId: LocationId | undefined,
+    matId: number,
+  ): number {
+    if (!locationId) return 0;
+    return this.materialSending.get(`${locationId}-${matId}`) || 0;
+  }
+
+  public setMaterialSending(
+    locationId: LocationId | undefined,
+    matId: number,
+    percent: number,
+  ) {
+    if (!locationId) return;
+    this.materialSending.set(`${locationId}-${matId}`, percent);
   }
 }

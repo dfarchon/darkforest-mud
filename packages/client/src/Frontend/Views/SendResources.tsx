@@ -1,7 +1,7 @@
 import { formatNumber, isSpaceShip } from "@df/gamelogic";
 import { isUnconfirmedMoveTx, isUnconfirmedReleaseTx } from "@df/serde";
 import type { Artifact, Planet } from "@df/types";
-import { artifactNameFromArtifact, TooltipName } from "@df/types";
+import { artifactNameFromArtifact, MaterialType, TooltipName } from "@df/types";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
@@ -25,6 +25,10 @@ import { useEmitterValue } from "../Utils/EmitterHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
 import { TOGGLE_ABANDON, TOGGLE_SEND } from "../Utils/ShortcutConstants";
 import { SelectArtifactRow } from "./ArtifactRow";
+import {
+  getMaterialColor,
+  getMaterialName,
+} from "@frontend/Panes/PlanetMaterialsPane";
 
 const StyledSendResources = styled.div`
   display: flex;
@@ -82,38 +86,153 @@ const ResourceRowDetails = styled.div`
   gap: 4px;
 `;
 
+export function MaterialIcon({ materialId }: { materialId: number }) {
+  return (
+    <div
+      style={{
+        width: "1em",
+        height: "1em",
+        borderRadius: "3px",
+        backgroundColor: getMaterialColor(materialId),
+        display: "inline-block",
+        marginRight: "6px",
+      }}
+    />
+  );
+}
+
+export type Material = {
+  materialId: number;
+  amount: string | bigint;
+  cap: string | bigint;
+  growthRate: string | bigint;
+  lastTick: number;
+};
+
 function ResourceBar({
   isSilver,
+  isMaterial,
   selected,
+  material,
   value,
   setValue,
   disabled,
 }: {
   isSilver?: boolean;
-  selected: Planet | undefined;
+  isMaterial?: boolean;
+  selected: Planet | Material | undefined;
+  material?: Material;
   value: number;
   setValue: (x: number) => void;
   disabled?: boolean;
 }) {
-  const getResource = useCallback(
-    (val: number) => {
-      if (!selected) {
-        return "";
-      }
-      const resource = isSilver ? selected.silver : selected.energy;
-      return formatNumber((val / 100) * resource);
-    },
-    [selected, isSilver],
-  );
+  // const getResource = useCallback(
+  //   (val: number): string => {
+  //     if (!selected) return "";
+  //     console.log("is material1", material);
+  //     // MATERIAL
+  //     if (isMaterial && material) {
+  //       console.log("is material", material);
+  //       const amount =
+  //         typeof material.amount === "string"
+  //           ? parseFloat(material.amount)
+  //           : Number(material.amount);
+  //       return formatNumber(((val / 100) * amount) / 1e18);
+  //     }
 
+  //     // SILVER or ENERGY
+  //     const resource = isSilver
+  //       ? (selected as Planet).silver
+  //       : (selected as Planet).energy;
+  //     return formatNumber((val / 100) * resource);
+  //   },
+  //   [selected, isSilver, isMaterial, material],
+  // );
+  const getResource = useCallback(
+    (val: number): string => {
+      if (!selected) return "";
+
+      // MATERIAL
+      if (isMaterial && material) {
+        const amount =
+          typeof material.amount === "string"
+            ? parseFloat(material.amount)
+            : Number(material.amount);
+        const value = ((val / 100) * amount) / 1e18;
+
+        // e.g., "312.4 MYCELIUM"
+        return `${formatNumber(value)}`;
+      }
+
+      // SILVER or ENERGY
+      const resource = isSilver
+        ? (selected as Planet).silver
+        : (selected as Planet).energy;
+
+      const label = isSilver ? "SILVER" : "ENERGY";
+      const value = (val / 100) * resource;
+
+      return `${formatNumber(value)}`;
+    },
+    [selected, isSilver, isMaterial, material],
+  );
   return (
     <>
+      {/* <Row>
+        <ResourceRowDetails>
+          {isMaterial && material?.length > 0 ? (
+            <>
+              <Icon type={IconType.Frozen} />
+              {material[1].amount}
+            </>
+          ) : isSilver ? (
+            <>
+              <Icon type={IconType.Silver} />
+              {getResource(value)}
+            </>
+          ) : (
+            <>
+              <Icon type={IconType.Energy} />
+              {getResource(value)}
+            </>
+          )}
+        </ResourceRowDetails>
+
+        <ShowPercent value={value} setValue={setValue} />
+      </Row> */}
       <Row>
         <ResourceRowDetails>
-          <Icon type={isSilver ? IconType.Silver : IconType.Energy} />
-          {getResource(value)}
-          <Subber>{isSilver ? "silver" : "energy"}</Subber>
+          {(() => {
+            if (isMaterial && material) {
+              return (
+                <>
+                  <MaterialIcon materialId={material.materialId} />
+                  {getResource(value)}
+                  <Subber>{getMaterialName(material.materialId)}</Subber>
+                </>
+              );
+            }
+
+            if (isSilver) {
+              return (
+                <>
+                  <Icon type={IconType.Silver} />
+                  {getResource(value)}
+                  <Subber>Silver</Subber>
+                </>
+              );
+            }
+
+            return (
+              <>
+                <Icon type={IconType.Energy} />
+                {getResource(value)}
+                <Subber>Energy</Subber>
+              </>
+            );
+          })()}
         </ResourceRowDetails>
+
         <ShowPercent value={value} setValue={setValue} />
       </Row>
       <Slider
@@ -244,6 +363,16 @@ export function SendResources({
 
   const disableSliders = isSendingShip || isAbandoning;
 
+  const activeMaterials =
+    p.value?.materials?.filter(
+      (mat) => mat.materialId !== 0 && mat.amount > 0,
+    ) || [];
+  console.log(activeMaterials);
+  const materialSending = activeMaterials.map((mat) => ({
+    materialId: mat.materialId,
+    value: uiManager.getMaterialSending(locationId, mat.materialId),
+  }));
+  console.log(materialSending);
   const updateEnergySending = useCallback(
     (energyPercent) => {
       if (!locationId) {
@@ -388,6 +517,26 @@ export function SendResources({
           )}
         </>
       )}
+      {owned &&
+        !p.value?.destroyed &&
+        !p.value?.frozen &&
+        activeMaterials.length > 0 && (
+          <>
+            {activeMaterials.map((mat) => (
+              <ResourceBar
+                key={mat.materialId}
+                selected={p.value} // pass full material
+                material={mat} // pass full material
+                value={uiManager.getMaterialSending(locationId, mat.materialId)}
+                setValue={(val) =>
+                  uiManager.setMaterialSending(locationId, mat.materialId, val)
+                }
+                disabled={disableSliders}
+                isMaterial // <-- optional prop to distinguish in styling
+              />
+            ))}
+          </>
+        )}
       {p.value && artifacts.length > 0 && (
         <SelectArtifactRow
           artifacts={artifacts}
