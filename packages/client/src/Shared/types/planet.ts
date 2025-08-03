@@ -173,26 +173,28 @@ export type MaterialType =
   | 1 // WATER
   | 2 // WOOD
   | 3 // WINDSTEEL
-  | 4 // SILVER
+  | 4 // GLACITE
   | 5 // MYCELIUM
-  | 6 // SUNSTONE
-  | 7 // GLACITE
+  | 6 // SANDGLASS
+  | 7 // CRYOSTONE
   | 8 // SCRAPIUM
   | 9 // PYROSTEEL
-  | 10; // BLACKALLOY;
+  | 10 // BLACKALLOY
+  | 11; // CORRUPTED_CRYSTAL
 
 export const MaterialType = {
   UNKNOWN: 0 as MaterialType,
-  WATER: 1 as MaterialType,
-  WOOD: 2 as MaterialType,
+  WATER_CRYSTALS: 1 as MaterialType,
+  LIVING_WOOD: 2 as MaterialType,
   WINDSTEEL: 3 as MaterialType,
-  SILVER: 4 as MaterialType,
+  GLACITE: 4 as MaterialType,
   MYCELIUM: 5 as MaterialType,
-  SUNSTONE: 6 as MaterialType,
-  GLACITE: 7 as MaterialType,
+  SANDGLASS: 6 as MaterialType,
+  CRYOSTONE: 7 as MaterialType,
   SCRAPIUM: 8 as MaterialType,
   PYROSTEEL: 9 as MaterialType,
   BLACKALLOY: 10 as MaterialType,
+  CORRUPTED_CRYSTAL: 11 as MaterialType,
 } as const;
 
 export type Materials = {

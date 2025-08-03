@@ -384,23 +384,37 @@ library PlanetLib {
 
   function _initPlanetMaterials(Planet memory planet) internal view {
     // Only initialize materials for ASTEROID_FIELD planets to save gas
-    if (PlanetConstants.getPlanetType(bytes32(planet.planetHash)) != PlanetType.ASTEROID_FIELD) {
-      //For non-ASTEROID_FIELD planets, initialize empty array to save gas
-      planet.materials = new Materials[](0);
-      return;
+    if (planet.planetType == PlanetType(uint8(PlanetType.ASTEROID_FIELD))) {
+      // For ASTEROID_FIELD planets, get allowed materials and initialize only those
+      Biome biome = Biome(uint8(PlanetLib.getPlanetBiome(planet)) - 1);
+      MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
+
+      // Initialize array with only the allowed materials
+      planet.materials = new Materials[](allowed.length);
+
+      // Initialize only the materials allowed by this biome
+      for (uint j = 1; j < allowed.length; j++) {
+        planet.materials[j] = MaterialLib.newMaterial(
+          allowed[j],
+          _initMaterialsCap(planet.level),
+          _initMaterialsGrow(planet.level)
+        );
+      }
     }
+  }
 
-    // For ASTEROID_FIELD planets, get allowed materials and initialize only those
-    Biome biome = PlanetLib.getPlanetBiome(planet);
-    MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
-
-    // Initialize array with only the allowed materials
-    planet.materials = new Materials[](allowed.length);
-
-    // Initialize only the materials allowed by this biome
-    for (uint j = 0; j < allowed.length; j++) {
-      planet.materials[j] = MaterialLib.newMaterial(allowed[j], 1000 ether, 0.1 ether);
+  function _initMaterialsCap(uint256 planetLvl) internal pure returns (uint256) {
+    if (planetLvl <= 3) {
+      return planetLvl * 1000 * 1e18;
+    } else if (planetLvl <= 6) {
+      return planetLvl * 2000 * 1e18;
+    } else {
+      return 6000 * planetLvl * 1e18;
     }
+  }
+
+  function _initMaterialsGrow(uint256 planetLvl) internal pure returns (uint256) {
+    return planetLvl * 1e16 * 2;
   }
 
   function _initSpaceType(Planet memory planet) internal view {
@@ -865,28 +879,6 @@ library PlanetLib {
     }
   }
 
-  function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
-    if (planet.spaceType == SpaceType.DEAD_SPACE) {
-      return Biome.CORRUPTED;
-    }
-
-    uint256 res = uint8(planet.spaceType) * 3;
-    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
-    if (biomeBase < config.threshold1) {
-      res -= 2;
-    } else if (biomeBase < config.threshold2) {
-      res -= 1;
-    }
-    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
-  }
-
-  function getPlanetBiome(Planet memory planet) internal view returns (Biome) {
-    // Compute biomebase deterministically from planet properties
-    // Use a combination of planetHash and perlin to create a deterministic biomebase
-    uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.perlin))) % 1000;
-    return _getBiome(planet, biomeBase);
-  }
-
   function _createArtifactSeed(Planet memory planet) internal view returns (uint256 seed) {
     seed = uint256(
       keccak256(
@@ -899,83 +891,51 @@ library PlanetLib {
     );
   }
 
-  //   function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
-  //     if (biome == Biome.OCEAN) {
-  //         MaterialType[] memory mats = new MaterialType[](1);
-  //         mats[0] = MaterialType.WATER;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.FOREST) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.WOOD;
-  //         mats[1] = MaterialType.MYCELIUM;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.GRASSLAND) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.WINDSTEEL;
-  //         mats[1] = MaterialType.WOOD;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.TUNDRA) {
-  //         MaterialType[] memory mats = new MaterialType[](1);
-  //         mats[0] = MaterialType.SILVER;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.SWAMP) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.MYCELIUM;
-  //         mats[1] = MaterialType.WOOD;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.DESERT) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.GLACITE;
-  //         mats[1] = MaterialType.SUNSTONE;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.ICE) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.GLACITE;
-  //         mats[1] = MaterialType.PYROSTEEL;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.WASTELAND) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.SCRAPIUM;
-  //         mats[1] = MaterialType.WOOD;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.LAVA) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.PYROSTEEL;
-  //         mats[1] = MaterialType.SUNSTONE;
-  //         return mats;
-  //     }
-  //     if (biome == Biome.CORRUPTED) {
-  //         MaterialType[] memory mats = new MaterialType[](2);
-  //         mats[0] = MaterialType.BLACKALLOY;
-  //         mats[1] = MaterialType.SILVER;
-  //         return mats;
-  //     }
-  //     // Default: return empty array
-  //     return new MaterialType[](0);
-  // }
+  function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
+    // 1. If planet is in Dead Space, its biome is Corrupted
+    if (planet.spaceType == SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED; // Dead space yields corrupted biome:contentReference[oaicite:8]{index=8}
+    }
+    // 2. Base index derived from spaceType (3 biome variants per zone)
+    uint256 res = uint8(planet.spaceType) * 3;
+    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get(); // Load threshold config:contentReference[oaicite:9]{index=9}
+
+    // 3. Adjust index based on biomeBase against thresholds
+    if (biomeBase < config.threshold1) {
+      res -= 2; // lowest biome variant for this zone
+    } else if (biomeBase < config.threshold2) {
+      res -= 1; // middle biome variant
+    }
+
+    // 4. Cast to Biome (ensure within range)
+    if (res > uint8(type(Biome).max)) {
+      // Clamp to max enum value if somehow out of range
+      res = uint8(type(Biome).max);
+    }
+    biome = Biome(res);
+  }
+
+  function getPlanetBiome(Planet memory planet) internal view returns (Biome) {
+    // Compute biomebase deterministically from planet properties
+    // Use a combination of planetHash and perlin to create a deterministic biomebase
+    uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.perlin))) % 1000;
+    return _getBiome(planet, biomeBase);
+  }
+
   function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
     MaterialType[] memory mats = new MaterialType[](3);
     if (biome == Biome.CORRUPTED) {
-      mats[0] = MaterialType.SILVER;
       mats[1] = MaterialType.BLACKALLOY;
-      mats[2] = MaterialType.MYCELIUM;
+      mats[2] = MaterialType.CORRUPTED_CRYSTAL;
       return mats;
     }
 
     MaterialType biomeMat;
 
     if (biome == Biome.OCEAN) {
-      biomeMat = MaterialType.WATER;
+      biomeMat = MaterialType.WATER_CRYSTALS;
     } else if (biome == Biome.FOREST) {
-      biomeMat = MaterialType.WOOD;
+      biomeMat = MaterialType.LIVING_WOOD;
     } else if (biome == Biome.GRASSLAND) {
       biomeMat = MaterialType.WINDSTEEL;
     } else if (biome == Biome.TUNDRA) {
@@ -983,15 +943,14 @@ library PlanetLib {
     } else if (biome == Biome.SWAMP) {
       biomeMat = MaterialType.MYCELIUM;
     } else if (biome == Biome.DESERT) {
-      biomeMat = MaterialType.SUNSTONE;
+      biomeMat = MaterialType.SANDGLASS;
     } else if (biome == Biome.ICE) {
-      biomeMat = MaterialType.PYROSTEEL;
+      biomeMat = MaterialType.CRYOSTONE;
     } else if (biome == Biome.WASTELAND) {
       biomeMat = MaterialType.SCRAPIUM;
     } else if (biome == Biome.LAVA) {
       biomeMat = MaterialType.PYROSTEEL;
     }
-    mats[0] = MaterialType.SILVER;
     mats[1] = biomeMat;
     return mats;
   }

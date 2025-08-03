@@ -17,6 +17,8 @@ import { GPTTokens } from "codegen/index.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { PlanetMaterial, PlanetMaterialData } from "codegen/tables/PlanetMaterial.sol";
+import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
+import { Materials, MaterialLib } from "libraries/Material.sol";
 
 contract TestOnlySystem is BaseSystem {
   // function createPlanet(
@@ -40,6 +42,26 @@ contract TestOnlySystem is BaseSystem {
 
   //   PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
   // }
+  // function createPlanet(
+  //   uint256 planetHash,
+  //   address owner,
+  //   uint8 perlin,
+  //   uint8 level,
+  //   PlanetType planetType,
+  //   SpaceType spaceType,
+  //   uint64 population,
+  //   uint64 silver,
+  //   uint24 upgrades
+  // ) public {
+  //   DFUtils.tick(_world());
+
+  //   PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
+  //   PlanetOwner.set(bytes32(planetHash), owner);
+  //   setPlanetJunkOwner(planetHash, owner, level);
+
+  //   PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
+
+  // }
   function createPlanet(
     uint256 planetHash,
     address owner,
@@ -53,19 +75,50 @@ contract TestOnlySystem is BaseSystem {
   ) public {
     DFUtils.tick(_world());
 
+    // 1. Save core metadata
     PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
     PlanetOwner.set(bytes32(planetHash), owner);
     setPlanetJunkOwner(planetHash, owner, level);
 
     PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
 
-    // Biome biome = PlanetLib.getPlanetBiome(PlanetConstants.get((planetHash)));
-    // MaterialType[] memory materials = PlanetLib.allowedMaterialsForBiome(biome);
-
-    // for (uint i = 0; i < materials.length; i++) {
-    //   PlanetMaterial.setAmount(bytes32(planetHash), materials[i], 10);
+    // Biome biome = Biome(uint8(getPlanetBiome1(planetHash,perlin,spaceType)) - 1);
+    // MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
+    // for (uint i = 0; i < allowed.length; i++) {
+    // MaterialLib.newMaterial(allowed[i], 1000 ether, 0.1 ether);
     // }
   }
+
+  //   function getPlanetBiome1(uint256 planetHash , uint8 perlin , SpaceType spaceType) internal view returns (Biome) {
+  //     // Compute biomebase deterministically from planet properties
+  //     // Use a combination of planetHash and perlin to create a deterministic biomebase
+  //     uint256 biomeBase = uint256(keccak256(abi.encodePacked(planetHash, perlin))) % 1000;
+  //     return _getBiome1(spaceType, biomeBase);
+  //   }
+
+  //     function _getBiome1(SpaceType spaceType, uint256 biomeBase) internal view returns (Biome biome) {
+  //     // 1. If planet is in Dead Space, its biome is Corrupted
+  //     if (spaceType == SpaceType.DEAD_SPACE) {
+  //         return Biome.CORRUPTED;                       // Dead space yields corrupted biome:contentReference[oaicite:8]{index=8}
+  //     }
+  //     // 2. Base index derived from spaceType (3 biome variants per zone)
+  //     uint256 res = uint8(spaceType) * 3;
+  //     PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();  // Load threshold config:contentReference[oaicite:9]{index=9}
+
+  //     // 3. Adjust index based on biomeBase against thresholds
+  //     if (biomeBase < config.threshold1) {
+  //         res -= 2;  // lowest biome variant for this zone
+  //     } else if (biomeBase < config.threshold2) {
+  //         res -= 1;  // middle biome variant
+  //     }
+
+  //     // 4. Cast to Biome (ensure within range)
+  //     if (res > uint8(type(Biome).max)) {
+  //         // Clamp to max enum value if somehow out of range
+  //         res = uint8(type(Biome).max);
+  //     }
+  //     biome = Biome(res);
+  // }
 
   function setPlanetJunkOwner(uint256 planetHash, address junkOwner, uint256 level) public {
     DFUtils.tick(_world());
