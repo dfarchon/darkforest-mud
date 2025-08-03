@@ -19,6 +19,19 @@ export default defineWorld({
       "LAVA",
       "CORRUPTED",
     ],
+    MaterialType: [
+      "UNKNOWN",
+      "WATER",
+      "WOOD",
+      "WINDSTEEL",
+      "SILVER",
+      "MYCELIUM",
+      "SUNSTONE",
+      "GLACITE",
+      "SCRAPIUM",
+      "PYROSTEEL",
+      "BLACKALLOY",
+    ],
     ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "READY", "ACTIVE", "BROKEN"],
     ArtifactGenre: ["UNKNOWN", "DEFENSIVE", "OFFENSIVE", "PRODUCTIVE", "GENERAL"],
     ArtifactRarity: ["UNKNOWN", "COMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC"],
@@ -610,6 +623,17 @@ export default defineWorld({
         junk: "uint256",
       },
       key: ["owner"],
+    },
+    PlanetMaterial: {
+      schema: {
+        planetId: "bytes32",
+        resourceId: "uint8",
+        amount: "uint256",
+        cap: "uint256",
+        growthRate: "uint256",
+        lastTick: "uint256",
+      },
+      key: ["planetId", "resourceId"],
     },
     GlobalStats: {
       schema: {

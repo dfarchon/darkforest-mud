@@ -15,6 +15,7 @@ import { OpenKardashevButton } from "../Components/OpenKardashevButton";
 import {
   OpenBroadcastPaneButton,
   OpenManagePlanetArtifactsButton,
+  OpenMaterialsPaneButton,
   OpenPlanetInfoButton,
   OpenUpgradeDetailsPaneButton,
 } from "../Components/OpenPaneButtons";
@@ -156,13 +157,24 @@ function PlanetContextPaneContent({
       key={PlanetPaneName.Boardcast}
     />
   );
-  const infoRow = (
-    <OpenPlanetInfoButton
-      modal={modal}
-      planetId={p?.locationId}
-      key={PlanetPaneName.Info}
-    />
-  );
+  let infoRow = null;
+  if (!p?.destroyed && !p?.frozen) {
+    infoRow = <OpenPlanetInfoButton modal={modal} planetId={p?.locationId} />;
+  }
+
+  let materialsRow = null;
+  if (!p?.destroyed && !p?.frozen) {
+    materialsRow = (
+      <OpenMaterialsPaneButton modal={modal} planetId={p?.locationId} />
+    );
+  }
+
+  let artifactsRow = null;
+  if (!p?.destroyed && !p?.frozen) {
+    artifactsRow = (
+      <OpenManagePlanetArtifactsButton modal={modal} planetId={p?.locationId} />
+    );
+  }
 
   // let hatRow = null;
   // if (!p?.destroyed && !p?.frozen && owned) {
@@ -225,13 +237,40 @@ function PlanetContextPaneContent({
   // planetId={p?.locationId} key={PlanetPaneName.BuyArtifact} />;
   // }
 
-  const artifactsRow = (
-    <OpenManagePlanetArtifactsButton
-      modal={modal}
-      planetId={p?.locationId}
-      key={PlanetPaneName.Artifacts}
-    />
-  );
+  const rows = [];
+  if (upgradeRow) {
+    rows.push(upgradeRow);
+  }
+  if (boardcastRow) {
+    rows.push(boardcastRow);
+  }
+  if (infoRow) {
+    rows.push(infoRow);
+  }
+  if (materialsRow) {
+    rows.push(materialsRow);
+  }
+  // if (buyArtifactRow) rows.push(buyArtifactRow);
+  if (artifactsRow) {
+    rows.push(artifactsRow);
+  }
+
+  // if (dropBombRow) {
+  //   rows.push(dropBombRow);
+  // }
+  if (pinkRow) {
+    rows.push(pinkRow);
+  }
+  // if (kardashevRow) {
+  //   rows.push(kardashevRow);
+  // }
+  // if (blueRow) {
+  //   rows.push(blueRow);
+  // }
+  // if (hatRow) {
+  //   rows.push(hatRow);
+  // }
+
   let withdrawRow = null;
   if (
     !p?.destroyed &&
@@ -245,28 +284,6 @@ function PlanetContextPaneContent({
   let notifRow = null;
   if (!p?.destroyed && !p?.frozen && notifs.length > 0) {
     notifRow = <PlanetNotifications planet={planet} notifs={notifs} />;
-  }
-
-  const rows = [];
-  if (upgradeRow) {
-    rows.push(upgradeRow);
-  }
-  if (boardcastRow) {
-    rows.push(boardcastRow);
-  }
-  if (infoRow) {
-    rows.push(infoRow);
-  }
-  // if (buyArtifactRow) rows.push(buyArtifactRow);
-  if (artifactsRow) {
-    rows.push(artifactsRow);
-  }
-
-  // if (dropBombRow) {
-  //   rows.push(dropBombRow);
-  // }
-  if (pinkRow) {
-    rows.push(pinkRow);
   }
   // if (kardashevRow) {
   //   rows.push(kardashevRow);
@@ -313,8 +330,12 @@ function PlanetContextPaneContent({
         {/* {captureRow} */}
 
         <VerticalSplit>
-          <>{leftRows}</>
-          <>{rightRows}</>
+          {leftRows.map((row, idx) => (
+            <React.Fragment key={"left-" + idx}>{row}</React.Fragment>
+          ))}
+          {rightRows.map((row, idx) => (
+            <React.Fragment key={"right-" + idx}>{row}</React.Fragment>
+          ))}
         </VerticalSplit>
 
         {withdrawRow}

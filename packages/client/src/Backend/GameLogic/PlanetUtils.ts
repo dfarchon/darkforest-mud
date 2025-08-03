@@ -13,6 +13,8 @@ import type {
   EthAddress,
   LocatablePlanet,
   LocationId,
+  Materials,
+  MaterialType,
   Planet,
   PlanetBonus,
   PlanetType,
@@ -113,6 +115,11 @@ export class PlanetUtils {
       frozen: planet.frozen,
       effects: planet.effects,
       flags: planet.flags,
+      junkOwner: planet.junkOwner,
+      addJunkTick: planet.addJunkTick,
+      materials: planet.materials,
+      loadingServerState: false,
+      needsServerRefresh: false,
     };
   }
 
@@ -379,6 +386,40 @@ export class PlanetUtils {
       planetEntity,
     );
 
+    // --- MATERIALS ---
+    // Try to get the PlanetMaterial component from this.components
+    const { PlanetMaterial } = this.components;
+    const materials: Materials[] = [];
+    if (PlanetMaterial) {
+      // There are 11 material types (0-10), 0 is UNKNOWN
+      for (let i = 0; i <= 10; i++) {
+        const matData = getComponentValue(
+          PlanetMaterial,
+          encodeEntity(PlanetMaterial.metadata.keySchema, {
+            planetId: locationIdToHexStr(planetId) as `0x${string}`,
+            resourceId: i,
+          }),
+        );
+        if (matData) {
+          materials[i] = {
+            materialId: i as MaterialType,
+            amount: Number(matData.amount),
+            cap: Number(matData.cap),
+            growthRate: Number(matData.growthRate),
+            lastTick: Number(matData.lastTick),
+          };
+        } else {
+          materials[i] = {
+            materialId: i as MaterialType,
+            amount: 0,
+            cap: 0,
+            growthRate: 0,
+            lastTick: 0,
+          };
+        }
+      }
+    }
+
     return {
       locationId: planetId,
       isHomePlanet: false,
@@ -425,6 +466,9 @@ export class PlanetUtils {
       addJunkTick: planetAddJunkTickData
         ? Number(planetAddJunkTickData.value)
         : 0,
+      materials,
+      loadingServerState: false,
+      needsServerRefresh: false,
     };
   }
 

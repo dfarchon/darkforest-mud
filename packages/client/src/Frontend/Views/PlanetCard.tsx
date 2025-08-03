@@ -28,6 +28,7 @@ import {
   DefenseText,
   EnergyGrowthText,
   JunkText,
+  MaterialsDisplay,
   PlanetBiomeTypeLabelAnim,
   PlanetEnergyLabel,
   PlanetLevel,
@@ -435,6 +436,14 @@ export function PlanetCard({
             </SpreadApart>
           </StatRow>
         </ElevatedContainer>
+
+        {/* Materials Display */}
+        {planet.materials && planet.materials.length > 0 && (
+          <>
+            <EmSpacer height={0.5} />
+            <MaterialsDisplay planet={planet} />
+          </>
+        )}
 
         {standalone && (
           <>

@@ -2,22 +2,44 @@
 pragma solidity >=0.8.24;
 
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
-import { PlanetType, SpaceType, PlanetStatus } from "codegen/common.sol";
+import { Biome, PlanetType, SpaceType, PlanetStatus, MaterialType } from "codegen/common.sol";
 import { Planet as PlanetTable } from "codegen/tables/Planet.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
 import { PlanetJunkOwner } from "codegen/tables/PlanetJunkOwner.sol";
 import { PlanetConstants } from "codegen/tables/PlanetConstants.sol";
 import { Ticker } from "codegen/tables/Ticker.sol";
 import { RevealedPlanet } from "codegen/tables/RevealedPlanet.sol";
-import { Planet } from "libraries/Planet.sol";
+import { Planet, PlanetLib } from "libraries/Planet.sol";
 import { Proof } from "libraries/SnarkProof.sol";
 import { SpawnInput } from "libraries/VerificationInput.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GPTTokens } from "codegen/index.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
+import { PlanetMaterial, PlanetMaterialData } from "codegen/tables/PlanetMaterial.sol";
 
 contract TestOnlySystem is BaseSystem {
+  // function createPlanet(
+  //   uint256 planetHash,
+  //   address owner,
+  //   uint8 perlin,
+  //   uint8 level,
+  //   PlanetType planetType,
+  //   SpaceType spaceType,
+  //   uint64 population,
+  //   uint64 silver,
+  //   uint24 upgrades
+  // ) public {
+  //   DFUtils.tick(_world());
+
+  //   PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
+
+  //   PlanetOwner.set(bytes32(planetHash), owner);
+
+  //   setPlanetJunkOwner(planetHash, owner, level);
+
+  //   PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
+  // }
   function createPlanet(
     uint256 planetHash,
     address owner,
@@ -32,12 +54,17 @@ contract TestOnlySystem is BaseSystem {
     DFUtils.tick(_world());
 
     PlanetConstants.set(bytes32(planetHash), perlin, level, planetType, spaceType);
-
     PlanetOwner.set(bytes32(planetHash), owner);
-
     setPlanetJunkOwner(planetHash, owner, level);
 
     PlanetTable.set(bytes32(planetHash), Ticker.getTickNumber(), population, silver, upgrades, false);
+
+    // Biome biome = PlanetLib.getPlanetBiome(PlanetConstants.get((planetHash)));
+    // MaterialType[] memory materials = PlanetLib.allowedMaterialsForBiome(biome);
+
+    // for (uint i = 0; i < materials.length; i++) {
+    //   PlanetMaterial.setAmount(bytes32(planetHash), materials[i], 10);
+    // }
   }
 
   function setPlanetJunkOwner(uint256 planetHash, address junkOwner, uint256 level) public {

@@ -2,6 +2,7 @@ import { EMPTY_ADDRESS } from "@df/constants";
 import { formatNumber } from "@df/gamelogic";
 import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
+import type { MaterialType } from "@df/types";
 import { PlanetType, PlanetTypeNames } from "@df/types";
 import React from "react";
 
@@ -282,4 +283,128 @@ export function PlanetOwnerLabel({
       <TextPreview text={planet.owner} />
     </Colored>
   );
+}
+
+export function MaterialsText({
+  planet,
+  style,
+}: {
+  planet: Planet | undefined;
+  style?: React.CSSProperties;
+}) {
+  if (!planet || !planet.materials || planet.materials.length === 0) {
+    return <span style={style}>No materials</span>;
+  }
+
+  // Filter out materials with 0 amount and UNKNOWN type
+  const activeMaterials = planet.materials.filter(
+    (mat) => mat.materialId !== 0 && mat.amount > 0,
+  );
+
+  if (activeMaterials.length === 0) {
+    return <span style={style}>No materials</span>;
+  }
+
+  return (
+    <span style={style}>
+      {activeMaterials.map((mat, index) => (
+        <span key={mat.materialId}>
+          {index > 0 && ", "}
+          {getMaterialName(mat.materialId)}: {formatNumber(mat.amount)}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+export function MaterialsDisplay({
+  planet,
+  style,
+}: {
+  planet: Planet | undefined;
+  style?: React.CSSProperties;
+}) {
+  if (!planet || !planet.materials || planet.materials.length === 0) {
+    return null;
+  }
+
+  // Filter out materials with 0 amount and UNKNOWN type
+  const activeMaterials = planet.materials.filter(
+    (mat) => mat.materialId !== 0 && mat.amount > 0,
+  );
+
+  if (activeMaterials.length === 0) {
+    return null;
+  }
+
+  return (
+    <div style={style}>
+      <div
+        style={{
+          fontSize: "0.9em",
+          color: dfstyles.colors.subtext,
+          marginBottom: "4px",
+          textAlign: "center",
+        }}
+      >
+        Materials
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          gap: "4px",
+          fontSize: "0.8em",
+        }}
+      >
+        {activeMaterials.map((mat) => (
+          <div
+            key={mat.materialId}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "2px 4px",
+              backgroundColor: dfstyles.colors.backgroundlighter,
+              borderRadius: "2px",
+              border: `1px solid ${dfstyles.colors.borderDarker}`,
+            }}
+          >
+            <span style={{ color: dfstyles.colors.subtext }}>
+              {getMaterialName(mat.materialId)}
+            </span>
+            <span style={{ color: dfstyles.colors.text }}>
+              {formatNumber(mat.amount)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function getMaterialName(materialId: MaterialType): string {
+  switch (materialId) {
+    case 1:
+      return "Water";
+    case 2:
+      return "Wood";
+    case 3:
+      return "Windsteel";
+    case 4:
+      return "Silver";
+    case 5:
+      return "Mycelium";
+    case 6:
+      return "Sunstone";
+    case 7:
+      return "Glacite";
+    case 8:
+      return "Scrapium";
+    case 9:
+      return "Pyrosteel";
+    case 10:
+      return "Blackalloy";
+    default:
+      return "Unknown";
+  }
 }

@@ -15,6 +15,7 @@ import styled from "styled-components";
 import { getPlanetRank } from "../../Backend/Utils/Utils";
 import { CenterBackgroundSubtext, Spacer } from "../Components/CoreUI";
 import { Icon, IconType } from "../Components/Icons";
+import { MaterialsText } from "../Components/Labels/PlanetLabels";
 import { Sub } from "../Components/Text";
 import { useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
@@ -193,8 +194,24 @@ export function PlanetDexPane({
     };
   }, [visible, uiManager]);
 
-  const headers = ["", "Planet Name", "Level", "Energy", "Silver", "Inventory"];
-  const alignments: Array<"r" | "c" | "l"> = ["r", "l", "r", "r", "r", "r"];
+  const headers = [
+    "",
+    "Planet Name",
+    "Level",
+    "Energy",
+    "Silver",
+    "Materials",
+    "Inventory",
+  ];
+  const alignments: Array<"r" | "c" | "l"> = [
+    "r",
+    "l",
+    "r",
+    "r",
+    "r",
+    "l",
+    "r",
+  ];
 
   const columns = [
     (planet: Planet) => <PlanetThumb planet={planet} />,
@@ -206,6 +223,11 @@ export function PlanetDexPane({
     (planet: Planet) => <Sub>{planet.planetLevel}</Sub>,
     (planet: Planet) => <Sub>{formatNumber(planet.energy)}</Sub>,
     (planet: Planet) => <Sub>{formatNumber(planet.silver)}</Sub>,
+    (planet: Planet) => (
+      <Sub style={{ fontSize: "0.75em", maxWidth: "150px" }}>
+        <MaterialsText planet={planet} />
+      </Sub>
+    ),
     (planet: Planet) => (
       <Sub>{formatNumber(planet.heldArtifactIds.length)}</Sub>
     ),

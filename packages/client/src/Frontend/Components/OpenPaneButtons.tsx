@@ -11,8 +11,10 @@ import {
   ManagePlanetArtifactsHelpContent,
   ManagePlanetArtifactsPane,
   PlanetInfoHelpContent,
+  PlanetMaterialsHelpContent,
 } from "../Panes/ManagePlanetArtifacts/ManagePlanetArtifactsPane";
 import { PlanetInfoPane } from "../Panes/PlanetInfoPane";
+import { PlanetMaterialsPane } from "../Panes/PlanetMaterialsPane";
 import {
   UpgradeDetailsPane,
   UpgradeDetailsPaneHelpContent,
@@ -173,6 +175,25 @@ export function OpenBlueButton({
       shortcut={TOGGLE_BLUE_PANE}
       element={() => <BluePane initialPlanetId={planetId} modal={modal} />}
       helpContent={PlanetInfoHelpContent()}
+    />
+  );
+}
+
+export function OpenMaterialsPaneButton({
+  modal,
+  planetId,
+}: {
+  modal: ModalHandle;
+  planetId: LocationId | undefined;
+}) {
+  return (
+    <OpenPaneButton
+      modal={modal}
+      title="Materials"
+      element={() => (
+        <PlanetMaterialsPane modal={modal} initialPlanetId={planetId} />
+      )}
+      helpContent={PlanetMaterialsHelpContent()}
     />
   );
 }

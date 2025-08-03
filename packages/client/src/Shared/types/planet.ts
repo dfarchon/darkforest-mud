@@ -168,6 +168,41 @@ export type Effect = {
   id: number;
 };
 
+export type MaterialType =
+  | 0 // UNKNOWN
+  | 1 // WATER
+  | 2 // WOOD
+  | 3 // WINDSTEEL
+  | 4 // SILVER
+  | 5 // MYCELIUM
+  | 6 // SUNSTONE
+  | 7 // GLACITE
+  | 8 // SCRAPIUM
+  | 9 // PYROSTEEL
+  | 10; // BLACKALLOY;
+
+export const MaterialType = {
+  UNKNOWN: 0 as MaterialType,
+  WATER: 1 as MaterialType,
+  WOOD: 2 as MaterialType,
+  WINDSTEEL: 3 as MaterialType,
+  SILVER: 4 as MaterialType,
+  MYCELIUM: 5 as MaterialType,
+  SUNSTONE: 6 as MaterialType,
+  GLACITE: 7 as MaterialType,
+  SCRAPIUM: 8 as MaterialType,
+  PYROSTEEL: 9 as MaterialType,
+  BLACKALLOY: 10 as MaterialType,
+} as const;
+
+export type Materials = {
+  materialId: MaterialType;
+  amount: number;
+  cap: number;
+  growthRate: number;
+  lastTick: number;
+};
+
 export type Planet = {
   locationId: LocationId; //planetHash
   perlin: number;
@@ -248,6 +283,7 @@ export type Planet = {
   flags?: bigint;
   junkOwner: EthAddress;
   addJunkTick: number;
+  materials: Materials[];
 };
 
 /**

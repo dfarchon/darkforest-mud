@@ -39,6 +39,13 @@ export function ManagePlanetArtifactsHelpContent() {
     </div>
   );
 }
+export function PlanetMaterialsHelpContent() {
+  return (
+    <div>
+      <p>Metadata MATERIALS related to this planet.</p>
+    </div>
+  );
+}
 
 /**
  * This is the place where a user can manage all of their artifacts on a

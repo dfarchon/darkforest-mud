@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { Errors } from "interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagType, ArtifactGenre } from "codegen/common.sol";
+import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagType, ArtifactGenre, MaterialType } from "codegen/common.sol";
 import { Planet as PlanetTable, PlanetData } from "codegen/tables/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
@@ -29,10 +29,13 @@ import { ArtifactMetadataData } from "modules/atfs/tables/ArtifactMetadata.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "libraries/Move.sol";
 import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "libraries/Artifact.sol";
+import { Materials, MaterialLib } from "libraries/Material.sol";
 import { Effect, EffectLib } from "libraries/Effect.sol";
+
 import { _artifactProxySystemId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
 import { IArtifactProxySystem } from "modules/atfs/IArtifactProxySystem.sol";
 import { Flags, FlagsLib } from "libraries/Flags.sol";
+import { PlanetMaterial, PlanetMaterialData } from "codegen/tables/PlanetMaterial.sol";
 
 using PlanetLib for Planet global;
 
@@ -78,6 +81,8 @@ struct Planet {
   Effect[] effects;
   // flags
   Flags flags;
+  // material storage
+  Materials[] materials;
 }
 
 library PlanetLib {
@@ -167,9 +172,26 @@ library PlanetLib {
         useProps: planet.useProps
       })
     );
+
+    // Write materials to storage - only for ASTEROID_FIELD planets
+    if (planet.materials.length > 0) {
+      for (uint8 i = 1; i < 11; i++) {
+        if (i < planet.materials.length) {
+          Materials memory mat = planet.materials[i];
+          PlanetMaterial.set(
+            bytes32(planet.planetHash),
+            uint8(mat.materialId),
+            mat.amount,
+            mat.cap,
+            mat.growthRate,
+            mat.lastTick
+          );
+        }
+      }
+    }
   }
 
-  function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
+  function naturalGrowth(Planet memory planet, uint256 untilTick) internal view {
     if (planet.lastUpdateTick >= untilTick) {
       return;
     }
@@ -189,6 +211,7 @@ library PlanetLib {
 
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);
+    _materialGrow(planet, tickElapsed);
   }
 
   function pushMove(Planet memory planet, MoveData memory move) internal {
@@ -355,7 +378,29 @@ library PlanetLib {
     _initLevel(planet);
     _initPlanetType(planet);
     _initPopulationAndSilver(planet);
+    _initPlanetMaterials(planet);
     planet.lastUpdateTick = Ticker.getTickNumber();
+  }
+
+  function _initPlanetMaterials(Planet memory planet) internal view {
+    // Only initialize materials for ASTEROID_FIELD planets to save gas
+    if (PlanetConstants.getPlanetType(bytes32(planet.planetHash)) != PlanetType.ASTEROID_FIELD) {
+      //For non-ASTEROID_FIELD planets, initialize empty array to save gas
+      planet.materials = new Materials[](0);
+      return;
+    }
+
+    // For ASTEROID_FIELD planets, get allowed materials and initialize only those
+    Biome biome = PlanetLib.getPlanetBiome(planet);
+    MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
+
+    // Initialize array with only the allowed materials
+    planet.materials = new Materials[](allowed.length);
+
+    // Initialize only the materials allowed by this biome
+    for (uint j = 0; j < allowed.length; j++) {
+      planet.materials[j] = MaterialLib.newMaterial(allowed[j], 1000 ether, 0.1 ether);
+    }
   }
 
   function _initSpaceType(Planet memory planet) internal view {
@@ -474,6 +519,39 @@ library PlanetLib {
     planet.speedUpgrades = uint8(upgrades >> 8);
     planet.defenseUpgrades = uint8(upgrades);
     planet.useProps = data.useProps;
+
+    // Read materials from storage - only for ASTEROID_FIELD planets
+    PlanetType planetType = PlanetConstants.getPlanetType(bytes32(planet.planetHash));
+    if (planetType == PlanetType.ASTEROID_FIELD) {
+      // For ASTEROID_FIELD planets, read all possible materials from storage
+      planet.materials = new Materials[](11);
+
+      // Read materials from storage
+      for (uint8 i = 1; i < 11; i++) {
+        // skip UNKNOWN = 0
+        PlanetMaterialData memory tempMat = PlanetMaterial.get(bytes32(planet.planetHash), i);
+
+        planet.materials[i] = Materials({
+          materialId: MaterialType(i),
+          amount: tempMat.amount,
+          cap: tempMat.cap,
+          growthRate: tempMat.growthRate,
+          lastTick: tempMat.lastTick
+        });
+      }
+
+      // Initialize index 0 (UNKNOWN) with default values
+      planet.materials[0] = Materials({
+        materialId: MaterialType.UNKNOWN,
+        amount: 0,
+        cap: 0,
+        growthRate: 0,
+        lastTick: planet.lastUpdateTick
+      });
+    } else {
+      // For non-ASTEROID_FIELD planets, initialize empty array
+      planet.materials = new Materials[](0);
+    }
   }
 
   function _readConstants(Planet memory planet) internal view {
@@ -625,6 +703,24 @@ library PlanetLib {
     }
     silver += planet.silverGrowth * tickElapsed;
     planet.silver = silver > cap ? cap : silver;
+  }
+
+  function _materialGrow(Planet memory planet, uint256 tickElapsed) internal view {
+    if (planet.materials.length == 0) {
+      return;
+    }
+
+    // Only grow materials for ASTEROID_FIELD planets
+    for (uint8 i = 1; i < planet.materials.length && i < 11; i++) {
+      Materials memory m = planet.materials[i];
+      if (m.growthRate == 0 || m.amount >= m.cap) continue;
+
+      // Use MaterialLib.grow to calculate growth from material's lastTick
+      uint256 newAmount = MaterialLib.grow(m);
+      planet.materials[i].amount = newAmount;
+      // Update lastTick to current tick for next growth calculation
+      planet.materials[i].lastTick = Ticker.getTickNumber();
+    }
   }
 
   function _validateUpgrade(
@@ -784,6 +880,13 @@ library PlanetLib {
     biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
   }
 
+  function getPlanetBiome(Planet memory planet) internal view returns (Biome) {
+    // Compute biomebase deterministically from planet properties
+    // Use a combination of planetHash and perlin to create a deterministic biomebase
+    uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.perlin))) % 1000;
+    return _getBiome(planet, biomeBase);
+  }
+
   function _createArtifactSeed(Planet memory planet) internal view returns (uint256 seed) {
     seed = uint256(
       keccak256(
@@ -794,5 +897,102 @@ library PlanetLib {
         )
       )
     );
+  }
+
+  //   function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
+  //     if (biome == Biome.OCEAN) {
+  //         MaterialType[] memory mats = new MaterialType[](1);
+  //         mats[0] = MaterialType.WATER;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.FOREST) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.WOOD;
+  //         mats[1] = MaterialType.MYCELIUM;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.GRASSLAND) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.WINDSTEEL;
+  //         mats[1] = MaterialType.WOOD;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.TUNDRA) {
+  //         MaterialType[] memory mats = new MaterialType[](1);
+  //         mats[0] = MaterialType.SILVER;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.SWAMP) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.MYCELIUM;
+  //         mats[1] = MaterialType.WOOD;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.DESERT) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.GLACITE;
+  //         mats[1] = MaterialType.SUNSTONE;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.ICE) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.GLACITE;
+  //         mats[1] = MaterialType.PYROSTEEL;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.WASTELAND) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.SCRAPIUM;
+  //         mats[1] = MaterialType.WOOD;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.LAVA) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.PYROSTEEL;
+  //         mats[1] = MaterialType.SUNSTONE;
+  //         return mats;
+  //     }
+  //     if (biome == Biome.CORRUPTED) {
+  //         MaterialType[] memory mats = new MaterialType[](2);
+  //         mats[0] = MaterialType.BLACKALLOY;
+  //         mats[1] = MaterialType.SILVER;
+  //         return mats;
+  //     }
+  //     // Default: return empty array
+  //     return new MaterialType[](0);
+  // }
+  function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
+    MaterialType[] memory mats = new MaterialType[](3);
+    if (biome == Biome.CORRUPTED) {
+      mats[0] = MaterialType.SILVER;
+      mats[1] = MaterialType.BLACKALLOY;
+      mats[2] = MaterialType.MYCELIUM;
+      return mats;
+    }
+
+    MaterialType biomeMat;
+
+    if (biome == Biome.OCEAN) {
+      biomeMat = MaterialType.WATER;
+    } else if (biome == Biome.FOREST) {
+      biomeMat = MaterialType.WOOD;
+    } else if (biome == Biome.GRASSLAND) {
+      biomeMat = MaterialType.WINDSTEEL;
+    } else if (biome == Biome.TUNDRA) {
+      biomeMat = MaterialType.GLACITE;
+    } else if (biome == Biome.SWAMP) {
+      biomeMat = MaterialType.MYCELIUM;
+    } else if (biome == Biome.DESERT) {
+      biomeMat = MaterialType.SUNSTONE;
+    } else if (biome == Biome.ICE) {
+      biomeMat = MaterialType.PYROSTEEL;
+    } else if (biome == Biome.WASTELAND) {
+      biomeMat = MaterialType.SCRAPIUM;
+    } else if (biome == Biome.LAVA) {
+      biomeMat = MaterialType.PYROSTEEL;
+    }
+    mats[0] = MaterialType.SILVER;
+    mats[1] = biomeMat;
+    return mats;
   }
 }
