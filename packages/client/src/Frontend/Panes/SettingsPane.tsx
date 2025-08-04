@@ -272,6 +272,33 @@ export function SettingsPane({
               Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("10"))
                 .toFixed(FIXED_DIGIT_NUMBER)
                 .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("11"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("12"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("13"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("14"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("15"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("16"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("17"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("18"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("19"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString(),
               Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("20"))
                 .toFixed(FIXED_DIGIT_NUMBER)
                 .toString(),
@@ -345,6 +372,33 @@ export function SettingsPane({
                 .toFixed(FIXED_DIGIT_NUMBER)
                 .toString() + " gwei",
               Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("10"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("11"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("12"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("13"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("14"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("15"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("16"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("17"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("18"))
+                .toFixed(FIXED_DIGIT_NUMBER)
+                .toString() + " gwei",
+              Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("19"))
                 .toFixed(FIXED_DIGIT_NUMBER)
                 .toString() + " gwei",
               Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("20"))

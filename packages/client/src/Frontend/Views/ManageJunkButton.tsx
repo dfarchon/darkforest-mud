@@ -67,7 +67,12 @@ export function ManageJunkButton({
     if (!planet) {
       return;
     }
-    uiManager.clearJunk(planet.locationId);
+    const confirmed = confirm(
+      "If you are the owner of this planet, clearing junk will cause you to lose ownership. Are you sure you want to clear the junk?",
+    );
+    if (confirmed) {
+      uiManager.clearJunk(planet.locationId);
+    }
   }, [planet, uiManager]);
 
   const clearing = useMemo(
