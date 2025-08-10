@@ -175,7 +175,7 @@ import { BigNumber } from "ethers";
 import { utils } from "ethers";
 import { EventEmitter } from "events";
 import type { Hex } from "viem";
-import { encodeFunctionData, toBytes } from "viem";
+import { encodeAbiParameters, encodeFunctionData, toBytes } from "viem";
 
 import type {
   ContractConstants,
@@ -5409,7 +5409,31 @@ export class GameManager extends EventEmitter {
       // if (!bypassChecks && this.checkGameHasEnded()) {
       //   throw new Error('game has ended');
       // }
-
+      function encodeMovedMaterials(
+        mats?: readonly {
+          materialId: number | bigint;
+          materialAmount: number | bigint;
+        }[],
+      ): `0x${string}` {
+        if (!mats || mats.length === 0) return "0x";
+        const norm = mats.map((m) => ({
+          resourceId: Number(m.materialId) & 0xff, // uint8
+          amount: BigInt(m.materialAmount) & ((1n << 256n) - 1n), // uint64
+        }));
+        return encodeAbiParameters(
+          [
+            {
+              name: "mats",
+              type: "tuple[]",
+              components: [
+                { name: "resourceId", type: "uint8" },
+                { name: "amount", type: "uint256" },
+              ],
+            },
+          ],
+          [norm],
+        ) as `0x${string}`;
+      }
       const arrivalsToOriginPlanet =
         this.entityStore.getArrivalIdsForLocation(from);
       const hasIncomingVoyage =
@@ -5490,7 +5514,7 @@ export class GameManager extends EventEmitter {
           this.worldRadius,
           distMax,
         );
-
+        const movedMaterials = encodeMovedMaterials(materialsMoved);
         const args: MoveArgs = [
           snarkArgs[ZKArgIdx.PROOF_A],
           snarkArgs[ZKArgIdx.PROOF_B],
@@ -5500,24 +5524,24 @@ export class GameManager extends EventEmitter {
           (silverMoved * CONTRACT_PRECISION).toString(),
           "0",
           abandoning ? "1" : "0",
-          materialsMoved,
-        ] as MoveArgs;
+          movedMaterials,
+        ] as unknown as MoveArgs;
 
         this.terminal.current?.println(
           "MOVE: calculated SNARK with args:",
           TerminalTextStyle.Sub,
         );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(args)),
-          TerminalTextStyle.Sub,
-        );
+        // this.terminal.current?.println(
+        //   JSON.stringify(hexifyBigIntNestedArray(args)),
+        //   TerminalTextStyle.Sub,
+        // );
         this.terminal.current?.newline();
 
         if (artifactMoved) {
           args[6] = artifactIdToDecStr(artifactMoved);
         }
-        // console.log("move args");
-        // console.log(args);
+        console.log("move args");
+        console.log(args);
         return args;
       };
 
@@ -5537,7 +5561,7 @@ export class GameManager extends EventEmitter {
         silver: silverMoved,
         artifact: artifactMoved,
         abandoning,
-        materials: materials,
+        materials: materialsMoved,
       };
 
       if (artifactMoved) {

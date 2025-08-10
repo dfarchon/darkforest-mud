@@ -3,6 +3,7 @@
  * for changes in the World state (using the System contracts).
  */
 
+import type { MaterialTransfer } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import type { Address } from "viem";
@@ -383,6 +384,7 @@ export function createSystemCalls(
     silver: bigint,
     artifact: bigint,
     isAbandoning: boolean,
+    materials: MaterialTransfer,
   ) => {
     try {
       // Transform the inputs to arguments
@@ -416,6 +418,7 @@ export function createSystemCalls(
         silver,
         artifact,
         isAbandoning ? BigInt(1) : BigInt(0),
+        materials,
       ];
 
       // Call the move function on the contract

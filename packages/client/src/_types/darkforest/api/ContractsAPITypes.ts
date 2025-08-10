@@ -168,7 +168,7 @@ export type MoveArgs = [
   string, // artifactId sent
   // string, // dist from origin
   string, // is planet being released (1 true, 0 false)
-  MaterialTransfer[], // Materials sent
+  `0x${string}`, // materials sent
 ];
 
 // Same as reveal args with Explicit coords attached

@@ -53,6 +53,8 @@ export class MoveUtils {
         });
         const move = getComponentValue(Move, moveEntity);
         const movedMaterials = getComponentValue(MoveMaterial, moveEntity);
+        // NEED TO FINISH materialsMoved
+        // debbuger;
         if (!move) {
           throw new Error("Move not found");
         }

@@ -415,6 +415,15 @@ export class TxExecutor {
       const systemId = get_SystemId_from_FunctionName(functionName);
 
       console.log(`[TX ${tx.id}] Encoding system call`);
+      //debugger;
+      console.log(
+        `[TX ${tx.id}] : sysId`,
+        systemId,
+        `fcName`,
+        functionName,
+        `args`,
+        args,
+      );
       const callFromArgs = encodeSystemCallFrom({
         abi: abi,
         from: addressToHex(tx.intent.delegator),
@@ -424,6 +433,9 @@ export class TxExecutor {
       });
 
       console.log(`[TX ${tx.id}] Submitting transaction`);
+      // PUNK LOG
+      // console.log(`[TX ${tx.id}] callFromArgs`, callFromArgs);
+
       const submitted = await timeout<providers.TransactionResponse>(
         tx.intent.contract["callFrom"](...callFromArgs, {
           ...requestWithDefaults,
