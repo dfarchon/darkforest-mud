@@ -11,8 +11,13 @@ import { Planet } from "../src/lib/Planet.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
+import { MaterialMove } from "../src/lib/Material.sol";
 
 contract MoveTest is BaseTest {
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[11] memory a) {
+    a[0] = m1;
+  }
+
   function setUp() public override {
     super.setUp();
 
@@ -47,7 +52,7 @@ contract MoveTest is BaseTest {
     input.toPlanetHash = planet2.planetHash;
     input.distance = 80;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 0);
     assertEq(pendingMove.number, 1);
@@ -88,7 +93,7 @@ contract MoveTest is BaseTest {
     input.toPlanetHash = planet2.planetHash;
     input.distance = 320;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     uint256 index = _getIndexAt(pendingMove, 0);
     MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
@@ -96,7 +101,7 @@ contract MoveTest is BaseTest {
     input.distance /= 2;
     planet1 = IWorld(worldAddress).df__readPlanet(1);
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 110000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 110000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 0);
     assertEq(pendingMove.number, 2);
@@ -117,7 +122,7 @@ contract MoveTest is BaseTest {
     vm.warp(_getTimestampAtTick(move2.arrivalTick));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 1);
     assertEq(pendingMove.number, 2);
@@ -147,13 +152,13 @@ contract MoveTest is BaseTest {
     input.toPlanetHash = planet2.planetHash;
     input.distance = 320;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     uint256 index = _getIndexAt(pendingMove, 0);
     MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
     input.distance *= 2;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 200000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 200000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     index = _getIndexAt(pendingMove, 1);
     MoveData memory move2 = Move.get(bytes32(planet2.planetHash), uint8(index));

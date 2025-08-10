@@ -168,8 +168,9 @@ export function PlanetMaterialsPane({
   }
 
   const activeMaterials =
-    planet.materials?.filter((mat) => mat.materialId !== 0 && mat.amount > 0) ||
-    [];
+    planet.materials?.filter(
+      (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
+    ) || [];
 
   return (
     <ModalPane
@@ -189,7 +190,8 @@ export function PlanetMaterialsPane({
         ) : (
           <MaterialsContainer>
             {activeMaterials.map((mat) => {
-              const percentage = mat.cap > 0 ? (mat.amount / mat.cap) * 100 : 0;
+              const percentage =
+                mat.cap > 0 ? (mat.materialAmount / mat.cap) * 100 : 0;
               const materialColor = getMaterialColor(mat.materialId);
 
               return (
@@ -225,7 +227,7 @@ export function PlanetMaterialsPane({
                       }}
                     >
                       <Sub>
-                        {formatCompact(mat.amount / 1e18)}/
+                        {formatCompact(mat.materialAmount / 1e18)}/
                         {formatCompact(mat.cap / 1e18)}
                       </Sub>
                       {""}

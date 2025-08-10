@@ -636,6 +636,14 @@ export default defineWorld({
       },
       key: ["planetId", "resourceId"],
     },
+    MoveMaterial: {
+      schema: {
+        moveId: "uint64",
+        resourceId: "uint8",
+        amount: "uint256",
+      },
+      key: ["moveId", "resourceId"],
+    },
     GlobalStats: {
       schema: {
         registerPlayerCount: "uint256",

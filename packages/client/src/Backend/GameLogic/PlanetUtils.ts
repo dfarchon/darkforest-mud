@@ -392,7 +392,7 @@ export class PlanetUtils {
     const materials: Materials[] = [];
     if (PlanetMaterial) {
       // There are 11 material types (0-10), 0 is UNKNOWN
-      for (let i = 0; i <= 10; i++) {
+      for (let i = 1; i <= 11; i++) {
         const matData = getComponentValue(
           PlanetMaterial,
           encodeEntity(PlanetMaterial.metadata.keySchema, {
@@ -403,7 +403,7 @@ export class PlanetUtils {
         if (matData) {
           materials[i] = {
             materialId: i as MaterialType,
-            amount: Number(matData.amount),
+            materialAmount: Number(matData.amount),
             cap: Number(matData.cap),
             growthRate: Number(matData.growthRate),
             lastTick: Number(matData.lastTick),
@@ -411,7 +411,7 @@ export class PlanetUtils {
         } else {
           materials[i] = {
             materialId: i as MaterialType,
-            amount: 0,
+            materialAmount: 0,
             cap: 0,
             growthRate: 0,
             lastTick: 0,

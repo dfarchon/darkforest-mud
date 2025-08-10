@@ -199,7 +199,7 @@ export const MaterialType = {
 
 export type Materials = {
   materialId: MaterialType;
-  amount: number;
+  materialAmount: number;
   cap: number;
   growthRate: number;
   lastTick: number;

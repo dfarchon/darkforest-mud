@@ -29,7 +29,7 @@ export class MoveUtils {
   }
 
   public getArrivalsForPlanet(planetId: LocationId): QueuedArrival[] {
-    const { Move, PendingMove } = this.components;
+    const { Move, PendingMove, MoveMaterial } = this.components;
     const pendingMoveEntity = encodeEntity(PendingMove.metadata.keySchema, {
       to: locationIdToHexStr(planetId) as `0x${string}`,
     });
@@ -52,6 +52,7 @@ export class MoveUtils {
           index: indexes[i % 30],
         });
         const move = getComponentValue(Move, moveEntity);
+        const movedMaterials = getComponentValue(MoveMaterial, moveEntity);
         if (!move) {
           throw new Error("Move not found");
         }
@@ -72,6 +73,7 @@ export class MoveUtils {
           distance: 0, // TODO: calculate distance
           arrivalTick: Number(move.arrivalTick),
           arrivalType: ArrivalType.Normal,
+          materialsMoved: movedMaterials,
           // unionId: 0, // TODO: calculate unionId
           // name: "", // TODO: calculate name
           // leader: move.captain as EthAddress,

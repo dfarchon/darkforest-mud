@@ -19,6 +19,8 @@ import type {
   Link,
   LocatablePlanet,
   LocationId,
+  MaterialAmount,
+  MaterialId,
   PerlinConfig,
   Planet,
   Player,
@@ -837,9 +839,10 @@ export class GameUIManager extends EventEmitter {
         if (myAtk > 0 || this.isSendingShip(from.locationId)) {
           const abandoning = this.isAbandoning();
           const silver = Math.floor((from.silver * effPercentSilver) / 100);
+          const materials = this.getMaterialsSending?.(from.locationId) ?? [];
           // TODO: do something like JSON.stringify(args) so we know formatting is correct
           this.terminal.current?.printShellLn(
-            `df.move('${from.locationId}', '${to.locationId}', ${forces}, ${silver})`,
+            `df.move('${from.locationId}', '${to.locationId}', ${forces}, ${silver}, ${JSON.stringify(materials ?? [])})`,
           );
           const artifact = this.getArtifactSending(from.locationId);
 
@@ -851,6 +854,7 @@ export class GameUIManager extends EventEmitter {
             silver,
             artifact?.id,
             abandoning,
+            materials,
           );
           tutorialManager.acceptInput(TutorialState.SendFleet);
         }
@@ -2138,5 +2142,40 @@ export class GameUIManager extends EventEmitter {
   ) {
     if (!locationId) return;
     this.materialSending.set(`${locationId}-${matId}`, percent);
+  }
+
+  /**
+   * Get material transfer list for a planet based on UI-configured percentages.
+   * Returns array of `{ materialId, amount }`.
+   */
+  public getMaterialsSending(
+    locationId?: LocationId,
+  ): { materialId: MaterialId; materialAmount: MaterialAmount }[] {
+    if (!locationId) return [];
+    const planet = this.getPlanetWithId(locationId);
+    if (!planet?.materials?.length) return [];
+
+    const results: { materialId: number; materialAmount: number }[] = [];
+
+    for (const mat of planet.materials) {
+      if (!mat) continue;
+      const percent = this.getMaterialSending(locationId, mat.materialId);
+      if (!percent || percent <= 0) continue;
+
+      const current =
+        typeof mat.materialAmount === "bigint"
+          ? Number(mat.materialAmount)
+          : parseFloat(mat.materialAmount);
+
+      const send = Math.floor((current * percent) / 100);
+      if (send > 0) {
+        results.push({
+          materialId: mat.materialId,
+          materialAmount: Number((send / 1e18).toFixed(0)),
+        });
+      }
+    }
+
+    return results;
   }
 }

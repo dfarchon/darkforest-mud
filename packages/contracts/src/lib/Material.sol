@@ -12,6 +12,11 @@ struct Materials {
   uint256 lastTick;
 }
 
+struct MaterialMove {
+  uint8 resourceId; // 0..255
+  uint64 amount; // <= 2^64-1
+}
+
 library MaterialLib {
   function newMaterial(MaterialType id, uint256 cap, uint256 growthRate) internal view returns (Materials memory) {
     return Materials({ materialId: id, amount: 0, cap: cap, growthRate: growthRate, lastTick: Ticker.getTickNumber() });

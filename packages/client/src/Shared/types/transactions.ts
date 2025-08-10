@@ -2,7 +2,14 @@ import type { Contract } from "ethers";
 import type { Abi, Hex } from "viem";
 
 import type { GuildRole } from "./guild";
-import type { ArtifactId, EthAddress, GuildId, LocationId } from "./identifier";
+import type {
+  ArtifactId,
+  EthAddress,
+  GuildId,
+  LocationId,
+  MaterialTransfer,
+} from "./identifier";
+import type { Materials } from "./planet";
 import type { WorldLocation } from "./world";
 
 // import type { LiteralUnion } from "type-fest";
@@ -118,6 +125,7 @@ export type UnconfirmedMove = TxIntent & {
   silver: number;
   abandoning: boolean;
   artifact?: ArtifactId;
+  materials?: MaterialTransfer[];
 };
 
 /**

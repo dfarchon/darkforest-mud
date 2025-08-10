@@ -26,6 +26,7 @@ import {
   address,
   artifactIdToDecStr,
   isUnconfirmedActivateArtifactTx,
+  isUnconfirmedAddJunkTx,
   isUnconfirmedBlueTx,
   isUnconfirmedBurnTx,
   isUnconfirmedBuyArtifactTx,
@@ -37,6 +38,7 @@ import {
   isUnconfirmedChangeArtifactImageTypeTx,
   isUnconfirmedChargeArtifactTx,
   isUnconfirmedClaimTx,
+  isUnconfirmedClearJunkTx,
   isUnconfirmedDeactivateArtifactTx,
   isUnconfirmedDepositArtifactTx,
   isUnconfirmedDonateTx,
@@ -51,8 +53,8 @@ import {
   isUnconfirmedRevealTx,
   isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
-  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedShutdownArtifactTx,
+  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawSilverTx,
@@ -60,8 +62,6 @@ import {
   locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
-  isUnconfirmedAddJunkTx,
-  isUnconfirmedClearJunkTx,
 } from "@df/serde";
 import type {
   RevealInput,
@@ -69,6 +69,7 @@ import type {
   SnarkProof,
 } from "@df/snarks";
 import type {
+  AIZone,
   Artifact,
   ArtifactId,
   Biome,
@@ -85,9 +86,9 @@ import type {
   Link,
   LocatablePlanet,
   LocationId,
+  MaterialTransfer,
   NetworkHealthSummary,
   PinkZone,
-  AIZone,
   Planet,
   PlanetLevel,
   Player,
@@ -101,6 +102,7 @@ import type {
   TxIntent,
   UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
+  UnconfirmedAddJunk,
   UnconfirmedApplyToGuild,
   UnconfirmedApproveApplication,
   UnconfirmedBlue,
@@ -114,6 +116,7 @@ import type {
   UnconfirmedChangeArtifactImageType,
   UnconfirmedChargeArtifact,
   UnconfirmedClaim,
+  UnconfirmedClearJunk,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -132,12 +135,12 @@ import type {
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
-  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
-  UnconfirmedSpendGPTTokens,
   UnconfirmedShutdownArtifact,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
@@ -146,8 +149,6 @@ import type {
   VoyageId,
   WorldCoords,
   WorldLocation,
-  UnconfirmedAddJunk,
-  UnconfirmedClearJunk,
 } from "@df/types";
 import type { Guild, GuildId } from "@df/types";
 import {
@@ -5385,6 +5386,7 @@ export class GameManager extends EventEmitter {
    * Submits a transaction to the blockchain to move the given amount of resources from
    * the given planet to the given planet.
    */
+
   public async move(
     from: LocationId,
     to: LocationId,
@@ -5392,6 +5394,7 @@ export class GameManager extends EventEmitter {
     silver: number,
     artifactMoved?: ArtifactId,
     abandoning = false,
+    materials?: MaterialTransfer[],
   ): Promise<Transaction<UnconfirmedMove>> {
     localStorage.setItem(
       `${this.ethConnection.getAddress()?.toLowerCase()}-fromPlanet`,
@@ -5441,6 +5444,16 @@ export class GameManager extends EventEmitter {
       // Contract will automatically send full forces/silver on abandon
       const shipsMoved = !abandoning ? forces : 0;
       const silverMoved = !abandoning ? silver : 0;
+      let materialsMoved: MaterialTransfer[] = [];
+      // Auto-pack all materials on abandon
+      if (abandoning && materials) {
+        materialsMoved = materials.map((mat) => ({
+          materialId: mat.materialId,
+          materialAmount: mat.materialAmount, // convert from string | bigint
+        }));
+      } else if (materials) {
+        materialsMoved = materials;
+      }
 
       if (newX ** 2 + newY ** 2 >= this.worldRadius ** 2) {
         throw new Error("attempted to move out of bounds");
@@ -5487,6 +5500,7 @@ export class GameManager extends EventEmitter {
           (silverMoved * CONTRACT_PRECISION).toString(),
           "0",
           abandoning ? "1" : "0",
+          materialsMoved,
         ] as MoveArgs;
 
         this.terminal.current?.println(
@@ -5523,6 +5537,7 @@ export class GameManager extends EventEmitter {
         silver: silverMoved,
         artifact: artifactMoved,
         abandoning,
+        materials: materials,
       };
 
       if (artifactMoved) {
@@ -5540,7 +5555,8 @@ export class GameManager extends EventEmitter {
       }
 
       const transactionFee = this.getTransactionFee();
-
+      console.log("args tx", txIntent);
+      // debugger;
       // Always await the submitTransaction so we can catch rejections
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
         value: transactionFee,

@@ -17,12 +17,15 @@ import { PlanetType, SpaceType, ArtifactStatus, ArtifactRarity, PlanetFlagType, 
 import { Artifact, ArtifactLib } from "../../src/lib/Artifact.sol";
 import { ARTIFACT_INDEX as CANNON_INDEX, COMMON_CHARGE, COMMON_ACTIVATE_BEFORE_MOVE, COMMON_ACTIVATE_STAT_BUFF } from "../../src/modules/atfs/PhotoidCannon/constant.sol";
 import { CannonSystem } from "../../src/modules/atfs/PhotoidCannon/CannonSystem.sol";
+import { MaterialMove } from "../../src/lib/Material.sol";
 
 import "forge-std/console.sol";
 
 contract CannonTest is BaseTest {
   using EffectLib for Planet;
-
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[11] memory a) {
+    a[0] = m1;
+  }
   function setUp() public virtual override {
     super.setUp();
     vm.startPrank(admin);
@@ -96,7 +99,7 @@ contract CannonTest is BaseTest {
     IWorld(worldAddress).df__chargeArtifact(1, 2, bytes(""));
 
     vm.prank(address(1));
-    _move(1, 2, 80, 100000, 5000, 0);
+    _move(1, 2, 80, 100000, 5000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     planetAfter = IWorld(worldAddress).df__readPlanet(1);
     assertEq(planetAfter.effectNumber, 0);
     assertEq(planetAfter.defense, planet.defense);
@@ -113,13 +116,14 @@ contract CannonTest is BaseTest {
     uint256 distance,
     uint256 population,
     uint256 silver,
-    uint256 artifact
+    uint256 artifact,
+    MaterialMove[11] memory mats
   ) internal {
     Proof memory proof;
     MoveInput memory input;
     input.fromPlanetHash = from;
     input.toPlanetHash = to;
     input.distance = distance;
-    IWorld(worldAddress).df__move(proof, input, population, silver, artifact);
+    IWorld(worldAddress).df__move(proof, input, population, silver, artifact, mats);
   }
 }

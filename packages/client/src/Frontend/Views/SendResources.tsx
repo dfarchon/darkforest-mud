@@ -103,7 +103,7 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
 
 export type Material = {
   materialId: number;
-  amount: string | bigint;
+  materialAmount: string | bigint;
   cap: string | bigint;
   growthRate: string | bigint;
   lastTick: number;
@@ -155,9 +155,9 @@ function ResourceBar({
       // MATERIAL
       if (isMaterial && material) {
         const amount =
-          typeof material.amount === "string"
-            ? parseFloat(material.amount)
-            : Number(material.amount);
+          typeof material.materialAmount === "string"
+            ? parseFloat(material.materialAmount)
+            : Number(material.materialAmount);
         const value = ((val / 100) * amount) / 1e18;
 
         // e.g., "312.4 MYCELIUM"
@@ -365,14 +365,14 @@ export function SendResources({
 
   const activeMaterials =
     p.value?.materials?.filter(
-      (mat) => mat.materialId !== 0 && mat.amount > 0,
+      (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
     ) || [];
-  console.log(activeMaterials);
+
   const materialSending = activeMaterials.map((mat) => ({
     materialId: mat.materialId,
     value: uiManager.getMaterialSending(locationId, mat.materialId),
   }));
-  console.log(materialSending);
+
   const updateEnergySending = useCallback(
     (energyPercent) => {
       if (!locationId) {
@@ -389,6 +389,20 @@ export function SendResources({
         return;
       }
       uiManager.setSilverSending(locationId, silverPercent);
+    },
+    [uiManager, locationId],
+  );
+
+  const updateMaterialSending = useCallback(
+    (materialPercent) => {
+      if (!locationId) {
+        return;
+      }
+      uiManager.setMaterialSending(
+        locationId,
+        materialSending.materialId,
+        materialPercent,
+      );
     },
     [uiManager, locationId],
   );

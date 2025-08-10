@@ -11,8 +11,10 @@ import {
   address,
   address as toEthAddress,
   addressToHex,
+  artifactIdFromDecStr,
   artifactIdFromEthersBN,
   artifactIdFromHexStr,
+  artifactIdToDecStr,
   hexToEthAddress,
   locationIdFromDecStr,
   // artifactIdToDecStr,
@@ -31,8 +33,6 @@ import {
   locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
-  artifactIdFromDecStr,
-  artifactIdToDecStr,
 } from "@df/serde";
 import type {
   Artifact,
@@ -75,7 +75,7 @@ import {
 } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import type { ContractFunction, Event, providers } from "ethers";
-import { Contract, BigNumber as EthersBN } from "ethers";
+import { BigNumber as EthersBN, Contract } from "ethers";
 import { EventEmitter } from "events";
 import type { Subscription } from "rxjs";
 import type { Hex } from "viem";

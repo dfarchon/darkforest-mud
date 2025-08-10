@@ -12,8 +12,41 @@ import { PlanetType, ArtifactStatus } from "codegen/common.sol";
 import { Planet } from "libraries/Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { GuildUtils } from "libraries/GuildUtils.sol";
+import { PlanetMaterial, PlanetMaterialData } from "codegen/tables/PlanetMaterial.sol";
+import { MoveMaterial } from "codegen/tables/MoveMaterial.sol";
+import { MaterialMove } from "libraries/Material.sol";
+import { MoveInput } from "libraries/VerificationInput.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
+import { JunkConfig } from "codegen/tables/JunkConfig.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 library MoveLib {
+  // function _readAndCheckPlanets(
+  //   address w,
+  //   MoveInput memory _input
+  // ) internal returns (Planet memory fromPlanet, Planet memory toPlanet) {
+  //   fromPlanet = DFUtils.readInitedPlanet(w, _input.fromPlanetHash);
+  //   if (_input.toPlanetHash == _input.fromPlanetHash) {
+  //     revert Errors.MoveToSamePlanet();
+  //   }
+  //   if (JunkConfig.getSPACE_JUNK_ENABLED() && fromPlanet.owner != fromPlanet.junkOwner) {
+  //     revert Errors.PlanetOwnershipMismatch();
+  //   }
+
+  //   toPlanet = DFUtils.readAnyPlanet(
+  //     w,
+  //     _input.toPlanetHash,
+  //     _input.toPerlin,
+  //     _input.toRadiusSquare
+  //   );
+
+  //   if (fromPlanet.owner != toPlanet.owner && toPlanet.owner != address(0)) {
+  //     GlobalStats.setAttackCount(GlobalStats.getAttackCount() + 1);
+  //     PlayerStats.setAttackCount(fromPlanet.owner, PlayerStats.getAttackCount(fromPlanet.owner) + 1);
+  //   }
+  // }
+
   function NewMove(Planet memory from, address captain) internal view returns (MoveData memory move) {
     if (from.owner != captain) {
       revert Errors.NotPlanetOwner();
@@ -52,6 +85,23 @@ library MoveLib {
     from.silver -= silver;
   }
 
+  function loadMaterials(MoveData memory move, Planet memory from, MaterialMove[11] memory mats) internal {
+    bytes32 fromId = bytes32(from.planetHash);
+    for (uint256 i = 1; i < 11; i++) {
+      uint8 rid = mats[i].resourceId;
+      uint64 amt = mats[i].amount;
+      if (amt == 0) continue;
+
+      PlanetMaterialData memory pm = PlanetMaterial.get(fromId, rid);
+      if (pm.amount < amt) revert Errors.NotEnoughMaterial(); // add to your Errors.sol if not present
+      pm.amount -= amt;
+      PlanetMaterial.setAmount(fromId, rid, pm.amount);
+
+      // record the moved amount on the move (FK = move.id, resourceId)
+      MoveMaterial.setAmount(move.id, rid, amt);
+    }
+  }
+
   function loadArtifact(MoveData memory move, Planet memory from, uint256 artifactId) internal view {
     if (artifactId == 0) {
       return;
@@ -86,6 +136,7 @@ library MoveLib {
     unloadPopulation(move, planet);
     unloadSilver(move, planet);
     unloadArtifact(move, planet);
+    // unloadMaterials(move, planet);
   }
 
   function unloadPopulation(MoveData memory move, Planet memory to) internal view {
@@ -117,6 +168,23 @@ library MoveLib {
     to.silver += move.silver;
     if (to.silver > to.silverCap) {
       to.silver = to.silverCap;
+    }
+  }
+
+  function unloadMaterials(MoveData memory move, Planet memory to) internal {
+    bytes32 toId = bytes32(to.planetHash);
+
+    for (uint8 rid = 1; rid < 11; rid++) {
+      uint256 amt = MoveMaterial.getAmount(move.id, rid); // 0 if row doesn't exist
+      if (amt == 0) continue;
+
+      PlanetMaterialData memory pm = PlanetMaterial.get(toId, rid);
+      uint256 newAmt = pm.amount + amt;
+      if (pm.cap > 0 && newAmt > pm.cap) newAmt = pm.cap;
+      PlanetMaterial.setAmount(toId, rid, newAmt);
+
+      // cleanup the per-move record
+      MoveMaterial.deleteRecord(move.id, rid);
     }
   }
 

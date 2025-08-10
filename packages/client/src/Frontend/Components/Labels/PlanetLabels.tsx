@@ -306,7 +306,7 @@ export function MaterialsText({
 
   // Filter out materials with 0 amount and UNKNOWN type
   const activeMaterials = planet.materials.filter(
-    (mat) => mat.materialId !== 0 && mat.amount > 0,
+    (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
   );
 
   if (activeMaterials.length === 0) {
@@ -318,7 +318,8 @@ export function MaterialsText({
       {activeMaterials.map((mat, index) => (
         <span key={mat.materialId}>
           {index > 0 && ", "}
-          {getMaterialName(mat.materialId)}: {formatEtherToNumber(mat.amount)}
+          {getMaterialName(mat.materialId)}:{" "}
+          {formatEtherToNumber(mat.materialAmount)}
         </span>
       ))}
     </span>
@@ -338,7 +339,7 @@ export function MaterialsDisplay({
 
   // Filter out materials with 0 amount and UNKNOWN type
   const activeMaterials = planet.materials.filter(
-    (mat) => mat.materialId !== 0 && mat.amount > 0,
+    (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
   );
 
   if (activeMaterials.length === 0) {
@@ -381,7 +382,7 @@ export function MaterialsDisplay({
               {getMaterialName(mat.materialId)}
             </span>
             <span style={{ color: dfstyles.colors.text }}>
-              {formatCompact(mat.amount / 1e18)} /{" "}
+              {formatCompact(mat.materialAmount / 1e18)} /{" "}
               {formatCompact(mat.cap / 1e18)}
             </span>
 

@@ -10,8 +10,13 @@ import { Errors } from "interfaces/errors.sol";
 import { Proof } from "libraries/SnarkProof.sol";
 import { MoveInput } from "libraries/VerificationInput.sol";
 import { IMoveSystem } from "codegen/world/IMoveSystem.sol";
+import { MaterialMove } from "../src/lib/Material.sol";
 
 contract EntryFeeTest is BaseTest {
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[11] memory a) {
+    a[0] = m1;
+  }
+
   function setUp() public override {
     super.setUp();
 
@@ -44,7 +49,7 @@ contract EntryFeeTest is BaseTest {
     input.distance = 80;
     vm.expectRevert(abi.encodeWithSelector(Errors.InsufficientEntryFee.selector, 1 ether));
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
 
     vm.prank(user1);
     (bool success, ) = worldAddress.call{ value: 1 ether }(

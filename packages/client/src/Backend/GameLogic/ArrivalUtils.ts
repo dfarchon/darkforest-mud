@@ -10,6 +10,7 @@ import type {
   Upgrade,
 } from "@df/types";
 import { ArrivalType, ArtifactType, PlanetType } from "@df/types";
+import type { Material } from "@frontend/Views/SendResources";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { GuildUtils } from "./GuildUtils";
@@ -144,6 +145,13 @@ export const updatePlanetToTick = (
   //   planet.localPhotoidUpgrade = activePhotoid.timeDelayedUpgrade;
   //   applyUpgrade(planet, activePhotoid.timeDelayedUpgrade);
   // }
+
+  // update materials to tick
+  planet.materials = planet.materials.map((mat) => ({
+    ...mat,
+    materialAmount: Number(getMaterialAmount(mat, atTick).toFixed(0)), // nebo String(...), záleží co vyžaduje typ
+    lastTick: atTick,
+  }));
 
   setPlanet(planet);
 };
@@ -284,7 +292,20 @@ export const arrive = (
     // }
     arrivingArtifact.onPlanetId = toPlanet.locationId;
   }
-
+  // materials moved with arrival
+  if (arrival.materialsMoved) {
+    for (const moved of arrival.materialsMoved) {
+      const idx = toPlanet.materials.findIndex(
+        (mat) => mat.materialId === moved.materialId,
+      );
+      if (idx !== -1) {
+        toPlanet.materials[idx].materialAmount = Math.min(
+          toPlanet.materials[idx].materialAmount + moved.materialAmount,
+          toPlanet.materials[idx].cap,
+        );
+      }
+    }
+  }
   return { arrival, current: toPlanet, previous: prevPlanet };
 };
 
@@ -292,6 +313,30 @@ export const arrive = (
  * @todo ArrivalUtils has become a dumping ground for functions that should just live inside of a
  * `Planet` class.
  */
+
+const getMaterialAmount = (material: Material, atTick: number): number => {
+  const ticksPassed = atTick - material.lastTick;
+
+  const growthRate =
+    typeof material.growthRate === "bigint"
+      ? Number(material.growthRate)
+      : parseFloat(material.growthRate);
+
+  const currentAmount =
+    typeof material.materialAmount === "bigint"
+      ? Number(material.materialAmount)
+      : parseFloat(material.materialAmount);
+
+  const cap =
+    typeof material.cap === "bigint"
+      ? Number(material.cap)
+      : parseFloat(material.cap);
+
+  const grown = ticksPassed * growthRate;
+
+  return Math.min(currentAmount + grown, cap);
+};
+
 export function getEmojiMessage(
   planet: Planet | undefined,
 ): PlanetMessage<EmojiFlagBody> | undefined {
