@@ -33,7 +33,12 @@ library MaterialStorageLib {
     uint256 materialCount = uint8(type(MaterialType).max) + 1;
     for (uint256 i; i < materialCount; ) {
       if (mat.exists[i]) {
-        exsitMap |= (1 << i);
+        if (mat.amount[i] > 0) {
+          exsitMap |= (1 << i);
+        }
+        if (mat.updates[i]) {
+          PlanetMaterial.set(bytes32(planetHash), uint8(i), mat.amount[i]);
+        }
       }
       unchecked {
         ++i;

@@ -12,7 +12,7 @@ import { Proof } from "../src/lib/SnarkProof.sol";
 import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { MaterialMove } from "../src/lib/Material.sol";
-
+import { PlanetMaterial } from "../src/codegen/tables/PlanetMaterial.sol";
 contract MoveTest is BaseTest {
   function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
     a = new MaterialMove[](1);
@@ -104,6 +104,11 @@ contract MoveTest is BaseTest {
     MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
     planet2 = IWorld(worldAddress).df__readPlanetAt(2, move1.arrivalTick);
     assertEq(planet2.materialStorage.getMaterial(planet2.planetHash, MaterialType(1)), 100);
+
+    vm.warp(_getTimestampAtTick(move1.arrivalTick));
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, new MaterialMove[](0));
+    assertEq(PlanetMaterial.get(bytes32(planet2.planetHash), uint8(1)), 100);
   }
 
   function testPendingMove() public {
