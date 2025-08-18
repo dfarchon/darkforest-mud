@@ -31,7 +31,8 @@ contract PinkBombTest is BaseTest {
 
   uint256 p = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
-  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[11] memory a) {
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
+    a = new MaterialMove[](1);
     a[0] = m1;
   }
 
@@ -197,7 +198,7 @@ contract PinkBombTest is BaseTest {
     uint256 population,
     uint256 silver,
     uint256 artifact,
-    MaterialMove[11] memory mats
+    MaterialMove[] memory mats
   ) internal {
     Proof memory proof;
     MoveInput memory input;

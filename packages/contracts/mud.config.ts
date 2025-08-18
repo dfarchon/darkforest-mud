@@ -625,14 +625,18 @@ export default defineWorld({
       },
       key: ["owner"],
     },
+    PlanetMaterialStorage: {
+      schema: {
+        planetId: "bytes32",
+        exsitMap: "uint256",
+      },
+      key: ["planetId"],
+    },
     PlanetMaterial: {
       schema: {
         planetId: "bytes32",
         resourceId: "uint8",
         amount: "uint256",
-        cap: "uint256",
-        growthRate: "uint256",
-        lastTick: "uint256",
       },
       key: ["planetId", "resourceId"],
     },

@@ -49,11 +49,11 @@ contract EntryFeeTest is BaseTest {
     input.distance = 80;
     vm.expectRevert(abi.encodeWithSelector(Errors.InsufficientEntryFee.selector, 1 ether));
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, new MaterialMove[](0));
 
     vm.prank(user1);
     (bool success, ) = worldAddress.call{ value: 1 ether }(
-      abi.encodeWithSelector(IMoveSystem.df__move.selector, proof, input, 100000, 1000, 0)
+      abi.encodeWithSelector(IMoveSystem.df__move.selector, proof, input, 100000, 1000, 0, new MaterialMove[](0))
     );
     assertTrue(success);
   }

@@ -12,12 +12,12 @@ import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { PlanetType, SpaceType, ArtifactStatus, PlanetFlagType } from "../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../src/lib/Artifact.sol";
-import { PlanetMaterial, PlanetMaterialData } from "../src/codegen/index.sol";
 import { MaterialMove } from "../src/lib/Material.sol";
 import { TempConfigSet } from "../src/codegen/index.sol";
 
 contract ArtifactTest is BaseTest {
-  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[11] memory a) {
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
+    a = new MaterialMove[](1);
     a[0] = m1;
   }
 
@@ -184,7 +184,7 @@ contract ArtifactTest is BaseTest {
     uint256 population,
     uint256 silver,
     uint256 artifact,
-    MaterialMove[11] memory mats
+    MaterialMove[] memory mats
   ) internal {
     Proof memory proof;
     MoveInput memory input;

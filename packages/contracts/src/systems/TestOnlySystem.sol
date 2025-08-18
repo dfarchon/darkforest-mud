@@ -16,9 +16,10 @@ import { DFUtils } from "libraries/DFUtils.sol";
 import { GPTTokens } from "codegen/index.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
-import { PlanetMaterial, PlanetMaterialData } from "codegen/tables/PlanetMaterial.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
-import { Materials, MaterialLib } from "libraries/Material.sol";
+import { Materials } from "libraries/Material.sol";
+import { PlanetMaterialStorage } from "codegen/tables/PlanetMaterialStorage.sol";
+import { PlanetMaterial } from "codegen/tables/PlanetMaterial.sol";
 
 contract TestOnlySystem is BaseSystem {
   // function createPlanet(
@@ -167,5 +168,15 @@ contract TestOnlySystem is BaseSystem {
    */
   function addGPTTokens(address player, uint256 amount) public {
     GPTTokens.set(player, GPTTokens.get(player) + amount);
+  }
+
+  function addMaterial(uint256 planetHash, MaterialType materialType, uint256 amount) public {
+    uint256 exsitMap = PlanetMaterialStorage.get(bytes32(planetHash));
+    PlanetMaterialStorage.set(bytes32(planetHash), exsitMap | (1 << uint8(materialType)));
+    PlanetMaterial.set(
+      bytes32(planetHash),
+      uint8(materialType),
+      PlanetMaterial.get(bytes32(planetHash), uint8(materialType)) + amount
+    );
   }
 }

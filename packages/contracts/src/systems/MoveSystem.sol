@@ -16,12 +16,9 @@ import { DFUtils } from "libraries/DFUtils.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
-import { PlanetMaterial, PlanetMaterialData } from "codegen/tables/PlanetMaterial.sol";
 import { MoveMaterial } from "codegen/tables/MoveMaterial.sol";
 import { MaterialMove } from "libraries/Material.sol";
 
-// PUNK without Stack issue
-// SIZE LIMIT version 25051 bytes from possible 24576 bytes
 contract MoveSystem is BaseSystem {
   using MoveLib for MoveData;
 
@@ -48,7 +45,7 @@ contract MoveSystem is BaseSystem {
     uint256 _population,
     uint256 _silver,
     uint256 _artifact,
-    MaterialMove[11] calldata _materials
+    MaterialMove[] calldata _materials
   ) public entryFee {
     GlobalStats.setMoveCount(GlobalStats.getMoveCount() + 1);
     PlayerStats.setMoveCount(_msgSender(), PlayerStats.getMoveCount(_msgSender()) + 1);
@@ -63,7 +60,7 @@ contract MoveSystem is BaseSystem {
     uint256 _population,
     uint256 _silver,
     uint256 _artifact,
-    MaterialMove[11] memory _materials
+    MaterialMove[] memory _materials
   ) internal {
     address w = _world();
     DFUtils.tick(w);
@@ -73,7 +70,7 @@ contract MoveSystem is BaseSystem {
 
     fromPlanet = IEffectSystem(w).df__beforeMove(fromPlanet);
 
-    MoveData memory shipping = _createAndDispatchMove(
+    (fromPlanet, toPlanet) = _createAndDispatchMove(
       fromPlanet,
       toPlanet,
       _input.distance,
@@ -85,7 +82,6 @@ contract MoveSystem is BaseSystem {
 
     fromPlanet = IEffectSystem(w).df__afterMove(fromPlanet);
 
-    Counter.setMove(shipping.id);
     DFUtils.writePlanet(w, fromPlanet);
     DFUtils.writePlanet(w, toPlanet);
   }
@@ -97,18 +93,20 @@ contract MoveSystem is BaseSystem {
     uint256 pop,
     uint256 silv,
     uint256 artifactId,
-    MaterialMove[11] memory mats
-  ) private returns (MoveData memory shipping) {
-    shipping = MoveLib.NewMove(fromPlanet, _msgSender());
+    MaterialMove[] memory mats
+  ) private returns (Planet memory, Planet memory) {
+    MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
 
-    {
-      uint256 d = UniverseLib.distance(fromPlanet, toPlanet, distanceParam);
-      shipping.loadPopulation(fromPlanet, pop, d);
-      shipping.loadSilver(fromPlanet, silv);
-      shipping.loadArtifact(fromPlanet, artifactId);
-      shipping.loadMaterials(fromPlanet, mats);
-      shipping.headTo(toPlanet, d, fromPlanet.speed);
-    }
+    uint256 d = UniverseLib.distance(fromPlanet, toPlanet, distanceParam);
+    (shipping, fromPlanet) = shipping.loadPopulation(fromPlanet, pop, d);
+    (shipping, fromPlanet) = shipping.loadSilver(fromPlanet, silv);
+    (shipping, fromPlanet) = shipping.loadArtifact(fromPlanet, artifactId);
+    (shipping, fromPlanet) = shipping.loadMaterials(fromPlanet, mats);
+    (shipping, toPlanet) = shipping.headTo(toPlanet, d, fromPlanet.speed);
+
+    Counter.setMove(shipping.id);
+
+    return (fromPlanet, toPlanet);
   }
 
   /**
@@ -131,7 +129,7 @@ contract MoveSystem is BaseSystem {
     MoveInput memory input;
     input.genFrom(_input);
 
-    MaterialMove[11] memory mats = abi.decode(movedMaterials, (MaterialMove[11]));
+    MaterialMove[] memory mats = abi.decode(movedMaterials, (MaterialMove[]));
 
     _move(proof, input, popMoved, silverMoved, movedArtifactId, mats);
   }

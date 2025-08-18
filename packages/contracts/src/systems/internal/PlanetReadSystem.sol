@@ -27,7 +27,7 @@ contract PlanetReadSystem is BaseSystem {
     planet.perlin = perlin;
     planet.distSquare = distanceSquare;
     planet.readFromStore();
-    _sync(planet);
+    return _sync(planet);
   }
 
   /**
@@ -39,7 +39,7 @@ contract PlanetReadSystem is BaseSystem {
   function readPlanet(uint256 planetHash) public view returns (Planet memory planet) {
     planet.planetHash = planetHash;
     planet.readFromStore();
-    _sync(planet);
+    return _sync(planet);
   }
 
   /**
@@ -50,21 +50,22 @@ contract PlanetReadSystem is BaseSystem {
   function readPlanetAt(uint256 planetHash, uint256 tickNumber) public view returns (Planet memory planet) {
     planet.planetHash = planetHash;
     planet.readFromStore();
-    _syncTo(planet, tickNumber);
+    return _syncTo(planet, tickNumber);
   }
 
-  function _sync(Planet memory planet) internal view {
+  function _sync(Planet memory planet) internal view returns (Planet memory) {
     uint256 untilTick = Ticker.getTickNumber();
-    _syncTo(planet, untilTick);
+    return _syncTo(planet, untilTick);
   }
 
-  function _syncTo(Planet memory planet, uint256 untilTick) internal view {
+  function _syncTo(Planet memory planet, uint256 untilTick) internal view returns (Planet memory) {
     MoveData memory move = planet.popArrivedMove(untilTick);
     while (uint256(move.from) != 0) {
       planet.naturalGrowth(move.arrivalTick);
-      move.arrivedAt(planet);
+      (move, planet) = move.arrivedAt(planet);
       move = planet.popArrivedMove(untilTick);
     }
     planet.naturalGrowth(untilTick);
+    return planet;
   }
 }
