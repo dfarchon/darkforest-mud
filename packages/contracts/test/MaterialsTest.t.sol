@@ -13,7 +13,7 @@ import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { MaterialMove } from "../src/lib/Material.sol";
 import { PlanetLib } from "../src/lib/Planet.sol";
 import { PlanetMaterialStorage } from "../src/codegen/tables/PlanetMaterialStorage.sol";
-
+import { PlanetMaterial } from "../src/codegen/tables/PlanetMaterial.sol";
 contract MaterialsTest is BaseTest {
   function setUp() public override {
     super.setUp();
@@ -50,7 +50,15 @@ contract MaterialsTest is BaseTest {
     uint64 tick = Ticker.getTickNumber();
     vm.prank(admin);
     uint64 elapsed = 1000;
-    Ticker.setTickNumber(tick + elapsed);
+    vm.warp(_getTimestampAtTick(tick + elapsed));
+    Proof memory proof;
+    MoveInput memory input;
+    input.fromPlanetHash = 1;
+    input.toPlanetHash = 2;
+    input.distance = 80;
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, new MaterialMove[](0));
+
     Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
 
     bool[] memory exits = planet1.materialStorage.exists;
@@ -60,6 +68,7 @@ contract MaterialsTest is BaseTest {
         uint256 currentAmount = planet1.materialStorage.getMaterial(planet1.planetHash, material);
         uint256 expectedAmount = planet1.level * 1e16 * 2 * elapsed;
         assertEq(currentAmount, expectedAmount);
+        assertEq(PlanetMaterial.get(bytes32(planet1.planetHash), uint8(material)), expectedAmount);
       }
     }
 
@@ -77,5 +86,11 @@ contract MaterialsTest is BaseTest {
       }
     }
     assertEq(currentExistsMap, existsMap);
+    assertEq(PlanetMaterialStorage.get(bytes32(planet1.planetHash)), existsMap);
+  }
+
+  function _getTimestampAtTick(uint256 tick) internal view returns (uint256) {
+    TickerData memory ticker = Ticker.get();
+    return ticker.timestamp + (tick - ticker.tickNumber) / ticker.tickRate;
   }
 }
