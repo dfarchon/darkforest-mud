@@ -13,6 +13,8 @@ import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { MaterialMove } from "../src/lib/Material.sol";
 import { PlanetMaterial } from "../src/codegen/tables/PlanetMaterial.sol";
+import { PlanetMaterialStorage } from "../src/codegen/tables/PlanetMaterialStorage.sol";
+
 contract MoveTest is BaseTest {
   function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
     a = new MaterialMove[](1);
@@ -91,6 +93,8 @@ contract MoveTest is BaseTest {
     // give planet1 some materials of type 1
     vm.prank(admin);
     IWorld(worldAddress).df__addMaterial(planet1.planetHash, MaterialType(1), 100);
+    assertEq(PlanetMaterial.get(bytes32(planet1.planetHash), uint8(1)), 100);
+    assertEq(PlanetMaterialStorage.get(bytes32(planet1.planetHash)), 1 << uint8(1));
 
     Proof memory proof;
     MoveInput memory input;
@@ -109,6 +113,10 @@ contract MoveTest is BaseTest {
     vm.prank(user1);
     IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, new MaterialMove[](0));
     assertEq(PlanetMaterial.get(bytes32(planet2.planetHash), uint8(1)), 100);
+    assertEq(PlanetMaterialStorage.get(bytes32(planet2.planetHash)), 1 << uint8(1));
+
+    assertEq(PlanetMaterialStorage.get(bytes32(planet1.planetHash)), 0);
+    assertEq(PlanetMaterial.get(bytes32(planet1.planetHash), uint8(1)), 0);
   }
 
   function testPendingMove() public {
