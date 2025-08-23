@@ -2,8 +2,8 @@
 pragma solidity >=0.8.24;
 
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
-import { Planet } from "libraries/Planet.sol";
-import { PlanetType } from "codegen/common.sol";
+import { Planet, PlanetLib } from "libraries/Planet.sol";
+import { PlanetType, Biome, MaterialType } from "codegen/common.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
@@ -50,6 +50,17 @@ contract PlanetJunkSystem is BaseSystem {
     planet.junkOwner = executor;
     planet.addJunkTick = DFUtils.getCurrentTick();
     PlayerJunk.set(executor, playerJunk + planetJunk);
+
+    // add material - determinate if planet.planetType == ASTEROID_FIELD then allowedMaterialsForBiome use setMaterial
+    if (planet.planetType == PlanetType.ASTEROID_FIELD) {
+      // For ASTEROID_FIELD planets, initialize allowed materials
+      Biome biome = Biome(uint8(PlanetLib.getPlanetBiomebase(planet)));
+      MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
+      for (uint256 i; i < allowed.length; i++) {
+        // Initialize with a starting amount based on planet level
+        planet.setMaterial(allowed[i], 0);
+      }
+    }
 
     planet.writeToStore();
   }

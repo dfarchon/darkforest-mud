@@ -446,8 +446,8 @@ export class PlanetUtils {
     const currentTick = tickerUtils.getCurrentTick();
 
     if (PlanetMaterial) {
-      // There are 11 material types (0-10), 0 is UNKNOWN
-      for (let i = 1; i <= 11; i++) {
+      // There are 12 material types (0-10), 0 is UNKNOWN
+      for (let i = 1; i <= 12; i++) {
         const matData = getComponentValue(
           PlanetMaterial,
           encodeEntity(PlanetMaterial.metadata.keySchema, {

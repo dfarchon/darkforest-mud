@@ -80,7 +80,7 @@ struct Planet {
   Effect[] effects;
   // flags
   Flags flags;
-  // material storage
+  // Table: MaterialStorage
   MaterialStorage materialStorage;
 }
 
@@ -406,41 +406,6 @@ library PlanetLib {
     planet.lastUpdateTick = Ticker.getTickNumber();
   }
 
-  // function _initPlanetMaterials(Planet memory planet) internal view {
-  //   // Only initialize materials for ASTEROID_FIELD planets to save gas
-  //   if (planet.planetType == PlanetType(uint8(PlanetType.ASTEROID_FIELD))) {
-  //     // For ASTEROID_FIELD planets, get allowed materials and initialize only those
-  //     Biome biome = Biome(uint8(PlanetLib.getPlanetBiome(planet)) - 1);
-  //     MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
-
-  //     // Initialize array with only the allowed materials
-  //     planet.materials = new Materials[](allowed.length);
-
-  //     // Initialize only the materials allowed by this biome
-  //     for (uint j = 1; j < allowed.length; j++) {
-  //       planet.materials[j] = MaterialLib.newMaterial(
-  //         allowed[j],
-  //         _initMaterialsCap(planet.level),
-  //         _initMaterialsGrow(planet.level)
-  //       );
-  //     }
-  //   }
-  // }
-
-  // function _initMaterialsCap(uint256 planetLvl) internal pure returns (uint256) {
-  //   if (planetLvl <= 3) {
-  //     return planetLvl * 1000 * 1e18;
-  //   } else if (planetLvl <= 6) {
-  //     return planetLvl * 2000 * 1e18;
-  //   } else {
-  //     return 6000 * planetLvl * 1e18;
-  //   }
-  // }
-
-  // function _initMaterialsGrow(uint256 planetLvl) internal pure returns (uint256) {
-  //   return planetLvl * 1e16 * 2;
-  // }
-
   function _initSpaceType(Planet memory planet) internal view {
     uint32[] memory thresholds = SpaceTypeConfig.getPerlinThresholds();
     uint256 perlin = planet.perlin;
@@ -759,8 +724,9 @@ library PlanetLib {
     } else if (biome == Biome.LAVA) {
       biomeMat = MaterialType.PYROSTEEL;
     }
-    MaterialType[] memory mats = new MaterialType[](1);
-    mats[0] = biomeMat;
+    MaterialType[] memory mats = new MaterialType[](2);
+    mats[0] = MaterialType.SILVER;
+    mats[1] = biomeMat;
     return mats;
   }
 
@@ -923,14 +889,41 @@ library PlanetLib {
       return Biome.CORRUPTED;
     }
 
-    uint256 res = 3 * (uint8(planet.spaceType));
+    Biome res;
     PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
-    if (biomeBase < config.threshold1) {
-      res -= 2;
-    } else if (biomeBase < config.threshold2) {
-      res -= 1;
+
+    if (planet.spaceType == SpaceType.NEBULA) {
+      if (biomeBase < config.threshold1) {
+        res = Biome.FOREST;
+      } else if (biomeBase < config.threshold2) {
+        res = Biome.OCEAN;
+      } else {
+        res = Biome.GRASSLAND;
+      }
+      return res;
     }
-    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
+
+    if (planet.spaceType == SpaceType.SPACE) {
+      if (biomeBase < config.threshold1) {
+        res = Biome.TUNDRA;
+      } else if (biomeBase < config.threshold2) {
+        res = Biome.SWAMP;
+      } else {
+        res = Biome.DESERT;
+      }
+      return res;
+    }
+
+    if (planet.spaceType == SpaceType.DEEP_SPACE) {
+      if (biomeBase < config.threshold1) {
+        res = Biome.ICE;
+      } else if (biomeBase < config.threshold2) {
+        res = Biome.WASTELAND;
+      } else {
+        res = Biome.LAVA;
+      }
+      return res;
+    }
   }
 
   function getPlanetBiomebase(Planet memory planet) internal view returns (Biome) {

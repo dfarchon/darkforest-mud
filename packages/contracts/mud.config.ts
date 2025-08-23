@@ -32,6 +32,7 @@ export default defineWorld({
       "PYROSTEEL",
       "BLACKALLOY",
       "CORRUPTED_CRYSTAL",
+      "SILVER",
     ],
     ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "READY", "ACTIVE", "BROKEN"],
     ArtifactGenre: ["UNKNOWN", "DEFENSIVE", "OFFENSIVE", "PRODUCTIVE", "GENERAL"],

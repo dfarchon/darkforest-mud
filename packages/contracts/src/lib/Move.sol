@@ -72,7 +72,7 @@ library MoveLib {
     Planet memory from,
     MaterialMove[] memory mats
   ) public returns (MoveData memory, Planet memory) {
-    bytes32 fromId = bytes32(from.planetHash);
+    // bytes32 fromId = bytes32(from.planetHash);
     for (uint256 i; i < mats.length; i++) {
       uint8 rid = mats[i].resourceId;
       uint256 amt = mats[i].amount;
@@ -175,7 +175,7 @@ library MoveLib {
   function _unloadMaterials(MoveData memory move, Planet memory to) internal view {
     // bytes32 toId = bytes32(to.planetHash); // TODO STX remove this??
 
-    for (uint8 rid = 1; rid < 11; rid++) {
+    for (uint8 rid = 1; rid <= 12; rid++) {
       uint256 amt = MoveMaterial.getAmount(move.id, rid); // 0 if row doesn't exist
       if (amt == 0) continue;
 
