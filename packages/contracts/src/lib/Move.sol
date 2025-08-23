@@ -175,7 +175,7 @@ library MoveLib {
   function _unloadMaterials(MoveData memory move, Planet memory to) internal view {
     // bytes32 toId = bytes32(to.planetHash); // TODO STX remove this??
 
-    for (uint8 rid = 1; rid <= 12; rid++) {
+    for (uint8 rid = 1; rid <= 11; rid++) {
       uint256 amt = MoveMaterial.getAmount(move.id, rid); // 0 if row doesn't exist
       if (amt == 0) continue;
 

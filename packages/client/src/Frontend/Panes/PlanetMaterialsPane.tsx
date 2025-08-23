@@ -82,8 +82,6 @@ export function getMaterialName(materialId: MaterialType): string {
       return "BLACKALLOY";
     case 11:
       return "CORRUPTED CRYSTAL";
-    case 12:
-      return "SILVER";
     default:
       return "Unknown";
   }
@@ -113,8 +111,6 @@ export function getMaterialColor(materialId: MaterialType): string {
       return "#2F4F4F"; // Dark gray for blackalloy
     case 11:
       return "#0df000df"; // Dark Green for Currapted Crystals
-    case 12:
-      return "#ffffff"; // White for Silver
     default:
       return dfstyles.colors.subtext;
   }
@@ -144,8 +140,6 @@ export function getMaterialDescription(id: number): string {
       return "A forbidden dark alloy synthesized from corrupted zones. Dense, unstable, and extremely powerful in shadow-tech applications.";
     case 11:
       return "Crystallized corruption extracted from reality-warped biomes. Essential for ZK-reactors, entropy drives, and unstable modules.";
-    case 12:
-      return "A precious metal extracted from the depths of space, used in advanced technology and weaponry.";
     default:
       return "Unknown material of mysterious origin.";
   }

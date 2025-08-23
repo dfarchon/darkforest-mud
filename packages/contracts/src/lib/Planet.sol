@@ -724,9 +724,8 @@ library PlanetLib {
     } else if (biome == Biome.LAVA) {
       biomeMat = MaterialType.PYROSTEEL;
     }
-    MaterialType[] memory mats = new MaterialType[](2);
-    mats[0] = MaterialType.SILVER;
-    mats[1] = biomeMat;
+    MaterialType[] memory mats = new MaterialType[](1);
+    mats[0] = biomeMat;
     return mats;
   }
 
@@ -897,7 +896,7 @@ library PlanetLib {
         res = Biome.FOREST;
       } else if (biomeBase < config.threshold2) {
         res = Biome.OCEAN;
-      } else {
+      } else if (biomeBase >= config.threshold2) {
         res = Biome.GRASSLAND;
       }
       return res;
@@ -908,7 +907,7 @@ library PlanetLib {
         res = Biome.TUNDRA;
       } else if (biomeBase < config.threshold2) {
         res = Biome.SWAMP;
-      } else {
+      } else if (biomeBase >= config.threshold2) {
         res = Biome.DESERT;
       }
       return res;
@@ -919,7 +918,7 @@ library PlanetLib {
         res = Biome.ICE;
       } else if (biomeBase < config.threshold2) {
         res = Biome.WASTELAND;
-      } else {
+      } else if (biomeBase >= config.threshold2) {
         res = Biome.LAVA;
       }
       return res;
