@@ -4,13 +4,13 @@ import { hasOwner, isEmojiFlagMessage } from "@df/gamelogic";
 import type {
   Artifact,
   EmojiFlagBody,
+  Materials,
   Planet,
   PlanetMessage,
   QueuedArrival,
   Upgrade,
 } from "@df/types";
 import { ArrivalType, ArtifactType, PlanetType } from "@df/types";
-import type { Material } from "@frontend/Views/SendResources";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { GuildUtils } from "./GuildUtils";
@@ -129,6 +129,16 @@ export const updatePlanetToTick = (
   planet.energy = getEnergyAtTick(planet, atTick);
   // }
 
+  // update materials to tick only for SILVER_MINE planets
+  if (planet.planetType === PlanetType.SILVER_MINE) {
+    planet.materials = planet.materials.map((mat) => ({
+      ...mat,
+      materialAmount: Number(
+        getMaterialAmount(mat, planet.lastUpdated, atTick).toFixed(0),
+      ),
+    }));
+  }
+
   planet.lastUpdated = atTick;
 
   // NOTE: please update to tick
@@ -145,13 +155,6 @@ export const updatePlanetToTick = (
   //   planet.localPhotoidUpgrade = activePhotoid.timeDelayedUpgrade;
   //   applyUpgrade(planet, activePhotoid.timeDelayedUpgrade);
   // }
-
-  // update materials to tick
-  planet.materials = planet.materials.map((mat) => ({
-    ...mat,
-    materialAmount: Number(getMaterialAmount(mat, atTick).toFixed(0)), // nebo String(...), záleží co vyžaduje typ
-    lastTick: atTick,
-  }));
 
   setPlanet(planet);
 };
@@ -300,8 +303,9 @@ export const arrive = (
       );
       if (idx !== -1) {
         toPlanet.materials[idx].materialAmount = Math.min(
-          toPlanet.materials[idx].materialAmount + moved.materialAmount,
-          toPlanet.materials[idx].cap,
+          Number(toPlanet.materials[idx].materialAmount) +
+            Number(moved.materialAmount),
+          Number(toPlanet.materials[idx].cap),
         );
       }
     }
@@ -314,27 +318,29 @@ export const arrive = (
  * `Planet` class.
  */
 
-const getMaterialAmount = (material: Material, atTick: number): number => {
-  const ticksPassed = atTick - material.lastTick;
+const getMaterialAmount = (
+  material: Materials,
+  startTick: number,
+  endTick: number,
+): number => {
+  const ticksPassed = endTick - startTick;
 
   const growthRate =
     typeof material.growthRate === "bigint"
       ? Number(material.growthRate)
-      : parseFloat(material.growthRate);
+      : material.growthRate;
 
   const currentAmount =
     typeof material.materialAmount === "bigint"
       ? Number(material.materialAmount)
-      : parseFloat(material.materialAmount);
+      : material.materialAmount;
 
   const cap =
-    typeof material.cap === "bigint"
-      ? Number(material.cap)
-      : parseFloat(material.cap);
+    typeof material.cap === "bigint" ? Number(material.cap) : material.cap;
 
-  const grown = ticksPassed * growthRate;
+  const grown = ticksPassed * Number(growthRate);
 
-  return Math.min(currentAmount + grown, cap);
+  return Math.min(Number(currentAmount) + grown, Number(cap));
 };
 
 export function getEmojiMessage(

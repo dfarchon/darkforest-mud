@@ -5415,15 +5415,17 @@ export class GameManager extends EventEmitter {
           materialAmount: number | bigint;
         }[],
       ): `0x${string}` {
-        if (!mats || mats.length === 0) return "0x";
+        if (!mats || mats.length === 0)
+          return "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000";
+
+        console.log("mats", mats);
         const norm = mats.map((m) => ({
           resourceId: Number(m.materialId) & 0xff, // uint8
-          amount: BigInt(m.materialAmount) & ((1n << 256n) - 1n), // uint64
+          amount: BigInt(m.materialAmount) & ((1n << 256n) - 1n), // uint256
         }));
         return encodeAbiParameters(
           [
             {
-              name: "mats",
               type: "tuple[]",
               components: [
                 { name: "resourceId", type: "uint8" },

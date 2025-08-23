@@ -199,10 +199,9 @@ export const MaterialType = {
 
 export type Materials = {
   materialId: MaterialType;
-  materialAmount: number;
-  cap: number;
-  growthRate: number;
-  lastTick: number;
+  materialAmount: number | bigint | string;
+  cap: number | bigint | string;
+  growthRate: number | bigint | string;
 };
 
 export type Planet = {

@@ -1,7 +1,11 @@
 import { formatNumber, isSpaceShip } from "@df/gamelogic";
 import { isUnconfirmedMoveTx, isUnconfirmedReleaseTx } from "@df/serde";
-import type { Artifact, Planet } from "@df/types";
+import type { Artifact, Materials, Planet } from "@df/types";
 import { artifactNameFromArtifact, MaterialType, TooltipName } from "@df/types";
+import {
+  getMaterialColor,
+  getMaterialName,
+} from "@frontend/Panes/PlanetMaterialsPane";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
@@ -25,10 +29,6 @@ import { useEmitterValue } from "../Utils/EmitterHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
 import { TOGGLE_ABANDON, TOGGLE_SEND } from "../Utils/ShortcutConstants";
 import { SelectArtifactRow } from "./ArtifactRow";
-import {
-  getMaterialColor,
-  getMaterialName,
-} from "@frontend/Panes/PlanetMaterialsPane";
 
 const StyledSendResources = styled.div`
   display: flex;
@@ -101,14 +101,6 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
   );
 }
 
-export type Material = {
-  materialId: number;
-  materialAmount: string | bigint;
-  cap: string | bigint;
-  growthRate: string | bigint;
-  lastTick: number;
-};
-
 function ResourceBar({
   isSilver,
   isMaterial,
@@ -120,8 +112,8 @@ function ResourceBar({
 }: {
   isSilver?: boolean;
   isMaterial?: boolean;
-  selected: Planet | Material | undefined;
-  material?: Material;
+  selected: Planet | Materials | undefined;
+  material?: Materials;
   value: number;
   setValue: (x: number) => void;
   disabled?: boolean;
@@ -178,28 +170,6 @@ function ResourceBar({
   );
   return (
     <>
-      {/* <Row>
-        <ResourceRowDetails>
-          {isMaterial && material?.length > 0 ? (
-            <>
-              <Icon type={IconType.Frozen} />
-              {material[1].amount}
-            </>
-          ) : isSilver ? (
-            <>
-              <Icon type={IconType.Silver} />
-              {getResource(value)}
-            </>
-          ) : (
-            <>
-              <Icon type={IconType.Energy} />
-              {getResource(value)}
-            </>
-          )}
-        </ResourceRowDetails>
-
-        <ShowPercent value={value} setValue={setValue} />
-      </Row> */}
       <Row>
         <ResourceRowDetails>
           {(() => {
@@ -365,7 +335,7 @@ export function SendResources({
 
   const activeMaterials =
     p.value?.materials?.filter(
-      (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
+      (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
     ) || [];
 
   const materialSending = activeMaterials.map((mat) => ({

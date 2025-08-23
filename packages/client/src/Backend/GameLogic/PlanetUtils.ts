@@ -29,6 +29,7 @@ import type { ClientComponents } from "@mud/createClientComponents";
 import bigInt from "big-integer";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
+import { TickerUtils } from "./TickerUtils";
 
 interface PlanetUtilsConfig {
   components: ClientComponents;
@@ -42,6 +43,55 @@ export class PlanetUtils {
   public constructor({ components, contractConstants }: PlanetUtilsConfig) {
     this.components = components;
     this.contractConstants = contractConstants;
+  }
+
+  /**
+   * Calculate material amount based on growth since last update tick
+   * @param materialAmount - Current material amount from storage
+   * @param lastUpdateTick - Last update tick of the planet
+   * @param currentTick - Current game tick
+   * @param growthRate - Material growth rate
+   * @param cap - Material cap
+   * @returns Updated material amount
+   */
+  private calculateMaterialAmount(
+    materialAmount: number,
+    lastUpdateTick: number,
+    currentTick: number,
+    growthRate: number,
+    cap: number,
+  ): number {
+    const ticksPassed = currentTick - lastUpdateTick;
+    if (ticksPassed <= 0) {
+      return materialAmount;
+    }
+
+    const grown = ticksPassed * growthRate;
+    return Math.min(materialAmount + grown, cap);
+  }
+
+  /**
+   * Calculate material cap based on planet level (from contract logic)
+   * @param planetLevel - Planet level
+   * @returns Material cap
+   */
+  private calculateMaterialCap(planetLevel: number): number {
+    if (planetLevel <= 3) {
+      return planetLevel * 1000 * 1e18;
+    } else if (planetLevel <= 6) {
+      return planetLevel * 2000 * 1e18;
+    } else {
+      return planetLevel * 6000 * 1e18;
+    }
+  }
+
+  /**
+   * Calculate material growth rate based on planet level (from contract logic)
+   * @param planetLevel - Planet level
+   * @returns Material growth rate
+   */
+  private calculateMaterialGrowthRate(planetLevel: number): number {
+    return planetLevel * 1e16 * 2;
   }
 
   public getPlanetById(planetId: LocationId): Planet | undefined {
@@ -390,6 +440,11 @@ export class PlanetUtils {
     // Try to get the PlanetMaterial component from this.components
     const { PlanetMaterial } = this.components;
     const materials: Materials[] = [];
+
+    // Get current tick for material calculations
+    const tickerUtils = new TickerUtils({ components: this.components });
+    const currentTick = tickerUtils.getCurrentTick();
+
     if (PlanetMaterial) {
       // There are 11 material types (0-10), 0 is UNKNOWN
       for (let i = 1; i <= 11; i++) {
@@ -401,12 +456,22 @@ export class PlanetUtils {
           }),
         );
         if (matData) {
+          const materialAmount = Number(matData.amount);
+          const cap = this.calculateMaterialCap(planetLevel);
+          const growthRate = this.calculateMaterialGrowthRate(planetLevel);
+          const calculatedAmount = this.calculateMaterialAmount(
+            materialAmount,
+            lastUpdateTick,
+            currentTick,
+            growthRate,
+            cap,
+          );
+
           materials[i] = {
             materialId: i as MaterialType,
-            materialAmount: Number(matData.amount),
-            cap: Number(matData.cap),
-            growthRate: Number(matData.growthRate),
-            lastTick: Number(matData.lastTick),
+            materialAmount: calculatedAmount,
+            cap: cap,
+            growthRate: growthRate,
           };
         } else {
           materials[i] = {
@@ -414,7 +479,6 @@ export class PlanetUtils {
             materialAmount: 0,
             cap: 0,
             growthRate: 0,
-            lastTick: 0,
           };
         }
       }

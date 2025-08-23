@@ -122,7 +122,7 @@ contract MoveSystem is BaseSystem {
     uint256 silverMoved,
     uint256 movedArtifactId,
     uint256, // isAbandoning
-    bytes calldata movedMaterials // abi.encode(MaterialMove[])
+    bytes calldata movedMaterials
   ) public {
     Proof memory proof;
     proof.genFrom(_a, _b, _c);

@@ -2155,7 +2155,10 @@ export class GameUIManager extends EventEmitter {
     const planet = this.getPlanetWithId(locationId);
     if (!planet?.materials?.length) return [];
 
-    const results: { materialId: number; materialAmount: number }[] = [];
+    const results: {
+      materialId: MaterialId;
+      materialAmount: MaterialAmount;
+    }[] = [];
 
     for (const mat of planet.materials) {
       if (!mat) continue;
@@ -2165,13 +2168,18 @@ export class GameUIManager extends EventEmitter {
       const current =
         typeof mat.materialAmount === "bigint"
           ? Number(mat.materialAmount)
-          : parseFloat(mat.materialAmount);
+          : Number(mat.materialAmount);
 
-      const send = Math.floor((current * percent) / 100);
+      // Convert from scaled amount (with 1e18) to base unit for contract
+      const baseAmount = current;
+      const send = Math.floor((baseAmount * percent) / 100);
       if (send > 0) {
+        console.log(
+          `Material ${mat.materialId}: original=${current}, scaled=${baseAmount}, percent=${percent}, sending=${send}`,
+        );
         results.push({
-          materialId: mat.materialId,
-          materialAmount: Number((send / 1e18).toFixed(0)),
+          materialId: mat.materialId as MaterialId,
+          materialAmount: send as MaterialAmount,
         });
       }
     }

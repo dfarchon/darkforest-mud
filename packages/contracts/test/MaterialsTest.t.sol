@@ -73,7 +73,7 @@ contract MaterialsTest is BaseTest {
     }
 
     MaterialType[] memory allowedMaterials = PlanetLib.allowedMaterialsForBiome(
-      Biome(uint8(planet1.getPlanetBiome()) - 1)
+      Biome(uint8(planet1.getPlanetBiomebase()) - 1)
     );
     uint256 existsMap = 0;
     for (uint256 i = 0; i < allowedMaterials.length; i++) {
