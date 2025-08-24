@@ -4,6 +4,7 @@ import type { Artifact, Materials, Planet } from "@df/types";
 import { artifactNameFromArtifact, MaterialType, TooltipName } from "@df/types";
 import {
   getMaterialColor,
+  getMaterialIcon,
   getMaterialName,
 } from "@frontend/Panes/PlanetMaterialsPane";
 import React, { useCallback } from "react";
@@ -63,14 +64,16 @@ const StyledShowPercent = styled.div`
 function ShowPercent({
   value,
   setValue,
+  color,
 }: {
   value: number;
   setValue: (x: number) => void;
+  color?: string;
 }) {
   return (
     <StyledShowPercent>
-      <span>{value}%</span>
-      <span>
+      <span style={{ color: color }}>{value}%</span>
+      <span style={{ color: color }}>
         <span onClick={() => setValue(value - 1)}>
           <LongDash />
         </span>
@@ -90,14 +93,19 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
   return (
     <div
       style={{
-        width: "1em",
-        height: "1em",
-        borderRadius: "3px",
+        width: "16px",
+        height: "16px",
         backgroundColor: getMaterialColor(materialId),
-        display: "inline-block",
-        marginRight: "6px",
+        borderRadius: "2px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "12px",
+        lineHeight: "1",
       }}
-    />
+    >
+      {getMaterialIcon(materialId)}
+    </div>
   );
 }
 
@@ -177,8 +185,13 @@ function ResourceBar({
               return (
                 <>
                   <MaterialIcon materialId={material.materialId} />
-                  {getResource(value)}
-                  <Subber>{getMaterialName(material.materialId)}</Subber>
+
+                  <Subber
+                    style={{ color: getMaterialColor(material.materialId) }}
+                  >
+                    {getResource(value)} {""}
+                    {getMaterialName(material.materialId)}
+                  </Subber>
                 </>
               );
             }
@@ -186,24 +199,68 @@ function ResourceBar({
             if (isSilver) {
               return (
                 <>
-                  <Icon type={IconType.Silver} />
-                  {getResource(value)}
-                  <Subber>Silver</Subber>
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      backgroundColor: "rgba(187, 187, 0, 0.41)",
+                      borderRadius: "2px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "12px",
+                      lineHeight: "1",
+                    }}
+                  >
+                    <Icon type={IconType.Silver} />
+                  </div>
+                  <Subber style={{ color: dfstyles.colors.dfyellow }}>
+                    {getResource(value)} {""}
+                    Silver
+                  </Subber>
                 </>
               );
             }
 
             return (
               <>
-                <Icon type={IconType.Energy} />
-                {getResource(value)}
-                <Subber>Energy</Subber>
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    backgroundColor: "rgb(0, 90, 187)",
+                    borderRadius: "2px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "12px",
+                    lineHeight: "1",
+                  }}
+                >
+                  <Icon type={IconType.Energy} />
+                </div>
+
+                <Subber style={{ color: dfstyles.colors.dfblue }}>
+                  {getResource(value)} {""}Energy
+                </Subber>
               </>
             );
           })()}
         </ResourceRowDetails>
 
-        <ShowPercent value={value} setValue={setValue} />
+        <ShowPercent
+          value={value}
+          setValue={setValue}
+          color={(() => {
+            if (isMaterial && material) {
+              return getMaterialColor(material.materialId);
+            }
+            if (isSilver) {
+              return dfstyles.colors.dfyellow;
+            }
+            return dfstyles.colors.dfblue;
+          })()}
+        />
       </Row>
       <Slider
         variant="filled"

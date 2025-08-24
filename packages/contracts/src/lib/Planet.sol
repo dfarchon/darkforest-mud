@@ -712,7 +712,7 @@ library PlanetLib {
     } else if (biome == Biome.GRASSLAND) {
       biomeMat = MaterialType.WINDSTEEL;
     } else if (biome == Biome.TUNDRA) {
-      biomeMat = MaterialType.GLACITE;
+      biomeMat = MaterialType.AURORIUM;
     } else if (biome == Biome.SWAMP) {
       biomeMat = MaterialType.MYCELIUM;
     } else if (biome == Biome.DESERT) {
@@ -887,48 +887,60 @@ library PlanetLib {
     if (planet.spaceType == SpaceType.DEAD_SPACE) {
       return Biome.CORRUPTED;
     }
-
-    Biome res;
+    uint256 res = (uint8(planet.spaceType) - 1) * 3;
     PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
-
-    if (planet.spaceType == SpaceType.NEBULA) {
-      if (biomeBase < config.threshold1) {
-        res = Biome.FOREST;
-      } else if (biomeBase < config.threshold2) {
-        res = Biome.OCEAN;
-      } else if (biomeBase >= config.threshold2) {
-        res = Biome.GRASSLAND;
-      }
-      return res;
+    if (biomeBase < config.threshold1) {
+      res += 1;
+    } else if (biomeBase < config.threshold2) {
+      res += 2;
+    } else {
+      res += 3;
     }
+    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
 
-    if (planet.spaceType == SpaceType.SPACE) {
-      if (biomeBase < config.threshold1) {
-        res = Biome.TUNDRA;
-      } else if (biomeBase < config.threshold2) {
-        res = Biome.SWAMP;
-      } else if (biomeBase >= config.threshold2) {
-        res = Biome.DESERT;
-      }
-      return res;
-    }
+    // if (planet.spaceType == SpaceType.NEBULA) {
+    //   if (biomeBase < config.threshold1) {
+    //     res = Biome.FOREST;
+    //   } else if (biomeBase < config.threshold2) {
+    //     res = Biome.OCEAN;
+    //   } else if (biomeBase >= config.threshold2) {
+    //     res = Biome.GRASSLAND;
+    //   }
+    //   return res;
+    // }
 
-    if (planet.spaceType == SpaceType.DEEP_SPACE) {
-      if (biomeBase < config.threshold1) {
-        res = Biome.ICE;
-      } else if (biomeBase < config.threshold2) {
-        res = Biome.WASTELAND;
-      } else if (biomeBase >= config.threshold2) {
-        res = Biome.LAVA;
-      }
-      return res;
-    }
+    // if (planet.spaceType == SpaceType.SPACE) {
+    //   if (biomeBase < config.threshold1) {
+    //     res = Biome.TUNDRA;
+    //   } else if (biomeBase < config.threshold2) {
+    //     res = Biome.SWAMP;
+    //   } else if (biomeBase >= config.threshold2) {
+    //     res = Biome.DESERT;
+    //   }
+    //   return res;
+    // }
+
+    // if (planet.spaceType == SpaceType.DEEP_SPACE) {
+    //   if (biomeBase < config.threshold1) {
+    //     res = Biome.ICE;
+    //   } else if (biomeBase < config.threshold2) {
+    //     res = Biome.WASTELAND;
+    //   } else if (biomeBase >= config.threshold2) {
+    //     res = Biome.LAVA;
+    //   }
+    //   return res;
+    // }
   }
 
   function getPlanetBiomebase(Planet memory planet) internal view returns (Biome) {
-    // TODO STX Validate biomebase deterministically from planet properties like in the client !!! I think there is a bug
+    // Create a deterministic biomebase key from the planet hash
+    uint256 biomebaseKey = uint256(keccak256(abi.encodePacked(planet.planetHash))) % 10000;
 
-    uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.perlin))) % 1000;
-    return _getBiome(planet, biomeBase);
+    // Apply a transformation that simulates the effect of using biomebaseKey instead of spaceTypeKey
+    // This transformation preserves the deterministic nature while simulating the perlin calculation
+    uint256 transformedPerlin = uint256(keccak256(abi.encodePacked(planet.perlin, biomebaseKey, planet.planetHash))) %
+      1000;
+
+    return _getBiome(planet, transformedPerlin);
   }
 }

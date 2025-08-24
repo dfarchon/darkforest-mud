@@ -1,6 +1,7 @@
 import { EMPTY_ADDRESS } from "@df/constants";
 import {
   formatCompact,
+  formatCompact2,
   formatEtherToNumber,
   formatNumber,
 } from "@df/gamelogic";
@@ -10,6 +11,7 @@ import type { MaterialType } from "@df/types";
 import { PlanetType, PlanetTypeNames } from "@df/types";
 import {
   getMaterialColor,
+  getMaterialIcon,
   getMaterialName,
 } from "@frontend/Panes/PlanetMaterialsPane";
 import React from "react";
@@ -306,7 +308,7 @@ export function MaterialsText({
 
   // Filter out materials with 0 amount and UNKNOWN type
   const activeMaterials = planet.materials.filter(
-    (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
+    (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
   );
 
   if (activeMaterials.length === 0) {
@@ -339,7 +341,7 @@ export function MaterialsDisplay({
 
   // Filter out materials with 0 amount and UNKNOWN type
   const activeMaterials = planet.materials.filter(
-    (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
+    (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
   );
 
   if (activeMaterials.length === 0) {
@@ -378,16 +380,31 @@ export function MaterialsDisplay({
               border: `1px solid ${dfstyles.colors.borderDarker}`,
             }}
           >
-            <span style={{ color: getMaterialColor(mat.materialId) }}>
+            <div
+              style={{
+                width: "16px",
+                height: "16px",
+                backgroundColor: getMaterialColor(mat.materialId),
+                borderRadius: "2px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                lineHeight: "1",
+              }}
+            >
+              {getMaterialIcon(mat.materialId)}
+            </div>
+            {/* <span style={{ color: getMaterialColor(mat.materialId) }}>
               {getMaterialName(mat.materialId)}
-            </span>
-            <span style={{ color: dfstyles.colors.text }}>
-              {formatCompact(mat.materialAmount / 1e18)} /{" "}
-              {formatCompact(mat.cap / 1e18)}
+            </span> */}
+            <span style={{ color: getMaterialColor(mat.materialId) }}>
+              {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+              {formatCompact(Number(mat.cap) / 1e18)}
             </span>
 
-            <span style={{ color: dfstyles.colors.text }}>
-              +{formatCompact(mat.growthRate / 1e18)}
+            <span style={{ color: getMaterialColor(mat.materialId) }}>
+              +{formatCompact2(Number(mat.growthRate) / 1e18)}
             </span>
           </div>
         ))}

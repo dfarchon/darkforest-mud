@@ -67,7 +67,7 @@ export function getMaterialName(materialId: MaterialType): string {
     case 3:
       return "WINDSTEEL";
     case 4:
-      return "GLACITE";
+      return "AURORIUM";
     case 5:
       return "MYCELIUM GEL";
     case 6:
@@ -84,6 +84,35 @@ export function getMaterialName(materialId: MaterialType): string {
       return "CORRUPTED CRYSTAL";
     default:
       return "Unknown";
+  }
+}
+
+export function getMaterialIcon(materialId: MaterialType): string {
+  switch (materialId) {
+    case 1:
+      return "💧";
+    case 2:
+      return "🌿";
+    case 3:
+      return "🌀";
+    case 4:
+      return "🌌";
+    case 5:
+      return "🧫";
+    case 6:
+      return "✨";
+    case 7:
+      return "🧊";
+    case 8:
+      return "🛠️";
+    case 9:
+      return "⚙️";
+    case 10:
+      return "🕳️";
+    case 11:
+      return "☣️";
+    default:
+      return "❓";
   }
 }
 
@@ -125,7 +154,7 @@ export function getMaterialDescription(id: number): string {
     case 3:
       return "Lightweight and highly conductive alloy spun from atmospheric windsteel veins; vital for turbine propulsion and trade ship frames.";
     case 4:
-      return "Rare crystalline ice harvested from Tundra zones, used in cryo-core technology, memory arrays, and reflective armor.";
+      return "Luminous mineral infused with polar energy, mined from aurora-lit tundra fields. Used in advanced navigation cores, sensor arrays, and energy-reflective ship plating.";
     case 5:
       return "Pulsating fungal gel infused with life essence; powers alchemical reactors and mycelial growth algorithms.";
     case 6:
@@ -208,12 +237,20 @@ export function PlanetMaterialsPane({
                     >
                       <div
                         style={{
-                          width: "12px",
-                          height: "12px",
+                          width: "16px",
+                          height: "16px",
                           backgroundColor: materialColor,
                           borderRadius: "2px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          lineHeight: "1",
                         }}
-                      />
+                      >
+                        {getMaterialIcon(mat.materialId)}
+                      </div>
+
                       <Text
                         style={{ color: materialColor, fontWeight: "bold" }}
                       >
@@ -233,7 +270,7 @@ export function PlanetMaterialsPane({
                         {formatCompact(Number(mat.cap) / 1e18)}
                       </Sub>
                       {""}
-                      <Sub> +{formatEtherToNumber(mat.growthRate)}</Sub>
+                      <Sub> +{formatCompact2(mat.growthRate)}</Sub>
                     </div>
                     <MaterialBar
                       percentage={percentage}

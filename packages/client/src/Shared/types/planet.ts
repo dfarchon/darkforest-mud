@@ -173,7 +173,7 @@ export type MaterialType =
   | 1 // WATER
   | 2 // WOOD
   | 3 // WINDSTEEL
-  | 4 // GLACITE
+  | 4 // AURORIUM
   | 5 // MYCELIUM
   | 6 // SANDGLASS
   | 7 // CRYOSTONE
@@ -187,7 +187,7 @@ export const MaterialType = {
   WATER_CRYSTALS: 1 as MaterialType,
   LIVING_WOOD: 2 as MaterialType,
   WINDSTEEL: 3 as MaterialType,
-  GLACITE: 4 as MaterialType,
+  AURORIUM: 4 as MaterialType,
   MYCELIUM: 5 as MaterialType,
   SANDGLASS: 6 as MaterialType,
   CRYOSTONE: 7 as MaterialType,

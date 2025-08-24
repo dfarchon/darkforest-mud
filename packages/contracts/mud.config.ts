@@ -24,7 +24,7 @@ export default defineWorld({
       "WATER_CRYSTALS",
       "LIVING_WOOD",
       "WINDSTEEL",
-      "GLACITE",
+      "AURORIUM",
       "MYCELIUM",
       "SANDGLASS",
       "CRYOSTONE",
