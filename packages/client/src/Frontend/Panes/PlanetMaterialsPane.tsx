@@ -1,4 +1,8 @@
-import { formatCompact, formatEtherToNumber } from "@df/gamelogic";
+import {
+  formatCompact,
+  formatCompact2,
+  formatEtherToNumber,
+} from "@df/gamelogic";
 import type { LocationId, MaterialType } from "@df/types";
 import React from "react";
 import styled from "styled-components";
@@ -47,6 +51,7 @@ const MaterialBar = styled.div<{
   background-color: ${dfstyles.colors.borderDarker};
   border-radius: 4px;
   overflow: hidden;
+  position: relative;
 
   &::after {
     content: "";
@@ -56,6 +61,19 @@ const MaterialBar = styled.div<{
     background-color: ${(props) => getMaterialColor(props.materialID)};
     transition: width 0.3s ease;
   }
+`;
+
+const MaterialBarText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+  pointer-events: none;
 `;
 
 export function getMaterialName(materialId: MaterialType): string {
@@ -260,22 +278,24 @@ export function PlanetMaterialsPane({
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
+                        justifyContent: "flex-end",
                         fontSize: "0.8em",
                         width: "fill",
                       }}
                     >
                       <Sub>
-                        {formatCompact(Number(mat.materialAmount) / 1e18)}/
-                        {formatCompact(Number(mat.cap) / 1e18)}
+                        +{formatCompact2(Number(mat.growthRate) / 1e18)}
                       </Sub>
-                      {""}
-                      <Sub> +{formatCompact2(mat.growthRate)}</Sub>
                     </div>
                     <MaterialBar
                       percentage={percentage}
                       materialID={mat.materialId}
-                    />
+                    >
+                      <MaterialBarText>
+                        {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+                        {formatCompact(Number(mat.cap) / 1e18)}
+                      </MaterialBarText>
+                    </MaterialBar>
                   </MaterialInfo>
                 </MaterialRow>
               );
