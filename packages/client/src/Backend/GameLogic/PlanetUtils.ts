@@ -21,7 +21,12 @@ import type {
   UpgradeState,
   WorldLocation,
 } from "@df/types";
-import { Biome, PlanetFlagType, SpaceType } from "@df/types";
+import {
+  Biome,
+  getMaxMaterialType,
+  PlanetFlagType,
+  SpaceType,
+} from "@df/types";
 import { PlanetLevel } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
@@ -446,8 +451,8 @@ export class PlanetUtils {
     const currentTick = tickerUtils.getCurrentTick();
 
     if (PlanetMaterial) {
-      // There are 12 material types (0-10), 0 is UNKNOWN
-      for (let i = 1; i <= 11; i++) {
+      // There are dynamic material types (0-x), 0 is UNKNOWN
+      for (let i = 1; i <= getMaxMaterialType(); i++) {
         const matData = getComponentValue(
           PlanetMaterial,
           encodeEntity(PlanetMaterial.metadata.keySchema, {

@@ -180,8 +180,7 @@ export type MaterialType =
   | 8 // SCRAPIUM
   | 9 // PYROSTEEL
   | 10 // BLACKALLOY
-  | 11 // CORRUPTED_CRYSTAL
-  | 12; // SILVER
+  | 11; // CORRUPTED_CRYSTAL
 
 export const MaterialType = {
   UNKNOWN: 0 as MaterialType,
@@ -196,8 +195,12 @@ export const MaterialType = {
   PYROSTEEL: 9 as MaterialType,
   BLACKALLOY: 10 as MaterialType,
   CORRUPTED_CRYSTAL: 11 as MaterialType,
-  SILVER: 12 as MaterialType,
 } as const;
+
+// Utility function to get the maximum MaterialType value
+export const getMaxMaterialType = (): MaterialType => {
+  return Math.max(...Object.values(MaterialType)) as MaterialType;
+};
 
 export type Materials = {
   materialId: MaterialType;
