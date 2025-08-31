@@ -57,6 +57,7 @@ import {
   isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
+  isUnconfirmedWithdrawMaterialTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdFromHexStr,
@@ -87,6 +88,7 @@ import type {
   LocatablePlanet,
   LocationId,
   MaterialTransfer,
+  MaterialType,
   NetworkHealthSummary,
   PinkZone,
   Planet,
@@ -144,6 +146,7 @@ import type {
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
+  UnconfirmedWithdrawMaterial,
   UnconfirmedWithdrawSilver,
   Upgrade,
   VoyageId,
@@ -4976,8 +4979,94 @@ export class GameManager extends EventEmitter {
     }
   }
 
+  public async withdrawMaterial(
+    locationId: LocationId,
+    materialType: MaterialType,
+    amount: number,
+  ): Promise<Transaction<UnconfirmedWithdrawMaterial>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to withdraw material from an unknown planet");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("can only withdraw material from spacetime rips");
+      }
+      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
+        throw new Error("can only withdraw material from a planet you own");
+      }
+      if (
+        planet.transactions?.hasTransaction(isUnconfirmedWithdrawMaterialTx)
+      ) {
+        throw new Error(
+          "a withdraw material action is already in progress for this planet",
+        );
+      }
+
+      // Check if planet has the material
+      const material = planet.materials?.find(
+        (m) => m?.materialId === materialType,
+      );
+      if (!material || Number(material.materialAmount) < amount * 1e18) {
+        throw new Error("not enough material to withdraw!");
+      }
+      if (amount * 1e18 * 5 < Number(material.cap)) {
+        throw new Error("require materialAmount >= materialCap * 0.2");
+      }
+
+      if (amount === 0) {
+        throw new Error("must withdraw more than 0 material!");
+      }
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawMaterialPlanet`,
+        locationId,
+      );
+
+      const delegator = planet.owner;
+
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedWithdrawMaterial = {
+        delegator: delegator,
+        methodName: "df__withdrawMaterial",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          materialType,
+          amount * CONTRACT_PRECISION * 1e18,
+        ]),
+        locationId,
+        materialType,
+        amount,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__withdrawMaterial",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
   public async addJunk(
     locationId: LocationId,
+    biomeBase?: number,
   ): Promise<Transaction<UnconfirmedAddJunk>> {
     try {
       if (!this.account) {
@@ -5046,8 +5135,12 @@ export class GameManager extends EventEmitter {
         delegator: delegator,
         methodName: "df__addJunk",
         contract: this.contractsAPI.contract,
-        args: Promise.resolve([locationIdToDecStr(locationId)]),
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          biomeBase || 0, // Use provided biomeBase or default to 0
+        ]),
         locationId,
+        biomeBase: biomeBase || 0,
       };
 
       const transactionFee = this.getTransactionFee();

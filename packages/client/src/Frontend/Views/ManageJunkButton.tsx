@@ -1,6 +1,6 @@
 import { EMPTY_ADDRESS } from "@df/constants";
 import { isUnconfirmedAddJunkTx, isUnconfirmedClearJunkTx } from "@df/serde";
-import type { Planet } from "@df/types";
+import type { Planet, LocatablePlanet } from "@df/types";
 import { useCallback, useMemo } from "react";
 import styled from "styled-components";
 
@@ -48,7 +48,9 @@ export function ManageJunkButton({
     if (!planet) {
       return;
     }
-    uiManager.addJunk(planet.locationId);
+    // Get biomeBase from planet location if available (for LocatablePlanet), otherwise use 0
+    const biomeBase = (planet as LocatablePlanet).location?.biomebase || 0;
+    uiManager.addJunk(planet.locationId, biomeBase);
   }, [planet, uiManager]);
 
   const adding = useMemo(

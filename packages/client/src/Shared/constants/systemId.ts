@@ -10,6 +10,7 @@ import PlanetEmojiSystemAbi from "contracts/out/PlanetEmojiSystem.sol/PlanetEmoj
 import PlanetRevealSystemAbi from "contracts/out/PlanetRevealSystem.sol/PlanetRevealSystem.abi.json";
 import PlanetUpgradeSystemAbi from "contracts/out/PlanetUpgradeSystem.sol/PlanetUpgradeSystem.abi.json";
 import PlanetWithdrawSilverSystemAbi from "contracts/out/PlanetWithdrawSilverSystem.sol/PlanetWithdrawSilverSystem.abi.json";
+import WithdrawMaterialSystemAbi from "contracts/out/WithdrawMaterialSystem.sol/WithdrawMaterialSystem.abi.json";
 import PlanetJunkSystemAbi from "contracts/out/PlanetJunkSystem.sol/PlanetJunkSystem.abi.json";
 import PlayerSystemAbi from "contracts/out/PlayerSystem.sol/PlayerSystem.abi.json";
 import TestOnlySystemAbi from "contracts/out/TestOnlySystem.sol/TestOnlySystem.abi.json";
@@ -54,6 +55,12 @@ export const PLANET_WITHDRAW_SILVER_SYSTEM_ID = resourceToHex({
   name: "PlanetWithdrawSilverSystem",
 });
 
+export const WITHDRAW_MATERIAL_SYSTEM_ID = resourceToHex({
+  type: "system",
+  namespace: "df",
+  name: "WithdrawMaterial",
+});
+
 export const PLANET_EMOJI_SYSTEM_ABI: Abi = PlanetEmojiSystemAbi;
 
 export const PLANET_EMOJI_SYATEM_ID = resourceToHex({
@@ -64,6 +71,8 @@ export const PLANET_EMOJI_SYATEM_ID = resourceToHex({
 
 export const PLANET_WITHDRAW_SILVER_SYSTEM_ABI: Abi =
   PlanetWithdrawSilverSystemAbi;
+
+export const WITHDRAW_MATERIAL_SYSTEM_ABI: Abi = WithdrawMaterialSystemAbi;
 
 export const PLAYER_SYSTEM_ID = resourceToHex({
   type: "system",
@@ -152,6 +161,8 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
     return PLANET_UPGRADE_SYSTEM_ABI;
   } else if (functionName === "withdrawSilver") {
     return PLANET_WITHDRAW_SILVER_SYSTEM_ABI;
+  } else if (functionName === "withdrawMaterial") {
+    return WITHDRAW_MATERIAL_SYSTEM_ABI;
   } else if (functionName === "setPlanetEmoji") {
     return PLANET_EMOJI_SYSTEM_ABI;
   } else if (functionName === "initializePlayer") {
@@ -235,6 +246,8 @@ export const get_SystemId_from_FunctionName = (functionName: string) => {
     return PLANET_EMOJI_SYATEM_ID;
   } else if (functionName === "withdrawSilver") {
     return PLANET_WITHDRAW_SILVER_SYSTEM_ID;
+  } else if (functionName === "withdrawMaterial") {
+    return WITHDRAW_MATERIAL_SYSTEM_ID;
   } else if (functionName === "initializePlayer") {
     return PLAYER_SYSTEM_ID;
   } else if (

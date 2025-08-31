@@ -4,7 +4,8 @@ import {
   formatEtherToNumber,
 } from "@df/gamelogic";
 import type { LocationId, MaterialType } from "@df/types";
-import React from "react";
+import { ModalName } from "@df/types";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 import {
@@ -12,6 +13,8 @@ import {
   Section,
   SectionHeader,
 } from "../Components/CoreUI";
+import { Btn } from "../Components/Btn";
+import { NumberInput } from "../Components/Input";
 import { Sub, Text } from "../Components/Text";
 import dfstyles from "../Styles/dfstyles";
 import { usePlanet, useUIManager } from "../Utils/AppHooks";
@@ -74,6 +77,23 @@ const MaterialBarText = styled.div`
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   z-index: 1;
   pointer-events: none;
+`;
+
+const MaterialWithdrawContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const WithdrawInput = styled.div`
+  width: 80px;
+`;
+
+const WithdrawButton = styled(Btn)`
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 60px;
 `;
 
 export function getMaterialName(materialId: MaterialType): string {
@@ -205,6 +225,22 @@ export function PlanetMaterialsPane({
     initialPlanetId,
   );
   const planet = usePlanet(uiManager, planetId).value;
+  const [withdrawAmounts, setWithdrawAmounts] = useState<{
+    [key: number]: number;
+  }>({});
+
+  const handleWithdraw = (materialType: MaterialType, amount: number) => {
+    if (amount > 0 && planet) {
+      uiManager.withdrawMaterial(planet.locationId, materialType, amount);
+      // Clear the input after withdrawal
+      setWithdrawAmounts((prev) => ({ ...prev, [materialType]: 0 }));
+    }
+  };
+
+  const handleAmountChange = (materialType: MaterialType, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setWithdrawAmounts((prev) => ({ ...prev, [materialType]: numValue }));
+  };
 
   if (!planet) {
     return (
@@ -216,7 +252,7 @@ export function PlanetMaterialsPane({
 
   const activeMaterials =
     planet.materials?.filter(
-      (mat) => mat.materialId !== 0 && mat.materialAmount > 0,
+      (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
     ) || [];
 
   return (
@@ -226,7 +262,7 @@ export function PlanetMaterialsPane({
       onClose={() => {
         /* close logic here */
       }}
-      id="PlanetMaterials" // or a unique ModalId string
+      id={ModalName.PlanetMaterials}
     >
       <Section>
         <SectionHeader>Materials</SectionHeader>
@@ -296,6 +332,37 @@ export function PlanetMaterialsPane({
                         {formatCompact(Number(mat.cap) / 1e18)}
                       </MaterialBarText>
                     </MaterialBar>
+
+                    {/* Material Withdrawal Controls */}
+                    {planet.planetType === 4 && ( // TRADING_POST
+                      <MaterialWithdrawContainer>
+                        <WithdrawInput>
+                          <NumberInput
+                            value={withdrawAmounts[mat.materialId] || ""}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>,
+                            ) =>
+                              handleAmountChange(mat.materialId, e.target.value)
+                            }
+                            placeholder="Amount"
+                          />
+                        </WithdrawInput>
+                        <WithdrawButton
+                          onClick={() =>
+                            handleWithdraw(
+                              mat.materialId,
+                              withdrawAmounts[mat.materialId] || 0,
+                            )
+                          }
+                          disabled={
+                            !withdrawAmounts[mat.materialId] ||
+                            withdrawAmounts[mat.materialId] <= 0
+                          }
+                        >
+                          Withdraw
+                        </WithdrawButton>
+                      </MaterialWithdrawContainer>
+                    )}
                   </MaterialInfo>
                 </MaterialRow>
               );

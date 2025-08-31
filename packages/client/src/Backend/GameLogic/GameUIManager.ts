@@ -21,6 +21,7 @@ import type {
   LocationId,
   MaterialAmount,
   MaterialId,
+  MaterialType,
   PerlinConfig,
   Planet,
   Player,
@@ -536,9 +537,31 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.withdrawSilver(locationId, amount);
   }
 
-  public addJunk(locationId: LocationId) {
+  public withdrawMaterial(
+    locationId: LocationId,
+    materialType: MaterialType,
+    amount: number,
+  ) {
+    const dontShowWarningStorageKey = `${this.getAccount()?.toLowerCase()}-withdrawMaterialWarningAcked`;
+
+    if (localStorage.getItem(dontShowWarningStorageKey) !== "true") {
+      localStorage.setItem(dontShowWarningStorageKey, "true");
+      const confirmationText =
+        `Are you sure you want withdraw this material? Once you withdraw it, you ` +
+        `cannot deposit it again. Your withdrawn material amount will be added to your score with biome-based multipliers. You'll only see this warning once!`;
+      if (!confirm(confirmationText)) {
+        return;
+      }
+    }
     this.playClickSound();
-    this.gameManager.addJunk(locationId);
+
+    this.gameManager.withdrawMaterial(locationId, materialType, amount);
+  }
+
+  public addJunk(locationId: LocationId, biomeBase?: number) {
+    this.playClickSound();
+    console.log("addJunk", locationId, biomeBase);
+    this.gameManager.addJunk(locationId, biomeBase);
   }
 
   public clearJunk(locationId: LocationId) {

@@ -3,8 +3,9 @@ pragma solidity >=0.8.24;
 
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { Planet, PlanetLib } from "libraries/Planet.sol";
-import { PlanetType, Biome, MaterialType } from "codegen/common.sol";
+import { PlanetType, Biome, MaterialType, SpaceType } from "codegen/common.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
+import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerStats } from "codegen/tables/PlayerStats.sol";
@@ -20,28 +21,46 @@ contract PlanetJunkSystem is BaseSystem {
   /**
    * @notice add junk to player
    * @param planetHash Planet hash
+   * @param biomeBase Biome base value for verification
    */
-  function addJunk(uint256 planetHash) public entryFee requireSpaceJunkEnabled {
+  function addJunk(uint256 planetHash, uint256 biomeBase) public entryFee requireSpaceJunkEnabled {
+    _updateStats();
+    _processAddJunk(planetHash, biomeBase);
+  }
+
+  function _updateStats() internal {
     GlobalStats.setAddJunkCount(GlobalStats.getAddJunkCount() + 1);
     PlayerStats.setAddJunkCount(_msgSender(), PlayerStats.getAddJunkCount(_msgSender()) + 1);
+  }
 
+  function _processAddJunk(uint256 planetHash, uint256 biomeBase) internal {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
     address executor = _msgSender();
 
-    uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
+    _validateAddJunk(planet, executor);
+    _executeAddJunk(planet, executor, biomeBase);
+  }
 
+  function _validateAddJunk(Planet memory planet, address executor) internal view {
+    uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
     uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
+    uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
+    uint256 playerJunk = PlayerJunk.get(executor);
+
+    if (planet.owner != executor) revert NotPlanetOwner();
+    if (playerJunk + planetJunk > SPACE_JUNK_LIMIT) revert JunkLimitExceeded();
+  }
+
+  function _executeAddJunk(Planet memory planet, address executor, uint256 biomeBase) internal {
+    uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
 
     address oldPlanetJunkOwner = planet.junkOwner;
     uint256 oldOwnerJunk = PlayerJunk.get(oldPlanetJunkOwner);
     uint256 playerJunk = PlayerJunk.get(executor);
-
-    if (planet.owner != executor) revert NotPlanetOwner();
-    if (playerJunk + planetJunk > SPACE_JUNK_LIMIT) revert JunkLimitExceeded();
 
     if (oldPlanetJunkOwner != address(0)) {
       PlayerJunk.set(oldPlanetJunkOwner, (oldOwnerJunk - planetJunk));
@@ -53,8 +72,8 @@ contract PlanetJunkSystem is BaseSystem {
 
     // add material - determinate if planet.planetType == ASTEROID_FIELD then allowedMaterialsForBiome use setMaterial
     if (planet.planetType == PlanetType.ASTEROID_FIELD) {
-      // For ASTEROID_FIELD planets, initialize allowed materials
-      Biome biome = Biome(uint8(PlanetLib.getPlanetBiomebase(planet)));
+      // For ASTEROID_FIELD planets, initialize allowed materials using _initBiome with client-provided biomeBase
+      Biome biome = _initBiome(planet.spaceType, biomeBase);
       MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
       for (uint256 i; i < allowed.length; i++) {
         // Initialize with a starting amount based on planet level
@@ -94,5 +113,26 @@ contract PlanetJunkSystem is BaseSystem {
     }
 
     planet.writeToStore();
+  }
+
+  /**
+   * @notice Initialize biome using spaceType and biomeBase
+   * @param spaceType The space type of the planet
+   * @param biomeBase The biome base value
+   * @return biome The calculated biome
+   */
+  function _initBiome(SpaceType spaceType, uint256 biomeBase) internal view returns (Biome biome) {
+    if (spaceType == SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
+
+    uint256 res = (uint8(spaceType)) * 3;
+    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
+    if (biomeBase < config.threshold1) {
+      res -= 2;
+    } else if (biomeBase < config.threshold2) {
+      res -= 1;
+    }
+    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
   }
 }

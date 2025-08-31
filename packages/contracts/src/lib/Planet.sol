@@ -375,15 +375,8 @@ library PlanetLib {
     if (planet.planetType != PlanetType.ASTEROID_FIELD) {
       return 0;
     }
-    // For ASTEROID_FIELD planets, get allowed materials
-    Biome biome = Biome(uint8(PlanetLib.getPlanetBiomebase(planet)));
-    MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
-    for (uint256 i; i < allowed.length; i++) {
-      if (allowed[i] == materialId) {
-        return _materialGrowth(planet.level);
-      }
-    }
-    return 0;
+
+    return _materialGrowth(planet.level);
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -680,11 +673,13 @@ library PlanetLib {
       return;
     }
 
-    // For ASTEROID_FIELD planets, get allowed materials
-    Biome biome = Biome(uint8(PlanetLib.getPlanetBiomebase(planet)));
+    // For ASTEROID_FIELD planets, get allowed materials and apply biome-specific growth rates
+    uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.spaceType, planet.perlin))) % 1000;
+    Biome biome = _getBiome(planet, biomeBase);
     MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
+
     for (uint256 i; i < allowed.length; i++) {
-      uint256 growthRate = _materialGrowth(planet.level);
+      uint256 growthRate = getMaterialGrowth(planet, allowed[i]);
       uint256 currentAmount = getMaterial(planet, allowed[i]);
       uint256 newAmount = currentAmount + growthRate * tickElapsed;
       setMaterial(planet, allowed[i], newAmount);
@@ -697,10 +692,10 @@ library PlanetLib {
 
   function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
     if (biome == Biome.CORRUPTED) {
-      MaterialType[] memory mats = new MaterialType[](2);
-      mats[0] = MaterialType.BLACKALLOY;
-      mats[1] = MaterialType.CORRUPTED_CRYSTAL;
-      return mats;
+      MaterialType[] memory corruptedMats = new MaterialType[](2);
+      corruptedMats[0] = MaterialType.BLACKALLOY;
+      corruptedMats[1] = MaterialType.CORRUPTED_CRYSTAL;
+      return corruptedMats;
     }
 
     MaterialType biomeMat;
@@ -724,9 +719,9 @@ library PlanetLib {
     } else if (biome == Biome.LAVA) {
       biomeMat = MaterialType.PYROSTEEL;
     }
-    MaterialType[] memory mats = new MaterialType[](1);
-    mats[0] = biomeMat;
-    return mats;
+    MaterialType[] memory singleMats = new MaterialType[](1);
+    singleMats[0] = biomeMat;
+    return singleMats;
   }
 
   function _validateUpgrade(
@@ -887,14 +882,12 @@ library PlanetLib {
     if (planet.spaceType == SpaceType.DEAD_SPACE) {
       return Biome.CORRUPTED;
     }
-    uint256 res = (uint8(planet.spaceType) - 1) * 3;
+    uint256 res = uint8(planet.spaceType) * 3;
     PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
     if (biomeBase < config.threshold1) {
-      res += 1;
+      res -= 2;
     } else if (biomeBase < config.threshold2) {
-      res += 2;
-    } else {
-      res += 3;
+      res -= 2;
     }
     biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
 
@@ -932,15 +925,10 @@ library PlanetLib {
     // }
   }
 
-  function getPlanetBiomebase(Planet memory planet) internal view returns (Biome) {
-    // Create a deterministic biomebase key from the planet hash
-    uint256 biomebaseKey = uint256(keccak256(abi.encodePacked(planet.planetHash))) % 10000;
+  // function getPlanetBiomebase(Planet memory planet) internal view returns (Biome) {
+  //   // TODO STX Validate biomebase deterministically from planet properties like in the client !!! I think there is a bug
 
-    // Apply a transformation that simulates the effect of using biomebaseKey instead of spaceTypeKey
-    // This transformation preserves the deterministic nature while simulating the perlin calculation
-    uint256 transformedPerlin = uint256(keccak256(abi.encodePacked(planet.perlin, biomebaseKey, planet.planetHash))) %
-      1000;
-
-    return _getBiome(planet, transformedPerlin);
-  }
+  //   uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.spaceType, planet.perlin))) % 1000;
+  //   return _getBiome(planet, biomeBase);
+  // }
 }

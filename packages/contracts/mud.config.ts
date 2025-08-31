@@ -141,6 +141,14 @@ export default defineWorld({
       },
       key: ["player"],
     },
+    PlayerWithdrawMaterial: {
+      schema: {
+        player: "address",
+        materialType: "uint8",
+        amount: "uint256",
+      },
+      key: ["player", "materialType"],
+    },
     SpawnPlanet: {
       schema: {
         player: "address",
@@ -671,6 +679,7 @@ export default defineWorld({
         revealLocationCount: "uint256",
         upgradePlanetCount: "uint256",
         withdrawSilverCount: "uint256",
+        withdrawMaterialCount: "uint256",
       },
       key: [],
     },
@@ -695,6 +704,7 @@ export default defineWorld({
         revealLocationCount: "uint256",
         upgradePlanetCount: "uint256",
         withdrawSilverCount: "uint256",
+        withdrawMaterialCount: "uint256",
       },
       key: ["player"],
     },

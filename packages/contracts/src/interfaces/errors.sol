@@ -75,6 +75,9 @@ interface Errors {
   error InsufficientSilverOnPlanet(); // 0xfe845fce
   error WithdrawAmountTooLow(); // 0xba43ea37
 
+  // planet withdraw material system
+  error InsufficientMaterialOnPlanet(); // 0x8c2529c4
+
   // planet junk systemAdd commentMore actions
   error SpaceJunkDisabled(); // 0x94486384
   error JunkLimitExceeded(); // 0x711da309
