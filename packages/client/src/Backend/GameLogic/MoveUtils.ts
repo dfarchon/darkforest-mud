@@ -9,10 +9,13 @@ import type {
   ArtifactId,
   EthAddress,
   LocationId,
+  MaterialAmount,
+  MaterialId,
+  MaterialTransfer,
   QueuedArrival,
   VoyageId,
 } from "@df/types";
-import { ArrivalType } from "@df/types";
+import { ArrivalType, getMaxMaterialType } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
@@ -52,12 +55,37 @@ export class MoveUtils {
           index: indexes[i % 30],
         });
         const move = getComponentValue(Move, moveEntity);
-        const movedMaterials = getComponentValue(MoveMaterial, moveEntity);
-        // NEED TO FINISH materialsMoved
-        // debbuger;
         if (!move) {
           throw new Error("Move not found");
         }
+
+        // Get all materials for this move
+        const materialsMoved: MaterialTransfer[] = [];
+        for (
+          let resourceId = 1;
+          resourceId <= getMaxMaterialType();
+          resourceId++
+        ) {
+          // Assuming max 8 material types
+          const moveMaterialEntity = encodeEntity(
+            MoveMaterial.metadata.keySchema,
+            {
+              moveId: move.id,
+              resourceId: resourceId as number,
+            },
+          );
+          const moveMaterial = getComponentValue(
+            MoveMaterial,
+            moveMaterialEntity,
+          );
+          if (moveMaterial && moveMaterial.amount > 0n) {
+            materialsMoved.push({
+              materialId: resourceId as MaterialId,
+              materialAmount: Number(moveMaterial.amount) as MaterialAmount,
+            });
+          }
+        }
+
         res.push({
           eventId: move.id.toString() as VoyageId,
           player: address(move.captain),
@@ -75,7 +103,7 @@ export class MoveUtils {
           distance: 0, // TODO: calculate distance
           arrivalTick: Number(move.arrivalTick),
           arrivalType: ArrivalType.Normal,
-          materialsMoved: movedMaterials,
+          materialsMoved: materialsMoved,
           // unionId: 0, // TODO: calculate unionId
           // name: "", // TODO: calculate name
           // leader: move.captain as EthAddress,

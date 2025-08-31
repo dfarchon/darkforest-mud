@@ -3,6 +3,7 @@ import { formatNumber, hasOwner } from "@df/gamelogic";
 import { getOwnerColorVec } from "@df/procedural";
 import type {
   LocationId,
+  MaterialType,
   Planet,
   Player,
   QueuedArrival,
@@ -15,6 +16,7 @@ import {
   TextAlign,
   TextAnchor,
 } from "@df/types";
+import { getMaterialColor } from "@frontend/Panes/PlanetMaterialsPane";
 
 import { engineConsts } from "../EngineConsts";
 import type { Renderer } from "../Renderer";
@@ -231,6 +233,33 @@ export class VoyageRenderer implements VoyageRendererType {
           TextAlign.Center,
           TextAnchor.Bottom,
         );
+      }
+
+      // Display materials if being moved
+      if (voyage.materialsMoved && voyage.materialsMoved.length > 0) {
+        let materialOffset = 0;
+        for (const mat of voyage.materialsMoved) {
+          const materialColor = getMaterialColor(
+            mat.materialId as MaterialType,
+          );
+          // Convert hex color to RGB array
+          const r = parseInt(materialColor.slice(1, 3), 16);
+          const g = parseInt(materialColor.slice(3, 5), 16);
+          const b = parseInt(materialColor.slice(5, 7), 16);
+
+          tR.queueTextWorld(
+            `${formatNumber(mat.materialAmount, 0)}`,
+            {
+              x: shipsLocationX,
+              y: shipsLocationY + 1.0 + materialOffset * 0.5,
+            },
+            [r, g, b, alpha],
+            -2 - materialOffset,
+            TextAlign.Center,
+            TextAnchor.Bottom,
+          );
+          materialOffset++;
+        }
       }
     }
   }
