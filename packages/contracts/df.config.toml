@@ -9,9 +9,9 @@ number = 4
 value = 2000000000000
 
 [artifact_nft]
-# address = "0x0000000000000000000000000000000000000000"
-address = "0x14a11B17105cC70F154f84eDe21E9B08dd832577"
-set_current_round = true # if true,should be deployed by nft contract owner
+address = "0x0000000000000000000000000000000000000000"
+# address = "0x14a11B17105cC70F154f84eDe21E9B08dd832577"
+set_current_round = false # if true,should be deployed by nft contract owner
 
 [temp]
 b_skip_proof_check = false

@@ -16,6 +16,7 @@ import {
   type MUDChain,
   mudFoundry,
   redstone,
+  pyrope,
 } from "@latticexyz/common/chains";
 
 import {
@@ -73,4 +74,5 @@ export const supportedChains: MUDChain[] = [
   garnet,
   baseSepolia,
   base,
+  pyrope,
 ];
