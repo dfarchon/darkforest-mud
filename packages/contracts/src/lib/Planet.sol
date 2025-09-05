@@ -673,16 +673,16 @@ library PlanetLib {
       return;
     }
 
-    // For ASTEROID_FIELD planets, get allowed materials and apply biome-specific growth rates
-    uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.spaceType, planet.perlin))) % 1000;
-    Biome biome = _getBiome(planet, biomeBase);
-    MaterialType[] memory allowed = allowedMaterialsForBiome(biome);
-
-    for (uint256 i; i < allowed.length; i++) {
-      uint256 growthRate = getMaterialGrowth(planet, allowed[i]);
-      uint256 currentAmount = getMaterial(planet, allowed[i]);
-      uint256 newAmount = currentAmount + growthRate * tickElapsed;
-      setMaterial(planet, allowed[i], newAmount);
+    // Use planet.materialStorage.exists to determine which materials exist on this planet
+    planet.materialStorage.ReadFromStore(planet.planetHash);
+    MaterialStorage memory materialsStorage = planet.materialStorage;
+    for (uint256 i; i < materialsStorage.exists.length; i++) {
+      if (materialsStorage.exists[i]) {
+        uint256 growthRate = getMaterialGrowth(planet, MaterialType(i));
+        uint256 currentAmount = getMaterial(planet, MaterialType(i));
+        uint256 newAmount = currentAmount + growthRate * tickElapsed;
+        setMaterial(planet, MaterialType(i), newAmount);
+      }
     }
   }
 

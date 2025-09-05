@@ -299,7 +299,7 @@ export const arrive = (
   if (arrival.materialsMoved) {
     for (const moved of arrival.materialsMoved) {
       const idx = toPlanet.materials.findIndex(
-        (mat) => mat.materialId === moved.materialId,
+        (mat) => mat?.materialId === moved?.materialId,
       );
       if (idx !== -1) {
         toPlanet.materials[idx].materialAmount = Math.min(

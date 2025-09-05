@@ -76,8 +76,9 @@ contract PlanetJunkSystem is BaseSystem {
       Biome biome = _initBiome(planet.spaceType, biomeBase);
       MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
       for (uint256 i; i < allowed.length; i++) {
-        // Initialize with a starting amount based on planet level
-        planet.setMaterial(allowed[i], 0);
+        // Initialize with a small starting amount to ensure material exists and can grow
+        uint256 startingAmount = planet.level * 1e16; // Small amount based on planet level
+        planet.setMaterial(allowed[i], startingAmount);
       }
     }
 
