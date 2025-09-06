@@ -675,12 +675,11 @@ library PlanetLib {
     if (planet.planetType != PlanetType.ASTEROID_FIELD) {
       return;
     }
-
-    // Use planet.materialStorage.exists to determine which materials exist on this planet
     planet.materialStorage.ReadFromStore(planet.planetHash);
     MaterialStorage memory materialsStorage = planet.materialStorage;
-    for (uint256 i; i < materialsStorage.exists.length; i++) {
-      if (materialsStorage.exists[i] && materialsStorage.growth[i]) {
+    for (uint256 i; i < materialsStorage.growth.length; i++) {
+      // materialsStorage.growth[i] is true if the material is allowed to grow double check in Material.sol
+      if (materialsStorage.growth[i]) {
         uint256 growthRate = getMaterialGrowth(planet, MaterialType(i));
         uint256 currentAmount = getMaterial(planet, MaterialType(i));
         uint256 newAmount = currentAmount + growthRate * tickElapsed;
@@ -893,45 +892,5 @@ library PlanetLib {
       res -= 2;
     }
     biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
-
-    // if (planet.spaceType == SpaceType.NEBULA) {
-    //   if (biomeBase < config.threshold1) {
-    //     res = Biome.FOREST;
-    //   } else if (biomeBase < config.threshold2) {
-    //     res = Biome.OCEAN;
-    //   } else if (biomeBase >= config.threshold2) {
-    //     res = Biome.GRASSLAND;
-    //   }
-    //   return res;
-    // }
-
-    // if (planet.spaceType == SpaceType.SPACE) {
-    //   if (biomeBase < config.threshold1) {
-    //     res = Biome.TUNDRA;
-    //   } else if (biomeBase < config.threshold2) {
-    //     res = Biome.SWAMP;
-    //   } else if (biomeBase >= config.threshold2) {
-    //     res = Biome.DESERT;
-    //   }
-    //   return res;
-    // }
-
-    // if (planet.spaceType == SpaceType.DEEP_SPACE) {
-    //   if (biomeBase < config.threshold1) {
-    //     res = Biome.ICE;
-    //   } else if (biomeBase < config.threshold2) {
-    //     res = Biome.WASTELAND;
-    //   } else if (biomeBase >= config.threshold2) {
-    //     res = Biome.LAVA;
-    //   }
-    //   return res;
-    // }
   }
-
-  // function getPlanetBiomebase(Planet memory planet) internal view returns (Biome) {
-  //   // TODO STX Validate biomebase deterministically from planet properties like in the client !!! I think there is a bug
-
-  //   uint256 biomeBase = uint256(keccak256(abi.encodePacked(planet.planetHash, planet.spaceType, planet.perlin))) % 1000;
-  //   return _getBiome(planet, biomeBase);
-  // }
 }

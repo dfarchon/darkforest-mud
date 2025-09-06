@@ -456,14 +456,16 @@ export function MaterialsDisplay({
                 >
                   {getMaterialName(mat.materialId)}
                 </span>
-                <span
-                  style={{
-                    color: getMaterialColor(mat.materialId),
-                    fontSize: "12px",
-                  }}
-                >
-                  +{formatCompact2(Number(mat.growthRate) / 1e18)}
-                </span>
+                {mat.growth && (
+                  <span
+                    style={{
+                      color: getMaterialColor(mat.materialId),
+                      fontSize: "12px",
+                    }}
+                  >
+                    + {""} {formatCompact2(Number(mat.growthRate) / 1e18)}
+                  </span>
+                )}
               </div>
 
               <MaterialBar percentage={percentage} materialID={mat.materialId}>

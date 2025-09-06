@@ -207,6 +207,7 @@ export type Materials = {
   materialAmount: number | bigint | string;
   cap: number | bigint | string;
   growthRate: number | bigint | string;
+  growth: boolean;
 };
 
 export type Planet = {

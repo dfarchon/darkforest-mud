@@ -1,11 +1,7 @@
-import {
-  formatCompact,
-  formatCompact2,
-  formatEtherToNumber,
-} from "@df/gamelogic";
+import { formatCompact, formatCompact2 } from "@df/gamelogic";
 import type { LocationId, MaterialType } from "@df/types";
 import { ModalName } from "@df/types";
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 import {
@@ -15,7 +11,7 @@ import {
 } from "../Components/CoreUI";
 import { Btn } from "../Components/Btn";
 import { NumberInput } from "../Components/Input";
-import { Sub, Text } from "../Components/Text";
+// import { Sub, Text } from "../Components/Text";
 import dfstyles from "../Styles/dfstyles";
 import { usePlanet, useUIManager } from "../Utils/AppHooks";
 import { useEmitterValue } from "../Utils/EmitterHooks";
@@ -23,26 +19,131 @@ import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
 
 const MaterialsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   margin-top: 8px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-const MaterialRow = styled.div`
+const MaterialCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background-color: ${dfstyles.colors.backgroundlighter};
+  border: 1px solid ${dfstyles.colors.borderDarker};
+  border-radius: 6px;
+  gap: 8px;
+`;
+
+const MaterialHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const MaterialIcon = styled.div<{ color: string }>`
+  width: 20px;
+  height: 20px;
+  background-color: ${(props) => props.color};
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+`;
+
+const MaterialName = styled.div<{ color: string }>`
+  color: ${(props) => props.color};
+  font-weight: bold;
+  font-size: 14px;
+`;
+
+const MaterialStats = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  background-color: ${dfstyles.colors.backgroundlighter};
-  border: 1px solid ${dfstyles.colors.borderDarker};
-  border-radius: 4px;
+  font-size: 12px;
+  color: ${dfstyles.colors.subtext};
 `;
 
-const MaterialInfo = styled.div`
+const SliderContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+`;
+
+const SliderRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const Slider = styled.input`
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: ${dfstyles.colors.borderDarker};
+  outline: none;
+  -webkit-appearance: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${dfstyles.colors.dfblue};
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${dfstyles.colors.dfblue};
+    cursor: pointer;
+    border: none;
+  }
+`;
+
+const SliderValue = styled.div`
+  min-width: 40px;
+  text-align: right;
+  font-size: 12px;
+  color: ${dfstyles.colors.text};
+`;
+
+const SliderButtons = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+const SliderButton = styled.button`
+  width: 20px;
+  height: 20px;
+  border: 1px solid ${dfstyles.colors.borderDarker};
+  background: ${dfstyles.colors.backgroundlighter};
+  color: ${dfstyles.colors.text};
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+
+  &:hover {
+    background: ${dfstyles.colors.borderDarker};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const MaterialBar = styled.div<{
@@ -77,6 +178,49 @@ const MaterialBarText = styled.div`
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   z-index: 1;
   pointer-events: none;
+`;
+
+const IntegratedSlider = styled.input<{ materialID: MaterialType }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  z-index: 2;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${dfstyles.colors.dfblue};
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${dfstyles.colors.dfblue};
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  &::-webkit-slider-track {
+    background: transparent;
+  }
+
+  &::-moz-range-track {
+    background: transparent;
+  }
 `;
 
 const MaterialWithdrawContainer = styled.div`
@@ -214,7 +358,7 @@ export function getMaterialDescription(id: number): string {
 
 export function PlanetMaterialsPane({
   initialPlanetId,
-  modal,
+  modal: _modal,
 }: {
   initialPlanetId: LocationId | undefined;
   modal: ModalHandle;
@@ -229,6 +373,10 @@ export function PlanetMaterialsPane({
     [key: number]: number;
   }>({});
 
+  const [materialAllocations, setMaterialAllocations] = useState<{
+    [key: number]: number;
+  }>({});
+
   const handleWithdraw = (materialType: MaterialType, amount: number) => {
     if (amount > 0 && planet) {
       uiManager.withdrawMaterial(planet.locationId, materialType, amount);
@@ -240,6 +388,67 @@ export function PlanetMaterialsPane({
   const handleAmountChange = (materialType: MaterialType, value: string) => {
     const numValue = parseFloat(value) || 0;
     setWithdrawAmounts((prev) => ({ ...prev, [materialType]: numValue }));
+  };
+
+  const handleSliderChange = (materialType: MaterialType, value: number) => {
+    setMaterialAllocations((prev) => ({ ...prev, [materialType]: value }));
+
+    // Also update withdraw amounts based on slider percentage
+    if (planet) {
+      const material = planet.materials?.find(
+        (m) => m?.materialId === materialType,
+      );
+      if (material) {
+        const maxWithdraw = Number(material.materialAmount) / 1e18;
+        const withdrawAmount = (value / 100) * maxWithdraw;
+        setWithdrawAmounts((prev) => ({
+          ...prev,
+          [materialType]: withdrawAmount,
+        }));
+      }
+    }
+  };
+
+  const handleSliderIncrement = (materialType: MaterialType) => {
+    const current = materialAllocations[materialType] || 0;
+    const newValue = Math.min(current + 5, 100);
+    setMaterialAllocations((prev) => ({ ...prev, [materialType]: newValue }));
+
+    // Also update withdraw amounts
+    if (planet) {
+      const material = planet.materials?.find(
+        (m) => m.materialId === materialType,
+      );
+      if (material) {
+        const maxWithdraw = Number(material.materialAmount) / 1e18;
+        const withdrawAmount = (newValue / 100) * maxWithdraw;
+        setWithdrawAmounts((prev) => ({
+          ...prev,
+          [materialType]: withdrawAmount,
+        }));
+      }
+    }
+  };
+
+  const handleSliderDecrement = (materialType: MaterialType) => {
+    const current = materialAllocations[materialType] || 0;
+    const newValue = Math.max(current - 5, 0);
+    setMaterialAllocations((prev) => ({ ...prev, [materialType]: newValue }));
+
+    // Also update withdraw amounts
+    if (planet) {
+      const material = planet.materials?.find(
+        (m) => m.materialId === materialType,
+      );
+      if (material) {
+        const maxWithdraw = Number(material.materialAmount) / 1e18;
+        const withdrawAmount = (newValue / 100) * maxWithdraw;
+        setWithdrawAmounts((prev) => ({
+          ...prev,
+          [materialType]: withdrawAmount,
+        }));
+      }
+    }
   };
 
   if (!planet) {
@@ -278,93 +487,110 @@ export function PlanetMaterialsPane({
                   ? (Number(mat.materialAmount) / Number(mat.cap)) * 100
                   : 0;
               const materialColor = getMaterialColor(mat.materialId);
+              const allocation = materialAllocations[mat.materialId] || 0;
 
               return (
-                <MaterialRow key={mat.materialId}>
-                  <MaterialInfo>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                          backgroundColor: materialColor,
-                          borderRadius: "2px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          lineHeight: "1",
-                        }}
-                      >
-                        {getMaterialIcon(mat.materialId)}
-                      </div>
+                <MaterialCard key={mat.materialId}>
+                  <MaterialHeader>
+                    <MaterialIcon color={materialColor}>
+                      {getMaterialIcon(mat.materialId)}
+                    </MaterialIcon>
+                    <MaterialName color={materialColor}>
+                      {getMaterialName(mat.materialId)}
+                    </MaterialName>
+                  </MaterialHeader>
 
-                      <Text
-                        style={{ color: materialColor, fontWeight: "bold" }}
-                      >
-                        {getMaterialName(mat.materialId)}
-                      </Text>
+                  <MaterialStats>
+                    <div>
+                      {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+                      {formatCompact(Number(mat.cap) / 1e18)}
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        fontSize: "0.8em",
-                        width: "fill",
-                      }}
-                    >
-                      <Sub>
-                        +{formatCompact2(Number(mat.growthRate) / 1e18)}
-                      </Sub>
-                    </div>
-                    <MaterialBar
-                      percentage={percentage}
-                      materialID={mat.materialId}
-                    >
-                      <MaterialBarText>
-                        {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                        {formatCompact(Number(mat.cap) / 1e18)}
-                      </MaterialBarText>
-                    </MaterialBar>
-
-                    {/* Material Withdrawal Controls */}
-                    {planet.planetType === 4 && ( // TRADING_POST
-                      <MaterialWithdrawContainer>
-                        <WithdrawInput>
-                          <NumberInput
-                            value={withdrawAmounts[mat.materialId] || ""}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>,
-                            ) =>
-                              handleAmountChange(mat.materialId, e.target.value)
+                    <SliderContainer>
+                      <SliderRow>
+                        <SliderValue>{allocation}%</SliderValue>
+                        <SliderButtons>
+                          <SliderButton
+                            onClick={() =>
+                              handleSliderDecrement(mat.materialId)
                             }
-                            placeholder="Amount"
-                          />
-                        </WithdrawInput>
-                        <WithdrawButton
-                          onClick={() =>
-                            handleWithdraw(
-                              mat.materialId,
-                              withdrawAmounts[mat.materialId] || 0,
-                            )
-                          }
-                          disabled={
-                            !withdrawAmounts[mat.materialId] ||
-                            withdrawAmounts[mat.materialId] <= 0
-                          }
-                        >
-                          Withdraw
-                        </WithdrawButton>
-                      </MaterialWithdrawContainer>
+                            disabled={allocation <= 0}
+                          >
+                            -
+                          </SliderButton>
+                          <SliderButton
+                            onClick={() =>
+                              handleSliderIncrement(mat.materialId)
+                            }
+                            disabled={allocation >= 100}
+                          >
+                            +
+                          </SliderButton>
+                        </SliderButtons>
+                      </SliderRow>
+                    </SliderContainer>
+                    {mat.growth && (
+                      <div style={{ color: "#00ff00" }}>
+                        +{formatCompact2(Number(mat.growthRate) / 1e18)}
+                      </div>
                     )}
-                  </MaterialInfo>
-                </MaterialRow>
+                  </MaterialStats>
+
+                  <MaterialBar
+                    percentage={percentage}
+                    materialID={mat.materialId}
+                  >
+                    <MaterialBarText>
+                      {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+                      {formatCompact(Number(mat.cap) / 1e18)}
+                    </MaterialBarText>
+                    <IntegratedSlider
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={allocation}
+                      materialID={mat.materialId}
+                      onChange={(e) =>
+                        handleSliderChange(
+                          mat.materialId,
+                          parseInt(e.target.value),
+                        )
+                      }
+                    />
+                  </MaterialBar>
+
+                  {/* Material Withdrawal Controls */}
+                  {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                    <MaterialWithdrawContainer>
+                      <WithdrawInput>
+                        <NumberInput
+                          value={withdrawAmounts[mat.materialId] || 0}
+                          onChange={(e) => {
+                            if (e.target) {
+                              handleAmountChange(
+                                mat.materialId,
+                                (e.target as HTMLInputElement).value,
+                              );
+                            }
+                          }}
+                        />
+                      </WithdrawInput>
+                      <WithdrawButton
+                        onClick={() =>
+                          handleWithdraw(
+                            mat.materialId,
+                            withdrawAmounts[mat.materialId] || 0,
+                          )
+                        }
+                        disabled={
+                          !withdrawAmounts[mat.materialId] ||
+                          withdrawAmounts[mat.materialId] <= 0
+                        }
+                      >
+                        Withdraw
+                      </WithdrawButton>
+                    </MaterialWithdrawContainer>
+                  )}
+                </MaterialCard>
               );
             })}
           </MaterialsContainer>

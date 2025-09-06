@@ -338,6 +338,10 @@ const getMaterialAmount = (
   const cap =
     typeof material.cap === "bigint" ? Number(material.cap) : material.cap;
 
+  if (!material.growth) {
+    return Number(currentAmount);
+  }
+
   const grown = ticksPassed * Number(growthRate);
 
   return Math.min(Number(currentAmount) + grown, Number(cap));

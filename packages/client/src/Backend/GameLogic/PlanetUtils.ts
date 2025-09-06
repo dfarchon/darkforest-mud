@@ -52,11 +52,13 @@ export class PlanetUtils {
 
   /**
    * Calculate material amount based on growth since last update tick
+   * Only applies growth if the material has growth enabled
    * @param materialAmount - Current material amount from storage
    * @param lastUpdateTick - Last update tick of the planet
    * @param currentTick - Current game tick
    * @param growthRate - Material growth rate
    * @param cap - Material cap
+   * @param growthEnabled - Whether this material can grow
    * @returns Updated material amount
    */
   private calculateMaterialAmount(
@@ -65,7 +67,13 @@ export class PlanetUtils {
     currentTick: number,
     growthRate: number,
     cap: number,
+    growthEnabled: boolean = false,
   ): number {
+    // Only apply growth if growth is enabled for this material
+    if (!growthEnabled) {
+      return materialAmount;
+    }
+
     const ticksPassed = currentTick - lastUpdateTick;
     if (ticksPassed <= 0) {
       return materialAmount;
@@ -442,8 +450,8 @@ export class PlanetUtils {
     );
 
     // --- MATERIALS ---
-    // Try to get the PlanetMaterial component from this.components
-    const { PlanetMaterial } = this.components;
+    // Try to get the PlanetMaterial and PlanetMaterialGrowth components from this.components
+    const { PlanetMaterial, PlanetMaterialGrowth } = this.components;
     const materials: Materials[] = [];
 
     // Get current tick for material calculations
@@ -460,6 +468,20 @@ export class PlanetUtils {
             resourceId: i,
           }),
         );
+
+        // Check if this material has growth enabled
+        let growthEnabled = false;
+        if (PlanetMaterialGrowth) {
+          const growthData = getComponentValue(
+            PlanetMaterialGrowth,
+            encodeEntity(PlanetMaterialGrowth.metadata.keySchema, {
+              planetId: locationIdToHexStr(planetId) as `0x${string}`,
+              resourceId: i,
+            }),
+          );
+          growthEnabled = growthData ? growthData.growth : false;
+        }
+
         if (matData) {
           const materialAmount = Number(matData.amount);
           const cap = this.calculateMaterialCap(planetLevel);
@@ -470,6 +492,7 @@ export class PlanetUtils {
             currentTick,
             growthRate,
             cap,
+            growthEnabled,
           );
 
           materials[i] = {
@@ -477,6 +500,7 @@ export class PlanetUtils {
             materialAmount: calculatedAmount,
             cap: cap,
             growthRate: growthRate,
+            growth: growthEnabled,
           };
         } else {
           materials[i] = {
@@ -484,6 +508,7 @@ export class PlanetUtils {
             materialAmount: 0,
             cap: 0,
             growthRate: 0,
+            growth: false,
           };
         }
       }

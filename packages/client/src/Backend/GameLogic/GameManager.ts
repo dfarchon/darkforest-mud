@@ -5040,7 +5040,7 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           materialType,
-          amount * CONTRACT_PRECISION * 1e18,
+          amount * 1e17, // TODO why doesnt works for 1e18 but for 1e17 does right tx but with - *10 in contract?
         ]),
         locationId,
         materialType,

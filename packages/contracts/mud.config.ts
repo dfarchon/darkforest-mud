@@ -648,6 +648,14 @@ export default defineWorld({
       },
       key: ["planetId", "resourceId"],
     },
+    PlanetMaterialGrowth: {
+      schema: {
+        planetId: "bytes32",
+        resourceId: "uint8",
+        growth: "bool",
+      },
+      key: ["planetId", "resourceId"],
+    },
     MoveMaterial: {
       schema: {
         moveId: "uint64",

@@ -2,8 +2,9 @@
 pragma solidity >=0.8.24;
 
 import { MaterialType } from "codegen/common.sol";
-import { PlanetMaterialStorage } from "codegen/tables/PlanetMaterialStorage.sol";
-import { PlanetMaterial } from "codegen/tables/PlanetMaterial.sol";
+import { PlanetMaterialStorage } from "src/codegen/tables/PlanetMaterialStorage.sol";
+import { PlanetMaterial } from "src/codegen/tables/PlanetMaterial.sol";
+import { PlanetMaterialGrowth } from "src/codegen/tables/PlanetMaterialGrowth.sol";
 
 struct MaterialStorage {
   bool[] exists;
@@ -24,6 +25,12 @@ library MaterialStorageLib {
     uint256 exsitMap = PlanetMaterialStorage.get(bytes32(planetHash));
     for (uint256 i; i < materialCount; ) {
       mat.exists[i] = (exsitMap & (1 << i)) != 0;
+      // Read growth status from persistent storage
+      if (mat.exists[i]) {
+        mat.growth[i] = PlanetMaterialGrowth.get(bytes32(planetHash), uint8(i));
+      } else {
+        mat.growth[i] = false;
+      }
       unchecked {
         ++i;
       }
@@ -31,7 +38,7 @@ library MaterialStorageLib {
   }
 
   function WriteToStore(MaterialStorage memory mat, uint256 planetHash) internal {
-    uint256 exsitMap = 0;
+    uint256 exsitMap = PlanetMaterialStorage.get(bytes32(planetHash));
     uint256 materialCount = uint8(type(MaterialType).max) + 1;
     for (uint256 i; i < materialCount; ) {
       if (mat.exists[i]) {
@@ -40,6 +47,8 @@ library MaterialStorageLib {
         if (mat.updates[i]) {
           PlanetMaterial.set(bytes32(planetHash), uint8(i), mat.amount[i]);
         }
+        // Persist growth status to storage
+        PlanetMaterialGrowth.set(bytes32(planetHash), uint8(i), mat.growth[i]);
       }
       unchecked {
         ++i;
@@ -67,7 +76,7 @@ library MaterialStorageLib {
 
   function setMaterial(
     MaterialStorage memory mat,
-    uint256 planetHash,
+    uint256 /* planetHash */,
     MaterialType materialId,
     uint256 amount
   ) internal pure {

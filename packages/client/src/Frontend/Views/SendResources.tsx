@@ -37,6 +37,15 @@ const StyledSendResources = styled.div`
   gap: 8px;
   margin-bottom: 8px;
 `;
+const MaterialsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
 
 const StyledShowPercent = styled.div`
   display: inline-block;
@@ -126,28 +135,6 @@ function ResourceBar({
   setValue: (x: number) => void;
   disabled?: boolean;
 }) {
-  // const getResource = useCallback(
-  //   (val: number): string => {
-  //     if (!selected) return "";
-  //     console.log("is material1", material);
-  //     // MATERIAL
-  //     if (isMaterial && material) {
-  //       console.log("is material", material);
-  //       const amount =
-  //         typeof material.amount === "string"
-  //           ? parseFloat(material.amount)
-  //           : Number(material.amount);
-  //       return formatNumber(((val / 100) * amount) / 1e18);
-  //     }
-
-  //     // SILVER or ENERGY
-  //     const resource = isSilver
-  //       ? (selected as Planet).silver
-  //       : (selected as Planet).energy;
-  //     return formatNumber((val / 100) * resource);
-  //   },
-  //   [selected, isSilver, isMaterial, material],
-  // );
   const getResource = useCallback(
     (val: number): string => {
       if (!selected) return "";
@@ -178,32 +165,70 @@ function ResourceBar({
   );
   return (
     <>
-      <Row>
-        <ResourceRowDetails>
-          {(() => {
-            if (isMaterial && material) {
-              return (
-                <>
-                  <MaterialIcon materialId={material.materialId} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        {/* Header with icon, name, and percentage */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <ResourceRowDetails>
+            {(() => {
+              if (isMaterial && material) {
+                return (
+                  <>
+                    <MaterialIcon materialId={material.materialId} />
+                    <Subber
+                      style={{
+                        color: getMaterialColor(material.materialId),
+                        fontSize: "11px",
+                      }}
+                    >
+                      {getMaterialName(material.materialId)}
+                    </Subber>
+                  </>
+                );
+              }
 
-                  <Subber
-                    style={{ color: getMaterialColor(material.materialId) }}
-                  >
-                    {getResource(value)} {""}
-                    {getMaterialName(material.materialId)}
-                  </Subber>
-                </>
-              );
-            }
+              if (isSilver) {
+                return (
+                  <>
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: "rgba(187, 187, 0, 0.41)",
+                        borderRadius: "2px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        lineHeight: "1",
+                      }}
+                    >
+                      <Icon type={IconType.Silver} />
+                    </div>
+                    <Subber
+                      style={{
+                        color: dfstyles.colors.dfyellow,
+                        fontSize: "12px",
+                      }}
+                    >
+                      Silver
+                    </Subber>
+                  </>
+                );
+              }
 
-            if (isSilver) {
               return (
                 <>
                   <div
                     style={{
                       width: "16px",
                       height: "16px",
-                      backgroundColor: "rgba(187, 187, 0, 0.41)",
+                      backgroundColor: "rgb(0, 90, 187)",
                       borderRadius: "2px",
                       display: "flex",
                       alignItems: "center",
@@ -212,68 +237,67 @@ function ResourceBar({
                       lineHeight: "1",
                     }}
                   >
-                    <Icon type={IconType.Silver} />
+                    <Icon type={IconType.Energy} />
                   </div>
-                  <Subber style={{ color: dfstyles.colors.dfyellow }}>
-                    {getResource(value)} {""}
-                    Silver
+                  <Subber
+                    style={{ color: dfstyles.colors.dfblue, fontSize: "12px" }}
+                  >
+                    Energy
                   </Subber>
                 </>
               );
-            }
+            })()}
+          </ResourceRowDetails>
 
-            return (
-              <>
-                <div
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: "rgb(0, 90, 187)",
-                    borderRadius: "2px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    lineHeight: "1",
-                  }}
-                >
-                  <Icon type={IconType.Energy} />
-                </div>
+          <div
+            style={{
+              fontSize: "11px",
+              fontWeight: "bold",
+              color: dfstyles.colors.text,
+            }}
+          >
+            <ShowPercent
+              value={value}
+              setValue={setValue}
+              color={(() => {
+                if (isMaterial && material) {
+                  return getMaterialColor(material.materialId);
+                }
+                if (isSilver) {
+                  return dfstyles.colors.dfyellow;
+                }
+                return dfstyles.colors.dfblue;
+              })()}
+            />
+          </div>
+        </div>
 
-                <Subber style={{ color: dfstyles.colors.dfblue }}>
-                  {getResource(value)} {""}Energy
-                </Subber>
-              </>
-            );
-          })()}
-        </ResourceRowDetails>
+        {/* Amount display */}
+        <div
+          style={{
+            fontSize: "14px",
+            fontWeight: "bold",
+            color: dfstyles.colors.subtext,
+          }}
+        >
+          {getResource(value)}
+        </div>
 
-        <ShowPercent
+        {/* Slider */}
+        <Slider
+          variant="filled"
+          labelVisibility="none"
+          min={0}
+          max={100}
           value={value}
-          setValue={setValue}
-          color={(() => {
-            if (isMaterial && material) {
-              return getMaterialColor(material.materialId);
-            }
-            if (isSilver) {
-              return dfstyles.colors.dfyellow;
-            }
-            return dfstyles.colors.dfblue;
-          })()}
+          step={1}
+          disabled={disabled}
+          onChange={(e: Event & React.ChangeEvent<HTMLInputElement>) => {
+            setValue(parseInt(e.target.value, 10));
+          }}
+          style={{ height: "20px" }}
         />
-      </Row>
-      <Slider
-        variant="filled"
-        labelVisibility="none"
-        min={0}
-        max={100}
-        value={value}
-        step={1}
-        disabled={disabled}
-        onChange={(e: Event & React.ChangeEvent<HTMLInputElement>) => {
-          setValue(parseInt(e.target.value, 10));
-        }}
-      />
+      </div>
     </>
   );
 }
@@ -562,7 +586,7 @@ export function SendResources({
         !p.value?.destroyed &&
         !p.value?.frozen &&
         activeMaterials.length > 0 && (
-          <>
+          <MaterialsContainer>
             {activeMaterials.map((mat) => (
               <ResourceBar
                 key={mat.materialId}
@@ -576,7 +600,7 @@ export function SendResources({
                 isMaterial // <-- optional prop to distinguish in styling
               />
             ))}
-          </>
+          </MaterialsContainer>
         )}
       {p.value && artifacts.length > 0 && (
         <SelectArtifactRow

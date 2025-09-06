@@ -680,6 +680,28 @@ export function createSystemCalls(
       throw error;
     }
   };
+
+  // Withdraw material system call
+  const withdrawMaterial = async (
+    planetHash: bigint,
+    materialType: number,
+    amount: bigint,
+  ): Promise<void> => {
+    try {
+      const tx = await worldContract.write.df__withdrawMaterial([
+        planetHash,
+        materialType,
+        amount,
+      ]);
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      console.log("Withdraw material successfully:", receipt);
+      getComponentValue(Planet, singletonEntity);
+    } catch (error) {
+      console.error("Withdraw material transaction failed:", error);
+      throw error;
+    }
+  };
+
   // do not forget init function calls to be accessable in MUD systems calls
   return {
     registerPlayer,
@@ -706,5 +728,6 @@ export function createSystemCalls(
     readPlanetWithHashPerlinDistance,
     readPlanetAt,
     getMsgSender,
+    withdrawMaterial,
   };
 }

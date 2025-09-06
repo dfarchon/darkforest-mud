@@ -9,7 +9,7 @@ import { PlanetMaterialStorage } from "../src/codegen/tables/PlanetMaterialStora
 import { PlanetMaterial } from "../src/codegen/tables/PlanetMaterial.sol";
 
 contract MaterialsTest is Test {
-  function testMaterialGrowthLogic() public {
+  function testMaterialGrowthLogic() public view {
     // Test the material growth logic directly without relying on world contract
     Planet memory planet;
     planet.planetHash = 1;
@@ -29,7 +29,7 @@ contract MaterialsTest is Test {
     assertEq(materialCap, expectedCap);
   }
 
-  function testMaterialGrowthCalculation() public {
+  function testMaterialGrowthCalculation() public view {
     // Test the material growth calculation for different planet levels
     Planet memory planet;
     planet.planetType = PlanetType.ASTEROID_FIELD;
@@ -50,7 +50,7 @@ contract MaterialsTest is Test {
     assertEq(growthRate5, 1e17); // 5 * 1e16 * 2
   }
 
-  function testMaterialCapCalculation() public {
+  function testMaterialCapCalculation() public pure {
     // Test the material cap calculation for different planet levels
     Planet memory planet;
     planet.planetType = PlanetType.ASTEROID_FIELD;
@@ -76,7 +76,7 @@ contract MaterialsTest is Test {
     assertEq(cap7, 42000 * 1e18); // 7 * 6000 * 1e18
   }
 
-  function testNonAsteroidFieldPlanet() public {
+  function testNonAsteroidFieldPlanet() public view {
     // Test that non-ASTEROID_FIELD planets don't have material growth
     Planet memory planet;
     planet.planetType = PlanetType.PLANET;
@@ -86,7 +86,7 @@ contract MaterialsTest is Test {
     assertEq(growthRate, 0); // Non-ASTEROID_FIELD planets should have 0 growth
   }
 
-  function testMaterialStorageOperations() public {
+  function testMaterialStorageOperations() public view {
     // Test material storage operations
     Planet memory planet;
     planet.planetHash = 1;
