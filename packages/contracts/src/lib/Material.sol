@@ -8,6 +8,7 @@ import { PlanetMaterial } from "codegen/tables/PlanetMaterial.sol";
 struct MaterialStorage {
   bool[] exists;
   bool[] updates;
+  bool[] growth;
   uint256[] amount;
 }
 
@@ -18,6 +19,7 @@ library MaterialStorageLib {
     uint256 materialCount = uint8(type(MaterialType).max) + 1;
     mat.exists = new bool[](materialCount);
     mat.updates = new bool[](materialCount);
+    mat.growth = new bool[](materialCount);
     mat.amount = new uint256[](materialCount);
     uint256 exsitMap = PlanetMaterialStorage.get(bytes32(planetHash));
     for (uint256 i; i < materialCount; ) {
@@ -72,6 +74,12 @@ library MaterialStorageLib {
     mat.exists[uint8(materialId)] = true;
     mat.amount[uint8(materialId)] = amount;
     mat.updates[uint8(materialId)] = true;
+  }
+
+  function initMaterial(MaterialStorage memory mat, uint256 planetHash, MaterialType materialId) internal pure {
+    mat.exists[uint8(materialId)] = true;
+    mat.updates[uint8(materialId)] = true;
+    mat.growth[uint8(materialId)] = true;
   }
 }
 

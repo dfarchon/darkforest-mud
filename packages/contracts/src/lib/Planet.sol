@@ -359,6 +359,9 @@ library PlanetLib {
     }
     planet.materialStorage.setMaterial(planet.planetHash, materialId, amount);
   }
+  function initMaterial(Planet memory planet, MaterialType materialId) internal pure {
+    planet.materialStorage.initMaterial(planet.planetHash, materialId);
+  }
 
   function getMaterialCap(Planet memory planet, MaterialType materialId) internal pure returns (uint256) {
     uint256 planetLvl = planet.level;
@@ -677,7 +680,7 @@ library PlanetLib {
     planet.materialStorage.ReadFromStore(planet.planetHash);
     MaterialStorage memory materialsStorage = planet.materialStorage;
     for (uint256 i; i < materialsStorage.exists.length; i++) {
-      if (materialsStorage.exists[i]) {
+      if (materialsStorage.exists[i] && materialsStorage.growth[i]) {
         uint256 growthRate = getMaterialGrowth(planet, MaterialType(i));
         uint256 currentAmount = getMaterial(planet, MaterialType(i));
         uint256 newAmount = currentAmount + growthRate * tickElapsed;
