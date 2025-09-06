@@ -5103,6 +5103,10 @@ export class GameManager extends EventEmitter {
         throw new Error("can only add junk to your own planet");
       }
 
+      if (!isLocatable(planet)) {
+        throw new Error("you don't know the coordinates of this planet");
+      }
+
       const player = this.getPlayer(this.getAccount());
 
       if (!player) {
@@ -5130,6 +5134,13 @@ export class GameManager extends EventEmitter {
         throw Error("no delegator account");
       }
 
+      // Generate proof for biome base verification
+      const locatablePlanet = planet as LocatablePlanet;
+      const proof = await this.snarkHelper.getFindArtifactArgs(
+        locatablePlanet.location.coords.x,
+        locatablePlanet.location.coords.y,
+      );
+
       const txIntent: UnconfirmedAddJunk = {
         delegator: delegator,
         methodName: "df__addJunk",
@@ -5137,9 +5148,11 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           biomeBase || 0, // Use provided biomeBase or default to 0
+          proof, // ZK proof for biome base verification
         ]),
         locationId,
         biomeBase: biomeBase || 0,
+        proof,
       };
 
       const transactionFee = this.getTransactionFee();

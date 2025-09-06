@@ -1,6 +1,6 @@
 import type { Contract } from "ethers";
-import type { Abi, Hex } from "viem";
 
+import type { BiomebaseSnarkContractCallArgs } from "../snarks";
 import type { GuildRole } from "./guild";
 import type {
   ArtifactId,
@@ -8,7 +8,6 @@ import type {
   GuildId,
   LocationId,
   MaterialTransfer,
-  MaterialType,
 } from "./identifier";
 import type { Materials } from "./planet";
 import type { WorldLocation } from "./world";
@@ -291,6 +290,7 @@ export type UnconfirmedAddJunk = TxIntent & {
   methodName: "df__addJunk";
   locationId: LocationId;
   biomeBase: number;
+  proof: BiomebaseSnarkContractCallArgs;
 };
 
 /**
