@@ -104,7 +104,7 @@ export class PlanetUtils {
    * @returns Material growth rate
    */
   private calculateMaterialGrowthRate(planetLevel: number): number {
-    return planetLevel * 1e16 * 2;
+    return planetLevel * 1e16;
   }
 
   public getPlanetById(planetId: LocationId): Planet | undefined {

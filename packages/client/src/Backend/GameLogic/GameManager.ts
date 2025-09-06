@@ -5032,7 +5032,6 @@ export class GameManager extends EventEmitter {
       if (!delegator) {
         throw Error("no delegator account");
       }
-
       const txIntent: UnconfirmedWithdrawMaterial = {
         delegator: delegator,
         methodName: "df__withdrawMaterial",
@@ -5040,7 +5039,7 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           materialType,
-          amount * 1e17, // TODO why doesnt works for 1e18 but for 1e17 does right tx but with - *10 in contract?
+          amount * 1e18,
         ]),
         locationId,
         materialType,

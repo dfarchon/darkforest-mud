@@ -5,6 +5,7 @@ import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { Planet } from "libraries/Planet.sol";
 import { PlanetType, MaterialType, Biome } from "codegen/common.sol";
 import { PlayerWithdrawMaterial } from "codegen/tables/PlayerWithdrawMaterial.sol";
+import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GuildUtils } from "libraries/GuildUtils.sol";
 import { Guild } from "codegen/tables/Guild.sol";
@@ -57,7 +58,7 @@ contract WithdrawMaterialSystem is BaseSystem {
     if (currentMaterial < materialToWithdraw) revert Errors.InsufficientMaterialOnPlanet();
 
     uint256 materialCap = planet.getMaterialCap(materialType);
-    if (materialCap < materialToWithdraw * 5) revert Errors.WithdrawAmountTooLow();
+    if (materialCap > materialToWithdraw * 5) revert Errors.WithdrawAmountTooLow();
   }
 
   function _executeWithdrawal(
@@ -71,7 +72,7 @@ contract WithdrawMaterialSystem is BaseSystem {
 
     // Calculate biome-based score multiplier
     uint256 scoreMultiplier = getBiomeScoreMultiplier(materialType);
-    uint256 scorePoints = materialToWithdraw * scoreMultiplier;
+    uint256 scorePoints = (materialToWithdraw * scoreMultiplier) / 1e9;
 
     // Remove material from planet
     planet.setMaterial(materialType, currentMaterial - materialToWithdraw);
@@ -79,13 +80,15 @@ contract WithdrawMaterialSystem is BaseSystem {
     // Add to player's withdrawn material amount
     playerWithdrawMaterialAmount += materialToWithdraw;
 
-    // Add score points to player (this would need to be implemented in the scoring system)
-    // For now, we'll just track the withdrawn material amount
+    // Add score points to player's silver (which is used as the score)
+    uint256 currentPlayerSilver = PlayerWithdrawSilver.get(executor);
+    PlayerWithdrawSilver.set(executor, currentPlayerSilver + scorePoints);
 
+    // Add score points to guild if player is in a guild
     uint8 guildId = GuildUtils.getCurrentGuildId(executor);
     if (guildId != 0) {
-      // Add material value to guild (could be implemented as guild materials)
-      // Guild.setMaterial(guildId, materialType, Guild.getMaterial(guildId, materialType) + materialToWithdraw);
+      uint256 currentGuildSilver = Guild.getSilver(guildId);
+      Guild.setSilver(guildId, currentGuildSilver + scorePoints);
     }
 
     planet.writeToStore();

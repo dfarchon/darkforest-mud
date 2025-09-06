@@ -689,7 +689,7 @@ library PlanetLib {
   }
 
   function _materialGrowth(uint256 planetLevel) internal pure returns (uint256) {
-    return planetLevel * 1e16 * 2;
+    return planetLevel * 1e16;
   }
 
   function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
