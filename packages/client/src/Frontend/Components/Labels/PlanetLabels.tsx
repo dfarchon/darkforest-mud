@@ -356,7 +356,7 @@ export function MaterialsText({
         <span key={mat.materialId}>
           {index > 0 && ", "}
           {getMaterialName(mat.materialId)}:{" "}
-          {formatEtherToNumber(mat.materialAmount)}
+          {formatEtherToNumber(mat.materialAmount).toFixed(0)}
         </span>
       ))}
     </span>

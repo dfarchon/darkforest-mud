@@ -501,33 +501,31 @@ export function PlanetMaterialsPane({
                   </MaterialHeader>
 
                   <MaterialStats>
-                    <div>
-                      {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                      {formatCompact(Number(mat.cap) / 1e18)}
-                    </div>
-                    <SliderContainer>
-                      <SliderRow>
-                        <SliderValue>{allocation}%</SliderValue>
-                        <SliderButtons>
-                          <SliderButton
-                            onClick={() =>
-                              handleSliderDecrement(mat.materialId)
-                            }
-                            disabled={allocation <= 0}
-                          >
-                            -
-                          </SliderButton>
-                          <SliderButton
-                            onClick={() =>
-                              handleSliderIncrement(mat.materialId)
-                            }
-                            disabled={allocation >= 100}
-                          >
-                            +
-                          </SliderButton>
-                        </SliderButtons>
-                      </SliderRow>
-                    </SliderContainer>
+                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                      <SliderContainer>
+                        <SliderRow>
+                          <SliderValue>{allocation}%</SliderValue>
+                          <SliderButtons>
+                            <SliderButton
+                              onClick={() =>
+                                handleSliderDecrement(mat.materialId)
+                              }
+                              disabled={allocation <= 0}
+                            >
+                              -
+                            </SliderButton>
+                            <SliderButton
+                              onClick={() =>
+                                handleSliderIncrement(mat.materialId)
+                              }
+                              disabled={allocation >= 100}
+                            >
+                              +
+                            </SliderButton>
+                          </SliderButtons>
+                        </SliderRow>
+                      </SliderContainer>
+                    )}
                     {mat.growth && (
                       <div style={{ color: "#00ff00" }}>
                         +{formatCompact2(Number(mat.growthRate) / 1e18)}
@@ -543,19 +541,21 @@ export function PlanetMaterialsPane({
                       {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
                       {formatCompact(Number(mat.cap) / 1e18)}
                     </MaterialBarText>
-                    <IntegratedSlider
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={allocation}
-                      materialID={mat.materialId}
-                      onChange={(e) =>
-                        handleSliderChange(
-                          mat.materialId,
-                          parseInt(e.target.value),
-                        )
-                      }
-                    />
+                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                      <IntegratedSlider
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={allocation}
+                        materialID={mat.materialId}
+                        onChange={(e) =>
+                          handleSliderChange(
+                            mat.materialId,
+                            parseInt(e.target.value),
+                          )
+                        }
+                      />
+                    )}
                   </MaterialBar>
 
                   {/* Material Withdrawal Controls */}
