@@ -32,6 +32,13 @@ export const syncFilters: SyncFilter[] = [
       name: "ArtifactMetadata",
     }),
   },
+  {
+    tableId: resourceToHex({
+      type: "table",
+      namespace: "atf.3",
+      name: "ArtifactMetadata",
+    }),
+  },
 ];
 
 export const tables = {
@@ -112,6 +119,29 @@ export const tables = {
     // tableId: resourceToHex({
     //   type: "table",
     //   namespace: "atf.6",
+    //   name: "ArtifactMetadata",
+    // }),
+    key: ["rarity"],
+    schema: {
+      rarity: "uint8",
+      genre: "uint8",
+      charge: "uint32",
+      cooldown: "uint32",
+      durable: "bool",
+      reusable: "bool",
+      reqLevel: "uint16",
+      reqPopulation: "uint64",
+      reqSilver: "uint64",
+    },
+  }),
+  SpaceshipMetadata: defineTable({
+    namespace: "atf.3",
+    namespaceLabel: "atf.3",
+    name: "ArtifactMetadata",
+    label: "SpaceshipMetadata",
+    // tableId: resourceToHex({
+    //   type: "table",
+    //   namespace: "atf.3",
     //   name: "ArtifactMetadata",
     // }),
     key: ["rarity"],

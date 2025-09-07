@@ -558,6 +558,23 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.withdrawMaterial(locationId, materialType, amount);
   }
 
+  public craftSpaceship(
+    foundryHash: LocationId,
+    spaceshipType: number,
+    materials: MaterialType[],
+    amounts: number[],
+    biome: Biome,
+  ) {
+    this.playClickSound();
+    this.gameManager.craftSpaceship(
+      foundryHash,
+      spaceshipType,
+      materials,
+      amounts,
+      biome,
+    );
+  }
+
   public addJunk(locationId: LocationId, biomeBase?: number) {
     this.playClickSound();
     console.log("addJunk", locationId, biomeBase);

@@ -3,7 +3,7 @@
  * for changes in the World state (using the System contracts).
  */
 
-import type { MaterialTransfer } from "@df/types";
+import type { MaterialTransfer, MaterialType, Biome } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import type { Address } from "viem";
@@ -702,6 +702,30 @@ export function createSystemCalls(
     }
   };
 
+  const craftSpaceship = async (
+    foundryHash: bigint,
+    spaceshipType: number,
+    materials: number[],
+    amounts: bigint[],
+    biome: number,
+  ): Promise<void> => {
+    try {
+      const tx = await worldContract.write.df__craftSpaceship([
+        foundryHash,
+        spaceshipType,
+        materials,
+        amounts,
+        biome,
+      ]);
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      console.log("Craft spaceship successfully:", receipt);
+      getComponentValue(Planet, singletonEntity);
+    } catch (error) {
+      console.error("Craft spaceship transaction failed:", error);
+      throw error;
+    }
+  };
+
   // do not forget init function calls to be accessable in MUD systems calls
   return {
     registerPlayer,
@@ -729,5 +753,6 @@ export function createSystemCalls(
     readPlanetAt,
     getMsgSender,
     withdrawMaterial,
+    craftSpaceship,
   };
 }

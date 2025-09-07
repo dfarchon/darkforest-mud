@@ -41,6 +41,7 @@ interface Errors {
   error UnknownPlanetType(); // 0xa6fa3da7
   error InvalidUpgradeTarget(); // 0x0ec7b300
   error UpgradeExceedMaxLevel(); // 0x1d245dc9
+  error UpgradeExceedsLimit(); // 0x1d245dca
   error NotEnoughSilverToUpgrade(); // 0x3c1137b2
   error PlanetNotAvailable(); // 0xa7d5125d
   error PlanetNotInitialized(); // 0xcfd4ee18
@@ -60,6 +61,7 @@ interface Errors {
   error ArtifactOnCooldown(); // 0x47e6b7ca
   error ArtifactNotChargeable(); // 0x342e603f
   error PlanetLevelMismatch(); // 0x3b366702
+  error PlanetLevelTooLow(); // 0x3b366703
   error NotEnoughResourceToActivate(); // 0xe642b7b4
   error ExistingArtifact(); // 0x11f0e4e4
   error OnlyCallableByArtifactInstallModule(); // 0xbf9f6704
@@ -69,6 +71,7 @@ interface Errors {
   error ArtifactOutOfControl(); // 0xf90edd80
   error ArtifactRarityTooHigh(); // 0xaefde1a6
   error ArtifactWithdrawalDisabled(); // 0xed2ec822
+  error FoundryCraftingLimitReached(); // 0x8c2529c5
 
   // planet withdraw silver system
   error InvalidPlanetType(); // 0xcfb7f825

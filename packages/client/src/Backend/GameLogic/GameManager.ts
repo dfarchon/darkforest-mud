@@ -59,6 +59,7 @@ import {
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawMaterialTx,
   isUnconfirmedWithdrawSilverTx,
+  isUnconfirmedCraftSpaceshipTx,
   locationIdFromBigInt,
   locationIdFromHexStr,
   locationIdToDecStr,
@@ -148,6 +149,7 @@ import type {
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawMaterial,
   UnconfirmedWithdrawSilver,
+  UnconfirmedCraftSpaceship,
   Upgrade,
   VoyageId,
   WorldCoords,
@@ -5057,6 +5059,88 @@ export class GameManager extends EventEmitter {
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__withdrawMaterial",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async craftSpaceship(
+    foundryHash: LocationId,
+    spaceshipType: number,
+    materials: MaterialType[],
+    amounts: number[],
+    biome: Biome,
+  ): Promise<Transaction<UnconfirmedCraftSpaceship>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      const foundry = this.entityStore.getPlanetWithId(foundryHash);
+      if (!foundry) {
+        throw new Error("tried to craft spaceship from an unknown foundry");
+      }
+      if (foundry.planetType !== PlanetType.RUINS) {
+        throw new Error("can only craft spaceships at foundries");
+      }
+      if (!this.checkDelegateCondition(foundry.owner, this.getAccount())) {
+        throw new Error("can only craft spaceships at foundries you own");
+      }
+      if (foundry.level < 4) {
+        throw new Error(
+          "foundry must be level 4 or higher to craft spaceships",
+        );
+      }
+
+      // Check if materials are sufficient
+      for (let i = 0; i < materials.length; i++) {
+        const material = foundry.materials?.find(
+          (m) => m?.materialId === materials[i],
+        );
+        if (
+          !material ||
+          Number(material.materialAmount) < Number(amounts[i]) * 1e18
+        ) {
+          throw new Error(
+            `not enough ${materials[i]} material to craft spaceship!`,
+          );
+        }
+      }
+
+      const delegator = foundry.owner;
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedCraftSpaceship = {
+        delegator: delegator,
+        methodName: "df__craftSpaceship",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(foundryHash),
+          spaceshipType,
+          materials,
+          amounts.map((amount) => BigInt(Number(amount)) * BigInt(1e18)),
+          biome,
+        ]),
+        foundryHash,
+        spaceshipType,
+        materials,
+        amounts,
+        biome,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__craftSpaceship",
         (e as Error).message,
       );
       throw e;

@@ -9,7 +9,7 @@ import type {
   LocationId,
   MaterialTransfer,
 } from "./identifier";
-import type { Materials } from "./planet";
+import type { Materials, MaterialType } from "./planet";
 import type { WorldLocation } from "./world";
 
 // import type { LiteralUnion } from "type-fest";
@@ -39,6 +39,7 @@ export type ContractMethodName =
   | "df__addJunk"
   | "df__clearJunk"
   | "df__setPlanetEmoji"
+  | "df__craftSpaceship"
   | "useKey"
   | "adminUseKey"
   | "addKeys"
@@ -564,4 +565,16 @@ export type UnconfirmedSendGPTTokens = TxIntent & {
   methodName: "df__sendGPTTokens";
   player: EthAddress;
   amount: number;
+};
+
+/**
+ * @hidden
+ */
+export type UnconfirmedCraftSpaceship = TxIntent & {
+  methodName: "df__craftSpaceship";
+  foundryHash: LocationId;
+  spaceshipType: number;
+  materials: number[];
+  amounts: number[];
+  biome: number;
 };

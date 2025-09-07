@@ -15,6 +15,7 @@ import type {
   UnconfirmedBuySpaceship,
   UnconfirmedCapturePlanet,
   UnconfirmedChangeArtifactImageType,
+  UnconfirmedCraftSpaceship,
   UnconfirmedChargeArtifact,
   UnconfirmedClaim,
   UnconfirmedClearJunk,
@@ -642,4 +643,16 @@ export function isUnconfirmedSpendGPTTokensTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedSpendGPTTokens> {
   return isUnconfirmedSpendGPTTokens(tx.intent);
+}
+
+export function isUnconfirmedCraftSpaceship(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedCraftSpaceship {
+  return txIntent.methodName === "df__craftSpaceship";
+}
+
+export function isUnconfirmedCraftSpaceshipTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedCraftSpaceship> {
+  return isUnconfirmedCraftSpaceship(tx.intent);
 }

@@ -17,6 +17,8 @@ import { usePlanet, useUIManager } from "../Utils/AppHooks";
 import { useEmitterValue } from "../Utils/EmitterHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
+import SpaceshipCraftingPane from "./SpaceshipCraftingPane";
+import { useFoundryCrafting } from "../../hooks/useFoundryCrafting";
 
 const MaterialsContainer = styled.div`
   display: grid;
@@ -240,6 +242,51 @@ const WithdrawButton = styled(Btn)`
   min-width: 60px;
 `;
 
+const SpaceshipCraftingSection = styled.div`
+  margin-top: 20px;
+  padding: 16px;
+  background-color: ${dfstyles.colors.backgroundlighter};
+  border: 1px solid ${dfstyles.colors.borderDarker};
+  border-radius: 8px;
+`;
+
+const CraftingHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+`;
+
+const CraftingTitle = styled.h3`
+  margin: 0;
+  color: ${dfstyles.colors.text};
+  font-size: 16px;
+`;
+
+const CraftingInfo = styled.div`
+  font-size: 12px;
+  color: ${dfstyles.colors.subtext};
+  margin-bottom: 12px;
+`;
+
+const CraftingButton = styled(Btn)`
+  width: 100%;
+  height: 40px;
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(45deg, #4caf50, #45a049);
+  border: none;
+
+  &:hover {
+    background: linear-gradient(45deg, #45a049, #3d8b40);
+  }
+
+  &:disabled {
+    background: #666;
+    cursor: not-allowed;
+  }
+`;
+
 export function getMaterialName(materialId: MaterialType): string {
   switch (materialId) {
     case 1:
@@ -377,6 +424,9 @@ export function PlanetMaterialsPane({
     [key: number]: number;
   }>({});
 
+  // Use foundry crafting hook for real-time data
+  const { craftingData, canCraftMore, refetch } = useFoundryCrafting(planetId);
+
   const handleWithdraw = (materialType: MaterialType, amount: number) => {
     if (amount > 0 && planet) {
       uiManager.withdrawMaterial(planet.locationId, materialType, amount);
@@ -463,6 +513,12 @@ export function PlanetMaterialsPane({
     planet.materials?.filter(
       (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
     ) || [];
+
+  // Check if this is a foundry planet
+  const isFoundry = planet.planetType === 3; // FOUNDRY = 3
+
+  // Use crafting data from the hook
+  const currentMultiplier = craftingData.multiplier;
 
   return (
     <ModalPane
@@ -596,6 +652,24 @@ export function PlanetMaterialsPane({
           </MaterialsContainer>
         )}
       </Section>
+
+      {/* Spaceship Crafting Section for Foundry Planets */}
+      {isFoundry && (
+        <Section>
+          {canCraftMore && (
+            <SpaceshipCraftingPane
+              planet={planet}
+              onClose={() => {}} // No close needed since it's embedded
+              craftingMultiplier={currentMultiplier}
+              craftingCount={craftingData.count}
+              onCraftComplete={() => {
+                // Refetch crafting data after successful craft
+                refetch();
+              }}
+            />
+          )}
+        </Section>
+      )}
     </ModalPane>
   );
 }
