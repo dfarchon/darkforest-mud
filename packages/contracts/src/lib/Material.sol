@@ -89,7 +89,7 @@ library MaterialStorageLib {
     mat.exists[uint8(materialId)] = true;
     mat.updates[uint8(materialId)] = true;
     mat.growth[uint8(materialId)] = true;
-    //  mat.amount[uint8(materialId)] = 5000 * 1e18; // 5000 is the default amount for development mode
+    mat.amount[uint8(materialId)] = 5000 * 1e18; // 5000 is the default amount for development mode
   }
 }
 

@@ -355,8 +355,37 @@ export function MaterialsText({
       {activeMaterials.map((mat, index) => (
         <span key={mat.materialId}>
           {index > 0 && ", "}
-          {getMaterialName(mat.materialId)}:{" "}
-          {formatEtherToNumber(mat.materialAmount).toFixed(0)}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span
+              style={{
+                width: "12px",
+                height: "12px",
+                backgroundColor: getMaterialColor(mat.materialId),
+                borderRadius: "2px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                lineHeight: "1",
+              }}
+            >
+              {getMaterialIcon(mat.materialId)}
+            </span>
+            <span
+              style={{
+                color: getMaterialColor(mat.materialId),
+                fontWeight: "bold",
+              }}
+            >
+              {formatEtherToNumber(mat.materialAmount).toFixed(0)}
+            </span>
+          </span>
         </span>
       ))}
     </span>
