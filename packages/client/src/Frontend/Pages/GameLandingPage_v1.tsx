@@ -111,10 +111,8 @@ export function GameLandingPage_v1() {
     },
   );
 
-  // MUD components are now set in ControllableCanvas after Renderer initialization
-
   const syncSign = useMemo(() => {
-    // console.log(syncProgress);
+    console.log(syncProgress);
     return syncProgress.step === "live" && syncProgress.percentage == 100;
   }, [syncProgress]);
 

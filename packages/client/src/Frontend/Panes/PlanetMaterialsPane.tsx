@@ -21,7 +21,6 @@ import SpaceshipCraftingPane from "./SpaceshipCraftingPane";
 import { useFoundryCrafting } from "../../hooks/useFoundryCrafting";
 import { useFoundryCraftingCount } from "../../hooks/useFoundryCraftingCount";
 import MaterialTooltip from "../Components/MaterialTooltip";
-import { foundry } from "viem/chains";
 
 const MaterialsContainer = styled.div`
   display: grid;
@@ -396,12 +395,10 @@ export function PlanetMaterialsPane({
   }>({});
 
   // Use foundry crafting hook for real-time data
-  const { craftingData, refetch } = useFoundryCrafting(planetId as string);
+  const { craftingData, refetch } = useFoundryCrafting(planetId);
 
   // Use real-time component data for consistent visibility logic
-  const { count: realTimeCraftingCount } = useFoundryCraftingCount(
-    planetId as string,
-  );
+  const { count: realTimeCraftingCount } = useFoundryCraftingCount(planetId);
   const canCraftMoreRealTime = realTimeCraftingCount < 3;
 
   const handleWithdraw = (materialType: MaterialType, amount: number) => {

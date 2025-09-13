@@ -1,16 +1,16 @@
 import { formatNumber } from "@df/gamelogic";
 import { ArtifactRarity, Biome, MaterialType } from "@df/types";
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useEffect, useRef, useState } from "react";
+import styled, { css } from "styled-components";
 
 import { useFoundryCraftingCount } from "../../hooks/useFoundryCraftingCount";
 import { useSpaceshipCrafting } from "../../hooks/useSpaceshipCrafting";
 import { SpaceshipType as SpaceshipTypeEnum } from "../../Shared/types/artifact";
 import type { Planet } from "../../Shared/types/planet";
 import { Icon, IconType } from "../Components/Icons";
+import MaterialTooltip from "../Components/MaterialTooltip";
 import { useUIManager } from "../Utils/AppHooks";
 import { getMaterialIcon } from "./PlanetMaterialsPane";
-import MaterialTooltip from "../Components/MaterialTooltip";
 
 // Custom spaceship sprite URLs
 const SPACESHIP_SPRITES = {
@@ -25,7 +25,13 @@ const CustomSpaceshipSprite: React.FC<{
   spaceshipType: number;
   biome: Biome;
   size: number;
-}> = ({ spaceshipType, biome: biomeType, size }) => {
+  rarity?: ArtifactRarity;
+}> = ({
+  spaceshipType,
+  biome: biomeType,
+  size,
+  rarity = ArtifactRarity.Common,
+}) => {
   const getBiomeIndex = (biome: Biome): number => {
     const biomeMap = {
       [Biome.OCEAN]: 0,
@@ -46,6 +52,11 @@ const CustomSpaceshipSprite: React.FC<{
   const spriteUrl =
     SPACESHIP_SPRITES[spaceshipType as keyof typeof SPACESHIP_SPRITES];
 
+  // Determine visual effects based on rarity
+  const isLegendary = rarity === ArtifactRarity.Legendary;
+  const isMythic = rarity === ArtifactRarity.Mythic;
+  const hasShine = rarity >= ArtifactRarity.Rare;
+
   if (!spriteUrl) {
     return (
       <div style={{ width: size, height: size, backgroundColor: "#333" }} />
@@ -53,7 +64,170 @@ const CustomSpaceshipSprite: React.FC<{
   }
 
   return (
-    <SpaceshipSpriteImage size={size} src={spriteUrl} biomeIndex={biomeIndex} />
+    <SpaceshipContainer size={size}>
+      {isMythic ? (
+        <MythicSpaceshipSprite
+          size={size}
+          src={spriteUrl}
+          biomeIndex={biomeIndex}
+          isLegendary={isLegendary}
+        />
+      ) : (
+        <SpaceshipSpriteImage
+          size={size}
+          src={spriteUrl}
+          biomeIndex={biomeIndex}
+          isLegendary={isLegendary}
+          isMythic={isMythic}
+        />
+      )}
+      {hasShine && (
+        <SpaceshipShineOverlay
+          size={size}
+          isLegendary={isLegendary}
+          isMythic={isMythic}
+        />
+      )}
+    </SpaceshipContainer>
+  );
+};
+
+// Component for mythic spaceships with pixel manipulation effects
+const MythicSpaceshipSprite: React.FC<{
+  size: number;
+  src: string;
+  biomeIndex: number;
+  isLegendary: boolean;
+}> = ({ size, src, biomeIndex, isLegendary }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const image = imageRef.current;
+    if (!canvas || !image) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Set canvas size
+    canvas.width = size;
+    canvas.height = size;
+
+    // Calculate sprite position (same logic as SpaceshipSpriteImage)
+    const spriteWidth = 64; // Original sprite width in the sheet
+
+    // Apply legendary color inversion if needed
+    if (isLegendary) {
+      ctx.filter = "invert(1)";
+    }
+
+    // Draw the specific biome sprite
+    ctx.drawImage(
+      image,
+      biomeIndex * spriteWidth,
+      0,
+      spriteWidth,
+      spriteWidth,
+      0,
+      0,
+      size,
+      size,
+    );
+
+    // Apply mythic pixel manipulation effects
+    const imageData = ctx.getImageData(0, 0, size, size);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      // Check if pixel is black or white (preserve them)
+      const isBlack = r < 13 && g < 13 && b < 13;
+      const isWhite = r > 242 && g > 242 && b > 242;
+
+      if (!isBlack && !isWhite) {
+        // Apply mythic color transformation (same as Overlay2DRenderer)
+        data[i] = Math.min(255, Math.max(0, (r - 89) * 3 + 89)); // Red
+        data[i + 1] = Math.min(255, Math.max(0, (g - 89) * 3 + 89)); // Green
+        data[i + 2] = Math.min(255, Math.max(0, (b - 89) * 3 + 89)); // Blue
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  }, [size, biomeIndex, isLegendary]);
+
+  return (
+    <>
+      <img
+        ref={imageRef}
+        src={src}
+        style={{ display: "none" }}
+        onLoad={() => {
+          // Trigger canvas redraw when image loads
+          const canvas = canvasRef.current;
+          const image = imageRef.current;
+          if (!canvas || !image) return;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          canvas.width = size;
+          canvas.height = size;
+
+          const spriteWidth = 64;
+
+          if (isLegendary) {
+            ctx.filter = "invert(1)";
+          }
+
+          ctx.drawImage(
+            image,
+            biomeIndex * spriteWidth,
+            0,
+            spriteWidth,
+            spriteWidth,
+            0,
+            0,
+            size,
+            size,
+          );
+
+          const imageData = ctx.getImageData(0, 0, size, size);
+          const data = imageData.data;
+
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+
+            const isBlack = r < 13 && g < 13 && b < 13;
+            const isWhite = r > 242 && g > 242 && b > 242;
+
+            if (!isBlack && !isWhite) {
+              data[i] = Math.min(255, Math.max(0, (r - 89) * 3 + 89));
+              data[i + 1] = Math.min(255, Math.max(0, (g - 89) * 3 + 89));
+              data[i + 2] = Math.min(255, Math.max(0, (b - 89) * 3 + 89));
+            }
+          }
+
+          ctx.putImageData(imageData, 0, 0);
+        }}
+      />
+      <canvas
+        ref={canvasRef}
+        width={size}
+        height={size}
+        willReadFrequently={true}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          imageRendering: "crisp-edges",
+        }}
+      />
+    </>
   );
 };
 
@@ -568,6 +742,7 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
                         spaceshipType={config.type}
                         biome={selectedBiome}
                         size={60}
+                        rarity={foundryRarity}
                       />
                     </BackgroundSprite>
                   </SpaceshipCard>
@@ -750,10 +925,19 @@ const BackgroundSprite = styled.div`
   pointer-events: none;
 `;
 
+const SpaceshipContainer = styled.div<{ size: number }>`
+  position: relative;
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
+  display: inline-block;
+`;
+
 const SpaceshipSpriteImage = styled.div<{
   size: number;
   src: string;
   biomeIndex: number;
+  isLegendary: boolean;
+  isMythic: boolean;
 }>`
   image-rendering: crisp-edges;
   width: ${({ size }) => size}px;
@@ -772,6 +956,121 @@ const SpaceshipSpriteImage = styled.div<{
     const position = `-${adjustedOffset}px 0`;
     return position;
   }};
+  filter: ${({ isLegendary, isMythic }) => {
+    if (isMythic) {
+      // For mythic spaceships, we'll use the MythicSpaceshipSprite component instead
+      return "none";
+    }
+    if (isLegendary) {
+      // Legendary effects: color inversion like in viewport
+      return "invert(1)";
+    }
+    return "none";
+  }};
+`;
+
+const SpaceshipShineOverlay = styled.div<{
+  size: number;
+  isLegendary: boolean;
+  isMythic: boolean;
+}>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      45deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 255, 255, 0.8) 55%,
+      transparent 60%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: shine 3s ease-in-out infinite;
+  }
+
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Legendary and Mythic special effects */
+  ${({ isLegendary }) =>
+    isLegendary &&
+    css`
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 215, 0, 0.3) 0%,
+          transparent 70%
+        );
+        animation: legendaryGlow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes legendaryGlow {
+        from {
+          opacity: 0.3;
+        }
+        to {
+          opacity: 0.7;
+        }
+      }
+    `}
+
+  ${({ isMythic }) =>
+    isMythic &&
+    css`
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at center,
+          rgba(138, 43, 226, 0.4) 0%,
+          transparent 70%
+        );
+        animation: mythicGlow 1.5s ease-in-out infinite alternate;
+      }
+
+      @keyframes mythicGlow {
+        from {
+          opacity: 0.4;
+        }
+        to {
+          opacity: 0.8;
+        }
+      }
+    `}
 `;
 
 const MaterialList = styled.div`

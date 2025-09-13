@@ -18,9 +18,6 @@ import {
   memeTypeToNum,
 } from "@df/procedural";
 import { isUnconfirmedMoveTx } from "@df/serde";
-import { getComponentValue } from "@latticexyz/recs";
-import { encodeEntity } from "@latticexyz/store-sync/recs";
-import type { ClientComponents } from "@mud/createClientComponents";
 import type {
   Artifact,
   AvatarType,
@@ -43,6 +40,9 @@ import {
   TextAlign,
   TextAnchor,
 } from "@df/types";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
 
 import { avatars } from "../Avatars";
 import { engineConsts } from "../EngineConsts";
@@ -508,13 +508,13 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
         const _biomeMap = components.CraftedSpaceship.values.biome;
 
         // Debug: Log available keys in spaceshipTypeMap
-        if (spaceshipTypeMap) {
-          console.log(
-            `Available spaceship type keys:`,
-            Array.from(spaceshipTypeMap.keys()),
-          );
-          console.log(`Looking for artifact ID: ${artifactId}`);
-        }
+        // if (spaceshipTypeMap) {
+        //   console.log(
+        //     `Available spaceship type keys:`,
+        //     Array.from(spaceshipTypeMap.keys()),
+        //   );
+        //   console.log(`Looking for artifact ID: ${artifactId}`);
+        // }
 
         // Try to find the correct key in the map by iterating through all keys
         let foundSpaceshipType: SpaceshipType | undefined;
@@ -524,21 +524,21 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
             const keyString = key.toString();
             if (keyString.includes(artifactId.toString())) {
               foundSpaceshipType = value as SpaceshipType;
-              console.log(
-                `Found spaceship type for artifact ${artifactId}: ${foundSpaceshipType}`,
-              );
+              // console.log(
+              //   `Found spaceship type for artifact ${artifactId}: ${foundSpaceshipType}`,
+              // );
               break;
             }
           }
         }
         spaceshipType = foundSpaceshipType;
 
-        // Debug: Log if we couldn't find the spaceship type
-        if (!spaceshipType) {
-          console.log(
-            `No spaceship type found for artifact ${artifactId}, will use fallback`,
-          );
-        }
+        // // Debug: Log if we couldn't find the spaceship type
+        // if (!spaceshipType) {
+        //   console.log(
+        //     `No spaceship type found for artifact ${artifactId}, will use fallback`,
+        //   );
+        // }
       }
     }
 
@@ -576,8 +576,8 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       rotation = Math.atan2(-dy, dx);
     }
 
-    // Use HTML image renderer with biome-specific sprite clipping and rotation
-    this.renderer.overlay2dRenderer.drawHTMLImageWithClipping(
+    // Use HTML image renderer with biome-specific sprite clipping, rotation, and rarity effects
+    this.renderer.overlay2dRenderer.drawHTMLImageWithRarityEffects(
       spaceshipImage,
       centerW,
       radiusW,
@@ -589,6 +589,8 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       64, // sprite width
       64, // sprite height
       rotation, // rotation in radians
+      artifact.rarity, // artifact rarity for effects
+      alpha, // alpha value for transparency
     );
   }
 

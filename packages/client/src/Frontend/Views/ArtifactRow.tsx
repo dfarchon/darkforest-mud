@@ -42,8 +42,6 @@ const StyledArtifactThumb = styled.div<{ active: boolean; enemy: boolean }>`
   justify-content: space-around;
   align-items: center;
 
-  background: ${dfstyles.colors.artifactBackground};
-
   &:hover {
     ${thumbActive}
     cursor: pointer;

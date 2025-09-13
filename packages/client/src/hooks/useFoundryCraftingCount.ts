@@ -9,14 +9,14 @@ export interface FoundryCraftingData {
   lastCraftTime: number;
 }
 
-export function useFoundryCraftingCount(foundryHash: LocationId) {
+export function useFoundryCraftingCount(foundryHash: LocationId | undefined) {
   const { components } = useMUD();
 
   // Try to get the FoundryCraftingCount component
   const FoundryCraftingCount = components.FoundryCraftingCount;
 
-  if (!FoundryCraftingCount) {
-    // Component not available, return default values
+  if (!FoundryCraftingCount || !foundryHash) {
+    // Component not available or foundryHash is undefined, return default values
     return {
       count: 0,
       lastCraftTime: 0,
