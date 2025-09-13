@@ -688,7 +688,6 @@ export class Renderer {
           this.planetRenderManager = renderer;
           break;
         }
-        console.log("Renderer is not a PlanetRenderManager");
         return false;
 
       case RendererType.QuasarBody:

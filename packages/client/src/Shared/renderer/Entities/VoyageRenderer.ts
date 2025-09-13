@@ -184,7 +184,22 @@ export class VoyageRenderer implements VoyageRendererType {
           const k = 40;
           const size = (k * 20.0) / (1.0 * viewport.worldToCanvasDist(20));
 
-          if (artifact.artifactType !== ArtifactType.Avatar) {
+          if (artifact.artifactType === ArtifactType.Spaceship) {
+            // Handle custom spaceship sprites in voyages
+            const fromLoc = gameUIManager.getLocationOfPlanet(
+              voyage.fromPlanet,
+            );
+            const toLoc = gameUIManager.getLocationOfPlanet(voyage.toPlanet);
+
+            pRM.queueCustomSpaceshipSprite(
+              artifact,
+              viewport.canvasToWorldCoords({ x, y }),
+              viewport.canvasToWorldDist(artifactSizePixels),
+              255,
+              fromLoc?.coords,
+              toLoc?.coords,
+            );
+          } else if (artifact.artifactType !== ArtifactType.Avatar) {
             sR.queueArtifact(artifact, { x, y }, artifactSizePixels);
           } else {
             pRM.queueArtifactImage(

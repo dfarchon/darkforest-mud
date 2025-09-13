@@ -9,7 +9,7 @@ import { DFUtils } from "libraries/DFUtils.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 import { CraftedSpaceship, CraftedSpaceshipData } from "codegen/tables/CraftedSpaceship.sol";
-import { SpaceshipConfig, SpaceshipConfigData } from "codegen/tables/SpaceshipConfig.sol";
+import { SpaceshipBonus, SpaceshipBonusData } from "codegen/tables/SpaceshipBonus.sol";
 import { FoundryCraftingCount, FoundryCraftingCountData } from "codegen/tables/FoundryCraftingCount.sol";
 import { PlanetType, MaterialType, Biome, ArtifactRarity } from "codegen/common.sol";
 import { IArtifactNFT } from "tokens/IArtifactNFT.sol";
@@ -111,21 +111,22 @@ contract FoundryCraftingSystem is BaseSystem {
     );
 
     // Calculate bonuses and store spaceship data
-    SpaceshipConfigData memory config = SpaceshipConfig.get(spaceshipType);
-    CraftedSpaceship.set(
-      spaceshipType,
-      biome,
-      rarity,
-      CraftedSpaceshipData({
-        attackBonus: _calculateAttackBonus(config.baseAttack, biome, rarity),
-        defenseBonus: _calculateDefenseBonus(config.baseDefense, biome, rarity),
-        speedBonus: _calculateSpeedBonus(config.baseSpeed, biome, rarity),
-        rangeBonus: _calculateRangeBonus(config.baseRange, biome, rarity),
-        crafter: executor,
-        craftedAt: uint64(block.timestamp),
-        nftTokenId: 0 // Will be set after NFT minting
-      })
-    );
+
+    uint32 artifactId = uint32(spaceshipArtifact.id);
+    // todo find how to use CraftedSpaceship.set instead step by step setSpaceShip setBiome setRarity setCraftedAt setNftTokenId setCrafter etc
+    //  CraftedSpaceship.set(artifactId, spaceshipType, biome, rarity, uint64(block.timestamp), 0, executor);
+    CraftedSpaceship.setSpaceshipType(artifactId, spaceshipType);
+    CraftedSpaceship.setBiome(artifactId, biome);
+    CraftedSpaceship.setRarity(artifactId, rarity);
+    CraftedSpaceship.setCraftedAt(artifactId, uint64(block.timestamp));
+    CraftedSpaceship.setNftTokenId(artifactId, 0); // Will be set after NFT minting
+    CraftedSpaceship.setCrafter(artifactId, executor);
+    // todo find how to use SpaceshipBonus.set instead step by step setAttackBonus setDefenseBonus setSpeedBonus setRangeBonus etc
+    //    SpaceshipBonus.set(artifactId, _calculateAttackBonus(config.baseAttack, biome, rarity), _calculateDefenseBonus(config.baseDefense, biome, rarity), _calculateSpeedBonus(config.baseSpeed, biome, rarity), _calculateRangeBonus(config.baseRange, biome, rarity));
+    SpaceshipBonus.setAttackBonus(artifactId, _calculateAttackBonus(biome, rarity, spaceshipType));
+    SpaceshipBonus.setDefenseBonus(artifactId, _calculateDefenseBonus(biome, rarity, spaceshipType));
+    SpaceshipBonus.setSpeedBonus(artifactId, _calculateSpeedBonus(biome, rarity, spaceshipType));
+    SpaceshipBonus.setRangeBonus(artifactId, _calculateRangeBonus(biome, rarity, spaceshipType));
 
     // TODO: Mint ArtifactNFT and update spaceship data
     // For now, we'll skip NFT minting to avoid deployment issues
@@ -201,32 +202,76 @@ contract FoundryCraftingSystem is BaseSystem {
     }
   }
 
-  function _calculateAttackBonus(uint16 baseAttack, Biome biome, ArtifactRarity rarity) internal pure returns (uint16) {
-    uint16 biomeBonus = _getBiomeAttackBonus(biome);
+  function _calculateAttackBonus(
+    Biome biome,
+    ArtifactRarity rarity,
+    uint8 spaceshipType
+  ) internal pure returns (uint16) {
+    uint16 biomeBonus = _getBiomeBonus(biome);
+    uint16 roleBonus = _getSpaceshipRoleAttackBonus(spaceshipType);
     uint16 rarityMultiplier = _getRarityMultiplier(rarity);
-    return baseAttack + ((biomeBonus * rarityMultiplier) / 100);
+
+    // If role bonus is 0, then no biome bonus is added
+    if (roleBonus == 0) {
+      return 0;
+    }
+
+    uint16 totalBonus = biomeBonus + roleBonus;
+    return ((totalBonus * rarityMultiplier) / 100);
   }
 
   function _calculateDefenseBonus(
-    uint16 baseDefense,
     Biome biome,
-    ArtifactRarity rarity
+    ArtifactRarity rarity,
+    uint8 spaceshipType
   ) internal pure returns (uint16) {
-    uint16 biomeBonus = _getBiomeDefenseBonus(biome);
+    uint16 biomeBonus = _getBiomeBonus(biome);
+    uint16 roleBonus = _getSpaceshipRoleDefenseBonus(spaceshipType);
     uint16 rarityMultiplier = _getRarityMultiplier(rarity);
-    return baseDefense + ((biomeBonus * rarityMultiplier) / 100);
+
+    // If role bonus is 0, then no biome bonus is added
+    if (roleBonus == 0) {
+      return 0;
+    }
+
+    uint16 totalBonus = biomeBonus + roleBonus;
+    return ((totalBonus * rarityMultiplier) / 100);
   }
 
-  function _calculateSpeedBonus(uint16 baseSpeed, Biome biome, ArtifactRarity rarity) internal pure returns (uint16) {
-    uint16 biomeBonus = _getBiomeSpeedBonus(biome);
+  function _calculateSpeedBonus(
+    Biome biome,
+    ArtifactRarity rarity,
+    uint8 spaceshipType
+  ) internal pure returns (uint16) {
+    uint16 biomeBonus = _getBiomeBonus(biome);
+    uint16 roleBonus = _getSpaceshipRoleSpeedBonus(spaceshipType);
     uint16 rarityMultiplier = _getRarityMultiplier(rarity);
-    return baseSpeed + ((biomeBonus * rarityMultiplier) / 100);
+
+    // If role bonus is 0, then no biome bonus is added
+    if (roleBonus == 0) {
+      return 0;
+    }
+
+    uint16 totalBonus = biomeBonus + roleBonus;
+    return ((totalBonus * rarityMultiplier) / 100);
   }
 
-  function _calculateRangeBonus(uint16 baseRange, Biome biome, ArtifactRarity rarity) internal pure returns (uint16) {
-    uint16 biomeBonus = _getBiomeRangeBonus(biome);
+  function _calculateRangeBonus(
+    Biome biome,
+    ArtifactRarity rarity,
+    uint8 spaceshipType
+  ) internal pure returns (uint16) {
+    uint16 biomeBonus = _getBiomeBonus(biome);
+    uint16 roleBonus = _getSpaceshipRoleRangeBonus(spaceshipType);
     uint16 rarityMultiplier = _getRarityMultiplier(rarity);
-    return baseRange + ((biomeBonus * rarityMultiplier) / 100);
+
+    // If role bonus is 0, then no biome bonus is added
+    if (roleBonus == 0) {
+      return 0;
+    }
+
+    uint16 totalBonus = biomeBonus + roleBonus;
+    return ((totalBonus * rarityMultiplier) / 100);
   }
 
   function _getRarityMultiplier(ArtifactRarity rarity) internal pure returns (uint16) {
@@ -238,42 +283,54 @@ contract FoundryCraftingSystem is BaseSystem {
     return 100;
   }
 
-  function _getBiomeAttackBonus(Biome biome) internal pure returns (uint16) {
-    if (biome == Biome.TUNDRA) return 20;
-    if (biome == Biome.DESERT) return 20;
-    if (biome == Biome.WASTELAND) return 15;
-    if (biome == Biome.LAVA) return 30;
-    if (biome == Biome.CORRUPTED) return 25;
+  function _getBiomeBonus(Biome biome) internal pure returns (uint16) {
+    uint16 b = uint16(biome);
+    if (b >= 1 && b <= 3) {
+      return 1;
+    } else if (b >= 4 && b <= 6) {
+      return 2;
+    } else if (b >= 7 && b <= 9) {
+      return 4;
+    } else if (b == 10) {
+      return 8;
+    }
     return 0;
   }
 
-  function _getBiomeDefenseBonus(Biome biome) internal pure returns (uint16) {
-    if (biome == Biome.FOREST) return 15;
-    if (biome == Biome.SWAMP) return 15;
-    if (biome == Biome.ICE) return 25;
-    if (biome == Biome.WASTELAND) return 15;
-    if (biome == Biome.CORRUPTED) return 25;
+  // Spaceship role-specific bonus functions
+  function _getSpaceshipRoleAttackBonus(uint8 spaceshipType) internal pure returns (uint16) {
+    // Scout: 0, Fighter: 5, Destroyer: 10, Carrier: 5
+    if (spaceshipType == 1) return 0; // Scout - no attack bonus
+    if (spaceshipType == 2) return 5; // Fighter
+    if (spaceshipType == 3) return 10; // Destroyer
+    if (spaceshipType == 4) return 5; // Carrier
     return 0;
   }
 
-  function _getBiomeSpeedBonus(Biome biome) internal pure returns (uint16) {
-    if (biome == Biome.OCEAN) return 20;
-    if (biome == Biome.GRASSLAND) return 25;
-    if (biome == Biome.CORRUPTED) return 25;
+  function _getSpaceshipRoleDefenseBonus(uint8 spaceshipType) internal pure returns (uint16) {
+    // Scout: 0, Fighter: 5, Destroyer: 10, Carrier: 15
+    if (spaceshipType == 1) return 0; // Scout
+    if (spaceshipType == 2) return 5; // Fighter
+    if (spaceshipType == 3) return 10; // Destroyer
+    if (spaceshipType == 4) return 15; // Carrier
     return 0;
   }
 
-  function _getBiomeRangeBonus(Biome biome) internal pure returns (uint16) {
-    if (biome == Biome.OCEAN) return 10;
-    if (biome == Biome.FOREST) return 5;
-    if (biome == Biome.GRASSLAND) return 15;
-    if (biome == Biome.TUNDRA) return 5;
-    if (biome == Biome.SWAMP) return 10;
-    if (biome == Biome.DESERT) return 10;
-    if (biome == Biome.ICE) return 5;
-    if (biome == Biome.WASTELAND) return 10;
-    if (biome == Biome.LAVA) return 5;
-    if (biome == Biome.CORRUPTED) return 15;
+  function _getSpaceshipRoleSpeedBonus(uint8 spaceshipType) internal pure returns (uint16) {
+    // Scout: 10, Fighter: 0, Destroyer: 0, Carrier: 0
+    if (spaceshipType == 1) return 10; // Scout
+    if (spaceshipType == 2) return 0; // Fighter
+    if (spaceshipType == 3) return 0; // Destroyer
+    if (spaceshipType == 4) return 0; // Carrier
+    return 0;
+  }
+
+  function _getSpaceshipRoleRangeBonus(uint8 spaceshipType) internal pure returns (uint16) {
+    // Scout: 5, Fighter: 5, Destroyer: 0, Carrier: 3
+    if (spaceshipType == 1) return 5; // Scout
+    if (spaceshipType == 2) return 5; // Fighter
+    if (spaceshipType == 3) return 0; // Destroyer - no range bonus
+    if (spaceshipType == 4) return 3; // Carrier
     return 0;
   }
 

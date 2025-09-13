@@ -1,14 +1,151 @@
+import { formatNumber } from "@df/gamelogic";
+import { ArtifactRarity, Biome, MaterialType } from "@df/types";
 import React, { useState } from "react";
 import styled from "styled-components";
-import type { Planet } from "../../Shared/types/planet";
-import type { SpaceshipType } from "../../Shared/types/artifact";
-import { SpaceshipType as SpaceshipTypeEnum } from "../../Shared/types/artifact";
-import { MaterialType, Biome, ArtifactRarity } from "@df/types";
-import { getMaterialIcon, getMaterialName } from "./PlanetMaterialsPane";
-import { formatNumber } from "@df/gamelogic";
-import { useSpaceshipCrafting } from "../../hooks/useSpaceshipCrafting";
+
 import { useFoundryCraftingCount } from "../../hooks/useFoundryCraftingCount";
+import { useSpaceshipCrafting } from "../../hooks/useSpaceshipCrafting";
+import { SpaceshipType as SpaceshipTypeEnum } from "../../Shared/types/artifact";
+import type { Planet } from "../../Shared/types/planet";
+import { Icon, IconType } from "../Components/Icons";
 import { useUIManager } from "../Utils/AppHooks";
+import { getMaterialIcon } from "./PlanetMaterialsPane";
+import MaterialTooltip from "../Components/MaterialTooltip";
+
+// Custom spaceship sprite URLs
+const SPACESHIP_SPRITES = {
+  [SpaceshipTypeEnum.Scout]: "/sprites/Scouts.png",
+  [SpaceshipTypeEnum.Fighter]: "/sprites/Fighters.png",
+  [SpaceshipTypeEnum.Destroyer]: "/sprites/Destroyers.png",
+  [SpaceshipTypeEnum.Carrier]: "/sprites/Cruisers.png", // Using Cruisers.png for Carrier
+} as const;
+
+// Custom spaceship sprite component
+const CustomSpaceshipSprite: React.FC<{
+  spaceshipType: number;
+  biome: Biome;
+  size: number;
+}> = ({ spaceshipType, biome: biomeType, size }) => {
+  const getBiomeIndex = (biome: Biome): number => {
+    const biomeMap = {
+      [Biome.OCEAN]: 0,
+      [Biome.FOREST]: 1,
+      [Biome.GRASSLAND]: 2,
+      [Biome.TUNDRA]: 3,
+      [Biome.SWAMP]: 4,
+      [Biome.DESERT]: 5,
+      [Biome.ICE]: 6,
+      [Biome.WASTELAND]: 7,
+      [Biome.LAVA]: 8,
+      [Biome.CORRUPTED]: 9,
+    };
+    return biomeMap[biome] ?? 0;
+  };
+
+  const biomeIndex = getBiomeIndex(biomeType);
+  const spriteUrl =
+    SPACESHIP_SPRITES[spaceshipType as keyof typeof SPACESHIP_SPRITES];
+
+  if (!spriteUrl) {
+    return (
+      <div style={{ width: size, height: size, backgroundColor: "#333" }} />
+    );
+  }
+
+  return (
+    <SpaceshipSpriteImage size={size} src={spriteUrl} biomeIndex={biomeIndex} />
+  );
+};
+
+// Info tooltip styled components
+const InfoTooltipContainer = styled.div`
+  position: relative;
+  display: inline-block;
+  cursor: help;
+`;
+
+const InfoTooltipBox = styled.div<{
+  mouseX: number;
+  mouseY: number;
+  visible: boolean;
+}>`
+  position: fixed;
+  top: ${(props) => props.mouseY + 10}px;
+  left: ${(props) => props.mouseX + 10}px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 12px;
+  min-width: 200px;
+  max-width: 280px;
+  z-index: 1000;
+  opacity: ${(props) => (props.visible ? 1 : 0)};
+  visibility: ${(props) => (props.visible ? "visible" : "hidden")};
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+`;
+
+const InfoTooltipTitle = styled.div`
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+`;
+
+const InfoTooltipDescription = styled.div`
+  color: #ccc;
+  font-size: 12px;
+  line-height: 1.4;
+`;
+
+// Info tooltip component for crafting explanations
+interface InfoTooltipProps {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}
+
+const InfoTooltip: React.FC<InfoTooltipProps> = ({
+  title,
+  description,
+  children,
+}) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    setMousePosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleMouseEnter = () => {
+    setIsVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsVisible(false);
+  };
+
+  return (
+    <InfoTooltipContainer
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+      <InfoTooltipBox
+        mouseX={mousePosition.x}
+        mouseY={mousePosition.y}
+        visible={isVisible}
+      >
+        <InfoTooltipTitle>{title}</InfoTooltipTitle>
+        <InfoTooltipDescription>{description}</InfoTooltipDescription>
+      </InfoTooltipBox>
+    </InfoTooltipContainer>
+  );
+};
 
 interface SpaceshipCraftingPaneProps {
   planet: Planet;
@@ -23,7 +160,7 @@ interface MaterialRequirement {
   currentAmount: number;
 }
 
-interface SpaceshipConfig {
+interface SpaceshipTypeConfig {
   type: (typeof SpaceshipTypeEnum)[keyof typeof SpaceshipTypeEnum];
   name: string;
   baseAttack: number;
@@ -43,7 +180,8 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
     SpaceshipTypeEnum.Scout,
   );
   // Use planet's biome directly instead of selection
-  const selectedBiome = (planet.biome as unknown as Biome) || Biome.OCEAN;
+  const selectedBiome =
+    ((planet as { biome?: Biome }).biome as unknown as Biome) || Biome.OCEAN;
 
   const uiManager = useUIManager();
   const { craftingState } = useSpaceshipCrafting();
@@ -65,14 +203,14 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
     return material ? Number(material.materialAmount) / 1e18 : 0;
   };
 
-  const spaceshipConfigs: SpaceshipConfig[] = [
+  const spaceshipConfigs: SpaceshipTypeConfig[] = [
     {
       type: SpaceshipTypeEnum.Scout,
       name: "Scout",
-      baseAttack: 50,
-      baseDefense: 30,
-      baseSpeed: 100,
-      baseRange: 80,
+      baseAttack: 0,
+      baseDefense: 0,
+      baseSpeed: 10,
+      baseRange: 5,
       materialRequirements: [
         {
           materialType: MaterialType.WINDSTEEL,
@@ -89,10 +227,10 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
     {
       type: SpaceshipTypeEnum.Fighter,
       name: "Fighter",
-      baseAttack: 100,
-      baseDefense: 60,
-      baseSpeed: 70,
-      baseRange: 60,
+      baseAttack: 5,
+      baseDefense: 5,
+      baseSpeed: 0,
+      baseRange: 5,
       materialRequirements: [
         {
           materialType: MaterialType.PYROSTEEL,
@@ -109,10 +247,10 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
     {
       type: SpaceshipTypeEnum.Destroyer,
       name: "Destroyer",
-      baseAttack: 150,
-      baseDefense: 100,
-      baseSpeed: 50,
-      baseRange: 90,
+      baseAttack: 10,
+      baseDefense: 10,
+      baseSpeed: 0,
+      baseRange: 0,
       materialRequirements: [
         {
           materialType: MaterialType.BLACKALLOY,
@@ -129,10 +267,10 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
     {
       type: SpaceshipTypeEnum.Carrier,
       name: "Carrier",
-      baseAttack: 80,
-      baseDefense: 150,
-      baseSpeed: 40,
-      baseRange: 120,
+      baseAttack: 5,
+      baseDefense: 15,
+      baseSpeed: 0,
+      baseRange: 3,
       materialRequirements: [
         {
           materialType: MaterialType.LIVING_WOOD,
@@ -163,50 +301,15 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
   const predictSpaceshipRarity = (): ArtifactRarity => {
     if (!selectedConfig) return ArtifactRarity.Common;
 
-    // Base rarity chance based on planet level
-    const planetLevel = planet.level || 1;
-    const baseRarityChance = Math.min(planetLevel * 0.1, 0.8); // Max 80% chance for higher rarity
+    // Use deterministic rarity based on planet level for stable predictions
+    const planetLevel = planet.planetLevel || 1;
 
-    // Material quality bonus
-    const materialQualityBonus = selectedConfig.materialRequirements.reduce(
-      (sum, req) => {
-        const materialRarity = getMaterialRarity(req.materialType);
-        return sum + (materialRarity / 10000) * 0.1; // Convert to percentage bonus
-      },
-      0,
-    );
-
-    // Total rarity chance (removed biome crafting bonus as it's not used in contract)
-    const totalRarityChance = Math.min(
-      baseRarityChance + materialQualityBonus,
-      0.95,
-    );
-
-    // Simulate rarity roll based on chance
-    const roll = Math.random();
-
-    if (roll < totalRarityChance * 0.05) return ArtifactRarity.Mythic; // 5% of total chance
-    if (roll < totalRarityChance * 0.15) return ArtifactRarity.Legendary; // 10% of total chance
-    if (roll < totalRarityChance * 0.35) return ArtifactRarity.Epic; // 20% of total chance
-    if (roll < totalRarityChance * 0.65) return ArtifactRarity.Rare; // 30% of total chance
-    return ArtifactRarity.Common; // Remaining chance
-  };
-
-  const getMaterialRarity = (materialType: MaterialType): number => {
-    const rarityMap = {
-      [MaterialType.WATER_CRYSTALS]: 1000,
-      [MaterialType.LIVING_WOOD]: 1000,
-      [MaterialType.WINDSTEEL]: 1000,
-      [MaterialType.AURORIUM]: 5000,
-      [MaterialType.MYCELIUM]: 5000,
-      [MaterialType.SANDGLASS]: 5000,
-      [MaterialType.CRYOSTONE]: 20000,
-      [MaterialType.SCRAPIUM]: 20000,
-      [MaterialType.PYROSTEEL]: 20000,
-      [MaterialType.BLACKALLOY]: 100000,
-      [MaterialType.CORRUPTED_CRYSTAL]: 100000,
-    };
-    return rarityMap[materialType] || 1000;
+    // Determine rarity based on planet level thresholds (matching contract logic)
+    if (planetLevel <= 1) return ArtifactRarity.Common;
+    if (planetLevel <= 3) return ArtifactRarity.Rare;
+    if (planetLevel <= 5) return ArtifactRarity.Epic;
+    if (planetLevel <= 7) return ArtifactRarity.Legendary;
+    return ArtifactRarity.Mythic;
   };
 
   const getRarityMultiplier = (rarity: ArtifactRarity): number => {
@@ -218,47 +321,54 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
     if (rarity === ArtifactRarity.Mythic) return 300;
     return 100;
   };
-
-  const getBiomeAttackBonus = (biome: Biome): number => {
-    // Match contract's _getBiomeAttackBonus function exactly
-    if (biome === Biome.TUNDRA) return 20;
-    if (biome === Biome.DESERT) return 20;
-    if (biome === Biome.WASTELAND) return 15;
-    if (biome === Biome.LAVA) return 30;
-    if (biome === Biome.CORRUPTED) return 25;
+  const getBiomeBonus = (biome: Biome): number => {
+    const b = Number(biome);
+    if (b >= 1 && b <= 3) {
+      return 1;
+    } else if (b >= 4 && b <= 6) {
+      return 2;
+    } else if (b >= 7 && b <= 9) {
+      return 4;
+    } else if (b == 10) {
+      return 8;
+    }
     return 0;
   };
 
-  const getBiomeDefenseBonus = (biome: Biome): number => {
-    // Match contract's _getBiomeDefenseBonus function exactly
-    if (biome === Biome.FOREST) return 15;
-    if (biome === Biome.SWAMP) return 15;
-    if (biome === Biome.ICE) return 25;
-    if (biome === Biome.WASTELAND) return 15;
-    if (biome === Biome.CORRUPTED) return 25;
+  // Spaceship role-specific bonus functions (matching contract)
+  const getSpaceshipRoleAttackBonus = (spaceshipType: number): number => {
+    // Scout: 0, Fighter: 5, Destroyer: 10, Carrier: 5
+    if (spaceshipType === 1) return 0; // Scout - no attack bonus
+    if (spaceshipType === 2) return 5; // Fighter
+    if (spaceshipType === 3) return 10; // Destroyer
+    if (spaceshipType === 4) return 5; // Carrier
     return 0;
   };
 
-  const getBiomeSpeedBonus = (biome: Biome): number => {
-    // Match contract's _getBiomeSpeedBonus function exactly
-    if (biome === Biome.OCEAN) return 20;
-    if (biome === Biome.GRASSLAND) return 25;
-    if (biome === Biome.CORRUPTED) return 25;
+  const getSpaceshipRoleDefenseBonus = (spaceshipType: number): number => {
+    // Scout: 0, Fighter: 5, Destroyer: 10, Carrier: 15
+    if (spaceshipType === 1) return 0; // Scout
+    if (spaceshipType === 2) return 5; // Fighter
+    if (spaceshipType === 3) return 10; // Destroyer
+    if (spaceshipType === 4) return 15; // Carrier
     return 0;
   };
 
-  const getBiomeRangeBonus = (biome: Biome): number => {
-    // Match contract's _getBiomeRangeBonus function exactly
-    if (biome === Biome.OCEAN) return 10;
-    if (biome === Biome.FOREST) return 5;
-    if (biome === Biome.GRASSLAND) return 15;
-    if (biome === Biome.TUNDRA) return 5;
-    if (biome === Biome.SWAMP) return 10;
-    if (biome === Biome.DESERT) return 10;
-    if (biome === Biome.ICE) return 5;
-    if (biome === Biome.WASTELAND) return 10;
-    if (biome === Biome.LAVA) return 5;
-    if (biome === Biome.CORRUPTED) return 15;
+  const getSpaceshipRoleSpeedBonus = (spaceshipType: number): number => {
+    // Scout: 10, Fighter: 0, Destroyer: 0, Carrier: 0
+    if (spaceshipType === 1) return 10; // Scout
+    if (spaceshipType === 2) return 0; // Fighter
+    if (spaceshipType === 3) return 0; // Destroyer
+    if (spaceshipType === 4) return 0; // Carrier
+    return 0;
+  };
+
+  const getSpaceshipRoleRangeBonus = (spaceshipType: number): number => {
+    // Scout: 5, Fighter: 5, Destroyer: 0, Carrier: 3
+    if (spaceshipType === 1) return 5; // Scout
+    if (spaceshipType === 2) return 5; // Fighter
+    if (spaceshipType === 3) return 0; // Destroyer - no range bonus
+    if (spaceshipType === 4) return 3; // Carrier
     return 0;
   };
 
@@ -277,7 +387,7 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
         (req) => req.materialType,
       );
       const amounts = selectedConfig.materialRequirements.map((req) =>
-        BigInt(Math.floor(req.amount)),
+        Math.floor(req.amount),
       );
 
       // Call the contract through UIManager
@@ -324,48 +434,69 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
           justifyContent: "center",
         }}
       >
-        <CraftingCounter>
-          <CounterLabel>Crafting:</CounterLabel>
-          <CounterValue limitReached={isCraftingLimitReached}>
-            {craftingCount}/3
-          </CounterValue>
-        </CraftingCounter>
-        <MultiplierDisplay>
-          {actualCraftingMultiplier.toFixed(1)}x
-        </MultiplierDisplay>
-        <div>+{Math.round((actualCraftingMultiplier - 1) * 100)}%</div>
+        <InfoTooltip
+          title="Crafting Limit"
+          description="Foundry is possible to craft max 3x spaceships per planet"
+        >
+          <CraftingCounter>
+            <CounterLabel>Crafting:</CounterLabel>
+            <CounterValue limitReached={isCraftingLimitReached}>
+              {craftingCount}/3
+            </CounterValue>
+          </CraftingCounter>
+        </InfoTooltip>
+        <InfoTooltip
+          title="Crafting Multiplier"
+          description="Any crafted ships need more materials. Each craft increases the cost multiplier."
+        >
+          <MultiplierDisplay>
+            {actualCraftingMultiplier.toFixed(1)}x
+          </MultiplierDisplay>
+        </InfoTooltip>
+        {/* <div>+{Math.round((actualCraftingMultiplier - 1) * 100)}%</div> */}
       </div>
       <Content>
         <Section>
           <SpaceshipGrid>
             {(() => {
               // Calculate rarity once for all spaceships to ensure consistent stats
-              const rarity = predictSpaceshipRarity();
-              const rarityMultiplier = getRarityMultiplier(rarity);
-              const biomeAttackBonus = getBiomeAttackBonus(selectedBiome);
-              const biomeDefenseBonus = getBiomeDefenseBonus(selectedBiome);
-              const biomeSpeedBonus = getBiomeSpeedBonus(selectedBiome);
-              const biomeRangeBonus = getBiomeRangeBonus(selectedBiome);
+              // Use the same logic as contract's _calculateSpaceshipRarity function
+              const foundryRarity = predictSpaceshipRarity();
+              const rarityMultiplier = getRarityMultiplier(foundryRarity);
+              const biomeAttackBonus = getBiomeBonus(selectedBiome);
+              const biomeDefenseBonus = getBiomeBonus(selectedBiome);
+              const biomeSpeedBonus = getBiomeBonus(selectedBiome);
+              const biomeRangeBonus = getBiomeBonus(selectedBiome);
 
               return spaceshipConfigs.map((config) => {
-                // Match contract's calculation exactly: baseStat + (biomeBonus * rarityMultiplier / 100)
+                // Calculate role bonuses based on CURRENT spaceship type in the loop (not selectedSpaceshipType)
+                const roleAttackBonus =
+                  getSpaceshipRoleAttackBonus(config.type) + biomeAttackBonus;
+                const roleDefenseBonus =
+                  getSpaceshipRoleDefenseBonus(config.type) + biomeDefenseBonus;
+                const roleSpeedBonus =
+                  getSpaceshipRoleSpeedBonus(config.type) + biomeSpeedBonus;
+                const roleRangeBonus =
+                  getSpaceshipRoleRangeBonus(config.type) + biomeRangeBonus;
+
+                // Calculate projected stats for each spaceship type using its own role bonuses
                 const projectedStats = {
-                  attack: Math.round(
-                    config.baseAttack +
-                      (biomeAttackBonus * rarityMultiplier) / 100,
-                  ),
-                  defense: Math.round(
-                    config.baseDefense +
-                      (biomeDefenseBonus * rarityMultiplier) / 100,
-                  ),
-                  speed: Math.round(
-                    config.baseSpeed +
-                      (biomeSpeedBonus * rarityMultiplier) / 100,
-                  ),
-                  range: Math.round(
-                    config.baseRange +
-                      (biomeRangeBonus * rarityMultiplier) / 100,
-                  ),
+                  attack:
+                    config.baseAttack === 0
+                      ? config.baseAttack
+                      : Math.round((roleAttackBonus * rarityMultiplier) / 100),
+                  defense:
+                    config.baseDefense === 0
+                      ? config.baseDefense
+                      : Math.round((roleDefenseBonus * rarityMultiplier) / 100),
+                  speed:
+                    config.baseSpeed === 0
+                      ? config.baseSpeed
+                      : Math.round((roleSpeedBonus * rarityMultiplier) / 100),
+                  range:
+                    config.baseRange === 0
+                      ? config.baseRange
+                      : Math.round((roleRangeBonus * rarityMultiplier) / 100),
                 };
 
                 return (
@@ -374,17 +505,71 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
                     selected={selectedSpaceshipType === config.type}
                     onClick={() => setSelectedSpaceshipType(config.type)}
                   >
-                    <SpaceshipName>{config.name}</SpaceshipName>
-                    <SpaceshipStats>
-                      <StatsRow>
-                        <Stat>Atk: {projectedStats.attack}</Stat>
-                        <Stat>Def: {projectedStats.defense}</Stat>
-                      </StatsRow>
-                      <StatsRow>
-                        <Stat>Spe: {projectedStats.speed}</Stat>
-                        <Stat>Rng: {projectedStats.range}</Stat>
-                      </StatsRow>
-                    </SpaceshipStats>
+                    {/* Corner Stats */}
+                    <CornerStat top left>
+                      <Icon type={IconType.Target} />
+                      <span
+                        style={{
+                          color:
+                            projectedStats.attack > 0 ? "#00DC82" : "#FF6492",
+                        }}
+                      >
+                        {projectedStats.attack > 0
+                          ? `+${projectedStats.attack}%`
+                          : projectedStats.attack}
+                      </span>
+                    </CornerStat>
+
+                    <CornerStat top right>
+                      <Icon type={IconType.Defense} />
+                      <span
+                        style={{
+                          color:
+                            projectedStats.defense > 0 ? "#00DC82" : "#FF6492",
+                        }}
+                      >
+                        {projectedStats.defense > 0
+                          ? `+${projectedStats.defense}%`
+                          : projectedStats.defense}
+                      </span>
+                    </CornerStat>
+
+                    <CornerStat bottom left>
+                      <Icon type={IconType.Speed} />
+                      <span
+                        style={{
+                          color:
+                            projectedStats.speed > 0 ? "#00DC82" : "#FF6492",
+                        }}
+                      >
+                        {projectedStats.speed > 0
+                          ? `+${projectedStats.speed}%`
+                          : projectedStats.speed}
+                      </span>
+                    </CornerStat>
+
+                    <CornerStat bottom right>
+                      <Icon type={IconType.Range} />
+                      <span
+                        style={{
+                          color:
+                            projectedStats.range > 0 ? "#00DC82" : "#FF6492",
+                        }}
+                      >
+                        {projectedStats.range > 0
+                          ? `+${projectedStats.range}%`
+                          : projectedStats.range}
+                      </span>
+                    </CornerStat>
+
+                    {/* Background Sprite */}
+                    <BackgroundSprite>
+                      <CustomSpaceshipSprite
+                        spaceshipType={config.type}
+                        biome={selectedBiome}
+                        size={60}
+                      />
+                    </BackgroundSprite>
                   </SpaceshipCard>
                 );
               });
@@ -394,45 +579,29 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
 
         {selectedConfig && (
           <Section>
-            <SectionTitle>
-              Material Requirements
-              {actualCraftingMultiplier > 1 && (
-                <span
-                  style={{
-                    color: "#ff6b6b",
-                    fontSize: "12px",
-                    marginLeft: "8px",
-                  }}
-                >
-                  (×{actualCraftingMultiplier.toFixed(2)} cost multiplier)
-                </span>
-              )}
-            </SectionTitle>
             <MaterialList>
-              {selectedConfig.materialRequirements.map((req, index) => (
-                <MaterialItem
-                  key={index}
-                  insufficient={req.currentAmount < req.amount}
-                >
-                  <MaterialIcon>
-                    {getMaterialIcon(req.materialType)}
-                  </MaterialIcon>
-                  <MaterialInfo>
-                    <MaterialName>
-                      {getMaterialName(req.materialType)}
-                    </MaterialName>
-                    <MaterialAmount
-                      insufficient={req.currentAmount < req.amount}
-                    >
-                      {formatNumber(req.currentAmount)} /{" "}
-                      {formatNumber(req.amount)}
-                    </MaterialAmount>
-                  </MaterialInfo>
-                  <MaterialStatus insufficient={req.currentAmount < req.amount}>
-                    {req.currentAmount >= req.amount ? "✓" : "✗"}
-                  </MaterialStatus>
-                </MaterialItem>
-              ))}
+              {/* TODO selectedConfig.materialRequirements arange ascending by materialType   */}
+              {selectedConfig.materialRequirements
+                .sort((a, b) => a.materialType - b.materialType)
+                .map((req, index) => (
+                  <MaterialTooltip key={index} materialType={req.materialType}>
+                    <MaterialItem insufficient={req.currentAmount < req.amount}>
+                      <MaterialIcon>
+                        {getMaterialIcon(req.materialType)}
+                      </MaterialIcon>
+                      <MaterialInfo>
+                        {/* <MaterialName>
+                          {getMaterialName(req.materialType)}
+                        </MaterialName> */}
+                        <MaterialAmount
+                          insufficient={req.currentAmount < req.amount}
+                        >
+                          <p> {formatNumber(req.amount)}</p>
+                        </MaterialAmount>
+                      </MaterialInfo>
+                    </MaterialItem>
+                  </MaterialTooltip>
+                ))}
             </MaterialList>
           </Section>
         )}
@@ -460,7 +629,9 @@ const SpaceshipCraftingPane: React.FC<SpaceshipCraftingPaneProps> = ({
 
 // Styled components
 const Container = styled.div`
-  width: 100%;
+  width: 275px;
+  min-width: 275x;
+  max-width: 275px;
   background: #1a1a1a;
   border: 2px solid #333;
   border-radius: 8px;
@@ -532,55 +703,97 @@ const SectionTitle = styled.h3`
 const SpaceshipGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 6px;
 `;
 
 const SpaceshipCard = styled.div<{ selected: boolean }>`
-  padding: 12px;
-  border: 2px solid ${(props) => (props.selected ? "#4CAF50" : "#333")};
-  border-radius: 6px;
+  position: relative;
+  padding: 6px;
+  border: 1px solid ${(props) => (props.selected ? "#4CAF50" : "#333")};
+  border-radius: 4px;
   cursor: pointer;
   background: ${(props) => (props.selected ? "#2a4a2a" : "#222")};
   transition: all 0.2s;
-`;
-
-const SpaceshipName = styled.div`
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 8px;
-`;
-
-const SpaceshipStats = styled.div`
-  font-size: 12px;
-  color: #ccc;
-`;
-
-const StatsRow = styled.div`
+  min-height: 80px;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 2px;
+  align-items: center;
+  justify-content: center;
 `;
 
-const Stat = styled.div`
-  flex: 1;
-  text-align: center;
+const CornerStat = styled.div<{
+  top?: boolean;
+  bottom?: boolean;
+  left?: boolean;
+  right?: boolean;
+}>`
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: bold;
+  z-index: 2;
+
+  ${(props) => props.top && "top: 4px;"}
+  ${(props) => props.bottom && "bottom: 4px;"}
+  ${(props) => props.left && "left: 4px;"}
+  ${(props) => props.right && "right: 4px;"}
+`;
+
+const BackgroundSprite = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+
+  pointer-events: none;
+`;
+
+const SpaceshipSpriteImage = styled.div<{
+  size: number;
+  src: string;
+  biomeIndex: number;
+}>`
+  image-rendering: crisp-edges;
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
+  display: inline-block;
+  vertical-align: middle;
+  background-image: url(${({ src }) => src});
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  background-position: ${({ biomeIndex, size }) => {
+    // For smaller display sizes, we need to adjust the offset
+    // The sprite sheet has 64px sprites, but we might be displaying at 32px
+    const spriteWidth = 64; // Original sprite width in the sheet
+    const scaleFactor = size / spriteWidth; // How much we're scaling down
+    const adjustedOffset = biomeIndex * spriteWidth * scaleFactor;
+    const position = `-${adjustedOffset}px 0`;
+    return position;
+  }};
 `;
 
 const MaterialList = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
+  justify-content: space-between;
 `;
 
 const MaterialItem = styled.div<{ insufficient: boolean }>`
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 8px 10px;
   background: ${(props) => (props.insufficient ? "#4a2a2a" : "#2a2a2a")};
   border-radius: 6px;
-  border-left: 4px solid
+  border-left: 3px solid
     ${(props) => (props.insufficient ? "#ff6b6b" : "#4caf50")};
   transition: all 0.2s ease;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  cursor: help;
 
   &:hover {
     background: ${(props) => (props.insufficient ? "#5a3a3a" : "#3a3a3a")};
@@ -588,46 +801,29 @@ const MaterialItem = styled.div<{ insufficient: boolean }>`
 `;
 
 const MaterialIcon = styled.div`
-  font-size: 20px;
-  margin-right: 12px;
+  font-size: 16px;
+  margin-right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 `;
 
 const MaterialInfo = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-`;
-
-const MaterialName = styled.span`
-  font-weight: 600;
-  color: #fff;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  gap: 1px;
+  min-width: 0;
 `;
 
 const MaterialAmount = styled.span<{ insufficient: boolean }>`
   font-family: "Courier New", monospace;
-  font-size: 12px;
+  font-size: 10px;
   color: ${(props) => (props.insufficient ? "#ff6b6b" : "#4caf50")};
   font-weight: 500;
-`;
-
-const MaterialStatus = styled.div<{ insufficient: boolean }>`
-  font-size: 16px;
-  color: ${(props) => (props.insufficient ? "#ff6b6b" : "#4caf50")};
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
 `;
 
 const CraftButton = styled.button`

@@ -1,5 +1,7 @@
 import { Renderer } from "@df/renderer";
+import { PlanetRenderManager } from "@df/renderer";
 import { CursorState, ModalManagerEvent, Setting } from "@df/types";
+import { useMUD } from "@mud/MUDContext";
 // import * as fabric from 'fabric'; // v6
 import {
   useCallback,
@@ -63,6 +65,7 @@ export default function ControllableCanvas() {
   // const [fCanvas, setFCanvas] = useState<fabric.Canvas | null>(null);
 
   const gameUIManager = useUIManager();
+  const { components } = useMUD();
 
   const modalManager = gameUIManager.getModalManager();
   const [targeting, setTargeting] = useState<boolean>(false);
@@ -133,7 +136,7 @@ export default function ControllableCanvas() {
     // TODO: Store this as it changes and re-initialize to that if stored
     const defaultWorldUnits = 4;
     Viewport.initialize(gameUIManager, defaultWorldUnits, canvas);
-    Renderer.initialize(
+    const renderer = Renderer.initialize(
       canvasRef.current,
       glRef.current,
       bufferRef.current,
@@ -159,6 +162,14 @@ export default function ControllableCanvas() {
         },
       },
     );
+
+    // Set MUD components for PlanetRenderManager after Renderer is initialized
+    PlanetRenderManager.setComponents(components);
+
+    // Also set components on the renderer for dynamic access
+    (renderer as Renderer & { components: ClientComponents }).components =
+      components;
+
     // We can't attach the wheel event onto the canvas due to:
     // https://www.chromestatus.com/features/6662647093133312
     canvas.addEventListener("wheel", onWheel);

@@ -158,6 +158,7 @@ export class ArtifactUtils {
       reqSilver: metadata.reqSilver,
       chargeUpgrade,
       activateUpgrade,
+      spaceshipType: artifactRec.spaceshipType, // Add spaceship type from MUD component
       transactions: new TxCollection(),
     };
   }

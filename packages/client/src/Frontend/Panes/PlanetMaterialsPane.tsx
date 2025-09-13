@@ -19,6 +19,9 @@ import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
 import SpaceshipCraftingPane from "./SpaceshipCraftingPane";
 import { useFoundryCrafting } from "../../hooks/useFoundryCrafting";
+import { useFoundryCraftingCount } from "../../hooks/useFoundryCraftingCount";
+import MaterialTooltip from "../Components/MaterialTooltip";
+import { foundry } from "viem/chains";
 
 const MaterialsContainer = styled.div`
   display: grid;
@@ -39,6 +42,7 @@ const MaterialCard = styled.div`
   border: 1px solid ${dfstyles.colors.borderDarker};
   border-radius: 6px;
   gap: 8px;
+  cursor: help;
 `;
 
 const MaterialHeader = styled.div`
@@ -242,49 +246,16 @@ const WithdrawButton = styled(Btn)`
   min-width: 60px;
 `;
 
-const SpaceshipCraftingSection = styled.div`
-  margin-top: 20px;
-  padding: 16px;
-  background-color: ${dfstyles.colors.backgroundlighter};
-  border: 1px solid ${dfstyles.colors.borderDarker};
-  border-radius: 8px;
-`;
-
-const CraftingHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-`;
-
-const CraftingTitle = styled.h3`
-  margin: 0;
-  color: ${dfstyles.colors.text};
-  font-size: 16px;
-`;
-
-const CraftingInfo = styled.div`
+const DepletedMessage = styled.div`
+  margin-top: 1px;
+  padding: 1px 1px;
+  background: #4a3a2a;
+  border: 1px solid #ff9800;
+  border-radius: 4px;
+  color: #ff9800;
   font-size: 12px;
-  color: ${dfstyles.colors.subtext};
-  margin-bottom: 12px;
-`;
-
-const CraftingButton = styled(Btn)`
-  width: 100%;
-  height: 40px;
-  font-size: 14px;
+  text-align: center;
   font-weight: bold;
-  background: linear-gradient(45deg, #4caf50, #45a049);
-  border: none;
-
-  &:hover {
-    background: linear-gradient(45deg, #45a049, #3d8b40);
-  }
-
-  &:disabled {
-    background: #666;
-    cursor: not-allowed;
-  }
 `;
 
 export function getMaterialName(materialId: MaterialType): string {
@@ -310,7 +281,7 @@ export function getMaterialName(materialId: MaterialType): string {
     case 10:
       return "BLACKALLOY";
     case 11:
-      return "CORRUPTED CRYSTAL";
+      return "CRYSTALL";
     default:
       return "Unknown";
   }
@@ -425,7 +396,13 @@ export function PlanetMaterialsPane({
   }>({});
 
   // Use foundry crafting hook for real-time data
-  const { craftingData, canCraftMore, refetch } = useFoundryCrafting(planetId);
+  const { craftingData, refetch } = useFoundryCrafting(planetId as string);
+
+  // Use real-time component data for consistent visibility logic
+  const { count: realTimeCraftingCount } = useFoundryCraftingCount(
+    planetId as string,
+  );
+  const canCraftMoreRealTime = realTimeCraftingCount < 3;
 
   const handleWithdraw = (materialType: MaterialType, amount: number) => {
     if (amount > 0 && planet) {
@@ -546,107 +523,112 @@ export function PlanetMaterialsPane({
               const allocation = materialAllocations[mat.materialId] || 0;
 
               return (
-                <MaterialCard key={mat.materialId}>
-                  <MaterialHeader>
-                    <MaterialIcon color={materialColor}>
-                      {getMaterialIcon(mat.materialId)}
-                    </MaterialIcon>
-                    <MaterialName color={materialColor}>
-                      {getMaterialName(mat.materialId)}
-                    </MaterialName>
-                  </MaterialHeader>
+                <MaterialTooltip
+                  key={mat.materialId}
+                  materialType={mat.materialId}
+                >
+                  <MaterialCard>
+                    <MaterialHeader>
+                      <MaterialIcon color={materialColor}>
+                        {getMaterialIcon(mat.materialId)}
+                      </MaterialIcon>
+                      <MaterialName color={materialColor}>
+                        {getMaterialName(mat.materialId)}
+                      </MaterialName>
+                    </MaterialHeader>
 
-                  <MaterialStats>
-                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
-                      <SliderContainer>
-                        <SliderRow>
-                          <SliderValue>{allocation}%</SliderValue>
-                          <SliderButtons>
-                            <SliderButton
-                              onClick={() =>
-                                handleSliderDecrement(mat.materialId)
-                              }
-                              disabled={allocation <= 0}
-                            >
-                              -
-                            </SliderButton>
-                            <SliderButton
-                              onClick={() =>
-                                handleSliderIncrement(mat.materialId)
-                              }
-                              disabled={allocation >= 100}
-                            >
-                              +
-                            </SliderButton>
-                          </SliderButtons>
-                        </SliderRow>
-                      </SliderContainer>
-                    )}
-                    {mat.growth && (
-                      <div style={{ color: "#00ff00" }}>
-                        +{formatCompact2(Number(mat.growthRate) / 1e18)}
-                      </div>
-                    )}
-                  </MaterialStats>
+                    <MaterialStats>
+                      {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                        <SliderContainer>
+                          <SliderRow>
+                            <SliderValue>{allocation}%</SliderValue>
+                            <SliderButtons>
+                              <SliderButton
+                                onClick={() =>
+                                  handleSliderDecrement(mat.materialId)
+                                }
+                                disabled={allocation <= 0}
+                              >
+                                -
+                              </SliderButton>
+                              <SliderButton
+                                onClick={() =>
+                                  handleSliderIncrement(mat.materialId)
+                                }
+                                disabled={allocation >= 100}
+                              >
+                                +
+                              </SliderButton>
+                            </SliderButtons>
+                          </SliderRow>
+                        </SliderContainer>
+                      )}
+                      {mat.growth && (
+                        <div style={{ color: "#00ff00" }}>
+                          +{formatCompact2(Number(mat.growthRate) / 1e18)}
+                        </div>
+                      )}
+                    </MaterialStats>
 
-                  <MaterialBar
-                    percentage={percentage}
-                    materialID={mat.materialId}
-                  >
-                    <MaterialBarText>
-                      {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                      {formatCompact(Number(mat.cap) / 1e18)}
-                    </MaterialBarText>
-                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
-                      <IntegratedSlider
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={allocation}
-                        materialID={mat.materialId}
-                        onChange={(e) =>
-                          handleSliderChange(
-                            mat.materialId,
-                            parseInt(e.target.value),
-                          )
-                        }
-                      />
-                    )}
-                  </MaterialBar>
-
-                  {/* Material Withdrawal Controls */}
-                  {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
-                    <MaterialWithdrawContainer>
-                      <WithdrawInput>
-                        <NumberInput
-                          value={withdrawAmounts[mat.materialId] || 0}
-                          onChange={(e) => {
-                            if (e.target) {
-                              handleAmountChange(
-                                mat.materialId,
-                                (e.target as HTMLInputElement).value,
-                              );
-                            }
-                          }}
+                    <MaterialBar
+                      percentage={percentage}
+                      materialID={mat.materialId}
+                    >
+                      <MaterialBarText>
+                        {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+                        {formatCompact(Number(mat.cap) / 1e18)}
+                      </MaterialBarText>
+                      {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                        <IntegratedSlider
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={allocation}
+                          materialID={mat.materialId}
+                          onChange={(e) =>
+                            handleSliderChange(
+                              mat.materialId,
+                              parseInt(e.target.value),
+                            )
+                          }
                         />
-                      </WithdrawInput>
-                      <WithdrawButton
-                        onClick={() =>
-                          handleWithdraw(
-                            mat.materialId,
-                            withdrawAmounts[mat.materialId] || 0,
-                          )
-                        }
-                        disabled={
-                          !withdrawAmounts[mat.materialId] ||
-                          withdrawAmounts[mat.materialId] <= 0
-                        }
-                      >
-                        Withdraw
-                      </WithdrawButton>
-                    </MaterialWithdrawContainer>
-                  )}
-                </MaterialCard>
+                      )}
+                    </MaterialBar>
+
+                    {/* Material Withdrawal Controls */}
+                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                      <MaterialWithdrawContainer>
+                        <WithdrawInput>
+                          <NumberInput
+                            value={withdrawAmounts[mat.materialId] || 0}
+                            onChange={(e) => {
+                              if (e.target) {
+                                handleAmountChange(
+                                  mat.materialId,
+                                  (e.target as HTMLInputElement).value,
+                                );
+                              }
+                            }}
+                          />
+                        </WithdrawInput>
+                        <WithdrawButton
+                          onClick={() =>
+                            handleWithdraw(
+                              mat.materialId,
+                              withdrawAmounts[mat.materialId] || 0,
+                            )
+                          }
+                          disabled={
+                            !withdrawAmounts[mat.materialId] ||
+                            withdrawAmounts[mat.materialId] <= 0
+                          }
+                        >
+                          Withdraw
+                        </WithdrawButton>
+                      </MaterialWithdrawContainer>
+                    )}
+                  </MaterialCard>
+                </MaterialTooltip>
               );
             })}
           </MaterialsContainer>
@@ -656,17 +638,20 @@ export function PlanetMaterialsPane({
       {/* Spaceship Crafting Section for Foundry Planets */}
       {isFoundry && (
         <Section>
-          {canCraftMore && (
+          {canCraftMoreRealTime && (
             <SpaceshipCraftingPane
               planet={planet}
               onClose={() => {}} // No close needed since it's embedded
               craftingMultiplier={currentMultiplier}
-              craftingCount={craftingData.count}
               onCraftComplete={() => {
                 // Refetch crafting data after successful craft
                 refetch();
               }}
             />
+          )}
+
+          {!canCraftMoreRealTime && (
+            <DepletedMessage>Crafting depleted</DepletedMessage>
           )}
         </Section>
       )}

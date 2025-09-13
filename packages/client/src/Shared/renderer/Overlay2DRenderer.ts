@@ -194,6 +194,47 @@ export class Overlay2DRenderer {
     }
   }
 
+  drawHTMLImageWithClipping(
+    image: HTMLImageElement,
+    center: WorldCoords,
+    width: number,
+    height: number,
+    radius: number,
+    hoveringPlanet: boolean,
+    spriteX: number, // x offset in sprite sheet
+    spriteY: number, // y offset in sprite sheet
+    spriteWidth: number, // width of individual sprite
+    spriteHeight: number, // height of individual sprite
+    rotation: number = 0, // rotation in radians
+  ) {
+    const { ctx } = this;
+    const viewport = this.renderer.getViewport();
+
+    const trueCenter = viewport.worldToCanvasCoords(center);
+    const trueWidth = viewport.worldToCanvasDist(width);
+    const trueHeight = viewport.worldToCanvasDist(height);
+
+    ctx.save();
+    ctx.translate(trueCenter.x, trueCenter.y);
+    ctx.rotate(rotation);
+    ctx.scale(trueWidth / spriteWidth, trueHeight / spriteHeight);
+
+    // Draw the specific sprite from the sprite sheet
+    ctx.drawImage(
+      image,
+      spriteX,
+      spriteY,
+      spriteWidth,
+      spriteHeight, // source rectangle
+      -spriteWidth / 2,
+      -spriteHeight / 2,
+      spriteWidth,
+      spriteHeight, // destination rectangle
+    );
+
+    ctx.restore();
+  }
+
   drawHTMLImage(
     image: HTMLImageElement,
     center: WorldCoords, // center of planet

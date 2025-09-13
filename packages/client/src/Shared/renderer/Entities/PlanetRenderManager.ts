@@ -18,6 +18,9 @@ import {
   memeTypeToNum,
 } from "@df/procedural";
 import { isUnconfirmedMoveTx } from "@df/serde";
+import { getComponentValue } from "@latticexyz/recs";
+import { encodeEntity } from "@latticexyz/store-sync/recs";
+import type { ClientComponents } from "@mud/createClientComponents";
 import type {
   Artifact,
   AvatarType,
@@ -31,10 +34,12 @@ import type {
 } from "@df/types";
 import {
   ArtifactType,
+  Biome,
   HatType,
   LogoType,
   PlanetType,
   RendererType,
+  SpaceshipType,
   TextAlign,
   TextAnchor,
 } from "@df/types";
@@ -58,11 +63,47 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
 
   rendererType = RendererType.PlanetManager;
 
+  // Custom spaceship sprite management
+  private spaceshipImages: Map<SpaceshipType, HTMLImageElement> = new Map();
+  private spaceshipSpritesLoaded: boolean = false;
+
+  // Custom spaceship sprite URLs
+  private static readonly SPACESHIP_SPRITES = {
+    [SpaceshipType.Scout]: "/sprites/Scouts.png",
+    [SpaceshipType.Fighter]: "/sprites/Fighters.png",
+    [SpaceshipType.Destroyer]: "/sprites/Destroyers.png",
+    [SpaceshipType.Carrier]: "/sprites/Cruisers.png", // Using Cruisers.png for Carrier
+  } as const;
+
   HTMLImages: Record<number, HTMLImageElement> = {};
+  private static components: ClientComponents | null = null;
+
   constructor(gl: GameGLManager) {
     this.renderer = gl.renderer;
     this.loadHTMLImages();
+    this.loadSpaceshipSprites();
     // this.loadNewHats();
+  }
+
+  static setComponents(components: ClientComponents): void {
+    PlanetRenderManager.components = components;
+  }
+
+  static refreshComponents(components: ClientComponents): void {
+    PlanetRenderManager.components = components;
+  }
+
+  // Get components from renderer context instead of static components
+  private getComponents(): ClientComponents | null {
+    // Try to get components from renderer context
+    const rendererWithComponents = this.renderer as Renderer & {
+      components?: ClientComponents;
+    };
+    if (rendererWithComponents?.components) {
+      return rendererWithComponents.components;
+    }
+    // Fallback to static components
+    return PlanetRenderManager.components;
   }
 
   loadHTMLImages(): void {
@@ -115,6 +156,29 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       };
     }
   }
+
+  loadSpaceshipSprites(): void {
+    for (const [spaceshipType, spriteUrl] of Object.entries(
+      PlanetRenderManager.SPACESHIP_SPRITES,
+    )) {
+      const img = new Image();
+      img.src = spriteUrl;
+      img.onload = () => {
+        this.spaceshipImages.set(Number(spaceshipType) as SpaceshipType, img);
+        // Check if all sprites are loaded
+        if (
+          this.spaceshipImages.size ===
+          Object.keys(PlanetRenderManager.SPACESHIP_SPRITES).length
+        ) {
+          this.spaceshipSpritesLoaded = true;
+        }
+      };
+      img.onerror = () => {
+        console.warn(`Failed to load spaceship sprite: ${spriteUrl}`);
+      };
+    }
+  }
+
   // loadNewHats(): void {
   //   const keys = Object.keys(hats);
   //   // for (let i = 0; i < keys.length; ++i) {
@@ -372,6 +436,14 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
             radiusW,
             false,
           );
+      } else if (artifacts[i].artifactType === ArtifactType.Spaceship) {
+        // Handle custom spaceship sprites using HTML images
+        this.queueCustomSpaceshipSprite(
+          artifacts[i],
+          { x, y },
+          artifactSize,
+          alpha,
+        );
       } else if (artifacts[i].artifactType !== ArtifactType.Avatar) {
         this.renderer.spriteRenderer.queueArtifactWorld(
           artifacts[i],
@@ -385,6 +457,156 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
         );
       }
     }
+  }
+
+  public queueCustomSpaceshipSprite(
+    artifact: Artifact,
+    centerW: WorldCoords,
+    radiusW: number,
+    alpha: number,
+    fromCoords?: WorldCoords,
+    toCoords?: WorldCoords,
+  ) {
+    if (!this.spaceshipSpritesLoaded) {
+      // Fallback to default sprite renderer
+      this.renderer.spriteRenderer.queueArtifactWorld(
+        artifact,
+        centerW,
+        radiusW,
+        alpha,
+        undefined,
+        undefined,
+        undefined,
+        this.renderer.getViewport(),
+      );
+      return;
+    }
+
+    // Get spaceship type from CraftedSpaceship MUD table
+    let spaceshipType: SpaceshipType | undefined;
+    const components = this.getComponents();
+    if (components) {
+      const artifactId = Number(artifact.id);
+
+      // Safety check: ensure artifactId is a valid number
+      if (isNaN(artifactId) || artifactId <= 0) {
+        console.warn(
+          `Invalid artifact ID: ${artifact.id}, falling back to default spaceship type`,
+        );
+        spaceshipType = SpaceshipType.Scout;
+      } else {
+        const _spaceshipEntity = encodeEntity(
+          components.CraftedSpaceship.metadata.keySchema,
+          {
+            artifactId,
+          },
+        );
+
+        // Access data directly from component values instead of using getComponentValue
+        const spaceshipTypeMap =
+          components.CraftedSpaceship.values.spaceshipType;
+        const _biomeMap = components.CraftedSpaceship.values.biome;
+
+        // Debug: Log available keys in spaceshipTypeMap
+        if (spaceshipTypeMap) {
+          console.log(
+            `Available spaceship type keys:`,
+            Array.from(spaceshipTypeMap.keys()),
+          );
+          console.log(`Looking for artifact ID: ${artifactId}`);
+        }
+
+        // Try to find the correct key in the map by iterating through all keys
+        let foundSpaceshipType: SpaceshipType | undefined;
+        if (spaceshipTypeMap) {
+          for (const [key, value] of spaceshipTypeMap.entries()) {
+            // Check if this key corresponds to our artifactId
+            const keyString = key.toString();
+            if (keyString.includes(artifactId.toString())) {
+              foundSpaceshipType = value as SpaceshipType;
+              console.log(
+                `Found spaceship type for artifact ${artifactId}: ${foundSpaceshipType}`,
+              );
+              break;
+            }
+          }
+        }
+        spaceshipType = foundSpaceshipType;
+
+        // Debug: Log if we couldn't find the spaceship type
+        if (!spaceshipType) {
+          console.log(
+            `No spaceship type found for artifact ${artifactId}, will use fallback`,
+          );
+        }
+      }
+    }
+
+    // Fallback: If no CraftedSpaceship data exists, use default spaceship type
+    if (!spaceshipType) {
+      spaceshipType = SpaceshipType.Scout; // Default to Scout
+    }
+    const spaceshipImage = this.spaceshipImages.get(spaceshipType);
+    if (!spaceshipImage) {
+      // Fallback to default sprite renderer
+      this.renderer.spriteRenderer.queueArtifactWorld(
+        artifact,
+        centerW,
+        radiusW,
+        alpha,
+        undefined,
+        undefined,
+        undefined,
+        this.renderer.getViewport(),
+      );
+      return;
+    }
+
+    // Calculate biome index for sprite selection (0-9)
+    const biomeIndex = this.getBiomeIndex(artifact.planetBiome);
+
+    // Calculate rotation based on movement direction
+    let rotation = 0;
+    if (fromCoords && toCoords) {
+      const dx = toCoords.x - fromCoords.x;
+      const dy = toCoords.y - fromCoords.y;
+      // Calculate the angle from the movement direction
+      // The spaceship sprite's default orientation points to the right (0 radians)
+      // Note: Canvas Y-axis is inverted (positive Y goes down), so we need to flip dy
+      rotation = Math.atan2(-dy, dx);
+    }
+
+    // Use HTML image renderer with biome-specific sprite clipping and rotation
+    this.renderer.overlay2dRenderer.drawHTMLImageWithClipping(
+      spaceshipImage,
+      centerW,
+      radiusW,
+      radiusW,
+      radiusW,
+      false,
+      biomeIndex * 64, // x offset for biome sprite (64px per sprite)
+      0, // y offset (always 0 since it's a horizontal strip)
+      64, // sprite width
+      64, // sprite height
+      rotation, // rotation in radians
+    );
+  }
+
+  private getBiomeIndex(biome: Biome): number {
+    // Map biome to sprite index (0-9)
+    const biomeMap = {
+      [Biome.OCEAN]: 0,
+      [Biome.FOREST]: 1,
+      [Biome.GRASSLAND]: 2,
+      [Biome.TUNDRA]: 3,
+      [Biome.SWAMP]: 4,
+      [Biome.DESERT]: 5,
+      [Biome.ICE]: 6,
+      [Biome.WASTELAND]: 7,
+      [Biome.LAVA]: 8,
+      [Biome.CORRUPTED]: 9,
+    };
+    return biomeMap[biome] ?? 0; // Default to Ocean if biome not found
   }
 
   private drawPlanetMessages(

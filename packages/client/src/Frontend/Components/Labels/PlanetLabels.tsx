@@ -16,6 +16,7 @@ import {
 } from "@frontend/Panes/PlanetMaterialsPane";
 import styled from "styled-components";
 import React from "react";
+import MaterialTooltip from "../MaterialTooltip";
 
 import { getPlanetRank } from "../../../Backend/Utils/Utils";
 import dfstyles from "../../Styles/dfstyles";
@@ -355,37 +356,39 @@ export function MaterialsText({
       {activeMaterials.map((mat, index) => (
         <span key={mat.materialId}>
           {index > 0 && ", "}
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
+          <MaterialTooltip materialType={mat.materialId}>
             <span
               style={{
-                width: "12px",
-                height: "12px",
-                backgroundColor: getMaterialColor(mat.materialId),
-                borderRadius: "2px",
                 display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "10px",
-                lineHeight: "1",
+                gap: "4px",
               }}
             >
-              {getMaterialIcon(mat.materialId)}
+              <span
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  backgroundColor: getMaterialColor(mat.materialId),
+                  borderRadius: "2px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "10px",
+                  lineHeight: "1",
+                }}
+              >
+                {getMaterialIcon(mat.materialId)}
+              </span>
+              <span
+                style={{
+                  color: getMaterialColor(mat.materialId),
+                  fontWeight: "bold",
+                }}
+              >
+                {formatEtherToNumber(mat.materialAmount).toFixed(0)}
+              </span>
             </span>
-            <span
-              style={{
-                color: getMaterialColor(mat.materialId),
-                fontWeight: "bold",
-              }}
-            >
-              {formatEtherToNumber(mat.materialAmount).toFixed(0)}
-            </span>
-          </span>
+          </MaterialTooltip>
         </span>
       ))}
     </span>
@@ -442,68 +445,72 @@ export function MaterialsDisplay({
               : 0;
 
           return (
-            <div
-              key={mat.materialId}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "4px",
-                padding: "4px",
-                backgroundColor: dfstyles.colors.backgroundlighter,
-                borderRadius: "4px",
-                border: `1px solid ${dfstyles.colors.borderDarker}`,
-              }}
-            >
+            <MaterialTooltip key={mat.materialId} materialType={mat.materialId}>
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  fontSize: "0.8em",
+                  flexDirection: "column",
+                  gap: "4px",
+                  padding: "4px",
+                  backgroundColor: dfstyles.colors.backgroundlighter,
+                  borderRadius: "4px",
+                  border: `1px solid ${dfstyles.colors.borderDarker}`,
                 }}
               >
                 <div
                   style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: getMaterialColor(mat.materialId),
-                    borderRadius: "2px",
                     display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    lineHeight: "1",
+                    fontSize: "0.8em",
                   }}
                 >
-                  {getMaterialIcon(mat.materialId)}
-                </div>
-                <span
-                  style={{
-                    color: getMaterialColor(mat.materialId),
-                    fontSize: "12px",
-                  }}
-                >
-                  {getMaterialName(mat.materialId)}
-                </span>
-                {mat.growth && (
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      backgroundColor: getMaterialColor(mat.materialId),
+                      borderRadius: "2px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "12px",
+                      lineHeight: "1",
+                    }}
+                  >
+                    {getMaterialIcon(mat.materialId)}
+                  </div>
                   <span
                     style={{
                       color: getMaterialColor(mat.materialId),
                       fontSize: "12px",
                     }}
                   >
-                    + {""} {formatCompact2(Number(mat.growthRate) / 1e18)}
+                    {getMaterialName(mat.materialId)}
                   </span>
-                )}
-              </div>
+                  {mat.growth && (
+                    <span
+                      style={{
+                        color: getMaterialColor(mat.materialId),
+                        fontSize: "12px",
+                      }}
+                    >
+                      + {""} {formatCompact2(Number(mat.growthRate) / 1e18)}
+                    </span>
+                  )}
+                </div>
 
-              <MaterialBar percentage={percentage} materialID={mat.materialId}>
-                <MaterialBarText>
-                  {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                  {formatCompact(Number(mat.cap) / 1e18)}
-                </MaterialBarText>
-              </MaterialBar>
-            </div>
+                <MaterialBar
+                  percentage={percentage}
+                  materialID={mat.materialId}
+                >
+                  <MaterialBarText>
+                    {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+                    {formatCompact(Number(mat.cap) / 1e18)}
+                  </MaterialBarText>
+                </MaterialBar>
+              </div>
+            </MaterialTooltip>
           );
         })}
       </div>

@@ -511,30 +511,27 @@ export default defineWorld({
     },
     CraftedSpaceship: {
       schema: {
+        artifactId: "uint32",
         spaceshipType: "uint8",
         biome: "Biome",
         rarity: "ArtifactRarity",
+        craftedAt: "uint64",
+        nftTokenId: "uint256",
+        crafter: "address",
+      },
+      key: ["artifactId"],
+    },
+    SpaceshipBonus: {
+      schema: {
+        artifactId: "uint32",
         attackBonus: "uint16",
         defenseBonus: "uint16",
         speedBonus: "uint16",
         rangeBonus: "uint16",
-        crafter: "address",
-        craftedAt: "uint64",
-        nftTokenId: "uint256",
       },
-      key: ["spaceshipType", "biome", "rarity"],
+      key: ["artifactId"],
     },
-    SpaceshipConfig: {
-      schema: {
-        spaceshipType: "uint8",
-        baseAttack: "uint16",
-        baseDefense: "uint16",
-        baseSpeed: "uint16",
-        baseRange: "uint16",
-        materialCost: "uint256",
-      },
-      key: ["spaceshipType"],
-    },
+
     MaterialUpgradeConfig: {
       schema: {
         upgradeType: "uint8",
