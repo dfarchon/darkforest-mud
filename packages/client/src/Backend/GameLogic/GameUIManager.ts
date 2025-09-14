@@ -1,13 +1,19 @@
 import { EMPTY_ADDRESS } from "@df/constants";
 import type { Monomitter } from "@df/events";
 import { monomitter } from "@df/events";
-import { biomeName, isLocatable, isSpaceShip } from "@df/gamelogic";
+import {
+  biomeName,
+  isLocatable,
+  isArtifactSpaceShip,
+  isSpaceShip,
+} from "@df/gamelogic";
 import { isBroken } from "@df/gamelogic";
 import { planetHasBonus } from "@df/hexgen";
 import type { EthConnection } from "@df/network";
 import type { GameGLManager } from "@df/renderer";
 import { Renderer } from "@df/renderer";
 import { isUnconfirmedMoveTx } from "@df/serde";
+import { getSpaceshipBonuses } from "../../Utils/SpaceshipBonusUtils";
 import type {
   Artifact,
   ArtifactId,
@@ -147,8 +153,12 @@ export class GameUIManager extends EventEmitter {
 
   public readonly isSending$: Monomitter<boolean>;
   public readonly isAbandoning$: Monomitter<boolean>;
+  public readonly artifactSending$: Monomitter<
+    { planetId: LocationId; artifact: Artifact | undefined } | undefined
+  >;
 
   private planetHoveringInRenderer = false;
+  private mudComponents: any = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   // lifecycle methods
 
@@ -201,6 +211,9 @@ export class GameUIManager extends EventEmitter {
 
     this.isSending$ = monomitter(true);
     this.isAbandoning$ = monomitter(true);
+    this.artifactSending$ = monomitter<
+      { planetId: LocationId; artifact: Artifact | undefined } | undefined
+    >();
 
     settingChanged$.subscribe((setting) => {
       // If user selects to always use the default energy level, we need to clear existing energy send level values set.
@@ -726,13 +739,48 @@ export class GameUIManager extends EventEmitter {
     to: LocationId | undefined,
     dist: number | undefined,
     energy: number,
+    mudComponents?: unknown,
   ) {
+    const artifactSending = this.getArtifactSending(from);
+    let spaceshipBonuses;
+
+    // Use provided MUD components or fall back to stored ones
+    const componentsToUse = mudComponents || this.mudComponents;
+
+    if (artifactSending && componentsToUse) {
+      spaceshipBonuses = getSpaceshipBonuses(artifactSending, componentsToUse);
+    }
+
     return this.gameManager.getEnergyArrivingForMove(
       from,
       to,
       dist,
       energy,
       this.abandoning,
+      spaceshipBonuses,
+    );
+  }
+
+  public getTimeForMove(
+    fromId: LocationId,
+    toId: LocationId,
+    abandoning = false,
+  ): number {
+    const artifactSending = this.getArtifactSending(fromId);
+    let spaceshipBonuses;
+
+    if (artifactSending && this.mudComponents) {
+      spaceshipBonuses = getSpaceshipBonuses(
+        artifactSending,
+        this.mudComponents,
+      );
+    }
+
+    return this.gameManager.getTimeForMove(
+      fromId,
+      toId,
+      abandoning,
+      spaceshipBonuses,
     );
   }
 
@@ -856,12 +904,11 @@ export class GameUIManager extends EventEmitter {
 
         const dist = this.gameManager.getDist(from.locationId, to.locationId);
 
-        const myAtk: number = this.gameManager.getEnergyArrivingForMove(
+        const myAtk: number = this.getEnergyArrivingForMove(
           from.locationId,
           to.locationId,
           dist,
           forces,
-          this.abandoning,
         );
 
         let effPercentSilver = this.getSilverSending(from.locationId);
@@ -1009,6 +1056,7 @@ export class GameUIManager extends EventEmitter {
       this.abandoning = false;
       this.isAbandoning$.publish(false);
     }
+    this.artifactSending$.publish({ planetId, artifact });
     this.gameManager.getGameObjects().forceTick(planetId);
   }
 
@@ -1500,7 +1548,32 @@ export class GameUIManager extends EventEmitter {
     if (!planetId) {
       return false;
     }
+    // KEEP THIS its for artifact types 17 - 22 not for artifact type 3 artifact.spaceship
     return isSpaceShip(this.artifactSending[planetId]?.artifactType);
+  }
+
+  public setMUDComponents(components: unknown): void {
+    this.mudComponents = components;
+  }
+
+  public getSpaceshipRangeBoost(planetId: LocationId): number {
+    const artifact = this.artifactSending[planetId];
+    if (!artifact || !isArtifactSpaceShip(artifact.artifactType)) {
+      return 1;
+    }
+
+    // Get spaceship bonuses from MUD components
+    if (this.mudComponents) {
+      const spaceshipBonuses = getSpaceshipBonuses(
+        artifact,
+        this.mudComponents,
+      );
+      if (spaceshipBonuses && spaceshipBonuses.rangeBonus > 0) {
+        return (100 + spaceshipBonuses.rangeBonus) / 100; // Convert percentage to multiplier
+      }
+    }
+
+    return 1; // No bonus
   }
 
   public isOverOwnPlanet(coords: WorldCoords): Planet | undefined {

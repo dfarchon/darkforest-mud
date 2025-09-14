@@ -1,11 +1,5 @@
 import { EMPTY_ADDRESS } from "@df/constants";
-import {
-  formatNumber,
-  getRange,
-  hasOwner,
-  isLocatable,
-  isSpaceShip,
-} from "@df/gamelogic";
+import { formatNumber, getRange, hasOwner, isLocatable } from "@df/gamelogic";
 import {
   artifactImageTypeToNum,
   avatarTypeToNum,
@@ -1039,9 +1033,13 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
    * Renders rings around planet that show how far sending the given percentage of this planet's
    * energy would be able to travel.
    */
-  drawRangeAtPercent(planet: LocatablePlanet, pct: number) {
+  drawRangeAtPercent(
+    planet: LocatablePlanet,
+    pct: number,
+    spaceshipRangeBoost = 1,
+  ) {
     const { circleRenderer: cR, textRenderer: tR } = this.renderer;
-    const range = getRange(planet, pct);
+    const range = getRange(planet, pct, spaceshipRangeBoost);
     const {
       range: { dash },
     } = engineConsts.colors;
@@ -1069,22 +1067,17 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
       range: { energy },
     } = engineConsts.colors;
     const { x, y } = planet.location.coords;
-    const sendingArtifact = this.renderer.context.getArtifactSending(
+    // Get spaceship range boost from UI manager
+    const spaceshipRangeBoost = this.renderer.context.getSpaceshipRangeBoost(
       planet.locationId,
     );
-    const sendingSpaceShip = isSpaceShip(sendingArtifact?.artifactType);
-
-    if (sendingSpaceShip) {
-      return;
-    }
-
     const abandonRangeBoost =
       this.renderer.context.getAbandonRangeChangePercent() / 100;
 
     if (!context.isAbandoning()) {
-      this.drawRangeAtPercent(planet, 100);
-      this.drawRangeAtPercent(planet, 50);
-      this.drawRangeAtPercent(planet, 25);
+      this.drawRangeAtPercent(planet, 100, spaceshipRangeBoost);
+      this.drawRangeAtPercent(planet, 50, spaceshipRangeBoost);
+      this.drawRangeAtPercent(planet, 25, spaceshipRangeBoost);
     }
 
     if (planet.owner === EMPTY_ADDRESS) {
@@ -1097,7 +1090,7 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
     const range = getRange(
       planet,
       scaledForces,
-      context.isAbandoning() ? abandonRangeBoost : 1,
+      context.isAbandoning() ? abandonRangeBoost : spaceshipRangeBoost,
     );
 
     if (range > 1) {

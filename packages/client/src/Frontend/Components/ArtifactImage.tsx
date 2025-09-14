@@ -123,6 +123,17 @@ export function ArtifactImage({
       );
     }
 
+    if (isLegendary) {
+      return (
+        <LegendaryArtifactSprite
+          width={size}
+          height={size}
+          src={getImageSrc()}
+          alt={`Artifact ${artifact.artifactType}`}
+        />
+      );
+    }
+
     return (
       <ArtifactSprite
         width={size}
@@ -388,7 +399,79 @@ function MythicArtifactSprite({
         ref={canvasRef}
         width={width}
         height={height}
-        willReadFrequently={true}
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+          imageRendering: "crisp-edges",
+        }}
+      />
+    </>
+  );
+}
+
+// Component for legendary artifacts with canvas-based color inversion
+function LegendaryArtifactSprite({
+  src,
+  alt,
+  width,
+  height,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const image = imageRef.current;
+    if (!canvas || !image) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Set canvas size
+    canvas.width = width;
+    canvas.height = height;
+
+    // Apply legendary color inversion
+    ctx.filter = "invert(1)";
+
+    // Draw the image
+    ctx.drawImage(image, 0, 0, width, height);
+  }, [width, height]);
+
+  return (
+    <>
+      <img
+        ref={imageRef}
+        src={src}
+        alt={alt}
+        style={{ display: "none" }}
+        onLoad={() => {
+          // Trigger canvas redraw when image loads
+          const canvas = canvasRef.current;
+          const image = imageRef.current;
+          if (!canvas || !image) return;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          canvas.width = width;
+          canvas.height = height;
+
+          // Apply legendary color inversion
+          // ctx.filter = "invert(1)";
+
+          ctx.drawImage(image, 0, 0, width, height);
+        }}
+      />
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
         style={{
           width: `${width}px`,
           height: `${height}px`,
@@ -409,8 +492,8 @@ const ArtifactSprite = styled.img<{
       return "none";
     }
     if (isLegendary) {
-      // Legendary effects: color inversion like in viewport
-      return "invert(1)";
+      // For legendary artifacts, we'll use the LegendaryArtifactSprite component instead
+      return "none";
     }
     return "none";
   }};
@@ -551,7 +634,6 @@ function MythicSpaceshipSprite({
         ref={canvasRef}
         width={width}
         height={height}
-        willReadFrequently={true}
         style={{
           width: `${width}px`,
           height: `${height}px`,

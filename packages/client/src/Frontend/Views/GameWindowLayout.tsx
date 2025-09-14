@@ -4,6 +4,7 @@ import { ModalName, Setting } from "@df/types";
 import { AmbiencePane } from "@frontend/Panes/AmbiencePane";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
+import { useMUD } from "@mud/MUDContext";
 
 import { BorderlessPane } from "../Components/CoreUI";
 import {
@@ -69,6 +70,7 @@ export function GameWindowLayout({
   const uiManager = useUIManager();
   const modalManager = uiManager.getModalManager();
   const modalPositions = modalManager.getModalPositions();
+  const { components } = useMUD();
 
   /**
    * We use the existence of a window position for a given modal as an indicator
@@ -171,6 +173,10 @@ export function GameWindowLayout({
   useEffect(() => {
     uiManager.setOverlayContainer(modalsContainer);
   }, [uiManager, modalsContainer]);
+
+  useEffect(() => {
+    uiManager.setMUDComponents(components);
+  }, [uiManager, components]);
 
   const account = uiManager.getAccount();
 

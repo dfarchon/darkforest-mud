@@ -6634,6 +6634,12 @@ export class GameManager extends EventEmitter {
     distance: number | undefined,
     sentEnergy: number,
     abandoning: boolean,
+    spaceshipBonuses?: {
+      attackBonus: number;
+      defenseBonus: number;
+      speedBonus: number;
+      rangeBonus: number;
+    },
   ) {
     const from = this.getPlanetWithId(fromId);
     const to = this.getPlanetWithId(toId);
@@ -6656,9 +6662,26 @@ export class GameManager extends EventEmitter {
     //   }
     // }
 
-    const range = from.range * this.getRangeBuff(abandoning);
+    let range = from.range * this.getRangeBuff(abandoning);
+
+    // Apply spaceship range bonus if provided
+    if (spaceshipBonuses && spaceshipBonuses.rangeBonus > 0) {
+      range = range * ((100 + spaceshipBonuses.rangeBonus) / 100);
+    }
+
     const scale = (1 / 2) ** (dist / range);
     let ret = scale * sentEnergy - 0.05 * from.energyCap;
+
+    // Apply spaceship attack bonus if attacking an enemy and spaceship bonuses are provided
+    if (
+      spaceshipBonuses &&
+      spaceshipBonuses.attackBonus > 0 &&
+      to &&
+      to.owner !== from.owner
+    ) {
+      ret = (ret * (100 + spaceshipBonuses.attackBonus)) / 100;
+    }
+
     if (ret < 0) {
       ret = 0;
     }
@@ -6741,6 +6764,12 @@ export class GameManager extends EventEmitter {
     fromId: LocationId,
     toId: LocationId,
     abandoning = false,
+    spaceshipBonuses?: {
+      attackBonus: number;
+      defenseBonus: number;
+      speedBonus: number;
+      rangeBonus: number;
+    },
   ): number {
     const from = this.getPlanetWithId(fromId);
     if (!isLocatable(from)) {
@@ -6757,7 +6786,12 @@ export class GameManager extends EventEmitter {
 
     // NOTE: The speed factor will always be 1 when SPACE_JUNK_ENABLED=false
     const speedFactor = this.getSpeedBuff(abandoning);
-    const speed = from.speed * speedFactor;
+    let speed = from.speed * speedFactor;
+
+    // Apply spaceship speed bonus if provided
+    if (spaceshipBonuses && spaceshipBonuses.speedBonus > 0) {
+      speed = speed * ((100 + spaceshipBonuses.speedBonus) / 100);
+    }
 
     let deltaTime = dist / (speed / 100);
 

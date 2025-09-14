@@ -98,9 +98,9 @@ contract MoveSystem is BaseSystem {
     MoveData memory shipping = MoveLib.NewMove(fromPlanet, _msgSender());
 
     uint256 d = UniverseLib.distance(fromPlanet, toPlanet, distanceParam);
+    (shipping, fromPlanet) = shipping.loadArtifact(fromPlanet, artifactId);
     (shipping, fromPlanet) = shipping.loadPopulation(fromPlanet, pop, d);
     (shipping, fromPlanet) = shipping.loadSilver(fromPlanet, silv);
-    (shipping, fromPlanet) = shipping.loadArtifact(fromPlanet, artifactId);
     (shipping, fromPlanet) = shipping.loadMaterials(fromPlanet, mats);
     (shipping, toPlanet) = shipping.headTo(toPlanet, d, fromPlanet.speed);
 

@@ -167,6 +167,11 @@ export interface RendererGameContext extends DiagnosticUpdater {
     dist: number | undefined,
     energy: number,
   ): number;
+  getTimeForMove(
+    fromId: LocationId,
+    toId: LocationId,
+    abandoning?: boolean,
+  ): number;
   getEnergyNeededForMove(
     fromId: LocationId,
     toId: LocationId,
@@ -187,6 +192,7 @@ export interface RendererGameContext extends DiagnosticUpdater {
   isAbandoning(): boolean;
   getArtifactSending(planetId: LocationId): Artifact | undefined;
   getAbandonRangeChangePercent(): number;
+  getSpaceshipRangeBoost(planetId: LocationId): number;
   getCaptureZones(): Iterable<CaptureZone>;
   getPinkZones(): Iterable<PinkZone>;
   getAIZones(): Iterable<AIZone>;
