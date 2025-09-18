@@ -30,6 +30,7 @@ interface Errors {
   error ArtifactStorageFull(); // 0xb3643b72
   error ArtifactNotOnPlanet(); // 0x37a29a4e
   error PlanetOwnershipMismatch(); //0xb43ec652
+  error NotEnoughMaterial(); // 0x4f15d777
 
   // tick system
   error Paused(); // 0x9e87fac8
@@ -73,6 +74,9 @@ interface Errors {
   error InvalidPlanetType(); // 0xcfb7f825
   error InsufficientSilverOnPlanet(); // 0xfe845fce
   error WithdrawAmountTooLow(); // 0xba43ea37
+
+  // planet withdraw material system
+  error InsufficientMaterialOnPlanet(); // 0x8c2529c4
 
   // planet junk systemAdd commentMore actions
   error SpaceJunkDisabled(); // 0x94486384

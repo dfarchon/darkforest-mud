@@ -38,3 +38,21 @@ export type ArtifactId = Abstract<string, "ArtifactId">;
  * initial deserialization of a Guild from contract data (see `serde`)
  */
 export type GuildId = Abstract<number, "GuildId">;
+
+/**
+ * A struct describing transfer of a specific material.
+ * A unique identifier for a material (uint8 onchain)
+ * Matches Solidity struct: { uint8 materialId; uint64 amount; }
+ */
+
+export type MaterialId = Abstract<number, "MaterialId">;
+
+/**
+ * Amount of material transferred or stored (uint64 onchain)
+ */
+export type MaterialAmount = Abstract<number, "MaterialAmount">;
+
+export type MaterialTransfer = {
+  materialId: MaterialId;
+  materialAmount: MaterialAmount;
+};

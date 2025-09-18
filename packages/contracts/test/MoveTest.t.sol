@@ -6,13 +6,21 @@ import { BaseTest } from "./BaseTest.t.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { Ticker, TickerData, PendingMove, PendingMoveData, Move, MoveData } from "../src/codegen/index.sol";
 import { Planet as PlanetTable, Counter, TempConfigSet } from "../src/codegen/index.sol";
-import { PlanetType, SpaceType } from "../src/codegen/common.sol";
+import { PlanetType, SpaceType, MaterialType } from "../src/codegen/common.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { Proof } from "../src/lib/SnarkProof.sol";
 import { MoveInput } from "../src/lib/VerificationInput.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
+import { MaterialMove } from "../src/lib/Material.sol";
+import { PlanetMaterial } from "../src/codegen/tables/PlanetMaterial.sol";
+import { PlanetMaterialStorage } from "../src/codegen/tables/PlanetMaterialStorage.sol";
 
 contract MoveTest is BaseTest {
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
+    a = new MaterialMove[](1);
+    a[0] = m1;
+  }
+
   function setUp() public override {
     super.setUp();
 
@@ -47,7 +55,7 @@ contract MoveTest is BaseTest {
     input.toPlanetHash = planet2.planetHash;
     input.distance = 80;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, new MaterialMove[](0));
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 0);
     assertEq(pendingMove.number, 1);
@@ -77,6 +85,40 @@ contract MoveTest is BaseTest {
     assertEq(planet1.silver - 1000, PlanetTable.getSilver(bytes32(planet1.planetHash)));
   }
 
+  function testMoveWithMaterials() public {
+    vm.warp(block.timestamp + 1000);
+    Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
+    Planet memory planet2 = IWorld(worldAddress).df__readPlanet(2);
+
+    // give planet1 some materials of type 1
+    vm.prank(admin);
+    IWorld(worldAddress).df__addMaterial(planet1.planetHash, MaterialType(1), 100);
+    assertEq(PlanetMaterial.get(bytes32(planet1.planetHash), uint8(1)), 100);
+    assertEq(PlanetMaterialStorage.get(bytes32(planet1.planetHash)), 1 << uint8(1));
+
+    Proof memory proof;
+    MoveInput memory input;
+    input.fromPlanetHash = planet1.planetHash;
+    input.toPlanetHash = planet2.planetHash;
+    input.distance = 80;
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 1, amount: 100 })));
+    PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
+    uint256 index = _getIndexAt(pendingMove, 0);
+    MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
+    planet2 = IWorld(worldAddress).df__readPlanetAt(2, move1.arrivalTick);
+    assertEq(planet2.materialStorage.getMaterial(planet2.planetHash, MaterialType(1)), 100);
+
+    vm.warp(_getTimestampAtTick(move1.arrivalTick));
+    vm.prank(user1);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, new MaterialMove[](0));
+    assertEq(PlanetMaterial.get(bytes32(planet2.planetHash), uint8(1)), 100);
+    assertEq(PlanetMaterialStorage.get(bytes32(planet2.planetHash)), 1 << uint8(1));
+
+    assertEq(PlanetMaterialStorage.get(bytes32(planet1.planetHash)), 0);
+    assertEq(PlanetMaterial.get(bytes32(planet1.planetHash), uint8(1)), 0);
+  }
+
   function testPendingMove() public {
     vm.warp(block.timestamp + 1000);
     Planet memory planet1 = IWorld(worldAddress).df__readPlanet(1);
@@ -88,7 +130,7 @@ contract MoveTest is BaseTest {
     input.toPlanetHash = planet2.planetHash;
     input.distance = 320;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     uint256 index = _getIndexAt(pendingMove, 0);
     MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
@@ -96,7 +138,7 @@ contract MoveTest is BaseTest {
     input.distance /= 2;
     planet1 = IWorld(worldAddress).df__readPlanet(1);
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 110000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 110000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 0);
     assertEq(pendingMove.number, 2);
@@ -117,7 +159,7 @@ contract MoveTest is BaseTest {
     vm.warp(_getTimestampAtTick(move2.arrivalTick));
     planet2 = IWorld(worldAddress).df__readPlanet(2);
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 120000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     assertEq(pendingMove.head, 1);
     assertEq(pendingMove.number, 2);
@@ -147,13 +189,13 @@ contract MoveTest is BaseTest {
     input.toPlanetHash = planet2.planetHash;
     input.distance = 320;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     PendingMoveData memory pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     uint256 index = _getIndexAt(pendingMove, 0);
     MoveData memory move1 = Move.get(bytes32(planet2.planetHash), uint8(index));
     input.distance *= 2;
     vm.prank(user1);
-    IWorld(worldAddress).df__move(proof, input, 200000, 1000, 0);
+    IWorld(worldAddress).df__move(proof, input, 200000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     pendingMove = PendingMove.get(bytes32(planet2.planetHash));
     index = _getIndexAt(pendingMove, 1);
     MoveData memory move2 = Move.get(bytes32(planet2.planetHash), uint8(index));

@@ -168,6 +168,48 @@ export type Effect = {
   id: number;
 };
 
+export type MaterialType =
+  | 0 // UNKNOWN
+  | 1 // WATER
+  | 2 // WOOD
+  | 3 // WINDSTEEL
+  | 4 // AURORIUM
+  | 5 // MYCELIUM
+  | 6 // SANDGLASS
+  | 7 // CRYOSTONE
+  | 8 // SCRAPIUM
+  | 9 // PYROSTEEL
+  | 10 // BLACKALLOY
+  | 11; // CORRUPTED_CRYSTAL
+
+export const MaterialType = {
+  UNKNOWN: 0 as MaterialType,
+  WATER_CRYSTALS: 1 as MaterialType,
+  LIVING_WOOD: 2 as MaterialType,
+  WINDSTEEL: 3 as MaterialType,
+  AURORIUM: 4 as MaterialType,
+  MYCELIUM: 5 as MaterialType,
+  SANDGLASS: 6 as MaterialType,
+  CRYOSTONE: 7 as MaterialType,
+  SCRAPIUM: 8 as MaterialType,
+  PYROSTEEL: 9 as MaterialType,
+  BLACKALLOY: 10 as MaterialType,
+  CORRUPTED_CRYSTAL: 11 as MaterialType,
+} as const;
+
+// Utility function to get the maximum MaterialType value
+export const getMaxMaterialType = (): MaterialType => {
+  return Math.max(...Object.values(MaterialType)) as MaterialType;
+};
+
+export type Materials = {
+  materialId: MaterialType;
+  materialAmount: number | bigint | string;
+  cap: number | bigint | string;
+  growthRate: number | bigint | string;
+  growth: boolean;
+};
+
 export type Planet = {
   locationId: LocationId; //planetHash
   perlin: number;
@@ -248,6 +290,7 @@ export type Planet = {
   flags?: bigint;
   junkOwner: EthAddress;
   addJunkTick: number;
+  materials: Materials[];
 };
 
 /**

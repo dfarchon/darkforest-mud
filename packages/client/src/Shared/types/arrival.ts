@@ -2,6 +2,7 @@ import type {
   ArtifactId,
   EthAddress,
   LocationId,
+  MaterialTransfer,
   VoyageId,
 } from "./identifier";
 import type { Abstract } from "./utility";
@@ -21,6 +22,7 @@ export interface QueuedArrival {
   distance: number;
   arrivalTick: number;
   arrivalType: ArrivalType;
+  materialsMoved: MaterialTransfer[];
   // unionId: number;
   // name: string;
   // leader: EthAddress;

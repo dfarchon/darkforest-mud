@@ -19,6 +19,20 @@ export default defineWorld({
       "LAVA",
       "CORRUPTED",
     ],
+    MaterialType: [
+      "UNKNOWN",
+      "WATER_CRYSTALS",
+      "LIVING_WOOD",
+      "WINDSTEEL",
+      "AURORIUM",
+      "MYCELIUM",
+      "SANDGLASS",
+      "CRYOSTONE",
+      "SCRAPIUM",
+      "PYROSTEEL",
+      "BLACKALLOY",
+      "CORRUPTED_CRYSTAL",
+    ],
     ArtifactStatus: ["DEFAULT", "COOLDOWN", "CHARGING", "READY", "ACTIVE", "BROKEN"],
     ArtifactGenre: ["UNKNOWN", "DEFENSIVE", "OFFENSIVE", "PRODUCTIVE", "GENERAL"],
     ArtifactRarity: ["UNKNOWN", "COMMON", "RARE", "EPIC", "LEGENDARY", "MYTHIC"],
@@ -126,6 +140,14 @@ export default defineWorld({
         silver: "uint256",
       },
       key: ["player"],
+    },
+    PlayerWithdrawMaterial: {
+      schema: {
+        player: "address",
+        materialType: "uint8",
+        amount: "uint256",
+      },
+      key: ["player", "materialType"],
     },
     SpawnPlanet: {
       schema: {
@@ -611,6 +633,37 @@ export default defineWorld({
       },
       key: ["owner"],
     },
+    PlanetMaterialStorage: {
+      schema: {
+        planetId: "bytes32",
+        exsitMap: "uint256",
+      },
+      key: ["planetId"],
+    },
+    PlanetMaterial: {
+      schema: {
+        planetId: "bytes32",
+        resourceId: "uint8",
+        amount: "uint256",
+      },
+      key: ["planetId", "resourceId"],
+    },
+    PlanetMaterialGrowth: {
+      schema: {
+        planetId: "bytes32",
+        resourceId: "uint8",
+        growth: "bool",
+      },
+      key: ["planetId", "resourceId"],
+    },
+    MoveMaterial: {
+      schema: {
+        moveId: "uint64",
+        resourceId: "uint8",
+        amount: "uint256",
+      },
+      key: ["moveId", "resourceId"],
+    },
     GlobalStats: {
       schema: {
         registerPlayerCount: "uint256",
@@ -634,6 +687,7 @@ export default defineWorld({
         revealLocationCount: "uint256",
         upgradePlanetCount: "uint256",
         withdrawSilverCount: "uint256",
+        withdrawMaterialCount: "uint256",
       },
       key: [],
     },
@@ -658,6 +712,7 @@ export default defineWorld({
         revealLocationCount: "uint256",
         upgradePlanetCount: "uint256",
         withdrawSilverCount: "uint256",
+        withdrawMaterialCount: "uint256",
       },
       key: ["player"],
     },

@@ -4,6 +4,7 @@ import { hasOwner, isEmojiFlagMessage } from "@df/gamelogic";
 import type {
   Artifact,
   EmojiFlagBody,
+  Materials,
   Planet,
   PlanetMessage,
   QueuedArrival,
@@ -127,6 +128,16 @@ export const updatePlanetToTick = (
 
   planet.energy = getEnergyAtTick(planet, atTick);
   // }
+
+  // update materials to tick only for SILVER_MINE planets
+  if (planet.planetType === PlanetType.SILVER_MINE) {
+    planet.materials = planet.materials.map((mat) => ({
+      ...mat,
+      materialAmount: Number(
+        getMaterialAmount(mat, planet.lastUpdated, atTick).toFixed(0),
+      ),
+    }));
+  }
 
   planet.lastUpdated = atTick;
 
@@ -284,7 +295,21 @@ export const arrive = (
     // }
     arrivingArtifact.onPlanetId = toPlanet.locationId;
   }
-
+  // materials moved with arrival
+  if (arrival.materialsMoved) {
+    for (const moved of arrival.materialsMoved) {
+      const idx = toPlanet.materials.findIndex(
+        (mat) => mat?.materialId === moved?.materialId,
+      );
+      if (idx !== -1) {
+        toPlanet.materials[idx].materialAmount = Math.min(
+          Number(toPlanet.materials[idx].materialAmount) +
+            Number(moved.materialAmount),
+          Number(toPlanet.materials[idx].cap),
+        );
+      }
+    }
+  }
   return { arrival, current: toPlanet, previous: prevPlanet };
 };
 
@@ -292,6 +317,36 @@ export const arrive = (
  * @todo ArrivalUtils has become a dumping ground for functions that should just live inside of a
  * `Planet` class.
  */
+
+const getMaterialAmount = (
+  material: Materials,
+  startTick: number,
+  endTick: number,
+): number => {
+  const ticksPassed = endTick - startTick;
+
+  const growthRate =
+    typeof material.growthRate === "bigint"
+      ? Number(material.growthRate)
+      : material.growthRate;
+
+  const currentAmount =
+    typeof material.materialAmount === "bigint"
+      ? Number(material.materialAmount)
+      : material.materialAmount;
+
+  const cap =
+    typeof material.cap === "bigint" ? Number(material.cap) : material.cap;
+
+  if (!material.growth) {
+    return Number(currentAmount);
+  }
+
+  const grown = ticksPassed * Number(growthRate);
+
+  return Math.min(Number(currentAmount) + grown, Number(cap));
+};
+
 export function getEmojiMessage(
   planet: Planet | undefined,
 ): PlanetMessage<EmojiFlagBody> | undefined {

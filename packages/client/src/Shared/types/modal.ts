@@ -31,10 +31,10 @@ export const ModalName = {
   PlanetContextPane: "PlanetContextPane" as ModalName,
   GuildContextPane: "GuildContextPane" as ModalName,
   TransactionLog: "TransactionLog" as ModalName,
-
+  // BuyArtifact: "BuyArtifact" as ModalName,
   WithdrawSilver: "WithdrawSilver" as ModalName,
   Diagnostics: "Diagnostics" as ModalName,
-
+  // Blue: "Blue" as ModalName,
   ArtifactConversation: "ArtifactConversation" as ModalName,
   ArtifactDetails: "ArtifactDetails" as ModalName,
   MapShare: "MapShare" as ModalName,
@@ -42,7 +42,8 @@ export const ModalName = {
   Onboarding: "Onboarding" as ModalName,
   Private: "Private" as ModalName,
   Wallet: "Wallet" as ModalName,
-};
+  PlanetMaterials: "PlanetMaterials" as ModalName,
+} as const;
 
 export type CursorState = Abstract<string, "CursorState">;
 

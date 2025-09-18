@@ -2,13 +2,17 @@
 pragma solidity >=0.8.24;
 
 import { BaseSystem } from "systems/internal/BaseSystem.sol";
-import { Planet } from "libraries/Planet.sol";
-import { PlanetType } from "codegen/common.sol";
+import { Planet, PlanetLib } from "libraries/Planet.sol";
+import { PlanetType, Biome, MaterialType, SpaceType } from "codegen/common.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
+import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { Proof } from "libraries/SnarkProof.sol";
+import { BiomebaseInput } from "libraries/VerificationInput.sol";
+import { SnarkConfig, SnarkConfigData } from "codegen/tables/SnarkConfig.sol";
 
 contract PlanetJunkSystem is BaseSystem {
   modifier requireSpaceJunkEnabled() {
@@ -20,40 +24,86 @@ contract PlanetJunkSystem is BaseSystem {
   /**
    * @notice add junk to player
    * @param planetHash Planet hash
+   * @param biomeBase Biome base value for verification
+   * @param proof ZK proof for biome base verification
    */
-  function addJunk(uint256 planetHash) public entryFee requireSpaceJunkEnabled {
+  function addJunk(uint256 planetHash, uint256 biomeBase, Proof memory proof) public entryFee requireSpaceJunkEnabled {
+    _updateStats();
+    _processAddJunk(planetHash, biomeBase, proof);
+  }
+
+  function _updateStats() internal {
     GlobalStats.setAddJunkCount(GlobalStats.getAddJunkCount() + 1);
     PlayerStats.setAddJunkCount(_msgSender(), PlayerStats.getAddJunkCount(_msgSender()) + 1);
+  }
 
+  function _processAddJunk(uint256 planetHash, uint256 biomeBase, Proof memory proof) internal {
     address worldAddress = _world();
     DFUtils.tick(worldAddress);
 
     Planet memory planet = DFUtils.readInitedPlanet(worldAddress, planetHash);
     address executor = _msgSender();
 
-    if (executor == planet.junkOwner) revert InvalidJunkOperation();
+    _validateAddJunk(planet, executor);
+    _executeAddJunk(planet, executor, biomeBase, proof);
+  }
 
+  function _validateAddJunk(Planet memory planet, address executor) internal view {
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
-
     uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
-
-    address oldPlanetJunkOwner = planet.junkOwner;
-    uint256 oldOwnerJunk = PlayerJunk.get(oldPlanetJunkOwner);
     uint256 playerJunk = PlayerJunk.get(executor);
 
     if (planet.owner != executor) revert NotPlanetOwner();
     if (playerJunk + planetJunk > SPACE_JUNK_LIMIT) revert JunkLimitExceeded();
+  }
 
+  function _executeAddJunk(Planet memory planet, address executor, uint256 biomeBase, Proof memory proof) internal {
+    _updateJunkOwnership(planet, executor);
+    _verifyBiomeProof(planet, biomeBase, proof);
+    _initAsteroidMaterials(planet, biomeBase);
+    planet.writeToStore();
+  }
+
+  function _updateJunkOwnership(Planet memory planet, address executor) internal {
+    uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
+    uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
+
+    address oldPlanetJunkOwner = planet.junkOwner;
     if (oldPlanetJunkOwner != address(0)) {
-      PlayerJunk.set(oldPlanetJunkOwner, (oldOwnerJunk - planetJunk));
+      uint256 oldOwnerJunk = PlayerJunk.get(oldPlanetJunkOwner);
+      PlayerJunk.set(oldPlanetJunkOwner, oldOwnerJunk - planetJunk);
     }
 
     planet.junkOwner = executor;
     planet.addJunkTick = DFUtils.getCurrentTick();
+    uint256 playerJunk = PlayerJunk.get(executor);
     PlayerJunk.set(executor, playerJunk + planetJunk);
+  }
 
-    planet.writeToStore();
+  function _verifyBiomeProof(Planet memory planet, uint256 biomeBase, Proof memory proof) internal {
+    BiomebaseInput memory input;
+    input.planetHash = planet.planetHash;
+    input.biomebase = biomeBase;
+
+    SnarkConfigData memory config = SnarkConfig.get();
+    input.mimcHashKey = config.planetHashKey;
+    input.biomebaseKey = config.biomeBaseKey;
+    input.perlinLengthScale = config.perlinLengthScale;
+    input.perlinMirrorX = config.perlinMirrorX;
+    input.perlinMirrorY = config.perlinMirrorY;
+
+    DFUtils.verify(_world(), proof, input);
+  }
+
+  function _initAsteroidMaterials(Planet memory planet, uint256 biomeBase) internal view {
+    if (planet.planetType == PlanetType.ASTEROID_FIELD) {
+      Biome biome = planet._getBiome(biomeBase);
+      MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
+      for (uint256 i; i < allowed.length; i++) {
+        planet.initMaterial(allowed[i]);
+      }
+    }
   }
 
   /**

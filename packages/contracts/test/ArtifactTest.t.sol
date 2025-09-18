@@ -12,9 +12,15 @@ import { BiomebaseInput, MoveInput } from "../src/lib/VerificationInput.sol";
 import { Planet } from "../src/lib/Planet.sol";
 import { PlanetType, SpaceType, ArtifactStatus, PlanetFlagType } from "../src/codegen/common.sol";
 import { Artifact, ArtifactLib } from "../src/lib/Artifact.sol";
+import { MaterialMove } from "../src/lib/Material.sol";
 import { TempConfigSet } from "../src/codegen/index.sol";
 
 contract ArtifactTest is BaseTest {
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
+    a = new MaterialMove[](1);
+    a[0] = m1;
+  }
+
   function setUp() public virtual override {
     super.setUp();
     vm.startPrank(admin);
@@ -110,18 +116,17 @@ contract ArtifactTest is BaseTest {
     input.planetHash = 1;
     vm.prank(address(1));
     IWorld(worldAddress).df__findingArtifact(proof, input);
-
     // move artifact
     vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
-    _move(1, 2, 80, 100000, 1000, 1);
+    _move(1, 2, 80, 100000, 1000, 1, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 0);
 
     // artifact arrives
     vm.warp(block.timestamp + 1000);
     vm.prank(address(2));
-    _move(2, 1, 80, 100000, 1000, 0); // to update two planets
+    _move(2, 1, 80, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 }))); // to update two planets
     assertEq(ArtifactOwner.get(1), bytes32(uint256(2)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 1);
   }
@@ -147,12 +152,12 @@ contract ArtifactTest is BaseTest {
     // move artifact
     vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
-    _move(1, 2, 80, 50000, 1000, 1);
+    _move(1, 2, 80, 50000, 1000, 1, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
 
     // artifact arrives
     vm.warp(block.timestamp + 1000);
     vm.prank(address(2));
-    _move(2, 1, 80, 50000, 1000, 0); // to update two planets
+    _move(2, 1, 80, 50000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 }))); // to update two planets
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 2 + (uint256(1) << 32));
 
     // use admin to create more artifacts on planet 2
@@ -161,13 +166,13 @@ contract ArtifactTest is BaseTest {
 
     // move artifact
     vm.prank(address(2));
-    _move(2, 1, 80, 50000, 1000, 1);
+    _move(2, 1, 80, 50000, 1000, 1, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(2))), 2 + (uint256(3) << 32));
 
     // artifact arrives
     vm.warp(block.timestamp + 1000);
     vm.prank(address(1));
-    _move(1, 2, 80, 50000, 1000, 0); // to update two planets
+    _move(1, 2, 80, 50000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 }))); // to update two planets
     assertEq(ArtifactOwner.get(1), bytes32(uint256(1)));
     assertEq(PlanetArtifact.getArtifacts(bytes32(uint256(1))), 1);
   }
@@ -178,13 +183,14 @@ contract ArtifactTest is BaseTest {
     uint256 distance,
     uint256 population,
     uint256 silver,
-    uint256 artifact
+    uint256 artifact,
+    MaterialMove[] memory mats
   ) internal {
     Proof memory proof;
     MoveInput memory input;
     input.fromPlanetHash = from;
     input.toPlanetHash = to;
     input.distance = distance;
-    IWorld(worldAddress).df__move(proof, input, population, silver, artifact);
+    IWorld(worldAddress).df__move(proof, input, population, silver, artifact, mats);
   }
 }

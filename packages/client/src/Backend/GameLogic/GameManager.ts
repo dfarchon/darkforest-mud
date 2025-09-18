@@ -26,6 +26,7 @@ import {
   address,
   artifactIdToDecStr,
   isUnconfirmedActivateArtifactTx,
+  isUnconfirmedAddJunkTx,
   isUnconfirmedBlueTx,
   isUnconfirmedBurnTx,
   isUnconfirmedBuyArtifactTx,
@@ -37,6 +38,7 @@ import {
   isUnconfirmedChangeArtifactImageTypeTx,
   isUnconfirmedChargeArtifactTx,
   isUnconfirmedClaimTx,
+  isUnconfirmedClearJunkTx,
   isUnconfirmedDeactivateArtifactTx,
   isUnconfirmedDepositArtifactTx,
   isUnconfirmedDonateTx,
@@ -51,17 +53,16 @@ import {
   isUnconfirmedRevealTx,
   isUnconfirmedSendGPTTokensTx,
   isUnconfirmedSetPlanetEmojiTx,
-  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedShutdownArtifactTx,
+  isUnconfirmedSpendGPTTokensTx,
   isUnconfirmedUpgradeTx,
   isUnconfirmedWithdrawArtifactTx,
+  isUnconfirmedWithdrawMaterialTx,
   isUnconfirmedWithdrawSilverTx,
   locationIdFromBigInt,
   locationIdFromHexStr,
   locationIdToDecStr,
   locationIdToHexStr,
-  isUnconfirmedAddJunkTx,
-  isUnconfirmedClearJunkTx,
 } from "@df/serde";
 import type {
   RevealInput,
@@ -69,6 +70,7 @@ import type {
   SnarkProof,
 } from "@df/snarks";
 import type {
+  AIZone,
   Artifact,
   ArtifactId,
   Biome,
@@ -85,9 +87,10 @@ import type {
   Link,
   LocatablePlanet,
   LocationId,
+  MaterialTransfer,
+  MaterialType,
   NetworkHealthSummary,
   PinkZone,
-  AIZone,
   Planet,
   PlanetLevel,
   Player,
@@ -101,6 +104,7 @@ import type {
   TxIntent,
   UnconfirmedAcceptInvitation,
   UnconfirmedActivateArtifact,
+  UnconfirmedAddJunk,
   UnconfirmedApplyToGuild,
   UnconfirmedApproveApplication,
   UnconfirmedBlue,
@@ -114,6 +118,7 @@ import type {
   UnconfirmedChangeArtifactImageType,
   UnconfirmedChargeArtifact,
   UnconfirmedClaim,
+  UnconfirmedClearJunk,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -132,22 +137,21 @@ import type {
   UnconfirmedProspectPlanet,
   UnconfirmedRefreshPlanet,
   UnconfirmedReveal,
+  UnconfirmedSendGPTTokens,
   UnconfirmedSetGrant,
   UnconfirmedSetMemberRole,
-  UnconfirmedSendGPTTokens,
   UnconfirmedSetPlanetEmoji,
-  UnconfirmedSpendGPTTokens,
   UnconfirmedShutdownArtifact,
+  UnconfirmedSpendGPTTokens,
   UnconfirmedTransferGuildLeadership,
   UnconfirmedUpgrade,
   UnconfirmedWithdrawArtifact,
+  UnconfirmedWithdrawMaterial,
   UnconfirmedWithdrawSilver,
   Upgrade,
   VoyageId,
   WorldCoords,
   WorldLocation,
-  UnconfirmedAddJunk,
-  UnconfirmedClearJunk,
 } from "@df/types";
 import type { Guild, GuildId } from "@df/types";
 import {
@@ -174,7 +178,7 @@ import { BigNumber } from "ethers";
 import { utils } from "ethers";
 import { EventEmitter } from "events";
 import type { Hex } from "viem";
-import { encodeFunctionData, toBytes } from "viem";
+import { encodeAbiParameters, encodeFunctionData, toBytes } from "viem";
 
 import type {
   ContractConstants,
@@ -4975,8 +4979,93 @@ export class GameManager extends EventEmitter {
     }
   }
 
+  public async withdrawMaterial(
+    locationId: LocationId,
+    materialType: MaterialType,
+    amount: number,
+  ): Promise<Transaction<UnconfirmedWithdrawMaterial>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      const planet = this.entityStore.getPlanetWithId(locationId);
+      if (!planet) {
+        throw new Error("tried to withdraw material from an unknown planet");
+      }
+      if (planet.planetType !== PlanetType.TRADING_POST) {
+        throw new Error("can only withdraw material from spacetime rips");
+      }
+      if (!this.checkDelegateCondition(planet.owner, this.getAccount())) {
+        throw new Error("can only withdraw material from a planet you own");
+      }
+      if (
+        planet.transactions?.hasTransaction(isUnconfirmedWithdrawMaterialTx)
+      ) {
+        throw new Error(
+          "a withdraw material action is already in progress for this planet",
+        );
+      }
+
+      // Check if planet has the material
+      const material = planet.materials?.find(
+        (m) => m?.materialId === materialType,
+      );
+      if (!material || Number(material.materialAmount) < amount * 1e18) {
+        throw new Error("not enough material to withdraw!");
+      }
+      if (amount * 1e18 * 5 < Number(material.cap)) {
+        throw new Error("require materialAmount >= materialCap * 0.2");
+      }
+
+      if (amount === 0) {
+        throw new Error("must withdraw more than 0 material!");
+      }
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-withdrawMaterialPlanet`,
+        locationId,
+      );
+
+      const delegator = planet.owner;
+
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+      const txIntent: UnconfirmedWithdrawMaterial = {
+        delegator: delegator,
+        methodName: "df__withdrawMaterial",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          materialType,
+          amount * 1e18,
+        ]),
+        locationId,
+        materialType,
+        amount,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__withdrawMaterial",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
   public async addJunk(
     locationId: LocationId,
+    biomeBase?: number,
   ): Promise<Transaction<UnconfirmedAddJunk>> {
     try {
       if (!this.account) {
@@ -5014,6 +5103,10 @@ export class GameManager extends EventEmitter {
         throw new Error("can only add junk to your own planet");
       }
 
+      if (!isLocatable(planet)) {
+        throw new Error("you don't know the coordinates of this planet");
+      }
+
       const player = this.getPlayer(this.getAccount());
 
       if (!player) {
@@ -5041,12 +5134,25 @@ export class GameManager extends EventEmitter {
         throw Error("no delegator account");
       }
 
+      // Generate proof for biome base verification
+      const locatablePlanet = planet as LocatablePlanet;
+      const proof = await this.snarkHelper.getFindArtifactArgs(
+        locatablePlanet.location.coords.x,
+        locatablePlanet.location.coords.y,
+      );
+
       const txIntent: UnconfirmedAddJunk = {
         delegator: delegator,
         methodName: "df__addJunk",
         contract: this.contractsAPI.contract,
-        args: Promise.resolve([locationIdToDecStr(locationId)]),
+        args: Promise.resolve([
+          locationIdToDecStr(locationId),
+          biomeBase || 0, // Use provided biomeBase or default to 0
+          proof, // ZK proof for biome base verification
+        ]),
         locationId,
+        biomeBase: biomeBase || 0,
+        proof,
       };
 
       const transactionFee = this.getTransactionFee();
@@ -5385,6 +5491,7 @@ export class GameManager extends EventEmitter {
    * Submits a transaction to the blockchain to move the given amount of resources from
    * the given planet to the given planet.
    */
+
   public async move(
     from: LocationId,
     to: LocationId,
@@ -5392,6 +5499,7 @@ export class GameManager extends EventEmitter {
     silver: number,
     artifactMoved?: ArtifactId,
     abandoning = false,
+    materials?: MaterialTransfer[],
   ): Promise<Transaction<UnconfirmedMove>> {
     localStorage.setItem(
       `${this.ethConnection.getAddress()?.toLowerCase()}-fromPlanet`,
@@ -5406,7 +5514,33 @@ export class GameManager extends EventEmitter {
       // if (!bypassChecks && this.checkGameHasEnded()) {
       //   throw new Error('game has ended');
       // }
+      function encodeMovedMaterials(
+        mats?: readonly {
+          materialId: number | bigint;
+          materialAmount: number | bigint;
+        }[],
+      ): `0x${string}` {
+        if (!mats || mats.length === 0)
+          return "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000";
 
+        console.log("mats", mats);
+        const norm = mats.map((m) => ({
+          resourceId: Number(m.materialId) & 0xff, // uint8
+          amount: BigInt(m.materialAmount) & ((1n << 256n) - 1n), // uint256
+        }));
+        return encodeAbiParameters(
+          [
+            {
+              type: "tuple[]",
+              components: [
+                { name: "resourceId", type: "uint8" },
+                { name: "amount", type: "uint256" },
+              ],
+            },
+          ],
+          [norm],
+        ) as `0x${string}`;
+      }
       const arrivalsToOriginPlanet =
         this.entityStore.getArrivalIdsForLocation(from);
       const hasIncomingVoyage =
@@ -5441,6 +5575,16 @@ export class GameManager extends EventEmitter {
       // Contract will automatically send full forces/silver on abandon
       const shipsMoved = !abandoning ? forces : 0;
       const silverMoved = !abandoning ? silver : 0;
+      let materialsMoved: MaterialTransfer[] = [];
+      // Auto-pack all materials on abandon
+      if (abandoning && materials) {
+        materialsMoved = materials.map((mat) => ({
+          materialId: mat.materialId,
+          materialAmount: mat.materialAmount, // convert from string | bigint
+        }));
+      } else if (materials) {
+        materialsMoved = materials;
+      }
 
       if (newX ** 2 + newY ** 2 >= this.worldRadius ** 2) {
         throw new Error("attempted to move out of bounds");
@@ -5477,7 +5621,7 @@ export class GameManager extends EventEmitter {
           this.worldRadius,
           distMax,
         );
-
+        const movedMaterials = encodeMovedMaterials(materialsMoved);
         const args: MoveArgs = [
           snarkArgs[ZKArgIdx.PROOF_A],
           snarkArgs[ZKArgIdx.PROOF_B],
@@ -5487,23 +5631,24 @@ export class GameManager extends EventEmitter {
           (silverMoved * CONTRACT_PRECISION).toString(),
           "0",
           abandoning ? "1" : "0",
-        ] as MoveArgs;
+          movedMaterials,
+        ] as unknown as MoveArgs;
 
         this.terminal.current?.println(
           "MOVE: calculated SNARK with args:",
           TerminalTextStyle.Sub,
         );
-        this.terminal.current?.println(
-          JSON.stringify(hexifyBigIntNestedArray(args)),
-          TerminalTextStyle.Sub,
-        );
+        // this.terminal.current?.println(
+        //   JSON.stringify(hexifyBigIntNestedArray(args)),
+        //   TerminalTextStyle.Sub,
+        // );
         this.terminal.current?.newline();
 
         if (artifactMoved) {
           args[6] = artifactIdToDecStr(artifactMoved);
         }
-        // console.log("move args");
-        // console.log(args);
+        console.log("move args");
+        console.log(args);
         return args;
       };
 
@@ -5523,6 +5668,7 @@ export class GameManager extends EventEmitter {
         silver: silverMoved,
         artifact: artifactMoved,
         abandoning,
+        materials: materialsMoved,
       };
 
       if (artifactMoved) {
@@ -5540,7 +5686,8 @@ export class GameManager extends EventEmitter {
       }
 
       const transactionFee = this.getTransactionFee();
-
+      console.log("args tx", txIntent);
+      // debugger;
       // Always await the submitTransaction so we can catch rejections
       const tx = await this.contractsAPI.submitTransaction(txIntent, {
         value: transactionFee,

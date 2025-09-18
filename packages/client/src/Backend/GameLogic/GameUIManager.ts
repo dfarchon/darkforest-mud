@@ -19,6 +19,9 @@ import type {
   Link,
   LocatablePlanet,
   LocationId,
+  MaterialAmount,
+  MaterialId,
+  MaterialType,
   PerlinConfig,
   Planet,
   Player,
@@ -47,6 +50,7 @@ import {
 import autoBind from "auto-bind";
 import type { BigNumber } from "ethers";
 import EventEmitter from "events";
+import { Howl } from "howler";
 import deferred from "p-defer";
 import type React from "react";
 import type { Hex } from "viem";
@@ -79,7 +83,6 @@ import type { GuildUtils } from "./GuildUtils";
 import { PluginManager } from "./PluginManager";
 import TutorialManager, { TutorialState } from "./TutorialManager";
 import { ViewportEntities } from "./ViewportEntities";
-import { Howl } from "howler";
 
 export const enum GameUIManagerEvent {
   InitializedPlayer = "InitializedPlayer",
@@ -534,9 +537,31 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.withdrawSilver(locationId, amount);
   }
 
-  public addJunk(locationId: LocationId) {
+  public withdrawMaterial(
+    locationId: LocationId,
+    materialType: MaterialType,
+    amount: number,
+  ) {
+    const dontShowWarningStorageKey = `${this.getAccount()?.toLowerCase()}-withdrawMaterialWarningAcked`;
+
+    if (localStorage.getItem(dontShowWarningStorageKey) !== "true") {
+      localStorage.setItem(dontShowWarningStorageKey, "true");
+      const confirmationText =
+        `Are you sure you want withdraw this material? Once you withdraw it, you ` +
+        `cannot deposit it again. Your withdrawn material amount will be added to your score with biome-based multipliers. You'll only see this warning once!`;
+      if (!confirm(confirmationText)) {
+        return;
+      }
+    }
     this.playClickSound();
-    this.gameManager.addJunk(locationId);
+
+    this.gameManager.withdrawMaterial(locationId, materialType, amount);
+  }
+
+  public addJunk(locationId: LocationId, biomeBase?: number) {
+    this.playClickSound();
+    console.log("addJunk", locationId, biomeBase);
+    this.gameManager.addJunk(locationId, biomeBase);
   }
 
   public clearJunk(locationId: LocationId) {
@@ -837,9 +862,10 @@ export class GameUIManager extends EventEmitter {
         if (myAtk > 0 || this.isSendingShip(from.locationId)) {
           const abandoning = this.isAbandoning();
           const silver = Math.floor((from.silver * effPercentSilver) / 100);
+          const materials = this.getMaterialsSending?.(from.locationId) ?? [];
           // TODO: do something like JSON.stringify(args) so we know formatting is correct
           this.terminal.current?.printShellLn(
-            `df.move('${from.locationId}', '${to.locationId}', ${forces}, ${silver})`,
+            `df.move('${from.locationId}', '${to.locationId}', ${forces}, ${silver}, ${JSON.stringify(materials ?? [])})`,
           );
           const artifact = this.getArtifactSending(from.locationId);
 
@@ -851,6 +877,7 @@ export class GameUIManager extends EventEmitter {
             silver,
             artifact?.id,
             abandoning,
+            materials,
           );
           tutorialManager.acceptInput(TutorialState.SendFleet);
         }
@@ -2119,5 +2146,67 @@ export class GameUIManager extends EventEmitter {
       },
     });
     clickSound.play();
+  }
+
+  private materialSending = new Map<string, number>(); // key: `${locationId}-${materialId}`
+
+  public getMaterialSending(
+    locationId: LocationId | undefined,
+    matId: number,
+  ): number {
+    if (!locationId) return 0;
+    return this.materialSending.get(`${locationId}-${matId}`) || 0;
+  }
+
+  public setMaterialSending(
+    locationId: LocationId | undefined,
+    matId: number,
+    percent: number,
+  ) {
+    if (!locationId) return;
+    this.materialSending.set(`${locationId}-${matId}`, percent);
+  }
+
+  /**
+   * Get material transfer list for a planet based on UI-configured percentages.
+   * Returns array of `{ materialId, amount }`.
+   */
+  public getMaterialsSending(
+    locationId?: LocationId,
+  ): { materialId: MaterialId; materialAmount: MaterialAmount }[] {
+    if (!locationId) return [];
+    const planet = this.getPlanetWithId(locationId);
+    if (!planet?.materials?.length) return [];
+
+    const results: {
+      materialId: MaterialId;
+      materialAmount: MaterialAmount;
+    }[] = [];
+
+    for (const mat of planet.materials) {
+      if (!mat) continue;
+      const percent = this.getMaterialSending(locationId, mat.materialId);
+      if (!percent || percent <= 0) continue;
+
+      const current =
+        typeof mat.materialAmount === "bigint"
+          ? Number(mat.materialAmount)
+          : Number(mat.materialAmount);
+
+      // Convert from scaled amount (with 1e18) to base unit for contract
+      const baseAmount = current;
+      const send = Math.floor((baseAmount * percent) / 100);
+      if (send > 0) {
+        console.log(
+          `Material ${mat.materialId}: original=${current}, scaled=${baseAmount}, percent=${percent}, sending=${send}`,
+        );
+        results.push({
+          materialId: mat.materialId as MaterialId,
+          materialAmount: send as MaterialAmount,
+        });
+      }
+    }
+
+    return results;
   }
 }

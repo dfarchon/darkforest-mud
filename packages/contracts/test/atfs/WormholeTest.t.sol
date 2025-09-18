@@ -19,9 +19,16 @@ import { _artifactIndexToNamespace } from "../../src/modules/atfs/utils.sol";
 import { _wormholeDestTableId, _wormholeRecordTableId } from "../../src/modules/atfs/Wormhole/utils.sol";
 import { WormholeRecord } from "../../src/modules/atfs/Wormhole/tables/WormholeRecord.sol";
 import "forge-std/console.sol";
+import { MaterialMove } from "../../src/lib/Material.sol";
+import { PlanetOwner } from "../../src/codegen/tables/PlanetOwner.sol";
 
 contract WormholeTest is BaseTest {
   uint32[] wormholeMultipliers = [1000, 500, 250, 125, 62, 31];
+
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
+    a = new MaterialMove[](1);
+    a[0] = m1;
+  }
 
   function setUp() public virtual override {
     super.setUp();
@@ -32,7 +39,7 @@ contract WormholeTest is BaseTest {
     TempConfigSet.setSkipProofCheck(true);
     IWorld(worldAddress).df__unpause();
     IWorld(worldAddress).df__createPlanet(1, address(1), 0, 1, PlanetType.FOUNDRY, SpaceType.NEBULA, 300000, 10000, 0);
-    IWorld(worldAddress).df__createPlanet(2, address(2), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
+    IWorld(worldAddress).df__createPlanet(2, address(1), 0, 1, PlanetType.PLANET, SpaceType.NEBULA, 300000, 10000, 0);
     Counter.setArtifact(1);
     PlanetArtifact.set(bytes32(uint256(1)), 1);
     ArtifactOwner.set(1, bytes32(uint256(1)));
@@ -50,6 +57,15 @@ contract WormholeTest is BaseTest {
     vm.prank(address(1));
     vm.expectRevert(WormholeSystem.WormholeSetToSelf.selector);
     IWorld(worldAddress).df__activateArtifact(1, 1, abi.encode(uint256(1)));
+
+    vm.prank(admin);
+    PlanetOwner.set(bytes32(uint256(2)), address(2));
+    vm.prank(address(1));
+    vm.expectRevert(WormholeSystem.WormholeRequiresSameOwner.selector);
+    IWorld(worldAddress).df__activateArtifact(1, 1, abi.encode(uint256(2)));
+
+    vm.prank(admin);
+    PlanetOwner.set(bytes32(uint256(2)), address(1));
     vm.prank(address(1));
     IWorld(worldAddress).df__activateArtifact(1, 1, abi.encode(uint256(2)));
     assertEq(
@@ -58,7 +74,7 @@ contract WormholeTest is BaseTest {
     );
 
     vm.prank(address(1));
-    _move(1, 2, 100, 100000, 5000, 0);
+    _move(1, 2, 100, 100000, 5000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     uint256 distance = (100 * wormholeMultipliers[uint8(artifact.rarity)]) / 1000;
     MoveData memory move1 = Move.get(bytes32(uint256(2)), 0);
     assertEq(move1.arrivalTick, move1.departureTick + (distance * 100) / planet1.speed);
@@ -73,7 +89,7 @@ contract WormholeTest is BaseTest {
     Artifact memory artifact = IWorld(worldAddress).df__readArtifact(1);
     assertTrue(artifact.status == ArtifactStatus.COOLDOWN);
 
-    _move(1, 2, 100, 100000, 5000, 1);
+    _move(1, 2, 100, 100000, 5000, 1, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
     MoveData memory move1 = Move.get(bytes32(uint256(2)), 0);
     assertEq(move1.arrivalTick, move1.departureTick + (100 * 100) / planet1.speed);
     vm.stopPrank();
@@ -82,10 +98,10 @@ contract WormholeTest is BaseTest {
     IWorld(worldAddress).df__tick();
     artifact = IWorld(worldAddress).df__readArtifact(1);
     vm.expectRevert(Errors.ArtifactNotAvailable.selector);
-    vm.prank(address(2));
+    vm.prank(address(1));
     IWorld(worldAddress).df__activateArtifact(2, 1, abi.encode(uint256(1)));
     vm.warp(_getTimestampAtTick(artifact.cooldownTick + artifact.cooldown) + 1);
-    vm.prank(address(2));
+    vm.prank(address(1));
     IWorld(worldAddress).df__activateArtifact(2, 1, abi.encode(uint256(1)));
   }
 
@@ -105,14 +121,15 @@ contract WormholeTest is BaseTest {
     uint256 distance,
     uint256 population,
     uint256 silver,
-    uint256 artifact
+    uint256 artifact,
+    MaterialMove[] memory mats
   ) internal {
     Proof memory proof;
     MoveInput memory input;
     input.fromPlanetHash = from;
     input.toPlanetHash = to;
     input.distance = distance;
-    IWorld(worldAddress).df__move(proof, input, population, silver, artifact);
+    IWorld(worldAddress).df__move(proof, input, population, silver, artifact, mats);
   }
 
   function _getTimestampAtTick(uint256 tick) internal view returns (uint256) {

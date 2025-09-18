@@ -3,6 +3,7 @@
  * for changes in the World state (using the System contracts).
  */
 
+import type { MaterialTransfer } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import type { Address } from "viem";
@@ -383,6 +384,7 @@ export function createSystemCalls(
     silver: bigint,
     artifact: bigint,
     isAbandoning: boolean,
+    materials: MaterialTransfer,
   ) => {
     try {
       // Transform the inputs to arguments
@@ -416,6 +418,7 @@ export function createSystemCalls(
         silver,
         artifact,
         isAbandoning ? BigInt(1) : BigInt(0),
+        materials,
       ];
 
       // Call the move function on the contract
@@ -677,6 +680,28 @@ export function createSystemCalls(
       throw error;
     }
   };
+
+  // Withdraw material system call
+  const withdrawMaterial = async (
+    planetHash: bigint,
+    materialType: number,
+    amount: bigint,
+  ): Promise<void> => {
+    try {
+      const tx = await worldContract.write.df__withdrawMaterial([
+        planetHash,
+        materialType,
+        amount,
+      ]);
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      console.log("Withdraw material successfully:", receipt);
+      getComponentValue(Planet, singletonEntity);
+    } catch (error) {
+      console.error("Withdraw material transaction failed:", error);
+      throw error;
+    }
+  };
+
   // do not forget init function calls to be accessable in MUD systems calls
   return {
     registerPlayer,
@@ -703,5 +728,6 @@ export function createSystemCalls(
     readPlanetWithHashPerlinDistance,
     readPlanetAt,
     getMsgSender,
+    withdrawMaterial,
   };
 }

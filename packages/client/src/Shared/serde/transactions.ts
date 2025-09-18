@@ -49,6 +49,7 @@ import type {
   UnconfirmedUpgrade,
   UnconfirmedUseKey,
   UnconfirmedWithdrawArtifact,
+  UnconfirmedWithdrawMaterial,
   UnconfirmedWithdrawSilver,
 } from "@df/types";
 
@@ -175,6 +176,12 @@ export function isUnconfirmedWithdrawSilver(
   txIntent: TxIntent,
 ): txIntent is UnconfirmedWithdrawSilver {
   return txIntent.methodName === "df__withdrawSilver";
+}
+
+export function isUnconfirmedWithdrawMaterial(
+  txIntent: TxIntent,
+): txIntent is UnconfirmedWithdrawMaterial {
+  return txIntent.methodName === "df__withdrawMaterial";
 }
 
 export function isUnconfirmedAddJunk(
@@ -463,6 +470,12 @@ export function isUnconfirmedWithdrawSilverTx(
   tx: Transaction,
 ): tx is Transaction<UnconfirmedWithdrawSilver> {
   return isUnconfirmedWithdrawSilver(tx.intent);
+}
+
+export function isUnconfirmedWithdrawMaterialTx(
+  tx: Transaction,
+): tx is Transaction<UnconfirmedWithdrawMaterial> {
+  return isUnconfirmedWithdrawMaterial(tx.intent);
 }
 
 export function isUnconfirmedAddJunkTx(

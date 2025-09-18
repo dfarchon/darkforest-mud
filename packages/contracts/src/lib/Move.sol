@@ -8,13 +8,20 @@ import { PendingMove, PendingMoveData } from "codegen/tables/PendingMove.sol";
 import { Counter } from "codegen/tables/Counter.sol";
 import { Artifact as ArtifactTable } from "codegen/tables/Artifact.sol";
 import { ArtifactOwner } from "codegen/tables/ArtifactOwner.sol";
-import { PlanetType, ArtifactStatus } from "codegen/common.sol";
+import { PlanetType, ArtifactStatus, MaterialType } from "codegen/common.sol";
 import { Planet } from "libraries/Planet.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { GuildUtils } from "libraries/GuildUtils.sol";
+import { MoveMaterial } from "codegen/tables/MoveMaterial.sol";
+import { MaterialMove } from "libraries/Material.sol";
+import { MoveInput } from "libraries/VerificationInput.sol";
+import { DFUtils } from "libraries/DFUtils.sol";
+import { JunkConfig } from "codegen/tables/JunkConfig.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 
 library MoveLib {
-  function NewMove(Planet memory from, address captain) internal view returns (MoveData memory move) {
+  function NewMove(Planet memory from, address captain) public view returns (MoveData memory move) {
     if (from.owner != captain) {
       revert Errors.NotPlanetOwner();
     }
@@ -28,7 +35,7 @@ library MoveLib {
     Planet memory from,
     uint256 population,
     uint256 distance
-  ) internal pure {
+  ) public pure returns (MoveData memory, Planet memory) {
     if (from.population <= population) {
       revert Errors.NotEnoughPopulation();
     }
@@ -42,19 +49,52 @@ library MoveLib {
     }
     move.population += ABDKMath64x64.toUInt(int128(alive - constantLoss));
     from.population -= population;
+
+    return (move, from);
   }
 
-  function loadSilver(MoveData memory move, Planet memory from, uint256 silver) internal pure {
+  function loadSilver(
+    MoveData memory move,
+    Planet memory from,
+    uint256 silver
+  ) public pure returns (MoveData memory, Planet memory) {
     if (from.silver < silver) {
       revert Errors.NotEnoughSilver();
     }
     move.silver += uint64(silver);
     from.silver -= silver;
+
+    return (move, from);
   }
 
-  function loadArtifact(MoveData memory move, Planet memory from, uint256 artifactId) internal view {
+  function loadMaterials(
+    MoveData memory move,
+    Planet memory from,
+    MaterialMove[] memory mats
+  ) public returns (MoveData memory, Planet memory) {
+    // bytes32 fromId = bytes32(from.planetHash);
+    for (uint256 i; i < mats.length; i++) {
+      uint8 rid = mats[i].resourceId;
+      uint256 amt = mats[i].amount;
+      if (amt == 0) continue;
+
+      uint256 currentAmount = from.getMaterial(MaterialType(rid));
+      if (currentAmount < amt) revert Errors.NotEnoughMaterial(); // add to your Errors.sol if not present
+      from.setMaterial(MaterialType(rid), currentAmount - amt);
+      // record the moved amount on the move (FK = move.id, resourceId)
+      MoveMaterial.setAmount(move.id, rid, amt);
+    }
+
+    return (move, from);
+  }
+
+  function loadArtifact(
+    MoveData memory move,
+    Planet memory from,
+    uint256 artifactId
+  ) public view returns (MoveData memory, Planet memory) {
     if (artifactId == 0) {
-      return;
+      return (move, from);
     }
     if (ArtifactTable.getStatus(uint32(artifactId)) >= ArtifactStatus.CHARGING) {
       revert Errors.ArtifactNotAvailable();
@@ -62,9 +102,16 @@ library MoveLib {
 
     move.artifact = artifactId;
     from.removeArtifact(artifactId);
+
+    return (move, from);
   }
 
-  function headTo(MoveData memory move, Planet memory to, uint256 distance, uint256 speed) internal {
+  function headTo(
+    MoveData memory move,
+    Planet memory to,
+    uint256 distance,
+    uint256 speed
+  ) public returns (MoveData memory, Planet memory) {
     uint256 time = (distance * 100) / speed;
     uint256 present = to.lastUpdateTick;
     move.departureTick = uint64(present);
@@ -79,16 +126,21 @@ library MoveLib {
     } else {
       to.pushMove(move);
     }
+
+    return (move, to);
   }
 
-  function arrivedAt(MoveData memory move, Planet memory planet) internal view {
+  function arrivedAt(MoveData memory move, Planet memory planet) public view returns (MoveData memory, Planet memory) {
     assert(move.arrivalTick == planet.lastUpdateTick);
-    unloadPopulation(move, planet);
-    unloadSilver(move, planet);
-    unloadArtifact(move, planet);
+    _unloadPopulation(move, planet);
+    _unloadSilver(move, planet);
+    _unloadArtifact(move, planet);
+    _unloadMaterials(move, planet);
+
+    return (move, planet);
   }
 
-  function unloadPopulation(MoveData memory move, Planet memory to) internal view {
+  function _unloadPopulation(MoveData memory move, Planet memory to) internal view {
     uint256 population = to.population;
     uint256 arrivedPopulation = move.population;
     if (move.captain == to.owner || GuildUtils.inSameGuild(move.captain, to.owner, move.arrivalTick)) {
@@ -113,14 +165,27 @@ library MoveLib {
     to.population = population;
   }
 
-  function unloadSilver(MoveData memory move, Planet memory to) internal pure {
+  function _unloadSilver(MoveData memory move, Planet memory to) internal pure {
     to.silver += move.silver;
     if (to.silver > to.silverCap) {
       to.silver = to.silverCap;
     }
   }
 
-  function unloadArtifact(MoveData memory move, Planet memory to) internal pure {
+  function _unloadMaterials(MoveData memory move, Planet memory to) internal view {
+    // bytes32 toId = bytes32(to.planetHash); // TODO STX remove this??
+
+    for (uint8 rid = 1; rid <= uint8(type(MaterialType).max); rid++) {
+      uint256 amt = MoveMaterial.getAmount(move.id, rid); // 0 if row doesn't exist
+      if (amt == 0) continue;
+
+      uint256 currentAmount = to.getMaterial(MaterialType(rid));
+      uint256 newAmt = currentAmount + amt;
+      to.setMaterial(MaterialType(rid), newAmt);
+    }
+  }
+
+  function _unloadArtifact(MoveData memory move, Planet memory to) internal pure {
     if (move.artifact != 0) {
       to.pushArtifact(move.artifact);
     }

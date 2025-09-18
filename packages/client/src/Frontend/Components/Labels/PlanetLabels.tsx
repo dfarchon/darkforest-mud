@@ -1,8 +1,20 @@
 import { EMPTY_ADDRESS } from "@df/constants";
-import { formatNumber } from "@df/gamelogic";
+import {
+  formatCompact,
+  formatCompact2,
+  formatEtherToNumber,
+  formatNumber,
+} from "@df/gamelogic";
 import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
+import type { MaterialType } from "@df/types";
 import { PlanetType, PlanetTypeNames } from "@df/types";
+import {
+  getMaterialColor,
+  getMaterialIcon,
+  getMaterialName,
+} from "@frontend/Panes/PlanetMaterialsPane";
+import styled from "styled-components";
 import React from "react";
 
 import { getPlanetRank } from "../../../Backend/Utils/Utils";
@@ -14,6 +26,40 @@ import { TextPreview } from "../TextPreview";
 import { OptionalPlanetBiomeLabelAnim } from "./BiomeLabels";
 import { TwitterLink } from "./Labels";
 import { SpacetimeRipLabel } from "./SpacetimeRipLabel";
+
+const MaterialBar = styled.div<{
+  percentage: number;
+  materialID: MaterialType;
+}>`
+  width: 100%;
+  height: 8px;
+  background-color: ${dfstyles.colors.borderDarker};
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: "";
+    display: block;
+    width: ${(props) => props.percentage}%;
+    height: 100%;
+    background-color: ${(props) => getMaterialColor(props.materialID)};
+    transition: width 0.3s ease;
+  }
+`;
+
+const MaterialBarText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+  pointer-events: none;
+`;
 
 /* note that we generally prefer `Planet | undefined` over `Planet` because it
    makes it easier to pass in selected / hovering planet from the emitters      */
@@ -281,5 +327,186 @@ export function PlanetOwnerLabel({
     <Colored color={color}>
       <TextPreview text={planet.owner} />
     </Colored>
+  );
+}
+
+export function MaterialsText({
+  planet,
+  style,
+}: {
+  planet: Planet | undefined;
+  style?: React.CSSProperties;
+}) {
+  if (!planet || !planet.materials || planet.materials.length === 0) {
+    return <span style={style}>No materials</span>;
+  }
+
+  // Filter out materials with 0 amount and UNKNOWN type
+  const activeMaterials = planet.materials.filter(
+    (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
+  );
+
+  if (activeMaterials.length === 0) {
+    return <span style={style}>No materials</span>;
+  }
+
+  return (
+    <span style={style}>
+      {activeMaterials.map((mat, index) => (
+        <span key={mat.materialId}>
+          {index > 0 && ", "}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span
+              style={{
+                width: "12px",
+                height: "12px",
+                backgroundColor: getMaterialColor(mat.materialId),
+                borderRadius: "2px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                lineHeight: "1",
+              }}
+            >
+              {getMaterialIcon(mat.materialId)}
+            </span>
+            <span
+              style={{
+                color: getMaterialColor(mat.materialId),
+                fontWeight: "bold",
+              }}
+            >
+              {formatEtherToNumber(mat.materialAmount).toFixed(0)}
+            </span>
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+export function MaterialsDisplay({
+  planet,
+  style,
+}: {
+  planet: Planet | undefined;
+  style?: React.CSSProperties;
+}) {
+  if (!planet || !planet.materials || planet.materials.length === 0) {
+    return null;
+  }
+
+  // Filter out materials with 0 amount and UNKNOWN type
+  const activeMaterials = planet.materials.filter(
+    (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
+  );
+
+  if (activeMaterials.length === 0) {
+    return null;
+  }
+
+  return (
+    <div style={style}>
+      <div
+        style={{
+          fontSize: "0.9em",
+          color: dfstyles.colors.subtext,
+          marginBottom: "4px",
+          textAlign: "center",
+        }}
+      >
+        Materials
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          gap: "4px",
+          fontSize: "0.8em",
+        }}
+      >
+        {activeMaterials.map((mat) => {
+          const percentage =
+            Number(mat.cap) > 0
+              ? Math.min(
+                  (Number(mat.materialAmount) / Number(mat.cap)) * 100,
+                  100,
+                )
+              : 0;
+
+          return (
+            <div
+              key={mat.materialId}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                padding: "4px",
+                backgroundColor: dfstyles.colors.backgroundlighter,
+                borderRadius: "4px",
+                border: `1px solid ${dfstyles.colors.borderDarker}`,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  fontSize: "0.8em",
+                }}
+              >
+                <div
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    backgroundColor: getMaterialColor(mat.materialId),
+                    borderRadius: "2px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "12px",
+                    lineHeight: "1",
+                  }}
+                >
+                  {getMaterialIcon(mat.materialId)}
+                </div>
+                <span
+                  style={{
+                    color: getMaterialColor(mat.materialId),
+                    fontSize: "12px",
+                  }}
+                >
+                  {getMaterialName(mat.materialId)}
+                </span>
+                {mat.growth && (
+                  <span
+                    style={{
+                      color: getMaterialColor(mat.materialId),
+                      fontSize: "12px",
+                    }}
+                  >
+                    + {""} {formatCompact2(Number(mat.growthRate) / 1e18)}
+                  </span>
+                )}
+              </div>
+
+              <MaterialBar percentage={percentage} materialID={mat.materialId}>
+                <MaterialBarText>
+                  {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
+                  {formatCompact(Number(mat.cap) / 1e18)}
+                </MaterialBarText>
+              </MaterialBar>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

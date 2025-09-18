@@ -24,11 +24,17 @@ import { PinkBomb, PinkBombData } from "../../src/modules/atfs/PinkBomb/tables/P
 import { _artifactIndexToNamespace, _artifactProxySystemId } from "../../src/modules/atfs/utils.sol";
 import { _pinkBombTableId } from "../../src/modules/atfs/PinkBomb/utils.sol";
 import "forge-std/console.sol";
+import { MaterialMove } from "../../src/lib/Material.sol";
 
 contract PinkBombTest is BaseTest {
   using EffectLib for Planet;
 
   uint256 p = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
+
+  function _mats(MaterialMove memory m1) internal pure returns (MaterialMove[] memory a) {
+    a = new MaterialMove[](1);
+    a[0] = m1;
+  }
 
   function setUp() public virtual override {
     super.setUp();
@@ -182,7 +188,7 @@ contract PinkBombTest is BaseTest {
 
     vm.prank(address(3));
     vm.expectRevert(Errors.PlanetNotAvailable.selector);
-    _move(3, 1, 100, 100000, 1000, 0);
+    _move(3, 1, 100, 100000, 1000, 0, _mats(MaterialMove({ resourceId: 0, amount: 0 })));
   }
 
   function _move(
@@ -191,13 +197,14 @@ contract PinkBombTest is BaseTest {
     uint256 distance,
     uint256 population,
     uint256 silver,
-    uint256 artifact
+    uint256 artifact,
+    MaterialMove[] memory mats
   ) internal {
     Proof memory proof;
     MoveInput memory input;
     input.fromPlanetHash = from;
     input.toPlanetHash = to;
     input.distance = distance;
-    IWorld(worldAddress).df__move(proof, input, population, silver, artifact);
+    IWorld(worldAddress).df__move(proof, input, population, silver, artifact, mats);
   }
 }

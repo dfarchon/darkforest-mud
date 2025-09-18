@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { Errors } from "interfaces/errors.sol";
-import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagType, ArtifactGenre } from "codegen/common.sol";
+import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagType, ArtifactGenre, MaterialType } from "codegen/common.sol";
 import { Planet as PlanetTable, PlanetData } from "codegen/tables/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
@@ -29,7 +29,9 @@ import { ArtifactMetadataData } from "modules/atfs/tables/ArtifactMetadata.sol";
 import { ABDKMath64x64 } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { PendingMoveQueue } from "libraries/Move.sol";
 import { Artifact, ArtifactLib, ArtifactStorage, ArtifactStorageLib } from "libraries/Artifact.sol";
+import { MaterialStorage } from "libraries/Material.sol";
 import { Effect, EffectLib } from "libraries/Effect.sol";
+
 import { _artifactProxySystemId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
 import { IArtifactProxySystem } from "modules/atfs/IArtifactProxySystem.sol";
 import { Flags, FlagsLib } from "libraries/Flags.sol";
@@ -78,6 +80,8 @@ struct Planet {
   Effect[] effects;
   // flags
   Flags flags;
+  // Table: MaterialStorage
+  MaterialStorage materialStorage;
 }
 
 library PlanetLib {
@@ -99,6 +103,8 @@ library PlanetLib {
     planet.status = FlagsLib.check(planet.flags, PlanetFlagType.DESTROYED)
       ? PlanetStatus.DESTROYED
       : PlanetStatus.DEFAULT;
+
+    planet.materialStorage.ReadFromStore(planet.planetHash);
   }
 
   function writeToStore(Planet memory planet) internal {
@@ -167,9 +173,12 @@ library PlanetLib {
         useProps: planet.useProps
       })
     );
+
+    // Write materials to storage
+    planet.materialStorage.WriteToStore(planet.planetHash);
   }
 
-  function naturalGrowth(Planet memory planet, uint256 untilTick) internal pure {
+  function naturalGrowth(Planet memory planet, uint256 untilTick) internal view {
     if (planet.lastUpdateTick >= untilTick) {
       return;
     }
@@ -189,6 +198,7 @@ library PlanetLib {
 
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);
+    _materialGrow(planet, tickElapsed);
   }
 
   function pushMove(Planet memory planet, MoveData memory move) internal {
@@ -355,6 +365,7 @@ library PlanetLib {
     _initLevel(planet);
     _initPlanetType(planet);
     _initPopulationAndSilver(planet);
+    // _initPlanetMaterials(planet);
     planet.lastUpdateTick = Ticker.getTickNumber();
   }
 
@@ -627,6 +638,85 @@ library PlanetLib {
     planet.silver = silver > cap ? cap : silver;
   }
 
+  function _materialGrow(Planet memory planet, uint256 tickElapsed) internal view {
+    if (planet.planetType != PlanetType.ASTEROID_FIELD) {
+      return;
+    }
+    MaterialStorage memory materialsStorage = planet.materialStorage;
+    for (uint256 i; i < materialsStorage.growth.length; i++) {
+      // materialsStorage.growth[i] is true if the material is allowed to grow double check in Material.sol
+      if (materialsStorage.growth[i]) {
+        uint256 growthRate = getMaterialGrowth(planet, MaterialType(i));
+        uint256 currentAmount = getMaterial(planet, MaterialType(i));
+        uint256 newAmount = currentAmount + growthRate * tickElapsed;
+        setMaterial(planet, MaterialType(i), newAmount);
+      }
+    }
+  }
+
+  function initMaterial(Planet memory planet, MaterialType materialId) internal view {
+    PlanetInitialResourceData memory initialResources = PlanetInitialResource.get(
+      planet.spaceType,
+      planet.planetType,
+      uint8(planet.level)
+    );
+    planet.materialStorage.initMaterial(planet.planetHash, materialId, initialResources.silver);
+  }
+
+  function getMaterial(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
+    return planet.materialStorage.getMaterial(planet.planetHash, materialId);
+  }
+
+  function setMaterial(Planet memory planet, MaterialType materialId, uint256 amount) internal pure {
+    uint256 cap = getMaterialCap(planet, materialId);
+    if (amount > cap) {
+      amount = cap;
+    }
+    planet.materialStorage.setMaterial(planet.planetHash, materialId, amount);
+  }
+
+  function getMaterialCap(Planet memory planet, MaterialType materialId) internal pure returns (uint256) {
+    return planet.silverCap;
+  }
+
+  function getMaterialGrowth(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
+    return planet.silverGrowth;
+  }
+
+  function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
+    if (biome == Biome.CORRUPTED) {
+      MaterialType[] memory corruptedMats = new MaterialType[](2);
+      corruptedMats[0] = MaterialType.BLACKALLOY;
+      corruptedMats[1] = MaterialType.CORRUPTED_CRYSTAL;
+      return corruptedMats;
+    }
+
+    MaterialType biomeMat;
+
+    if (biome == Biome.OCEAN) {
+      biomeMat = MaterialType.WATER_CRYSTALS;
+    } else if (biome == Biome.FOREST) {
+      biomeMat = MaterialType.LIVING_WOOD;
+    } else if (biome == Biome.GRASSLAND) {
+      biomeMat = MaterialType.WINDSTEEL;
+    } else if (biome == Biome.TUNDRA) {
+      biomeMat = MaterialType.AURORIUM;
+    } else if (biome == Biome.SWAMP) {
+      biomeMat = MaterialType.MYCELIUM;
+    } else if (biome == Biome.DESERT) {
+      biomeMat = MaterialType.SANDGLASS;
+    } else if (biome == Biome.ICE) {
+      biomeMat = MaterialType.CRYOSTONE;
+    } else if (biome == Biome.WASTELAND) {
+      biomeMat = MaterialType.SCRAPIUM;
+    } else if (biome == Biome.LAVA) {
+      biomeMat = MaterialType.PYROSTEEL;
+    }
+    MaterialType[] memory singleMats = new MaterialType[](1);
+    singleMats[0] = biomeMat;
+    return singleMats;
+  }
+
   function _validateUpgrade(
     Planet memory planet,
     address executor,
@@ -769,21 +859,6 @@ library PlanetLib {
     }
   }
 
-  function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
-    if (planet.spaceType == SpaceType.DEAD_SPACE) {
-      return Biome.CORRUPTED;
-    }
-
-    uint256 res = uint8(planet.spaceType) * 3;
-    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
-    if (biomeBase < config.threshold1) {
-      res -= 2;
-    } else if (biomeBase < config.threshold2) {
-      res -= 1;
-    }
-    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
-  }
-
   function _createArtifactSeed(Planet memory planet) internal view returns (uint256 seed) {
     seed = uint256(
       keccak256(
@@ -794,5 +869,19 @@ library PlanetLib {
         )
       )
     );
+  }
+
+  function _getBiome(Planet memory planet, uint256 biomeBase) internal view returns (Biome biome) {
+    if (planet.spaceType == SpaceType.DEAD_SPACE) {
+      return Biome.CORRUPTED;
+    }
+    uint256 res = uint8(planet.spaceType) * 3;
+    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
+    if (biomeBase < config.threshold1) {
+      res -= 2;
+    } else if (biomeBase < config.threshold2) {
+      res -= 1;
+    }
+    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
   }
 }

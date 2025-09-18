@@ -1,8 +1,15 @@
 import type { Contract } from "ethers";
-import type { Abi, Hex } from "viem";
 
+import type { BiomebaseSnarkContractCallArgs } from "../snarks";
 import type { GuildRole } from "./guild";
-import type { ArtifactId, EthAddress, GuildId, LocationId } from "./identifier";
+import type {
+  ArtifactId,
+  EthAddress,
+  GuildId,
+  LocationId,
+  MaterialTransfer,
+} from "./identifier";
+import type { Materials } from "./planet";
 import type { WorldLocation } from "./world";
 
 // import type { LiteralUnion } from "type-fest";
@@ -28,6 +35,7 @@ export type ContractMethodName =
   | "changeArtifactImageType"
   | "buyArtifact"
   | "df__withdrawSilver"
+  | "df__withdrawMaterial"
   | "df__addJunk"
   | "df__clearJunk"
   | "df__setPlanetEmoji"
@@ -118,6 +126,7 @@ export type UnconfirmedMove = TxIntent & {
   silver: number;
   abandoning: boolean;
   artifact?: ArtifactId;
+  materials?: MaterialTransfer[];
 };
 
 /**
@@ -267,9 +276,21 @@ export type UnconfirmedWithdrawSilver = TxIntent & {
 /**
  * @hidden
  */
+export type UnconfirmedWithdrawMaterial = TxIntent & {
+  methodName: "df__withdrawMaterial";
+  locationId: LocationId;
+  materialType: MaterialType;
+  amount: number;
+};
+
+/**
+ * @hidden
+ */
 export type UnconfirmedAddJunk = TxIntent & {
   methodName: "df__addJunk";
   locationId: LocationId;
+  biomeBase: number;
+  proof: BiomebaseSnarkContractCallArgs;
 };
 
 /**
