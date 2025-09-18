@@ -26,6 +26,8 @@ import {
   type ConcurrentQueueConfiguration,
   ThrottledConcurrentQueue,
 } from "./ThrottledConcurrentQueue";
+import { BigNumber } from "ethers";
+
 /**
  * Returns either a string that represents the gas price we should use by default for transactions,
  * or a string that represents the fact that we should be using one of the automatic gas prices.
@@ -284,6 +286,13 @@ export class TxExecutor {
 
       tx.overrides.gasPrice = utils.parseUnits(t2, "gwei");
     }
+
+    // PUNK HIGHLIGHT
+    const gasPrice = BigNumber.from(tx.overrides.gasPrice);
+    tx.overrides.maxFeePerGas = gasPrice;
+    tx.overrides.maxPriorityFeePerGas = gasPrice.div(2);
+
+    tx.overrides.gasPrice = undefined;
 
     this.queue.add(() => {
       this.diagnosticsUpdater?.updateDiagnostics((d) => {

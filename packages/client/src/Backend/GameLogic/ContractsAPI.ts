@@ -1393,7 +1393,26 @@ export class ContractsAPI extends EventEmitter {
     });
     const playerStats = getComponentValue(PlayerStats, playerKey);
     if (!playerStats) {
-      throw new Error("not set player stats yet");
+      return {
+        prospectPlanetCount: 0,
+        findArtifactCount: 0,
+        withdrawArtifactCount: 0,
+        depositArtifactCount: 0,
+        chargeArtifactCount: 0,
+        shutdownArtifactCount: 0,
+        activateArtifactCount: 0,
+        buyGPTTokensCount: 0,
+        spendGPTTokensCount: 0,
+        sendGPTTokensCount: 0,
+        moveCount: 0,
+        attackCount: 0,
+        setPlanetEmojiCount: 0,
+        addJunkCount: 0,
+        clearJunkCount: 0,
+        revealLocationCount: 0,
+        upgradePlanetCount: 0,
+        withdrawSilverCount: 0,
+      };
     }
     return {
       prospectPlanetCount: Number(playerStats.prospectPlanetCount),

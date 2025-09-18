@@ -52,7 +52,7 @@ export function PlanetIcons({ planet }: { planet: Planet | undefined }) {
   if (!planet) {
     return <StyledPlanetIcons />;
   }
-  const bonuses = bonusFromHex(planet.locationId);
+  const bonuses = planet.bonus; // bonusFromHex(planet.locationId);
   const rank = getPlanetRank(planet);
 
   let captureZoneIcons = null;
