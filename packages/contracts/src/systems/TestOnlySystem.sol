@@ -17,7 +17,6 @@ import { GPTTokens } from "codegen/index.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
-import { Materials } from "libraries/Material.sol";
 import { PlanetMaterialStorage } from "codegen/tables/PlanetMaterialStorage.sol";
 import { PlanetMaterial } from "codegen/tables/PlanetMaterial.sol";
 

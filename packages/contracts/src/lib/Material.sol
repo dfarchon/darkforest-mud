@@ -13,6 +13,11 @@ struct MaterialStorage {
   uint256[] amount;
 }
 
+struct MaterialMove {
+  uint8 resourceId; // 0..255
+  uint256 amount; // <= 2^256-1
+}
+
 using MaterialStorageLib for MaterialStorage global;
 
 library MaterialStorageLib {
@@ -47,6 +52,13 @@ library MaterialStorageLib {
         if (mat.updates[i]) {
           PlanetMaterial.set(bytes32(planetHash), uint8(i), mat.amount[i]);
         }
+
+        if (mat.amount[i] > 0) {
+          exsitMap |= (1 << i);
+        } else {
+          exsitMap &= ~(1 << i);
+        }
+
         // Persist growth status to storage
         PlanetMaterialGrowth.set(bytes32(planetHash), uint8(i), mat.growth[i]);
       }
@@ -55,6 +67,18 @@ library MaterialStorageLib {
       }
     }
     PlanetMaterialStorage.set(bytes32(planetHash), exsitMap);
+  }
+
+  function initMaterial(
+    MaterialStorage memory mat,
+    uint256 planetHash,
+    MaterialType materialId,
+    uint256 amount
+  ) internal pure {
+    mat.exists[uint8(materialId)] = true;
+    mat.updates[uint8(materialId)] = true;
+    mat.growth[uint8(materialId)] = true;
+    mat.amount[uint8(materialId)] = amount;
   }
 
   function getMaterial(
@@ -84,23 +108,4 @@ library MaterialStorageLib {
     mat.amount[uint8(materialId)] = amount;
     mat.updates[uint8(materialId)] = true;
   }
-
-  function initMaterial(MaterialStorage memory mat, uint256 planetHash, MaterialType materialId) internal pure {
-    mat.exists[uint8(materialId)] = true;
-    mat.updates[uint8(materialId)] = true;
-    mat.growth[uint8(materialId)] = true;
-    mat.amount[uint8(materialId)] = 5000 * 1e18; // 5000 is the default amount for development mode
-  }
-}
-
-struct Materials {
-  MaterialType materialId;
-  uint256 amount;
-  uint256 cap;
-  uint256 growthRate;
-}
-
-struct MaterialMove {
-  uint8 resourceId; // 0..255
-  uint256 amount; // <= 2^256-1
 }

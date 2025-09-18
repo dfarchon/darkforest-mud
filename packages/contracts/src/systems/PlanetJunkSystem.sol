@@ -98,7 +98,7 @@ contract PlanetJunkSystem is BaseSystem {
 
   function _initAsteroidMaterials(Planet memory planet, uint256 biomeBase) internal view {
     if (planet.planetType == PlanetType.ASTEROID_FIELD) {
-      Biome biome = _initBiome(planet.spaceType, biomeBase);
+      Biome biome = planet._getBiome(biomeBase);
       MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
       for (uint256 i; i < allowed.length; i++) {
         planet.initMaterial(allowed[i]);
@@ -135,26 +135,5 @@ contract PlanetJunkSystem is BaseSystem {
     }
 
     planet.writeToStore();
-  }
-
-  /**
-   * @notice Initialize biome using spaceType and biomeBase
-   * @param spaceType The space type of the planet
-   * @param biomeBase The biome base value
-   * @return biome The calculated biome
-   */
-  function _initBiome(SpaceType spaceType, uint256 biomeBase) internal view returns (Biome biome) {
-    if (spaceType == SpaceType.DEAD_SPACE) {
-      return Biome.CORRUPTED;
-    }
-
-    uint256 res = (uint8(spaceType)) * 3;
-    PlanetBiomeConfigData memory config = PlanetBiomeConfig.get();
-    if (biomeBase < config.threshold1) {
-      res -= 2;
-    } else if (biomeBase < config.threshold2) {
-      res -= 1;
-    }
-    biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
   }
 }
