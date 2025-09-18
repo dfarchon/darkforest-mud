@@ -97,13 +97,14 @@ library PlanetLib {
 
     planet.artifactStorage.ReadFromStore(planet.planetHash);
     planet.moveQueue.ReadFromStore(planet.planetHash);
-    planet.materialStorage.ReadFromStore(planet.planetHash);
 
     _readPropsOrMetadata(planet);
     planet.flags = Flags.wrap(PlanetFlags.get(bytes32(planet.planetHash)));
     planet.status = FlagsLib.check(planet.flags, PlanetFlagType.DESTROYED)
       ? PlanetStatus.DESTROYED
       : PlanetStatus.DEFAULT;
+
+    planet.materialStorage.ReadFromStore(planet.planetHash);
   }
 
   function writeToStore(Planet memory planet) internal {
@@ -143,9 +144,6 @@ library PlanetLib {
     planet.moveQueue.WriteToStore();
     planet.artifactStorage.WriteToStore();
 
-    // Write materials to storage
-    planet.materialStorage.WriteToStore(planet.planetHash);
-
     uint256 effectsData;
     for (uint256 i; i < planet.effectNumber; ) {
       effectsData <<= 24;
@@ -175,6 +173,9 @@ library PlanetLib {
         useProps: planet.useProps
       })
     );
+
+    // Write materials to storage
+    planet.materialStorage.WriteToStore(planet.planetHash);
   }
 
   function naturalGrowth(Planet memory planet, uint256 untilTick) internal view {
@@ -346,40 +347,6 @@ library PlanetLib {
 
   function checkFlag(Planet memory planet, PlanetFlagType flagType) internal pure returns (bool) {
     return FlagsLib.check(planet.flags, flagType);
-  }
-
-  function getMaterial(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
-    return planet.materialStorage.getMaterial(planet.planetHash, materialId);
-  }
-
-  function setMaterial(Planet memory planet, MaterialType materialId, uint256 amount) internal pure {
-    uint256 cap = getMaterialCap(planet, materialId);
-    if (amount > cap) {
-      amount = cap;
-    }
-    planet.materialStorage.setMaterial(planet.planetHash, materialId, amount);
-  }
-  function initMaterial(Planet memory planet, MaterialType materialId) internal pure {
-    planet.materialStorage.initMaterial(planet.planetHash, materialId);
-  }
-
-  function getMaterialCap(Planet memory planet, MaterialType materialId) internal pure returns (uint256) {
-    uint256 planetLvl = planet.level;
-    if (planetLvl <= 3) {
-      return planetLvl * 1000 * 1e18;
-    } else if (planetLvl <= 6) {
-      return planetLvl * 2000 * 1e18;
-    } else {
-      return planetLvl * 6000 * 1e18;
-    }
-  }
-
-  function getMaterialGrowth(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
-    if (planet.planetType != PlanetType.ASTEROID_FIELD) {
-      return 0;
-    }
-
-    return _materialGrowth(planet.level);
   }
 
   function _validateHash(Planet memory planet) internal view {
@@ -675,7 +642,6 @@ library PlanetLib {
     if (planet.planetType != PlanetType.ASTEROID_FIELD) {
       return;
     }
-    planet.materialStorage.ReadFromStore(planet.planetHash);
     MaterialStorage memory materialsStorage = planet.materialStorage;
     for (uint256 i; i < materialsStorage.growth.length; i++) {
       // materialsStorage.growth[i] is true if the material is allowed to grow double check in Material.sol
@@ -688,8 +654,33 @@ library PlanetLib {
     }
   }
 
-  function _materialGrowth(uint256 planetLevel) internal pure returns (uint256) {
-    return planetLevel * 1e16;
+  function initMaterial(Planet memory planet, MaterialType materialId) internal view {
+    PlanetInitialResourceData memory initialResources = PlanetInitialResource.get(
+      planet.spaceType,
+      planet.planetType,
+      uint8(planet.level)
+    );
+    planet.materialStorage.initMaterial(planet.planetHash, materialId, initialResources.silver);
+  }
+
+  function getMaterial(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
+    return planet.materialStorage.getMaterial(planet.planetHash, materialId);
+  }
+
+  function setMaterial(Planet memory planet, MaterialType materialId, uint256 amount) internal pure {
+    uint256 cap = getMaterialCap(planet, materialId);
+    if (amount > cap) {
+      amount = cap;
+    }
+    planet.materialStorage.setMaterial(planet.planetHash, materialId, amount);
+  }
+
+  function getMaterialCap(Planet memory planet, MaterialType materialId) internal pure returns (uint256) {
+    return planet.silverCap;
+  }
+
+  function getMaterialGrowth(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
+    return planet.silverGrowth;
   }
 
   function allowedMaterialsForBiome(Biome biome) internal pure returns (MaterialType[] memory) {
@@ -889,7 +880,7 @@ library PlanetLib {
     if (biomeBase < config.threshold1) {
       res -= 2;
     } else if (biomeBase < config.threshold2) {
-      res -= 2;
+      res -= 1;
     }
     biome = res > uint8(type(Biome).max) ? type(Biome).max : Biome(res);
   }

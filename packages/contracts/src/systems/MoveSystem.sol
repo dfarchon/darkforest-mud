@@ -50,7 +50,7 @@ contract MoveSystem is BaseSystem {
     GlobalStats.setMoveCount(GlobalStats.getMoveCount() + 1);
     PlayerStats.setMoveCount(_msgSender(), PlayerStats.getMoveCount(_msgSender()) + 1);
 
-    // delegace do interní funkce, kde uděláme zbytek
+    // delegate to the internal function, where we’ll do the rest
     _move(_proof, _input, _population, _silver, _artifact, _materials);
   }
 
