@@ -9,6 +9,7 @@ import type {
   LocationId,
   Planet,
   Player,
+  QueuedArrival,
   Transaction,
   TransactionId,
 } from "@df/types";
@@ -131,6 +132,12 @@ export function useHoverArtifact(
   uiManager: GameUIManager,
 ): Wrapper<Artifact | undefined> {
   return useWrappedEmitter<Artifact>(uiManager.hoverArtifact$, undefined);
+}
+
+export function useHoverVoyage(
+  uiManager: GameUIManager,
+): Wrapper<QueuedArrival | undefined> {
+  return useWrappedEmitter<QueuedArrival>(uiManager.hoverVoyage$, undefined);
 }
 
 export function useHoverArtifactId(

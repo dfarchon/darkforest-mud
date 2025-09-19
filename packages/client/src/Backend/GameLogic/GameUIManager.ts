@@ -116,6 +116,8 @@ export class GameUIManager extends EventEmitter {
   private mouseHoveringOverPlanet: LocatablePlanet | undefined;
   private mouseHoveringOverCoords: WorldCoords | undefined;
   private mouseHoveringOverArtifactId: ArtifactId | undefined;
+  private mouseHoveringOverVoyage: QueuedArrival | undefined;
+  private selectedVoyage: QueuedArrival | undefined;
   private sendingPlanet: LocatablePlanet | undefined;
   private sendingCoords: WorldCoords | undefined;
   private isSending = false;
@@ -149,6 +151,8 @@ export class GameUIManager extends EventEmitter {
   public readonly hoverPlanet$: Monomitter<Planet | undefined>;
   public readonly hoverArtifactId$: Monomitter<ArtifactId | undefined>;
   public readonly hoverArtifact$: Monomitter<Artifact | undefined>;
+  public readonly hoverVoyage$: Monomitter<QueuedArrival | undefined>;
+  public readonly selectedVoyage$: Monomitter<QueuedArrival | undefined>;
   public readonly myArtifacts$: Monomitter<Map<ArtifactId, Artifact>>;
 
   public readonly isSending$: Monomitter<boolean>;
@@ -206,6 +210,8 @@ export class GameUIManager extends EventEmitter {
       this.hoverArtifactId$,
       this.gameManager.getArtifactUpdated$(),
     );
+    this.hoverVoyage$ = monomitter<QueuedArrival | undefined>();
+    this.selectedVoyage$ = monomitter<QueuedArrival | undefined>();
     this.myArtifacts$ = this.gameManager.getMyArtifactsUpdated$();
     this.viewportEntities = new ViewportEntities(this.gameManager, this);
 
@@ -1449,8 +1455,26 @@ export class GameUIManager extends EventEmitter {
     );
   }
 
+  public setHoveringOverVoyage(voyage?: QueuedArrival) {
+    this.mouseHoveringOverVoyage = voyage;
+    this.hoverVoyage$.publish(voyage);
+  }
+
+  public setSelectedVoyage(voyage?: QueuedArrival) {
+    this.selectedVoyage = voyage;
+    this.selectedVoyage$.publish(voyage);
+  }
+
   public getHoveringOverPlanet(): Planet | undefined {
     return this.mouseHoveringOverPlanet;
+  }
+
+  public getHoveringVoyage(): QueuedArrival | undefined {
+    return this.mouseHoveringOverVoyage;
+  }
+
+  public getSelectedVoyage(): QueuedArrival | undefined {
+    return this.selectedVoyage;
   }
 
   public getHoveringOverCoords(): WorldCoords | undefined {

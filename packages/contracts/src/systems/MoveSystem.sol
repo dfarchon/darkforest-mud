@@ -7,7 +7,7 @@ import { Proof } from "libraries/SnarkProof.sol";
 import { MoveInput } from "libraries/VerificationInput.sol";
 import { Planet } from "libraries/Planet.sol";
 import { Counter } from "codegen/tables/Counter.sol";
-import { MoveData } from "codegen/tables/Move.sol";
+import { MoveData, Move } from "codegen/tables/Move.sol";
 import { MoveLib } from "libraries/Move.sol";
 import { UniverseLib } from "libraries/Universe.sol";
 import { EffectLib } from "libraries/Effect.sol";
@@ -18,9 +18,15 @@ import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { MoveMaterial } from "codegen/tables/MoveMaterial.sol";
 import { MaterialMove } from "libraries/Material.sol";
+import { Ticker } from "codegen/tables/Ticker.sol";
+import { PendingMoveQueue, PendingMoveQueueLib } from "libraries/Move.sol";
+import { MaterialType } from "codegen/common.sol";
 
 contract MoveSystem is BaseSystem {
   using MoveLib for MoveData;
+
+  // Events
+  event MoveReverted(uint64 moveId, address captain, bytes32 fromPlanet, bytes32 toPlanet);
 
   // Small, view-only helper to keep codegen tight
   function _readAndCheckPlanets(
@@ -132,6 +138,100 @@ contract MoveSystem is BaseSystem {
     MaterialMove[] memory mats = abi.decode(movedMaterials, (MaterialMove[]));
 
     _move(proof, input, popMoved, silverMoved, movedArtifactId, mats);
+  }
+
+  /**
+   * @notice Reverts a movement if the caller is the captain and the move is within the first half of its journey
+   * @param moveId The ID of the move to revert
+   * @param toPlanetHash The destination planet hash of the move
+   * @param moveIndex The index of the move in the destination planet's queue
+   */
+  function revertMove(uint64 moveId, bytes32 toPlanetHash, uint8 moveIndex) public entryFee {
+    address w = _world();
+    DFUtils.tick(w);
+
+    // Get the move data
+    MoveData memory moveData = Move.get(toPlanetHash, moveIndex);
+
+    // Verify the move exists and caller is the captain
+    if (moveData.id != moveId) {
+      revert MoveNotFound();
+    }
+    if (moveData.captain != _msgSender()) {
+      revert NotMoveCaptain();
+    }
+
+    // Check if move is within first half of journey
+    uint256 currentTick = Ticker.getTickNumber();
+    uint256 elapsedTime = currentTick - moveData.departureTick;
+
+    // Allow revert only if less than half the journey is completed
+    if (elapsedTime >= (moveData.arrivalTick - moveData.departureTick) / 2) {
+      revert MoveTooFarToRevert();
+    }
+
+    // Get source planet and check ownership
+    Planet memory fromPlanet = DFUtils.readInitedPlanet(w, uint256(moveData.from));
+    if (fromPlanet.owner != moveData.captain) {
+      revert SourcePlanetNotOwned();
+    }
+
+    // Remove original move from destination planet's queue
+    PendingMoveQueue memory queue;
+    queue.ReadFromStore(uint256(toPlanetHash));
+    PendingMoveQueueLib.RemoveMove(queue, moveIndex);
+    queue.WriteToStore();
+
+    // Delete original move
+    Move.deleteRecord(toPlanetHash, moveIndex);
+
+    // Create new move with reduced variables
+    _createReversedMove(moveData, toPlanetHash, moveIndex, currentTick, elapsedTime);
+
+    // Update materials (50% of original amounts)
+    for (uint8 rid = 1; rid <= uint8(type(MaterialType).max); rid++) {
+      uint256 originalAmount = MoveMaterial.getAmount(moveData.id, rid);
+      if (originalAmount > 0) {
+        MoveMaterial.setAmount(moveId, rid, originalAmount / 2);
+      }
+    }
+    // MaterialMove.deleteRecord(moveData.id);
+    // Write planets back to storage
+    DFUtils.writePlanet(w, fromPlanet);
+    DFUtils.writePlanet(w, DFUtils.readInitedPlanet(w, uint256(toPlanetHash)));
+
+    // Emit revert event with new direction
+    emit MoveReverted(moveId, moveData.captain, toPlanetHash, moveData.from);
+  }
+
+  function _createReversedMove(
+    MoveData memory moveData,
+    bytes32 toPlanetHash,
+    uint8 moveIndex,
+    uint256 currentTick,
+    uint256 elapsedTime
+  ) internal {
+    // Create new move directly
+    Move.set(
+      moveData.from,
+      moveIndex,
+      MoveData({
+        from: toPlanetHash,
+        id: moveData.id,
+        captain: moveData.captain,
+        departureTick: uint64(currentTick),
+        arrivalTick: uint64(currentTick + elapsedTime),
+        population: uint64(moveData.population / 2),
+        silver: uint64(moveData.silver / 2),
+        artifact: moveData.artifact
+      })
+    );
+
+    // Add to original source planet's queue
+    PendingMoveQueue memory newQueue;
+    newQueue.ReadFromStore(uint256(moveData.from));
+    PendingMoveQueueLib.PushMove(newQueue, Move.get(moveData.from, moveIndex));
+    newQueue.WriteToStore();
   }
 }
 

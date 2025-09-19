@@ -3,6 +3,7 @@ export * from "./EngineConsts";
 export * from "./EngineUtils";
 export * from "./Entities/PlanetRenderManager";
 export * from "./Entities/SpriteRenderer";
+export * from "./Entities/VoyageRenderer";
 export * from "./Hats";
 export * from "./Logos";
 export * from "./Memes";

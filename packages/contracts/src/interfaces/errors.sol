@@ -31,6 +31,10 @@ interface Errors {
   error ArtifactNotOnPlanet(); // 0x37a29a4e
   error PlanetOwnershipMismatch(); //0xb43ec652
   error NotEnoughMaterial(); // 0x4f15d777
+  error MoveNotFound(); // 0x8c2529c6
+  error NotMoveCaptain(); // 0x8c2529c7
+  error MoveTooFarToRevert(); // 0x8c2529c8
+  error SourcePlanetNotOwned(); // 0x8c2529c9
 
   // tick system
   error Paused(); // 0x9e87fac8

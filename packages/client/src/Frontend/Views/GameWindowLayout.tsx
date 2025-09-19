@@ -25,6 +25,7 @@ import { HelpPane } from "../Panes/HelpPane";
 import { HotkeysArtShipPane, HotkeysMainLinePane } from "../Panes/HotKeyPane";
 import { HoverPlanetPane } from "../Panes/HoverPlanetPane";
 import OnboardingPane from "../Panes/OnboardingPane";
+import { VoyageHoverPane } from "../Panes/VoyageHoverPane";
 import { PlanetContextPane } from "../Panes/PlanetContextPane";
 import { PlanetDexPane } from "../Panes/PlanetDexPane";
 import { PlayerArtifactsPane } from "../Panes/PlayerArtifactsPane";
@@ -479,6 +480,7 @@ export function GameWindowLayout({
 
           <HoverPlanetPane />
           <ArtifactHoverPane />
+          <VoyageHoverPane />
           {!spectate && <TutorialPane tutorialHook={tutorialHook} />}
         </CanvasContainer>
       </MainWindow>

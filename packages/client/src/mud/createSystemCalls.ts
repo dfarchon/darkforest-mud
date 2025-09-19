@@ -3,7 +3,7 @@
  * for changes in the World state (using the System contracts).
  */
 
-import type { MaterialTransfer, MaterialType, Biome } from "@df/types";
+import type { Biome, MaterialTransfer, MaterialType } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import type { Address } from "viem";
@@ -71,7 +71,6 @@ export function createSystemCalls(
       const receipt = await waitForTransaction(tx as `0x${string}`);
 
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("UnPaused:", receipt);
       getComponentValue(Ticker, singletonEntity);
     } catch (error) {
       console.error("Create UnPaused:", error);
@@ -85,7 +84,6 @@ export function createSystemCalls(
       const tx = await worldContract.write.df__pause();
       const receipt = await waitForTransaction(tx as `0x${string}`);
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Paused:", receipt);
       getComponentValue(Ticker, singletonEntity);
     } catch (error) {
       console.error("Create Paused:", error);
@@ -99,7 +97,6 @@ export function createSystemCalls(
       const tx = await worldContract.write.df__tick();
       const receipt = await waitForTransaction(tx as `0x${string}`);
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Tick:", receipt);
       getComponentValue(Ticker, singletonEntity);
     } catch (error) {
       console.error("Create Paused:", error);
@@ -139,7 +136,6 @@ export function createSystemCalls(
       const receipt = await waitForTransaction(tx as `0x${string}`);
 
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Planet created successfully:", receipt);
       getComponentValue(Planet, singletonEntity);
     } catch (error) {
       console.error("Create planet transaction failed:", error);
@@ -156,7 +152,6 @@ export function createSystemCalls(
       const tx = await worldContract.write.df__registerPlayer([name, burner]);
       const receipt = await waitForTransaction(tx);
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Register player successfully:", receipt);
       return getComponentValue(Player, singletonEntity);
     } catch (error) {
       console.error("Create planet transaction failed:", error);
@@ -169,7 +164,6 @@ export function createSystemCalls(
     const tx = await worldContract.write.df__changePlayerName([newName]);
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
-    console.log("Change Player Name successfully:", receipt);
     return getComponentValue(Player, singletonEntity);
   };
 
@@ -178,7 +172,6 @@ export function createSystemCalls(
     const tx = await worldContract.write.df__changeBurnerWallet([newAddress]);
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
-    console.log("Change Burner successfully:", receipt);
     return getComponentValue(Player, singletonEntity);
   };
 
@@ -204,7 +197,6 @@ export function createSystemCalls(
     const tx = await worldContract.write.df__spawnPlayer([proof, SpawnInput]);
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
-    console.log("Spawn Player successfully:", receipt);
     // Replace this with the actual method to get the newly spawned planet
     return getComponentValue(Player, singletonEntity);
   };
@@ -235,7 +227,6 @@ export function createSystemCalls(
     );
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
-    console.log("Spawn Player from Burner successfully:", receipt);
     // Replace this with the actual method to get the newly spawned planet
     return getComponentValue(Player, singletonEntity);
   };
@@ -266,7 +257,6 @@ export function createSystemCalls(
     ]);
     const receipt = await waitForTransaction(tx);
     // Log the receipt or trigger additional actions, e.g., update game state
-    console.log("Spawn Player successfully:", receipt);
     // Replace this with the actual method to get the newly spawned planet
     return getComponentValue(Player, singletonEntity);
   };
@@ -300,7 +290,6 @@ export function createSystemCalls(
       // Wait for the transaction to be confirmed
       const receipt = await waitForTransaction(tx as `0x${string}`);
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Reveal location successfully:", receipt);
       getComponentValue(Planet, singletonEntity);
     } catch (error) {
       console.error("Reveal location transaction failed:", error);
@@ -328,7 +317,6 @@ export function createSystemCalls(
       const receipt = await waitForTransaction(tx as `0x${string}`);
 
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Planet upgraded successfully:", receipt);
       getComponentValue(Planet, singletonEntity);
     } catch (error) {
       console.error("Upgrade planet transaction failed:", error);
@@ -352,7 +340,6 @@ export function createSystemCalls(
       const receipt = await waitForTransaction(tx as `0x${string}`);
 
       // Log the receipt or trigger additional actions, e.g., update game state
-      console.log("Planet upgraded successfully:", receipt);
       getComponentValue(Planet, singletonEntity);
     } catch (error) {
       console.error("Upgrade planet transaction failed:", error);
@@ -425,7 +412,6 @@ export function createSystemCalls(
       const tx = await worldContract.write.df__move(argsMove);
 
       const receipt = await waitForTransaction(tx);
-      console.log("Move created successfully:", receipt);
       getComponentValue(Move, singletonEntity);
     } catch (error) {
       console.error("Move transaction failed:", error);
@@ -445,7 +431,6 @@ export function createSystemCalls(
       ]);
 
       // Log the planet details or trigger additional actions, e.g., update game state
-      console.log("Planet Details (Hash):", planet);
 
       getComponentValue(Planet, singletonEntity);
 
@@ -472,8 +457,6 @@ export function createSystemCalls(
 
       // Log the planet details or trigger additional actions, e.g., update game state
 
-      console.log("Planet Details (Hash, Perlin, Distance):", planet);
-
       getComponentValue(Planet, singletonEntity);
 
       return planet;
@@ -499,7 +482,6 @@ export function createSystemCalls(
       ]);
 
       // Log the planet details or trigger additional actions, e.g., update game state
-      console.log("Planet At Details :", planet);
 
       getComponentValue(Planet, singletonEntity);
 
@@ -694,7 +676,6 @@ export function createSystemCalls(
         amount,
       ]);
       const receipt = await waitForTransaction(tx as `0x${string}`);
-      console.log("Withdraw material successfully:", receipt);
       getComponentValue(Planet, singletonEntity);
     } catch (error) {
       console.error("Withdraw material transaction failed:", error);
@@ -718,10 +699,29 @@ export function createSystemCalls(
         biome,
       ]);
       const receipt = await waitForTransaction(tx as `0x${string}`);
-      console.log("Craft spaceship successfully:", receipt);
       getComponentValue(Planet, singletonEntity);
     } catch (error) {
       console.error("Craft spaceship transaction failed:", error);
+      throw error;
+    }
+  };
+
+  // REVERT MOVE call
+  const revertMove = async (
+    moveId: bigint,
+    toPlanetHash: bigint,
+    moveIndex: number,
+  ): Promise<void> => {
+    try {
+      const tx = await worldContract.write.df__revertMove([
+        moveId,
+        toPlanetHash,
+        moveIndex,
+      ]);
+      const receipt = await waitForTransaction(tx as `0x${string}`);
+      getComponentValue(Move, singletonEntity);
+    } catch (error) {
+      console.error("Revert move transaction failed:", error);
       throw error;
     }
   };
@@ -736,6 +736,7 @@ export function createSystemCalls(
     initializePlayer,
     createPlanet,
     move,
+    revertMove,
     unPause,
     pause,
     tick,

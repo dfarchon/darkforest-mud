@@ -375,4 +375,69 @@ export class VoyageRenderer implements VoyageRendererType {
   }
 
   flush() {}
+
+  /**
+   * Gets voyage data for rendering UI components
+   */
+  getVoyageData() {
+    const { context: gameUIManager, now, currentTick } = this.renderer;
+    const voyages = gameUIManager.getAllVoyages();
+    const voyageData: Array<{
+      voyage: QueuedArrival;
+      position: { x: number; y: number };
+      isMyVoyage: boolean;
+      canRevert: boolean;
+    }> = [];
+
+    for (const voyage of voyages) {
+      if (currentTick < voyage.arrivalTick) {
+        const isMyVoyage =
+          voyage.player === gameUIManager.getAccount() ||
+          gameUIManager.getArtifactWithId(voyage.artifactId)?.controller ===
+            gameUIManager.getPlayer()?.address;
+
+        const fromLoc = gameUIManager.getLocationOfPlanet(voyage.fromPlanet);
+        const toLoc = gameUIManager.getLocationOfPlanet(voyage.toPlanet);
+
+        if (fromLoc && toLoc) {
+          const departureTime = gameUIManager.convertTickToMs(
+            voyage.departureTick,
+          );
+          const arrivalTime = gameUIManager.convertTickToMs(voyage.arrivalTick);
+          const nowMs = now;
+
+          let proportion =
+            (nowMs - departureTime) / (arrivalTime - departureTime);
+          proportion = Math.max(proportion, 0.01);
+          proportion = Math.min(proportion, 0.99);
+
+          const shipsLocationX =
+            (1 - proportion) * fromLoc.coords.x + proportion * toLoc.coords.x;
+          const shipsLocationY =
+            (1 - proportion) * fromLoc.coords.y + proportion * toLoc.coords.y;
+          const shipsLocation = { x: shipsLocationX, y: shipsLocationY };
+
+          // Check if can revert using proper logic
+          let canRevert = false;
+          if (isMyVoyage && proportion < 0.5) {
+            // Check if the original source planet is still owned by the player
+            const sourcePlanet = gameUIManager.getPlanetWithId(
+              voyage.fromPlanet,
+            );
+            canRevert =
+              sourcePlanet && sourcePlanet.owner === gameUIManager.getAccount();
+          }
+
+          voyageData.push({
+            voyage,
+            position: shipsLocation,
+            isMyVoyage,
+            canRevert,
+          });
+        }
+      }
+    }
+
+    return voyageData;
+  }
 }

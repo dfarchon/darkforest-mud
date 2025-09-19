@@ -474,6 +474,16 @@ export interface VoyageRendererType {
    * Draws all active voyages.
    */
   flush(): void;
+
+  /**
+   * Gets voyage data for rendering UI components
+   */
+  getVoyageData(): Array<{
+    voyage: QueuedArrival;
+    position: { x: number; y: number };
+    isMyVoyage: boolean;
+    canRevert: boolean;
+  }>;
 }
 
 export interface LinkRendererType {

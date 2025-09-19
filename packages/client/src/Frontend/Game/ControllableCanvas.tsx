@@ -1,7 +1,9 @@
 import { Renderer } from "@df/renderer";
 import { PlanetRenderManager } from "@df/renderer";
+import type { QueuedArrival } from "@df/types";
 import { CursorState, ModalManagerEvent, Setting } from "@df/types";
 import { useMUD } from "@mud/MUDContext";
+import type { ClientComponents } from "@mud/createClientComponents";
 // import * as fabric from 'fabric'; // v6
 import {
   useCallback,
@@ -12,6 +14,8 @@ import {
 } from "react";
 import styled from "styled-components";
 
+import { SelectedVoyagePane } from "../Components/SelectedVoyagePane";
+import { VoyageSelector } from "../Components/VoyageSelector";
 import { useUIManager } from "../Utils/AppHooks";
 import { useIsDown } from "../Utils/KeyEmitters";
 import {
@@ -22,6 +26,24 @@ import {
 } from "../Utils/ShortcutConstants";
 import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import Viewport from "./Viewport";
+
+// Type definitions for voyage renderer and renderer objects
+interface VoyageRenderer {
+  getVoyageData(): Array<{
+    voyage: QueuedArrival;
+    position: { x: number; y: number };
+    isMyVoyage: boolean;
+    canRevert: boolean;
+  }>;
+}
+
+interface RendererWithComponents {
+  components?: ClientComponents;
+}
+
+interface RendererInstance {
+  voyageRenderManager?: VoyageRenderer;
+}
 
 const CanvasWrapper = styled.div`
   width: 100%;
@@ -69,6 +91,17 @@ export default function ControllableCanvas() {
 
   const modalManager = gameUIManager.getModalManager();
   const [targeting, setTargeting] = useState<boolean>(false);
+  const [selectedVoyage, setSelectedVoyage] = useState<
+    QueuedArrival | undefined
+  >(undefined);
+  const [voyageData, setVoyageData] = useState<
+    Array<{
+      voyage: QueuedArrival;
+      position: { x: number; y: number };
+      isMyVoyage: boolean;
+      canRevert: boolean;
+    }>
+  >([]);
 
   useEffect(() => {
     const updateTargeting = (newstate: CursorState) => {
@@ -82,6 +115,40 @@ export default function ControllableCanvas() {
       );
     };
   }, [modalManager]);
+
+  // Update voyage data when renderer changes
+  useEffect(() => {
+    if (Renderer.instance) {
+      const rendererInstance = Renderer.instance as RendererInstance;
+      const voyageRenderer = rendererInstance.voyageRenderManager;
+      if (
+        voyageRenderer &&
+        typeof voyageRenderer.getVoyageData === "function"
+      ) {
+        const data = voyageRenderer.getVoyageData();
+        setVoyageData(data);
+      }
+    }
+  }, [gameUIManager, components]); // Re-run when game state changes
+
+  // Update voyage data more frequently to catch voyage changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (Renderer.instance) {
+        const rendererInstance = Renderer.instance as RendererInstance;
+        const voyageRenderer = rendererInstance.voyageRenderManager;
+        if (
+          voyageRenderer &&
+          typeof voyageRenderer.getVoyageData === "function"
+        ) {
+          const data = voyageRenderer.getVoyageData();
+          setVoyageData(data);
+        }
+      }
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, []);
 
   const doResize = useCallback(() => {
     const uiEmitter: UIEmitter = UIEmitter.getInstance();
@@ -167,8 +234,7 @@ export default function ControllableCanvas() {
     PlanetRenderManager.setComponents(components);
 
     // Also set components on the renderer for dynamic access
-    (renderer as Renderer & { components: ClientComponents }).components =
-      components;
+    (renderer as RendererWithComponents).components = components;
 
     // We can't attach the wheel event onto the canvas due to:
     // https://www.chromestatus.com/features/6662647093133312
@@ -282,6 +348,46 @@ export default function ControllableCanvas() {
       <canvas ref={glRef} width={width} height={height} />
       <canvas ref={canvasRef} width={width} height={height} />
       <canvas ref={bufferRef} id="buffer" />
+      {/* Render voyage UI elements over the canvas */}
+      {voyageData.map((data) => {
+        const viewport = Renderer.instance?.getViewport();
+        if (!viewport) return null;
+
+        return (
+          <div key={`voyage-${data.voyage.eventId}`}>
+            {/* Voyage Selector */}
+            <VoyageSelector
+              voyage={data.voyage}
+              worldCoords={data.position}
+              viewport={viewport}
+              onSelect={(voyage) => {
+                // Toggle selection - if same voyage is clicked, deselect it
+                if (
+                  selectedVoyage &&
+                  selectedVoyage.eventId === voyage.eventId
+                ) {
+                  setSelectedVoyage(undefined);
+                  gameUIManager.setSelectedVoyage(undefined);
+                } else {
+                  setSelectedVoyage(voyage);
+                  gameUIManager.setSelectedVoyage(voyage);
+                }
+              }}
+            />
+          </div>
+        );
+      })}
+
+      {/* Selected Voyage Pane */}
+      {selectedVoyage && (
+        <SelectedVoyagePane
+          voyage={selectedVoyage}
+          onClose={() => {
+            setSelectedVoyage(undefined);
+            gameUIManager.setSelectedVoyage(undefined);
+          }}
+        />
+      )}
     </CanvasWrapper>
   );
 }
