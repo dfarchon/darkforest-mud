@@ -660,7 +660,13 @@ library PlanetLib {
       planet.planetType,
       uint8(planet.level)
     );
-    planet.materialStorage.initMaterial(planet.planetHash, materialId, initialResources.silver);
+
+    uint256 amount = getMaterial(planet, materialId) + initialResources.silver;
+    uint256 cap = getMaterialCap(planet, materialId);
+    if (amount > cap) {
+      amount = cap;
+    }
+    planet.materialStorage.initMaterial(planet.planetHash, materialId, amount);
   }
 
   function getMaterial(Planet memory planet, MaterialType materialId) internal view returns (uint256) {
