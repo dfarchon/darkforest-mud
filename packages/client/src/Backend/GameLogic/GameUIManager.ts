@@ -2193,7 +2193,7 @@ export class GameUIManager extends EventEmitter {
           ? Number(mat.materialAmount)
           : Number(mat.materialAmount);
 
-      // Convert from scaled amount (with 1e18) to base unit for contract
+      // Convert from scaled amount to base unit for contract
       const baseAmount = current;
       const send = Math.floor((baseAmount * percent) / 100);
       if (send > 0) {

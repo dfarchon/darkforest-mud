@@ -145,7 +145,7 @@ function ResourceBar({
           typeof material.materialAmount === "string"
             ? parseFloat(material.materialAmount)
             : Number(material.materialAmount);
-        const value = ((val / 100) * amount) / 1e18;
+        const value = (val / 100) * amount;
 
         // e.g., "312.4 MYCELIUM"
         return `${formatNumber(value)}`;

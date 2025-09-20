@@ -204,9 +204,9 @@ export const getMaxMaterialType = (): MaterialType => {
 
 export type Materials = {
   materialId: MaterialType;
-  materialAmount: number | bigint | string;
-  cap: number | bigint | string;
-  growthRate: number | bigint | string;
+  materialAmount: number;
+  cap: number;
+  growthRate: number;
   growth: boolean;
 };
 

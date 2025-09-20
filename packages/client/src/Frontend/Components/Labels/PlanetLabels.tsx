@@ -1,10 +1,5 @@
 import { EMPTY_ADDRESS } from "@df/constants";
-import {
-  formatCompact,
-  formatCompact2,
-  formatEtherToNumber,
-  formatNumber,
-} from "@df/gamelogic";
+import { formatEtherToNumber, formatNumber } from "@df/gamelogic";
 import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
 import type { MaterialType } from "@df/types";
@@ -14,8 +9,8 @@ import {
   getMaterialIcon,
   getMaterialName,
 } from "@frontend/Panes/PlanetMaterialsPane";
-import styled from "styled-components";
 import React from "react";
+import styled from "styled-components";
 
 import { getPlanetRank } from "../../../Backend/Utils/Utils";
 import dfstyles from "../../Styles/dfstyles";
@@ -492,15 +487,15 @@ export function MaterialsDisplay({
                       fontSize: "12px",
                     }}
                   >
-                    + {""} {formatCompact2(Number(mat.growthRate) / 1e18)}
+                    + {""} {formatNumber(Number(mat.growthRate), 2)}
                   </span>
                 )}
               </div>
 
               <MaterialBar percentage={percentage} materialID={mat.materialId}>
                 <MaterialBarText>
-                  {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                  {formatCompact(Number(mat.cap) / 1e18)}
+                  {formatNumber(Number(mat.materialAmount), 2)} /{" "}
+                  {formatNumber(Number(mat.cap), 2)}
                 </MaterialBarText>
               </MaterialBar>
             </div>

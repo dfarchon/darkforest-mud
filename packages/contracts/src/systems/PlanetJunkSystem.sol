@@ -59,9 +59,12 @@ contract PlanetJunkSystem is BaseSystem {
   }
 
   function _executeAddJunk(Planet memory planet, address executor, uint256 biomeBase, Proof memory proof) internal {
+    bool isFirstTime = planet.addJunkTick == 0;
     _updateJunkOwnership(planet, executor);
     _verifyBiomeProof(planet, biomeBase, proof);
-    _initAsteroidMaterials(planet, biomeBase);
+    if (isFirstTime) {
+      _initAsteroidMaterials(planet, biomeBase);
+    }
     planet.writeToStore();
   }
 
