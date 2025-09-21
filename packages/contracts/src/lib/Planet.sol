@@ -660,6 +660,7 @@ library PlanetLib {
       planet.planetType,
       uint8(planet.level)
     );
+
     uint256 amount = getMaterial(planet, materialId) + initialResources.silver;
     uint256 cap = getMaterialCap(planet, materialId);
     if (amount > cap) {
