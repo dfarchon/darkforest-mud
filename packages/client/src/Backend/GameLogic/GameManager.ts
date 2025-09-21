@@ -87,6 +87,8 @@ import type {
   Link,
   LocatablePlanet,
   LocationId,
+  MaterialAmount,
+  MaterialAmount,
   MaterialTransfer,
   MaterialType,
   NetworkHealthSummary,
@@ -5011,10 +5013,10 @@ export class GameManager extends EventEmitter {
       const material = planet.materials?.find(
         (m) => m?.materialId === materialType,
       );
-      if (!material || Number(material.materialAmount) < amount * 1e18) {
+      if (!material || Number(material.materialAmount) < amount) {
         throw new Error("not enough material to withdraw!");
       }
-      if (amount * 1e18 * 5 < Number(material.cap)) {
+      if (amount * 5 < Number(material.cap)) {
         throw new Error("require materialAmount >= materialCap * 0.2");
       }
 
@@ -5039,7 +5041,7 @@ export class GameManager extends EventEmitter {
         args: Promise.resolve([
           locationIdToDecStr(locationId),
           materialType,
-          amount * 1e18,
+          Number(amount * CONTRACT_PRECISION),
         ]),
         locationId,
         materialType,
@@ -5580,11 +5582,17 @@ export class GameManager extends EventEmitter {
       if (abandoning && materials) {
         materialsMoved = materials.map((mat) => ({
           materialId: mat.materialId,
-          materialAmount: mat.materialAmount, // convert from string | bigint
+          materialAmount: Number(mat.materialAmount) as MaterialAmount,
         }));
       } else if (materials) {
         materialsMoved = materials;
       }
+      materialsMoved = materialsMoved.map((mat) => ({
+        materialId: mat.materialId,
+        materialAmount: Number(
+          mat.materialAmount * CONTRACT_PRECISION,
+        ) as MaterialAmount,
+      }));
 
       if (newX ** 2 + newY ** 2 >= this.worldRadius ** 2) {
         throw new Error("attempted to move out of bounds");
@@ -5621,6 +5629,7 @@ export class GameManager extends EventEmitter {
           this.worldRadius,
           distMax,
         );
+
         const movedMaterials = encodeMovedMaterials(materialsMoved);
         const args: MoveArgs = [
           snarkArgs[ZKArgIdx.PROOF_A],

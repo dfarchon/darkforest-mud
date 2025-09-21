@@ -601,6 +601,32 @@ export class GameObjects {
     if (loc) {
       (planet as LocatablePlanet).location = loc;
       (planet as LocatablePlanet).biome = this.getBiome(loc);
+
+      if (planet.addJunkTick === 0) {
+        const materials = this.planetUtils.getDefaultMaterials(
+          (planet as LocatablePlanet).biome,
+          planet,
+        );
+
+        planet.materials = planet.materials.map((existing) => {
+          const defaultMaterial = materials.find(
+            (mat) => mat.materialId === existing.materialId,
+          );
+
+          if (defaultMaterial && defaultMaterial.materialAmount > 0) {
+            const newAmount =
+              existing.materialAmount + defaultMaterial.materialAmount;
+            console.log(
+              `Adding ${defaultMaterial.materialAmount} to ${existing.materialAmount} = ${newAmount}`,
+            );
+            return {
+              ...existing,
+              materialAmount: newAmount,
+            };
+          }
+          return existing;
+        });
+      }
     }
     if (revealedLocation) {
       this.markLocationRevealed(revealedLocation);

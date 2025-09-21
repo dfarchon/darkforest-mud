@@ -81,7 +81,9 @@ export class MoveUtils {
           if (moveMaterial && moveMaterial.amount > 0n) {
             materialsMoved.push({
               materialId: resourceId as MaterialId,
-              materialAmount: Number(moveMaterial.amount) as MaterialAmount,
+              materialAmount: Math.floor(
+                Number(moveMaterial.amount) / CONTRACT_PRECISION,
+              ),
             });
           }
         }
