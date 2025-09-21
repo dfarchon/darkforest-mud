@@ -72,7 +72,7 @@ contract WithdrawMaterialSystem is BaseSystem {
 
     // Calculate biome-based score multiplier
     uint256 scoreMultiplier = getBiomeScoreMultiplier(materialType);
-    uint256 scorePoints = (materialToWithdraw * scoreMultiplier) / 1e9;
+    uint256 scorePoints = (materialToWithdraw * scoreMultiplier);
 
     // Remove material from planet
     planet.setMaterial(materialType, currentMaterial - materialToWithdraw);
@@ -106,38 +106,31 @@ contract WithdrawMaterialSystem is BaseSystem {
 
     // Apply material-specific bonuses based on actual MaterialType enum
     if (materialType == MaterialType.CORRUPTED_CRYSTAL) {
-      multiplier = 6; // 6x for corrupted crystals (highest value)
+      multiplier = 600; // 6x for corrupted crystals (highest value)
     } else if (materialType == MaterialType.BLACKALLOY) {
-      multiplier = 4; // 4x for blackalloy
+      multiplier = 400; // 4x for blackalloy
     } else if (materialType == MaterialType.PYROSTEEL) {
-      multiplier = 3; // 3x for pyrosteel
+      multiplier = 300; // 3x for pyrosteel
     } else if (materialType == MaterialType.SCRAPIUM) {
-      multiplier = 25; // 2.5x for scrapium (will be divided by 10)
+      multiplier = 250; // 2.5x for scrapium (will be divided by 10)
     } else if (materialType == MaterialType.CRYOSTONE) {
-      multiplier = 2; // 2x for cryostone
+      multiplier = 200; // 2x for cryostone
     } else if (materialType == MaterialType.SANDGLASS) {
-      multiplier = 18; // 1.8x for sandglass (will be divided by 10)
+      multiplier = 180; // 1.8x for sandglass (will be divided by 10)
     } else if (materialType == MaterialType.MYCELIUM) {
-      multiplier = 15; // 1.5x for mycelium (will be divided by 10)
+      multiplier = 150; // 1.5x for mycelium (will be divided by 10)
     } else if (materialType == MaterialType.AURORIUM) {
-      multiplier = 13; // 1.3x for aurorium (will be divided by 10)
+      multiplier = 130; // 1.3x for aurorium (will be divided by 10)
     } else if (materialType == MaterialType.WINDSTEEL) {
-      multiplier = 12; // 1.2x for windsteel (will be divided by 10)
+      multiplier = 120; // 1.2x for windsteel (will be divided by 10)
     } else if (materialType == MaterialType.LIVING_WOOD) {
-      multiplier = 11; // 1.1x for living wood (will be divided by 10)
+      multiplier = 110; // 1.1x for living wood (will be divided by 10)
     } else if (materialType == MaterialType.WATER_CRYSTALS) {
       multiplier = 105; // 1.05x for water crystals (will be divided by 100)
     } else if (materialType == MaterialType.UNKNOWN) {
-      multiplier = 1; // 1x for unknown materials
+      multiplier = 100; // 1x for unknown materials
     } else {
-      multiplier = 1; // Default multiplier for any other materials
-    }
-
-    // Handle decimal multipliers
-    if (multiplier >= 100) {
-      multiplier = multiplier / 100;
-    } else if (multiplier >= 10) {
-      multiplier = multiplier / 10;
+      multiplier = 100; // Default multiplier for any other materials
     }
   }
 }

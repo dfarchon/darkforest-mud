@@ -1,5 +1,5 @@
 import { formatNumber } from "@df/gamelogic";
-import type { LocationId, MaterialType } from "@df/types";
+import type { LocationId, Materials, MaterialType } from "@df/types";
 import { ModalName } from "@df/types";
 import { useState } from "react";
 import styled from "styled-components";
@@ -18,15 +18,78 @@ import { useEmitterValue } from "../Utils/EmitterHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
 
+const PlanetMaterialsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 500px;
+
+  & .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    & > span {
+      &:first-child {
+        color: ${dfstyles.colors.subtext};
+        padding-right: 1em;
+      }
+    }
+  }
+  & .message {
+    margin: 1em 0;
+
+    & p {
+      margin: 0.5em 0;
+
+      &:last-child {
+        margin-bottom: 1em;
+      }
+    }
+  }
+`;
+
 const MaterialsContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 8px;
+  overflow-y: auto;
+  max-height: calc(100% - 40px);
+  padding-right: 4px;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  /* Force scrollbar to left side */
+  direction: rtl;
+
+  & > * {
+    direction: ltr; /* Restore normal direction for children */
   }
+
+  /* Custom scrollbar styling - left side scrollbar */
+  &::-webkit-scrollbar {
+    width: 12px; /* Make scrollbar wider */
+    background-color: ${dfstyles.colors.backgroundDarker};
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${dfstyles.colors.backgroundDarker};
+    border-radius: 6px;
+    margin: 4px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${dfstyles.colors.borderDarker};
+    border-radius: 6px;
+    border: 2px solid ${dfstyles.colors.backgroundDarker};
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${dfstyles.colors.subtext};
+  }
+
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: ${dfstyles.colors.borderDarker}
+    ${dfstyles.colors.backgroundDarker};
 `;
 
 const MaterialCard = styled.div`
@@ -37,6 +100,7 @@ const MaterialCard = styled.div`
   border: 1px solid ${dfstyles.colors.borderDarker};
   border-radius: 6px;
   gap: 8px;
+  min-height: fit-content;
 `;
 
 const MaterialHeader = styled.div`
@@ -240,6 +304,93 @@ const WithdrawButton = styled(Btn)`
   min-width: 60px;
 `;
 
+const MaterialWithdrawBar = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: ${dfstyles.colors.background};
+  border: 1px solid ${dfstyles.colors.borderDarker};
+  border-radius: 4px;
+`;
+
+const WithdrawHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+`;
+
+const WithdrawLabel = styled.div`
+  font-size: 12px;
+  font-weight: bold;
+  color: ${dfstyles.colors.text};
+`;
+
+const WithdrawAmount = styled.div`
+  font-size: 14px;
+  font-weight: bold;
+  color: ${dfstyles.colors.subtext};
+`;
+
+const WithdrawSlider = styled.input`
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: ${dfstyles.colors.borderDarker};
+  outline: none;
+  -webkit-appearance: none;
+  margin: 4px 0;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${dfstyles.colors.dfblue};
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${dfstyles.colors.dfblue};
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+`;
+
+const WithdrawWarning = styled.div`
+  font-size: 15px;
+  color: ${dfstyles.colors.dfred};
+  background-color: ${dfstyles.colors.backgroundDarker};
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid ${dfstyles.colors.dfred};
+  margin-top: 4px;
+`;
+
+const MaterialScoreInfo = styled.div`
+  font-size: 15px;
+  color: ${dfstyles.colors.subtext};
+  background-color: ${dfstyles.colors.backgroundDarker};
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid ${dfstyles.colors.borderDarker};
+  margin-top: 4px;
+`;
+
+const ScoreMultiplier = styled.span<{ color: string }>`
+  color: ${(props) => props.color};
+  font-weight: bold;
+`;
+
 export function getMaterialName(materialId: MaterialType): string {
   switch (materialId) {
     case 1:
@@ -295,6 +446,35 @@ export function getMaterialIcon(materialId: MaterialType): string {
       return "☣️";
     default:
       return "❓";
+  }
+}
+
+export function getMaterialScoreMultiplier(materialId: MaterialType): number {
+  switch (materialId) {
+    case 1:
+      return 105;
+    case 2:
+      return 110;
+    case 3:
+      return 120;
+    case 4:
+      return 130;
+    case 5:
+      return 150;
+    case 6:
+      return 180;
+    case 7:
+      return 200;
+    case 8:
+      return 250;
+    case 9:
+      return 300;
+    case 10:
+      return 400;
+    case 11:
+      return 600;
+    default:
+      return 100;
   }
 }
 
@@ -400,7 +580,7 @@ export function PlanetMaterialsPane({
       );
       if (material) {
         const maxWithdraw = Number(material.materialAmount);
-        const withdrawAmount = (value / 100) * maxWithdraw;
+        const withdrawAmount = Math.floor((value / 100) * maxWithdraw);
         setWithdrawAmounts((prev) => ({
           ...prev,
           [materialType]: withdrawAmount,
@@ -451,6 +631,30 @@ export function PlanetMaterialsPane({
     }
   };
 
+  const getWithdrawAmount = (
+    materialType: MaterialType,
+    percentage: number,
+  ): string => {
+    if (!planet) return "";
+
+    const material = planet.materials?.find(
+      (m) => m.materialId === materialType,
+    );
+    if (!material) return "";
+
+    const maxAmount = Number(material.materialAmount);
+    const amount = (percentage / 100) * maxAmount;
+    return `${formatNumber(amount)}`;
+  };
+
+  // Check if material amount is less than 1/5 of cap
+  const isMaterialBelowThreshold = (material: Materials): boolean => {
+    const currentAmount = Math.floor(withdrawAmounts[material.materialId]);
+    const cap = Math.ceil(Number(material.cap));
+
+    return currentAmount * 5 < cap;
+  };
+
   if (!planet) {
     return (
       <CenterBackgroundSubtext width="100%" height="200px">
@@ -465,100 +669,129 @@ export function PlanetMaterialsPane({
     ) || [];
 
   return (
-    <ModalPane
-      title="Materials"
-      visible={true}
-      onClose={() => {
-        /* close logic here */
-      }}
-      id={ModalName.PlanetMaterials}
-    >
-      <Section>
-        <SectionHeader>Materials</SectionHeader>
-        {activeMaterials.length === 0 ? (
-          <CenterBackgroundSubtext width="100%" height="100px">
-            No materials found on this planet
-          </CenterBackgroundSubtext>
-        ) : (
-          <MaterialsContainer>
-            {activeMaterials.map((mat) => {
-              const percentage =
-                Number(mat.cap) > 0
-                  ? (Number(mat.materialAmount) / Number(mat.cap)) * 100
-                  : 0;
-              const materialColor = getMaterialColor(mat.materialId);
-              const allocation = materialAllocations[mat.materialId] || 0;
+    <PlanetMaterialsWrapper>
+      {activeMaterials.length === 0 ? (
+        <CenterBackgroundSubtext width="100%" height="100px">
+          No materials found on this planet
+        </CenterBackgroundSubtext>
+      ) : (
+        <MaterialsContainer>
+          {activeMaterials.map((mat) => {
+            const percentage =
+              Number(mat.cap) > 0
+                ? (Number(mat.materialAmount) / Number(mat.cap)) * 100
+                : 0;
+            const materialColor = getMaterialColor(mat.materialId);
+            const allocation = materialAllocations[mat.materialId] || 0;
+            const isBelowThreshold = isMaterialBelowThreshold(mat);
+            const scoreMultiplier = getMaterialScoreMultiplier(mat.materialId);
 
-              return (
-                <MaterialCard key={mat.materialId}>
-                  <MaterialHeader>
-                    <MaterialIcon color={materialColor}>
-                      {getMaterialIcon(mat.materialId)}
-                    </MaterialIcon>
-                    <MaterialName color={materialColor}>
-                      {getMaterialName(mat.materialId)}
-                    </MaterialName>
-                  </MaterialHeader>
+            return (
+              <MaterialCard key={mat.materialId}>
+                <MaterialHeader>
+                  <MaterialIcon color={materialColor}>
+                    {getMaterialIcon(mat.materialId)}
+                  </MaterialIcon>
+                  <MaterialName color={materialColor}>
+                    {getMaterialName(mat.materialId)}
+                  </MaterialName>
+                </MaterialHeader>
 
-                  <MaterialStats>
-                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
-                      <SliderContainer>
-                        <SliderRow>
-                          <SliderValue>{allocation}%</SliderValue>
-                          <SliderButtons>
-                            <SliderButton
-                              onClick={() =>
-                                handleSliderDecrement(mat.materialId)
-                              }
-                              disabled={allocation <= 0}
-                            >
-                              -
-                            </SliderButton>
-                            <SliderButton
-                              onClick={() =>
-                                handleSliderIncrement(mat.materialId)
-                              }
-                              disabled={allocation >= 100}
-                            >
-                              +
-                            </SliderButton>
-                          </SliderButtons>
-                        </SliderRow>
-                      </SliderContainer>
-                    )}
-                    {mat.growth && (
-                      <div style={{ color: "#00ff00" }}>
-                        +{formatNumber(Number(mat.growthRate), 2)}
-                      </div>
-                    )}
-                  </MaterialStats>
+                <MaterialStats>
+                  {mat.growth && (
+                    <div style={{ color: materialColor }}>
+                      Growth Rate: {formatNumber(Number(mat.growthRate), 2)}
+                    </div>
+                  )}
+                </MaterialStats>
 
-                  <MaterialBar
-                    percentage={percentage}
-                    materialID={mat.materialId}
+                {/* Score multiplier info */}
+                <MaterialScoreInfo>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      color: "white",
+                    }}
                   >
-                    <MaterialBarText>
-                      {Number(mat.materialAmount)} / {Number(mat.cap)}
-                    </MaterialBarText>
-                    {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
-                      <IntegratedSlider
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={allocation}
-                        materialID={mat.materialId}
-                        onChange={(e) =>
-                          handleSliderChange(
-                            mat.materialId,
-                            parseInt(e.target.value),
-                          )
-                        }
-                      />
-                    )}
-                  </MaterialBar>
+                    <span>Withdraw Score Multiplier: {scoreMultiplier}</span>
+                  </div>
+                </MaterialScoreInfo>
 
-                  {/* Material Withdrawal Controls */}
-                  {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                {/* Material quantity vs cap progress bar - shows current status only */}
+                <MaterialBar
+                  percentage={percentage}
+                  materialID={mat.materialId}
+                >
+                  <MaterialBarText>
+                    {Number(mat.materialAmount)} / {Number(mat.cap)}
+                  </MaterialBarText>
+                </MaterialBar>
+
+                {/* Material withdrawal control panel - only shown at trading posts */}
+                {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                  <MaterialWithdrawBar>
+                    <WithdrawHeader>
+                      <WithdrawLabel>Withdraw Amount</WithdrawLabel>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <span
+                          style={{ fontSize: "11px", color: materialColor }}
+                        >
+                          {allocation}%
+                        </span>
+                        <div style={{ display: "flex", gap: "4px" }}>
+                          <SliderButton
+                            onClick={() =>
+                              handleSliderDecrement(mat.materialId)
+                            }
+                            disabled={allocation <= 0}
+                          >
+                            -
+                          </SliderButton>
+                          <SliderButton
+                            onClick={() =>
+                              handleSliderIncrement(mat.materialId)
+                            }
+                            disabled={allocation >= 100}
+                          >
+                            +
+                          </SliderButton>
+                        </div>
+                      </div>
+                    </WithdrawHeader>
+
+                    <WithdrawAmount>
+                      {getWithdrawAmount(mat.materialId, allocation)}
+                    </WithdrawAmount>
+
+                    <WithdrawSlider
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={allocation}
+                      onChange={(e) =>
+                        handleSliderChange(
+                          mat.materialId,
+                          parseInt(e.target.value),
+                        )
+                      }
+                    />
+
+                    {/* Warning message for materials below threshold */}
+                    {isBelowThreshold && (
+                      <WithdrawWarning>
+                        ⚠️ Cannot withdraw: Material amount is less than 1/5 of
+                        capacity
+                      </WithdrawWarning>
+                    )}
+
                     <MaterialWithdrawContainer>
                       <WithdrawInput>
                         <NumberInput
@@ -582,19 +815,20 @@ export function PlanetMaterialsPane({
                         }
                         disabled={
                           !withdrawAmounts[mat.materialId] ||
-                          withdrawAmounts[mat.materialId] <= 0
+                          withdrawAmounts[mat.materialId] <= 0 ||
+                          isBelowThreshold
                         }
                       >
                         Withdraw
                       </WithdrawButton>
                     </MaterialWithdrawContainer>
-                  )}
-                </MaterialCard>
-              );
-            })}
-          </MaterialsContainer>
-        )}
-      </Section>
-    </ModalPane>
+                  </MaterialWithdrawBar>
+                )}
+              </MaterialCard>
+            );
+          })}
+        </MaterialsContainer>
+      )}
+    </PlanetMaterialsWrapper>
   );
 }
