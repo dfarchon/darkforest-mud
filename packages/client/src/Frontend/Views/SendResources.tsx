@@ -1,6 +1,6 @@
 import { formatNumber, isSpaceShip } from "@df/gamelogic";
-import { isUnconfirmedMoveTx, isUnconfirmedReleaseTx } from "@df/serde";
-import type { Artifact, Materials, Planet } from "@df/types";
+import { isUnconfirmedMoveTx } from "@df/serde";
+import type { Artifact, Materials, MaterialType, Planet } from "@df/types";
 import { artifactNameFromArtifact, TooltipName } from "@df/types";
 import {
   getMaterialColor,
@@ -10,15 +10,12 @@ import {
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import { StatIdx } from "../../_types/global/GlobalTypes";
 import type { Wrapper } from "../../Backend/Utils/Wrapper";
 import { Btn } from "../Components/Btn";
 import { Icon, IconType } from "../Components/Icons";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
 import { MaybeShortcutButton } from "../Components/MaybeShortcutButton";
-import { Row } from "../Components/Row";
 import { Slider } from "../Components/Slider";
-import { LongDash, Subber } from "../Components/Text";
 import { TooltipTrigger } from "../Panes/Tooltip";
 import dfstyles from "../Styles/dfstyles";
 import {
@@ -28,21 +25,22 @@ import {
 } from "../Utils/AppHooks";
 import { useEmitterValue } from "../Utils/EmitterHooks";
 import { useOnUp } from "../Utils/KeyEmitters";
-import { TOGGLE_ABANDON, TOGGLE_SEND } from "../Utils/ShortcutConstants";
+import { TOGGLE_SEND } from "../Utils/ShortcutConstants";
 import { SelectArtifactRow } from "./ArtifactRow";
 
 const StyledSendResources = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 8px;
   /* Allow the container to be flexible for proper scrolling */
   min-height: 0;
 `;
+
 const MaterialsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 `;
 
 const ResourcesScrollable = styled.div`
@@ -63,13 +61,13 @@ const ResourcesScrollable = styled.div`
   /* Webkit scrollbar styling */
   &::-webkit-scrollbar {
     width: 16px; /* make scrollbar wider */
-    background-color: #e0e0e0; /* track background */
+    background-color: transparent; /* track background */
   }
 
   &::-webkit-scrollbar-thumb {
     background-color: #888; /* thumb color */
     border-radius: 8px; /* rounder thumb */
-    border: 4px solid #e0e0e0; /* create extra space around thumb */
+    border: 4px solid transparent; /* create extra space around thumb */
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -79,62 +77,12 @@ const ResourcesScrollable = styled.div`
   &::-webkit-scrollbar-track {
     margin: 8px 0; /* add vertical margin to track */
     border-radius: 8px;
+    background-color: transparent;
   }
 
   /* Firefox scrollbar */
   scrollbar-width: thin;
-  scrollbar-color: #888 #e0e0e0;
-`;
-
-const StyledShowPercent = styled.div`
-  display: inline-block;
-
-  & > span:first-child {
-    width: 3em;
-    text-align: right;
-    margin-right: 1em;
-  }
-
-  & > span:last-child {
-    color: ${dfstyles.colors.subtext};
-    & > span {
-      ${dfstyles.prefabs.noselect};
-      &:hover {
-        color: ${dfstyles.colors.text};
-        cursor: pointer;
-      }
-      &:first-child {
-        margin-right: 0.5em;
-      }
-    }
-  }
-`;
-function ShowPercent({
-  value,
-  setValue,
-  color,
-}: {
-  value: number;
-  setValue: (x: number) => void;
-  color?: string;
-}) {
-  return (
-    <StyledShowPercent>
-      <span style={{ color: color }}>{value}%</span>
-      <span style={{ color: color }}>
-        <span onClick={() => setValue(value - 1)}>
-          <LongDash />
-        </span>
-        <span onClick={() => setValue(value + 1)}>+</span>
-      </span>
-    </StyledShowPercent>
-  );
-}
-
-const ResourceRowDetails = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  scrollbar-color: #888 transparent;
 `;
 
 export function MaterialIcon({ materialId }: { materialId: number }) {
@@ -156,6 +104,118 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
     </div>
   );
 }
+
+function getMaterialTooltipName(
+  materialId: MaterialType,
+): TooltipName | undefined {
+  switch (materialId) {
+    case 1:
+      return TooltipName.MaterialWaterCrystals;
+    case 2:
+      return TooltipName.MaterialLivingWood;
+    case 3:
+      return TooltipName.MaterialWindsteel;
+    case 4:
+      return TooltipName.MaterialAurorium;
+    case 5:
+      return TooltipName.MaterialMycelium;
+    case 6:
+      return TooltipName.MaterialSandglass;
+    case 7:
+      return TooltipName.MaterialCryostone;
+    case 8:
+      return TooltipName.MaterialScrapium;
+    case 9:
+      return TooltipName.MaterialPyrosteel;
+    case 10:
+      return TooltipName.MaterialBlackalloy;
+    case 11:
+      return TooltipName.MaterialCorruptedCrystal;
+    default:
+      return undefined;
+  }
+}
+
+const ResourceRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  min-height: 32px;
+`;
+
+const ResourceIcon = styled.div<{ color: string }>`
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: help;
+`;
+
+const _ResourceName = styled.div<{ color: string }>`
+  color: ${(props) => props.color};
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 60px;
+  flex-shrink: 0;
+`;
+
+const ResourceValue = styled.div<{ color: string }>`
+  color: ${(props) => props.color};
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+`;
+
+const ResourceSlider = styled.div`
+  width: 100%;
+  margin: 0;
+`;
+
+const ResourcePercentage = styled.div<{ color: string }>`
+  color: ${(props) => props.color};
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 35px;
+  text-align: center;
+  flex-shrink: 0;
+`;
+
+const ResourceControls = styled.div<{ color: string }>`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+
+  button {
+    background: none;
+    border: none;
+    color: ${(props) => props.color};
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+`;
 
 function ResourceBar({
   isSilver,
@@ -184,10 +244,10 @@ function ResourceBar({
           typeof material.materialAmount === "string"
             ? parseFloat(material.materialAmount)
             : Number(material.materialAmount);
-        const value = (val / 100) * amount;
+        const materialValue = (val / 100) * amount;
 
         // e.g., "312.4 MYCELIUM"
-        return `${formatNumber(value)}`;
+        return `${formatNumber(materialValue)}`;
       }
 
       // SILVER or ENERGY
@@ -195,187 +255,117 @@ function ResourceBar({
         ? (selected as Planet).silver
         : (selected as Planet).energy;
 
-      const label = isSilver ? "SILVER" : "ENERGY";
-      const value = (val / 100) * resource;
+      const resourceValue = (val / 100) * resource;
 
-      return `${formatNumber(value)}`;
+      return `${formatNumber(resourceValue)}`;
     },
     [selected, isSilver, isMaterial, material],
   );
+
+  const getResourceColor = () => {
+    if (isMaterial && material) {
+      return getMaterialColor(material.materialId);
+    }
+    if (isSilver) {
+      return dfstyles.colors.dfyellow;
+    }
+    return dfstyles.colors.dfblue;
+  };
+
+  const _getResourceName = () => {
+    if (isMaterial && material) {
+      return getMaterialName(material.materialId);
+    }
+    if (isSilver) {
+      return "Silver";
+    }
+    return "Energy";
+  };
+
+  const getResourceIcon = () => {
+    if (isMaterial && material) {
+      return getMaterialIcon(material.materialId);
+    }
+    if (isSilver) {
+      return <Icon type={IconType.Silver} />;
+    }
+    return <Icon type={IconType.Energy} />;
+  };
+
+  const resourceColor = getResourceColor();
+
   return (
-    <>
-      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        {/* Header with icon, name, and percentage */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <ResourceRowDetails>
-            {(() => {
-              if (isMaterial && material) {
-                return (
-                  <>
-                    <MaterialIcon materialId={material.materialId} />
-                    <Subber
-                      style={{
-                        color: getMaterialColor(material.materialId),
-                        fontSize: "11px",
-                      }}
-                    >
-                      {getMaterialName(material.materialId)}
-                    </Subber>
-                  </>
-                );
-              }
+    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      {/* Main resource row: [Icon] [Name] [Value] [%] [+/-] */}
+      <ResourceRow>
+        {(() => {
+          if (isMaterial && material) {
+            return (
+              <TooltipTrigger
+                name={getMaterialTooltipName(material.materialId)}
+              >
+                <ResourceIcon color={resourceColor}>
+                  {getResourceIcon()}
+                </ResourceIcon>
+              </TooltipTrigger>
+            );
+          }
+          if (isSilver) {
+            return (
+              <TooltipTrigger name={TooltipName.Silver}>
+                <ResourceIcon color={resourceColor}>
+                  {getResourceIcon()}
+                </ResourceIcon>
+              </TooltipTrigger>
+            );
+          }
+          return (
+            <TooltipTrigger name={TooltipName.Energy}>
+              <ResourceIcon color={resourceColor}>
+                {getResourceIcon()}
+              </ResourceIcon>
+            </TooltipTrigger>
+          );
+        })()}
 
-              if (isSilver) {
-                return (
-                  <>
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: "rgba(187, 187, 0, 0.41)",
-                        borderRadius: "2px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "12px",
-                        lineHeight: "1",
-                      }}
-                    >
-                      <Icon type={IconType.Silver} />
-                    </div>
-                    <Subber
-                      style={{
-                        color: dfstyles.colors.dfyellow,
-                        fontSize: "12px",
-                      }}
-                    >
-                      Silver
-                    </Subber>
-                  </>
-                );
-              }
+        {/* <ResourceName color={resourceColor}>{getResourceName()}</ResourceName> */}
 
-              return (
-                <>
-                  <div
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      backgroundColor: "rgb(0, 90, 187)",
-                      borderRadius: "2px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "12px",
-                      lineHeight: "1",
-                    }}
-                  >
-                    <Icon type={IconType.Energy} />
-                  </div>
-                  <Subber
-                    style={{ color: dfstyles.colors.dfblue, fontSize: "12px" }}
-                  >
-                    Energy
-                  </Subber>
-                </>
-              );
-            })()}
-          </ResourceRowDetails>
-
-          <div
-            style={{
-              fontSize: "11px",
-              fontWeight: "bold",
-              color: dfstyles.colors.text,
-            }}
-          >
-            <ShowPercent
-              value={value}
-              setValue={setValue}
-              color={(() => {
-                if (isMaterial && material) {
-                  return getMaterialColor(material.materialId);
-                }
-                if (isSilver) {
-                  return dfstyles.colors.dfyellow;
-                }
-                return dfstyles.colors.dfblue;
-              })()}
-            />
-          </div>
-        </div>
-
-        {/* Amount display */}
-        <div
-          style={{
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: dfstyles.colors.subtext,
-          }}
-        >
+        <ResourceValue color={resourceColor}>
           {getResource(value)}
-        </div>
+        </ResourceValue>
+        <ResourceSlider>
+          <Slider
+            variant="filled"
+            labelVisibility="none"
+            min={0}
+            max={100}
+            value={value}
+            step={1}
+            disabled={disabled}
+            onChange={(e: Event & React.ChangeEvent<HTMLInputElement>) => {
+              const target = e.target as HTMLInputElement;
+              setValue(parseInt(target.value, 10));
+            }}
+          />
+        </ResourceSlider>
+        <ResourcePercentage color={resourceColor}>{value}%</ResourcePercentage>
 
-        {/* Slider */}
-        <Slider
-          variant="filled"
-          labelVisibility="none"
-          min={0}
-          max={100}
-          value={value}
-          step={1}
-          disabled={disabled}
-          onChange={(e: Event & React.ChangeEvent<HTMLInputElement>) => {
-            setValue(parseInt(e.target.value, 10));
-          }}
-          style={{ height: "20px" }}
-        />
-      </div>
-    </>
-  );
-}
-
-function AbandonButton({
-  planet,
-  abandoning,
-  toggleAbandoning,
-  disabled,
-}: {
-  planet?: Planet;
-  abandoning: boolean;
-  toggleAbandoning: () => void;
-  disabled?: boolean;
-}) {
-  const uiManager = useUIManager();
-
-  if (!planet) {
-    return null;
-  }
-
-  let junk = uiManager.getDefaultSpaceJunkForPlanetLevel(planet?.planetLevel);
-  if (planet.bonus[StatIdx.SpaceJunk]) {
-    junk /= 2;
-  }
-  /* Explicitly avoid binding to `onShortcutPressed` so we can support sending on subpanes */
-  return (
-    <MaybeShortcutButton
-      size="stretch"
-      active={abandoning}
-      onClick={toggleAbandoning}
-      shortcutKey={TOGGLE_ABANDON}
-      shortcutText={TOGGLE_ABANDON}
-      disabled={planet.isHomePlanet || disabled}
-    >
-      <TooltipTrigger name={TooltipName.Abandon}>
-        {abandoning ? "Abandoning" : `Abandon Planet (-${junk}) space junk`}
-      </TooltipTrigger>
-    </MaybeShortcutButton>
+        <ResourceControls color={resourceColor}>
+          <button
+            onClick={() => setValue(Math.max(0, value - 1))}
+            disabled={disabled || value <= 0}
+          >
+            -
+          </button>
+          <button
+            onClick={() => setValue(Math.min(100, value + 1))}
+            disabled={disabled || value >= 100}
+          >
+            +
+          </button>
+        </ResourceControls>
+      </ResourceRow>
+    </div>
   );
 }
 
@@ -424,7 +414,7 @@ function SendRow({
 export function SendResources({
   planetWrapper: p,
   onToggleSendForces,
-  onToggleAbandon,
+  onToggleAbandon: _onToggleAbandon,
 }: {
   planetWrapper: Wrapper<Planet | undefined>;
   onToggleSendForces: () => void;
@@ -458,13 +448,8 @@ export function SendResources({
       (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
     ) || [];
 
-  const materialSending = activeMaterials.map((mat) => ({
-    materialId: mat.materialId,
-    value: uiManager.getMaterialSending(locationId, mat.materialId),
-  }));
-
   const updateEnergySending = useCallback(
-    (energyPercent) => {
+    (energyPercent: number) => {
       if (!locationId) {
         return;
       }
@@ -474,7 +459,7 @@ export function SendResources({
   );
 
   const updateSilverSending = useCallback(
-    (silverPercent) => {
+    (silverPercent: number) => {
       if (!locationId) {
         return;
       }
@@ -483,22 +468,8 @@ export function SendResources({
     [uiManager, locationId],
   );
 
-  const updateMaterialSending = useCallback(
-    (materialPercent) => {
-      if (!locationId) {
-        return;
-      }
-      uiManager.setMaterialSending(
-        locationId,
-        materialSending.materialId,
-        materialPercent,
-      );
-    },
-    [uiManager, locationId],
-  );
-
   const updateArtifactSending = useCallback(
-    (sendArtifact) => {
+    (sendArtifact: Artifact | undefined) => {
       if (!locationId) {
         return;
       }
@@ -559,24 +530,6 @@ export function SendResources({
   const spaceshipsYouOwn = artifacts.filter(
     (a) => isSpaceShip(a.artifactType) && a.controller === account,
   );
-
-  let abandonRow;
-  if (p.value && p.value.transactions?.hasTransaction(isUnconfirmedReleaseTx)) {
-    abandonRow = (
-      <Btn size="stretch" disabled>
-        <LoadingSpinner initialText="Abandoning..." />
-      </Btn>
-    );
-  } else if (p.value && !p.value.destroyed && !p.value.frozen) {
-    abandonRow = (
-      <AbandonButton
-        planet={p.value}
-        abandoning={isAbandoning && !isSendingShip}
-        toggleAbandoning={onToggleAbandon}
-        disabled={isSendingShip}
-      />
-    );
-  }
 
   let sendRow;
   if (p.value && p.value.transactions?.hasTransaction(isUnconfirmedMoveTx)) {
@@ -662,12 +615,12 @@ export function SendResources({
                     selected={p.value}
                     material={mat}
                     value={uiManager.getMaterialSending(
-                      locationId,
+                      locationId!,
                       mat.materialId,
                     )}
                     setValue={(val) =>
                       uiManager.setMaterialSending(
-                        locationId,
+                        locationId!,
                         mat.materialId,
                         val,
                       )
