@@ -152,9 +152,9 @@ const getEnergyAtTick = (planet: Planet, atTick: number): number => {
 
 export const updatePlanetToTick = (
   planet: Planet,
-  planetArtifacts: Artifact[],
+  _planetArtifacts: Artifact[],
   atTick: number,
-  contractConstants: ContractConstants,
+  _contractConstants: ContractConstants,
   setPlanet: (p: Planet) => void = () => {},
 ): void => {
   if (atTick < planet.lastUpdated) {
@@ -173,17 +173,6 @@ export const updatePlanetToTick = (
   planet.materials = getMaterialsOverTick(planet, planet.lastUpdated, atTick);
 
   // }
-
-  // update materials to tick only for SILVER_MINE planets
-  if (planet.planetType === PlanetType.SILVER_MINE) {
-    planet.materials = planet.materials.map((mat) => ({
-      ...mat,
-      materialAmount: Number(
-        getMaterialAmount(mat, planet.lastUpdated, atTick).toFixed(0),
-      ),
-    }));
-  }
-
   planet.lastUpdated = atTick;
 
   // NOTE: please update to tick
@@ -267,7 +256,7 @@ export const arrive = (
   // apply energy
   const { energyArriving, arrivalTick } = arrival;
 
-  const activeArtifact = artifactsOnPlanet.find(
+  const _activeArtifact = artifactsOnPlanet.find(
     (a) => a.lastActivated > a.lastDeactivated,
   );
 
