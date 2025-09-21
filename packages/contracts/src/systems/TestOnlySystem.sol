@@ -154,8 +154,6 @@ contract TestOnlySystem is BaseSystem {
     // new planet instances in memory
     Planet memory planet = DFUtils.readAnyPlanet(worldAddress, input.planetHash, input.perlin, input.radiusSquare);
     planet.changeOwner(newOwner);
-    planet.population = planet.populationCap;
-    planet.silver = planet.silverCap;
 
     planet.writeToStore();
   }
