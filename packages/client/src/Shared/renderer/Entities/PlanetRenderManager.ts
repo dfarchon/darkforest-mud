@@ -28,6 +28,7 @@ import type {
   PlanetRenderInfo,
   PlanetRenderManagerType,
   WorldCoords,
+  MaterialType,
 } from "@df/types";
 import {
   ArtifactType,
@@ -45,6 +46,7 @@ import { logos } from "../Logos";
 import { memes } from "../Memes";
 import type { Renderer } from "../Renderer";
 import type { GameGLManager } from "../WebGL/GameGLManager";
+import { getMaterialColor } from "@frontend/Panes/PlanetMaterialsPane";
 
 const { whiteA, barbsA, gold } = engineConsts.colors;
 const { maxRadius } = engineConsts.planet;
@@ -298,6 +300,13 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
         textAlpha,
       );
 
+      this.queuePlanetMaterialsText(
+        planet,
+        planet.location.coords,
+        renderInfo.radii.radiusWorld,
+        textAlpha,
+      );
+
       this.queueArtifactIcon(
         planet,
         planet.location.coords,
@@ -447,6 +456,51 @@ export class PlanetRenderManager implements PlanetRenderManagerType {
         TextAlign.Center,
         TextAnchor.Bottom,
       );
+    }
+  }
+
+  private queuePlanetMaterialsText(
+    planet: Planet,
+    center: WorldCoords,
+    radius: number,
+    alpha: number,
+  ) {
+    const { textRenderer: tR } = this.renderer;
+
+    if (!planet.materials || planet.materials.length === 0) {
+      return;
+    }
+
+    let materialOffset = 0;
+    for (const material of planet.materials) {
+      if (!material || material.materialAmount <= 0) {
+        continue;
+      }
+
+      const materialColor = getMaterialColor(
+        material.materialId as MaterialType,
+      );
+      // Convert hex color to RGB array
+      const r = parseInt(materialColor.slice(1, 3), 16);
+      const g = parseInt(materialColor.slice(3, 5), 16);
+      const b = parseInt(materialColor.slice(5, 7), 16);
+
+      tR.queueTextWorld(
+        formatNumber(material.materialAmount, 0),
+        {
+          x: center.x,
+          y:
+            center.y +
+            1.1 * radius +
+            (planet.silver > 0 ? 0.75 : 0) +
+            materialOffset * 0.5,
+        },
+        [r, g, b, alpha],
+        (planet.silver > 0 ? -1 : 0) - materialOffset,
+        TextAlign.Center,
+        TextAnchor.Bottom,
+      );
+      materialOffset++;
     }
   }
 

@@ -43,16 +43,3 @@ export function formatEtherToNumber(
     return 0;
   }
 }
-
-export function formatCompact(num: number): string {
-  return Intl.NumberFormat("en", {
-    notation: "compact",
-    maximumFractionDigits: 0,
-  }).format(num);
-}
-export function formatCompact2(num: number): string {
-  return Intl.NumberFormat("en", {
-    notation: "compact",
-    maximumFractionDigits: 2,
-  }).format(num);
-}

@@ -442,6 +442,7 @@ export function PlanetCard({
           <>
             <EmSpacer height={0.5} />
             <MaterialsDisplay planet={planet} />
+            <EmSpacer height={0.5} />
           </>
         )}
 

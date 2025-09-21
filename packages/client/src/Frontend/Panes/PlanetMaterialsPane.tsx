@@ -1,4 +1,4 @@
-import { formatCompact, formatCompact2 } from "@df/gamelogic";
+import { formatNumber } from "@df/gamelogic";
 import type { LocationId, MaterialType } from "@df/types";
 import { ModalName } from "@df/types";
 import { useState } from "react";
@@ -399,7 +399,7 @@ export function PlanetMaterialsPane({
         (m) => m?.materialId === materialType,
       );
       if (material) {
-        const maxWithdraw = Number(material.materialAmount) / 1e18;
+        const maxWithdraw = Number(material.materialAmount);
         const withdrawAmount = (value / 100) * maxWithdraw;
         setWithdrawAmounts((prev) => ({
           ...prev,
@@ -420,7 +420,7 @@ export function PlanetMaterialsPane({
         (m) => m.materialId === materialType,
       );
       if (material) {
-        const maxWithdraw = Number(material.materialAmount) / 1e18;
+        const maxWithdraw = Number(material.materialAmount);
         const withdrawAmount = (newValue / 100) * maxWithdraw;
         setWithdrawAmounts((prev) => ({
           ...prev,
@@ -441,7 +441,7 @@ export function PlanetMaterialsPane({
         (m) => m.materialId === materialType,
       );
       if (material) {
-        const maxWithdraw = Number(material.materialAmount) / 1e18;
+        const maxWithdraw = Number(material.materialAmount);
         const withdrawAmount = (newValue / 100) * maxWithdraw;
         setWithdrawAmounts((prev) => ({
           ...prev,
@@ -528,7 +528,7 @@ export function PlanetMaterialsPane({
                     )}
                     {mat.growth && (
                       <div style={{ color: "#00ff00" }}>
-                        +{formatCompact2(Number(mat.growthRate) / 1e18)}
+                        +{formatNumber(Number(mat.growthRate), 2)}
                       </div>
                     )}
                   </MaterialStats>
@@ -538,8 +538,7 @@ export function PlanetMaterialsPane({
                     materialID={mat.materialId}
                   >
                     <MaterialBarText>
-                      {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                      {formatCompact(Number(mat.cap) / 1e18)}
+                      {Number(mat.materialAmount)} / {Number(mat.cap)}
                     </MaterialBarText>
                     {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
                       <IntegratedSlider

@@ -173,5 +173,6 @@ c_ABANDON_SPEED_CHANGE_PERCENT = 150
 # The range boost a movement receives when abandoning a planet.
 d_ABANDON_RANGE_CHANGE_PERCENT = 150
 # The amount of junk that each level of planet gives the player when moving to it for the first time.
+# Don't forget to update getJunk function in PlanetLabels.tsx
 e_PLANET_LEVEL_JUNK = [50, 55, 60, 65, 75, 100, 200, 250, 300, 500]
 

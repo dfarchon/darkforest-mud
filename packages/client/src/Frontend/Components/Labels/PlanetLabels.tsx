@@ -1,10 +1,5 @@
 import { EMPTY_ADDRESS } from "@df/constants";
-import {
-  formatCompact,
-  formatCompact2,
-  formatEtherToNumber,
-  formatNumber,
-} from "@df/gamelogic";
+import { formatEtherToNumber, formatNumber } from "@df/gamelogic";
 import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
 import type { MaterialType } from "@df/types";
@@ -14,8 +9,8 @@ import {
   getMaterialIcon,
   getMaterialName,
 } from "@frontend/Panes/PlanetMaterialsPane";
-import styled from "styled-components";
 import React from "react";
+import styled from "styled-components";
 
 import { getPlanetRank } from "../../../Backend/Utils/Utils";
 import dfstyles from "../../Styles/dfstyles";
@@ -165,7 +160,10 @@ export const RangeText = ({
   buff?: number;
 }) => <StatText planet={planet} getStat={getRange} buff={buff} />;
 
-const getJunk = (p: Planet) => p.spaceJunk;
+const getJunk = (p: Planet) => {
+  const PLANET_LEVEL_JUNK = [50, 55, 60, 65, 75, 100, 200, 250, 300, 500];
+  return PLANET_LEVEL_JUNK[p.planetLevel];
+};
 export const JunkText = ({ planet }: { planet: Planet | undefined }) => (
   <StatText planet={planet} getStat={getJunk} />
 );
@@ -392,6 +390,41 @@ export function MaterialsText({
   );
 }
 
+const MaterialsScrollable = styled.div`
+  position: relative;
+  max-height: 200px;
+  overflow-y: auto; /* 只在需要时显示滚动条 */
+  padding: 8px;
+  direction: rtl;
+
+  & > * {
+    direction: ltr;
+  }
+
+  &::-webkit-scrollbar {
+    width: 16px;
+    background-color: #e0e0e0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 8px;
+    border: 4px solid #e0e0e0;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin: 8px 0;
+    border-radius: 8px;
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: #888 #e0e0e0;
+`;
+
 export function MaterialsDisplay({
   planet,
   style,
@@ -424,89 +457,94 @@ export function MaterialsDisplay({
       >
         Materials
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-          gap: "4px",
-          fontSize: "0.8em",
-        }}
-      >
-        {activeMaterials.map((mat) => {
-          const percentage =
-            Number(mat.cap) > 0
-              ? Math.min(
-                  (Number(mat.materialAmount) / Number(mat.cap)) * 100,
-                  100,
-                )
-              : 0;
+      <MaterialsScrollable>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+            fontSize: "0.8em",
+          }}
+        >
+          {activeMaterials.map((mat) => {
+            const percentage =
+              Number(mat.cap) > 0
+                ? Math.min(
+                    (Number(mat.materialAmount) / Number(mat.cap)) * 100,
+                    100,
+                  )
+                : 0;
 
-          return (
-            <div
-              key={mat.materialId}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "4px",
-                padding: "4px",
-                backgroundColor: dfstyles.colors.backgroundlighter,
-                borderRadius: "4px",
-                border: `1px solid ${dfstyles.colors.borderDarker}`,
-              }}
-            >
+            return (
               <div
+                key={mat.materialId}
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  fontSize: "0.8em",
+                  flexDirection: "column",
+                  gap: "4px",
+                  padding: "4px",
+                  backgroundColor: dfstyles.colors.backgroundlighter,
+                  borderRadius: "4px",
+                  border: `1px solid ${dfstyles.colors.borderDarker}`,
                 }}
               >
                 <div
                   style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: getMaterialColor(mat.materialId),
-                    borderRadius: "2px",
                     display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    lineHeight: "1",
+                    fontSize: "0.8em",
                   }}
                 >
-                  {getMaterialIcon(mat.materialId)}
-                </div>
-                <span
-                  style={{
-                    color: getMaterialColor(mat.materialId),
-                    fontSize: "12px",
-                  }}
-                >
-                  {getMaterialName(mat.materialId)}
-                </span>
-                {mat.growth && (
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      backgroundColor: getMaterialColor(mat.materialId),
+                      borderRadius: "2px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "12px",
+                      lineHeight: "1",
+                    }}
+                  >
+                    {getMaterialIcon(mat.materialId)}
+                  </div>
                   <span
                     style={{
                       color: getMaterialColor(mat.materialId),
                       fontSize: "12px",
                     }}
                   >
-                    + {""} {formatCompact2(Number(mat.growthRate) / 1e18)}
+                    {getMaterialName(mat.materialId)}
                   </span>
-                )}
-              </div>
+                  {mat.growth && (
+                    <span
+                      style={{
+                        color: getMaterialColor(mat.materialId),
+                        fontSize: "12px",
+                      }}
+                    >
+                      + {""} {formatNumber(Number(mat.growthRate), 2)}
+                    </span>
+                  )}
+                </div>
 
-              <MaterialBar percentage={percentage} materialID={mat.materialId}>
-                <MaterialBarText>
-                  {formatCompact(Number(mat.materialAmount) / 1e18)} /{" "}
-                  {formatCompact(Number(mat.cap) / 1e18)}
-                </MaterialBarText>
-              </MaterialBar>
-            </div>
-          );
-        })}
-      </div>
+                <MaterialBar
+                  percentage={percentage}
+                  materialID={mat.materialId}
+                >
+                  <MaterialBarText>
+                    {formatNumber(Number(mat.materialAmount), 2)} /{" "}
+                    {formatNumber(Number(mat.cap), 2)}
+                  </MaterialBarText>
+                </MaterialBar>
+              </div>
+            );
+          })}
+        </div>
+      </MaterialsScrollable>
     </div>
   );
 }

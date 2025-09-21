@@ -47,20 +47,18 @@ library MaterialStorageLib {
     uint256 materialCount = uint8(type(MaterialType).max) + 1;
     for (uint256 i; i < materialCount; ) {
       if (mat.exists[i]) {
-        // Mark material as existing in the bitmap regardless of amount
+        // Mark material as existing in the bitmap
         exsitMap |= (1 << i);
+
         if (mat.updates[i]) {
           PlanetMaterial.set(bytes32(planetHash), uint8(i), mat.amount[i]);
         }
 
-        if (mat.amount[i] > 0) {
-          exsitMap |= (1 << i);
-        } else {
-          exsitMap &= ~(1 << i);
-        }
-
         // Persist growth status to storage
         PlanetMaterialGrowth.set(bytes32(planetHash), uint8(i), mat.growth[i]);
+      } else {
+        // Clear the bit if material doesn't exist
+        exsitMap &= ~(1 << i);
       }
       unchecked {
         ++i;

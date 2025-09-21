@@ -428,7 +428,7 @@ export class TxExecutor {
       console.log(
         `[TX ${tx.id}] : sysId`,
         systemId,
-        `fcName`,
+        `functionName`,
         functionName,
         `args`,
         args,
