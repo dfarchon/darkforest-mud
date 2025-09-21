@@ -158,14 +158,6 @@ const ResourceIcon = styled.div<{ color: string }>`
   cursor: help;
 `;
 
-const _ResourceName = styled.div<{ color: string }>`
-  color: ${(props) => props.color};
-  font-size: 12px;
-  font-weight: 500;
-  min-width: 60px;
-  flex-shrink: 0;
-`;
-
 const ResourceValue = styled.div<{ color: string }>`
   color: ${(props) => props.color};
   font-size: 12px;
@@ -272,16 +264,6 @@ function ResourceBar({
     return dfstyles.colors.dfblue;
   };
 
-  const _getResourceName = () => {
-    if (isMaterial && material) {
-      return getMaterialName(material.materialId);
-    }
-    if (isSilver) {
-      return "Silver";
-    }
-    return "Energy";
-  };
-
   const getResourceIcon = () => {
     if (isMaterial && material) {
       return getMaterialIcon(material.materialId);
@@ -346,6 +328,7 @@ function ResourceBar({
               const target = e.target as HTMLInputElement;
               setValue(parseInt(target.value, 10));
             }}
+            style={{ height: "16px" }}
           />
         </ResourceSlider>
         <ResourcePercentage color={resourceColor}>{value}%</ResourcePercentage>
