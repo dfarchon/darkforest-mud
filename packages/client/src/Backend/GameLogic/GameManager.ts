@@ -736,6 +736,10 @@ export class GameManager extends EventEmitter {
     // this.getSpaceships();
 
     this.safeMode = false;
+
+    allTouchedPlanetIds.forEach((planetId) => {
+      this.hardRefreshPlanet(planetId);
+    });
   }
 
   // private async uploadDiagnostics() {
