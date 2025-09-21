@@ -134,6 +134,16 @@ contract TestOnlySystem is BaseSystem {
     RevealedPlanet.set(bytes32(planetHash), int32(x), int32(y), _msgSender());
   }
 
+  function _initAsteroidMaterials(Planet memory planet, uint256 biomeBase) internal view {
+    if (planet.planetType == PlanetType.ASTEROID_FIELD) {
+      Biome biome = planet._getBiome(biomeBase);
+      MaterialType[] memory allowed = PlanetLib.allowedMaterialsForBiome(biome);
+      for (uint256 i; i < allowed.length; i++) {
+        planet.initMaterial(allowed[i]);
+      }
+    }
+  }
+
   function safeSetOwner(
     address newOwner,
     uint256[2] memory _a,
@@ -154,6 +164,8 @@ contract TestOnlySystem is BaseSystem {
     // new planet instances in memory
     Planet memory planet = DFUtils.readAnyPlanet(worldAddress, input.planetHash, input.perlin, input.radiusSquare);
     planet.changeOwner(newOwner);
+
+    planet._initPopulationAndSilver();
 
     planet.writeToStore();
   }
