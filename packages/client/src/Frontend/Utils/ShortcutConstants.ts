@@ -14,8 +14,9 @@ export const TOGGLE_PLANET_ARTIFACTS_PANE = "f";
 export const TOGGLE_DROP_BOMB_PANE = "z";
 export const TOGGLE_PINK_PANE = "x";
 export const TOGGLE_KARDASHEV_PANE = "c";
-export const TOGGLE_BLUE_PANE = "v";
+export const TOGGLE_BLUE_PANE = "v"; // NOTE: not used
 export const TOGGLE_HAT_PANE = "b";
+export const TOGGLE_MATERIALS_PANE = "v";
 export const INVADE = "y";
 
 // modal shortcuts

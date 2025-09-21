@@ -133,6 +133,7 @@ export class GameUIManager extends EventEmitter {
 
   private forcesSending: { [key: string]: number } = {}; // this is a percentage
   private silverSending: { [key: string]: number } = {}; // this is a percentage
+  private materialSending: { [key: string]: number } = {}; // this is a percentage
 
   private artifactSending: { [key: string]: Artifact | undefined } = {};
 
@@ -862,7 +863,7 @@ export class GameUIManager extends EventEmitter {
         if (myAtk > 0 || this.isSendingShip(from.locationId)) {
           const abandoning = this.isAbandoning();
           const silver = Math.floor((from.silver * effPercentSilver) / 100);
-          const materials = this.getMaterialsSending?.(from.locationId) ?? [];
+          const materials = this.getMaterialsSending(from.locationId) ?? [];
           // TODO: do something like JSON.stringify(args) so we know formatting is correct
           this.terminal.current?.printShellLn(
             `df.move('${from.locationId}', '${to.locationId}', ${forces}, ${silver}, ${JSON.stringify(materials ?? [])})`,
@@ -957,6 +958,23 @@ export class GameUIManager extends EventEmitter {
       percentage = 100;
     }
     this.silverSending[planetId] = percentage;
+    this.gameManager.getGameObjects().forceTick(planetId);
+  }
+
+  public setMaterialSending(
+    planetId: LocationId,
+    materialId: number,
+    percentage: number,
+  ) {
+    if (percentage < 0) {
+      percentage = 0;
+    }
+    if (percentage > 100) {
+      percentage = 100;
+    }
+
+    const key = `${planetId},${materialId}`;
+    this.materialSending[key] = percentage;
     this.gameManager.getGameObjects().forceTick(planetId);
   }
 
@@ -1444,6 +1462,45 @@ export class GameUIManager extends EventEmitter {
     }
 
     return this.silverSending[planetId] ?? defaultSending;
+  }
+
+  public getMaterialSending(
+    planetId?: LocationId,
+    materialId?: number,
+  ): number {
+    const defaultSending = 0;
+    if (!planetId || !materialId) {
+      return defaultSending;
+    }
+    const key = `${planetId},${materialId}`;
+    return this.materialSending[key] ?? defaultSending;
+  }
+
+  public getMaterialsSending(
+    locationId?: LocationId,
+  ): { materialId: MaterialId; materialAmount: MaterialAmount }[] {
+    if (!locationId) return [];
+    const planet = this.getPlanetWithId(locationId);
+    if (!planet?.materials?.length) return [];
+
+    const results: {
+      materialId: MaterialId;
+      materialAmount: MaterialAmount;
+    }[] = [];
+
+    for (const mat of planet.materials) {
+      if (!mat) continue;
+      const percent = this.getMaterialSending(locationId, mat.materialId);
+      if (percent && percent > 0) {
+        results.push({
+          materialId: mat.materialId as MaterialId,
+          materialAmount: Math.floor(
+            (mat.materialAmount * percent) / 100,
+          ) as MaterialAmount,
+        });
+      }
+    }
+    return results;
   }
 
   public isAbandoning(): boolean {
@@ -2146,67 +2203,5 @@ export class GameUIManager extends EventEmitter {
       },
     });
     clickSound.play();
-  }
-
-  private materialSending = new Map<string, number>(); // key: `${locationId}-${materialId}`
-
-  public getMaterialSending(
-    locationId: LocationId | undefined,
-    matId: number,
-  ): number {
-    if (!locationId) return 0;
-    return this.materialSending.get(`${locationId}-${matId}`) || 0;
-  }
-
-  public setMaterialSending(
-    locationId: LocationId | undefined,
-    matId: number,
-    percent: number,
-  ) {
-    if (!locationId) return;
-    this.materialSending.set(`${locationId}-${matId}`, percent);
-  }
-
-  /**
-   * Get material transfer list for a planet based on UI-configured percentages.
-   * Returns array of `{ materialId, amount }`.
-   */
-  public getMaterialsSending(
-    locationId?: LocationId,
-  ): { materialId: MaterialId; materialAmount: MaterialAmount }[] {
-    if (!locationId) return [];
-    const planet = this.getPlanetWithId(locationId);
-    if (!planet?.materials?.length) return [];
-
-    const results: {
-      materialId: MaterialId;
-      materialAmount: MaterialAmount;
-    }[] = [];
-
-    for (const mat of planet.materials) {
-      if (!mat) continue;
-      const percent = this.getMaterialSending(locationId, mat.materialId);
-      if (!percent || percent <= 0) continue;
-
-      const current =
-        typeof mat.materialAmount === "bigint"
-          ? Number(mat.materialAmount)
-          : Number(mat.materialAmount);
-
-      // Convert from scaled amount to base unit for contract
-      const baseAmount = current;
-      const send = Math.floor((baseAmount * percent) / 100);
-      if (send > 0) {
-        console.log(
-          `Material ${mat.materialId}: original=${current}, scaled=${baseAmount}, percent=${percent}, sending=${send}`,
-        );
-        results.push({
-          materialId: mat.materialId as MaterialId,
-          materialAmount: send as MaterialAmount,
-        });
-      }
-    }
-
-    return results;
   }
 }

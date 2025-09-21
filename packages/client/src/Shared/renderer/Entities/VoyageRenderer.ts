@@ -251,10 +251,10 @@ export class VoyageRenderer implements VoyageRendererType {
             `${formatNumber(mat.materialAmount, 0)}`,
             {
               x: shipsLocationX,
-              y: shipsLocationY + 1.0 + materialOffset * 0.5,
+              y: shipsLocationY + 0.5,
             },
             [r, g, b, alpha],
-            -2 - materialOffset,
+            (voyage.silverMoved ? -2 : -1) - materialOffset,
             TextAlign.Center,
             TextAnchor.Bottom,
           );
