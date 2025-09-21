@@ -42,7 +42,6 @@ export const ModalName = {
   Onboarding: "Onboarding" as ModalName,
   Private: "Private" as ModalName,
   Wallet: "Wallet" as ModalName,
-  PlanetMaterials: "PlanetMaterials" as ModalName,
 } as const;
 
 export type CursorState = Abstract<string, "CursorState">;
