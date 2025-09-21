@@ -153,6 +153,19 @@ export const TooltipName = {
   Blue: "Blue" as TooltipName,
   BuyHat: "BuyHat" as TooltipName,
   Empty: "Empty" as TooltipName,
+
+  // Material tooltips
+  MaterialWaterCrystals: "MaterialWaterCrystals" as TooltipName,
+  MaterialLivingWood: "MaterialLivingWood" as TooltipName,
+  MaterialWindsteel: "MaterialWindsteel" as TooltipName,
+  MaterialAurorium: "MaterialAurorium" as TooltipName,
+  MaterialMycelium: "MaterialMycelium" as TooltipName,
+  MaterialSandglass: "MaterialSandglass" as TooltipName,
+  MaterialCryostone: "MaterialCryostone" as TooltipName,
+  MaterialScrapium: "MaterialScrapium" as TooltipName,
+  MaterialPyrosteel: "MaterialPyrosteel" as TooltipName,
+  MaterialBlackalloy: "MaterialBlackalloy" as TooltipName,
+  MaterialCorruptedCrystal: "MaterialCorruptedCrystal" as TooltipName,
 };
 
 /**
