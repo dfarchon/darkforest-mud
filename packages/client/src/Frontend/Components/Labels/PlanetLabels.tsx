@@ -160,7 +160,10 @@ export const RangeText = ({
   buff?: number;
 }) => <StatText planet={planet} getStat={getRange} buff={buff} />;
 
-const getJunk = (p: Planet) => p.spaceJunk;
+const getJunk = (p: Planet) => {
+  const PLANET_LEVEL_JUNK = [50, 55, 60, 65, 75, 100, 200, 250, 300, 500];
+  return PLANET_LEVEL_JUNK[p.planetLevel];
+};
 export const JunkText = ({ planet }: { planet: Planet | undefined }) => (
   <StatText planet={planet} getStat={getJunk} />
 );
