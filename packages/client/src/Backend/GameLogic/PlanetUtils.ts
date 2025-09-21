@@ -14,27 +14,26 @@ import type {
   LocatablePlanet,
   LocationId,
   Materials,
-  MaterialType,
   Planet,
   PlanetBonus,
-  PlanetType,
+  PlanetLevel,
   UpgradeState,
   WorldLocation,
 } from "@df/types";
 import {
   Biome,
   getMaxMaterialType,
+  MaterialType,
   PlanetFlagType,
+  PlanetType,
   SpaceType,
 } from "@df/types";
-import { PlanetLevel } from "@df/types";
 import { getComponentValue } from "@latticexyz/recs";
 import { encodeEntity } from "@latticexyz/store-sync/recs";
 import type { ClientComponents } from "@mud/createClientComponents";
 import bigInt from "big-integer";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
-import { TickerUtils } from "./TickerUtils";
 
 interface PlanetUtilsConfig {
   components: ClientComponents;
@@ -48,63 +47,6 @@ export class PlanetUtils {
   public constructor({ components, contractConstants }: PlanetUtilsConfig) {
     this.components = components;
     this.contractConstants = contractConstants;
-  }
-
-  /**
-   * Calculate material amount based on growth since last update tick
-   * Only applies growth if the material has growth enabled
-   * @param materialAmount - Current material amount from storage
-   * @param lastUpdateTick - Last update tick of the planet
-   * @param currentTick - Current game tick
-   * @param growthRate - Material growth rate
-   * @param cap - Material cap
-   * @param growthEnabled - Whether this material can grow
-   * @returns Updated material amount
-   */
-  private calculateMaterialAmount(
-    materialAmount: number,
-    lastUpdateTick: number,
-    currentTick: number,
-    growthRate: number,
-    cap: number,
-    growthEnabled: boolean = false,
-  ): number {
-    // Only apply growth if growth is enabled for this material
-    if (!growthEnabled) {
-      return materialAmount;
-    }
-
-    const ticksPassed = currentTick - lastUpdateTick;
-    if (ticksPassed <= 0) {
-      return materialAmount;
-    }
-
-    const grown = ticksPassed * growthRate;
-    return Math.min(materialAmount + grown, cap);
-  }
-
-  /**
-   * Calculate material cap based on planet level (from contract logic)
-   * @param planetLevel - Planet level
-   * @returns Material cap
-   */
-  private calculateMaterialCap(planetLevel: number): number {
-    if (planetLevel <= 3) {
-      return planetLevel * 1000 * 1e18;
-    } else if (planetLevel <= 6) {
-      return planetLevel * 2000 * 1e18;
-    } else {
-      return planetLevel * 6000 * 1e18;
-    }
-  }
-
-  /**
-   * Calculate material growth rate based on planet level (from contract logic)
-   * @param planetLevel - Planet level
-   * @returns Material growth rate
-   */
-  private calculateMaterialGrowthRate(planetLevel: number): number {
-    return planetLevel * 1e16;
   }
 
   public getPlanetById(planetId: LocationId): Planet | undefined {
@@ -124,6 +66,9 @@ export class PlanetUtils {
       // It should be noted that this may indicate the presence of invalid or corrupted data.
 
       const planet: Planet = this.readPlanet(planetId, 0, 0);
+      const materials = this.readMaterials(planet);
+      planet.materials = materials;
+
       return planet;
     } else {
       return undefined;
@@ -136,6 +81,7 @@ export class PlanetUtils {
     const distSquare = location.coords.x ** 2 + location.coords.y ** 2;
     const planet: Planet = this.readPlanet(planetId, perlin, distSquare);
     const biome = this.getBiome(location);
+    const materials = this.getDefaultMaterials(biome, planet);
 
     return {
       location: location,
@@ -180,9 +126,9 @@ export class PlanetUtils {
       flags: planet.flags,
       junkOwner: planet.junkOwner,
       addJunkTick: planet.addJunkTick,
-      materials: planet.materials,
       loadingServerState: false,
       needsServerRefresh: false,
+      materials: materials,
     };
   }
 
@@ -449,70 +395,7 @@ export class PlanetUtils {
       planetEntity,
     );
 
-    // --- MATERIALS ---
-    // Try to get the PlanetMaterial and PlanetMaterialGrowth components from this.components
-    const { PlanetMaterial, PlanetMaterialGrowth } = this.components;
     const materials: Materials[] = [];
-
-    // Get current tick for material calculations
-    const tickerUtils = new TickerUtils({ components: this.components });
-    const currentTick = tickerUtils.getCurrentTick();
-
-    if (PlanetMaterial) {
-      // There are dynamic material types (0-x), 0 is UNKNOWN
-      for (let i = 1; i <= getMaxMaterialType(); i++) {
-        const matData = getComponentValue(
-          PlanetMaterial,
-          encodeEntity(PlanetMaterial.metadata.keySchema, {
-            planetId: locationIdToHexStr(planetId) as `0x${string}`,
-            resourceId: i,
-          }),
-        );
-
-        // Check if this material has growth enabled
-        let growthEnabled = false;
-        if (PlanetMaterialGrowth) {
-          const growthData = getComponentValue(
-            PlanetMaterialGrowth,
-            encodeEntity(PlanetMaterialGrowth.metadata.keySchema, {
-              planetId: locationIdToHexStr(planetId) as `0x${string}`,
-              resourceId: i,
-            }),
-          );
-          growthEnabled = growthData ? growthData.growth : false;
-        }
-
-        if (matData) {
-          const materialAmount = Number(matData.amount);
-          const cap = this.calculateMaterialCap(planetLevel);
-          const growthRate = this.calculateMaterialGrowthRate(planetLevel);
-          const calculatedAmount = this.calculateMaterialAmount(
-            materialAmount,
-            lastUpdateTick,
-            currentTick,
-            growthRate,
-            cap,
-            growthEnabled,
-          );
-
-          materials[i] = {
-            materialId: i as MaterialType,
-            materialAmount: calculatedAmount,
-            cap: cap,
-            growthRate: growthRate,
-            growth: growthEnabled,
-          };
-        } else {
-          materials[i] = {
-            materialId: i as MaterialType,
-            materialAmount: 0,
-            cap: 0,
-            growthRate: 0,
-            growth: false,
-          };
-        }
-      }
-    }
 
     return {
       locationId: planetId,
@@ -775,5 +658,165 @@ export class PlanetUtils {
       totalUpgradeCostPercent += upgradeCosts[i];
     }
     return (totalUpgradeCostPercent / 100) * silverCap;
+  }
+
+  public getDefaultMaterials(biome: Biome, planet: Planet): Materials[] {
+    const planetType = planet.planetType;
+    const amount = planet.silver;
+    const cap = planet.silverCap;
+    const growthRate = planet.silverGrowth;
+
+    const materials: Materials[] = [];
+
+    for (let i = 0; i <= getMaxMaterialType(); i++) {
+      materials.push({
+        materialId: i as MaterialType,
+        materialAmount: 0,
+        cap: 0,
+        growthRate: 0,
+        growth: false,
+        lastUpdateTick: 0,
+      });
+    }
+
+    if (planetType !== PlanetType.SILVER_MINE) {
+      return materials;
+    }
+
+    // Helper function to set material by finding the correct index
+    const setMaterialByType = (materialType: MaterialType) => {
+      const index = materials.findIndex(
+        (mat) => mat.materialId === materialType,
+      );
+      if (index !== -1) {
+        materials[index] = {
+          materialId: materialType,
+          materialAmount: amount,
+          cap: cap,
+          growthRate: growthRate,
+          growth: true,
+          lastUpdateTick: 0,
+        };
+      }
+    };
+
+    if (biome === Biome.CORRUPTED) {
+      setMaterialByType(MaterialType.BLACKALLOY);
+      setMaterialByType(MaterialType.CORRUPTED_CRYSTAL);
+    } else if (biome === Biome.OCEAN) {
+      setMaterialByType(MaterialType.WATER_CRYSTALS);
+    } else if (biome === Biome.FOREST) {
+      setMaterialByType(MaterialType.LIVING_WOOD);
+    } else if (biome === Biome.GRASSLAND) {
+      setMaterialByType(MaterialType.WINDSTEEL);
+    } else if (biome === Biome.TUNDRA) {
+      setMaterialByType(MaterialType.AURORIUM);
+    } else if (biome === Biome.SWAMP) {
+      setMaterialByType(MaterialType.MYCELIUM);
+    } else if (biome === Biome.DESERT) {
+      setMaterialByType(MaterialType.SANDGLASS);
+    } else if (biome === Biome.ICE) {
+      setMaterialByType(MaterialType.CRYOSTONE);
+    } else if (biome === Biome.WASTELAND) {
+      setMaterialByType(MaterialType.SCRAPIUM);
+    } else if (biome === Biome.LAVA) {
+      setMaterialByType(MaterialType.PYROSTEEL);
+    }
+    return materials;
+  }
+
+  // directly read from the contract
+  public readMaterials(planet: Planet): Materials[] {
+    const materials: Materials[] = [];
+
+    const { PlanetMaterial, PlanetMaterialGrowth, PlanetMaterialStorage } =
+      this.components;
+
+    const planetId = planet.locationId;
+
+    // Get the material storage bitmap to see which materials exist
+    const storageEntity = encodeEntity(
+      PlanetMaterialStorage.metadata.keySchema,
+      {
+        planetId: locationIdToHexStr(planetId) as `0x${string}`,
+      },
+    );
+
+    const materialStorage = getComponentValue(
+      PlanetMaterialStorage,
+      storageEntity,
+    );
+
+    // Calculate material cap and growth rate based on planet's silver properties
+    // This matches the implementation in getDefaultMaterials and Solidity getMaterialGrowth
+    const materialCap = planet.silverCap;
+    const materialGrowthRate = planet.silverGrowth;
+
+    // Add placeholder for index 0 (UNKNOWN material type)
+    materials.push({
+      materialId: 0,
+      materialAmount: 0,
+      cap: 0,
+      growthRate: 0,
+      growth: false,
+      lastUpdateTick: planet.lastUpdated,
+    });
+
+    // Check each material type starting from 1
+    for (let i = 1; i <= getMaxMaterialType(); i++) {
+      let materialAmount = 0;
+      let growth = false;
+
+      if (materialStorage) {
+        const materialExists =
+          (Number(materialStorage.exsitMap) & (1 << i)) !== 0;
+
+        if (materialExists) {
+          // Get material amount
+          const materialEntity = encodeEntity(
+            PlanetMaterial.metadata.keySchema,
+            {
+              planetId: locationIdToHexStr(planetId) as `0x${string}`,
+              resourceId: i,
+            },
+          );
+
+          const materialData = getComponentValue(
+            PlanetMaterial,
+            materialEntity,
+          );
+          if (materialData) {
+            materialAmount = Number(materialData.amount) / CONTRACT_PRECISION;
+          }
+
+          // Get material growth status
+          const growthEntity = encodeEntity(
+            PlanetMaterialGrowth.metadata.keySchema,
+            {
+              planetId: locationIdToHexStr(planetId) as `0x${string}`,
+              resourceId: i,
+            },
+          );
+
+          const growthData = getComponentValue(
+            PlanetMaterialGrowth,
+            growthEntity,
+          );
+          if (growthData) {
+            growth = growthData.growth;
+          }
+        }
+      }
+
+      materials.push({
+        materialId: i as MaterialType,
+        materialAmount: materialAmount,
+        cap: materialCap,
+        growthRate: materialGrowthRate,
+        growth: growth,
+        lastUpdateTick: planet.lastUpdated,
+      });
+    }
+    return materials;
   }
 }

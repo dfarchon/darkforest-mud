@@ -23,6 +23,8 @@ import {
   TOGGLE_BLUE_PANE,
   TOGGLE_BROADCAST_PANE,
   TOGGLE_BUY_ARTIFACT_PANE,
+  TOGGLE_HAT_PANE,
+  TOGGLE_MATERIALS_PANE,
   TOGGLE_PLANET_ARTIFACTS_PANE,
   TOGGLE_PLANET_INFO_PANE,
   TOGGLE_UPGRADES_PANE,
@@ -190,6 +192,7 @@ export function OpenMaterialsPaneButton({
     <OpenPaneButton
       modal={modal}
       title="Materials"
+      shortcut={TOGGLE_MATERIALS_PANE}
       element={() => (
         <PlanetMaterialsPane modal={modal} initialPlanetId={planetId} />
       )}

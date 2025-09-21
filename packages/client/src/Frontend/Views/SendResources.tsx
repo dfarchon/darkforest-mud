@@ -1,7 +1,7 @@
 import { formatNumber, isSpaceShip } from "@df/gamelogic";
 import { isUnconfirmedMoveTx, isUnconfirmedReleaseTx } from "@df/serde";
 import type { Artifact, Materials, Planet } from "@df/types";
-import { artifactNameFromArtifact, MaterialType, TooltipName } from "@df/types";
+import { artifactNameFromArtifact, TooltipName } from "@df/types";
 import {
   getMaterialColor,
   getMaterialIcon,
@@ -36,15 +36,54 @@ const StyledSendResources = styled.div`
   flex-direction: column;
   gap: 8px;
   margin-bottom: 8px;
+  /* Allow the container to be flexible for proper scrolling */
+  min-height: 0;
 `;
 const MaterialsContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+`;
 
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+const ResourcesScrollable = styled.div`
+  position: relative;
+  max-height: 200px;
+  overflow-y: scroll; /* force scrollbar always visible */
+  padding: 8px; /* keep content padding */
+
+  flex-shrink: 0;
+  min-height: 0;
+
+  /* Force scrollbar to left side */
+  direction: rtl; /* flip scrollbar to left */
+  & > * {
+    direction: ltr; /* restore normal direction for children */
   }
+
+  /* Webkit scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 16px; /* make scrollbar wider */
+    background-color: #e0e0e0; /* track background */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #888; /* thumb color */
+    border-radius: 8px; /* rounder thumb */
+    border: 4px solid #e0e0e0; /* create extra space around thumb */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin: 8px 0; /* add vertical margin to track */
+    border-radius: 8px;
+  }
+
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #888 #e0e0e0;
 `;
 
 const StyledShowPercent = styled.div`
@@ -104,7 +143,7 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
       style={{
         width: "16px",
         height: "16px",
-        backgroundColor: getMaterialColor(materialId),
+        backgroundColor: getMaterialColor(materialId as MaterialType),
         borderRadius: "2px",
         display: "flex",
         alignItems: "center",
@@ -113,7 +152,7 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
         lineHeight: "1",
       }}
     >
-      {getMaterialIcon(materialId)}
+      {getMaterialIcon(materialId as MaterialType)}
     </div>
   );
 }
@@ -145,7 +184,7 @@ function ResourceBar({
           typeof material.materialAmount === "string"
             ? parseFloat(material.materialAmount)
             : Number(material.materialAmount);
-        const value = ((val / 100) * amount) / 1e18;
+        const value = (val / 100) * amount;
 
         // e.g., "312.4 MYCELIUM"
         return `${formatNumber(value)}`;
@@ -563,52 +602,91 @@ export function SendResources({
 
   return (
     <StyledSendResources>
-      {owned && !p.value?.destroyed && !p.value?.frozen && (
-        <>
-          <ResourceBar
-            selected={p.value}
-            value={energySending}
-            setValue={updateEnergySending}
-            disabled={disableSliders}
-          />
-          {p.value && p.value.silver > 0 && (
-            <ResourceBar
-              selected={p.value}
-              value={silverSending}
-              setValue={updateSilverSending}
-              disabled={disableSliders}
-              isSilver
+      <div style={{ position: "relative" }}>
+        <ResourcesScrollable
+          ref={(el: HTMLDivElement | null) => {
+            // Attach scroll handler to update custom thumb position
+            if (!el) return;
+            const rail = el.parentElement?.querySelector(
+              '[data-custom-scrollbar="rail"]',
+            ) as HTMLDivElement | null;
+            const thumb = el.parentElement?.querySelector(
+              '[data-custom-scrollbar="thumb"]',
+            ) as HTMLDivElement | null;
+            const update = () => {
+              if (!thumb || !rail) return;
+              const { scrollTop, scrollHeight, clientHeight } = el;
+              const trackHeight = rail.clientHeight;
+              const thumbHeight = Math.max(
+                Math.round((clientHeight / scrollHeight) * trackHeight),
+                24,
+              );
+              const maxThumbTop = trackHeight - thumbHeight;
+              const ratio = scrollTop / (scrollHeight - clientHeight || 1);
+              const top = Math.round(ratio * maxThumbTop);
+              thumb.style.height = `${thumbHeight}px`;
+              thumb.style.top = `${top}px`;
+            };
+            el.addEventListener("scroll", update);
+            // Initialize
+            setTimeout(update, 0);
+          }}
+        >
+          {owned && !p.value?.destroyed && !p.value?.frozen && (
+            <>
+              <ResourceBar
+                selected={p.value}
+                value={energySending}
+                setValue={updateEnergySending}
+                disabled={disableSliders}
+              />
+              {p.value && p.value.silver > 0 && (
+                <ResourceBar
+                  selected={p.value}
+                  value={silverSending}
+                  setValue={updateSilverSending}
+                  disabled={disableSliders}
+                  isSilver
+                />
+              )}
+            </>
+          )}
+          {owned &&
+            !p.value?.destroyed &&
+            !p.value?.frozen &&
+            activeMaterials.length > 0 && (
+              <MaterialsContainer>
+                {activeMaterials.map((mat) => (
+                  <ResourceBar
+                    key={mat.materialId}
+                    selected={p.value}
+                    material={mat}
+                    value={uiManager.getMaterialSending(
+                      locationId,
+                      mat.materialId,
+                    )}
+                    setValue={(val) =>
+                      uiManager.setMaterialSending(
+                        locationId,
+                        mat.materialId,
+                        val,
+                      )
+                    }
+                    disabled={disableSliders}
+                    isMaterial
+                  />
+                ))}
+              </MaterialsContainer>
+            )}
+          {p.value && artifacts.length > 0 && (
+            <SelectArtifactRow
+              artifacts={artifacts}
+              onArtifactChange={updateArtifactSending}
+              selectedArtifact={artifactSending}
             />
           )}
-        </>
-      )}
-      {owned &&
-        !p.value?.destroyed &&
-        !p.value?.frozen &&
-        activeMaterials.length > 0 && (
-          <MaterialsContainer>
-            {activeMaterials.map((mat) => (
-              <ResourceBar
-                key={mat.materialId}
-                selected={p.value} // pass full material
-                material={mat} // pass full material
-                value={uiManager.getMaterialSending(locationId, mat.materialId)}
-                setValue={(val) =>
-                  uiManager.setMaterialSending(locationId, mat.materialId, val)
-                }
-                disabled={disableSliders}
-                isMaterial // <-- optional prop to distinguish in styling
-              />
-            ))}
-          </MaterialsContainer>
-        )}
-      {p.value && artifacts.length > 0 && (
-        <SelectArtifactRow
-          artifacts={artifacts}
-          onArtifactChange={updateArtifactSending}
-          selectedArtifact={artifactSending}
-        />
-      )}
+        </ResourcesScrollable>
+      </div>
       {spaceshipsYouOwn.length > 0 || owned ? sendRow : null}
 
       {/* {uiManager.getSpaceJunkEnabled() && owned ? abandonRow : null} */}

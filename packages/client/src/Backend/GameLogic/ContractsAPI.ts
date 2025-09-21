@@ -44,6 +44,7 @@ import type {
   DiagnosticUpdater,
   EthAddress,
   KardashevCoords,
+  LocatablePlanet,
   LocationId,
   Planet,
   Player,
@@ -167,6 +168,7 @@ export class ContractsAPI extends EventEmitter {
   private lastRevealSubscription: Subscription;
   private revealedPlanetSubscription: Subscription;
   private planetSubscription: Subscription;
+  private planetOwnerSubscription: Subscription;
   private planetJunkOwnerSubscription: Subscription;
   private planetAddJunkTickSubscription: Subscription;
   private moveSubscription: Subscription;
@@ -181,6 +183,10 @@ export class ContractsAPI extends EventEmitter {
   private guildHistorySubscription: Subscription;
   private guildCandidateSubscription: Subscription;
   private planetFlagsSubscription: Subscription;
+
+  // materials
+  private planetMaterialStorageSubscription: Subscription;
+  private planetMaterialSubscription: Subscription;
 
   get contract() {
     return this.ethConnection.getContract(this.contractAddress);
@@ -412,6 +418,15 @@ export class ContractsAPI extends EventEmitter {
       },
     );
 
+    this.planetOwnerSubscription =
+      this.components.PlanetOwner.update$.subscribe((update) => {
+        const entity = update.entity;
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
+      });
+
     this.planetJunkOwnerSubscription =
       this.components.PlanetJunkOwner.update$.subscribe((update) => {
         const entity = update.entity;
@@ -424,6 +439,7 @@ export class ContractsAPI extends EventEmitter {
     this.planetAddJunkTickSubscription =
       this.components.PlanetAddJunkTick.update$.subscribe((update) => {
         const entity = update.entity;
+
         this.emit(
           ContractsAPIEvent.PlanetUpdate,
           locationIdFromHexStr(entity.toString()),
@@ -578,6 +594,32 @@ export class ContractsAPI extends EventEmitter {
             this.emit(ContractsAPIEvent.GuildUpdate, guild_id_2);
           }
         }
+      });
+
+    this.planetMaterialStorageSubscription =
+      this.components.PlanetMaterialStorage.update$.subscribe((update) => {
+        const entity = update.entity;
+
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(entity.toString()),
+        );
+      });
+
+    this.planetMaterialSubscription =
+      this.components.PlanetMaterial.update$.subscribe((update) => {
+        const entity = update.entity;
+
+        const keys = decodeEntity(
+          this.components.PlanetMaterial.metadata.keySchema,
+          entity,
+        );
+        const planetId = keys.planetId;
+
+        this.emit(
+          ContractsAPIEvent.PlanetUpdate,
+          locationIdFromHexStr(planetId),
+        );
       });
 
     return;
@@ -952,6 +994,7 @@ export class ContractsAPI extends EventEmitter {
     this.lastRevealSubscription.unsubscribe();
     this.revealedPlanetSubscription.unsubscribe();
     this.planetSubscription.unsubscribe();
+    this.planetOwnerSubscription.unsubscribe();
     this.planetJunkOwnerSubscription.unsubscribe();
     this.planetAddJunkTickSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
@@ -965,6 +1008,8 @@ export class ContractsAPI extends EventEmitter {
     this.guildCandidateSubscription.unsubscribe();
 
     this.planetFlagsSubscription.unsubscribe();
+    this.planetMaterialStorageSubscription.unsubscribe();
+    this.planetMaterialSubscription.unsubscribe();
     return;
     const { contract } = this;
 
@@ -1638,7 +1683,7 @@ export class ContractsAPI extends EventEmitter {
     return this.planetUtils.getPlanetById(planetId);
   }
 
-  public getDefaultPlanetByLocation(location: WorldLocation): Planet {
+  public getDefaultPlanetByLocation(location: WorldLocation): LocatablePlanet {
     return this.planetUtils.defaultPlanetFromLocation(location);
   }
 

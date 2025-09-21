@@ -407,7 +407,7 @@ function ChangeTickRate() {
           value=${tickRate}
           onChange=${(e) => setTickRate(e.target.value)}
           min=${1}
-          max=${20}
+          max=${200}
         ></df-slider>
 
         <span style=${{ width: "130px" }}>

@@ -10,7 +10,7 @@ import type {
   QueuedArrival,
   Upgrade,
 } from "@df/types";
-import { ArrivalType, ArtifactType, PlanetType } from "@df/types";
+import { getMaxMaterialType, PlanetType } from "@df/types";
 
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { GuildUtils } from "./GuildUtils";
@@ -80,6 +80,48 @@ const getSilverOverTick = (
   );
 };
 
+const getMaterialsOverTick = (
+  planet: Planet,
+  startTick: number,
+  endTick: number,
+): Materials[] => {
+  if (!hasOwner(planet)) {
+    return planet.materials;
+  }
+  let tickElapsed = endTick - Math.max(startTick, planet.addJunkTick);
+  if (planet.owner != planet.junkOwner) {
+    tickElapsed = 0;
+  }
+
+  // Create a copy of materials to avoid mutating the original
+  const updatedMaterials = [...planet.materials];
+
+  // Update materials growth, starting from index 1 (skipping index 0 which is UNKNOWN)
+  for (let i = 1; i <= getMaxMaterialType(); i++) {
+    // Find the material in the array by materialId, not by array index
+    const materialIndex = updatedMaterials.findIndex(
+      (mat) => mat.materialId === i,
+    );
+
+    if (materialIndex !== -1 && updatedMaterials[materialIndex]) {
+      const material = updatedMaterials[materialIndex];
+
+      // Only update if material has growth enabled
+      if (material.growth && material.materialAmount !== undefined) {
+        const amount = material.materialAmount;
+        const grown = tickElapsed * material.growthRate;
+
+        updatedMaterials[materialIndex] = {
+          ...material,
+          materialAmount: Math.min(amount + grown, material.cap),
+        };
+      }
+    }
+  }
+
+  return updatedMaterials;
+};
+
 const getEnergyAtTick = (planet: Planet, atTick: number): number => {
   if (planet.energy === 0) {
     return 0;
@@ -127,6 +169,9 @@ export const updatePlanetToTick = (
   planet.silver = getSilverOverTick(planet, planet.lastUpdated, atTick);
 
   planet.energy = getEnergyAtTick(planet, atTick);
+
+  planet.materials = getMaterialsOverTick(planet, planet.lastUpdated, atTick);
+
   // }
 
   // update materials to tick only for SILVER_MINE planets
@@ -301,12 +346,16 @@ export const arrive = (
       const idx = toPlanet.materials.findIndex(
         (mat) => mat?.materialId === moved?.materialId,
       );
-      if (idx !== -1) {
-        toPlanet.materials[idx].materialAmount = Math.min(
-          Number(toPlanet.materials[idx].materialAmount) +
-            Number(moved.materialAmount),
-          Number(toPlanet.materials[idx].cap),
-        );
+      if (idx !== -1 && toPlanet.materials[idx]) {
+        const currentAmount =
+          Number(toPlanet.materials[idx].materialAmount) || 0;
+        const movedAmount = Number(moved.materialAmount) || 0;
+        const cap = Number(toPlanet.materials[idx].cap) || 0;
+
+        toPlanet.materials[idx] = {
+          ...toPlanet.materials[idx],
+          materialAmount: Math.min(currentAmount + movedAmount, cap),
+        };
       }
     }
   }
@@ -318,37 +367,10 @@ export const arrive = (
  * `Planet` class.
  */
 
-const getMaterialAmount = (
-  material: Materials,
-  startTick: number,
-  endTick: number,
-): number => {
-  const ticksPassed = endTick - startTick;
-
-  const growthRate =
-    typeof material.growthRate === "bigint"
-      ? Number(material.growthRate)
-      : material.growthRate;
-
-  const currentAmount =
-    typeof material.materialAmount === "bigint"
-      ? Number(material.materialAmount)
-      : material.materialAmount;
-
-  const cap =
-    typeof material.cap === "bigint" ? Number(material.cap) : material.cap;
-
-  if (!material.growth) {
-    return Number(currentAmount);
-  }
-
-  const grown = ticksPassed * Number(growthRate);
-
-  return Math.min(Number(currentAmount) + grown, Number(cap));
-};
-
 export function getEmojiMessage(
   planet: Planet | undefined,
 ): PlanetMessage<EmojiFlagBody> | undefined {
-  return planet?.messages?.find(isEmojiFlagMessage);
+  // Note: messages property may not exist on Planet type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (planet as any)?.messages?.find(isEmojiFlagMessage);
 }

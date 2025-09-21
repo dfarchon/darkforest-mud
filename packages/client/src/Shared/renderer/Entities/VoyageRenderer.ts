@@ -248,13 +248,13 @@ export class VoyageRenderer implements VoyageRendererType {
           const b = parseInt(materialColor.slice(5, 7), 16);
 
           tR.queueTextWorld(
-            `${formatNumber(mat.materialAmount / 1e18, 0)}`,
+            `${formatNumber(mat.materialAmount, 0)}`,
             {
               x: shipsLocationX,
-              y: shipsLocationY + 1.0 + materialOffset * 0.5,
+              y: shipsLocationY + 0.5,
             },
             [r, g, b, alpha],
-            -2 - materialOffset,
+            (voyage.silverMoved ? -2 : -1) - materialOffset,
             TextAlign.Center,
             TextAnchor.Bottom,
           );
