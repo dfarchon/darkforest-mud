@@ -4,11 +4,13 @@ import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
 import type { MaterialType } from "@df/types";
 import { PlanetType, PlanetTypeNames } from "@df/types";
+import { TooltipName } from "@df/types";
 import {
   getMaterialColor,
   getMaterialIcon,
   getMaterialName,
 } from "@frontend/Panes/PlanetMaterialsPane";
+import { TooltipTrigger } from "@frontend/Panes/Tooltip";
 import React from "react";
 import styled from "styled-components";
 
@@ -403,13 +405,13 @@ const MaterialsScrollable = styled.div`
 
   &::-webkit-scrollbar {
     width: 16px;
-    background-color: #e0e0e0;
+    background-color: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
     background-color: #888;
     border-radius: 8px;
-    border: 4px solid #e0e0e0;
+    border: 4px solid transparent;
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -419,11 +421,99 @@ const MaterialsScrollable = styled.div`
   &::-webkit-scrollbar-track {
     margin: 8px 0;
     border-radius: 8px;
+    background-color: transparent;
   }
 
   scrollbar-width: thin;
-  scrollbar-color: #888 #e0e0e0;
+  scrollbar-color: #888 transparent;
 `;
+
+const MaterialsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background-color: transparent;
+  border: 1px solid ${dfstyles.colors.borderDarker};
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const MaterialItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: ${dfstyles.colors.backgroundlight};
+  min-height: 40px;
+  border-right: 1px solid ${dfstyles.colors.borderDarker};
+  border-bottom: 1px solid ${dfstyles.colors.borderDarker};
+
+  &:nth-child(even) {
+    border-right: none;
+  }
+
+  &:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+`;
+
+const MaterialIcon = styled.div<{ color: string }>`
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    cursor: help;
+  }
+`;
+
+const MaterialValues = styled.div`
+  color: ${dfstyles.colors.text};
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+`;
+
+function getMaterialTooltipName(
+  materialId: MaterialType,
+): TooltipName | undefined {
+  switch (materialId) {
+    case 1:
+      return TooltipName.MaterialWaterCrystals;
+    case 2:
+      return TooltipName.MaterialLivingWood;
+    case 3:
+      return TooltipName.MaterialWindsteel;
+    case 4:
+      return TooltipName.MaterialAurorium;
+    case 5:
+      return TooltipName.MaterialMycelium;
+    case 6:
+      return TooltipName.MaterialSandglass;
+    case 7:
+      return TooltipName.MaterialCryostone;
+    case 8:
+      return TooltipName.MaterialScrapium;
+    case 9:
+      return TooltipName.MaterialPyrosteel;
+    case 10:
+      return TooltipName.MaterialBlackalloy;
+    case 11:
+      return TooltipName.MaterialCorruptedCrystal;
+    default:
+      return undefined;
+  }
+}
 
 export function MaterialsDisplay({
   planet,
@@ -447,103 +537,26 @@ export function MaterialsDisplay({
 
   return (
     <div style={style}>
-      <div
-        style={{
-          fontSize: "0.9em",
-          color: dfstyles.colors.subtext,
-          marginBottom: "4px",
-          textAlign: "center",
-        }}
-      >
-        Materials
-      </div>
       <MaterialsScrollable>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-            fontSize: "0.8em",
-          }}
-        >
+        <MaterialsGrid>
           {activeMaterials.map((mat) => {
-            const percentage =
-              Number(mat.cap) > 0
-                ? Math.min(
-                    (Number(mat.materialAmount) / Number(mat.cap)) * 100,
-                    100,
-                  )
-                : 0;
+            const materialColor = getMaterialColor(mat.materialId);
 
             return (
-              <div
-                key={mat.materialId}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  padding: "4px",
-                  backgroundColor: dfstyles.colors.backgroundlighter,
-                  borderRadius: "4px",
-                  border: `1px solid ${dfstyles.colors.borderDarker}`,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    fontSize: "0.8em",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      backgroundColor: getMaterialColor(mat.materialId),
-                      borderRadius: "2px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "12px",
-                      lineHeight: "1",
-                    }}
-                  >
+              <MaterialItem key={mat.materialId}>
+                <TooltipTrigger name={getMaterialTooltipName(mat.materialId)}>
+                  <MaterialIcon color={materialColor}>
                     {getMaterialIcon(mat.materialId)}
-                  </div>
-                  <span
-                    style={{
-                      color: getMaterialColor(mat.materialId),
-                      fontSize: "12px",
-                    }}
-                  >
-                    {getMaterialName(mat.materialId)}
-                  </span>
-                  {mat.growth && (
-                    <span
-                      style={{
-                        color: getMaterialColor(mat.materialId),
-                        fontSize: "12px",
-                      }}
-                    >
-                      + {""} {formatNumber(Number(mat.growthRate), 2)}
-                    </span>
-                  )}
-                </div>
-
-                <MaterialBar
-                  percentage={percentage}
-                  materialID={mat.materialId}
-                >
-                  <MaterialBarText>
-                    {formatNumber(Number(mat.materialAmount), 2)} /{" "}
-                    {formatNumber(Number(mat.cap), 2)}
-                  </MaterialBarText>
-                </MaterialBar>
-              </div>
+                  </MaterialIcon>
+                </TooltipTrigger>
+                <MaterialValues>
+                  {formatNumber(Number(mat.materialAmount), 0)} /{" "}
+                  {formatNumber(Number(mat.cap), 0)}
+                </MaterialValues>
+              </MaterialItem>
             );
           })}
-        </div>
+        </MaterialsGrid>
       </MaterialsScrollable>
     </div>
   );

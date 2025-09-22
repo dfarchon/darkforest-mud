@@ -67,11 +67,11 @@ const MaterialsContainer = styled.div`
   /* Custom scrollbar styling - left side scrollbar */
   &::-webkit-scrollbar {
     width: 12px; /* Make scrollbar wider */
-    background-color: ${dfstyles.colors.backgroundDarker};
+    background-color: transparent;
   }
 
   &::-webkit-scrollbar-track {
-    background: ${dfstyles.colors.backgroundDarker};
+    background: transparent;
     border-radius: 6px;
     margin: 4px 0;
   }
@@ -79,7 +79,7 @@ const MaterialsContainer = styled.div`
   &::-webkit-scrollbar-thumb {
     background: ${dfstyles.colors.borderDarker};
     border-radius: 6px;
-    border: 2px solid ${dfstyles.colors.backgroundDarker};
+    border: 2px solid transparent;
   }
 
   &::-webkit-scrollbar-thumb:hover {
@@ -88,8 +88,7 @@ const MaterialsContainer = styled.div`
 
   /* Firefox scrollbar */
   scrollbar-width: thin;
-  scrollbar-color: ${dfstyles.colors.borderDarker}
-    ${dfstyles.colors.backgroundDarker};
+  scrollbar-color: ${dfstyles.colors.borderDarker} transparent;
 `;
 
 const MaterialCard = styled.div`
@@ -414,7 +413,7 @@ export function getMaterialName(materialId: MaterialType): string {
     case 10:
       return "BLACKALLOY";
     case 11:
-      return "CORRUPTED CRYSTAL";
+      return "CRYSTAL";
     default:
       return "Unknown";
   }

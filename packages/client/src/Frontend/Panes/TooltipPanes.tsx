@@ -4,8 +4,17 @@ import React from "react";
 
 import { getPlanetRank, isFullRank } from "../../Backend/Utils/Utils";
 import { ScoreLabel, SilverLabel } from "../Components/Labels/KeywordLabels";
-import { Blue, Green, Pink, Red, Text, White } from "../Components/Text";
+import {
+  Blue,
+  Colored,
+  Green,
+  Pink,
+  Red,
+  Text,
+  White,
+} from "../Components/Text";
 import { useAccount, useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
+import { getMaterialColor } from "./PlanetMaterialsPane";
 
 export function NetworkHealthPane() {
   return (
@@ -598,6 +607,96 @@ const BuyHat = () => (
   </>
 );
 
+// Material tooltip components
+const MaterialWaterCrystalsTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(1)}>WATER CRYSTALS:</Colored> A shimmering
+    liquid harvested from deep ocean wells, used in cooling systems, fluidic
+    shields, and hydro-reactive engines.
+  </>
+);
+
+const MaterialLivingWoodTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(2)}>LIVING WOOD:</Colored> An organic,
+    flexible biofiber that forms the core of regenerative hull plating and
+    photosynthetic tech modules.
+  </>
+);
+
+const MaterialWindsteelTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(3)}>WINDSTEEL:</Colored> Lightweight and
+    highly conductive alloy spun from atmospheric windsteel veins; vital for
+    turbine propulsion and trade ship frames.
+  </>
+);
+
+const MaterialAuroriumTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(4)}>AURORIUM:</Colored> Luminous mineral
+    infused with polar energy, mined from aurora-lit tundra fields. Used in
+    advanced navigation cores, sensor arrays, and energy-reflective ship
+    plating.
+  </>
+);
+
+const MaterialMyceliumTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(5)}>MYCELIUM GEL:</Colored> Pulsating
+    fungal gel infused with life essence; powers alchemical reactors and
+    mycelial growth algorithms.
+  </>
+);
+
+const MaterialSandglassTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(6)}>SANDGLASS:</Colored> Sharp, granular
+    shards capable of storing temporal energy—used in chrono-sensors and
+    time-slowing projectiles.
+  </>
+);
+
+const MaterialCryostoneTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(7)}>CRYOSTONE:</Colored> Frozen mineral
+    forged in vacuum conditions, used in advanced refrigeration, stasis
+    chambers, and cryo-lasers.
+  </>
+);
+
+const MaterialScrapiumTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(8)}>SCRAPIUM:</Colored> Junk-forged alloy
+    made from Wasteland scraps, restructured into modular components for rough
+    industrial builds.
+  </>
+);
+
+const MaterialPyrosteelTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(9)}>PYROSTEEL:</Colored> Ultra-dense alloy
+    mined from volcanic zones, ideal for magma engines, high-heat armor, and
+    thermal weapon cores.
+  </>
+);
+
+const MaterialBlackalloyTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(10)}>BLACKALLOY:</Colored> A forbidden dark
+    alloy synthesized from corrupted zones. Dense, unstable, and extremely
+    powerful in shadow-tech applications.
+  </>
+);
+
+const MaterialCorruptedCrystalTooltip = () => (
+  <>
+    <Colored color={getMaterialColor(11)}>CORRUPTED CRYSTAL:</Colored>{" "}
+    Crystallized corruption extracted from reality-warped biomes. Essential for
+    ZK-reactors, entropy drives, and unstable modules.
+  </>
+);
+
 export function TooltipContent({ name }: { name: TooltipName | undefined }) {
   if (name === TooltipName.SilverGrowth) {
     return <SilverGrowthTooltipPane />;
@@ -832,6 +931,41 @@ export function TooltipContent({ name }: { name: TooltipName | undefined }) {
   }
   if (name === TooltipName.BuyHat) {
     return <BuyHat />;
+  }
+
+  // Material tooltips
+  if (name === TooltipName.MaterialWaterCrystals) {
+    return <MaterialWaterCrystalsTooltip />;
+  }
+  if (name === TooltipName.MaterialLivingWood) {
+    return <MaterialLivingWoodTooltip />;
+  }
+  if (name === TooltipName.MaterialWindsteel) {
+    return <MaterialWindsteelTooltip />;
+  }
+  if (name === TooltipName.MaterialAurorium) {
+    return <MaterialAuroriumTooltip />;
+  }
+  if (name === TooltipName.MaterialMycelium) {
+    return <MaterialMyceliumTooltip />;
+  }
+  if (name === TooltipName.MaterialSandglass) {
+    return <MaterialSandglassTooltip />;
+  }
+  if (name === TooltipName.MaterialCryostone) {
+    return <MaterialCryostoneTooltip />;
+  }
+  if (name === TooltipName.MaterialScrapium) {
+    return <MaterialScrapiumTooltip />;
+  }
+  if (name === TooltipName.MaterialPyrosteel) {
+    return <MaterialPyrosteelTooltip />;
+  }
+  if (name === TooltipName.MaterialBlackalloy) {
+    return <MaterialBlackalloyTooltip />;
+  }
+  if (name === TooltipName.MaterialCorruptedCrystal) {
+    return <MaterialCorruptedCrystalTooltip />;
   }
 
   return <></>;
