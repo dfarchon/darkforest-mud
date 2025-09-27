@@ -440,7 +440,6 @@ export function PlanetCard({
         {/* Materials Display */}
         {planet.materials && planet.materials.length > 0 && (
           <>
-            <EmSpacer height={0.5} />
             <MaterialsDisplay planet={planet} />
             <EmSpacer height={0.5} />
           </>

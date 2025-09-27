@@ -1,5 +1,6 @@
 import { RECOMMENDED_MODAL_WIDTH } from "@df/constants";
-import type { TooltipName } from "@df/types";
+import type { MaterialType } from "@df/types";
+import { TooltipName } from "@df/types";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
@@ -153,3 +154,34 @@ const StyledTooltip = styled.div`
   line-height: 1.5em;
   z-index: ${DFZIndex.Tooltip};
 `;
+
+export function getMaterialTooltipName(
+  materialId: MaterialType,
+): TooltipName | undefined {
+  switch (materialId) {
+    case 1:
+      return TooltipName.MaterialWaterCrystals;
+    case 2:
+      return TooltipName.MaterialLivingWood;
+    case 3:
+      return TooltipName.MaterialWindsteel;
+    case 4:
+      return TooltipName.MaterialAurorium;
+    case 5:
+      return TooltipName.MaterialMycelium;
+    case 6:
+      return TooltipName.MaterialSandglass;
+    case 7:
+      return TooltipName.MaterialCryostone;
+    case 8:
+      return TooltipName.MaterialScrapium;
+    case 9:
+      return TooltipName.MaterialPyrosteel;
+    case 10:
+      return TooltipName.MaterialBlackalloy;
+    case 11:
+      return TooltipName.MaterialCorruptedCrystal;
+    default:
+      return undefined;
+  }
+}
