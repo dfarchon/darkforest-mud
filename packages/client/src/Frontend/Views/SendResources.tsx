@@ -16,7 +16,7 @@ import { Icon, IconType } from "../Components/Icons";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
 import { MaybeShortcutButton } from "../Components/MaybeShortcutButton";
 import { Slider } from "../Components/Slider";
-import { TooltipTrigger } from "../Panes/Tooltip";
+import { getMaterialTooltipName, TooltipTrigger } from "../Panes/Tooltip";
 import dfstyles from "../Styles/dfstyles";
 import {
   useAccount,
@@ -105,37 +105,6 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
   );
 }
 
-function getMaterialTooltipName(
-  materialId: MaterialType,
-): TooltipName | undefined {
-  switch (materialId) {
-    case 1:
-      return TooltipName.MaterialWaterCrystals;
-    case 2:
-      return TooltipName.MaterialLivingWood;
-    case 3:
-      return TooltipName.MaterialWindsteel;
-    case 4:
-      return TooltipName.MaterialAurorium;
-    case 5:
-      return TooltipName.MaterialMycelium;
-    case 6:
-      return TooltipName.MaterialSandglass;
-    case 7:
-      return TooltipName.MaterialCryostone;
-    case 8:
-      return TooltipName.MaterialScrapium;
-    case 9:
-      return TooltipName.MaterialPyrosteel;
-    case 10:
-      return TooltipName.MaterialBlackalloy;
-    case 11:
-      return TooltipName.MaterialCorruptedCrystal;
-    default:
-      return undefined;
-  }
-}
-
 const ResourceRow = styled.div`
   display: flex;
   align-items: center;
@@ -156,14 +125,6 @@ const ResourceIcon = styled.div<{ color: string }>`
   line-height: 1;
   flex-shrink: 0;
   cursor: help;
-`;
-
-const _ResourceName = styled.div<{ color: string }>`
-  color: ${(props) => props.color};
-  font-size: 12px;
-  font-weight: 500;
-  min-width: 60px;
-  flex-shrink: 0;
 `;
 
 const ResourceValue = styled.div<{ color: string }>`
@@ -272,16 +233,6 @@ function ResourceBar({
     return dfstyles.colors.dfblue;
   };
 
-  const _getResourceName = () => {
-    if (isMaterial && material) {
-      return getMaterialName(material.materialId);
-    }
-    if (isSilver) {
-      return "Silver";
-    }
-    return "Energy";
-  };
-
   const getResourceIcon = () => {
     if (isMaterial && material) {
       return getMaterialIcon(material.materialId);
@@ -346,6 +297,7 @@ function ResourceBar({
               const target = e.target as HTMLInputElement;
               setValue(parseInt(target.value, 10));
             }}
+            style={{ height: "16px" }}
           />
         </ResourceSlider>
         <ResourcePercentage color={resourceColor}>{value}%</ResourcePercentage>

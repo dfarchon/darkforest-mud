@@ -10,7 +10,10 @@ import {
   getMaterialIcon,
   getMaterialName,
 } from "@frontend/Panes/PlanetMaterialsPane";
-import { TooltipTrigger } from "@frontend/Panes/Tooltip";
+import {
+  getMaterialTooltipName,
+  TooltipTrigger,
+} from "@frontend/Panes/Tooltip";
 import React from "react";
 import styled from "styled-components";
 
@@ -23,40 +26,6 @@ import { TextPreview } from "../TextPreview";
 import { OptionalPlanetBiomeLabelAnim } from "./BiomeLabels";
 import { TwitterLink } from "./Labels";
 import { SpacetimeRipLabel } from "./SpacetimeRipLabel";
-
-const MaterialBar = styled.div<{
-  percentage: number;
-  materialID: MaterialType;
-}>`
-  width: 100%;
-  height: 8px;
-  background-color: ${dfstyles.colors.borderDarker};
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-
-  &::after {
-    content: "";
-    display: block;
-    width: ${(props) => props.percentage}%;
-    height: 100%;
-    background-color: ${(props) => getMaterialColor(props.materialID)};
-    transition: width 0.3s ease;
-  }
-`;
-
-const MaterialBarText = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 10px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  z-index: 1;
-  pointer-events: none;
-`;
 
 /* note that we generally prefer `Planet | undefined` over `Planet` because it
    makes it easier to pass in selected / hovering planet from the emitters      */
@@ -354,28 +323,32 @@ export function MaterialsText({
     <span style={style}>
       {activeMaterials.map((mat, index) => (
         <span key={mat.materialId}>
-          {index > 0 && ", "}
+          {index > 0 && " "}
           <span
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "4px",
+              gap: "1px",
             }}
           >
             <span
               style={{
-                width: "12px",
-                height: "12px",
-                backgroundColor: getMaterialColor(mat.materialId),
+                width: "10px",
+                height: "10px",
+                backgroundColor: "transparent",
                 borderRadius: "2px",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "10px",
                 lineHeight: "1",
+                cursor: "help",
               }}
             >
-              {getMaterialIcon(mat.materialId)}
+              {" "}
+              <TooltipTrigger name={getMaterialTooltipName(mat.materialId)}>
+                {getMaterialIcon(mat.materialId)}
+              </TooltipTrigger>
             </span>
             <span
               style={{
@@ -383,7 +356,7 @@ export function MaterialsText({
                 fontWeight: "bold",
               }}
             >
-              {formatEtherToNumber(mat.materialAmount).toFixed(0)}
+              {formatNumber(mat.materialAmount)}
             </span>
           </span>
         </span>
@@ -395,8 +368,9 @@ export function MaterialsText({
 const MaterialsScrollable = styled.div`
   position: relative;
   max-height: 200px;
+
   overflow-y: auto;
-  padding: 8px;
+  padding: 0px;
   direction: rtl;
 
   & > * {
@@ -442,9 +416,9 @@ const MaterialItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 4px 10px;
   background-color: ${dfstyles.colors.backgroundlight};
-  min-height: 40px;
+  min-height: 20px;
   border-right: 1px solid ${dfstyles.colors.borderDarker};
   border-bottom: 1px solid ${dfstyles.colors.borderDarker};
 
@@ -458,17 +432,17 @@ const MaterialItem = styled.div`
 `;
 
 const MaterialIcon = styled.div<{ color: string }>`
-  width: 16px;
-  height: 16px;
+  width: 10px;
+  height: 10px;
   background-color: transparent;
-  border-radius: 4px;
+  border-radius: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1;
   flex-shrink: 0;
-  cursor: pointer;
+  cursor: help;
   transition: transform 0.2s ease;
 
   &:hover {
@@ -479,41 +453,10 @@ const MaterialIcon = styled.div<{ color: string }>`
 
 const MaterialValues = styled.div`
   color: ${dfstyles.colors.text};
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
 `;
-
-function getMaterialTooltipName(
-  materialId: MaterialType,
-): TooltipName | undefined {
-  switch (materialId) {
-    case 1:
-      return TooltipName.MaterialWaterCrystals;
-    case 2:
-      return TooltipName.MaterialLivingWood;
-    case 3:
-      return TooltipName.MaterialWindsteel;
-    case 4:
-      return TooltipName.MaterialAurorium;
-    case 5:
-      return TooltipName.MaterialMycelium;
-    case 6:
-      return TooltipName.MaterialSandglass;
-    case 7:
-      return TooltipName.MaterialCryostone;
-    case 8:
-      return TooltipName.MaterialScrapium;
-    case 9:
-      return TooltipName.MaterialPyrosteel;
-    case 10:
-      return TooltipName.MaterialBlackalloy;
-    case 11:
-      return TooltipName.MaterialCorruptedCrystal;
-    default:
-      return undefined;
-  }
-}
 
 export function MaterialsDisplay({
   planet,
@@ -550,6 +493,7 @@ export function MaterialsDisplay({
                   </MaterialIcon>
                 </TooltipTrigger>
                 <MaterialValues>
+                  {mat.growth && `+${formatNumber(Number(mat.growthRate), 2)} `}
                   {formatNumber(Number(mat.materialAmount), 0)} /{" "}
                   {formatNumber(Number(mat.cap), 0)}
                 </MaterialValues>

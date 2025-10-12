@@ -1,15 +1,16 @@
 import { formatNumber } from "@df/gamelogic";
 import type { LocationId, Materials, MaterialType } from "@df/types";
 import { ModalName } from "@df/types";
+import { getMaterialTooltipName } from "@frontend/Panes/Tooltip";
 import { useState } from "react";
 import styled from "styled-components";
 
+import { Btn } from "../Components/Btn";
 import {
   CenterBackgroundSubtext,
   Section,
   SectionHeader,
 } from "../Components/CoreUI";
-import { Btn } from "../Components/Btn";
 import { NumberInput } from "../Components/Input";
 // import { Sub, Text } from "../Components/Text";
 import dfstyles from "../Styles/dfstyles";
@@ -17,6 +18,7 @@ import { usePlanet, useUIManager } from "../Utils/AppHooks";
 import { useEmitterValue } from "../Utils/EmitterHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
+import { TooltipTrigger } from "./Tooltip";
 
 const PlanetMaterialsWrapper = styled.div`
   display: flex;
@@ -94,11 +96,11 @@ const MaterialsContainer = styled.div`
 const MaterialCard = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 6px;
   background-color: ${dfstyles.colors.backgroundlighter};
   border: 1px solid ${dfstyles.colors.borderDarker};
   border-radius: 6px;
-  gap: 8px;
+  gap: 2px;
   min-height: fit-content;
 `;
 
@@ -109,21 +111,22 @@ const MaterialHeader = styled.div`
 `;
 
 const MaterialIcon = styled.div<{ color: string }>`
-  width: 20px;
-  height: 20px;
-  background-color: ${(props) => props.color};
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
   border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   line-height: 1;
+  cursor: help;
 `;
 
 const MaterialName = styled.div<{ color: string }>`
   color: ${(props) => props.color};
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
 `;
 
 const MaterialStats = styled.div`
@@ -132,58 +135,6 @@ const MaterialStats = styled.div`
   align-items: center;
   font-size: 12px;
   color: ${dfstyles.colors.subtext};
-`;
-
-const SliderContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`;
-
-const SliderRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const Slider = styled.input`
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: ${dfstyles.colors.borderDarker};
-  outline: none;
-  -webkit-appearance: none;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: ${dfstyles.colors.dfblue};
-    cursor: pointer;
-  }
-
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: ${dfstyles.colors.dfblue};
-    cursor: pointer;
-    border: none;
-  }
-`;
-
-const SliderValue = styled.div`
-  min-width: 40px;
-  text-align: right;
-  font-size: 12px;
-  color: ${dfstyles.colors.text};
-`;
-
-const SliderButtons = styled.div`
-  display: flex;
-  gap: 4px;
 `;
 
 const SliderButton = styled.button`
@@ -214,7 +165,7 @@ const MaterialBar = styled.div<{
   materialID: MaterialType;
 }>`
   width: 100%;
-  height: 8px;
+  height: 10px;
   background-color: ${dfstyles.colors.borderDarker};
   border-radius: 4px;
   overflow: hidden;
@@ -232,7 +183,7 @@ const MaterialBar = styled.div<{
 
 const MaterialBarText = styled.div`
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 10px;
@@ -243,53 +194,10 @@ const MaterialBarText = styled.div`
   pointer-events: none;
 `;
 
-const IntegratedSlider = styled.input<{ materialID: MaterialType }>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  outline: none;
-  -webkit-appearance: none;
-  cursor: pointer;
-  z-index: 2;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: ${dfstyles.colors.dfblue};
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: ${dfstyles.colors.dfblue};
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  &::-webkit-slider-track {
-    background: transparent;
-  }
-
-  &::-moz-range-track {
-    background: transparent;
-  }
-`;
-
 const MaterialWithdrawContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-top: 8px;
 `;
 
@@ -348,7 +256,7 @@ const WithdrawSlider = styled.input`
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: ${dfstyles.colors.dfblue};
+    background: ${dfstyles.colors.subbertext};
     cursor: pointer;
     border: 2px solid white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -358,7 +266,7 @@ const WithdrawSlider = styled.input`
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: ${dfstyles.colors.dfblue};
+    background: ${dfstyles.colors.subbertext};
     cursor: pointer;
     border: 2px solid white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -368,7 +276,6 @@ const WithdrawSlider = styled.input`
 const WithdrawWarning = styled.div`
   font-size: 15px;
   color: ${dfstyles.colors.dfred};
-  background-color: ${dfstyles.colors.backgroundDarker};
   padding: 4px 8px;
   border-radius: 3px;
   border: 1px solid ${dfstyles.colors.dfred};
@@ -378,7 +285,6 @@ const WithdrawWarning = styled.div`
 const MaterialScoreInfo = styled.div`
   font-size: 15px;
   color: ${dfstyles.colors.subtext};
-  background-color: ${dfstyles.colors.backgroundDarker};
   padding: 4px 6px;
   border-radius: 3px;
   border: 1px solid ${dfstyles.colors.borderDarker};
@@ -688,9 +594,11 @@ export function PlanetMaterialsPane({
             return (
               <MaterialCard key={mat.materialId}>
                 <MaterialHeader>
-                  <MaterialIcon color={materialColor}>
-                    {getMaterialIcon(mat.materialId)}
-                  </MaterialIcon>
+                  <TooltipTrigger name={getMaterialTooltipName(mat.materialId)}>
+                    <MaterialIcon color={materialColor}>
+                      {getMaterialIcon(mat.materialId)}
+                    </MaterialIcon>
+                  </TooltipTrigger>
                   <MaterialName color={materialColor}>
                     {getMaterialName(mat.materialId)}
                   </MaterialName>
@@ -724,7 +632,7 @@ export function PlanetMaterialsPane({
                   materialID={mat.materialId}
                 >
                   <MaterialBarText>
-                    {Number(mat.materialAmount)} / {Number(mat.cap)}
+                    {formatNumber(mat.materialAmount)} / {formatNumber(mat.cap)}
                   </MaterialBarText>
                 </MaterialBar>
 
@@ -733,6 +641,9 @@ export function PlanetMaterialsPane({
                   <MaterialWithdrawBar>
                     <WithdrawHeader>
                       <WithdrawLabel>Withdraw Amount</WithdrawLabel>
+                      <WithdrawAmount>
+                        {getWithdrawAmount(mat.materialId, allocation)}
+                      </WithdrawAmount>
                       <div
                         style={{
                           display: "flex",
@@ -765,10 +676,6 @@ export function PlanetMaterialsPane({
                         </div>
                       </div>
                     </WithdrawHeader>
-
-                    <WithdrawAmount>
-                      {getWithdrawAmount(mat.materialId, allocation)}
-                    </WithdrawAmount>
 
                     <WithdrawSlider
                       type="range"
