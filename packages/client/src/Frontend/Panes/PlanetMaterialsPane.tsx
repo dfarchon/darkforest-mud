@@ -19,6 +19,7 @@ import { useEmitterValue } from "../Utils/EmitterHooks";
 import type { ModalHandle } from "../Views/ModalPane";
 import { ModalPane } from "../Views/ModalPane";
 import { TooltipTrigger } from "./Tooltip";
+import { MaterialSprite } from "@frontend/Components/MaterialSprite";
 
 const PlanetMaterialsWrapper = styled.div`
   display: flex;
@@ -325,33 +326,11 @@ export function getMaterialName(materialId: MaterialType): string {
   }
 }
 
-export function getMaterialIcon(materialId: MaterialType): string {
-  switch (materialId) {
-    case 1:
-      return "💧";
-    case 2:
-      return "🌿";
-    case 3:
-      return "🌀";
-    case 4:
-      return "🌌";
-    case 5:
-      return "🧫";
-    case 6:
-      return "✨";
-    case 7:
-      return "🧊";
-    case 8:
-      return "🛠️";
-    case 9:
-      return "⚙️";
-    case 10:
-      return "🕳️";
-    case 11:
-      return "☣️";
-    default:
-      return "❓";
-  }
+export function getMaterialIcon(
+  materialId: MaterialType,
+  size: number = 64, // Doubled from 64 to 128 (twice as big: 64 * 2 = 128)
+): React.ReactElement {
+  return <MaterialSprite materialId={materialId} size={size} />;
 }
 
 export function getMaterialScoreMultiplier(materialId: MaterialType): number {
