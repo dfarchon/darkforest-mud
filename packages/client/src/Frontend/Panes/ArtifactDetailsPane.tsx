@@ -4,6 +4,7 @@ import {
   dateMintedAt,
   hasStatBoost,
   isActivated,
+  isArtifactSpaceShip,
   isSpaceShip,
 } from "@df/gamelogic";
 import { artifactName, getPlanetName, getPlanetNameHash } from "@df/procedural";
@@ -47,6 +48,7 @@ import type { ModalHandle } from "../Views/ModalPane";
 import { ArtifactActions } from "./ManagePlanetArtifacts/ArtifactActions";
 import { ArtifactChangeImageType } from "./ManagePlanetArtifacts/ArtifactChangeImageType";
 import { TooltipTrigger } from "./Tooltip";
+import { SpaceshipBonuses } from "../Components/SpaceshipBonuses";
 
 const ArtifactStatusText = {
   0: "DEFAULT",
@@ -323,26 +325,31 @@ export function ArtifactDetailsBody({
           </>
         )}
 
-        {artifact.activateUpgrade && (
-          <>
-            <Green>Activate Stats Change</Green>
-            <ArtifactDetailsHeader>
-              <StatsContainer>
-                {range(0, 5).map((val) => (
-                  <UpgradeStatInfo
-                    upgrades={[artifact.activateUpgrade]}
-                    stat={val}
-                    key={val}
-                  />
-                ))}
-              </StatsContainer>
-            </ArtifactDetailsHeader>
-          </>
-        )}
+        {artifact.activateUpgrade &&
+          !isArtifactSpaceShip(artifact.artifactType) && (
+            <>
+              <Green>Activate Stats Change</Green>
+              <ArtifactDetailsHeader>
+                <StatsContainer>
+                  {range(0, 5).map((val) => (
+                    <UpgradeStatInfo
+                      upgrades={[artifact.activateUpgrade]}
+                      stat={val}
+                      key={val}
+                    />
+                  ))}
+                </StatsContainer>
+              </ArtifactDetailsHeader>
+            </>
+          )}
       </div>
 
       {isSpaceShip(artifact.artifactType) && (
         <ArtifactDescription collapsable={false} artifact={artifact} />
+      )}
+
+      {isArtifactSpaceShip(artifact.artifactType) && (
+        <SpaceshipBonuses artifact={artifact} />
       )}
 
       <StyledArtifactDetailsBody>

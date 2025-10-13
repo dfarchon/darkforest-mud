@@ -1,30 +1,28 @@
 import { formatNumber } from "@df/gamelogic";
-import type { LocationId, Materials, MaterialType } from "@df/types";
-import { ModalName } from "@df/types";
-import { getMaterialTooltipName } from "@frontend/Panes/Tooltip";
-import { useState } from "react";
+import type { LocationId, Materials, MaterialType, Planet } from "@df/types";
+import { ArtifactStatus, ArtifactType } from "@df/types";
+import React, { useState } from "react";
 import styled from "styled-components";
 
+import type { GameUIManager } from "../../Backend/GameLogic/GameUIManager";
+import { useFoundryCrafting } from "../../hooks/useFoundryCrafting";
+import { useFoundryCraftingCount } from "../../hooks/useFoundryCraftingCount";
 import { Btn } from "../Components/Btn";
-import {
-  CenterBackgroundSubtext,
-  Section,
-  SectionHeader,
-} from "../Components/CoreUI";
+import { CenterBackgroundSubtext, Section } from "../Components/CoreUI";
 import { NumberInput } from "../Components/Input";
-// import { Sub, Text } from "../Components/Text";
+import { MaterialSprite } from "../Components/MaterialSprite";
 import dfstyles from "../Styles/dfstyles";
 import { usePlanet, useUIManager } from "../Utils/AppHooks";
 import { useEmitterValue } from "../Utils/EmitterHooks";
 import type { ModalHandle } from "../Views/ModalPane";
-import { ModalPane } from "../Views/ModalPane";
-import { TooltipTrigger } from "./Tooltip";
+import SpaceshipCraftingPane from "./SpaceshipCraftingPane";
+import { getMaterialTooltipName, TooltipTrigger } from "./Tooltip";
 
 const PlanetMaterialsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: 500px;
+  max-height: 600px;
 
   & .row {
     display: flex;
@@ -111,8 +109,8 @@ const MaterialHeader = styled.div`
 `;
 
 const MaterialIcon = styled.div<{ color: string }>`
-  width: 16px;
-  height: 16px;
+  width: 30px;
+  height: 30px;
   background-color: transparent;
   border-radius: 3px;
   display: flex;
@@ -121,6 +119,10 @@ const MaterialIcon = styled.div<{ color: string }>`
   font-size: 14px;
   line-height: 1;
   cursor: help;
+  &:hover {
+    transform: scale(1.2);
+    cursor: help;
+  }
 `;
 
 const MaterialName = styled.div<{ color: string }>`
@@ -291,15 +293,66 @@ const MaterialScoreInfo = styled.div`
   margin-top: 4px;
 `;
 
-const ScoreMultiplier = styled.span<{ color: string }>`
-  color: ${(props) => props.color};
+const DepletedMessage = styled.div`
+  margin-top: 1px;
+  padding: 1px 1px;
+  background: #4a3a2a;
+  border: 1px solid #ff9800;
+  border-radius: 4px;
+  color: #ff9800;
+  font-size: 12px;
+  text-align: center;
   font-weight: bold;
+`;
+
+// Tab selector components
+const TabContainer = styled.div`
+  display: flex;
+  background-color: ${dfstyles.colors.background};
+  border-bottom: 1px solid ${dfstyles.colors.borderDarker};
+  margin-bottom: 8px;
+`;
+
+const TabButton = styled.button<{ active: boolean }>`
+  flex: 1;
+  padding: 8px 16px;
+  background-color: ${(props) =>
+    props.active ? dfstyles.colors.backgroundlighter : "transparent"};
+  border: none;
+  border-bottom: 2px solid
+    ${(props) => (props.active ? dfstyles.colors.subtext : "transparent")};
+  color: ${(props) =>
+    props.active ? dfstyles.colors.text : dfstyles.colors.subtext};
+  font-size: 14px;
+  font-weight: ${(props) => (props.active ? "bold" : "normal")};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${dfstyles.colors.backgroundlighter};
+    color: ${dfstyles.colors.text};
+  }
+
+  &:first-child {
+    border-top-left-radius: 4px;
+  }
+
+  &:last-child {
+    border-top-right-radius: 4px;
+  }
+`;
+
+const TabContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 export function getMaterialName(materialId: MaterialType): string {
   switch (materialId) {
     case 1:
-      return "WATER CRYSTALS";
+      return "WATER";
     case 2:
       return "LIVING WOOD";
     case 3:
@@ -325,33 +378,11 @@ export function getMaterialName(materialId: MaterialType): string {
   }
 }
 
-export function getMaterialIcon(materialId: MaterialType): string {
-  switch (materialId) {
-    case 1:
-      return "💧";
-    case 2:
-      return "🌿";
-    case 3:
-      return "🌀";
-    case 4:
-      return "🌌";
-    case 5:
-      return "🧫";
-    case 6:
-      return "✨";
-    case 7:
-      return "🧊";
-    case 8:
-      return "🛠️";
-    case 9:
-      return "⚙️";
-    case 10:
-      return "🕳️";
-    case 11:
-      return "☣️";
-    default:
-      return "❓";
-  }
+export function getMaterialIcon(
+  materialId: MaterialType,
+  size: number = 64, // Doubled from 64 to 128 (twice as big: 64 * 2 = 128)
+): React.ReactElement {
+  return <MaterialSprite materialId={materialId} size={size} />;
 }
 
 export function getMaterialScoreMultiplier(materialId: MaterialType): number {
@@ -462,6 +493,18 @@ export function PlanetMaterialsPane({
     [key: number]: number;
   }>({});
 
+  // Tab state management
+  const [activeTab, setActiveTab] = useState<"materials" | "crafting">(
+    "materials",
+  );
+
+  // Use foundry crafting hook for real-time data
+  const { craftingData, refetch } = useFoundryCrafting(planetId);
+
+  // Use real-time component data for consistent visibility logic
+  const { count: realTimeCraftingCount } = useFoundryCraftingCount(planetId);
+  const canCraftMoreRealTime = realTimeCraftingCount < 3;
+
   const handleWithdraw = (materialType: MaterialType, amount: number) => {
     if (amount > 0 && planet) {
       uiManager.withdrawMaterial(planet.locationId, materialType, amount);
@@ -535,7 +578,6 @@ export function PlanetMaterialsPane({
       }
     }
   };
-
   const getWithdrawAmount = (
     materialType: MaterialType,
     percentage: number,
@@ -573,168 +615,294 @@ export function PlanetMaterialsPane({
       (mat) => mat.materialId !== 0 && Number(mat.materialAmount) > 0,
     ) || [];
 
+  // Check if this is a foundry planet
+  const isFoundry = planet.planetType === 3; // FOUNDRY = 3
+
+  // Use crafting data from the hook
+  const currentMultiplier = craftingData.multiplier;
+
   return (
-    <PlanetMaterialsWrapper>
-      {activeMaterials.length === 0 ? (
-        <CenterBackgroundSubtext width="100%" height="100px">
-          No materials found on this planet
-        </CenterBackgroundSubtext>
-      ) : (
-        <MaterialsContainer>
-          {activeMaterials.map((mat) => {
-            const percentage =
-              Number(mat.cap) > 0
-                ? (Number(mat.materialAmount) / Number(mat.cap)) * 100
-                : 0;
-            const materialColor = getMaterialColor(mat.materialId);
-            const allocation = materialAllocations[mat.materialId] || 0;
-            const isBelowThreshold = isMaterialBelowThreshold(mat);
-            const scoreMultiplier = getMaterialScoreMultiplier(mat.materialId);
+    <>
+      <PlanetMaterialsWrapper>
+        {/* Tab selector */}
+        <TabContainer>
+          <TabButton
+            active={activeTab === "materials"}
+            onClick={() => setActiveTab("materials")}
+          >
+            Materials
+          </TabButton>
+          {isFoundry && (
+            <TabButton
+              active={activeTab === "crafting"}
+              onClick={() => setActiveTab("crafting")}
+            >
+              Spaceship Crafting
+            </TabButton>
+          )}
+        </TabContainer>
 
-            return (
-              <MaterialCard key={mat.materialId}>
-                <MaterialHeader>
-                  <TooltipTrigger name={getMaterialTooltipName(mat.materialId)}>
-                    <MaterialIcon color={materialColor}>
-                      {getMaterialIcon(mat.materialId)}
-                    </MaterialIcon>
-                  </TooltipTrigger>
-                  <MaterialName color={materialColor}>
-                    {getMaterialName(mat.materialId)}
-                  </MaterialName>
-                </MaterialHeader>
+        {/* Tab content */}
+        <TabContent>
+          {activeTab === "materials" && (
+            <>
+              {activeMaterials.length === 0 ? (
+                <CenterBackgroundSubtext width="100%" height="100px">
+                  No materials found on this planet
+                </CenterBackgroundSubtext>
+              ) : (
+                <MaterialsContainer>
+                  {activeMaterials.map((mat) => {
+                    const percentage =
+                      Number(mat.cap) > 0
+                        ? (Number(mat.materialAmount) / Number(mat.cap)) * 100
+                        : 0;
+                    const materialColor = getMaterialColor(mat.materialId);
+                    const allocation = materialAllocations[mat.materialId] || 0;
+                    const isBelowThreshold = isMaterialBelowThreshold(mat);
+                    const scoreMultiplier = getMaterialScoreMultiplier(
+                      mat.materialId,
+                    );
 
-                <MaterialStats>
-                  {mat.growth && (
-                    <div style={{ color: materialColor }}>
-                      Growth Rate: {formatNumber(Number(mat.growthRate), 2)}
-                    </div>
-                  )}
-                </MaterialStats>
+                    return (
+                      <MaterialCard key={mat.materialId}>
+                        <MaterialHeader>
+                          <TooltipTrigger
+                            name={getMaterialTooltipName(mat.materialId)}
+                          >
+                            <MaterialIcon color={materialColor}>
+                              {getMaterialIcon(mat.materialId)}
+                            </MaterialIcon>
+                          </TooltipTrigger>
+                          <MaterialName color={materialColor}>
+                            {getMaterialName(mat.materialId)}
+                          </MaterialName>
+                        </MaterialHeader>
 
-                {/* Score multiplier info */}
-                <MaterialScoreInfo>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      color: "white",
-                    }}
-                  >
-                    <span>Withdraw Score Multiplier: {scoreMultiplier}</span>
-                  </div>
-                </MaterialScoreInfo>
+                        <MaterialStats>
+                          {mat.growth && (
+                            <div style={{ color: materialColor }}>
+                              Growth Rate:{" "}
+                              {formatNumber(Number(mat.growthRate), 2)}{" "}
+                            </div>
+                          )}
+                          {/* Wormhole maintenance indicator for mycelium */}
+                          {mat.materialId === 5 &&
+                            planetHasActiveWormhole(planet, uiManager) && (
+                              <div
+                                style={{ color: "#ff6b6b", fontSize: "12px" }}
+                              >
+                                ⚠️ Wormhole Active: -10/tick
+                              </div>
+                            )}
+                        </MaterialStats>
 
-                {/* Material quantity vs cap progress bar - shows current status only */}
-                <MaterialBar
-                  percentage={percentage}
-                  materialID={mat.materialId}
-                >
-                  <MaterialBarText>
-                    {formatNumber(mat.materialAmount)} / {formatNumber(mat.cap)}
-                  </MaterialBarText>
-                </MaterialBar>
+                        {/* Score multiplier info */}
+                        <MaterialScoreInfo>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              color: "white",
+                            }}
+                          >
+                            <span>
+                              Withdraw Score Multiplier: {scoreMultiplier}
+                            </span>
+                          </div>
+                        </MaterialScoreInfo>
 
-                {/* Material withdrawal control panel - only shown at trading posts */}
-                {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
-                  <MaterialWithdrawBar>
-                    <WithdrawHeader>
-                      <WithdrawLabel>Withdraw Amount</WithdrawLabel>
-                      <WithdrawAmount>
-                        {getWithdrawAmount(mat.materialId, allocation)}
-                      </WithdrawAmount>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        <span
-                          style={{ fontSize: "11px", color: materialColor }}
+                        {/* Material quantity vs cap progress bar - shows current status only */}
+                        <MaterialBar
+                          percentage={percentage}
+                          materialID={mat.materialId}
                         >
-                          {allocation}%
-                        </span>
-                        <div style={{ display: "flex", gap: "4px" }}>
-                          <SliderButton
-                            onClick={() =>
-                              handleSliderDecrement(mat.materialId)
-                            }
-                            disabled={allocation <= 0}
-                          >
-                            -
-                          </SliderButton>
-                          <SliderButton
-                            onClick={() =>
-                              handleSliderIncrement(mat.materialId)
-                            }
-                            disabled={allocation >= 100}
-                          >
-                            +
-                          </SliderButton>
-                        </div>
-                      </div>
-                    </WithdrawHeader>
+                          <MaterialBarText>
+                            {formatNumber(mat.materialAmount)} /{" "}
+                            {formatNumber(mat.cap)}
+                          </MaterialBarText>
+                        </MaterialBar>
 
-                    <WithdrawSlider
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={allocation}
-                      onChange={(e) =>
-                        handleSliderChange(
-                          mat.materialId,
-                          parseInt(e.target.value),
-                        )
-                      }
-                    />
+                        {/* Material withdrawal control panel - only shown at trading posts */}
+                        {planet.planetType === 4 && ( // SPACETIME_RIP (TRADING_POST)
+                          <MaterialWithdrawBar>
+                            <WithdrawHeader>
+                              <WithdrawLabel>Withdraw Amount</WithdrawLabel>
+                              <WithdrawAmount>
+                                {getWithdrawAmount(mat.materialId, allocation)}
+                              </WithdrawAmount>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: "11px",
+                                    color: materialColor,
+                                  }}
+                                >
+                                  {allocation}%
+                                </span>
+                                <div style={{ display: "flex", gap: "4px" }}>
+                                  <SliderButton
+                                    onClick={() =>
+                                      handleSliderDecrement(mat.materialId)
+                                    }
+                                    disabled={allocation <= 0}
+                                  >
+                                    -
+                                  </SliderButton>
+                                  <SliderButton
+                                    onClick={() =>
+                                      handleSliderIncrement(mat.materialId)
+                                    }
+                                    disabled={allocation >= 100}
+                                  >
+                                    +
+                                  </SliderButton>
+                                </div>
+                              </div>
+                            </WithdrawHeader>
 
-                    {/* Warning message for materials below threshold */}
-                    {isBelowThreshold && (
-                      <WithdrawWarning>
-                        ⚠️ Cannot withdraw: Material amount is less than 1/5 of
-                        capacity
-                      </WithdrawWarning>
-                    )}
+                            <WithdrawSlider
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={allocation}
+                              onChange={(e) =>
+                                handleSliderChange(
+                                  mat.materialId,
+                                  parseInt(e.target.value),
+                                )
+                              }
+                            />
 
-                    <MaterialWithdrawContainer>
-                      <WithdrawInput>
-                        <NumberInput
-                          value={withdrawAmounts[mat.materialId] || 0}
-                          onChange={(e) => {
-                            if (e.target) {
-                              handleAmountChange(
-                                mat.materialId,
-                                (e.target as HTMLInputElement).value,
-                              );
-                            }
-                          }}
-                        />
-                      </WithdrawInput>
-                      <WithdrawButton
-                        onClick={() =>
-                          handleWithdraw(
-                            mat.materialId,
-                            withdrawAmounts[mat.materialId] || 0,
-                          )
-                        }
-                        disabled={
-                          !withdrawAmounts[mat.materialId] ||
-                          withdrawAmounts[mat.materialId] <= 0 ||
-                          isBelowThreshold
-                        }
-                      >
-                        Withdraw
-                      </WithdrawButton>
-                    </MaterialWithdrawContainer>
-                  </MaterialWithdrawBar>
-                )}
-              </MaterialCard>
-            );
-          })}
-        </MaterialsContainer>
-      )}
-    </PlanetMaterialsWrapper>
+                            {/* Warning message for materials below threshold */}
+                            {isBelowThreshold && (
+                              <WithdrawWarning>
+                                ⚠️ Cannot withdraw: Material amount is less than
+                                1/5 of capacity
+                              </WithdrawWarning>
+                            )}
+
+                            <MaterialWithdrawContainer>
+                              <WithdrawInput>
+                                <NumberInput
+                                  value={withdrawAmounts[mat.materialId] || 0}
+                                  onChange={(e) => {
+                                    if (e.target) {
+                                      handleAmountChange(
+                                        mat.materialId,
+                                        (e.target as HTMLInputElement).value,
+                                      );
+                                    }
+                                  }}
+                                />
+                              </WithdrawInput>
+                              <WithdrawButton
+                                onClick={() =>
+                                  handleWithdraw(
+                                    mat.materialId,
+                                    withdrawAmounts[mat.materialId] || 0,
+                                  )
+                                }
+                                disabled={
+                                  !withdrawAmounts[mat.materialId] ||
+                                  withdrawAmounts[mat.materialId] <= 0 ||
+                                  isBelowThreshold
+                                }
+                              >
+                                Withdraw
+                              </WithdrawButton>
+                            </MaterialWithdrawContainer>
+                          </MaterialWithdrawBar>
+                        )}
+                      </MaterialCard>
+                    );
+                  })}
+                </MaterialsContainer>
+              )}
+            </>
+          )}
+
+          {activeTab === "crafting" && isFoundry && (
+            <Section
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                display: "flex",
+                flex: 1,
+                height: "100%",
+                padding: "0px",
+              }}
+            >
+              {canCraftMoreRealTime && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <SpaceshipCraftingPane
+                    planet={planet}
+                    onClose={() => {}} // No close needed since it's embedded
+                    craftingMultiplier={currentMultiplier}
+                    onCraftComplete={() => {
+                      // Refetch crafting data after successful craft
+                      refetch();
+                    }}
+                  />
+                </div>
+              )}
+
+              {!canCraftMoreRealTime && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                  }}
+                >
+                  <DepletedMessage>Crafting depleted</DepletedMessage>
+                </div>
+              )}
+            </Section>
+          )}
+        </TabContent>
+      </PlanetMaterialsWrapper>
+    </>
   );
+}
+
+/**
+ * Check if a planet has an active wormhole
+ * @param planet The planet to check
+ * @param uiManager The UI manager to get artifact data
+ * @returns True if planet has an active wormhole
+ */
+function planetHasActiveWormhole(
+  planet: Planet,
+  uiManager: GameUIManager,
+): boolean {
+  // Check if planet has any artifacts
+  if (!planet.heldArtifactIds || planet.heldArtifactIds.length === 0) {
+    return false;
+  }
+
+  // Look for active wormhole artifacts using UI manager
+  return planet.heldArtifactIds.some((artifactId) => {
+    const artifact = uiManager.getArtifactWithId(artifactId);
+    return (
+      artifact?.artifactType === ArtifactType.Wormhole &&
+      artifact?.status === ArtifactStatus.Active
+    );
+  });
 }

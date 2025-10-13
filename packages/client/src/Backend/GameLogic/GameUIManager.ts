@@ -1,7 +1,12 @@
 import { EMPTY_ADDRESS } from "@df/constants";
 import type { Monomitter } from "@df/events";
 import { monomitter } from "@df/events";
-import { biomeName, isLocatable, isSpaceShip } from "@df/gamelogic";
+import {
+  biomeName,
+  isArtifactSpaceShip,
+  isLocatable,
+  isSpaceShip,
+} from "@df/gamelogic";
 import { isBroken } from "@df/gamelogic";
 import { planetHasBonus } from "@df/hexgen";
 import type { EthConnection } from "@df/network";
@@ -31,6 +36,7 @@ import type {
   UnconfirmedActivateArtifact,
   UnconfirmedMove,
   UnconfirmedRefreshPlanet,
+  UnconfirmedRevertMove,
   UnconfirmedSpendGPTTokens,
   UnconfirmedUpgrade,
   Upgrade,
@@ -74,6 +80,7 @@ import {
 } from "../../Frontend/Utils/SettingsHooks";
 import UIEmitter, { UIEmitterEvent } from "../../Frontend/Utils/UIEmitter";
 import type { TerminalHandle } from "../../Frontend/Views/Terminal";
+import { getSpaceshipBonuses } from "../../Utils/SpaceshipBonusUtils";
 import type { MiningPattern } from "../Miner/MiningPatterns";
 import { coordsEqual } from "../Utils/Coordinates";
 import type { GameManager } from "./GameManager";
@@ -110,6 +117,8 @@ export class GameUIManager extends EventEmitter {
   private mouseHoveringOverPlanet: LocatablePlanet | undefined;
   private mouseHoveringOverCoords: WorldCoords | undefined;
   private mouseHoveringOverArtifactId: ArtifactId | undefined;
+  private mouseHoveringOverVoyage: QueuedArrival | undefined;
+  private selectedVoyage: QueuedArrival | undefined;
   private sendingPlanet: LocatablePlanet | undefined;
   private sendingCoords: WorldCoords | undefined;
   private isSending = false;
@@ -144,12 +153,18 @@ export class GameUIManager extends EventEmitter {
   public readonly hoverPlanet$: Monomitter<Planet | undefined>;
   public readonly hoverArtifactId$: Monomitter<ArtifactId | undefined>;
   public readonly hoverArtifact$: Monomitter<Artifact | undefined>;
+  public readonly hoverVoyage$: Monomitter<QueuedArrival | undefined>;
+  public readonly selectedVoyage$: Monomitter<QueuedArrival | undefined>;
   public readonly myArtifacts$: Monomitter<Map<ArtifactId, Artifact>>;
 
   public readonly isSending$: Monomitter<boolean>;
   public readonly isAbandoning$: Monomitter<boolean>;
+  public readonly artifactSending$: Monomitter<
+    { planetId: LocationId; artifact: Artifact | undefined } | undefined
+  >;
 
   private planetHoveringInRenderer = false;
+  private mudComponents: any = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   // lifecycle methods
 
@@ -197,11 +212,16 @@ export class GameUIManager extends EventEmitter {
       this.hoverArtifactId$,
       this.gameManager.getArtifactUpdated$(),
     );
+    this.hoverVoyage$ = monomitter<QueuedArrival | undefined>();
+    this.selectedVoyage$ = monomitter<QueuedArrival | undefined>();
     this.myArtifacts$ = this.gameManager.getMyArtifactsUpdated$();
     this.viewportEntities = new ViewportEntities(this.gameManager, this);
 
     this.isSending$ = monomitter(true);
     this.isAbandoning$ = monomitter(true);
+    this.artifactSending$ = monomitter<
+      { planetId: LocationId; artifact: Artifact | undefined } | undefined
+    >();
 
     settingChanged$.subscribe((setting) => {
       // If user selects to always use the default energy level, we need to clear existing energy send level values set.
@@ -559,6 +579,32 @@ export class GameUIManager extends EventEmitter {
     this.gameManager.withdrawMaterial(locationId, materialType, amount);
   }
 
+  public revertMove(
+    moveId: string,
+    toPlanetHash: LocationId,
+    moveIndex: number,
+  ): Promise<Transaction<UnconfirmedRevertMove>> {
+    this.playClickSound();
+    return this.gameManager.revertMove(moveId, toPlanetHash, moveIndex);
+  }
+
+  public craftSpaceship(
+    foundryHash: LocationId,
+    spaceshipType: number,
+    materials: MaterialType[],
+    amounts: number[],
+    biome: Biome,
+  ) {
+    this.playClickSound();
+    this.gameManager.craftSpaceship(
+      foundryHash,
+      spaceshipType,
+      materials,
+      amounts,
+      biome,
+    );
+  }
+
   public addJunk(locationId: LocationId, biomeBase?: number) {
     this.playClickSound();
     console.log("addJunk", locationId, biomeBase);
@@ -710,13 +756,48 @@ export class GameUIManager extends EventEmitter {
     to: LocationId | undefined,
     dist: number | undefined,
     energy: number,
+    mudComponents?: unknown,
   ) {
+    const artifactSending = this.getArtifactSending(from);
+    let spaceshipBonuses;
+
+    // Use provided MUD components or fall back to stored ones
+    const componentsToUse = mudComponents || this.mudComponents;
+
+    if (artifactSending && componentsToUse) {
+      spaceshipBonuses = getSpaceshipBonuses(artifactSending, componentsToUse);
+    }
+
     return this.gameManager.getEnergyArrivingForMove(
       from,
       to,
       dist,
       energy,
       this.abandoning,
+      spaceshipBonuses,
+    );
+  }
+
+  public getTimeForMove(
+    fromId: LocationId,
+    toId: LocationId,
+    abandoning = false,
+  ): number {
+    const artifactSending = this.getArtifactSending(fromId);
+    let spaceshipBonuses;
+
+    if (artifactSending && this.mudComponents) {
+      spaceshipBonuses = getSpaceshipBonuses(
+        artifactSending,
+        this.mudComponents,
+      );
+    }
+
+    return this.gameManager.getTimeForMove(
+      fromId,
+      toId,
+      abandoning,
+      spaceshipBonuses,
     );
   }
 
@@ -771,15 +852,37 @@ export class GameUIManager extends EventEmitter {
     }
   }
 
-  public onMouseClick(_coords: WorldCoords) {
+  public onMouseClick(coords: WorldCoords) {
+    // Check for voyage line clicks
+    const clickedVoyage = this.getVoyageAtCoords(coords);
+    if (clickedVoyage) {
+      // If clicking on the same voyage, deselect it
+      if (
+        this.selectedVoyage &&
+        this.selectedVoyage.eventId === clickedVoyage.eventId
+      ) {
+        this.setSelectedVoyage(undefined);
+      } else {
+        // Select the clicked voyage
+        this.setSelectedVoyage(clickedVoyage);
+      }
+      return;
+    }
+
+    // If clicking on empty space, deselect voyage
     if (!this.mouseDownOverPlanet && !this.mouseHoveringOverPlanet) {
       this.setSelectedPlanet(undefined);
       this.selectedCoords = undefined;
+      this.setSelectedVoyage(undefined);
     }
   }
 
   public onMouseMove(coords: WorldCoords) {
     this.updateMouseHoveringOverCoords(coords);
+
+    // Check for voyage line hover
+    const hoveredVoyage = this.getVoyageAtCoords(coords);
+    this.setHoveringOverVoyage(hoveredVoyage);
   }
 
   public onMouseUp(coords: WorldCoords) {
@@ -840,12 +943,18 @@ export class GameUIManager extends EventEmitter {
 
         const dist = this.gameManager.getDist(from.locationId, to.locationId);
 
+        // Get spaceship bonuses for the move
+        const spaceshipBonuses = this.getSpaceshipBonusesForMove(
+          from.locationId,
+        );
+
         const myAtk: number = this.gameManager.getEnergyArrivingForMove(
           from.locationId,
           to.locationId,
           dist,
           forces,
           this.abandoning,
+          spaceshipBonuses,
         );
 
         let effPercentSilver = this.getSilverSending(from.locationId);
@@ -1010,6 +1119,7 @@ export class GameUIManager extends EventEmitter {
       this.abandoning = false;
       this.isAbandoning$.publish(false);
     }
+    this.artifactSending$.publish({ planetId, artifact });
     this.gameManager.getGameObjects().forceTick(planetId);
   }
 
@@ -1402,8 +1512,30 @@ export class GameUIManager extends EventEmitter {
     );
   }
 
+  public setHoveringOverVoyage(voyage?: QueuedArrival) {
+    this.mouseHoveringOverVoyage = voyage;
+    this.hoverVoyage$.publish(voyage);
+  }
+
+  public setSelectedVoyage(voyage?: QueuedArrival) {
+    this.selectedVoyage = voyage;
+    this.selectedVoyage$.publish(voyage);
+  }
+
   public getHoveringOverPlanet(): Planet | undefined {
     return this.mouseHoveringOverPlanet;
+  }
+
+  public getHoveringVoyage(): QueuedArrival | undefined {
+    return this.mouseHoveringOverVoyage;
+  }
+
+  public getSelectedVoyage(): QueuedArrival | undefined {
+    return this.selectedVoyage;
+  }
+
+  public getHoveringOverVoyage(): QueuedArrival | undefined {
+    return this.hoveringOverVoyage;
   }
 
   public getHoveringOverCoords(): WorldCoords | undefined {
@@ -1540,7 +1672,182 @@ export class GameUIManager extends EventEmitter {
     if (!planetId) {
       return false;
     }
+    // KEEP THIS its for artifact types 17 - 22 not for artifact type 3 artifact.spaceship
     return isSpaceShip(this.artifactSending[planetId]?.artifactType);
+  }
+  m;
+
+  public setMUDComponents(components: unknown): void {
+    this.mudComponents = components;
+  }
+
+  public getSpaceshipRangeBoost(planetId: LocationId): number {
+    const artifact = this.artifactSending[planetId];
+    if (!artifact || !isArtifactSpaceShip(artifact.artifactType)) {
+      return 1;
+    } else {
+      // First check if there's an artifact being sent from this planet
+      const sendingArtifact = this.artifactSending[planetId];
+      if (
+        sendingArtifact &&
+        isArtifactSpaceShip(sendingArtifact.artifactType)
+      ) {
+        // Get spaceship bonuses from MUD components for sending artifact
+        if (this.mudComponents) {
+          const spaceshipBonuses = getSpaceshipBonuses(
+            sendingArtifact,
+            this.mudComponents,
+          );
+          if (spaceshipBonuses && spaceshipBonuses.rangeBonus > 0) {
+            return (100 + spaceshipBonuses.rangeBonus) / 100; // Convert percentage to multiplier
+          }
+        }
+      }
+
+      // If no sending artifact, check for spaceships on the planet
+      const planet = this.getPlanetWithId(planetId);
+      if (
+        planet &&
+        planet.heldArtifactIds &&
+        planet.heldArtifactIds.length > 0
+      ) {
+        const artifacts = this.getArtifactsWithIds(planet.heldArtifactIds);
+        for (const artifact of artifacts) {
+          if (artifact && isArtifactSpaceShip(artifact.artifactType)) {
+            // Get spaceship bonuses from MUD components
+            if (this.mudComponents) {
+              const spaceshipBonuses = getSpaceshipBonuses(
+                artifact,
+                this.mudComponents,
+              );
+              if (spaceshipBonuses && spaceshipBonuses.rangeBonus > 0) {
+                return (100 + spaceshipBonuses.rangeBonus) / 100; // Convert percentage to multiplier
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return 1; // No bonus
+  }
+
+  public getVoyageAtCoords(coords: WorldCoords): QueuedArrival | undefined {
+    const voyages = this.getAllVoyages();
+    const currentTick = this.getCurrentTick();
+
+    for (const voyage of voyages) {
+      if (currentTick < voyage.arrivalTick) {
+        const fromLoc = this.getLocationOfPlanet(voyage.fromPlanet);
+        const toLoc = this.getLocationOfPlanet(voyage.toPlanet);
+
+        if (!fromLoc || !toLoc) continue;
+
+        // Check if click is near the voyage line
+        if (this.isPointNearLine(coords, fromLoc.coords, toLoc.coords, 20)) {
+          return voyage;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  private isPointNearLine(
+    point: WorldCoords,
+    lineStart: WorldCoords,
+    lineEnd: WorldCoords,
+    threshold: number,
+  ): boolean {
+    const A = point.x - lineStart.x;
+    const B = point.y - lineStart.y;
+    const C = lineEnd.x - lineStart.x;
+    const D = lineEnd.y - lineStart.y;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+
+    if (lenSq === 0) {
+      // Line is actually a point
+      const dist = Math.sqrt(A * A + B * B);
+      return dist <= threshold;
+    }
+
+    const param = dot / lenSq;
+    let xx, yy;
+
+    if (param < 0) {
+      xx = lineStart.x;
+      yy = lineStart.y;
+    } else if (param > 1) {
+      xx = lineEnd.x;
+      yy = lineEnd.y;
+    } else {
+      xx = lineStart.x + param * C;
+      yy = lineStart.y + param * D;
+    }
+
+    const dx = point.x - xx;
+    const dy = point.y - yy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance <= threshold;
+  }
+
+  public getSpaceshipBonusesForMove(planetId: LocationId):
+    | {
+        attackBonus: number;
+        defenseBonus: number;
+        speedBonus: number;
+        rangeBonus: number;
+      }
+    | undefined {
+    // First check if there's an artifact being sent from this planet
+    const sendingArtifact = this.artifactSending[planetId];
+    if (sendingArtifact && isArtifactSpaceShip(sendingArtifact.artifactType)) {
+      // Get spaceship bonuses from MUD components for sending artifact
+      if (this.mudComponents) {
+        const spaceshipBonuses = getSpaceshipBonuses(
+          sendingArtifact,
+          this.mudComponents,
+        );
+        if (spaceshipBonuses) {
+          return {
+            attackBonus: spaceshipBonuses.attackBonus || 0,
+            defenseBonus: spaceshipBonuses.defenseBonus || 0,
+            speedBonus: spaceshipBonuses.speedBonus || 0,
+            rangeBonus: spaceshipBonuses.rangeBonus || 0,
+          };
+        }
+      }
+    }
+
+    // If no sending artifact, check for spaceships on the planet
+    const planet = this.getPlanetWithId(planetId);
+    if (planet && planet.heldArtifactIds && planet.heldArtifactIds.length > 0) {
+      const artifacts = this.getArtifactsWithIds(planet.heldArtifactIds);
+      for (const artifact of artifacts) {
+        if (artifact && isArtifactSpaceShip(artifact.artifactType)) {
+          // Get spaceship bonuses from MUD components
+          if (this.mudComponents) {
+            const spaceshipBonuses = getSpaceshipBonuses(
+              artifact,
+              this.mudComponents,
+            );
+            if (spaceshipBonuses) {
+              return {
+                attackBonus: spaceshipBonuses.attackBonus || 0,
+                defenseBonus: spaceshipBonuses.defenseBonus || 0,
+                speedBonus: spaceshipBonuses.speedBonus || 0,
+                rangeBonus: spaceshipBonuses.rangeBonus || 0,
+              };
+            }
+          }
+        }
+      }
+    }
+
+    return undefined; // No spaceship bonuses
   }
 
   public isOverOwnPlanet(coords: WorldCoords): Planet | undefined {

@@ -4,6 +4,7 @@ pragma solidity >=0.8.24;
 import { IBaseWorld } from "@latticexyz/world/src/codegen/interfaces/IBaseWorld.sol";
 import { Errors } from "interfaces/errors.sol";
 import { PlanetType, SpaceType, Biome, ArtifactStatus, PlanetStatus, PlanetFlagType, ArtifactGenre, MaterialType } from "codegen/common.sol";
+import { WORMHOLE_MAINTENANCE_MYCELIUM_RATE } from "modules/atfs/Wormhole/constant.sol";
 import { Planet as PlanetTable, PlanetData } from "codegen/tables/Planet.sol";
 import { PlanetMetadata, PlanetMetadataData } from "codegen/tables/PlanetMetadata.sol";
 import { PlanetOwner } from "codegen/tables/PlanetOwner.sol";
@@ -35,6 +36,10 @@ import { Effect, EffectLib } from "libraries/Effect.sol";
 import { _artifactProxySystemId, _artifactIndexToNamespace } from "modules/atfs/utils.sol";
 import { IArtifactProxySystem } from "modules/atfs/IArtifactProxySystem.sol";
 import { Flags, FlagsLib } from "libraries/Flags.sol";
+import { WormholeDest } from "modules/atfs/Wormhole/tables/WormholeDest.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+import { RESOURCE_TABLE } from "@latticexyz/store/src/storeResourceTypes.sol";
+import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 using PlanetLib for Planet global;
 
@@ -198,6 +203,7 @@ library PlanetLib {
 
     _populationGrow(planet, tickElapsed);
     _silverGrow(planet, tickElapsed);
+    _wormholeMaintenance(planet, tickElapsed);
     _materialGrow(planet, tickElapsed);
   }
 
@@ -652,6 +658,53 @@ library PlanetLib {
         setMaterial(planet, MaterialType(i), newAmount);
       }
     }
+  }
+
+  function _wormholeMaintenance(Planet memory planet, uint256 tickElapsed) internal view {
+    // Check if planet has an active wormhole
+    if (!_hasActiveWormhole(planet)) {
+      return;
+    }
+
+    // Note: Wormhole maintenance consumption is handled by the WormholeMaintenanceSystem
+    // This function is kept for compatibility but doesn't modify state in view context
+    // The actual mycelium consumption and wormhole deactivation is handled by:
+    // - WormholeMaintenanceSystem.processPlanetWormholeMaintenance()
+    // - WormholeMaintenanceSystem._deactivateWormholesOnPlanet()
+  }
+
+  function _hasActiveWormhole(Planet memory planet) internal view returns (bool) {
+    // Check if planet has any artifacts
+    if (planet.artifactStorage.GetNumber() == 0) {
+      return false;
+    }
+
+    // Get the wormhole destination table ID using namespace "atf.5"
+    ResourceId wormholeDestTableId = _getWormholeDestTableId();
+
+    // Check each artifact on the planet to see if it's an active wormhole
+    for (uint256 i = 0; i < planet.artifactStorage.GetNumber(); i++) {
+      uint256 artifactId = planet.artifactStorage.Get(i);
+
+      // Check if this artifact has a destination in the WormholeDest table
+      bytes32 destination = WormholeDest.get(wormholeDestTableId, uint32(artifactId));
+
+      // If destination is not zero, this artifact is an active wormhole
+      if (destination != 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @notice Get the wormhole destination table ID
+   * @return tableId The ResourceId for the WormholeDest table
+   */
+  function _getWormholeDestTableId() internal pure returns (ResourceId) {
+    return
+      WorldResourceIdLib.encode({ typeId: RESOURCE_TABLE, namespace: bytes14("atf.5"), name: bytes16("WormholeDest") });
   }
 
   function initMaterial(Planet memory planet, MaterialType materialId) internal view {

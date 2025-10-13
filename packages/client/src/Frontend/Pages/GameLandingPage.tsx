@@ -1189,6 +1189,9 @@ export function GameLandingPage() {
         terminal,
       );
 
+      // Set MUD components in GameUIManager so it can access spaceship bonuses
+      newGameUIManager.setMUDComponents(components);
+
       window.ui = newGameUIManager;
 
       terminal.current?.newline();

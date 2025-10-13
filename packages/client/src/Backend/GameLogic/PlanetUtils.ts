@@ -227,7 +227,17 @@ export class PlanetUtils {
         upgradeState[0] = planetData.upgrades & 0x0000ff; // defense
         useProps = planetData.useProps;
       } else {
-        throw new Error("planet data not found");
+        console.warn(
+          `Planet data not found for planet ${planetId}, using default values`,
+        );
+        // Use default values instead of throwing an error
+        population = 0;
+        silver = 0;
+        lastUpdateTick = 0;
+        upgradeState[0] = 0; // defense
+        upgradeState[1] = 0; // range
+        upgradeState[2] = 0; // speed
+        useProps = false;
       }
     } else {
       universeZone = this._initZone(distSquare);

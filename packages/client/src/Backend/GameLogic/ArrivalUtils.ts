@@ -12,6 +12,7 @@ import type {
 } from "@df/types";
 import { getMaxMaterialType, PlanetType } from "@df/types";
 
+import { ArtifactStatus, ArtifactType } from "@df/types";
 import type { ContractConstants } from "../../_types/darkforest/api/ContractsAPITypes";
 import type { GuildUtils } from "./GuildUtils";
 // TODO: planet class, cmon, let's go
@@ -84,6 +85,7 @@ const getMaterialsOverTick = (
   planet: Planet,
   startTick: number,
   endTick: number,
+  planetArtifacts: Artifact[] = [],
 ): Materials[] => {
   if (!hasOwner(planet)) {
     return planet.materials;
@@ -94,7 +96,14 @@ const getMaterialsOverTick = (
   }
 
   // Create a copy of materials to avoid mutating the original
-  const updatedMaterials = [...planet.materials];
+  let updatedMaterials = [...planet.materials];
+
+  // Check if planet has an active wormhole and apply maintenance consumption
+  const hasActiveWormhole = planetHasActiveWormhole(planet, planetArtifacts);
+  if (hasActiveWormhole) {
+    // Apply wormhole maintenance consumption to mycelium
+    updatedMaterials = applyWormholeMaintenance(updatedMaterials, tickElapsed);
+  }
 
   // Update materials growth, starting from index 1 (skipping index 0 which is UNKNOWN)
   for (let i = 1; i <= getMaxMaterialType(); i++) {
@@ -152,7 +161,7 @@ const getEnergyAtTick = (planet: Planet, atTick: number): number => {
 
 export const updatePlanetToTick = (
   planet: Planet,
-  _planetArtifacts: Artifact[],
+  planetArtifacts: Artifact[],
   atTick: number,
   _contractConstants: ContractConstants,
   setPlanet: (p: Planet) => void = () => {},
@@ -170,7 +179,12 @@ export const updatePlanetToTick = (
 
   planet.energy = getEnergyAtTick(planet, atTick);
 
-  planet.materials = getMaterialsOverTick(planet, planet.lastUpdated, atTick);
+  planet.materials = getMaterialsOverTick(
+    planet,
+    planet.lastUpdated,
+    atTick,
+    planetArtifacts,
+  );
 
   // }
   planet.lastUpdated = atTick;
@@ -355,6 +369,64 @@ export const arrive = (
  * @todo ArrivalUtils has become a dumping ground for functions that should just live inside of a
  * `Planet` class.
  */
+
+/**
+ * Check if a planet has an active wormhole
+ * @param planet The planet to check
+ * @param planetArtifacts The artifacts on the planet
+ * @returns True if planet has an active wormhole
+ */
+function planetHasActiveWormhole(
+  planet: Planet,
+  planetArtifacts: Artifact[],
+): boolean {
+  // Check if planet has any artifacts
+  if (!planet.heldArtifactIds || planet.heldArtifactIds.length === 0) {
+    return false;
+  }
+
+  // Look for active wormhole artifacts
+  return planetArtifacts.some((artifact) => {
+    return (
+      artifact.artifactType === ArtifactType.Wormhole &&
+      artifact.status === ArtifactStatus.Active
+    );
+  });
+}
+
+/**
+ * Apply wormhole maintenance consumption to mycelium
+ * @param materials The materials array to update
+ * @param tickElapsed The number of ticks elapsed
+ */
+function applyWormholeMaintenance(
+  materials: Materials[],
+  tickElapsed: number,
+): Materials[] {
+  const WORMHOLE_MAINTENANCE_MYCELIUM_RATE = 10; // 10 mycelium per tick (matching contract)
+  const MYCELIUM_MATERIAL_ID = 5; // MaterialType.MYCELIUM
+
+  // Find mycelium material
+  const myceliumIndex = materials.findIndex(
+    (mat) => mat.materialId === MYCELIUM_MATERIAL_ID,
+  );
+
+  if (myceliumIndex !== -1 && materials[myceliumIndex]) {
+    const mycelium = materials[myceliumIndex];
+    const currentAmount = mycelium.materialAmount || 0;
+    const maintenanceCost = tickElapsed * WORMHOLE_MAINTENANCE_MYCELIUM_RATE;
+
+    // Consume mycelium for wormhole maintenance
+    const newAmount = Math.max(0, currentAmount - maintenanceCost);
+
+    materials[myceliumIndex] = {
+      ...mycelium,
+      materialAmount: newAmount,
+    };
+  }
+
+  return materials;
+}
 
 export function getEmojiMessage(
   planet: Planet | undefined,

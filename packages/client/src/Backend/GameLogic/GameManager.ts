@@ -59,6 +59,7 @@ import {
   isUnconfirmedWithdrawArtifactTx,
   isUnconfirmedWithdrawMaterialTx,
   isUnconfirmedWithdrawSilverTx,
+  isUnconfirmedCraftSpaceshipTx,
   locationIdFromBigInt,
   locationIdFromHexStr,
   locationIdToDecStr,
@@ -150,6 +151,8 @@ import type {
   UnconfirmedWithdrawArtifact,
   UnconfirmedWithdrawMaterial,
   UnconfirmedWithdrawSilver,
+  UnconfirmedCraftSpaceship,
+  UnconfirmedRevertMove,
   Upgrade,
   VoyageId,
   WorldCoords,
@@ -1032,114 +1035,123 @@ export class GameManager extends EventEmitter {
   }
 
   public hardRefreshPlanet(planetId: LocationId): void {
-    let planet = this.contractsAPI.getPlanetById(planetId);
+    try {
+      let planet = this.contractsAPI.getPlanetById(planetId);
 
-    if (!planet) {
-      // in some cases, the planet is not entirely initialized in the contract, but only some crucial table fields are set
-      // in this case, we still need to generate the planet from contract side and update it into the entity store
-      const location = this.entityStore.getLocationOfPlanet(planetId);
-      if (location) {
-        planet = this.contractsAPI.getDefaultPlanetByLocation(location);
-      } else {
-        return;
+      if (!planet) {
+        // in some cases, the planet is not entirely initialized in the contract, but only some crucial table fields are set
+        // in this case, we still need to generate the planet from contract side and update it into the entity store
+        const location = this.entityStore.getLocationOfPlanet(planetId);
+        if (location) {
+          planet = this.contractsAPI.getDefaultPlanetByLocation(location);
+        } else {
+          console.warn(
+            `Planet ${planetId} not found in contract and no location available for fallback`,
+          );
+          return;
+        }
       }
+
+      const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
+
+      // const artifactsOnPlanets =
+      //   await this.contractsAPI.bulkGetArtifactsOnPlanets([planetId]);
+      // const artifactsOnPlanet = artifactsOnPlanets[0];
+
+      const revealedCoords =
+        this.contractsAPI.getRevealedCoordsByIdIfExists(planetId);
+
+      // const claimedCoords =
+      //   await this.contractsAPI.getClaimedCoordsByIdIfExists(planetId);
+      // const burnedCoords =
+      //   await this.contractsAPI.getBurnedCoordsByIdIfExists(planetId);
+      // const kardashevCoords =
+      //   await this.contractsAPI.getKardashevCoordsByIdIfExists(planetId);
+
+      let revealedLocation: RevealedLocation | undefined;
+      // let claimedLocation: ClaimedLocation | undefined;
+      // let burnedLocation: BurnedLocation | undefined;
+      // let kardashevLocation: KardashevLocation | undefined;
+
+      if (revealedCoords) {
+        revealedLocation = {
+          ...this.locationFromCoords(revealedCoords),
+          revealer: revealedCoords.revealer,
+        };
+      }
+
+      // if (claimedCoords) {
+      //   claimedLocation = {
+      //     ...this.locationFromCoords(claimedCoords),
+      //     claimer: claimedCoords.claimer,
+      //   };
+      //   this.getGameObjects().setClaimedLocation(claimedLocation);
+
+      //   //to show planet in map
+      //   revealedLocation = {
+      //     ...this.locationFromCoords(claimedCoords),
+      //     revealer: claimedCoords.claimer,
+      //   };
+      // } else if (revealedCoords) {
+      //   revealedLocation = {
+      //     ...this.locationFromCoords(revealedCoords),
+      //     revealer: revealedCoords.revealer,
+      //   };
+      // } else if (burnedCoords) {
+      //   burnedLocation = {
+      //     ...this.locationFromCoords(burnedCoords),
+      //     operator: burnedCoords.operator,
+      //     radius:
+      //       this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
+      //         planet.planetLevel
+      //       ],
+      //   };
+
+      //   //to show planet in map
+      //   revealedLocation = {
+      //     ...this.locationFromCoords(burnedCoords),
+      //     revealer: burnedCoords.operator,
+      //   };
+      //   this.getGameObjects().setBurnedLocation(burnedLocation);
+      // } else if (kardashevCoords) {
+      //   kardashevLocation = {
+      //     ...this.locationFromCoords(kardashevCoords),
+      //     operator: kardashevCoords.operator,
+      //     radius:
+      //       this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
+      //         planet.planetLevel
+      //       ],
+      //   };
+
+      //   //to show planet in map
+      //   revealedLocation = {
+      //     ...this.locationFromCoords(kardashevCoords),
+      //     revealer: kardashevCoords.operator,
+      //   };
+      //   this.getGameObjects().setKardashevLocation(kardashevLocation);
+      // }
+
+      this.entityStore.replacePlanetFromContractData(
+        planet,
+        arrivals,
+        planet.heldArtifactIds, // artifactsOnPlanet.map((a) => a.id),
+        revealedLocation,
+        // claimedCoords?.claimer,
+        // burnedCoords?.operator,
+        // kardashevCoords?.operator,
+      );
+
+      // it's important that we reload the artifacts that are on the planet after the move
+      // completes because this move could have been a photoid canon move. one of the side
+      // effects of this type of move is that the active photoid canon deactivates upon a move
+      // meaning we need to reload its data from the blockchain.
+
+      planet.heldArtifactIds.forEach((a) => this.hardRefreshArtifact(a));
+    } catch (error) {
+      console.warn(`Failed to refresh planet ${planetId}:`, error);
+      // Don't throw the error, just log it and continue
+      // This prevents the "planet data not found" error from crashing the game
     }
-
-    const arrivals = this.contractsAPI.getArrivalsForPlanet(planetId);
-
-    // const artifactsOnPlanets =
-    //   await this.contractsAPI.bulkGetArtifactsOnPlanets([planetId]);
-    // const artifactsOnPlanet = artifactsOnPlanets[0];
-
-    const revealedCoords =
-      this.contractsAPI.getRevealedCoordsByIdIfExists(planetId);
-
-    // const claimedCoords =
-    //   await this.contractsAPI.getClaimedCoordsByIdIfExists(planetId);
-    // const burnedCoords =
-    //   await this.contractsAPI.getBurnedCoordsByIdIfExists(planetId);
-    // const kardashevCoords =
-    //   await this.contractsAPI.getKardashevCoordsByIdIfExists(planetId);
-
-    let revealedLocation: RevealedLocation | undefined;
-    // let claimedLocation: ClaimedLocation | undefined;
-    // let burnedLocation: BurnedLocation | undefined;
-    // let kardashevLocation: KardashevLocation | undefined;
-
-    if (revealedCoords) {
-      revealedLocation = {
-        ...this.locationFromCoords(revealedCoords),
-        revealer: revealedCoords.revealer,
-      };
-    }
-
-    // if (claimedCoords) {
-    //   claimedLocation = {
-    //     ...this.locationFromCoords(claimedCoords),
-    //     claimer: claimedCoords.claimer,
-    //   };
-    //   this.getGameObjects().setClaimedLocation(claimedLocation);
-
-    //   //to show planet in map
-    //   revealedLocation = {
-    //     ...this.locationFromCoords(claimedCoords),
-    //     revealer: claimedCoords.claimer,
-    //   };
-    // } else if (revealedCoords) {
-    //   revealedLocation = {
-    //     ...this.locationFromCoords(revealedCoords),
-    //     revealer: revealedCoords.revealer,
-    //   };
-    // } else if (burnedCoords) {
-    //   burnedLocation = {
-    //     ...this.locationFromCoords(burnedCoords),
-    //     operator: burnedCoords.operator,
-    //     radius:
-    //       this.getContractConstants().BURN_PLANET_LEVEL_EFFECT_RADIUS[
-    //         planet.planetLevel
-    //       ],
-    //   };
-
-    //   //to show planet in map
-    //   revealedLocation = {
-    //     ...this.locationFromCoords(burnedCoords),
-    //     revealer: burnedCoords.operator,
-    //   };
-    //   this.getGameObjects().setBurnedLocation(burnedLocation);
-    // } else if (kardashevCoords) {
-    //   kardashevLocation = {
-    //     ...this.locationFromCoords(kardashevCoords),
-    //     operator: kardashevCoords.operator,
-    //     radius:
-    //       this.getContractConstants().KARDASHEV_EFFECT_RADIUS[
-    //         planet.planetLevel
-    //       ],
-    //   };
-
-    //   //to show planet in map
-    //   revealedLocation = {
-    //     ...this.locationFromCoords(kardashevCoords),
-    //     revealer: kardashevCoords.operator,
-    //   };
-    //   this.getGameObjects().setKardashevLocation(kardashevLocation);
-    // }
-
-    this.entityStore.replacePlanetFromContractData(
-      planet,
-      arrivals,
-      planet.heldArtifactIds, // artifactsOnPlanet.map((a) => a.id),
-      revealedLocation,
-      // claimedCoords?.claimer,
-      // burnedCoords?.operator,
-      // kardashevCoords?.operator,
-    );
-
-    // it's important that we reload the artifacts that are on the planet after the move
-    // completes because this move could have been a photoid canon move. one of the side
-    // effects of this type of move is that the active photoid canon deactivates upon a move
-    // meaning we need to reload its data from the blockchain.
-
-    planet.heldArtifactIds.forEach((a) => this.hardRefreshArtifact(a));
   }
 
   public bulkHardRefreshPlanets(planetIds: LocationId[]): void {
@@ -5069,6 +5081,130 @@ export class GameManager extends EventEmitter {
     }
   }
 
+  public async revertMove(
+    moveId: string,
+    toPlanetHash: LocationId,
+    moveIndex: number,
+  ): Promise<Transaction<UnconfirmedRevertMove>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      const delegator = this.account;
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedRevertMove = {
+        delegator: delegator,
+        methodName: "df__revertMove",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          moveId, // Keep as string for JSON serialization
+          locationIdToHexStr(toPlanetHash),
+          moveIndex,
+        ]),
+        moveId: moveId,
+        toPlanetHash,
+        moveIndex,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__revertMove",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  public async craftSpaceship(
+    foundryHash: LocationId,
+    spaceshipType: number,
+    materials: MaterialType[],
+    amounts: number[],
+    biome: Biome,
+  ): Promise<Transaction<UnconfirmedCraftSpaceship>> {
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+
+      const foundry = this.entityStore.getPlanetWithId(foundryHash);
+      if (!foundry) {
+        throw new Error("tried to craft spaceship from an unknown foundry");
+      }
+      if (foundry.planetType !== PlanetType.RUINS) {
+        throw new Error("can only craft spaceships at foundries");
+      }
+      if (!this.checkDelegateCondition(foundry.owner, this.getAccount())) {
+        throw new Error("can only craft spaceships at foundries you own");
+      }
+      if (foundry.planetLevel < 4) {
+        throw new Error(
+          "foundry must be level 4 or higher to craft spaceships",
+        );
+      }
+
+      // Check if materials are sufficient
+      for (let i = 0; i < materials.length; i++) {
+        const material = foundry.materials?.find(
+          (m) => m?.materialId === materials[i],
+        );
+        if (!material || Number(material.materialAmount) < Number(amounts[i])) {
+          throw new Error(
+            `not enough ${materials[i]} material to craft spaceship!`,
+          );
+        }
+      }
+
+      const delegator = foundry.owner;
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedCraftSpaceship = {
+        delegator: delegator,
+        methodName: "df__craftSpaceship",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([
+          locationIdToDecStr(foundryHash),
+          spaceshipType,
+          materials,
+          amounts.map((amount) => Number(amount)), // * CONTRACT_PRECISION was here
+          biome,
+        ]),
+        foundryHash,
+        spaceshipType,
+        materials,
+        amounts,
+        biome,
+      };
+
+      const transactionFee = this.getTransactionFee();
+
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__craftSpaceship",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
   public async addJunk(
     locationId: LocationId,
     biomeBase?: number,
@@ -6563,6 +6699,12 @@ export class GameManager extends EventEmitter {
     distance: number | undefined,
     sentEnergy: number,
     abandoning: boolean,
+    spaceshipBonuses?: {
+      attackBonus: number;
+      defenseBonus: number;
+      speedBonus: number;
+      rangeBonus: number;
+    },
   ) {
     const from = this.getPlanetWithId(fromId);
     const to = this.getPlanetWithId(toId);
@@ -6585,9 +6727,26 @@ export class GameManager extends EventEmitter {
     //   }
     // }
 
-    const range = from.range * this.getRangeBuff(abandoning);
+    let range = from.range * this.getRangeBuff(abandoning);
+
+    // Apply spaceship range bonus if provided
+    if (spaceshipBonuses && spaceshipBonuses.rangeBonus > 0) {
+      range = range * ((100 + spaceshipBonuses.rangeBonus) / 100);
+    }
+
     const scale = (1 / 2) ** (dist / range);
     let ret = scale * sentEnergy - 0.05 * from.energyCap;
+
+    // Apply spaceship attack bonus if attacking an enemy and spaceship bonuses are provided
+    if (
+      spaceshipBonuses &&
+      spaceshipBonuses.attackBonus > 0 &&
+      to &&
+      to.owner !== from.owner
+    ) {
+      ret = (ret * (100 + spaceshipBonuses.attackBonus)) / 100;
+    }
+
     if (ret < 0) {
       ret = 0;
     }
@@ -6670,6 +6829,12 @@ export class GameManager extends EventEmitter {
     fromId: LocationId,
     toId: LocationId,
     abandoning = false,
+    spaceshipBonuses?: {
+      attackBonus: number;
+      defenseBonus: number;
+      speedBonus: number;
+      rangeBonus: number;
+    },
   ): number {
     const from = this.getPlanetWithId(fromId);
     if (!isLocatable(from)) {
@@ -6686,7 +6851,12 @@ export class GameManager extends EventEmitter {
 
     // NOTE: The speed factor will always be 1 when SPACE_JUNK_ENABLED=false
     const speedFactor = this.getSpeedBuff(abandoning);
-    const speed = from.speed * speedFactor;
+    let speed = from.speed * speedFactor;
+
+    // Apply spaceship speed bonus if provided
+    if (spaceshipBonuses && spaceshipBonuses.speedBonus > 0) {
+      speed = speed * ((100 + spaceshipBonuses.speedBonus) / 100);
+    }
 
     let deltaTime = dist / (speed / 100);
 

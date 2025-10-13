@@ -89,8 +89,8 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
   return (
     <div
       style={{
-        width: "16px",
-        height: "16px",
+        width: "24px",
+        height: "24px",
         backgroundColor: getMaterialColor(materialId as MaterialType),
         borderRadius: "2px",
         display: "flex",
@@ -108,23 +108,31 @@ export function MaterialIcon({ materialId }: { materialId: number }) {
 const ResourceRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  min-height: 32px;
+  gap: 4px;
+  min-height: 30px;
+  position: relative;
+  z-index: 0;
 `;
 
 const ResourceIcon = styled.div<{ color: string }>`
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   background-color: transparent;
-  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
   flex-shrink: 0;
   cursor: help;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  isolation: isolate;
+  &:hover {
+    transform: scale(1.1);
+    cursor: help;
+  }
 `;
 
 const ResourceValue = styled.div<{ color: string }>`
@@ -145,7 +153,7 @@ const ResourcePercentage = styled.div<{ color: string }>`
   color: ${(props) => props.color};
   font-size: 12px;
   font-weight: bold;
-  min-width: 35px;
+  min-width: 30px;
   text-align: center;
   flex-shrink: 0;
 `;
@@ -246,7 +254,7 @@ function ResourceBar({
   const resourceColor = getResourceColor();
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0px" }}>
       {/* Main resource row: [Icon] [Name] [Value] [%] [+/-] */}
       <ResourceRow>
         {(() => {
@@ -263,7 +271,12 @@ function ResourceBar({
           }
           if (isSilver) {
             return (
-              <TooltipTrigger name={TooltipName.Silver}>
+              <TooltipTrigger
+                name={TooltipName.Silver}
+                style={{
+                  display: "inline-block",
+                }}
+              >
                 <ResourceIcon color={resourceColor}>
                   {getResourceIcon()}
                 </ResourceIcon>
@@ -271,7 +284,10 @@ function ResourceBar({
             );
           }
           return (
-            <TooltipTrigger name={TooltipName.Energy}>
+            <TooltipTrigger
+              name={TooltipName.Energy}
+              style={{ display: "inline-block" }}
+            >
               <ResourceIcon color={resourceColor}>
                 {getResourceIcon()}
               </ResourceIcon>
@@ -583,14 +599,14 @@ export function SendResources({
                 ))}
               </MaterialsContainer>
             )}
-          {p.value && artifacts.length > 0 && (
-            <SelectArtifactRow
-              artifacts={artifacts}
-              onArtifactChange={updateArtifactSending}
-              selectedArtifact={artifactSending}
-            />
-          )}
         </ResourcesScrollable>
+        {p.value && artifacts.length > 0 && (
+          <SelectArtifactRow
+            artifacts={artifacts}
+            onArtifactChange={updateArtifactSending}
+            selectedArtifact={artifactSending}
+          />
+        )}
       </div>
       {spaceshipsYouOwn.length > 0 || owned ? sendRow : null}
 

@@ -1,4 +1,7 @@
-import { isLocatable } from "@df/gamelogic";
+import { useCallback } from "react";
+import styled from "styled-components";
+
+import { isLocatable, isArtifactSpaceShip } from "@df/gamelogic";
 import {
   getPlanetName,
   isAvatar,
@@ -8,13 +11,12 @@ import {
   numToLogoType,
 } from "@df/procedural";
 import { avatarFromType, logoFromType } from "@df/renderer";
-import type { Planet } from "@df/types";
+import type { Artifact, Planet } from "@df/types";
 import { TooltipName } from "@df/types";
-import React from "react";
-import styled from "styled-components";
 
 import { StatIdx } from "../../_types/global/GlobalTypes";
 import type { Wrapper } from "../../Backend/Utils/Wrapper";
+import { useSpaceshipMovement } from "../../hooks/useSpaceshipMovement";
 import {
   AlignCenterHorizontally,
   EmSpacer,
@@ -144,6 +146,58 @@ export function PlanetCard({
   const isAbandoning = useEmitterValue(
     uiManager.isAbandoning$,
     uiManager.isAbandoning(),
+  );
+
+  // Get spaceship bonuses if a spaceship is selected for movement
+  const { getSpaceshipBonusesForArtifact } = useSpaceshipMovement();
+  const artifactSendingChange = useEmitterValue(
+    uiManager.artifactSending$,
+    undefined,
+  );
+  const artifactSending =
+    planet && artifactSendingChange?.planetId === planet.locationId
+      ? artifactSendingChange.artifact
+      : undefined;
+
+  // Get real spaceship bonuses from MUD table
+  const spaceshipBonuses =
+    artifactSending && isArtifactSpaceShip(artifactSending.artifactType)
+      ? getSpaceshipBonusesForArtifact(artifactSending)
+      : undefined;
+
+  // // Debug logging
+  // console.log("PlanetCard Debug:", {
+  //   planetId: planet?.locationId,
+  //   artifactSendingChange,
+  //   artifactSending,
+  //   artifactType: artifactSending?.artifactType,
+  //   isSpaceship: artifactSending
+  //     ? isArtifactSpaceShip(artifactSending.artifactType)
+  //     : false,
+  //   spaceshipBonuses,
+  //   rangeBonus: spaceshipBonuses?.rangeBonus,
+  //   rangeMultiplier: spaceshipBonuses?.rangeBonus
+  //     ? (100 + spaceshipBonuses.rangeBonus) / 100
+  //     : undefined,
+  // });
+
+  // Handle artifact selection for movement
+  const updateArtifactSending = useCallback(
+    (sendArtifact: Artifact | undefined) => {
+      if (!planet) {
+        return;
+      }
+      // console.log("updateArtifactSending called:", {
+      //   planetId: planet.locationId,
+      //   artifact: sendArtifact,
+      //   artifactType: sendArtifact?.artifactType,
+      //   isSpaceship: sendArtifact
+      //     ? isArtifactSpaceShip(sendArtifact.artifactType)
+      //     : false,
+      // });
+      uiManager.setArtifactSending(planet.locationId, sendArtifact);
+    },
+    [uiManager, planet],
   );
 
   const gameManager = uiManager.getGameManager();
@@ -361,9 +415,18 @@ export function PlanetCard({
                     <AlignCenterHorizontally>
                       <SpeedText
                         planet={planet}
-                        buff={
-                          isAbandoning ? uiManager.getSpeedBuff() : undefined
-                        }
+                        buff={(() => {
+                          if (isAbandoning) {
+                            return uiManager.getSpeedBuff();
+                          }
+                          if (
+                            spaceshipBonuses &&
+                            spaceshipBonuses.speedBonus > 0
+                          ) {
+                            return (100 + spaceshipBonuses.speedBonus) / 100;
+                          }
+                          return undefined;
+                        })()}
                       />
                       {planet?.bonus && planet.bonus[StatIdx.Speed] && (
                         <TimesTwo />
@@ -393,9 +456,18 @@ export function PlanetCard({
                     <AlignCenterHorizontally>
                       <RangeText
                         planet={planet}
-                        buff={
-                          isAbandoning ? uiManager.getRangeBuff() : undefined
-                        }
+                        buff={(() => {
+                          if (isAbandoning) {
+                            return uiManager.getRangeBuff();
+                          }
+                          if (
+                            spaceshipBonuses &&
+                            spaceshipBonuses.rangeBonus > 0
+                          ) {
+                            return (100 + spaceshipBonuses.rangeBonus) / 100;
+                          }
+                          return undefined;
+                        })()}
                       />
                       {planet?.bonus && planet.bonus[StatIdx.Range] && (
                         <TimesTwo />
@@ -465,7 +537,11 @@ export function PlanetCard({
                   : "ANONYMOUS GUILD (ID:" + guild.id + ")"}
               </InfoHead>
             )}
-            <SelectArtifactRow artifacts={artifacts} />
+            <SelectArtifactRow
+              artifacts={artifacts}
+              onArtifactChange={updateArtifactSending}
+              selectedArtifact={artifactSending}
+            />
           </>
         )}
       </div>

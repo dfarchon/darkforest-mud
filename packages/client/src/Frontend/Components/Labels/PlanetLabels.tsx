@@ -2,9 +2,10 @@ import { EMPTY_ADDRESS } from "@df/constants";
 import { formatEtherToNumber, formatNumber } from "@df/gamelogic";
 import { getPlayerColor } from "@df/procedural";
 import type { Planet } from "@df/types";
-import type { MaterialType } from "@df/types";
+import { MaterialType } from "@df/types";
 import { PlanetType, PlanetTypeNames } from "@df/types";
 import { TooltipName } from "@df/types";
+import { ArtifactStatus, ArtifactType } from "@df/types";
 import {
   getMaterialColor,
   getMaterialIcon,
@@ -26,6 +27,7 @@ import { TextPreview } from "../TextPreview";
 import { OptionalPlanetBiomeLabelAnim } from "./BiomeLabels";
 import { TwitterLink } from "./Labels";
 import { SpacetimeRipLabel } from "./SpacetimeRipLabel";
+import type { GameUIManager } from "@backend/GameLogic/GameUIManager";
 
 /* note that we generally prefer `Planet | undefined` over `Planet` because it
    makes it easier to pass in selected / hovering planet from the emitters      */
@@ -333,8 +335,8 @@ export function MaterialsText({
           >
             <span
               style={{
-                width: "10px",
-                height: "10px",
+                width: "20px",
+                height: "20px",
                 backgroundColor: "transparent",
                 borderRadius: "2px",
                 display: "inline-flex",
@@ -347,7 +349,7 @@ export function MaterialsText({
             >
               {" "}
               <TooltipTrigger name={getMaterialTooltipName(mat.materialId)}>
-                {getMaterialIcon(mat.materialId)}
+                {getMaterialIcon(mat.materialId, 24)}
               </TooltipTrigger>
             </span>
             <span
@@ -432,8 +434,8 @@ const MaterialItem = styled.div`
 `;
 
 const MaterialIcon = styled.div<{ color: string }>`
-  width: 10px;
-  height: 10px;
+  width: 24px;
+  height: 24px;
   background-color: transparent;
   border-radius: 1px;
   display: flex;
@@ -446,7 +448,7 @@ const MaterialIcon = styled.div<{ color: string }>`
   transition: transform 0.2s ease;
 
   &:hover {
-    transform: scale(1.1);
+    transform: scale(1.2);
     cursor: help;
   }
 `;
@@ -458,6 +460,31 @@ const MaterialValues = styled.div`
   line-height: 1;
 `;
 
+/**
+ * Check if a planet has an active wormhole
+ * @param planet The planet to check
+ * @param uiManager The UI manager to get artifact data
+ * @returns True if planet has an active wormhole
+ */
+function planetHasActiveWormhole(
+  planet: Planet,
+  uiManager: GameUIManager,
+): boolean {
+  // Check if planet has any artifacts
+  if (!planet.heldArtifactIds || planet.heldArtifactIds.length === 0) {
+    return false;
+  }
+
+  // Look for active wormhole artifacts using UI manager
+  return planet.heldArtifactIds.some((artifactId) => {
+    const artifact = uiManager.getArtifactWithId(artifactId);
+    return (
+      artifact?.artifactType === ArtifactType.Wormhole &&
+      artifact?.status === ArtifactStatus.Active
+    );
+  });
+}
+
 export function MaterialsDisplay({
   planet,
   style,
@@ -465,6 +492,8 @@ export function MaterialsDisplay({
   planet: Planet | undefined;
   style?: React.CSSProperties;
 }) {
+  const uiManager = useUIManager();
+
   if (!planet || !planet.materials || planet.materials.length === 0) {
     return null;
   }
@@ -478,6 +507,9 @@ export function MaterialsDisplay({
     return null;
   }
 
+  // Check if planet has active wormhole
+  const hasActiveWormhole = planetHasActiveWormhole(planet, uiManager);
+
   return (
     <div style={style}>
       <MaterialsScrollable>
@@ -485,15 +517,23 @@ export function MaterialsDisplay({
           {activeMaterials.map((mat) => {
             const materialColor = getMaterialColor(mat.materialId);
 
+            // Check if this is mycelium and planet has active wormhole
+            const isMycelium = mat.materialId === 5; // MaterialType.MYCELIUM
+            const showWormholeConsumption = isMycelium && hasActiveWormhole;
+
             return (
               <MaterialItem key={mat.materialId}>
                 <TooltipTrigger name={getMaterialTooltipName(mat.materialId)}>
                   <MaterialIcon color={materialColor}>
-                    {getMaterialIcon(mat.materialId)}
+                    {getMaterialIcon(mat.materialId, 24)}
                   </MaterialIcon>
                 </TooltipTrigger>
                 <MaterialValues>
                   {mat.growth && `+${formatNumber(Number(mat.growthRate), 2)} `}
+                  <span style={{ color: "#ff6b6b" }}>
+                    {" "}
+                    {showWormholeConsumption && `-${formatNumber(10, 0)} `}
+                  </span>
                   {formatNumber(Number(mat.materialAmount), 0)} /{" "}
                   {formatNumber(Number(mat.cap), 0)}
                 </MaterialValues>

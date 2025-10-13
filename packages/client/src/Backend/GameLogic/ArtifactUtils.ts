@@ -85,6 +85,19 @@ export class ArtifactUtils {
         PinkBombMetadata,
         encodeEntity({ rarity: "uint8" }, { rarity: artifactRec.rarity }),
       );
+    } else if (artifactRec.artifactIndex === 3) {
+      // Spaceship artifacts - use fallback metadata since SpaceshipMetadata table doesn't exist yet
+      metadata = {
+        rarity: artifactRec.rarity,
+        genre: 0, // General
+        charge: 0,
+        cooldown: 0,
+        durable: true,
+        reusable: true,
+        reqLevel: 4, // Minimum level for spaceships
+        reqPopulation: BigInt(0),
+        reqSilver: BigInt(0),
+      };
     } else if (artifactRec.artifactIndex === 4) {
       metadata = getComponentValue(
         BloomFilterMetadata,
@@ -145,6 +158,7 @@ export class ArtifactUtils {
       reqSilver: metadata.reqSilver,
       chargeUpgrade,
       activateUpgrade,
+      spaceshipType: artifactRec.spaceshipType, // Add spaceship type from MUD component
       transactions: new TxCollection(),
     };
   }
@@ -170,6 +184,19 @@ export class ArtifactUtils {
         PinkBombMetadata,
         encodeEntity({ rarity: "uint8" }, { rarity: rarity }),
       );
+    } else if (index === 3) {
+      // Spaceship artifacts - use fallback metadata since SpaceshipMetadata table doesn't exist yet
+      metadata = {
+        rarity: rarity,
+        genre: 0, // General
+        charge: 0,
+        cooldown: 0,
+        durable: true,
+        reusable: true,
+        reqLevel: 4, // Minimum level for spaceships
+        reqPopulation: BigInt(0),
+        reqSilver: BigInt(0),
+      };
     } else if (index === 4) {
       metadata = getComponentValue(
         BloomFilterMetadata,
@@ -237,6 +264,8 @@ export class ArtifactUtils {
   private getArtifactType(index: number): ArtifactType {
     if (index === 1) {
       return ArtifactType.Bomb;
+    } else if (index === 3) {
+      return ArtifactType.Spaceship;
     } else if (index === 4) {
       return ArtifactType.BloomFilter;
     } else if (index === 5) {
@@ -263,6 +292,21 @@ export class ArtifactUtils {
           rangeMultiplier: 50,
           speedMultiplier: 50,
           defMultiplier: 100,
+        },
+      };
+    } else if (artifactType === ArtifactType.Spaceship) {
+      // Spaceships provide combat bonuses based on rarity
+      const defenseMultiplier = [0, 110, 120, 130, 140, 150][rarity];
+      const speedMultiplier = [0, 110, 120, 130, 140, 150][rarity];
+      const rangeMultiplier = [0, 110, 120, 130, 140, 150][rarity];
+      return {
+        chargeUpgrade: undefined,
+        activateUpgrade: {
+          energyCapMultiplier: 100,
+          energyGroMultiplier: 100,
+          rangeMultiplier,
+          speedMultiplier,
+          defMultiplier: defenseMultiplier,
         },
       };
     } else if (artifactType === ArtifactType.PhotoidCannon) {
@@ -298,12 +342,16 @@ export const updateArtifactStatus = (
 ): void => {
   if (
     artifact.status === ArtifactStatus.Cooldown &&
-    curTick >= artifact.cooldownTick + artifact.cooldown
+    artifact.cooldownTick !== undefined &&
+    artifact.cooldown !== undefined &&
+    curTick >= artifact.cooldownTick! + artifact.cooldown!
   ) {
     artifact.status = ArtifactStatus.Default;
   } else if (
     artifact.status === ArtifactStatus.Charging &&
-    curTick >= artifact.chargeTick + artifact.charge
+    artifact.chargeTick !== undefined &&
+    artifact.charge !== undefined &&
+    curTick >= artifact.chargeTick! + artifact.charge!
   ) {
     artifact.status = ArtifactStatus.Ready;
   }

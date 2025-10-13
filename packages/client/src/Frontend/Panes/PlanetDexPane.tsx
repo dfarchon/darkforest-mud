@@ -225,7 +225,10 @@ export function PlanetDexPane({
     (planet: Planet) => <Sub>{formatNumber(planet.silver)}</Sub>,
     (planet: Planet) => (
       <Sub style={{ fontSize: "0.75em", maxWidth: "150px" }}>
-        <MaterialsText planet={planet} />
+        <MaterialsText
+          planet={planet}
+          style={{ width: "24px", height: "24px" }}
+        />
       </Sub>
     ),
     (planet: Planet) => (
