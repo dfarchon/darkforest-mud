@@ -163,6 +163,7 @@ export class ContractsAPI extends EventEmitter {
   private pausedStateSubscription: Subscription;
   private playerSubscription: Subscription;
   private playerJunkSubscription: Subscription;
+  private playerJunkLimitSubscription: Subscription;
   private artifactSubscription: Subscription;
   private planetArtifactsSubscription: Subscription;
   private lastRevealSubscription: Subscription;
@@ -360,6 +361,17 @@ export class ContractsAPI extends EventEmitter {
         }
       },
     );
+
+    this.playerJunkLimitSubscription =
+      this.components.PlayerJunkLimit.update$.subscribe((update) => {
+        const entity = update.entity;
+        const [nextValue] = update.value;
+        const playerAddr = hexToEthAddress(entity.toString() as Hex);
+
+        if (nextValue) {
+          this.emit(ContractsAPIEvent.PlayerUpdate, playerAddr);
+        }
+      });
 
     this.artifactSubscription = this.components.Artifact.update$.subscribe(
       (update) => {
@@ -989,6 +1001,7 @@ export class ContractsAPI extends EventEmitter {
     this.pausedStateSubscription.unsubscribe();
     this.playerSubscription.unsubscribe();
     this.playerJunkSubscription.unsubscribe();
+    this.playerJunkLimitSubscription.unsubscribe();
     this.artifactSubscription.unsubscribe();
     this.planetArtifactsSubscription.unsubscribe();
     this.lastRevealSubscription.unsubscribe();
@@ -1345,7 +1358,19 @@ export class ContractsAPI extends EventEmitter {
 
       SPACESHIPS: { GEAR: false },
       SPACE_JUNK_ENABLED: junkConfig.SPACE_JUNK_ENABLED,
-      SPACE_JUNK_LIMIT: Number(junkConfig.SPACE_JUNK_LIMIT),
+      SPACE_JUNK_FREE_ALLOCATION: Number(junkConfig.SPACE_JUNK_FREE_ALLOCATION),
+      SPACE_JUNK_LINEAR_MIN_PURCHASE: Number(
+        junkConfig.SPACE_JUNK_LINEAR_MIN_PURCHASE,
+      ),
+      SPACE_JUNK_LINEAR_MAX_PURCHASE: Number(
+        junkConfig.SPACE_JUNK_LINEAR_MAX_PURCHASE,
+      ),
+      SPACE_JUNK_LINEAR_BASE_PRICE: junkConfig.SPACE_JUNK_LINEAR_BASE_PRICE,
+      SPACE_JUNK_QUADRATIC_MIN_PURCHASE: Number(
+        junkConfig.SPACE_JUNK_QUADRATIC_MIN_PURCHASE,
+      ),
+      SPACE_JUNK_QUADRATIC_BASE_PRICE:
+        junkConfig.SPACE_JUNK_QUADRATIC_BASE_PRICE,
       ABANDON_SPEED_CHANGE_PERCENT: Number(
         junkConfig.ABANDON_SPEED_CHANGE_PERCENT,
       ),
@@ -1488,6 +1513,7 @@ export class ContractsAPI extends EventEmitter {
       LastReveal,
       PlayerWithdrawSilver,
       PlayerJunk,
+      PlayerJunkLimit,
     } = this.components;
     const playerKey = encodeEntity(Player.metadata.keySchema, {
       owner: addressToHex(playerId),
@@ -1516,6 +1542,17 @@ export class ContractsAPI extends EventEmitter {
     });
     const playerJunk = getComponentValue(PlayerJunk, playerJunkKey);
 
+    const playerJunkLimitKey = encodeEntity(
+      PlayerJunkLimit.metadata.keySchema,
+      {
+        owner: addressToHex(playerId),
+      },
+    );
+    const playerJunkLimit = getComponentValue(
+      PlayerJunkLimit,
+      playerJunkLimitKey,
+    );
+
     if (!rawPlayer) {
       return undefined;
     }
@@ -1533,6 +1570,7 @@ export class ContractsAPI extends EventEmitter {
       silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
       score: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
       junk: playerJunk ? Number(playerJunk.junk) : 0,
+      junkLimit: playerJunkLimit ? Number(playerJunkLimit.junk) : 0,
     };
     return player;
   }

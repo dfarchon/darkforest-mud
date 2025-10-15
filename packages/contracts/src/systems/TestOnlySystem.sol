@@ -19,6 +19,7 @@ import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
 import { PlanetMaterialStorage } from "codegen/tables/PlanetMaterialStorage.sol";
 import { PlanetMaterial } from "codegen/tables/PlanetMaterial.sol";
+import { PlayerJunkLimit } from "codegen/tables/PlayerJunkLimit.sol";
 
 contract TestOnlySystem is BaseSystem {
   // function createPlanet(
@@ -123,10 +124,10 @@ contract TestOnlySystem is BaseSystem {
   function setPlanetJunkOwner(uint256 planetHash, address junkOwner, uint256 level) public {
     DFUtils.tick(_world());
     PlanetJunkOwner.set(bytes32(planetHash), junkOwner);
-    uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
     uint256 planetJunk = PLANET_LEVEL_JUNK[level];
     uint256 playerJunk = PlayerJunk.get(junkOwner);
+    uint256 playerJunkLimit = PlayerJunkLimit.get(junkOwner);
     PlayerJunk.set(junkOwner, playerJunk + planetJunk);
   }
 

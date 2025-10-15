@@ -84,6 +84,7 @@ interface Errors {
   error InvalidJunkOperation(); // 0xa94506f6
   error NotJunkOwner(); // 0x438f2b77
   error NotSameOwnerAndJunkOwner(); // 0x1ff3ce95
+  error NeedFundsToBuySpaceJunk(); // 0x0df7541b
 
   // GPTToken system
   error NotEnoughETH(); // 0x932b84b0

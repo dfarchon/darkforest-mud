@@ -1588,7 +1588,8 @@ export class GameManager extends EventEmitter {
   }
 
   public getPlayerSpaceJunkLimit(addr: EthAddress): number | undefined {
-    return this.contractConstants.SPACE_JUNK_LIMIT;
+    const player = this.players.get(addr);
+    return player?.junkLimit;
   }
 
   // public getPlayerActivateArtifactAmount(addr: EthAddress): number | undefined {
@@ -5124,7 +5125,7 @@ export class GameManager extends EventEmitter {
           this.contractsAPI.getConstants().PLANET_LEVEL_JUNK[
             planet.planetLevel
           ] >
-        this.contractsAPI.getConstants().SPACE_JUNK_LIMIT
+        player.junkLimit
       ) {
         throw new Error("junk limit exceeded");
       }

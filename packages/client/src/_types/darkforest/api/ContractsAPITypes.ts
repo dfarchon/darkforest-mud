@@ -302,7 +302,13 @@ export interface ContractConstants {
      This can be overridden at runtime by updating
      this value for a specific player in storage.
    */
-  SPACE_JUNK_LIMIT: number;
+  // SPACE_JUNK_LIMIT: number;
+  SPACE_JUNK_FREE_ALLOCATION: number;
+  SPACE_JUNK_LINEAR_MIN_PURCHASE: number;
+  SPACE_JUNK_LINEAR_MAX_PURCHASE: number;
+  SPACE_JUNK_LINEAR_BASE_PRICE: bigint;
+  SPACE_JUNK_QUADRATIC_MIN_PURCHASE: number;
+  SPACE_JUNK_QUADRATIC_BASE_PRICE: bigint;
 
   /**
      The amount of junk that each level of planet
