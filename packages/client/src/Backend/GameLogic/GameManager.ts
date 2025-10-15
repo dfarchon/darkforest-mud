@@ -121,6 +121,7 @@ import type {
   UnconfirmedChargeArtifact,
   UnconfirmedClaim,
   UnconfirmedClearJunk,
+  UnconfirmedBuyJunk,
   UnconfirmedCreateGuild,
   UnconfirmedDeactivateArtifact,
   UnconfirmedDepositArtifact,
@@ -1587,7 +1588,11 @@ export class GameManager extends EventEmitter {
     return player?.junk;
   }
 
-  public getPlayerSpaceJunkLimit(addr: EthAddress): number | undefined {
+  public getPlayerSpaceJunkLimit(
+    addr: EthAddress | undefined,
+  ): number | undefined {
+    if (addr === undefined) return undefined;
+
     const player = this.players.get(addr);
     return player?.junkLimit;
   }
@@ -5244,6 +5249,117 @@ export class GameManager extends EventEmitter {
     } catch (e) {
       this.getNotificationsManager().txInitError(
         "df__clearJunk",
+        (e as Error).message,
+      );
+      throw e;
+    }
+  }
+
+  // PUNK
+
+  public getBuyJunkFee(amount: number): bigint {
+    const config = this.contractsAPI.getConstants();
+
+    const SPACE_JUNK_FREE_ALLOCATION = config.SPACE_JUNK_FREE_ALLOCATION;
+    const SPACE_JUNK_LINEAR_MIN_PURCHASE =
+      config.SPACE_JUNK_LINEAR_MIN_PURCHASE;
+    const SPACE_JUNK_LINEAR_MAX_PURCHASE =
+      config.SPACE_JUNK_LINEAR_MAX_PURCHASE;
+    const SPACE_JUNK_LINEAR_BASE_PRICE = config.SPACE_JUNK_LINEAR_BASE_PRICE;
+    const SPACE_JUNK_QUADRATIC_MIN_PURCHASE =
+      config.SPACE_JUNK_QUADRATIC_MIN_PURCHASE;
+
+    const SPACE_JUNK_QUADRATIC_BASE_PRICE =
+      config.SPACE_JUNK_QUADRATIC_BASE_PRICE;
+
+    let fee = 0n;
+    if (amount < SPACE_JUNK_FREE_ALLOCATION) {
+      fee = 0n;
+    } else if (amount <= SPACE_JUNK_LINEAR_MAX_PURCHASE) {
+      fee +=
+        BigInt(amount - SPACE_JUNK_LINEAR_MIN_PURCHASE + 1) *
+        SPACE_JUNK_LINEAR_BASE_PRICE;
+    } else if (amount >= SPACE_JUNK_QUADRATIC_MIN_PURCHASE) {
+      fee +=
+        BigInt(
+          SPACE_JUNK_LINEAR_MAX_PURCHASE - SPACE_JUNK_LINEAR_MIN_PURCHASE + 1,
+        ) * SPACE_JUNK_LINEAR_BASE_PRICE;
+      const t = BigInt(amount - SPACE_JUNK_QUADRATIC_MIN_PURCHASE + 1);
+      fee += t * t * SPACE_JUNK_QUADRATIC_BASE_PRICE;
+    }
+    return fee;
+  }
+
+  public async buyJunk(
+    inputAmount: number,
+  ): Promise<Transaction<UnconfirmedBuyJunk>> {
+    const amount = Math.round(inputAmount / 1000);
+
+    console.log("buy junk amount:", amount);
+    try {
+      if (!this.account) {
+        throw new Error("no account");
+      }
+      // if (this.checkGameHasEnded()) {
+      //   throw new Error('game has ended');
+      // }
+
+      if (!this.contractsAPI.getConstants().SPACE_JUNK_ENABLED) {
+        throw new Error("space junk is disabled");
+      }
+
+      const playerJunkLimit = this.getPlayerSpaceJunkLimit(this.account);
+
+      const preAmount = playerJunkLimit
+        ? Math.round(playerJunkLimit / 1000)
+        : 0;
+
+      if (amount < preAmount) {
+        throw new Error("need buy more");
+      }
+
+      const transactionFee =
+        this.getBuyJunkFee(amount) - this.getBuyJunkFee(preAmount);
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-buySpaceJunk-amount`,
+        amount.toString(),
+      );
+
+      const transactionFeeETH = utils.formatEther(transactionFee);
+
+      localStorage.setItem(
+        `${this.ethConnection.getAddress()?.toLowerCase()}-buySpaceJunk-fee`,
+        transactionFeeETH.toString(),
+      );
+
+      // PUNK Test
+      console.log("fee", transactionFee);
+      console.log("fee (ETH):", utils.formatEther(transactionFee));
+
+      const delegator = this.getAccount();
+
+      if (!delegator) {
+        throw Error("no delegator account");
+      }
+
+      const txIntent: UnconfirmedBuyJunk = {
+        delegator: delegator,
+        methodName: "df__buyJunk",
+        contract: this.contractsAPI.contract,
+        args: Promise.resolve([amount]),
+        amount: amount,
+      };
+
+      // Always await the submitTransaction so we can catch rejections
+      const tx = await this.contractsAPI.submitTransaction(txIntent, {
+        value: transactionFee,
+      });
+
+      return tx;
+    } catch (e) {
+      this.getNotificationsManager().txInitError(
+        "df__buyJunk",
         (e as Error).message,
       );
       throw e;

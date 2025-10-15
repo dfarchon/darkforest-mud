@@ -146,7 +146,11 @@ export const GUILD_SYSTEM_ABI: Abi = GuildSystemAbi;
 export const get_ABI_from_FunctionName = (functionName: string) => {
   if (functionName === "move" || functionName === "legacyMove") {
     return MOVE_SYSTEM_ABI;
-  } else if (functionName === "addJunk" || functionName === "clearJunk") {
+  } else if (
+    functionName === "addJunk" ||
+    functionName === "clearJunk" ||
+    functionName === "buyJunk"
+  ) {
     return PLANET_JUNK_SYSTEM_ABI;
   }
   if (
@@ -229,7 +233,11 @@ export const get_ABI_from_FunctionName = (functionName: string) => {
 export const get_SystemId_from_FunctionName = (functionName: string) => {
   if (functionName === "move" || functionName === "legacyMove") {
     return MOVE_SYSTEM_ID;
-  } else if (functionName === "addJunk" || functionName === "clearJunk") {
+  } else if (
+    functionName === "addJunk" ||
+    functionName === "clearJunk" ||
+    functionName === "buyJunk"
+  ) {
     return PLANET_JUNK_SYSTEM_ID;
   }
   if (

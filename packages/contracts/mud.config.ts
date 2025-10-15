@@ -624,6 +624,7 @@ export default defineWorld({
         SPACE_JUNK_LINEAR_MAX_PURCHASE: "uint256",
         SPACE_JUNK_LINEAR_BASE_PRICE: "uint256",
         SPACE_JUNK_QUADRATIC_MIN_PURCHASE: "uint256",
+        SPACE_JUNK_QUADRATIC_MAX_PURCHASE: "uint256",
         SPACE_JUNK_QUADRATIC_BASE_PRICE: "uint256",
         PLANET_LEVEL_JUNK: "uint256[]",
       },

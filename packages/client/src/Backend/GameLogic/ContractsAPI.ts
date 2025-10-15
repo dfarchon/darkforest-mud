@@ -1369,6 +1369,9 @@ export class ContractsAPI extends EventEmitter {
       SPACE_JUNK_QUADRATIC_MIN_PURCHASE: Number(
         junkConfig.SPACE_JUNK_QUADRATIC_MIN_PURCHASE,
       ),
+      SPACE_JUNK_QUADRATIC_MAX_PURCHASE: Number(
+        junkConfig.SPACE_JUNK_QUADRATIC_MAX_PURCHASE,
+      ),
       SPACE_JUNK_QUADRATIC_BASE_PRICE:
         junkConfig.SPACE_JUNK_QUADRATIC_BASE_PRICE,
       ABANDON_SPEED_CHANGE_PERCENT: Number(

@@ -14,6 +14,7 @@ import { BurnerToPlayer } from "codegen/tables/BurnerToPlayer.sol";
 import { Planet } from "libraries/Planet.sol";
 import { SpaceType, PlanetType } from "codegen/common.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
+import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerJunkLimit } from "codegen/tables/PlayerJunkLimit.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 

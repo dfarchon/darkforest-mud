@@ -52,7 +52,6 @@ contract PlanetJunkSystem is BaseSystem {
 
   function _validateAddJunk(Planet memory planet, address executor) internal view {
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
-    uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
     uint256 playerJunk = PlayerJunk.get(executor);
     uint256 playerJunkLimit = PlayerJunkLimit.get(executor);
@@ -143,11 +142,7 @@ contract PlanetJunkSystem is BaseSystem {
     planet.writeToStore();
   }
 
-  function buySpaceJunk(uint amount) public payable requireSpaceJunkEnabled {
-    address worldAddress = _world();
-    DFUtils.tick(worldAddress);
-    address executor = _msgSender();
-
+  function getBuyJunkFee(uint amount) internal returns (uint) {
     uint SPACE_JUNK_FREE_ALLOCATION = JunkConfig.getSPACE_JUNK_FREE_ALLOCATION();
 
     uint SPACE_JUNK_LINEAR_MIN_PURCHASE = JunkConfig.getSPACE_JUNK_LINEAR_MIN_PURCHASE();
@@ -161,7 +156,7 @@ contract PlanetJunkSystem is BaseSystem {
     uint SPACE_JUNK_QUADRATIC_BASE_PRICE = JunkConfig.getSPACE_JUNK_QUADRATIC_BASE_PRICE();
 
     uint fee = 0;
-    if (amount < SPACE_JUNK_FREE_ALLOCATION) fee = 0;
+    if (amount <= SPACE_JUNK_FREE_ALLOCATION) fee = 0;
     else if (amount <= SPACE_JUNK_LINEAR_MAX_PURCHASE) {
       fee += (amount - SPACE_JUNK_LINEAR_MIN_PURCHASE + 1) * SPACE_JUNK_LINEAR_BASE_PRICE;
     } else if (amount >= SPACE_JUNK_QUADRATIC_MIN_PURCHASE) {
@@ -169,10 +164,31 @@ contract PlanetJunkSystem is BaseSystem {
       uint t = (amount - SPACE_JUNK_QUADRATIC_MIN_PURCHASE + 1);
       fee += t * t * SPACE_JUNK_QUADRATIC_BASE_PRICE;
     }
+    return fee;
+  }
+
+  function buyJunk(uint amount) public payable requireSpaceJunkEnabled {
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
+    address executor = _msgSender();
 
     if (Player.getIndex(executor) == 0) {
       revert NotRegistered();
     }
+
+    uint playerJunkLimit = PlayerJunkLimit.get(executor);
+    uint preAmount = playerJunkLimit / 1000;
+    if (amount < preAmount) {
+      revert NeedBuyMore();
+    }
+
+    uint SPACE_JUNK_QUADRATIC_MAX_PURCHASE = JunkConfig.getSPACE_JUNK_QUADRATIC_MAX_PURCHASE();
+
+    if (amount > SPACE_JUNK_QUADRATIC_MAX_PURCHASE) {
+      revert NeedBuyLess();
+    }
+
+    uint fee = getBuyJunkFee(amount) - getBuyJunkFee(preAmount);
 
     if (_msgValue() < fee) {
       revert NeedFundsToBuySpaceJunk();

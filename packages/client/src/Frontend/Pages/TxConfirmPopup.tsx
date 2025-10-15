@@ -277,6 +277,9 @@ export function TxConfirmPopup() {
   const createGuildFee = localStorage.getItem(`${account}-createGuild-fee`);
 
   const createGuildFeeEth = createGuildFee ? Number(createGuildFee) : 0;
+
+  const buyJunkFee = localStorage.getItem(`${account}-buySpaceJunk-fee`);
+  const buyJunkFeeEth = buyJunkFee ? Number(buyJunkFee) : 0;
   // function isTypeOK() {
   //     if (butArtifactType === undefined) return false;
   //     const val = Number(butArtifactType);
@@ -502,6 +505,17 @@ export function TxConfirmPopup() {
               <b>Create Guild Fee </b>
               <span>
                 {createGuildFeeEth} ${TOKEN_NAME}
+              </span>
+            </Row>
+          </>
+        )}
+
+        {method === "df__buyJunk" && (
+          <>
+            <Row>
+              <b>Buy Junk Fee </b>
+              <span>
+                {buyJunkFeeEth} ${TOKEN_NAME}
               </span>
             </Row>
           </>
