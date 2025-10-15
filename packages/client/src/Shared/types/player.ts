@@ -11,6 +11,7 @@ export type Player = {
   silver: number;
   score: number;
   junk: number;
+  junkLimit: number;
 };
 
 /**

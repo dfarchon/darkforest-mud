@@ -1,14 +1,9 @@
-import { BLOCK_EXPLORER_URL } from "@df/constants";
 import { ModalName } from "@df/types";
-import React from "react";
-import styled from "styled-components";
+import { useLocation } from "react-router-dom";
 
-import { Link, Section, SectionHeader } from "../Components/CoreUI";
-import { Pink } from "../Components/Text";
 import { WalletComponent } from "../Components/WalletComponent";
-import dfstyles from "../Styles/dfstyles";
-import { useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
+import { BuyJunkPane } from "./BuyJunkPane";
 
 export function WalletPane({
   visible,
@@ -17,15 +12,20 @@ export function WalletPane({
   visible: boolean;
   onClose: () => void;
 }) {
+  const location = useLocation();
+  // Don't show wallet if URL starts with /redpill
+  const hideWallet = location.pathname.startsWith("/redpill/");
+
   return (
     <ModalPane
       id={ModalName.Wallet}
-      title="Wallet Management"
+      title="Wallet & Trade"
       visible={visible}
       onClose={onClose}
       width="50em"
     >
-      <WalletComponent showRegisterPlayer={false} />
+      {!hideWallet && <WalletComponent showRegisterPlayer={false} />}
+      <BuyJunkPane />
     </ModalPane>
   );
 }

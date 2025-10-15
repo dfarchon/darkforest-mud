@@ -7,12 +7,14 @@ import { PlanetType, Biome, MaterialType, SpaceType } from "codegen/common.sol";
 import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 import { PlanetBiomeConfig, PlanetBiomeConfigData } from "codegen/tables/PlanetBiomeConfig.sol";
 import { PlayerJunk } from "codegen/tables/PlayerJunk.sol";
+import { PlayerJunkLimit } from "codegen/tables/PlayerJunkLimit.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
 import { PlayerStats } from "codegen/tables/PlayerStats.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { Proof } from "libraries/SnarkProof.sol";
 import { BiomebaseInput } from "libraries/VerificationInput.sol";
 import { SnarkConfig, SnarkConfigData } from "codegen/tables/SnarkConfig.sol";
+import { Player } from "codegen/tables/Player.sol";
 
 contract PlanetJunkSystem is BaseSystem {
   modifier requireSpaceJunkEnabled() {
@@ -50,12 +52,12 @@ contract PlanetJunkSystem is BaseSystem {
 
   function _validateAddJunk(Planet memory planet, address executor) internal view {
     uint256[] memory PLANET_LEVEL_JUNK = JunkConfig.getPLANET_LEVEL_JUNK();
-    uint256 SPACE_JUNK_LIMIT = JunkConfig.getSPACE_JUNK_LIMIT();
     uint256 planetJunk = PLANET_LEVEL_JUNK[planet.level];
     uint256 playerJunk = PlayerJunk.get(executor);
+    uint256 playerJunkLimit = PlayerJunkLimit.get(executor);
 
     if (planet.owner != executor) revert NotPlanetOwner();
-    if (playerJunk + planetJunk > SPACE_JUNK_LIMIT) revert JunkLimitExceeded();
+    if (playerJunk + planetJunk > playerJunkLimit) revert JunkLimitExceeded();
   }
 
   function _executeAddJunk(Planet memory planet, address executor, uint256 biomeBase, Proof memory proof) internal {
@@ -138,5 +140,60 @@ contract PlanetJunkSystem is BaseSystem {
     }
 
     planet.writeToStore();
+  }
+
+  function getBuyJunkFee(uint amount) internal returns (uint) {
+    uint SPACE_JUNK_FREE_ALLOCATION = JunkConfig.getSPACE_JUNK_FREE_ALLOCATION();
+
+    uint SPACE_JUNK_LINEAR_MIN_PURCHASE = JunkConfig.getSPACE_JUNK_LINEAR_MIN_PURCHASE();
+
+    uint SPACE_JUNK_LINEAR_MAX_PURCHASE = JunkConfig.getSPACE_JUNK_LINEAR_MAX_PURCHASE();
+
+    uint SPACE_JUNK_LINEAR_BASE_PRICE = JunkConfig.getSPACE_JUNK_LINEAR_BASE_PRICE();
+
+    uint SPACE_JUNK_QUADRATIC_MIN_PURCHASE = JunkConfig.getSPACE_JUNK_QUADRATIC_MIN_PURCHASE();
+
+    uint SPACE_JUNK_QUADRATIC_BASE_PRICE = JunkConfig.getSPACE_JUNK_QUADRATIC_BASE_PRICE();
+
+    uint fee = 0;
+    if (amount <= SPACE_JUNK_FREE_ALLOCATION) fee = 0;
+    else if (amount <= SPACE_JUNK_LINEAR_MAX_PURCHASE) {
+      fee += (amount - SPACE_JUNK_LINEAR_MIN_PURCHASE + 1) * SPACE_JUNK_LINEAR_BASE_PRICE;
+    } else if (amount >= SPACE_JUNK_QUADRATIC_MIN_PURCHASE) {
+      fee += (SPACE_JUNK_LINEAR_MAX_PURCHASE - SPACE_JUNK_LINEAR_MIN_PURCHASE + 1) * SPACE_JUNK_LINEAR_BASE_PRICE;
+      uint t = (amount - SPACE_JUNK_QUADRATIC_MIN_PURCHASE + 1);
+      fee += t * t * SPACE_JUNK_QUADRATIC_BASE_PRICE;
+    }
+    return fee;
+  }
+
+  function buyJunk(uint amount) public payable requireSpaceJunkEnabled {
+    address worldAddress = _world();
+    DFUtils.tick(worldAddress);
+    address executor = _msgSender();
+
+    if (Player.getIndex(executor) == 0) {
+      revert NotRegistered();
+    }
+
+    uint playerJunkLimit = PlayerJunkLimit.get(executor);
+    uint preAmount = playerJunkLimit / 1000;
+    if (amount < preAmount) {
+      revert NeedBuyMore();
+    }
+
+    uint SPACE_JUNK_QUADRATIC_MAX_PURCHASE = JunkConfig.getSPACE_JUNK_QUADRATIC_MAX_PURCHASE();
+
+    if (amount > SPACE_JUNK_QUADRATIC_MAX_PURCHASE) {
+      revert NeedBuyLess();
+    }
+
+    uint fee = getBuyJunkFee(amount) - getBuyJunkFee(preAmount);
+
+    if (_msgValue() < fee) {
+      revert NeedFundsToBuySpaceJunk();
+    }
+
+    PlayerJunkLimit.set(executor, amount * 1000);
   }
 }

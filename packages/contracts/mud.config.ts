@@ -617,9 +617,15 @@ export default defineWorld({
     JunkConfig: {
       schema: {
         SPACE_JUNK_ENABLED: "bool",
-        SPACE_JUNK_LIMIT: "uint256",
         ABANDON_SPEED_CHANGE_PERCENT: "uint256",
         ABANDON_RANGE_CHANGE_PERCENT: "uint256",
+        SPACE_JUNK_FREE_ALLOCATION: "uint256",
+        SPACE_JUNK_LINEAR_MIN_PURCHASE: "uint256",
+        SPACE_JUNK_LINEAR_MAX_PURCHASE: "uint256",
+        SPACE_JUNK_LINEAR_BASE_PRICE: "uint256",
+        SPACE_JUNK_QUADRATIC_MIN_PURCHASE: "uint256",
+        SPACE_JUNK_QUADRATIC_MAX_PURCHASE: "uint256",
+        SPACE_JUNK_QUADRATIC_BASE_PRICE: "uint256",
         PLANET_LEVEL_JUNK: "uint256[]",
       },
       key: [],
@@ -627,6 +633,13 @@ export default defineWorld({
     PlanetJunkOwner: "address",
     PlanetAddJunkTick: "uint256",
     PlayerJunk: {
+      schema: {
+        owner: "address",
+        junk: "uint256",
+      },
+      key: ["owner"],
+    },
+    PlayerJunkLimit: {
       schema: {
         owner: "address",
         junk: "uint256",

@@ -15,6 +15,8 @@ import { Planet } from "libraries/Planet.sol";
 import { SpaceType, PlanetType } from "codegen/common.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GlobalStats } from "codegen/tables/GlobalStats.sol";
+import { PlayerJunkLimit } from "codegen/tables/PlayerJunkLimit.sol";
+import { JunkConfig } from "codegen/tables/JunkConfig.sol";
 
 contract PlayerSystem is BaseSystem {
   // TODO: will move errors to each system that uses them. just like this one.
@@ -134,6 +136,10 @@ contract PlayerSystem is BaseSystem {
 
     SpawnPlanet.set(player, planet.planetHash);
     planet.writeToStore();
+
+    uint256 SPACE_JUNK_FREE_ALLOCATION = JunkConfig.getSPACE_JUNK_FREE_ALLOCATION();
+    PlayerJunkLimit.set(player, 1000 * SPACE_JUNK_FREE_ALLOCATION);
+
     return _input.planetHash;
   }
 
