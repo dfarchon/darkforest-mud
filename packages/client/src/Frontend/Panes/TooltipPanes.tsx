@@ -1,5 +1,5 @@
 import { BLOCKCHAIN_NAME } from "@df/constants";
-import { PlanetType, TooltipName } from "@df/types";
+import { MaterialType, PlanetType, TooltipName } from "@df/types";
 import React from "react";
 
 import { getPlanetRank, isFullRank } from "../../Backend/Utils/Utils";
@@ -14,7 +14,7 @@ import {
   White,
 } from "../Components/Text";
 import { useAccount, useSelectedPlanet, useUIManager } from "../Utils/AppHooks";
-import { getMaterialColor } from "./PlanetMaterialsPane";
+import { getMaterialColor, getMaterialIcon } from "./PlanetMaterialsPane";
 
 export function NetworkHealthPane() {
   return (
@@ -610,88 +610,121 @@ const BuyHat = () => (
 // Material tooltip components
 const MaterialWaterCrystalsTooltip = () => (
   <>
-    <Colored color={getMaterialColor(1)}>WATER CRYSTALS:</Colored> A shimmering
-    liquid harvested from deep ocean wells, used in cooling systems, fluidic
-    shields, and hydro-reactive engines.
+    {getMaterialIcon(MaterialType.WATER_CRYSTALS, 24)}
+    <Colored color={getMaterialColor(MaterialType.WATER_CRYSTALS)}>
+      WATER CRYSTALS:
+    </Colored>{" "}
+    A shimmering liquid harvested from deep ocean wells, used in cooling
+    systems, fluidic shields, and hydro-reactive engines.
   </>
 );
 
 const MaterialLivingWoodTooltip = () => (
   <>
-    <Colored color={getMaterialColor(2)}>LIVING WOOD:</Colored> An organic,
-    flexible biofiber that forms the core of regenerative hull plating and
-    photosynthetic tech modules.
+    {getMaterialIcon(MaterialType.LIVING_WOOD, 24)}
+    <Colored color={getMaterialColor(MaterialType.LIVING_WOOD)}>
+      LIVING WOOD:
+    </Colored>{" "}
+    An organic, flexible biofiber that forms the core of regenerative hull
+    plating and photosynthetic tech modules.
   </>
 );
 
 const MaterialWindsteelTooltip = () => (
   <>
-    <Colored color={getMaterialColor(3)}>WINDSTEEL:</Colored> Lightweight and
-    highly conductive alloy spun from atmospheric windsteel veins; vital for
-    turbine propulsion and trade ship frames.
+    {getMaterialIcon(MaterialType.WINDSTEEL, 24)}
+    <Colored color={getMaterialColor(MaterialType.WINDSTEEL)}>
+      WINDSTEEL:
+    </Colored>{" "}
+    Lightweight and highly conductive alloy spun from atmospheric windsteel
+    veins; vital for turbine propulsion and trade ship frames.
   </>
 );
 
 const MaterialAuroriumTooltip = () => (
   <>
-    <Colored color={getMaterialColor(4)}>AURORIUM:</Colored> Luminous mineral
-    infused with polar energy, mined from aurora-lit tundra fields. Used in
-    advanced navigation cores, sensor arrays, and energy-reflective ship
-    plating.
+    {getMaterialIcon(MaterialType.AURORIUM, 24)}
+    <Colored color={getMaterialColor(MaterialType.AURORIUM)}>
+      AURORIUM:
+    </Colored>{" "}
+    Luminous mineral infused with polar energy, mined from aurora-lit tundra
+    fields. Used in advanced navigation cores, sensor arrays, and
+    energy-reflective ship plating.
   </>
 );
 
 const MaterialMyceliumTooltip = () => (
   <>
-    <Colored color={getMaterialColor(5)}>MYCELIUM GEL:</Colored> Pulsating
-    fungal gel infused with life essence; powers alchemical reactors and
-    mycelial growth algorithms.
+    {getMaterialIcon(MaterialType.MYCELIUM, 24)}
+    <Colored color={getMaterialColor(MaterialType.MYCELIUM)}>
+      MYCELIUM GEL:
+    </Colored>{" "}
+    Pulsating fungal gel infused with life essence; powers alchemical reactors
+    and mycelial growth algorithms.
   </>
 );
 
 const MaterialSandglassTooltip = () => (
   <>
-    <Colored color={getMaterialColor(6)}>SANDGLASS:</Colored> Sharp, granular
-    shards capable of storing temporal energy—used in chrono-sensors and
-    time-slowing projectiles.
+    {getMaterialIcon(MaterialType.SANDGLASS, 24)}
+    <Colored color={getMaterialColor(MaterialType.SANDGLASS)}>
+      SANDGLASS:
+    </Colored>{" "}
+    Sharp, granular shards capable of storing temporal energy—used in
+    chrono-sensors and time-slowing projectiles.
   </>
 );
 
 const MaterialCryostoneTooltip = () => (
   <>
-    <Colored color={getMaterialColor(7)}>CRYOSTONE:</Colored> Frozen mineral
-    forged in vacuum conditions, used in advanced refrigeration, stasis
-    chambers, and cryo-lasers.
+    {getMaterialIcon(MaterialType.CRYOSTONE, 24)}
+    <Colored color={getMaterialColor(MaterialType.CRYOSTONE)}>
+      CRYOSTONE:
+    </Colored>{" "}
+    Frozen mineral forged in vacuum conditions, used in advanced refrigeration,
+    stasis chambers, and cryo-lasers.
   </>
 );
 
 const MaterialScrapiumTooltip = () => (
   <>
-    <Colored color={getMaterialColor(8)}>SCRAPIUM:</Colored> Junk-forged alloy
-    made from Wasteland scraps, restructured into modular components for rough
-    industrial builds.
+    {getMaterialIcon(MaterialType.SCRAPIUM, 24)}
+    <Colored color={getMaterialColor(MaterialType.SCRAPIUM)}>
+      SCRAPIUM:
+    </Colored>{" "}
+    Junk-forged alloy made from Wasteland scraps, restructured into modular
+    components for rough industrial builds.
   </>
 );
 
 const MaterialPyrosteelTooltip = () => (
   <>
-    <Colored color={getMaterialColor(9)}>PYROSTEEL:</Colored> Ultra-dense alloy
-    mined from volcanic zones, ideal for magma engines, high-heat armor, and
-    thermal weapon cores.
+    {getMaterialIcon(MaterialType.PYROSTEEL, 24)}
+    <Colored color={getMaterialColor(MaterialType.PYROSTEEL)}>
+      PYROSTEEL:
+    </Colored>{" "}
+    Ultra-dense alloy mined from volcanic zones, ideal for magma engines,
+    high-heat armor, and thermal weapon cores.
   </>
 );
 
 const MaterialBlackalloyTooltip = () => (
   <>
-    <Colored color={getMaterialColor(10)}>BLACKALLOY:</Colored> A forbidden dark
-    alloy synthesized from corrupted zones. Dense, unstable, and extremely
-    powerful in shadow-tech applications.
+    {getMaterialIcon(MaterialType.BLACKALLOY, 24)}
+    <Colored color={getMaterialColor(MaterialType.BLACKALLOY)}>
+      BLACKALLOY:
+    </Colored>{" "}
+    A forbidden dark alloy synthesized from corrupted zones. Dense, unstable,
+    and extremely powerful in shadow-tech applications.
   </>
 );
 
 const MaterialCorruptedCrystalTooltip = () => (
   <>
-    <Colored color={getMaterialColor(11)}>CORRUPTED CRYSTAL:</Colored>{" "}
+    {getMaterialIcon(MaterialType.CORRUPTED_CRYSTAL, 24)}
+    <Colored color={getMaterialColor(MaterialType.CORRUPTED_CRYSTAL)}>
+      CORRUPTED CRYSTAL:
+    </Colored>{" "}
     Crystallized corruption extracted from reality-warped biomes. Essential for
     ZK-reactors, entropy drives, and unstable modules.
   </>
