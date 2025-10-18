@@ -4,6 +4,7 @@ import styled from "styled-components";
 
 import { HeaderText, Spacer, TextButton } from "../Components/CoreUI";
 import dfstyles from "../Styles/dfstyles";
+import { WORLD_NAME } from "@df/constants";
 
 const TipText = styled.div`
   max-width: 500px;
@@ -55,7 +56,7 @@ export function DarkForestTips({
   return (
     <TipsContainer>
       <HeaderText style={{ textDecoration: "none" }}>
-        {title ?? "Dark Forest MUD Tips"}
+        {title ?? WORLD_NAME + " Tips"}
       </HeaderText>{" "}
       <PrevNextContainer>
         <TextButton onClick={() => incrementTipIndex(-1, true)}>

@@ -362,7 +362,7 @@ function DFMUDLogo({ rimRadius }: { rimRadius: number }) {
         height: `${size}px`,
       }}
     >
-      <img src="/darkforest_mud_logo.png" width={size} height={size} />;
+      <img src="/darkforest_punk_logo.png" width={size} height={size} />;
     </div>
   );
 }

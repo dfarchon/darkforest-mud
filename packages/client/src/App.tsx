@@ -5,7 +5,7 @@ import "./Frontend/Styles/preflight.css";
 import "./Frontend/Styles/Press_Start_2P/stylesheet.css";
 import "./Frontend/Styles/style.css";
 
-import { GameLandingPage_v1 } from "@frontend/Pages/GameLandingPage_v1";
+// import { GameLandingPage_v1 } from "@frontend/Pages/GameLandingPage_v1";
 import {
   BrowserRouter as Router,
   Navigate,
@@ -15,14 +15,15 @@ import {
 import { createGlobalStyle } from "styled-components";
 
 import { Theme } from "./Frontend/Components/Theme";
-import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
-import { GamePage } from "./Frontend/Pages/GamePage";
-import { HelloPage } from "./Frontend/Pages/HelloPage";
-import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
+// import { GameLandingPage } from "./Frontend/Pages/GameLandingPage";
+// import { GamePage } from "./Frontend/Pages/GamePage";
+// import { HelloPage } from "./Frontend/Pages/HelloPage";
+// import { ClassicLandingPage } from "./Frontend/Pages/LandingPage";
+import { DarkForestPunkLandingPage } from "./Frontend/Pages/DarkForestPunkLandingPage";
 import { NotFoundPage } from "./Frontend/Pages/NotFoundPage";
-import { SandboxPage } from "./Frontend/Pages/SandboxPage";
+// import { SandboxPage } from "./Frontend/Pages/SandboxPage";
 import { TxConfirmPopup } from "./Frontend/Pages/TxConfirmPopup";
-import { WelcomePage } from "./Frontend/Pages/WelcomePage";
+// import { WelcomePage } from "./Frontend/Pages/WelcomePage";
 import dfstyles from "./Frontend/Styles/dfstyles";
 import { getNetworkConfig } from "./mud/getNetworkConfig";
 import { PlanetTestPage } from "./PlanetTest/PlanetTestPage";
@@ -80,7 +81,7 @@ export const App = () => {
             />
             <Route path="/redpill/:contract" element={<RedPillLandingPage />} />
 
-            <Route path="/" element={<ClassicLandingPage />} />
+            <Route path="/" element={<DarkForestPunkLandingPage />} />
             {/* <Route path="/sandbox" element={<SandboxPage />} /> */}
             {/* <Route path="/welcome" element={<WelcomePage />} /> */}
             {/* <Route path="/game" element={<GamePage />} /> */}

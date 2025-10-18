@@ -14,6 +14,7 @@ import { Checkbox } from "../Components/Input";
 import { Row } from "../Components/Row";
 import dfstyles from "../Styles/dfstyles";
 import { getSetting, setBooleanSetting } from "../Utils/SettingsHooks";
+import { WORLD_NAME } from "@df/constants";
 
 const StyledTxConfirmPopup = styled.div`
   width: 100%;
@@ -728,7 +729,7 @@ export function TxConfirmPopup() {
       <div className="section">
         <Row className="network">
           <div>
-            <ConfirmIcon /> Dark Forest MUD connected to Blockchain
+            <ConfirmIcon /> {WORLD_NAME} connected to Blockchain
           </div>
         </Row>
         <Row className="mtop">

@@ -423,7 +423,7 @@ export function GameLandingPage_v1() {
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD`}
+            text={`Welcome To ${WORLD_NAME}`}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:

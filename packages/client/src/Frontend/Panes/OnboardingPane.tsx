@@ -10,6 +10,7 @@ import { TextPreview } from "../Components/TextPreview";
 import dfstyles from "../Styles/dfstyles";
 import { useAccount, useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
+import { WORLD_NAME } from "@df/constants";
 
 const StyledOnboardingContent = styled.div`
   width: 36em;
@@ -58,7 +59,7 @@ function OnboardMoney({ advance }: { advance: () => void }) {
   return (
     <StyledOnboardingContent>
       <p>
-        Welcome to <Green>Dark Forest MUD</Green>!
+        Welcome to <Green>{WORLD_NAME}</Green>!
       </p>
       <p>
         <Red>There is real money being transacted in-game!</Red> Game client
@@ -87,7 +88,7 @@ function OnboardMoney({ advance }: { advance: () => void }) {
         </White>
       </p>
       <p>
-        This means that when you make moves on Dark Forest MUD,{" "}
+        This means that when you make moves on {WORLD_NAME},{" "}
         <White>
           {" "}
           you are authorizing the client to pay gas fees on your behalf
@@ -127,8 +128,8 @@ function OnboardStorage({ advance }: { advance: () => void }) {
       </p>
       <p>
         Your <White>private key and home coordinates</White> act as your
-        password. You can use them to access your Dark Forest MUD account on
-        other browsers, or to continue playing if you accidentally clear local
+        password. You can use them to access your {WORLD_NAME} account on other
+        browsers, or to continue playing if you accidentally clear local
         storage. But this also means{" "}
         <Red>they should never be viewed by anyone else!</Red>
       </p>
@@ -222,7 +223,7 @@ function OnboardFinished({ advance }: { advance: () => void }) {
       <p>That&apos;s all! You&apos;re now ready to play the game!</p>
       <p>
         We invite you to log into the universe. Click <White>Proceed</White> to
-        join the world of <White>DARK FOREST MUD...</White>
+        join the world of <White>{WORLD_NAME}...</White>
       </p>
       <div>
         <span></span>
@@ -256,7 +257,7 @@ export default function OnboardingPane({
   return (
     <ModalPane
       id={ModalName.Onboarding}
-      title={"Welcome to Dark Forest MUD"}
+      title={"Welcome to " + WORLD_NAME}
       hideClose
       visible={visible}
       onClose={onClose}

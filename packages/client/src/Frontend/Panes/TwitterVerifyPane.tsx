@@ -12,6 +12,7 @@ import { Red } from "../Components/Text";
 import { usePlayer, useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
 import { TabbedView } from "../Views/TabbedView";
+import { WORLD_NAME } from "@df/constants";
 
 export function TwitterVerifyPane({
   visible,
@@ -47,15 +48,15 @@ export function TwitterVerifyPane({
       // PUNK need to change later
       // const str = `Verifying my DF ARES v0.1  account (https://dfares.xyz/)🩷\n @darkforest_eth Community Round hosted by @DFArchon: ${tweetText}`;
       // const str = `Verifying my DFAres v0.1 Round 3 account (https://dfares.xyz/)🩷\n @darkforest_eth community round hosted by @DFArchon \n ${tweetText}`;
-      // const str = `A new chapter unfold here! https://dfmud.xyz (🦑,🪐)\n\n Dark Forest MUD is community-driven development of @darkforest_eth game on @mud_dev engine. \n Follow @darkforest_mud to get latest udpates !`;
+      // const str = `A new chapter unfold here! https://dfpunk.xyz (🦑,🪐)\n\n Dark Forest Punk is community-driven development of @darkforest_eth game on @mud_dev engine. \n Follow @darkforest_punk to get latest udpates !`;
 
       const str =
-        `Dark Forest MUD (🦑,🪐) on @Base Mainnet!\n` +
+        `${WORLD_NAME} (🦑,🪐) on @Optimism Mainnet!\n` +
         `Decentralized, space-themed RTS built on @mud_dev and zkSNARKs\n` +
         `@darkforest_eth community round\n\n` +
-        `🔗 dfmud.xyz 🔗\n\n` +
-        `👉 Follow @darkforest_mud for updates!\n\n` +
-        `@GamingOnBase @jessepollak\n\n` +
+        `🔗 dfpunk.xyz 🔗\n\n` +
+        `👉 Follow @darkforest_punk for updates!\n\n` +
+        // `\n\n` +
         `#darkforest `;
 
       window.open(
