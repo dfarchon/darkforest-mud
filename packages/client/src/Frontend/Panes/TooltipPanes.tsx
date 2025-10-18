@@ -108,12 +108,20 @@ export function RankTooltipPane() {
 export function ScoreTooltipPane() {
   return (
     <>
-      Your score is dependent on how close you can get to the center (0,0) of
-      the universe. You need to <White> claim your planet (3+ level) </White> to
-      get the <ScoreLabel />. Check out the <White>Help Pane</White> for more
-      info on scoring.
+      You need to <White> withdraw silver or marterials</White> to get the{" "}
+      <ScoreLabel />. Check out the <White>Help Pane</White> for more info on
+      scoring.
     </>
   );
+
+  // return (
+  //   <>
+  //     Your score is dependent on how close you can get to the center (0,0) of
+  //     the universe. You need to <White> claim your planet (3+ level) </White> to
+  //     get the <ScoreLabel />. Check out the <White>Help Pane</White> for more
+  //     info on scoring.
+  //   </>
+  // );
 }
 
 export function PlayerSilverTooltipPane() {

@@ -141,6 +141,13 @@ export default defineWorld({
       },
       key: ["player"],
     },
+    PlayerScore: {
+      schema: {
+        player: "address",
+        score: "uint256",
+      },
+      key: ["player"],
+    },
     PlayerWithdrawMaterial: {
       schema: {
         player: "address",
