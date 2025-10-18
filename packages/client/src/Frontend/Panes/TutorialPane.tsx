@@ -15,6 +15,7 @@ import dfstyles from "../Styles/dfstyles";
 import { useUIManager } from "../Utils/AppHooks";
 import { useBooleanSetting } from "../Utils/SettingsHooks";
 import { VERSION } from "@df/constants";
+import { WORLD_NAME } from "@df/constants";
 
 function TutorialPaneContent({
   tutorialState,
@@ -27,8 +28,8 @@ function TutorialPaneContent({
   if (tutorialState === TutorialState.None) {
     return (
       <div className="tutintro">
-        Welcome to the universe of <White>DARK FOREST MUD</White>. Would you
-        like to play the tutorial?
+        Welcome to the universe of <White>{WORLD_NAME}</White>. Would you like
+        to play the tutorial?
         <div>
           <Btn
             className="btn"
@@ -257,8 +258,8 @@ function TutorialPaneContent({
       <div className="tutalmost">
         {/* Winners of each round of Dark Forest v0.6.x will receive a prize, and be added to the{' '}
         <Underline>Valhalla</Underline> universe. */}
-        {/* Winners of each round of Dark Forest MUD v0.1 will get mysterious prizes 🎩 */}
-        Winners of each round of Dark Forest MUD {VERSION} will get prizes 🎩
+        {/* Winners of each round of Dark Forest Punk v0.1 will get mysterious prizes 🎩 */}
+        Winners of each round of {WORLD_NAME} {VERSION} will get prizes 🎩
         <br />
         <br />
         To win, have the highest score (^:
@@ -279,7 +280,7 @@ function TutorialPaneContent({
         information will pop up in the <White>upper-right</White> as you
         discover more about the game.
         <br />
-        We hope you enjoy Dark Forest MUD!
+        We hope you enjoy {WORLD_NAME}!
         <div>
           <Btn className="btn" onClick={() => tutorialManager.complete()}>
             Finish

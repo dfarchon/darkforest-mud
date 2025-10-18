@@ -2,12 +2,13 @@ import type { ArtifactId, EthAddress, GasPrices, LocationId } from "@df/types";
 import { ArtifactRarity, ArtifactType, Biome, PlanetLevel } from "@df/types";
 import bigInt, { type BigInteger } from "big-integer";
 
+export const WORLD_NAME = "Dark Forest Punk";
 export const TOKEN_NAME = "ETH";
-export const BLOCKCHAIN_NAME = "Base";
+export const BLOCKCHAIN_NAME = "Optimism";
 export const HOST_TEAM_NAME = "DF Archon";
-export const VERSION = "v0.1.4";
+export const VERSION = "v0.1.1";
 
-export const GAS_ADJUST_DELTA = "0.001"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
+export const GAS_ADJUST_DELTA = "0.0002"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
 
 export const FIXED_DIGIT_NUMBER = 9;
 
@@ -126,13 +127,13 @@ export const MAX_AUTO_GAS_PRICE_GWEI = 15 as const;
  * The URL to the block explorer for the chain being used. Prepended to transaction links, etc
  */
 // Careful, don't add a slash to the end of this.
-export const BLOCK_EXPLORER_URL = "https://base.blockscout.com" as const;
+export const BLOCK_EXPLORER_URL = "https://explorer.optimism.io" as const;
 
 /**
  * The URL to the bridge for the chain being used. Prepended to transaction links, etc
  */
 
-export const BLOCKCHAIN_BRIDGE = "https://relay.link/bridge/base/" as const;
+export const BLOCKCHAIN_BRIDGE = "hhttps://relay.link/bridge/optimism" as const;
 /**
  * The amount of time between gas price refreshes when fetching prices from the oracle.
  */
@@ -189,7 +190,7 @@ export const MIN_HAT_TYPE = 1;
 export const MAX_HAT_TYPE = 10;
 
 // export const PICTURE_URL = 'http://localhost:8081';
-export const PICTURE_URL = "https://r4.dfmud.xyz";
+export const PICTURE_URL = "https://r1.dfpunk.xyz";
 
 export const MIN_MEME_TYPE = 1;
 export const MAX_MEME_TYPE = 10;

@@ -85,6 +85,7 @@ import UIEmitter, { UIEmitterEvent } from "../Utils/UIEmitter";
 import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
+import { WORLD_NAME } from "@df/constants";
 
 const enum TerminalPromptStep {
   NONE,
@@ -480,7 +481,7 @@ export function BluePillLandingPage() {
     terminal.current?.clear();
 
     terminal.current?.println(
-      "Welcome to the Dark Forest MUD.",
+      "Welcome to the " + WORLD_NAME,
       TerminalTextStyle.Green,
     );
     terminal.current?.println("");
@@ -565,9 +566,7 @@ export function BluePillLandingPage() {
         if (isLobby) {
           terminal.current?.newline();
           terminal.current?.printElement(
-            <MythicLabelText
-              text={`You are joining a Dark Forest MUD lobby`}
-            />,
+            <MythicLabelText text={`You are joining a ${WORLD_NAME} lobby`} />,
           );
           terminal.current?.newline();
           terminal.current?.newline();
@@ -1412,10 +1411,10 @@ export function BluePillLandingPage() {
       window.ui = newGameUIManager;
 
       terminal.current?.newline();
-      terminal.current?.println("Connected to Dark Forest MUD Contract");
+      terminal.current?.println("Connected to " + WORLD_NAME + " Contract");
 
       terminal.current?.newline();
-      terminal.current?.println("Welcome to DARK FOREST MUD.");
+      terminal.current?.println("Welcome to " + WORLD_NAME + ".");
       terminal.current?.newline();
       //NOTE: round 3 don't collect those information
       // terminal.current?.println('We collect a minimal set of statistics such as SNARK proving');
@@ -1893,7 +1892,7 @@ export function BluePillLandingPage() {
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD ${VERSION}`}
+            text={`Welcome To ${WORLD_NAME} ${VERSION}`}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:
@@ -1926,7 +1925,7 @@ export function BluePillLandingPage() {
                     color: "#ff69b4",
                   }}
                 >
-                  ⚡ INITIALIZING DARK FOREST MUD ⚡
+                  ⚡ INITIALIZING {WORLD_NAME} ⚡
                 </div>
                 <div style={{ marginBottom: "10px", fontSize: "18px" }}>
                   🔄 Loading game data...

@@ -25,6 +25,7 @@ import {
   NumberSetting,
 } from "../Utils/SettingsHooks";
 import { ModalPane } from "../Views/ModalPane";
+import { WORLD_NAME } from "@df/constants";
 
 const SCROLL_MIN = 0.0001 * 10000;
 const SCROLL_MAX = 0.01 * 10000;
@@ -481,8 +482,8 @@ export function SettingsPane({
         <Section>
           <SectionHeader>Burner Wallet Info (Private)</SectionHeader>
           Your private key, together with your home planet&apos;s coordinates,
-          grant you access to your Dark Forest MUD account on different
-          browsers. You should save this info somewhere on your computer.
+          grant you access to your {WORLD_NAME} account on different browsers.
+          You should save this info somewhere on your computer.
           <Spacer height={16} />
           <Red>WARNING:</Red> Never ever send this to anyone!
           <Spacer height={8} />

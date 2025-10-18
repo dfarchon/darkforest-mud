@@ -14,6 +14,7 @@ import { Pink } from "../Components/Text";
 import dfstyles from "../Styles/dfstyles";
 import { useUIManager } from "../Utils/AppHooks";
 import { ModalPane } from "../Views/ModalPane";
+import { WORLD_NAME } from "@df/constants";
 
 const HelpContent = styled.div`
   width: 500px;
@@ -122,15 +123,17 @@ export function HelpPane({
       <HelpContent>
         {uiManager.isRoundOver() && (
           <Section>
-            <SectionHeader>Dark Forest MUD Complete</SectionHeader>
-            Dark Forest MUD {VERSION} is now complete! Scores are being compiled
+            <SectionHeader>{WORLD_NAME} Complete</SectionHeader>
+            {WORLD_NAME} {VERSION} is now complete! Scores are being compiled
             and winners will be announced shortly. Also, Artifacts will no
             longer be mintable. Thanks for playing!
           </Section>
         )}
 
         <Section>
-          <SectionHeader>Dark Forest MUD {VERSION} 🦑</SectionHeader>
+          <SectionHeader>
+            {WORLD_NAME} {VERSION} 🦑
+          </SectionHeader>
           {/* The game is a vast universe, obfuscated by zero-knowledge cryptography. Your{' '}
           <White>explorer</White> (bottom left) explores the universe, searching for{' '}
           <White>Planets</White> and other players.
@@ -147,7 +150,7 @@ export function HelpPane({
           <div>
             Please read{" "}
             <Link to={PLAYER_GUIDE} color="pink">
-              Dark Forest MUD guide
+              {WORLD_NAME} guide
             </Link>{" "}
             to know how to play.
           </div>
@@ -162,10 +165,10 @@ export function HelpPane({
             </Link>{" "}
             hosts{" "}
             <Link
-              to="https://twitter.com/darkforest_mud"
+              to="https://twitter.com/darkforest_punk"
               color={dfstyles.colors.dfpink}
             >
-              Dark Forest MUD
+              {WORLD_NAME}
             </Link>{" "}
             on{" "}
             <Link to={BLOCK_EXPLORER_URL} color={"pink"}>
@@ -175,7 +178,7 @@ export function HelpPane({
           </div>
           <br />
           <div>
-            <Pink>Dark Forest MUD</Pink> is community-driven deployment of{" "}
+            <Pink>{WORLD_NAME}</Pink> is community-driven deployment of{" "}
             <Link to="https://zkga.me" color={dfstyles.colors.dfgreen}>
               Dark Forest
             </Link>{" "}
@@ -200,8 +203,8 @@ export function HelpPane({
         <Section>
           <SectionHeader>More Useful Links</SectionHeader>
 
-          <Link to={"https://twitter.com/darkforest_mud"}>
-            Dark Forest MUD Twitter
+          <Link to={"https://twitter.com/darkforest_punk"}>
+            {WORLD_NAME} Twitter
           </Link>
           <br />
           <Link to={DFArchonLinks.blog}>DFArchon&apos;s Blog</Link>

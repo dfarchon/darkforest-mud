@@ -46,7 +46,7 @@ const defaultSettings: Record<Setting, string> = {
   [Setting.HighPerformanceRendering]: "false",
   [Setting.MoveNotifications]: "true",
   [Setting.HasAcceptedPluginRisk]: onlyInDevelopment(),
-  [Setting.GasFeeGwei]: Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("2"))
+  [Setting.GasFeeGwei]: Number(parseFloat(GAS_ADJUST_DELTA) * parseInt("5"))
     .toFixed(FIXED_DIGIT_NUMBER)
     .toString(), // AutoGasSetting.Average,
   [Setting.GasFeeLimit]: "3000000",

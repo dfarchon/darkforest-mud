@@ -6,6 +6,7 @@ import { Link, Spacer, Title } from "../Components/CoreUI";
 import { Modal } from "../Components/Modal";
 import { Pink } from "../Components/Text";
 import dfstyles from "../Styles/dfstyles";
+import { WORLD_NAME } from "@df/constants";
 
 export const enum LandingPageZIndex {
   Background = 0,
@@ -14,7 +15,7 @@ export const enum LandingPageZIndex {
 }
 
 const DFArchonLinks = {
-  twitter: "https://twitter.com/darkforest_mud",
+  twitter: "https://twitter.com/darkforest_punk",
   email: "mailto:dfarchon@gmail.com",
   blog: "https://mirror.xyz/dfarchon.eth",
   discord: "https://discord.com/invite/XpBPEnsvgX",
@@ -111,7 +112,7 @@ export const ClassicLandingPage = () => {
                 >
                   <div>
                     <span style={{ fontSize: "50px" }}>
-                      <Round3Title>Dark Forest MUD</Round3Title>
+                      <Round3Title>{WORLD_NAME}</Round3Title>
                     </span>
                     <br />
                     <span style={{ fontSize: "30px" }}>

@@ -164,7 +164,7 @@ contract ArtifactNFT is Ownable, ERC721Enumerable, IArtifactNFT {
       0
     ] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
-    parts[1] = "Dark Forest MUD";
+    parts[1] = "Dark Forest Punk";
 
     parts[2] = '</text><text x="10" y="40" class="base">';
 
@@ -209,7 +209,7 @@ contract ArtifactNFT is Ownable, ERC721Enumerable, IArtifactNFT {
           abi.encodePacked(
             '{"name": "Artifact #',
             Strings.toHexString(tokenId),
-            '", "description": "The artifacts are gifts from Dark Forest MUD universe.", "image": "data:image/svg+xml;base64,',
+            '", "description": "The artifacts are gifts from Dark Forest Punk universe.", "image": "data:image/svg+xml;base64,',
             Base64.encode(bytes(output)),
             '"}'
           )

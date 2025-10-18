@@ -85,6 +85,7 @@ import { GameWindowLayout } from "../Views/GameWindowLayout";
 import type { TerminalHandle } from "../Views/Terminal";
 import { Terminal } from "../Views/Terminal";
 import { RedPillRegisterPlayer } from "@redpill/RedPillRegisterPlayer";
+import { WORLD_NAME } from "@df/constants";
 const enum TerminalPromptStep {
   NONE,
   COMPATIBILITY_CHECKS_PASSED,
@@ -269,9 +270,7 @@ export function RedPillLandingPage() {
         if (isLobby) {
           terminal.current?.newline();
           terminal.current?.printElement(
-            <MythicLabelText
-              text={`You are joining a Dark Forest MUD lobby`}
-            />,
+            <MythicLabelText text={`You are joining a ${WORLD_NAME} lobby`} />,
           );
           terminal.current?.newline();
           terminal.current?.newline();
@@ -1118,10 +1117,10 @@ export function RedPillLandingPage() {
       window.ui = newGameUIManager;
 
       terminal.current?.newline();
-      terminal.current?.println("Connected to Dark Forest MUD Contract");
+      terminal.current?.println("Connected to " + WORLD_NAME + " Contract");
 
       terminal.current?.newline();
-      terminal.current?.println("Welcome to DARK FOREST MUD.");
+      terminal.current?.println("Welcome to " + WORLD_NAME + ".");
       terminal.current?.newline();
 
       //register Player
@@ -1589,7 +1588,7 @@ export function RedPillLandingPage() {
       terminal.current?.clear();
 
       terminal.current?.println(
-        "Welcome to the Dark Forest MUD.",
+        "Welcome to the " + WORLD_NAME + ".",
         TerminalTextStyle.Green,
       );
       terminal.current?.println("");
@@ -1817,7 +1816,7 @@ export function RedPillLandingPage() {
           terminalEnabled={terminalVisible}
         >
           <MythicLabelText
-            text={`Welcome To Dark Forest MUD ${VERSION} `}
+            text={`Welcome To ${WORLD_NAME} ${VERSION} `}
             style={{
               fontFamily: "'Start Press 2P', sans-serif",
               display:

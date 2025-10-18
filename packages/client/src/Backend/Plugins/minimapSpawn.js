@@ -1,3 +1,4 @@
+/* global df, ui */
 class MinimapSpawnPlugin {
   constructor() {
     this.minDensity = 1000;
@@ -32,7 +33,7 @@ class MinimapSpawnPlugin {
     this.step = Math.floor((df.getWorldRadius() * 1.0) / 30);
 
     const image = new Image();
-    image.src = "/darkforest_mud_logo.png";
+    image.src = "/darkforest_punk_logo.png";
 
     // Wait for the image to load
     await new Promise((resolve) => {
@@ -44,7 +45,7 @@ class MinimapSpawnPlugin {
     };
 
     const checkBounds = (a, b, x, y, r) => {
-      let dist = (a - x) * (a - x) + (b - y) * (b - y);
+      const dist = (a - x) * (a - x) + (b - y) * (b - y);
       r *= r;
       return dist < r;
     };
@@ -57,9 +58,9 @@ class MinimapSpawnPlugin {
       this.canvas.width = this.canvasSize;
       this.canvas.height = this.canvasSize;
       this.sizeFactor = this.canvasSize - 18;
-      let radiusNormalized = normalize(radius) / 2;
+      const radiusNormalized = normalize(radius) / 2;
 
-      let data = [];
+      const data = [];
 
       // Generate x coordinates
       for (let i = radius * -1; i < radius; i += this.step) {
@@ -142,12 +143,12 @@ class MinimapSpawnPlugin {
       const pinkZones = Array.from(df.getPinkZones());
       for (let i = 0; i < pinkZones.length; i++) {
         // console.log(pinkZones[i]);
-        let coords = pinkZones[i].coords;
-        let pinkZoneRadius = pinkZones[i].radius;
-        let normalizeX = normalize(coords.x);
-        let normalizeY = normalize(coords.y * -1);
-        // let normalizePinkCircleRadius = radius / radiusNormalized
-        let normalizePinkCircleRadius =
+        const coords = pinkZones[i].coords;
+        const pinkZoneRadius = pinkZones[i].radius;
+        const normalizeX = normalize(coords.x);
+        const normalizeY = normalize(coords.y * -1);
+        // const normalizePinkCircleRadius = radius / radiusNormalized
+        const normalizePinkCircleRadius =
           (pinkZoneRadius * radiusNormalized) / radius;
 
         ctx.beginPath();
@@ -167,11 +168,11 @@ class MinimapSpawnPlugin {
       // draw blue circles
       const blueZones = Array.from(df.getBlueZones());
       for (let i = 0; i < blueZones.length; i++) {
-        let coords = blueZones[i].coords;
-        let blueZoneRadius = blueZones[i].radius;
-        let normalizeX = normalize(coords.x);
-        let normalizeY = normalize(coords.y * -1);
-        let normalizeBlueCircleRadius =
+        const coords = blueZones[i].coords;
+        const blueZoneRadius = blueZones[i].radius;
+        const normalizeX = normalize(coords.x);
+        const normalizeY = normalize(coords.y * -1);
+        const normalizeBlueCircleRadius =
           (blueZoneRadius * radiusNormalized) / radius;
         ctx.beginPath();
         ctx.arc(
@@ -243,11 +244,11 @@ class MinimapSpawnPlugin {
       if (this.clickOccurred === false) {
         this.xWorld = xWorld;
         this.yWorld = yWorld;
-        let formatX =
+        const formatX =
           this.xWorld === undefined ? "???" : this.xWorld.toString();
-        let formatY =
+        const formatY =
           this.yWorld === undefined ? "???" : this.yWorld.toString();
-        let formatCoords = "(" + formatX + "," + formatY + ")";
+        const formatCoords = "(" + formatX + "," + formatY + ")";
         this.formatCoords = formatCoords;
       }
 
@@ -333,7 +334,7 @@ class MinimapSpawnPlugin {
     const radius = ui.getWorldRadius();
 
     const checkBounds = (a, b, x, y, r) => {
-      let dist = (a - x) * (a - x) + (b - y) * (b - y);
+      const dist = (a - x) * (a - x) + (b - y) * (b - y);
       r *= r;
       return dist < r;
     };
@@ -345,10 +346,10 @@ class MinimapSpawnPlugin {
     // reset click
     this.clickOccurred = false;
     const onCanvasClick = (/** @type {MouseEvent} */ event) => {
-      let x = event.offsetX;
-      let y = event.offsetY;
-      let xWorld = toWorldCoord(x);
-      let yWorld = toWorldCoord(y) * -1;
+      const x = event.offsetX;
+      const y = event.offsetY;
+      const xWorld = toWorldCoord(x);
+      const yWorld = toWorldCoord(y) * -1;
       const radius = ui.getWorldRadius();
       const rim = Math.sqrt(df.getContractConstants().SPAWN_RIM_AREA);
 
