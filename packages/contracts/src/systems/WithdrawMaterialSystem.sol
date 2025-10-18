@@ -5,7 +5,7 @@ import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { Planet } from "libraries/Planet.sol";
 import { PlanetType, MaterialType, Biome } from "codegen/common.sol";
 import { PlayerWithdrawMaterial } from "codegen/tables/PlayerWithdrawMaterial.sol";
-import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
+import { PlayerScore } from "codegen/tables/PlayerScore.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GuildUtils } from "libraries/GuildUtils.sol";
 import { Guild } from "codegen/tables/Guild.sol";
@@ -80,9 +80,9 @@ contract WithdrawMaterialSystem is BaseSystem {
     // Add to player's withdrawn material amount
     playerWithdrawMaterialAmount += materialToWithdraw;
 
-    // Add score points to player's silver (which is used as the score)
-    uint256 currentPlayerSilver = PlayerWithdrawSilver.get(executor);
-    PlayerWithdrawSilver.set(executor, currentPlayerSilver + scorePoints);
+    // Add score points to player's score
+    uint256 currentPlayerScore = PlayerScore.get(executor);
+    PlayerScore.set(executor, currentPlayerScore + scorePoints);
 
     // Add score points to guild if player is in a guild
     uint8 guildId = GuildUtils.getCurrentGuildId(executor);

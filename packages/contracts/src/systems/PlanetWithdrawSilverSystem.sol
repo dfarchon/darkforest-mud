@@ -5,6 +5,7 @@ import { BaseSystem } from "systems/internal/BaseSystem.sol";
 import { Planet } from "libraries/Planet.sol";
 import { PlanetType } from "codegen/common.sol";
 import { PlayerWithdrawSilver } from "codegen/tables/PlayerWithdrawSilver.sol";
+import { PlayerScore } from "codegen/tables/PlayerScore.sol";
 import { DFUtils } from "libraries/DFUtils.sol";
 import { GuildUtils } from "libraries/GuildUtils.sol";
 import { Guild } from "codegen/tables/Guild.sol";
@@ -39,6 +40,9 @@ contract PlanetWithdrawSilverSystem is BaseSystem {
 
     planet.silver -= silverToWithdraw;
     playerWithdrawSilverAmount += silverToWithdraw;
+
+    uint playerScore = PlayerScore.get(executor);
+    PlayerScore.set(executor, playerScore + silverToWithdraw);
 
     uint8 guildId = GuildUtils.getCurrentGuildId(executor);
     if (guildId != 0) {

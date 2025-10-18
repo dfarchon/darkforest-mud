@@ -173,7 +173,7 @@ export class ContractsAPI extends EventEmitter {
   private planetJunkOwnerSubscription: Subscription;
   private planetAddJunkTickSubscription: Subscription;
   private moveSubscription: Subscription;
-  private playerWithdrawSilverSubscription: Subscription;
+  private playerScoreSubscription: Subscription;
   private tickerRateSubscription: Subscription;
   private setPlanetEmojiSubscription: Subscription;
 
@@ -475,8 +475,8 @@ export class ContractsAPI extends EventEmitter {
       }
     });
 
-    this.playerWithdrawSilverSubscription =
-      this.components.PlayerWithdrawSilver.update$.subscribe((update) => {
+    this.playerScoreSubscription =
+      this.components.PlayerScore.update$.subscribe((update) => {
         const entity = update.entity;
         const [nextValue] = update.value;
         const playerAddr = hexToEthAddress(entity.toString() as Hex);
@@ -1011,7 +1011,7 @@ export class ContractsAPI extends EventEmitter {
     this.planetJunkOwnerSubscription.unsubscribe();
     this.planetAddJunkTickSubscription.unsubscribe();
     this.moveSubscription.unsubscribe();
-    this.playerWithdrawSilverSubscription.unsubscribe();
+    this.playerScoreSubscription.unsubscribe();
     this.tickerRateSubscription.unsubscribe();
     this.setPlanetEmojiSubscription.unsubscribe();
     this.guildSubscription.unsubscribe();
@@ -1485,6 +1485,7 @@ export class ContractsAPI extends EventEmitter {
         revealLocationCount: 0,
         upgradePlanetCount: 0,
         withdrawSilverCount: 0,
+        withdrawMaterialCount: 0,
       };
     }
     return {
@@ -1506,6 +1507,7 @@ export class ContractsAPI extends EventEmitter {
       revealLocationCount: Number(playerStats.revealLocationCount),
       upgradePlanetCount: Number(playerStats.upgradePlanetCount),
       withdrawSilverCount: Number(playerStats.withdrawSilverCount),
+      withdrawMaterialCount: Number(playerStats.withdrawMaterialCount),
     };
   }
 
@@ -1515,6 +1517,7 @@ export class ContractsAPI extends EventEmitter {
       SpawnPlanet,
       LastReveal,
       PlayerWithdrawSilver,
+      PlayerScore,
       PlayerJunk,
       PlayerJunkLimit,
     } = this.components;
@@ -1533,12 +1536,19 @@ export class ContractsAPI extends EventEmitter {
 
     const playerWithdrawSilverKey = encodeEntity(
       PlayerWithdrawSilver.metadata.keySchema,
-      { player: addressToHex(playerId) },
+      {
+        player: addressToHex(playerId),
+      },
     );
-    const playerWithdrawSilver = getComponentValue(
+    const playerSilver = getComponentValue(
       PlayerWithdrawSilver,
       playerWithdrawSilverKey,
     );
+
+    const playerScoreKey = encodeEntity(PlayerScore.metadata.keySchema, {
+      player: addressToHex(playerId),
+    });
+    const playerScore = getComponentValue(PlayerScore, playerScoreKey);
 
     const playerJunkKey = encodeEntity(PlayerJunk.metadata.keySchema, {
       owner: addressToHex(playerId),
@@ -1570,8 +1580,8 @@ export class ContractsAPI extends EventEmitter {
         ? (rawSpawnPlanet.planet.toString() as LocationId)
         : undefined,
       lastRevealTick: lastReveal ? Number(lastReveal.tickNumber) : 0,
-      silver: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
-      score: playerWithdrawSilver ? Number(playerWithdrawSilver.silver) : 0,
+      silver: playerSilver ? Number(playerSilver.silver) : 0,
+      score: playerScore ? Number(playerScore.score) : 0,
       junk: playerJunk ? Number(playerJunk.junk) : 0,
       junkLimit: playerJunkLimit ? Number(playerJunkLimit.junk) : 0,
     };

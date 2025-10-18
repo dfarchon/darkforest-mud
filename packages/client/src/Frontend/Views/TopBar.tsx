@@ -45,7 +45,8 @@ function BoardPlacement({ account }: { account: EthAddress | undefined }) {
       player.value.score !== null &&
       player.value.lastClaimTimestamp !== 0
     ) {
-      formattedScore = player.value.score.toLocaleString();
+      const scoreAmount = Math.floor(player.value.score / 1000);
+      formattedScore = scoreAmount.toLocaleString();
     }
 
     content = (
@@ -282,8 +283,8 @@ export function TopBar({
             </TooltipTrigger>
           </>
         )}
-        {/* <BoardPlacement account={account} /> */}
-        <PlayerSilver account={account} />
+        <BoardPlacement account={account} />
+        {/* <PlayerSilver account={account} /> */}
         {/* </AlignCenterHorizontally>
       <AlignCenterHorizontally
         style={{ justifyContent: "space-around", width: "100%" }}
