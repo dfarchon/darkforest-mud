@@ -1580,7 +1580,7 @@ export class GameManager extends EventEmitter {
       return undefined;
     }
 
-    return player?.silver;
+    return player?.score;
   }
 
   public getPlayerSpaceJunk(addr: EthAddress): number | undefined {
