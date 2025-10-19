@@ -8,7 +8,7 @@ export const BLOCKCHAIN_NAME = "Optimism";
 export const HOST_TEAM_NAME = "DF Archon";
 export const VERSION = "v0.1.1";
 
-export const GAS_ADJUST_DELTA = "0.0002"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
+export const GAS_ADJUST_DELTA = "0.00005"; //"3"; // '0.000000001'; //'1'; //'0.00000005';
 
 export const FIXED_DIGIT_NUMBER = 9;
 
