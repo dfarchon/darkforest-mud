@@ -518,13 +518,14 @@ export function SelectedVoyagePane({
         {showCloseButton && onClose && (
           <CloseButton onClick={onClose}>✕</CloseButton>
         )}
-        {/* <VoyageTitle>
-          {voyage.isMultiple
-            ? `${voyage.count} Moves`
-            : isMyVoyage
-              ? "My Voyage"
-              : "Voyage"}
-        </VoyageTitle> */}
+        <VoyageTitle>
+          {(() => {
+            if (voyage.isMultiple) {
+              return `${voyage.count} Moves`;
+            }
+            return isMyVoyage ? "My Voyage" : "Voyage";
+          })()}
+        </VoyageTitle>
 
         {voyage.isMultiple ? (
           <StatRow>
