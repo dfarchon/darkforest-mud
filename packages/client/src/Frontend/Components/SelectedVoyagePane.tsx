@@ -9,7 +9,6 @@ import styled from "styled-components";
 import { useMoveRevert } from "../../hooks/useMoveRevert";
 import { ArtifactImage } from "../Components/ArtifactImage";
 import { Icon, IconType } from "../Components/Icons";
-import { SpaceshipBonuses } from "../Components/SpaceshipBonuses";
 import {
   getMaterialColor,
   getMaterialIcon,
@@ -661,16 +660,6 @@ export function SelectedVoyagePane({
                 </StatValue>
               </StatRow>
             )}
-
-            {/* Spaceship Bonuses Section */}
-            {voyage.artifactId &&
-              (() => {
-                const artifact = uiManager.getArtifactWithId(voyage.artifactId);
-                return artifact &&
-                  isArtifactSpaceShip(artifact.artifactType) ? (
-                  <SpaceshipBonuses artifact={artifact} />
-                ) : null;
-              })()}
 
             <VoyageInfo>
               <StatRow>
